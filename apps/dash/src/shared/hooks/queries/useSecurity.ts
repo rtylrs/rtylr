@@ -38,6 +38,47 @@ export const useToggleTwoFactor = () => {
   });
 };
 
+export const useBeginMFAEnrollment = () => {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await securityClient.beginMFAEnrollment({});
+      return {
+        secret: response.secret ?? '',
+        otpauthUri: response.otpauthUri ?? '',
+      };
+    },
+  });
+};
+
+export const useCompleteMFAEnrollment = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (code: string) => {
+      const response = await securityClient.completeMFAEnrollment({ code });
+      return response.recoveryCodes ?? [];
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['security'] });
+    },
+  });
+};
+
+export const useVerifyMFA = () => {
+  return useMutation({
+    mutationFn: async (code: string) => {
+      await securityClient.verifyMFA({ code });
+    },
+  });
+};
+
+export const useMFARecoveryCode = () => {
+  return useMutation({
+    mutationFn: async (code: string) => {
+      await securityClient.useMFARecoveryCode({ code });
+    },
+  });
+};
+
 export const useRevokeSession = () => {
   const qc = useQueryClient();
   return useMutation({

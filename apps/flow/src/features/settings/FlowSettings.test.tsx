@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { EffectiveAccess } from '@voxire/types';
 
 // FlowSettings statically imports TimeSection, whose own import chain reaches
 // the app's real i18next bootstrap module (shared/services/i18next.ts), which
@@ -98,8 +99,12 @@ vi.mock('../../features/tasks/useLabels', () => ({
 // A mutable "cookie" the tests flip per role, decoded by FlowSettings' own
 // getRoleFromToken exactly as it would decode a real auth cookie.
 const tokenState = vi.hoisted(() => ({ token: null as string | null }));
+const authState = vi.hoisted(() => ({
+  effectiveAccess: undefined as EffectiveAccess | undefined,
+}));
 vi.mock('@voxire/auth', () => ({
   getCookie: () => tokenState.token,
+  useUserStore: (selector: (state: typeof authState) => unknown): unknown => selector(authState),
 }));
 
 // A mutable stand-in for `?section=...`. FlowSettings reads this via
@@ -115,6 +120,43 @@ import FlowSettings, { TeamSection, LabelsSection } from './FlowSettings';
 function makeToken(role: string): string {
   const payload = btoa(JSON.stringify({ role }));
   return `header.${payload}.sig`;
+}
+
+function makeFlowAccess(permissions: EffectiveAccess['dashPermissions']): EffectiveAccess {
+  return {
+    businessId: '10',
+    dashRole: 'admin',
+    dashRoleId: null,
+    dashPermissions: [],
+    subscribedApps: ['flow'],
+    licenses: [
+      {
+        appId: 'flow',
+        status: 'active',
+        source: 'explicit',
+        groupId: null,
+        grantedAt: '2026-01-01T00:00:00Z',
+        revokedAt: null,
+      },
+    ],
+    apps: [
+      {
+        appId: 'flow',
+        licensed: true,
+        hasAccess: true,
+        roleIds: [],
+        primaryRoleId: null,
+        displayRole: 'admin',
+        permissions,
+        scopes: [],
+        sources: ['explicit'],
+        permissionSources: {},
+      },
+    ],
+    isOwner: false,
+    isAdmin: true,
+    authorizationVersion: 2,
+  };
 }
 
 function renderSettings() {
@@ -154,10 +196,12 @@ describe('FlowSettings section gating (#793)', () => {
     grantMutate.mockClear();
     deactivateMutate.mockClear();
     searchState.section = undefined;
+    authState.effectiveAccess = undefined;
   });
 
   it('shows Team, Workspaces and Time in the sidebar for an admin', () => {
     tokenState.token = makeToken('admin');
+    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
     renderSettings();
 
     expect(screen.getByRole('button', { name: 'common.settings.team' })).toBeInTheDocument();
@@ -222,42 +266,43 @@ describe('FlowSettings section gating (#793)', () => {
   // rather than in a test repair.
 });
 
-// #793 finding 2, defense in depth: even if TeamSection were ever reached
-// directly (bypassing the sidebar/section gate above), its own mutations stay
-// closed to a non-privileged role.
-describe('TeamSection own canInviteMembers gate (#793)', () => {
+// Flow team membership is read-only here. Dash owns app licenses and role
+// assignments, so these tests protect the boundary from accidental mutations.
+describe('TeamSection read-only boundary', () => {
   beforeEach(() => {
     flowTeamData.data = [
       { id: '1', name: 'Ada Lovelace', email: 'ada@example.com', apps: ['flow'], isActive: true },
     ];
     grantMutate.mockClear();
     deactivateMutate.mockClear();
+    authState.effectiveAccess = undefined;
   });
 
-  it('shows a gate reason and hides Add member / disables Remove for a non-admin', () => {
+  it('lists Flow members without mutation controls for a non-admin', () => {
     tokenState.token = makeToken('member');
     renderTeamSection();
 
-    expect(screen.getByText('flow.settings.team.gateReason')).toBeInTheDocument();
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'flow.settings.team.addMember' })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'flow.settings.team.removeMemberLabel' })
-    ).toBeDisabled();
+      screen.queryByRole('button', { name: 'flow.settings.team.removeMemberLabel' })
+    ).not.toBeInTheDocument();
   });
 
-  it('lets an admin see Add member and an enabled Remove control', () => {
+  it('keeps mutation controls absent for an admin as well', () => {
     tokenState.token = makeToken('admin');
+    authState.effectiveAccess = makeFlowAccess(['flow:team:manage']);
     renderTeamSection();
 
-    expect(screen.queryByText('flow.settings.team.gateReason')).not.toBeInTheDocument();
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'flow.settings.team.addMember' })
-    ).toBeInTheDocument();
+      screen.queryByRole('button', { name: 'flow.settings.team.addMember' })
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'flow.settings.team.removeMemberLabel' })
-    ).toBeEnabled();
+      screen.queryByRole('button', { name: 'flow.settings.team.removeMemberLabel' })
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -268,16 +313,16 @@ describe('TeamSection empty state', () => {
     flowTeamData.data = [];
     grantMutate.mockClear();
     deactivateMutate.mockClear();
+    authState.effectiveAccess = undefined;
   });
 
-  it('shows the empty title with an Add member CTA for an admin', () => {
+  it('shows the empty title with a Refresh CTA for an admin', () => {
     tokenState.token = makeToken('admin');
+    authState.effectiveAccess = makeFlowAccess(['flow:team:manage']);
     renderTeamSection();
 
     expect(screen.getByText('flow.settings.team.noMembersYet')).toBeInTheDocument();
-    const addButtons = screen.getAllByRole('button', { name: 'flow.settings.team.addMember' });
-    expect(addButtons.length).toBeGreaterThan(0);
-    addButtons.forEach((button) => expect(button).toBeEnabled());
+    expect(screen.getByRole('button', { name: 'flow.settings.team.refreshCta' })).toBeEnabled();
   });
 
   it('shows the empty title with a Refresh CTA for a non-admin', () => {

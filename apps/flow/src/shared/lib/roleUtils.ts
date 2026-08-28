@@ -1,5 +1,6 @@
 import type { Member } from '../stores/flowStore';
 import type { FlowProjectRole } from '../services/flowApi';
+import type { EffectiveAccess } from '@voxire/auth';
 
 /**
  * Two different role vocabularies live in this file and they are not
@@ -71,29 +72,15 @@ export function mostRestrictiveProjectRole(roles: FlowProjectRole[]): FlowProjec
   );
 }
 
-/**
- * Business-wide roles that bypass per-project membership entirely.
- *
- * Mirrors onion's `hubProfileBypasses`
- * (internal/modules/workspaces/internal/application/service.go), which admits
- * `IsOwner || role == "admin" || role == "operator"`. Note this is wider than
- * `MANAGE_WORKSPACE_ROLES` in FlowSettings: an operator bypasses project
- * membership on the server but is not treated as a workspace manager here.
- *
- * Takes the raw business role string rather than `Member['role']` on purpose.
- * `toFlowMemberRole` collapses `operator` to `viewer`, so mapping first would
- * drop exactly the role this predicate exists to admit.
- */
-const BUSINESS_ROLE_BYPASS: readonly string[] = ['owner', 'admin', 'operator'];
-
-/**
- * Whether a business-wide role bypasses per-project permission checks.
- *
- * Fails closed on null/undefined: an absent role is not evidence of authority.
- * The server is the authority either way; this only decides what to render.
- */
-export function hasBusinessRoleBypass(role: string | null | undefined): boolean {
-  return role !== null && role !== undefined && BUSINESS_ROLE_BYPASS.includes(role);
+/** Whether the central effective-access result grants a Flow permission. */
+export function hasFlowPermission(
+  effectiveAccess: EffectiveAccess | null | undefined,
+  permission: string
+): boolean {
+  const flowAccess = effectiveAccess?.apps.find(
+    (app) => app.appId === 'flow' && app.licensed && app.hasAccess
+  );
+  return flowAccess?.permissions.some((value) => value === permission) ?? false;
 }
 
 /** Returns true if the role can invite members. */

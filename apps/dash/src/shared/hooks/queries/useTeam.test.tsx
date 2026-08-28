@@ -168,7 +168,7 @@ describe('useInviteMember', () => {
     });
   });
 
-  it('includes a password when an administrator creates the account directly', async () => {
+  it('includes a temporary password when an administrator provisions credentials directly', async () => {
     mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
 
     const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
@@ -179,7 +179,8 @@ describe('useInviteMember', () => {
         fullName: 'Manual User',
         role: 'admin',
         apps: ['dash'],
-        password: 'strong-password',
+        username: 'manual-user',
+        temporaryPassword: 'strong-password',
       });
     });
 
@@ -188,7 +189,8 @@ describe('useInviteMember', () => {
       fullName: 'Manual User',
       role: 'admin',
       apps: ['dash'],
-      password: 'strong-password',
+      username: 'manual-user',
+      temporaryPassword: 'strong-password',
     });
   });
 });

@@ -109,7 +109,7 @@ export function useDeleteWorkType() {
 export function useWorkDaysRange(from: string, to: string) {
   return useQuery({
     queryKey: ['work-days-range', from, to],
-    queryFn: () => timeV2.listWorkDays({ from, to, limit: 7 }),
+    queryFn: () => timeV2.listWorkDays({ fromDate: from, toDate: to, limit: 7 }),
     enabled: !!from && !!to,
   });
 }
@@ -126,7 +126,7 @@ export function useWorkDaysRange(from: string, to: string) {
 export function useTeamWorkDays(from: string, to: string) {
   return useQuery({
     queryKey: ['work-days-team', from, to],
-    queryFn: () => timeV2.listTeamWorkDays({ from, to, limit: 500 }),
+    queryFn: () => timeV2.listTeamWorkDays({ fromDate: from, toDate: to, limit: 500 }),
     enabled: !!from && !!to,
   });
 }

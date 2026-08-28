@@ -18,12 +18,13 @@ const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
 const API_HOST = 'http://localhost:9999';
 
 const FAKE_USER = {
-  id: 'u1',
+  id: '5',
   email: 'owner@acme.test',
-  fullName: 'Acme Owner',
+  full_name: 'Acme Owner',
+  business_id: '1',
   role: 'owner',
   apps: ['flow'],
-  planSlug: 'pro',
+  plan_slug: 'pro',
 };
 
 const FAKE_PROJECT = {
@@ -44,12 +45,40 @@ const FAKE_MEMBER = {
   userId: '5',
   name: 'Ada Lovelace',
   email: 'ada@example.com',
-  role: 'member',
+  role: 'admin',
   addedAt: '2026-01-01T00:00:00Z',
 };
 
+function wireProject(project: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: project.id,
+    name: project.name,
+    description: project.description,
+    icon: 'folder',
+    color: project.color,
+    status: project.status,
+    visibility: 'private',
+    task_count: project.taskCount ?? 0,
+    completed_count: project.completedCount ?? 0,
+    start_date: '',
+    due_date: '',
+  };
+}
+
+function wireMember(member: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: member.id,
+    project_id: member.projectId,
+    user_id: member.userId,
+    name: member.name,
+    email: member.email,
+    role: member.role,
+    added_at: member.addedAt,
+  };
+}
+
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',
@@ -118,6 +147,33 @@ async function installBaseStubs(
     })
   );
 
+  await page.route(/localhost:9999\/flow\/project\/v2\/projects(\?.*)?$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        projects: [wireProject(FAKE_PROJECT)],
+        pagination: { total: 1 },
+      }),
+    })
+  );
+
+  await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ project: wireProject(FAKE_PROJECT) }),
+    })
+  );
+
+  await page.route(/localhost:9999\/flow\/project\/v2\/projects\/members(\?.*)?$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ members: [wireMember(FAKE_MEMBER)] }),
+    })
+  );
+
   // Project members list - GET only. Mutations on this exact path/sub-paths
   // are overridden per-test below to return 500.
   await page.route(
@@ -149,7 +205,7 @@ test.describe('Flow - ProjectSettings error toasts', () => {
 
   test('saving a project update failure shows exactly one toast', async ({ page }) => {
     await installBaseStubs(page);
-    await page.route(/localhost:9999\/flow\/project\/v1\/projects\/1(\?.*)?$/, (route: Route) => {
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1(\?.*)?$/, (route: Route) => {
       if (route.request().method() === 'PUT') {
         route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
         return;
@@ -166,7 +222,7 @@ test.describe('Flow - ProjectSettings error toasts', () => {
   test('removing a member failure shows exactly one toast', async ({ page }) => {
     await installBaseStubs(page);
     await page.route(
-      /localhost:9999\/flow\/project\/v1\/projects\/members(\?.*)?$/,
+      /localhost:9999\/flow\/project\/v2\/projects\/members(\?.*)?$/,
       (route: Route) => {
         if (route.request().method() === 'DELETE') {
           route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
@@ -186,7 +242,7 @@ test.describe('Flow - ProjectSettings error toasts', () => {
   test('updating a member role failure shows exactly one toast', async ({ page }) => {
     await installBaseStubs(page);
     await page.route(
-      /localhost:9999\/flow\/project\/v1\/projects\/members\/role(\?.*)?$/,
+      /localhost:9999\/flow\/project\/v2\/projects\/members\/role(\?.*)?$/,
       (route: Route) => {
         route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
       }
@@ -199,36 +255,9 @@ test.describe('Flow - ProjectSettings error toasts', () => {
     await expect(page.locator('[data-sonner-toast]')).toHaveCount(1, { timeout: 10_000 });
   });
 
-  test('moving a project failure shows exactly one toast and resets the confirm state', async ({
-    page,
-  }) => {
-    await installBaseStubs(page, {
-      workspaces: [
-        { id: '10', name: 'Acme Workspace', color: '#64C5B9' },
-        { id: '11', name: 'Other Workspace', color: '#111111' },
-      ],
-    });
-    await page.route(
-      /localhost:9999\/flow\/project\/v1\/projects\/move(\?.*)?$/,
-      (route: Route) => {
-        route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
-      }
-    );
-
-    await goToSettings(page);
-    await page.getByRole('button', { name: 'Members' }).click();
-    await page.getByText('Move to workspace').waitFor();
-    await page.locator('select').filter({ hasText: 'Other Workspace' }).selectOption('11');
-    await page.getByRole('button', { name: 'Move' }).click();
-    await page.getByRole('button', { name: 'Confirm' }).click();
-
-    await expect(page.locator('[data-sonner-toast]')).toHaveCount(1, { timeout: 10_000 });
-    await expect(page.getByRole('button', { name: 'Move' })).toBeVisible();
-  });
-
   test('deleting a project failure shows exactly one toast', async ({ page }) => {
     await installBaseStubs(page);
-    await page.route(/localhost:9999\/flow\/project\/v1\/projects\/1(\?.*)?$/, (route: Route) => {
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1(\?.*)?$/, (route: Route) => {
       if (route.request().method() === 'DELETE') {
         route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' });
         return;
@@ -238,9 +267,9 @@ test.describe('Flow - ProjectSettings error toasts', () => {
 
     await goToSettings(page);
     await page.getByRole('button', { name: 'Danger Zone' }).click();
-    await page.getByRole('button', { name: 'Delete' }).click();
+    await page.getByRole('button', { name: 'Archive', exact: true }).click();
     await page.getByPlaceholder('Alpha Project').fill('Alpha Project');
-    await page.getByRole('button', { name: 'Delete project' }).click();
+    await page.getByRole('button', { name: 'Archive project' }).click();
 
     await expect(page.locator('[data-sonner-toast]')).toHaveCount(1, { timeout: 10_000 });
   });

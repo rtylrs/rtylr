@@ -6,7 +6,7 @@ const FLOW_URL = 'http://localhost:5183';
 const EVIDENCE_DIR = '/Users/abedamouneh/Development/vault/rtylr/audit/flow-qa-2026-08-v2/evidence';
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMTAwMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',

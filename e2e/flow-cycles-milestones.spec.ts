@@ -10,7 +10,8 @@ const API_HOST = 'http://localhost:9999';
 const FAKE_USER = {
   id: '1001',
   email: 'owner@test.local',
-  fullName: 'Test Owner',
+  full_name: 'Test Owner',
+  business_id: '1',
   role: 'owner',
   apps: ['flow'],
 };
@@ -20,10 +21,10 @@ const FAKE_CYCLES = [
     id: '1',
     name: 'Sprint 1 - Foundations',
     description: 'Initial sprint cycle',
-    startDate: '2026-08-01',
-    endDate: '2026-08-15',
+    start_date: '2026-08-01',
+    end_date: '2026-08-15',
     status: 'active',
-    workspaceId: '10',
+    project_id: '1',
   },
 ];
 
@@ -32,15 +33,18 @@ const FAKE_MILESTONES = [
     id: '1',
     name: 'v1.0 Beta Release',
     description: 'Public beta milestone',
-    targetDate: '2026-08-30',
-    dueDate: '2026-08-30',
+    target_date: '2026-08-30',
+    computed_progress: 0,
+    done_count: 0,
+    task_count: 0,
     status: 'active',
-    workspaceId: '10',
+    project_id: '1',
+    project: { name: 'Alpha Project', color: '#64C5B9' },
   },
 ];
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMTAwMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',
@@ -74,11 +78,38 @@ test.describe('Flow - Cycles & Milestones', () => {
       })
     );
 
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          projects: [{ id: '1', name: 'Alpha Project', color: '#64C5B9' }],
+          pagination: { total: 1 },
+        }),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/cycle\/v2\/cycles(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ cycles: FAKE_CYCLES, pagination: { total: 1 } }),
+      })
+    );
+
     await page.route(/localhost:9999\/flow\/milestone\/v1\/milestones/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ milestones: FAKE_MILESTONES }),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/milestone\/v2\/milestones(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ milestones: FAKE_MILESTONES, pagination: { total: 1 } }),
       })
     );
 

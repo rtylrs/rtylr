@@ -55,7 +55,7 @@ describe('crmApi', () => {
     });
   });
 
-  it('converts compatibility request bodies to the backend wire shape', async () => {
+  it('passes canonical request bodies to generated clients', async () => {
     crmApi.createCustomer({ name: 'Jane Doe', email: 'jane@test.com' });
     crmApi.updateCampaignStatus(7, 'active');
     await Promise.resolve();
@@ -64,11 +64,11 @@ describe('crmApi', () => {
     // member to wrap them in, so the wrapper was an extra level the server
     // never asked for.
     expect(mockClients.compatibility.createCustomer).toHaveBeenCalledWith({
-      first_name: 'Jane',
-      last_name: 'Doe',
+      firstName: 'Jane',
+      lastName: 'Doe',
       email: 'jane@test.com',
       phone: undefined,
-      date_of_birth: undefined,
+      dateOfBirth: undefined,
       tags: undefined,
       notes: undefined,
     });

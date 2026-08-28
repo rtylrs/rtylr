@@ -16,9 +16,19 @@ export const permissionMatrixSchema = z.object({
 export const customRoleSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(String),
   name: z.string(),
-  color: z.string(),
-  permissions: z.array(z.string()),
-  members: z.number().default(0),
+  description: z.string().default(''),
+  permissions: z.array(z.string()).default([]),
+  appId: z.string().default('dash'),
+  roleKey: z.string().default(''),
+  level: z.number().default(0),
+  parentRoleId: z.union([z.string(), z.number()]).transform(String).nullable().optional(),
+  scopeRules: z.array(z.string()).default([]),
+  isSystem: z.boolean().default(false),
+  isArchived: z.boolean().default(false),
+  lifecycle: z.string().default('active'),
+  version: z.union([z.string(), z.number()]).transform(Number).default(1),
+  memberCount: z.number().default(0),
+  createdAt: z.string().default(''),
 });
 
 export type PermissionDef = z.infer<typeof permissionDefSchema>;

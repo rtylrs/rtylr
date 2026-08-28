@@ -44,10 +44,11 @@ interface StubShift {
 const FAKE_USER = {
   id: 1,
   email: 'hr-admin@acme.test',
-  fullName: 'HR Admin',
-  role: 'hr_admin',
+  full_name: 'HR Admin',
+  business_id: '1',
+  role: 'admin',
   apps: ['hr'],
-  planSlug: 'pro',
+  plan_slug: 'pro',
 };
 
 const FAKE_HR_CONFIG = {
@@ -138,7 +139,7 @@ async function installHrStubs(
       body: JSON.stringify({
         config: {
           id: 1,
-          setup_completed_at: '2026-01-01T00:00:00Z',
+          setup_completed_at: '1767225600',
           work_week_start: 'Monday',
           currency: 'USD',
           weekly_hours: 40,
@@ -244,7 +245,7 @@ async function installHrStubs(
   });
 
   await page.route(
-    /localhost:9999\/hr\/departments\/v1\/departments(\?.*)?$/,
+    /localhost:9999\/hr\/department\/v1\/departments(\?.*)?$/,
     async (route: Route) => {
       await route.fulfill({
         status: 200,
@@ -344,7 +345,9 @@ test.describe('HR staff detail', () => {
     await installHrStubs(page, { staff: fakeStaff });
     await page.goto(`${HR_URL}/staff/10`);
 
-    await expect(page.getByText('Diana Prince')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Diana Prince' })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('staff detail page renders the employee role and department', async ({ page }) => {
@@ -363,7 +366,9 @@ test.describe('HR staff detail', () => {
     await installHrStubs(page, { staff: fakeStaff });
     await page.goto(`${HR_URL}/staff/11`);
 
-    await expect(page.getByText('Ethan Hunt')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Ethan Hunt' })).toBeVisible({
+      timeout: 10_000,
+    });
     // Role and department should appear somewhere on the detail page.
     await expect(page.getByText('Sous Chef')).toBeVisible({ timeout: 5_000 });
   });
@@ -383,7 +388,7 @@ test.describe('HR shifts list', () => {
         start: '08:00',
         end: '16:00',
         status: 'Scheduled',
-        day: 'Monday',
+        day: 'Mon',
         staff_id: 1,
       },
       {
@@ -393,7 +398,7 @@ test.describe('HR shifts list', () => {
         start: '14:00',
         end: '22:00',
         status: 'Scheduled',
-        day: 'Monday',
+        day: 'Mon',
         staff_id: 2,
       },
     ];
@@ -401,6 +406,7 @@ test.describe('HR shifts list', () => {
     await installHrStubs(page, { shifts: fakeShifts });
     await page.goto(`${HR_URL}/shifts`);
 
+    await page.getByRole('button', { name: /Mon/i }).click();
     await expect(page.getByText('Morning Shift')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText('Evening Shift')).toBeVisible({ timeout: 5_000 });
   });
@@ -414,13 +420,14 @@ test.describe('HR shifts list', () => {
         start: '22:00',
         end: '06:00',
         status: 'Scheduled',
-        day: 'Tuesday',
+        day: 'Tue',
       },
     ];
 
     await installHrStubs(page, { shifts: fakeShifts });
     await page.goto(`${HR_URL}/shifts`);
 
+    await page.getByRole('button', { name: /Tue/i }).click();
     await expect(page.getByText('Night Shift')).toBeVisible({ timeout: 10_000 });
     // Start or end time should appear in the rendered row.
     await expect(page.getByText(/22:00/)).toBeVisible({ timeout: 5_000 });
@@ -435,14 +442,15 @@ test.describe('HR shifts list', () => {
         start: '07:00',
         end: '15:00',
         status: 'Scheduled',
-        day: 'Friday',
+        day: 'Fri',
       },
     ];
 
     await installHrStubs(page, { shifts: fakeShifts });
     await page.goto(`${HR_URL}/shifts`);
 
+    await page.getByRole('button', { name: /Fri/i }).click();
     await expect(page.getByText('Friday Opening')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText(/Friday/i)).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('heading', { name: /Fri:/i })).toBeVisible({ timeout: 5_000 });
   });
 });

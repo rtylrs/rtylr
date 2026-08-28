@@ -336,8 +336,7 @@ const CustomerProfile: React.FC = () => {
                     fontSize: '12px',
                   }}
                 >
-                  {balance.totalOutstanding.toFixed(2)}{' '}
-                  {t('customers.outstanding')}
+                  {balance.totalOutstanding.toFixed(2)} {t('customers.outstanding')}
                 </span>
               )}
             </div>

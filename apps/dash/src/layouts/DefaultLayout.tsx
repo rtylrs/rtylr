@@ -237,11 +237,17 @@ const AppsSection: React.FC = () => {
   const { user } = useUserStore();
   const { data: apps = [] } = useApps();
   const userApps = (user?.apps as string[] | undefined) ?? [];
-  const isOwner = user?.role === 'owner' || user?.role === 'admin';
+  const effectiveAccess = user?.effectiveAccess;
+  const isOwner = effectiveAccess?.isOwner ?? (user?.role === 'owner' || user?.role === 'admin');
 
   const visible = apps.filter((a) => {
     if (!(a.key in APP_URLS)) return false;
     if (a.status !== 'active') return false;
+    if (effectiveAccess) {
+      return effectiveAccess.apps.some(
+        (app) => app.appId === a.key && app.licensed && app.hasAccess
+      );
+    }
     if (isOwner) return userApps.length === 0 || userApps.includes(a.key);
     return userApps.includes(a.key);
   });
@@ -582,7 +588,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <button
                   type="button"
                   onClick={() => setMobileSidebarOpen((v) => !v)}
-                  className="md:hidden h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
+                  className="md:hidden h-11 w-11 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
                   aria-label="Toggle navigation menu"
                 >
@@ -607,16 +613,16 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     </span>
                   </div>
                 ) : (
-                  <h1 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                     {pageTitle}
-                  </h1>
+                  </span>
                 )}
               </div>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => setCommandPaletteOpen(true)}
-                  className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                  className="flex items-center gap-2 px-2.5 h-11 min-w-11 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{
                     color: 'var(--dash-text-muted)',
                     border: '1px solid var(--dash-border)',
@@ -642,7 +648,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <button
                   type="button"
                   onClick={() => navigate({ to: '/notifications' })}
-                  className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                  className="relative h-11 w-11 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
                   aria-label={
                     unreadCount > 0

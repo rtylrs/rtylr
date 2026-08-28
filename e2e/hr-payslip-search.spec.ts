@@ -15,10 +15,11 @@ const API = 'http://localhost:9999';
 const FAKE_USER = {
   id: 1,
   email: 'hr-admin@acme.test',
-  fullName: 'HR Admin',
-  role: 'hr_admin',
+  full_name: 'HR Admin',
+  business_id: '1',
+  role: 'admin',
   apps: ['hr'],
-  planSlug: 'pro',
+  plan_slug: 'pro',
 };
 
 const RUNS = [
@@ -115,7 +116,7 @@ async function installStubs(page: Page, requested: string[]): Promise<void> {
       body: JSON.stringify({
         config: {
           id: 1,
-          setup_completed_at: '2026-01-01T00:00:00Z',
+          setup_completed_at: '1767225600',
           work_week_start: 'Monday',
           currency: 'USD',
           weekly_hours: 40,
@@ -195,7 +196,7 @@ test.describe('pay slip typed search', () => {
     await page.goto(`${HR_URL}/payroll/my-payslips/view?runId=abc`);
 
     // The route must still render its own component - not the error boundary.
-    await expect(page.getByRole('link', { name: /back/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /back/i })).toBeVisible({ timeout: 15_000 });
     expect(requested).toHaveLength(0);
   });
 
@@ -205,7 +206,7 @@ test.describe('pay slip typed search', () => {
 
     await page.goto(`${HR_URL}/payroll/my-payslips/view`);
 
-    await expect(page.getByRole('link', { name: /back/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /back/i })).toBeVisible({ timeout: 15_000 });
     expect(requested).toHaveLength(0);
   });
 
@@ -231,7 +232,7 @@ test.describe('pay slip typed search', () => {
 
       await page.goto(`${HR_URL}/payroll/my-payslips/view?runId=${value}`);
 
-      await expect(page.getByRole('link', { name: /back/i })).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByRole('button', { name: /back/i })).toBeVisible({ timeout: 15_000 });
       expect(requested).toHaveLength(0);
     });
   }

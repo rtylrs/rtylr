@@ -43,6 +43,12 @@ export const securityStateSchema = z
   .object({
     twoFactorEnabled: z.boolean().optional(),
     two_factor_enabled: z.boolean().optional(),
+    mfaRequired: z.boolean().optional(),
+    mfa_required: z.boolean().optional(),
+    mfaEnrolled: z.boolean().optional(),
+    mfa_enrolled: z.boolean().optional(),
+    recoveryAvailable: z.boolean().optional(),
+    recovery_available: z.boolean().optional(),
     twoFactorMethod: z.enum(['app', 'sms']).nullable().default(null),
     sessions: z.array(sessionSchema).optional(),
     activeSessions: z.array(sessionSchema).optional(),
@@ -53,6 +59,10 @@ export const securityStateSchema = z
   })
   .transform((s) => ({
     twoFactorEnabled: s.twoFactorEnabled ?? s.two_factor_enabled ?? false,
+    mfaRequired: s.mfaRequired ?? s.mfa_required ?? false,
+    mfaEnrolled:
+      s.mfaEnrolled ?? s.mfa_enrolled ?? s.twoFactorEnabled ?? s.two_factor_enabled ?? false,
+    recoveryAvailable: s.recoveryAvailable ?? s.recovery_available ?? false,
     twoFactorMethod: s.twoFactorMethod,
     sessions: s.sessions ?? s.activeSessions ?? s.active_sessions ?? [],
     trustedDevices: s.trustedDevices,

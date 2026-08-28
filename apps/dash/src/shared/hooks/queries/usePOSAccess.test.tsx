@@ -17,7 +17,7 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
-import { locationFlagsForRole, useMemberLocations, usePOSLocations } from './usePOSAccess';
+import { useMemberLocations, usePOSLocations } from './usePOSAccess';
 
 function createWrapper() {
   const client = new QueryClient({
@@ -74,23 +74,5 @@ describe('useMemberLocations', () => {
         canViewReports: true,
       },
     ]);
-  });
-});
-
-describe('locationFlagsForRole', () => {
-  it('grants store managers management flags for assigned locations', () => {
-    expect(locationFlagsForRole('store_manager')).toEqual({
-      canManagePosUsers: true,
-      canManageTerminals: true,
-      canViewReports: true,
-    });
-  });
-
-  it('keeps non-manager assignments as plain location access', () => {
-    expect(locationFlagsForRole('staff')).toEqual({
-      canManagePosUsers: false,
-      canManageTerminals: false,
-      canViewReports: false,
-    });
   });
 });

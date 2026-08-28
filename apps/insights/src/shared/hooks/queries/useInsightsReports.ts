@@ -53,8 +53,8 @@ export const useGenerateRevenueReport = (): UseMutationResult<
     ): Promise<GenerateReportResult> => {
       const { from, to } = resolveDateRange(variables);
       const res = await reportClient.generateRevenueReport({
-        from,
-        to,
+        fromDate: from,
+        toDate: to,
         format: variables.format ?? 'pdf',
       });
       return {
@@ -80,7 +80,7 @@ export const useExportRevenueReport = (): UseMutationResult<void, unknown, DateR
   return useMutation<void, unknown, DateRangeParams>({
     mutationFn: async (params: DateRangeParams): Promise<void> => {
       const { from, to } = resolveDateRange(params);
-      const res = await reportClient.exportRevenueReport({ from, to });
+      const res = await reportClient.exportRevenueReport({ fromDate: from, toDate: to });
       const blob = new Blob([res.csv ?? ''], { type: res.contentType || 'text/csv' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');

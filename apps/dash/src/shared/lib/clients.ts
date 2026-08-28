@@ -1,4 +1,5 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, createRestRouteClient } from '@voxire/api';
+import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { AiServiceClient } from '@voxire/voxie/hub/ai/v1/client';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import { BusinessServiceClient } from '@voxire/voxie/hub/business/v1/client';
@@ -46,9 +47,8 @@ export const inventoryClient = createOneKitClient(InventoryServiceClient, 'dash'
 export const timeOffClient = createOneKitClient(TimeOffServiceClient, 'dash');
 export const orderClient = createOneKitClient(OrderServiceClient, 'dash');
 export const tableClient = createOneKitClient(TableServiceClient, 'dash');
-// licenseClient lives in ./api as a REST adapter: license/v1 has no contract
-// in voxie (#894).
-export { licenseClient } from './api';
+export const licenseClient = createOneKitClient(LicenseServiceClient, 'dash');
+export const rest = createRestRouteClient('dash');
 
 // pos/orders/compat/v1 and hub/settings/compat/v1 have no contract in voxie
 // (#894). useOrders and the SMTP test use the REST transport in ./api, which is

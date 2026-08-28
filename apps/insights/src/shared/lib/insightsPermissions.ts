@@ -1,7 +1,15 @@
-import { can } from '@voxire/permissions';
+import { can, canEffectiveAccess, canonicalizePermission } from '@voxire/permissions';
 import type { PlatformRole, Resource } from '@voxire/permissions';
+import { useUserStore } from '@voxire/auth';
+import type { EffectiveAccess } from '@voxire/types';
 
 export type InsightsPermission = Extract<Resource, `insights:${string}`>;
+
+function storedEffectiveAccess(): EffectiveAccess | undefined {
+  return typeof useUserStore.getState === 'function'
+    ? useUserStore.getState().user?.effectiveAccess
+    : undefined;
+}
 
 // Typed against the full PlatformRole set (not @voxire/auth's narrower
 // UserRole) because the permission matrix distinguishes billing,
@@ -11,7 +19,10 @@ export type InsightsPermission = Extract<Resource, `insights:${string}`>;
 // PlatformRole, so call sites are unaffected.
 export function canInsightsPermission(
   role: PlatformRole | null | undefined,
-  permission: InsightsPermission
+  permission: InsightsPermission,
+  effectiveAccess: EffectiveAccess | null | undefined = storedEffectiveAccess()
 ): boolean {
+  if (effectiveAccess)
+    return canEffectiveAccess(effectiveAccess, canonicalizePermission(permission));
   return role ? can({ platformRole: role }, permission) : false;
 }

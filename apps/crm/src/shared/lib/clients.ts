@@ -1,4 +1,5 @@
-import { createOneKitClient, unwrap } from '@voxire/api';
+import { createOneKitClient, createRestRouteClient, unwrap } from '@voxire/api';
+import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { CustomerServiceClient } from '@voxire/voxie/crm/customer/v1/client';
 import { SegmentServiceClient } from '@voxire/voxie/crm/segment/v1/client';
@@ -8,13 +9,9 @@ import { TemplateServiceClient } from '@voxire/voxie/crm/template/v1/client';
 import { FeedbackServiceClient } from '@voxire/voxie/crm/feedback/v1/client';
 import { SettingsServiceClient } from '@voxire/voxie/crm/settings/v1/client';
 import { DashboardServiceClient } from '@voxire/voxie/crm/dashboard/v1/client';
-import { safe } from './api';
+const rest = createRestRouteClient('crm');
 
-// license/v1 now exists in voxie (it did not when #894 was filed), so this
-// could become a generated client. Left as the REST adapter for now: its
-// response type is GetLicenseStateResponse while LicenseBanner wants
-// LicenseState, and reconciling those is not part of this fix.
-export { licenseClient } from './api';
+export const licenseClient = createOneKitClient(LicenseServiceClient, 'crm');
 export const userClient = createOneKitClient(UserServiceClient, 'crm');
 export const crmCustomerClient = createOneKitClient(CustomerServiceClient, 'crm');
 export const crmSegmentClient = createOneKitClient(SegmentServiceClient, 'crm');
@@ -45,18 +42,18 @@ const payload = (req: Req): unknown => {
 };
 
 const restGet = (path: string) => (req?: Req) =>
-  unwrap(safe.get<unknown>(path, { params: params(req) }));
+  unwrap(rest.get<unknown>(path, { params: params(req) }));
 
-const restPost = (path: string) => (req?: Req) => unwrap(safe.post<unknown>(path, payload(req)));
+const restPost = (path: string) => (req?: Req) => unwrap(rest.post<unknown>(path, payload(req)));
 
 const restPut = (path: (id: string) => string) => (req: { id: string; body?: unknown }) =>
-  unwrap(safe.put<unknown>(path(req.id), req.body ?? {}));
+  unwrap(rest.put<unknown>(path(req.id), req.body ?? {}));
 
 const restDelete = (path: (id: string) => string) => (req: { id: string }) =>
-  unwrap(safe.delete<unknown>(path(req.id)));
+  unwrap(rest.delete<unknown>(path(req.id)));
 
 const restGetById = (path: (id: string) => string) => (req: { id: string }) =>
-  unwrap(safe.get<unknown>(path(req.id)));
+  unwrap(rest.get<unknown>(path(req.id)));
 
 /**
  * c6e4ce609 routed 62 of this app's calls through a single
@@ -93,7 +90,7 @@ export const crmCompatibilityClient = {
   updateCustomer: (...args: Parameters<typeof crmCustomerClient.updateCustomer>) =>
     crmCustomerClient.updateCustomer(...args),
 
-  getCustomerFull: restGet('/crm/customers/detail/full'),
+  getCustomerFull: (id: number) => restGet('/crm/customers/detail/full')({ id }),
   getCustomerTimeline: restGet('/crm/customers/timeline'),
   exportCustomer: restGet('/crm/customers/export'),
   importCustomers: restPost('/crm/customers/import'),

@@ -57,10 +57,7 @@ import { RecycleBinSection } from '../features/projects-v2/RecycleBinSection';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
-import {
-  canCreateProject as canCreateProjectRole,
-  toFlowMemberRole,
-} from '../shared/lib/roleUtils';
+import { hasFlowPermission, toFlowMemberRole } from '../shared/lib/roleUtils';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useSidebarSections } from '../shared/hooks/useSidebarSections';
 import {
@@ -72,7 +69,7 @@ import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
 import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
-import { licenseClient } from '../shared/lib/api';
+import { licenseClient } from '../shared/lib/clients';
 import { useFlowBusinessName, useFlowBusinessId } from '../shared/hooks/useFlowBusinessName';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
@@ -254,6 +251,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { prefs: lifePrefs } = useLifePreferences();
 
   const authUser = useAuthUserStore((s) => s.user);
+  const effectiveAccess = useAuthUserStore((s) => s.effectiveAccess);
   const { user, setUser } = useUserStore();
 
   useEffect((): void => {
@@ -295,17 +293,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // threading the removal through those signatures here.
   const currentWorkspaceId = '';
 
-  // The business-wide role, read from the same `members` list the assignee
-  // picker uses. `canCreateProject` (roleUtils) is owner/admin/member only, so
-  // a viewer must not see project creation as available.
-  //
-  // This used to require a resolved workspace id as well. Since the workspace
-  // layer was stubbed out, that id has been the empty string, so the gate was
-  // permanently closed and nobody could create a project at all. v2 creation
-  // posts no workspace, so role is the only real condition.
-  const currentMemberRole = members.find((m) => String(m.id) === String(user?.id))?.role;
-  const canCreateProject =
-    currentMemberRole !== undefined && canCreateProjectRole(currentMemberRole);
+  const canCreateProject = hasFlowPermission(effectiveAccess, 'flow:projects:create');
   const createProjectGateReason = canCreateProject ? '' : t('flow.shell.createNeedsRole');
 
   // Workspace-scoped routes are authoritative even when the workspace list

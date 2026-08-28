@@ -1,5 +1,4 @@
-import { createOneKitClient, oneKitResult, unwrap } from '@voxire/api';
-import { safe } from './api';
+import { createOneKitClient, createRestRouteClient, oneKitResult, unwrap } from '@voxire/api';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/client';
@@ -43,6 +42,7 @@ const recurringInvoiceClient = createOneKitClient(RecurringInvoiceServiceClient,
 const reportClient = createOneKitClient(ReportServiceClient, 'finance');
 const statementClient = createOneKitClient(StatementServiceClient, 'finance');
 const taxClient = createOneKitClient(TaxServiceClient, 'finance');
+const rest = createRestRouteClient('finance');
 
 /**
  * c6e4ce609 routed 41 of this app's calls through a single
@@ -176,18 +176,18 @@ export const financeCompatibilityClient = {
   // are all in onion's route table.
 
   updateExpenseCategory: (req: { id: string; body?: unknown }) =>
-    unwrap(safe.put<unknown>('/finance/expense-categories', { id: req.id, ...(req.body ?? {}) })),
+    unwrap(rest.put<unknown>('/finance/expense-categories', { id: req.id, ...(req.body ?? {}) })),
 
   deleteExpenseCategory: (req: { id: string }) =>
-    unwrap(safe.delete<unknown>('/finance/expense-categories', { params: { id: req.id } })),
+    unwrap(rest.delete<unknown>('/finance/expense-categories', { params: { id: req.id } })),
 
   updateQuote: (req: { id: string; body?: unknown }) =>
-    unwrap(safe.put<unknown>(`/finance/quotes/${req.id}`, req.body ?? {})),
+    unwrap(rest.put<unknown>(`/finance/quotes/${req.id}`, req.body ?? {})),
 
-  deleteQuote: (req: { id: string }) => unwrap(safe.delete<unknown>(`/finance/quotes/${req.id}`)),
+  deleteQuote: (req: { id: string }) => unwrap(rest.delete<unknown>(`/finance/quotes/${req.id}`)),
 
   listBankFeeds: (req?: Record<string, unknown>) =>
-    unwrap(safe.get<unknown>('/finance/bank-feeds', { params: req ?? {} })),
+    unwrap(rest.get<unknown>('/finance/bank-feeds', { params: req ?? {} })),
 };
 
 export const listCrmCustomers = () => oneKitResult(() => crmCustomerClient.listCustomers({}));

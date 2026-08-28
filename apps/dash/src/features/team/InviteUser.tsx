@@ -11,6 +11,9 @@ import {
   Users as UsersIcon,
   CreditCard,
   Layers,
+  BarChart3,
+  Utensils,
+  BriefcaseBusiness,
   MapPin,
   Eye,
   EyeOff,
@@ -19,17 +22,15 @@ import { EmptyState } from '@voxire/ui';
 import { Input, Label } from '../../shared/components/ui';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 import { useGroups, useBulkInvite, type BulkResult } from '../../shared/hooks/queries/useGroups';
-import {
-  usePOSLocations,
-  useAssignPOSLocation,
-  locationFlagsForRole,
-} from '../../shared/hooks/queries/usePOSAccess';
+import { usePOSLocations, useAssignPOSLocation } from '../../shared/hooks/queries/usePOSAccess';
 import {
   useMySubscription,
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
 import { isAddonEnabled, useAddons } from '../../shared/hooks/queries/useAddons';
+import { buildAppRoleAssignments, dashRoleToLegacyRole } from './authorizationDraft';
+import { useCustomRoles } from '../../shared/hooks/queries/usePermissions';
 
 const ALL_APPS = [
   { key: 'pos', label: 'POS', desc: 'Point of sale', icon: MonitorSpeaker, color: '#4583C4' },
@@ -44,27 +45,28 @@ const ALL_APPS = [
     color: '#ef4444',
   },
   { key: 'flow', label: 'Flow', desc: 'Projects and tasks', icon: Layers, color: '#64C5B9' },
+  {
+    key: 'insights',
+    label: 'Insights',
+    desc: 'Reports and analytics',
+    icon: BarChart3,
+    color: '#ec4899',
+  },
+  { key: 'menu', label: 'Menu', desc: 'Menus and ordering', icon: Utensils, color: '#f97316' },
+  {
+    key: 'recruit',
+    label: 'Recruit',
+    desc: 'Jobs and candidates',
+    icon: BriefcaseBusiness,
+    color: '#06b6d4',
+  },
 ];
 
 const ROLES = [
-  { id: 'admin', label: 'Admin', desc: 'Full access to all apps and settings, except billing' },
-  {
-    id: 'operator',
-    label: 'Operator',
-    desc: 'Manage day-to-day operations across assigned apps',
-  },
-  {
-    id: 'billing',
-    label: 'Billing',
-    desc: 'Access to billing, invoices, and payment settings only',
-  },
-  {
-    id: 'store_manager',
-    label: 'Store Manager',
-    desc: 'Manages assigned POS locations — staff PINs, voids, refunds, reports',
-  },
-  { id: 'staff', label: 'Staff', desc: 'Use assigned apps only, no admin access' },
-  { id: 'viewer', label: 'Viewer', desc: 'Read-only access to assigned apps' },
+  { id: 'admin', label: 'Admin', desc: 'Manage business access and assigned applications' },
+  { id: 'manager', label: 'Manager', desc: 'Manage assigned work within delegated scope' },
+  { id: 'member', label: 'Member', desc: 'Use assigned applications and operational resources' },
+  { id: 'viewer', label: 'Viewer', desc: 'Read-only access to assigned applications' },
 ];
 
 const STATUS_COLORS: Record<BulkResult['status'], string> = {
@@ -81,23 +83,27 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const assignLocation = useAssignPOSLocation();
   const { data: sub } = useMySubscription();
   const { data: groups = [] } = useGroups();
+  const { data: customRoles = [] } = useCustomRoles();
 
   const [tab, setTab] = useState<'single' | 'bulk'>('single');
 
   // Single tab state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<TeamMember['role']>('staff');
+  const [role, setRole] = useState('member');
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
   const [authMethod, setAuthMethod] = useState<'invite' | 'manual'>('invite');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [singleGroupId, setSingleGroupId] = useState<string>('');
+  const [singleStep, setSingleStep] = useState<0 | 1 | 2 | 3>(0);
+  const [roleIdsByApp, setRoleIdsByApp] = useState<Record<string, string[]>>({});
 
   // Bulk tab state
   const [bulkEmailsRaw, setBulkEmailsRaw] = useState('');
-  const [bulkRole, setBulkRole] = useState<string>('staff');
+  const [bulkRole, setBulkRole] = useState<string>('member');
   const [bulkApps, setBulkApps] = useState<string[]>([]);
   const [bulkLocations, setBulkLocations] = useState<number[]>([]);
   const [bulkGroupId, setBulkGroupId] = useState<string>('');
@@ -154,12 +160,19 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const assignLocations = async (
     userId: number,
     locationIds: number[],
-    memberRole: string
+    _memberRole: string
   ): Promise<void> => {
     if (!userId || locationIds.length === 0) return;
-    const flags = locationFlagsForRole(memberRole);
     const results = await Promise.allSettled(
-      locationIds.map((locationId) => assignLocation.mutateAsync({ userId, locationId, ...flags }))
+      locationIds.map((locationId) =>
+        assignLocation.mutateAsync({
+          userId,
+          locationId,
+          canManagePosUsers: false,
+          canManageTerminals: false,
+          canViewReports: false,
+        })
+      )
     );
     if (results.some((r) => r.status === 'rejected')) {
       toast.error('Member invited, but some location assignments failed');
@@ -172,7 +185,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       toast.error('Email and name are required');
       return;
     }
-    if (authMethod === 'manual' && password.length < 8) {
+    if (authMethod === 'manual' && (!username.trim() || password.length < 8)) {
       toast.error('Password must be at least 8 characters');
       return;
     }
@@ -180,10 +193,19 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       const res = await invite.mutateAsync({
         email,
         fullName: name,
-        role,
+        role: dashRoleToLegacyRole(role) as TeamMember['role'],
         apps: selectedApps,
-        ...(authMethod === 'manual' ? { password } : {}),
-        ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
+        dashRole: role,
+        appAssignments: buildAppRoleAssignments(
+          selectedApps,
+          singleGroupId ? Number(singleGroupId) : undefined,
+          roleIdsByApp
+        ),
+        ...(singleGroupId ? { groupIds: [Number(singleGroupId)] } : {}),
+        provisioningMode: authMethod === 'manual' ? 'direct_credentials' : 'invitation',
+        ...(authMethod === 'manual'
+          ? { username: username.trim(), temporaryPassword: password }
+          : {}),
       });
       if (posSelectedSingle) {
         const userId = Number(res.userId || 0);
@@ -195,13 +217,75 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     }
   };
 
+  const continueToAccess = (): void => {
+    if (!name.trim() || !email.trim()) {
+      toast.error(t('team.inviteUser.identityRequired'));
+      return;
+    }
+    if (authMethod === 'manual' && (!username.trim() || password.length < 8)) {
+      toast.error(t('team.inviteUser.credentialsRequired'));
+      return;
+    }
+    setSingleStep(1);
+  };
+
+  const renderAppRoleSelectors = (): React.JSX.Element => (
+    <div className="space-y-3">
+      <div>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+          {t('team.inviteUser.appRolesTitle')}
+        </p>
+        <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+          {t('team.inviteUser.appRolesDescription')}
+        </p>
+      </div>
+      {selectedApps.map((appKey) => {
+        const options = customRoles.filter((customRole) => customRole.appId === appKey);
+        return (
+          <div key={appKey} className="space-y-1.5">
+            <Label htmlFor={`invite-app-role-${appKey}`}>{appKey.toUpperCase()}</Label>
+            <select
+              id={`invite-app-role-${appKey}`}
+              value={roleIdsByApp[appKey]?.[0] ?? ''}
+              onChange={(event) =>
+                setRoleIdsByApp((current) => ({
+                  ...current,
+                  [appKey]: event.target.value ? [event.target.value] : [],
+                }))
+              }
+              className="w-full rounded-lg px-3 py-2.5 text-base"
+              style={{
+                background: 'var(--dash-bg)',
+                border: '1px solid var(--dash-border)',
+                color: 'var(--dash-text)',
+              }}
+            >
+              <option value="">{t('team.inviteUser.defaultAppRole')}</option>
+              {options.map((customRole) => (
+                <option key={customRole.id} value={customRole.id}>
+                  {customRole.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   const submitBulk = async (): Promise<void> => {
     if (parsedEmails.length === 0) return;
     try {
       const res = await bulkInvite.mutateAsync({
         emails: parsedEmails,
-        role: bulkRole,
         apps: bulkApps,
+        dashRole: bulkRole,
+        role: dashRoleToLegacyRole(bulkRole) as TeamMember['role'],
+        appAssignments: buildAppRoleAssignments(
+          bulkApps,
+          bulkGroupId ? Number(bulkGroupId) : undefined
+        ),
+        ...(bulkGroupId ? { groupIds: [Number(bulkGroupId)] } : {}),
         ...(bulkGroupId ? { groupId: Number(bulkGroupId) } : {}),
       });
       setBulkResults(res.results);
@@ -311,8 +395,8 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           POS locations
         </p>
         <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-          {currentRole === 'store_manager'
-            ? 'Locations this manager runs (manage staff, voids, refunds, reports)'
+          {currentRole === 'manager'
+            ? 'Locations this manager runs within the assigned POS scope'
             : 'Locations this member can work at'}
         </p>
       </div>
@@ -425,7 +509,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               type="button"
               key={t}
               onClick={() => setTab(t)}
-              className="px-4 py-2 text-sm font-medium capitalize transition-colors"
+              className="min-h-11 px-4 py-2 text-sm font-medium capitalize transition-colors"
               style={{
                 color: tab === t ? 'var(--dash-text)' : 'var(--dash-text-muted)',
                 borderBottom: tab === t ? '2px solid #4583C4' : '2px solid transparent',
@@ -437,215 +521,413 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           ))}
         </div>
 
+        {tab === 'single' && (
+          <div className="grid grid-cols-3 gap-2" aria-label={t('team.inviteUser.progressLabel')}>
+            {[
+              t('team.inviteUser.stepIdentity'),
+              t('team.inviteUser.stepAccess'),
+              t('team.inviteUser.stepReview'),
+              t('team.inviteUser.stepActivate'),
+            ].map((label, index) => (
+              <button
+                type="button"
+                key={label}
+                onClick={() => {
+                  if (index <= singleStep) setSingleStep(index as 0 | 1 | 2 | 3);
+                }}
+                className="min-h-11 rounded-lg px-3 py-2 text-left text-xs font-semibold"
+                style={{
+                  background: index === singleStep ? 'var(--accent-muted)' : 'var(--dash-card)',
+                  border: `1px solid ${index <= singleStep ? 'var(--accent-border)' : 'var(--dash-border)'}`,
+                  color: index <= singleStep ? 'var(--accent)' : 'var(--dash-text-dim)',
+                }}
+              >
+                <span className="block text-[10px] uppercase tracking-wider">
+                  {t('team.inviteUser.stepLabel', { number: index + 1 })}
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Single tab */}
         {tab === 'single' && (
           <form onSubmit={submitSingle} className="space-y-6">
-            {/* Personal details */}
-            <div
-              className="rounded-xl p-5 space-y-4"
-              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-            >
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Personal details
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="inv-name">Full name</Label>
-                  <Input
-                    id="inv-name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Jane Doe"
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="inv-email">Email address</Label>
-                  <Input
-                    id="inv-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="jane@example.com"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Authentication */}
-            <div
-              className="rounded-xl p-5 space-y-4"
-              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-            >
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Authentication
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAuthMethod('invite')}
-                  className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
-                  style={{
-                    background:
-                      authMethod === 'invite' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
-                    border: `1px solid ${
-                      authMethod === 'invite' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
-                    }`,
-                    color: authMethod === 'invite' ? '#4583C4' : 'var(--dash-text-muted)',
-                  }}
+            {singleStep === 0 && (
+              <>
+                {/* Personal details */}
+                <div
+                  className="rounded-xl p-5 space-y-4"
+                  style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
                 >
-                  <p className="font-semibold">Send invitation email</p>
-                  <p
-                    className="text-[11px] mt-0.5 font-normal"
-                    style={{ color: 'var(--dash-text-dim)' }}
-                  >
-                    Member sets their own password
+                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                    Personal details
                   </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAuthMethod('manual')}
-                  className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
-                  style={{
-                    background:
-                      authMethod === 'manual' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
-                    border: `1px solid ${
-                      authMethod === 'manual' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
-                    }`,
-                    color: authMethod === 'manual' ? '#4583C4' : 'var(--dash-text-muted)',
-                  }}
-                >
-                  <p className="font-semibold">Set password manually</p>
-                  <p
-                    className="text-[11px] mt-0.5 font-normal"
-                    style={{ color: 'var(--dash-text-dim)' }}
-                  >
-                    You share credentials directly
-                  </p>
-                </button>
-              </div>
-
-              {authMethod === 'manual' && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="inv-password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="inv-password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="At least 8 characters"
-                      required={authMethod === 'manual'}
-                      minLength={8}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2"
-                      style={{ color: 'var(--dash-text-dim)' }}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="inv-name">Full name</Label>
+                      <Input
+                        id="inv-name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Jane Doe"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="inv-email">Email address</Label>
+                      <Input
+                        id="inv-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="jane@example.com"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Role */}
-            <div
-              className="rounded-xl p-5 space-y-4"
-              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-            >
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  Role
-                </p>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  Controls what this member can see and do
-                </p>
-              </div>
-              {renderRoleSelector(role, (r) => setRole(r as TeamMember['role']))}
-            </div>
-
-            {/* Licenses */}
-            <div
-              className="rounded-xl p-5 space-y-4"
-              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-            >
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  Assign licenses
-                </p>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  Choose which apps this member can access
-                </p>
-              </div>
-              {renderAppSelector(selectedApps, toggleApp)}
-
-              {posSelectedSingle &&
-                renderLocationSelector(selectedLocations, toggleLocation, role, () =>
-                  toggleApp('pos')
-                )}
-
-              {/* Seat cost preview */}
-              {sub &&
-                sub.pricePerSeatCents > 0 &&
-                sub.seatCount >= sub.includedSeatLimit &&
-                (() => {
-                  const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                    computeSeatProration(sub.pricePerSeatCents);
-                  return (
-                    <div
-                      className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
+                {/* Authentication */}
+                <div
+                  className="rounded-xl p-5 space-y-4"
+                  style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+                >
+                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                    Authentication
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAuthMethod('invite')}
+                      className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
                       style={{
-                        background: 'var(--accent-muted)',
-                        border: '1px solid var(--accent-border)',
+                        background:
+                          authMethod === 'invite' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
+                        border: `1px solid ${
+                          authMethod === 'invite' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
+                        }`,
+                        color: authMethod === 'invite' ? '#4583C4' : 'var(--dash-text-muted)',
                       }}
                     >
-                      <CreditCard
-                        size={12}
-                        style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}
-                      />
-                      <p style={{ color: 'var(--dash-text-muted)' }}>
-                        Adding this member adds{' '}
-                        <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                          +{centsToDisplay(proratedCents)}
-                        </span>{' '}
-                        to this month ({daysRemaining} of {daysInMonth} days remaining), then{' '}
-                        <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                          +{centsToDisplay(sub.pricePerSeatCents)}/mo
-                        </span>{' '}
-                        from {nextMonthName} 1st.
+                      <p className="font-semibold">Send invitation email</p>
+                      <p
+                        className="text-[11px] mt-0.5 font-normal"
+                        style={{ color: 'var(--dash-text-dim)' }}
+                      >
+                        Member sets their own password
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthMethod('manual')}
+                      className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
+                      style={{
+                        background:
+                          authMethod === 'manual' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
+                        border: `1px solid ${
+                          authMethod === 'manual' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
+                        }`,
+                        color: authMethod === 'manual' ? '#4583C4' : 'var(--dash-text-muted)',
+                      }}
+                    >
+                      <p className="font-semibold">Set password manually</p>
+                      <p
+                        className="text-[11px] mt-0.5 font-normal"
+                        style={{ color: 'var(--dash-text-dim)' }}
+                      >
+                        You share credentials directly
+                      </p>
+                    </button>
+                  </div>
+
+                  {authMethod === 'manual' && (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="inv-username">{t('team.inviteUser.usernameLabel')}</Label>
+                        <Input
+                          id="inv-username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder={t('team.inviteUser.usernamePlaceholder')}
+                          required={authMethod === 'manual'}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="inv-password">
+                          {t('team.inviteUser.temporaryPasswordLabel')}
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="inv-password"
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder={t('team.inviteUser.passwordPlaceholder')}
+                            required={authMethod === 'manual'}
+                            minLength={8}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center"
+                            style={{ color: 'var(--dash-text-dim)' }}
+                            aria-label={
+                              showPassword
+                                ? t('team.inviteUser.hidePassword')
+                                : t('team.inviteUser.showPassword')
+                            }
+                          >
+                            {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
+                        {t('team.inviteUser.temporaryPasswordHint')}
                       </p>
                     </div>
-                  );
-                })()}
-            </div>
+                  )}
+                </div>
+              </>
+            )}
 
-            {/* Group */}
-            {renderGroupSelector(singleGroupId, setSingleGroupId)}
+            {singleStep === 1 && (
+              <>
+                {/* Role */}
+                <div
+                  className="rounded-xl p-5 space-y-4"
+                  style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+                >
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      Role
+                    </p>
+                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                      Controls what this member can see and do
+                    </p>
+                  </div>
+                  {renderRoleSelector(role, setRole)}
+                </div>
+
+                {/* Licenses */}
+                <div
+                  className="rounded-xl p-5 space-y-4"
+                  style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+                >
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      Assign licenses
+                    </p>
+                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                      Choose which apps this member can access
+                    </p>
+                  </div>
+                  {renderAppSelector(selectedApps, toggleApp)}
+
+                  {posSelectedSingle &&
+                    renderLocationSelector(selectedLocations, toggleLocation, role, () =>
+                      toggleApp('pos')
+                    )}
+
+                  {selectedApps.length > 0 && renderAppRoleSelectors()}
+
+                  {/* Seat cost preview */}
+                  {sub &&
+                    sub.pricePerSeatCents > 0 &&
+                    sub.seatCount >= sub.includedSeatLimit &&
+                    (() => {
+                      const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                        computeSeatProration(sub.pricePerSeatCents);
+                      return (
+                        <div
+                          className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
+                          style={{
+                            background: 'var(--accent-muted)',
+                            border: '1px solid var(--accent-border)',
+                          }}
+                        >
+                          <CreditCard
+                            size={12}
+                            style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}
+                          />
+                          <p style={{ color: 'var(--dash-text-muted)' }}>
+                            Adding this member adds{' '}
+                            <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                              +{centsToDisplay(proratedCents)}
+                            </span>{' '}
+                            to this month ({daysRemaining} of {daysInMonth} days remaining), then{' '}
+                            <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                              +{centsToDisplay(sub.pricePerSeatCents)}/mo
+                            </span>{' '}
+                            from {nextMonthName} 1st.
+                          </p>
+                        </div>
+                      );
+                    })()}
+                </div>
+
+                {/* Group */}
+                {renderGroupSelector(singleGroupId, setSingleGroupId)}
+              </>
+            )}
+
+            {singleStep === 2 && (
+              <div
+                className="rounded-xl p-5 space-y-4"
+                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+              >
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                    {t('team.inviteUser.reviewTitle')}
+                  </p>
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
+                    {t('team.inviteUser.reviewDescription')}
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <strong>{t('team.inviteUser.reviewIdentity')}</strong>
+                    <p style={{ color: 'var(--dash-text-muted)' }}>
+                      {name} · {email}
+                    </p>
+                  </div>
+                  <div>
+                    <strong>{t('team.inviteUser.reviewDashRole')}</strong>
+                    <p className="capitalize" style={{ color: 'var(--dash-text-muted)' }}>
+                      {role}
+                    </p>
+                  </div>
+                  <div>
+                    <strong>{t('team.inviteUser.reviewApps')}</strong>
+                    <p style={{ color: 'var(--dash-text-muted)' }}>
+                      {selectedApps.length ? selectedApps.join(', ') : t('team.inviteUser.noApps')}
+                    </p>
+                  </div>
+                  <div>
+                    <strong>{t('team.inviteUser.reviewSignIn')}</strong>
+                    <p style={{ color: 'var(--dash-text-muted)' }}>
+                      {authMethod === 'invite'
+                        ? t('team.inviteUser.invitationMethod')
+                        : t('team.inviteUser.directCredentialMethod')}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className="rounded-lg px-3 py-2.5 text-xs"
+                  style={{
+                    background: 'var(--accent-muted)',
+                    border: '1px solid var(--accent-border)',
+                    color: 'var(--dash-text-muted)',
+                  }}
+                >
+                  {t('team.inviteUser.activationGuard')}
+                </div>
+              </div>
+            )}
+
+            {singleStep === 3 && (
+              <div
+                className="rounded-xl p-5 space-y-4"
+                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+              >
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                    {t('team.inviteUser.activationTitle')}
+                  </p>
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
+                    {t('team.inviteUser.activationDescription')}
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <strong>{t('team.inviteUser.activationMember')}</strong>
+                    <p style={{ color: 'var(--dash-text-muted)' }}>{name}</p>
+                  </div>
+                  <div>
+                    <strong>{t('team.inviteUser.activationState')}</strong>
+                    <p style={{ color: 'var(--dash-text-muted)' }}>
+                      {authMethod === 'invite'
+                        ? t('team.inviteUser.activationPendingInvite')
+                        : t('team.inviteUser.activationPendingVerification')}
+                    </p>
+                  </div>
+                  <div>
+                    <strong>{t('team.inviteUser.activationApps')}</strong>
+                    <p style={{ color: 'var(--dash-text-muted)' }}>
+                      {selectedApps.length ? selectedApps.join(', ') : t('team.inviteUser.noApps')}
+                    </p>
+                  </div>
+                  <div>
+                    <strong>{t('team.inviteUser.activationOwnership')}</strong>
+                    <p style={{ color: 'var(--dash-text-muted)' }}>
+                      {t('team.inviteUser.activationOwnershipValue')}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className="rounded-lg px-3 py-2.5 text-xs"
+                  style={{
+                    background: 'var(--accent-muted)',
+                    border: '1px solid var(--accent-border)',
+                    color: 'var(--dash-text-muted)',
+                  }}
+                >
+                  {t('team.inviteUser.activationGuard')}
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => navigate({ to: '/team' })}
-                className="px-4 py-2 rounded-lg text-sm font-medium"
+                className="min-h-11 px-4 py-2 rounded-lg text-sm font-medium"
                 style={{ color: 'var(--dash-text-muted)' }}
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                disabled={invite.isPending || !email.trim() || !name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
-                style={{ background: '#4583C4', color: '#fff' }}
-              >
-                <Send size={14} />
-                {authMethod === 'invite' ? 'Send invitation' : 'Create member'}
-              </button>
+              {singleStep > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSingleStep((singleStep - 1) as 0 | 1 | 2 | 3)}
+                  className="min-h-11 px-4 py-2 rounded-lg text-sm font-medium"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                >
+                  {t('team.inviteUser.backButton')}
+                </button>
+              )}
+              {singleStep < 3 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (singleStep === 0) {
+                      continueToAccess();
+                    } else {
+                      setSingleStep((singleStep + 1) as 0 | 1 | 2 | 3);
+                    }
+                  }}
+                  className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
+                  style={{ background: '#4583C4', color: '#fff' }}
+                >
+                  {singleStep === 2
+                    ? t('team.inviteUser.activateStepButton')
+                    : t('team.inviteUser.nextButton')}
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={invite.isPending}
+                  className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
+                  style={{ background: '#4583C4', color: '#fff' }}
+                >
+                  <Send size={14} />
+                  {authMethod === 'invite'
+                    ? t('team.inviteUser.sendInvitation')
+                    : t('team.inviteUser.createMember')}
+                </button>
+              )}
             </div>
           </form>
         )}
@@ -671,7 +953,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 onChange={(e) => setBulkEmailsRaw(e.target.value)}
                 placeholder="jane@example.com&#10;john@example.com&#10;alex@example.com"
                 rows={6}
-                className="w-full rounded-lg px-3 py-2.5 text-sm resize-y"
+                className="w-full rounded-lg px-3 py-2.5 text-base resize-y"
                 style={{
                   background: 'var(--dash-bg)',
                   border: '1px solid var(--dash-border)',
@@ -731,7 +1013,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               <button
                 type="button"
                 onClick={() => navigate({ to: '/team' })}
-                className="px-4 py-2 rounded-lg text-sm font-medium"
+                className="min-h-11 px-4 py-2 rounded-lg text-sm font-medium"
                 style={{ color: 'var(--dash-text-muted)' }}
               >
                 Cancel
@@ -740,7 +1022,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 type="button"
                 disabled={bulkInvite.isPending || parsedEmails.length === 0}
                 onClick={submitBulk}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
+                className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
                 style={{ background: '#4583C4', color: '#fff' }}
               >
                 <Send size={14} />

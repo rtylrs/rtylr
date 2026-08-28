@@ -1,5 +1,5 @@
-import { createOneKitClient } from '@voxire/api';
-import { safe } from './api';
+import { createOneKitClient, createRestRouteClient } from '@voxire/api';
+import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { ShiftServiceClient } from '@voxire/voxie/hr/shift/v1/client';
@@ -27,13 +27,12 @@ type HrRequestConfig = {
  * double-converted had it ever run.
  */
 export const hrTransport = {
-  get: <T = unknown>(path: string, config?: HrRequestConfig) => safe.get<T>(path, config),
-  post: <T = unknown>(path: string, data?: unknown) => safe.post<T>(path, data),
-  put: <T = unknown>(path: string, data?: unknown) => safe.put<T>(path, data),
-  delete: <T = unknown>(path: string, config?: HrRequestConfig) => safe.delete<T>(path, config),
+  get: <T = unknown>(path: string, config?: HrRequestConfig) => rest.get<T>(path, config),
+  post: <T = unknown>(path: string, data?: unknown) => rest.post<T>(path, data),
+  put: <T = unknown>(path: string, data?: unknown) => rest.put<T>(path, data),
+  delete: <T = unknown>(path: string, config?: HrRequestConfig) => rest.delete<T>(path, config),
 };
 
-// licenseClient now lives in ./api as a REST adapter: license/v1 has no
-// contract in voxie (#894).
-export { licenseClient } from './api';
+export const licenseClient = createOneKitClient(LicenseServiceClient, 'hr');
+const rest = createRestRouteClient('hr');
 export const userClient = createOneKitClient(UserServiceClient, 'hr');

@@ -4,7 +4,7 @@ import { Mail, Server, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
 import { oneKitResult, unwrap, getOneKitErrorMessage } from '@voxire/api';
-import { safe } from '../../../../../shared/lib/api';
+import { rest } from '../../../../../shared/lib/clients';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import {
   Card,
@@ -200,7 +200,7 @@ const Email: React.FC = () => {
   const testSmtpMutation = useMutation({
     mutationFn: (data: { host: string; port: number; username: string }) =>
       // hub/settings/compat/v1 has no contract in voxie (#894).
-      unwrap(safe.post('/hub/settings/email/test', data)),
+      unwrap(rest.post('/hub/settings/email/test', data)),
     onSuccess: () => {
       toast.success(`SMTP connection to ${smtp.host}:${smtp.port || 587} verified successfully`);
     },

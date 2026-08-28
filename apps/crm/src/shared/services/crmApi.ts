@@ -353,6 +353,11 @@ interface CustomerMutationPayload {
   notes?: string;
 }
 
+type CustomerMutationInput = Partial<Customer> & {
+  firstName?: string;
+  lastName?: string;
+};
+
 function splitCustomerName(name?: string): { firstName: string; lastName: string } {
   const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
   return {
@@ -361,8 +366,10 @@ function splitCustomerName(name?: string): { firstName: string; lastName: string
   };
 }
 
-function toCustomerMutationPayload(data: Partial<Customer>): CustomerMutationPayload {
-  const names = splitCustomerName(data.name);
+function toCustomerMutationPayload(data: CustomerMutationInput): CustomerMutationPayload {
+  const firstName = data.firstName?.trim() ?? '';
+  const lastName = data.lastName?.trim() ?? '';
+  const names = firstName || lastName ? { firstName, lastName } : splitCustomerName(data.name);
   return {
     firstName: names.firstName,
     lastName: names.lastName,
@@ -619,6 +626,11 @@ function withId<B>(id: string | number, value: unknown): { id: string; body: B }
   return { id: String(id), body: toOneKitJson(value) as B };
 }
 
+/** Payload for a generated request with a path ID and typed camelCase body. */
+function withCanonicalId<B>(id: string | number, body: B): { id: string; body: B } {
+  return { id: String(id), body };
+}
+
 /**
  * Coerce wire values into finite numbers. Money fields (mrr, mrr_potential,
  * total_mrr) are serialized by the backend's money.Amount as decimal strings
@@ -656,7 +668,7 @@ export const crmApi = {
     compatResult<Customer>(() => crmCompatibilityClient.getCustomer({ id: String(id) })),
 
   getCustomerFull: (id: number) =>
-    compatResult<Customer>(() => crmCompatibilityClient.getCustomerFull({ id })),
+    compatResult<Customer>(() => crmCompatibilityClient.getCustomerFull(id)),
 
   getCustomerTimeline: (
     id: number,
@@ -671,14 +683,14 @@ export const crmApi = {
       })
     ),
 
-  createCustomer: (data: Partial<Customer>) =>
+  createCustomer: (data: CustomerMutationInput) =>
     compatResult<Customer>(() =>
-      crmCompatibilityClient.createCustomer(flat(toCustomerMutationPayload(data)))
+      crmCompatibilityClient.createCustomer(toCustomerMutationPayload(data))
     ),
 
   updateCustomer: (id: number, data: Partial<Customer>) =>
     compatResult<Customer>(() =>
-      crmCompatibilityClient.updateCustomer(withId(id, toCustomerMutationPayload(data)))
+      crmCompatibilityClient.updateCustomer(withCanonicalId(id, toCustomerMutationPayload(data)))
     ),
 
   deleteCustomer: (id: number) =>

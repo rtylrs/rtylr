@@ -120,14 +120,14 @@ describe('useCanEditTask', () => {
   });
 
   it.each(['owner', 'admin', 'operator'] as const)(
-    'grants edit for a business-wide %s with no project role and no workspace role',
+    'does not grant edit from a legacy business-wide %s role without project scope',
     async (businessRole) => {
       useAuthUserStore.setState({ role: businessRole });
       (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
       (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
 
       const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
-      await waitFor(() => expect(result.current).toBe(true));
+      await waitFor(() => expect(result.current).toBe(false));
     }
   );
 });
@@ -151,7 +151,7 @@ describe('useCanDeleteResource', () => {
   });
 
   it.each(['owner', 'admin', 'operator'] as const)(
-    'grants delete for a business-wide %s with no project membership at all',
+    'does not grant delete from a legacy business-wide %s role without project scope',
     async (businessRole) => {
       useAuthUserStore.setState({ role: businessRole });
       (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
@@ -159,7 +159,7 @@ describe('useCanDeleteResource', () => {
       const { result } = renderHook(() => useCanDeleteResource('p1'), {
         wrapper: createWrapper(),
       });
-      await waitFor(() => expect(result.current).toBe(true));
+      await waitFor(() => expect(result.current).toBe(false));
     }
   );
 

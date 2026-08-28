@@ -1,5 +1,6 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { canEffectiveAccess } from '@voxire/permissions';
 import { Shield, Lock } from 'lucide-react';
 import { PermissionCheckbox, RoleBadge, SkeletonList } from '../../shared/components/dash';
 import { usePermissions, useUpdatePermissions } from '../../shared/hooks/queries/usePermissions';
@@ -10,8 +11,10 @@ const Permissions: React.FC = () => {
   const { data, isLoading } = usePermissions();
   const updatePermissions = useUpdatePermissions();
 
-  const isAdminOrOwner =
-    user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
+  const canEditRoles = user?.effectiveAccess
+    ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:edit') ||
+      canEffectiveAccess(user.effectiveAccess, 'hub:roles:create')
+    : user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
 
   if (isLoading || !data) {
     return (
@@ -47,7 +50,7 @@ const Permissions: React.FC = () => {
               </p>
             </div>
           </div>
-          {!isAdminOrOwner && (
+          {!canEditRoles && (
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
@@ -123,7 +126,7 @@ const Permissions: React.FC = () => {
                     {data.roles.map((role) => {
                       const value = data.values[role]?.[p.key] ?? false;
                       const isOwner = role === 'owner';
-                      const isDisabled = isOwner || !isAdminOrOwner;
+                      const isDisabled = isOwner || !canEditRoles;
                       return (
                         <div key={role} role="cell" className="flex justify-center">
                           <PermissionCheckbox

@@ -51,10 +51,25 @@ const Login: React.FC = (): React.JSX.Element => {
     // No explicit redirect, decide based on the user's subscription apps
     try {
       const res = await userClient.getMe({});
+      const provisioningStatus = res.provisioningStatus;
+      if (
+        provisioningStatus?.mfaRequired &&
+        (!provisioningStatus.mfaEnrolled || !provisioningStatus.mfaVerified)
+      ) {
+        window.location.href = APP_URLS.dash as string;
+        return;
+      }
       const role = res.role;
-      const apps = res.apps;
-      // Owners and admins always land on Dash (the account center)
-      if (role === 'owner' || role === 'admin' || apps.length === 0) {
+      const apps = res.effectiveAccess
+        ? res.effectiveAccess.apps
+            .filter((app) => app.licensed && app.hasAccess)
+            .map((app) => app.appId)
+        : res.apps;
+      const hasDashManagement = res.effectiveAccess
+        ? res.effectiveAccess.isOwner || res.effectiveAccess.isAdmin
+        : role === 'owner' || role === 'admin';
+      // Owners and admins always land on Dash, the account center.
+      if (hasDashManagement || apps.length === 0) {
         window.location.href = APP_URLS.dash as string;
         return;
       }

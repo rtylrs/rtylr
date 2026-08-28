@@ -33,7 +33,11 @@ const memberState = vi.hoisted(() => ({
 }));
 
 const userState = vi.hoisted(() => ({
-  user: { role: 'owner', isOwner: true } as { role: string; isOwner: boolean },
+  user: { role: '', isOwner: false } as {
+    role: string;
+    isOwner: boolean;
+    effectiveAccess?: { dashPermissions: string[] };
+  },
 }));
 
 const groupsState = vi.hoisted(() => ({
@@ -67,7 +71,6 @@ vi.mock('../../shared/hooks/queries/usePOSAccess', () => ({
   useMemberLocations: () => ({ data: EMPTY_LOCATIONS }),
   useAssignPOSLocation: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useRemovePOSLocation: () => ({ mutateAsync: vi.fn(), isPending: false }),
-  locationFlagsForRole: () => ({}),
 }));
 
 vi.mock('../../shared/stores/userStore', () => ({
@@ -97,7 +100,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   memberState.data = undefined;
   memberState.isLoading = false;
-  userState.user = { role: 'owner', isOwner: true };
+  userState.user = {
+    role: 'owner',
+    isOwner: true,
+    effectiveAccess: { dashPermissions: ['hub:team:edit'] },
+  };
   groupsState.data = [];
 });
 
@@ -116,7 +123,11 @@ describe('MemberDetail: member-not-found empty state', () => {
 
 describe('MemberDetail: app-access empty state (permission-gated)', () => {
   it('shows an "assign app" action that opens edit mode when the current user can edit the member', () => {
-    userState.user = { role: 'owner', isOwner: true };
+    userState.user = {
+      role: 'owner',
+      isOwner: true,
+      effectiveAccess: { dashPermissions: ['hub:team:edit'] },
+    };
     memberState.data = makeMember({ apps: [] });
     render(<MemberDetail />);
 
@@ -131,7 +142,7 @@ describe('MemberDetail: app-access empty state (permission-gated)', () => {
   });
 
   it('shows a refresh fallback instead when the current user cannot edit the member', () => {
-    userState.user = { role: 'staff', isOwner: false };
+    userState.user = { role: 'staff', isOwner: false, effectiveAccess: { dashPermissions: [] } };
     memberState.data = makeMember({ apps: [] });
     render(<MemberDetail />);
 

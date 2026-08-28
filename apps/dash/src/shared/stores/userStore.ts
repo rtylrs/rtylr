@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import type { EffectiveAccess, ProvisioningStatus } from '@voxire/types';
 
 interface Addons {
   feedback: boolean;
@@ -26,6 +27,9 @@ export interface StoredUser {
   planSlug?: string;
   subscriptionStatus?: string;
   effectiveResources?: Record<string, string>;
+  dashRole?: string;
+  effectiveAccess?: EffectiveAccess;
+  provisioningStatus?: ProvisioningStatus;
 }
 
 interface UserState {
@@ -34,7 +38,7 @@ interface UserState {
   isAuthenticated: boolean;
   userId: string | null;
   addons: Addons;
-  visits: any[];
+  visits: unknown[];
 }
 
 interface UserActions {

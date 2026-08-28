@@ -1,6 +1,10 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ResponsiveGridLayout, type Layout, type ResponsiveLayouts } from 'react-grid-layout';
+import {
+  Responsive as ResponsiveGridLayout,
+  type Layout,
+  type ResponsiveLayouts,
+} from 'react-grid-layout/legacy';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings2, X, Plus, GripVertical } from 'lucide-react';
 import { ErrorBoundary } from '@voxire/ui';
@@ -26,10 +30,6 @@ const today = new Date().toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
 });
-
-// react-grid-layout's ResponsiveGridLayoutProps misses draggableHandle, isDraggable, isResizable
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const GridLayout = ResponsiveGridLayout as React.ComponentType<any>;
 
 type SavedLayoutItem = Record<string, unknown> & {
   i: string;
@@ -186,7 +186,7 @@ const AdminDashboard: React.FC = () => {
 
       {/* Grid */}
       {containerWidth > 0 && (
-        <GridLayout
+        <ResponsiveGridLayout
           className="layout"
           layouts={layouts}
           breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
@@ -194,7 +194,8 @@ const AdminDashboard: React.FC = () => {
           rowHeight={80}
           width={containerWidth}
           onLayoutChange={handleLayoutChange}
-          {...({ isDraggable: showCatalog, isResizable: showCatalog } as Record<string, unknown>)}
+          isDraggable={showCatalog}
+          isResizable={showCatalog}
           draggableHandle=".widget-drag-handle"
           containerPadding={[0, 0]}
           margin={[12, 12]}
@@ -243,7 +244,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             );
           })}
-        </GridLayout>
+        </ResponsiveGridLayout>
       )}
 
       {/* Widget catalog modal (portaled to body) */}
@@ -422,12 +423,15 @@ const StaffDashboard: React.FC<{ userApps: string[] }> = ({ userApps }) => {
 
 const VendorDashboard: React.FC = () => {
   const { user } = useUserStore();
-  // Real role lives on user.role (populated by BusinessRoute's setUser()).
-  // An absent/unknown role must fall through to the restrictive StaffDashboard,
-  // never fail open into AdminDashboard.
   const role = (user?.role ?? '').toLowerCase();
-  const isAdmin = role === 'admin' || role === 'owner';
-  const userApps: string[] = (user?.apps as string[] | undefined) ?? [];
+  const isAdmin = user?.effectiveAccess
+    ? user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin
+    : role === 'admin' || role === 'owner';
+  const userApps: string[] = user?.effectiveAccess
+    ? user.effectiveAccess.apps
+        .filter((app) => app.licensed && app.hasAccess)
+        .map((app) => app.appId)
+    : (user?.apps ?? []);
   if (!isAdmin) return <StaffDashboard userApps={userApps} />;
   return (
     <>
