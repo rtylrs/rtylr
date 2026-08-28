@@ -349,6 +349,9 @@ importers:
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -388,6 +391,9 @@ importers:
       '@voxire/permissions':
         specifier: workspace:*
         version: link:../../packages/permissions
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -491,6 +497,9 @@ importers:
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -817,6 +826,9 @@ importers:
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -932,6 +944,9 @@ importers:
       '@voxire/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1038,6 +1053,9 @@ importers:
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
