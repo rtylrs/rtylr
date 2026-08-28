@@ -23,6 +23,14 @@ const (
 )
 
 const (
+	// OpenCode Zen is an optional final fallback. The endpoint and model stay
+	// product-controlled, like the other OpenAI-compatible providers.
+	OpenCodeAPIKeyEnvVar = "OPENCODE_API_KEY"
+	OpenCodeBaseURL      = "https://opencode.ai/zen/v1"
+	OpenCodeModel        = "minimax-m2.7"
+)
+
+const (
 	// DefaultJWTDuration is used when JWT_DURATION is not configured. Access
 	// tokens must always have a bounded lifetime.
 	DefaultJWTDuration = 24 * time.Hour
@@ -100,11 +108,12 @@ type AppConfig struct {
 	DBConnMaxLifetime time.Duration
 	DBConnMaxIdleTime time.Duration
 
-	// OpenAI & Gemini
-	OpenAIAPIKey  string
-	OpenAIOrgID   string
-	OpenAIBaseURL string
-	GeminiAPIKey  string
+	// OpenAI, Gemini and OpenCode Zen (fallback providers)
+	OpenAIAPIKey   string
+	OpenAIOrgID    string
+	OpenAIBaseURL  string
+	GeminiAPIKey   string
+	OpenCodeAPIKey string
 
 	// DeepSeek + NVIDIA NIM (primary providers) — only the keys are configurable.
 	DeepSeekAPIKey    string
@@ -297,11 +306,12 @@ func LoadAndValidate() (*AppConfig, error) {
 		DBConnMaxLifetime: dbConnMaxLifetime,
 		DBConnMaxIdleTime: dbConnMaxIdleTime,
 
-		// OpenAI & Gemini
-		OpenAIAPIKey:  os.Getenv("OPENAI_API_KEY"),
-		OpenAIOrgID:   os.Getenv("OPENAI_ORG_ID"),
-		OpenAIBaseURL: os.Getenv("OPENAI_BASE_URL"),
-		GeminiAPIKey:  os.Getenv("GEMINI_API_KEY"),
+		// OpenAI, Gemini and OpenCode Zen
+		OpenAIAPIKey:   os.Getenv("OPENAI_API_KEY"),
+		OpenAIOrgID:    os.Getenv("OPENAI_ORG_ID"),
+		OpenAIBaseURL:  os.Getenv("OPENAI_BASE_URL"),
+		GeminiAPIKey:   os.Getenv("GEMINI_API_KEY"),
+		OpenCodeAPIKey: strings.TrimSpace(os.Getenv(OpenCodeAPIKeyEnvVar)),
 
 		// DeepSeek + NVIDIA NIM
 		DeepSeekAPIKey:    os.Getenv(DeepSeekAPIKeyEnvVar),
@@ -524,6 +534,20 @@ func IsGeminiConfigured() bool {
 	return GetGeminiAPIKey() != ""
 }
 
+func GetOpenCodeAPIKey() string {
+	if GlobalConfig != nil {
+		return strings.TrimSpace(GlobalConfig.OpenCodeAPIKey)
+	}
+	return strings.TrimSpace(os.Getenv(OpenCodeAPIKeyEnvVar))
+}
+
+func GetOpenCodeBaseURL() string { return OpenCodeBaseURL }
+func GetOpenCodeModel() string   { return OpenCodeModel }
+
+func IsOpenCodeConfigured() bool {
+	return GetOpenCodeAPIKey() != ""
+}
+
 func GetDeepSeekAPIKey() string {
 	if GlobalConfig != nil {
 		return GlobalConfig.DeepSeekAPIKey
@@ -565,7 +589,7 @@ func GetAIPrimaryProvider() string {
 }
 
 func IsAnyAIConfigured() bool {
-	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured()
+	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
 }
 
 // GetLicenseSigningPrivateKey returns the private key used to sign self-host
