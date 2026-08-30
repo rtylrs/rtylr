@@ -121,8 +121,10 @@ func configFromDomain(cfg *domain.HRCompanyConfigRecord) *Config {
 // RegisterAPI registers hr_core's oneKit service servers. AutoRegisterAPIs
 // finds this by name on the modules struct, so no wiring in main.go is needed.
 //
-// hr_core had no oneKit surface before hr.work_schedule.v1: everything else in
-// this module is still hand-registered chi routes.
+// hr_core had no oneKit surface before hr.work_schedule.v1. The employee list
+// compatibility route is also registered here because Flow already consumes
+// hr.employee.v1; employee mutations remain on their hand-registered routes
+// until their contract semantics are aligned.
 func (m *Module) RegisterAPI(mux *nethttp.ServeMux) {
 	if err := workschedulev1.RegisterWorkScheduleServiceServer(
 		api.NewWorkScheduleAPI(m.service),
@@ -130,6 +132,7 @@ func (m *Module) RegisterAPI(mux *nethttp.ServeMux) {
 	); err != nil {
 		panic(fmt.Errorf("register hr_core work schedule service: %w", err))
 	}
+	api.RegisterEmployeeListAPI(mux, api.NewEmployeeListAPI(m.service))
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {

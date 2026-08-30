@@ -6,11 +6,19 @@ SELECT id, owner_id, business_id, user_id, department_id, location_id, work_sche
        clock_in_pin_hash, created_at, updated_at
 FROM hr_employees
 WHERE business_id = ?
+  AND (sqlc.narg('department_id') IS NULL OR department_id = sqlc.narg('department_id'))
+  AND (sqlc.narg('location_id') IS NULL OR location_id = sqlc.narg('location_id'))
+  AND (sqlc.narg('status') IS NULL OR status = sqlc.narg('status'))
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
 -- name: CountEmployees :one
-SELECT COUNT(*) AS total FROM hr_employees WHERE business_id = ?;
+SELECT COUNT(*) AS total
+FROM hr_employees
+WHERE business_id = ?
+  AND (sqlc.narg('department_id') IS NULL OR department_id = sqlc.narg('department_id'))
+  AND (sqlc.narg('location_id') IS NULL OR location_id = sqlc.narg('location_id'))
+  AND (sqlc.narg('status') IS NULL OR status = sqlc.narg('status'));
 
 -- name: GetEmployee :one
 SELECT id, owner_id, business_id, user_id, department_id, location_id, work_schedule_id,

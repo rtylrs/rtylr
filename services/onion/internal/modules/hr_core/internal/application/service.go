@@ -35,20 +35,49 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // --- Employees ---
 
 func (s *Service) ListEmployees(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.EmployeeRecord, int64, error) {
+	return s.ListEmployeesWithFilters(ctx, ownerID, domain.ListEmployeesParams{Limit: limit, Offset: offset})
+}
+
+// ListEmployeesWithFilters lists a bounded page of employees for a business.
+// The optional filters are part of the employee contract and are included in
+// the cache key so a filtered response can never be served to an unfiltered
+// request (or to a different filter combination).
+func (s *Service) ListEmployeesWithFilters(ctx context.Context, ownerID int64, params domain.ListEmployeesParams) ([]domain.EmployeeRecord, int64, error) {
+	limit := params.Limit
 	if limit <= 0 {
 		limit = 20
 	}
 	if limit > 100 {
 		limit = 100
 	}
+	offset := params.Offset
+	if offset < 0 {
+		offset = 0
+	}
+	params.Limit = limit
+	params.Offset = offset
+
+	departmentID := "*"
+	if params.DepartmentID != nil {
+		departmentID = fmt.Sprintf("%d", *params.DepartmentID)
+	}
+	locationID := "*"
+	if params.LocationID != nil {
+		locationID = fmt.Sprintf("%d", *params.LocationID)
+	}
+	status := "*"
+	if params.Status != nil {
+		status = fmt.Sprintf("%q", *params.Status)
+	}
+
 	type lr struct {
 		Items []domain.EmployeeRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrCoreScope, ownerID, fmt.Sprintf("emps|l=%d|o=%d", limit, offset))
+	key := cacheKeys.Scoped(hrCoreScope, ownerID, fmt.Sprintf("emps|l=%d|o=%d|d=%s|loc=%s|s=%s", limit, offset, departmentID, locationID, status))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
-			items, total, err := s.repo.ListEmployees(ctx, ownerID, domain.ListEmployeesParams{Limit: limit, Offset: offset})
+			items, total, err := s.repo.ListEmployees(ctx, ownerID, params)
 			return lr{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrCoreTTL),

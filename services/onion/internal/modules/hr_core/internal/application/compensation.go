@@ -60,7 +60,17 @@ func (s *Service) ListEmployeesForViewer(
 	ownerID, viewerUserID int64,
 	limit, offset int32,
 ) ([]domain.EmployeeRecord, int64, error) {
-	employees, total, err := s.ListEmployees(ctx, ownerID, limit, offset)
+	return s.ListEmployeesForViewerWithFilters(ctx, ownerID, viewerUserID, domain.ListEmployeesParams{Limit: limit, Offset: offset})
+}
+
+// ListEmployeesForViewerWithFilters applies the same compensation gate as the
+// unfiltered list while preserving the contract's optional tenant filters.
+func (s *Service) ListEmployeesForViewerWithFilters(
+	ctx context.Context,
+	ownerID, viewerUserID int64,
+	params domain.ListEmployeesParams,
+) ([]domain.EmployeeRecord, int64, error) {
+	employees, total, err := s.ListEmployeesWithFilters(ctx, ownerID, params)
 	if err != nil {
 		return nil, 0, err
 	}

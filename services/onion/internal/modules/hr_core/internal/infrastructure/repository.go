@@ -45,16 +45,38 @@ func NewRepository(db *sql.DB) *Repository {
 // --- Employees ---
 
 func (r *Repository) ListEmployees(ctx context.Context, businessID int64, params domain.ListEmployeesParams) ([]domain.EmployeeRecord, int64, error) {
-	total, err := r.queries.CountEmployees(ctx, businessID)
+	departmentID := sql.NullInt64{}
+	if params.DepartmentID != nil {
+		departmentID = sqlutil.NullInt64(*params.DepartmentID)
+	}
+	locationID := sql.NullInt64{}
+	if params.LocationID != nil {
+		locationID = sqlutil.NullInt64(*params.LocationID)
+	}
+	status := sql.NullString{}
+	if params.Status != nil {
+		status = sqlutil.NullString(*params.Status)
+	}
+
+	filterParams := sqlc.CountEmployeesParams{
+		BusinessID:   businessID,
+		DepartmentID: departmentID,
+		LocationID:   locationID,
+		Status:       status,
+	}
+	total, err := r.queries.CountEmployees(ctx, filterParams)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to count employees", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListEmployees(ctx, sqlc.ListEmployeesParams{
-		BusinessID: businessID,
-		Limit:      params.Limit,
-		Offset:     params.Offset,
+		BusinessID:   businessID,
+		DepartmentID: departmentID,
+		LocationID:   locationID,
+		Status:       status,
+		Limit:        params.Limit,
+		Offset:       params.Offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list employees", logger.Any("business_id", businessID), logger.Error(err))

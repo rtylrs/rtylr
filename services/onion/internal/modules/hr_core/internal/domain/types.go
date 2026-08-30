@@ -159,6 +159,9 @@ type InviteRecord struct {
 }
 
 type ListEmployeesParams struct {
-	Limit  int32
-	Offset int32
+	Limit        int32
+	Offset       int32
+	DepartmentID *int64
+	LocationID   *int64
+	Status       *string
 }
