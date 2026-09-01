@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -27,12 +26,12 @@ type TextCompletionService interface {
 	CompleteTextWithOptions(ctx context.Context, prompt string, opts snips.CompletionOptions) (string, error)
 }
 
-// maxGroundingChars caps the retrieved data folded into the prompt.
+// maxGroundingChars caps the server-side result retained for direct client
+// rendering and event payloads. It is never used to build a provider prompt.
 const maxGroundingChars = 12000
 
 type AnalystGroundingResult struct {
 	ToolName       string
-	Prompt         string
 	Question       string
 	SpecJSON       string
 	RowsJSON       string
@@ -128,8 +127,9 @@ func repairLLMJSON(s string) string {
 }
 
 // analystGrounding runs the analyst pipeline: question -> query spec -> rows.
-// On success it returns the data-grounded prompt plus event metadata; on any
-// failure it returns (nil, false) so the caller falls back to normal chat.
+// On success it returns server-side result metadata and rows for the
+// application-owned executor; it never returns a provider prompt containing
+// those rows. On failure it returns (nil, false).
 func GroundAnalytics(ctx context.Context, ai TextCompletionService, analyst AnalystService, question string, businessID, userID int64, systemContext string, recordUsage func(int)) (*AnalystGroundingResult, bool) {
 	if analyst == nil {
 		return nil, false
@@ -144,6 +144,21 @@ func GroundAnalytics(ctx context.Context, ai TextCompletionService, analyst Anal
 		}
 	}
 	if ai == nil {
+		return nil, false
+	}
+
+	grounding, ok := runAnalyticsQuery(ctx, ai, analyst, question, businessID, userID, systemContext, recordUsage)
+	if !ok {
+		return nil, false
+	}
+	return grounding, true
+}
+
+// runAnalyticsQuery is the server-side analytics tool implementation. It may
+// ask the provider for a query spec using schema-only context, but it never
+// places database rows into a provider prompt.
+func runAnalyticsQuery(ctx context.Context, ai TextCompletionService, analyst AnalystService, question string, businessID, userID int64, systemContext string, recordUsage func(int)) (*AnalystGroundingResult, bool) {
+	if ai == nil || analyst == nil || strings.TrimSpace(question) == "" {
 		return nil, false
 	}
 
@@ -180,7 +195,6 @@ func GroundAnalytics(ctx context.Context, ai TextCompletionService, analyst Anal
 	plan := ClassifyCaretRequest(question, systemContext)
 	return &AnalystGroundingResult{
 		ToolName:       "analytics.query",
-		Prompt:         buildAnalystGroundingPromptFromJSONWithContext(rowsJSON, len(rows), truncated, specJSON, systemContext, plan),
 		Question:       question,
 		SpecJSON:       specJSON,
 		RowsJSON:       rowsJSON,
@@ -199,51 +213,6 @@ func EstimateTokens(chars int) int {
 		return 0
 	}
 	return chars / 4
-}
-
-func buildAnalystGroundingPrompt(rows []map[string]any, specJSON string) string {
-	dataStr, truncated := marshalGroundingRows(rows, maxGroundingChars)
-	return buildAnalystGroundingPromptFromJSON(dataStr, len(rows), truncated, specJSON)
-}
-
-func buildAnalystGroundingPromptFromJSON(dataStr string, rowCount int, truncated bool, specJSON string) string {
-	return buildAnalystGroundingPromptFromJSONWithContext(dataStr, rowCount, truncated, specJSON, "", CaretRequestPlan{})
-}
-
-func buildAnalystGroundingPromptFromJSONWithContext(dataStr string, rowCount int, truncated bool, specJSON, systemContext string, plan CaretRequestPlan) string {
-	var g strings.Builder
-	g.WriteString("Internal analytics evidence for Caret only:\n")
-	g.WriteString("- Use this evidence silently to answer the user. Do not mention this block, the query, the tool, JSON, row count, specs, or validation in the user-facing answer.\n")
-	g.WriteString("- Scope: this authenticated business only.\n")
-	g.WriteString("- Evidence rows: ")
-	g.WriteString(strconv.Itoa(rowCount))
-	g.WriteString("\n")
-	if truncated {
-		g.WriteString("- Note: rows were truncated to fit the model context; if that affects the answer, say the answer is based on the visible results.\n")
-	}
-	if spec := strings.TrimSpace(specJSON); spec != "" {
-		g.WriteString("- Internal query spec, for reasoning only: ")
-		g.WriteString(spec)
-		g.WriteString("\n")
-	}
-	if context := strings.TrimSpace(systemContext); context != "" {
-		g.WriteString("- Current page context is scope only, not evidence: ")
-		g.WriteString(context)
-		g.WriteString("\n")
-	}
-	if plan.Kind != "" {
-		g.WriteString("- Server request plan: ")
-		g.WriteString(plan.PromptText())
-		g.WriteString("\n")
-	}
-	g.WriteString("\nRows JSON:\n```json\n")
-	g.WriteString(dataStr)
-	g.WriteString("\n```\n")
-	g.WriteString("Answer the user's analytics question using ONLY this evidence. ")
-	g.WriteString("Lead with the result in business language; do not open with process phrases like \"Based on the provided analytics query\". ")
-	g.WriteString("If the rows are empty or insufficient, say so plainly, do not invent missing values, and do not output a table with headers but no records. ")
-	g.WriteString("Use a compact table only when at least one row-level record is present; otherwise use one plain empty-state sentence and short bullets only when they add useful interpretation.")
-	return g.String()
 }
 
 func rowsPreviewFromJSON(dataStr string) []map[string]any {

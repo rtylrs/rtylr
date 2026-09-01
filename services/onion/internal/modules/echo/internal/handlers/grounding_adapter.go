@@ -23,7 +23,11 @@ func (h *GenerateTextStreamHandler) analystGroundingWithContext(ctx context.Cont
 		defer reservation.settle(0)
 	}
 	result, ok := echoapp.GroundAnalytics(ctx, h.AiService, h.AnalystService, question, businessID, userID, systemContext, func(tokens int) {
-		reservation.settle(int64(tokens))
+		if reservation != nil {
+			reservation.settle(int64(tokens))
+			return
+		}
+		h.recordUsage(ctx, businessID, userID, int64(tokens), 0)
 	})
 	return result, ok
 }

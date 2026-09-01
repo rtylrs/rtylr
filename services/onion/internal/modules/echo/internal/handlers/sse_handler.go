@@ -65,9 +65,6 @@ const (
 	cachedReplayMinDelay          = 95 * time.Millisecond
 	cachedReplayMaxDelay          = 650 * time.Millisecond
 	cachedReplayTargetDuration    = 8500 * time.Millisecond
-	maxToolResultContinuations    = 2
-	maxToolResultPromptBytes      = 12000
-	maxContinuationAnswerBytes    = 8000
 	unexpectedStreamClosureError  = "Response stream ended before completion"
 	sseHeartbeatInterval          = 15 * time.Second
 )
@@ -245,24 +242,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	mode := prepared.Mode
 	enhancedPrompt := prepared.EnhancedPrompt
 
-	var liveGrounding *analystGroundingResult
-	requestPolicy := prepared.ResponsePolicy
-	groundBeforeCache := requestPolicy.GroundBeforeCache
-	if groundBeforeCache {
-		if grounding, ok := h.analystGroundingWithContext(ctx, req.Prompt, businessID, authUserID, req.SystemContext); ok {
-			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
-			liveGrounding = grounding
-		}
-	}
-
 	cachePlan := application.BuildCacheWritePlan(mode, application.TurnRequest{
 		Prompt:        req.Prompt,
 		SystemContext: req.SystemContext,
 		PageContext:   req.PageContext,
-	}, enhancedPrompt, businessID, authUserID, h.AiService.GetPrimaryProvider(), requestNow, liveGrounding)
-	if groundBeforeCache && liveGrounding == nil {
-		cachePlan = application.DisableExactCachePlan(cachePlan, "live business request needs fresh grounding")
-	}
+	}, enhancedPrompt, businessID, authUserID, h.AiService.GetPrimaryProvider(), requestNow)
 
 	h.setupSSEHeaders(w)
 	clientGone := h.monitorClientDisconnect(r)
@@ -298,20 +282,6 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		})
 	}
 
-	// Analyst grounding may call an internal model and the read replica. For
-	// obvious live business questions we do it before the exact cache lookup so
-	// the key includes a fingerprint of the rows. If a question only resolves
-	// as live data after the lookup, keep the answer uncached rather than risk a
-	// stale replay on the next request.
-	if !groundBeforeCache && requestPolicy.Grounding != GroundingNone && mode != ModeSupport {
-		if grounding, ok := h.analystGroundingWithContext(ctx, req.Prompt, businessID, authUserID, req.SystemContext); ok {
-			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
-			liveGrounding = grounding
-			cachePlan = application.DisableExactCachePlan(cachePlan, "live business grounding resolved after exact cache lookup")
-			cachePlan.PromptChars = len(enhancedPrompt)
-		}
-	}
-
 	log.Info("Starting AI text generation",
 		logger.String("enhanced_prompt_length", strconv.Itoa(len(enhancedPrompt))),
 		logger.String("cache_mode", cachePlan.Mode),
@@ -334,7 +304,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, liveGrounding, enhancedPrompt, reservation)
+	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, reservation)
 }
 
 func isCaretSmokeCheck(prompt string) bool {
@@ -664,7 +634,7 @@ func waitCachedReplay(ctx context.Context, clientGone chan bool, delay time.Dura
 	}
 }
 
-func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, grounding *analystGroundingResult, basePrompt string, reservation *quotaReservation) {
+func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, reservation *quotaReservation) {
 	settleUsage := func(actualTokens int64) {
 		if reservation != nil {
 			reservation.settle(actualTokens)
@@ -685,87 +655,49 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		withStreamMode(application.ParseMode(cachePlan.Mode)),
 		withStreamToolExecution(ctx, h.ToolExecutors),
 		withStreamToolBudget(cachePlan.ToolBudget),
+		withStreamPlannerOnly(cachePlan.ProviderPlannerOnly),
+		withStreamPageContext(req.PageContext),
 	)
-	if grounding != nil {
-		if err := h.writeAnalystToolEvents(w, messageID, grounding); err != nil {
-			return
+
+	promptChars := cachePlan.PromptChars
+	token, ok := h.drainProviderStream(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, promptChars)
+	if !ok {
+		partialResponseChars := fullResponse.Len() + len(renderer.pending)
+		if token.Error != "" || partialResponseChars > 0 {
+			// Providers may consume the full prompt before a transport failure or
+			// client interruption. They do not reliably report usage on failed
+			// streams, so meter the observed partial attempt conservatively.
+			settleUsage(int64(estimateTokens(promptChars) + estimateTokens(partialResponseChars)))
 		}
+		return
 	}
 
-	currentPromptChars := cachePlan.PromptChars
-	totalTokens := 0
-	var finalToken snips.StreamToken
-	for round := 0; ; round++ {
-		beforeToolResults := renderer.ToolResultCount()
-		beforeResponseChars := fullResponse.Len()
-		token, ok := h.drainProviderStream(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, currentPromptChars)
-		if !ok {
-			partialResponseChars := fullResponse.Len() - beforeResponseChars + len(renderer.pending)
-			if token.Error != "" || partialResponseChars > 0 {
-				// Providers may consume the full prompt before a transport failure or
-				// client interruption. They do not reliably report usage on failed
-				// streams, so meter the observed partial attempt conservatively.
-				totalTokens += estimateTokens(currentPromptChars) + estimateTokens(partialResponseChars)
+	totalTokens := streamUsageTokens(token, promptChars, fullResponse.Len())
+	if renderer.ToolResultCount() > 0 {
+		// A live read can change independently of the request/page context, so
+		// never replay an answer that was informed by a tool result.
+		cachePlan = application.DisableExactCachePlan(cachePlan, "live tool result informed the response")
+	}
+	if strings.TrimSpace(fullResponse.String()) == "" && renderer.PendingApprovalCount() == 0 {
+		if fallback := fallbackCaretResponse(nil, renderer.toolResults); fallback != "" {
+			if err := renderer.AppendServerText(fallback); err != nil {
 				settleUsage(int64(totalTokens))
-			}
-			return
-		}
-		finalToken = token
-		totalTokens += streamUsageTokens(token, currentPromptChars, fullResponse.Len()-beforeResponseChars)
-
-		newToolResults := renderer.ToolResultsSince(beforeToolResults)
-		if len(newToolResults) > 0 {
-			// A live read can change independently of the request/page context, so
-			// never replay an answer that was informed by a tool result.
-			cachePlan = application.DisableExactCachePlan(cachePlan, "live tool result informed the response")
-		}
-		continuationBudget := cachePlan.ContinuationBudget
-		if continuationBudget <= 0 {
-			continuationBudget = maxToolResultContinuations
-		}
-		if len(newToolResults) == 0 || round >= continuationBudget {
-			if strings.TrimSpace(fullResponse.String()) == "" {
-				if fallback := fallbackCaretResponse(grounding, renderer.toolResults); fallback != "" {
-					if err := renderer.AppendText(fallback); err != nil {
-						return
-					}
-				}
-			}
-			if fullResponse.Len() > 0 {
-				if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
-					h.writeErrorResponse(w, "Failed to persist response")
-					settleUsage(int64(totalTokens))
-					return
-				}
-			}
-			if err := renderer.Finish(); err != nil {
 				return
 			}
-			settleUsage(int64(totalTokens))
-			h.writeExactCacheEntry(ctx, finalToken, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
-			return
 		}
-
-		currentPrompt := buildToolResultContinuationPrompt(basePrompt, fullResponse.String(), newToolResults)
-		currentPromptChars = len(currentPrompt)
-		nextTokenChan, err := h.AiService.GenerateTextStream(ctx, currentPrompt)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to generate tool-result continuation", logger.Error(err))
-			if fullResponse.Len() > 0 {
-				if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
-					h.writeErrorResponse(w, "Failed to persist response")
-					settleUsage(int64(totalTokens))
-					return
-				}
-			}
-			if err := renderer.Finish(); err != nil {
-				return
-			}
-			settleUsage(int64(totalTokens))
-			return
-		}
-		tokenChan = nextTokenChan
 	}
+	if fullResponse.Len() > 0 {
+		if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
+			h.writeErrorResponse(w, "Failed to persist response")
+			settleUsage(int64(totalTokens))
+			return
+		}
+	}
+	if err := renderer.Finish(); err != nil {
+		return
+	}
+	settleUsage(int64(totalTokens))
+	h.writeExactCacheEntry(ctx, token, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
 }
 
 func fallbackCaretResponse(grounding *analystGroundingResult, results []streamToolExecution) string {
@@ -865,76 +797,6 @@ func streamUsageTokens(token snips.StreamToken, promptChars, responseChars int) 
 		return tokens
 	}
 	return estimateTokens(promptChars) + estimateTokens(responseChars)
-}
-
-func buildToolResultContinuationPrompt(basePrompt, assistantSoFar string, results []streamToolExecution) string {
-	resultsJSON := boundedToolResultsJSON(results)
-
-	var b strings.Builder
-	b.WriteString(basePrompt)
-	b.WriteString("\n\nTool results are now available for the same user request.\n")
-	b.WriteString("Continue the same assistant answer using these results as evidence. Prefer each result summary for business language, then use raw output only for exact values. Do not repeat text already sent. Do not mention JSON, tool internals, rows, tenant, or implementation details unless the user asks.\n")
-	if trimmed := strings.TrimSpace(assistantSoFar); trimmed != "" {
-		b.WriteString("\nAssistant text already sent:\n")
-		b.WriteString(application.TruncateUTF8ToBytes(trimmed, maxContinuationAnswerBytes))
-		b.WriteString("\n")
-	}
-	b.WriteString("\nTool results:\n")
-	b.Write(resultsJSON)
-	b.WriteString("\n\nContinue now with the final user-facing answer.")
-	return b.String()
-}
-
-type continuationToolResult struct {
-	Name    string `json:"name"`
-	Status  string `json:"status"`
-	Summary string `json:"summary,omitempty"`
-	Error   string `json:"error,omitempty"`
-}
-
-type boundedToolResults struct {
-	Truncated bool                     `json:"truncated"`
-	Notice    string                   `json:"notice,omitempty"`
-	Results   []continuationToolResult `json:"results,omitempty"`
-}
-
-// boundedToolResultsJSON keeps the continuation prompt valid JSON. Slicing a
-// marshalled result at an arbitrary byte offset can create malformed JSON and
-// encourage the model to fill the missing tail with guesses. When raw outputs
-// do not fit, retain only bounded metadata and state the limitation explicitly.
-func boundedToolResultsJSON(results []streamToolExecution) []byte {
-	encoded, err := json.Marshal(results)
-	if err == nil && len(encoded) <= maxToolResultPromptBytes {
-		return encoded
-	}
-
-	metadata := boundedToolResults{
-		Truncated: true,
-		Notice:    "Tool output was too large for this continuation; only result metadata is available. Do not infer omitted values.",
-		Results:   make([]continuationToolResult, 0, len(results)),
-	}
-	for _, result := range results {
-		metadata.Results = append(metadata.Results, continuationToolResult{
-			Name:    application.TruncateUTF8ToBytes(result.Name, 256),
-			Status:  application.TruncateUTF8ToBytes(result.Status, 64),
-			Summary: application.TruncateUTF8ToBytes(result.Summary, 512),
-			Error:   application.TruncateUTF8ToBytes(result.Error, 512),
-		})
-	}
-
-	encoded, err = json.Marshal(metadata)
-	if err == nil && len(encoded) <= maxToolResultPromptBytes {
-		return encoded
-	}
-
-	fallback, marshalErr := json.Marshal(boundedToolResults{
-		Truncated: true,
-		Notice:    "Tool output was omitted because it exceeded the continuation context budget. Do not infer omitted values.",
-	})
-	if marshalErr != nil {
-		return []byte(`{"truncated":true}`)
-	}
-	return fallback
 }
 
 func (h *GenerateTextStreamHandler) writeExactCacheEntry(ctx context.Context, token snips.StreamToken, response string, tokens int, plan cacheWritePlan, businessID, userID int64) {

@@ -31,43 +31,6 @@ func TestMarshalGroundingRowsKeepsValidJSONWhenTruncated(t *testing.T) {
 	}
 }
 
-func TestBuildAnalystGroundingPromptStatesEvidenceRules(t *testing.T) {
-	got := buildAnalystGroundingPrompt(
-		[]map[string]any{{"revenue": 123.45}},
-		`{"view":"ai_invoices","aggregations":[{"func":"sum","col":"total","as":"revenue"}]}`,
-	)
-
-	mustContain := []string{
-		"Internal analytics evidence for Caret only:",
-		"Use this evidence silently to answer the user.",
-		"Scope: this authenticated business only.",
-		"Evidence rows: 1",
-		"Rows JSON:",
-		`"revenue":123.45`,
-		"using ONLY this evidence",
-		`do not open with process phrases like "Based on the provided analytics query"`,
-		"do not invent missing values",
-	}
-	for _, want := range mustContain {
-		if !strings.Contains(got, want) {
-			t.Fatalf("grounding prompt missing %q\nprompt:\n%s", want, got)
-		}
-	}
-}
-
-func TestBuildAnalystGroundingPromptAvoidsHeaderOnlyTablesForEmptyResults(t *testing.T) {
-	got := buildAnalystGroundingPrompt(nil, `{"view":"ai_customers","columns":["name"]}`)
-	for _, want := range []string{
-		"Evidence rows: 0",
-		"do not output a table with headers but no records",
-		"Use a compact table only when at least one row-level record is present",
-	} {
-		if !strings.Contains(got, want) {
-			t.Fatalf("empty-result guidance missing %q\n prompt:\n%s", want, got)
-		}
-	}
-}
-
 func TestBuildSpecGenPromptRoutesDailyRevenueToPaidPOSOrders(t *testing.T) {
 	got := buildSpecGenPrompt(
 		"ai_pos_orders(total, payment_status, paid_at)\nai_invoices(total, issue_date, paid_date)\n",
@@ -100,16 +63,8 @@ func TestAnalystGroundingUsesBusinessSnapshotForOwnerOverview(t *testing.T) {
 	if got.ToolName != "business.snapshot" {
 		t.Fatalf("expected business.snapshot tool, got %#v", got)
 	}
-	for _, want := range []string{
-		"Internal business snapshot evidence for Caret only:",
-		"snapshot tool",
-		"today_revenue",
-		"low_stock_products",
-		"using ONLY this evidence",
-	} {
-		if !strings.Contains(got.Prompt, want) {
-			t.Fatalf("snapshot prompt missing %q\nprompt:\n%s", want, got.Prompt)
-		}
+	if !strings.Contains(got.RowsJSON, "today_revenue") {
+		t.Fatalf("expected server-side snapshot rows to retain metric data: %s", got.RowsJSON)
 	}
 	if len(service.calls) != len(buildBusinessSnapshotQueries(timeNowUTCForTest())) {
 		t.Fatalf("expected all snapshot queries to run, got %d calls", len(service.calls))
@@ -133,17 +88,6 @@ func TestAnalystGroundingDefersHeavyRawExports(t *testing.T) {
 	}
 	if len(service.calls) != 0 {
 		t.Fatalf("heavy export should not run analytics queries, got %d calls", len(service.calls))
-	}
-	for _, want := range []string{
-		"Internal heavy-data guard for Caret only:",
-		"Do not run live analytics",
-		"background analytics job",
-		"Do not say a job was created",
-		"summarize the data",
-	} {
-		if !strings.Contains(got.Prompt, want) {
-			t.Fatalf("deferred analytics prompt missing %q\nprompt:\n%s", want, got.Prompt)
-		}
 	}
 	if !strings.Contains(got.SpecJSON, `"kind":"deferred_analytics"`) {
 		t.Fatalf("expected deferred analytics spec, got %s", got.SpecJSON)

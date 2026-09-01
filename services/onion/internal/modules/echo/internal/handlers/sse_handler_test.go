@@ -237,8 +237,6 @@ func TestStreamTokensToClientRecordsPartialFailedUsage(t *testing.T) {
 		2,
 		cacheWritePlan{Mode: string(ModeAsk), PromptChars: 40, StartedAt: time.Now()},
 		nil,
-		"prompt",
-		nil,
 	)
 
 	select {
@@ -323,7 +321,7 @@ func (s *recordingQuotaService) ReconcileUsage(_ context.Context, _, _, actualTo
 func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 	now := time.Date(2026, 6, 19, 11, 0, 0, 0, time.UTC)
 	req := &GenerateTextStreamRequest{
-		Prompt:        "Show my top customers",
+		Prompt:        "How does the exact cache work?",
 		SystemContext: "User is in the Dash app.",
 		Mode:          string(ModeAsk),
 	}
@@ -331,7 +329,7 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 	first := echoapp.BuildCacheWritePlan(
 		echoapp.ModeAsk,
 		echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext},
-		"Recent messages (oldest first):\nuser: Show my top customers\n\nCurrent request: Show my top customers",
+		"Recent messages (oldest first):\nuser: How does the exact cache work?\n\nCurrent request: How does the exact cache work?",
 		11,
 		22,
 		"",
@@ -340,7 +338,7 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 	second := echoapp.BuildCacheWritePlan(
 		echoapp.ModeAsk,
 		echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext},
-		"Recent messages (oldest first):\nuser: Show my top customers\nassistant: cached answer\nuser: Show my top customers\n\nCurrent request: Show my top customers",
+		"Recent messages (oldest first):\nuser: How does the exact cache work?\nassistant: cached answer\nuser: How does the exact cache work?\n\nCurrent request: How does the exact cache work?",
 		11,
 		22,
 		"",
@@ -362,7 +360,7 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 	other := echoapp.BuildCacheWritePlan(
 		echoapp.ModeAsk,
 		echoapp.TurnRequest{Prompt: otherReq.Prompt, SystemContext: otherReq.SystemContext, PageContext: otherReq.PageContext},
-		"Current request: Show my top customers",
+		"Current request: How does the exact cache work?",
 		11,
 		22,
 		"",
@@ -388,11 +386,11 @@ func TestBuildCacheWritePlanIncludesDataFreshness(t *testing.T) {
 	req.PageContext["dataFreshness"] = "products:2"
 	second := echoapp.BuildCacheWritePlan(echoapp.ModeAsk, echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext}, "Current request: Which products are low?", 11, 22, "", now)
 
-	if first.Key == "" || second.Key == "" {
-		t.Fatalf("expected cache keys, got first=%q second=%q", first.Key, second.Key)
+	if first.Enabled || second.Enabled || first.Key != "" || second.Key != "" {
+		t.Fatalf("business-data turns must not be exact cached: first=%+v second=%+v", first, second)
 	}
-	if first.Key == second.Key {
-		t.Fatal("expected data freshness changes to separate exact cache keys")
+	if !first.ProviderPlannerOnly || !second.ProviderPlannerOnly {
+		t.Fatalf("business-data turns must be planner-only: first=%+v second=%+v", first, second)
 	}
 }
 
@@ -420,11 +418,8 @@ func TestBuildCacheWritePlanIncludesGroundingFreshness(t *testing.T) {
 	first := echoapp.BuildCacheWritePlan(echoapp.ModeAsk, turnRequest, "grounded prompt", 11, 22, "", now, firstGrounding)
 	second := echoapp.BuildCacheWritePlan(echoapp.ModeAsk, turnRequest, "grounded prompt", 11, 22, "", now, secondGrounding)
 
-	if first.Key == "" || second.Key == "" {
-		t.Fatalf("expected cache keys, got first=%q second=%q", first.Key, second.Key)
-	}
-	if first.Key == second.Key {
-		t.Fatal("expected changed grounding rows to separate exact cache keys")
+	if first.Enabled || second.Enabled || first.Key != "" || second.Key != "" {
+		t.Fatalf("grounded data turns must not be exact cached: first=%+v second=%+v", first, second)
 	}
 }
 
@@ -437,8 +432,12 @@ func TestShouldGroundBeforeExactCacheForLiveBusinessQuestions(t *testing.T) {
 		"Which products are low on stock?",
 	}
 	for _, prompt := range cases {
-		if !echoapp.BuildCaretResponsePolicy(echoapp.ModeAsk, prompt, "", nil).GroundBeforeCache {
-			t.Fatalf("expected %q to ground before cache", prompt)
+		policy := echoapp.BuildCaretResponsePolicy(echoapp.ModeAsk, prompt, "", nil)
+		if policy.GroundBeforeCache {
+			t.Fatalf("provider path must not pre-ground %q", prompt)
+		}
+		if !policy.ProviderPlannerOnly {
+			t.Fatalf("expected %q to use planner-only execution", prompt)
 		}
 	}
 
@@ -488,57 +487,6 @@ func TestCachedReplayDelayIsBounded(t *testing.T) {
 	}
 	if got := cachedReplayDelay(500); got != cachedReplayMinDelay {
 		t.Fatalf("long replay delay = %s, want %s", got, cachedReplayMinDelay)
-	}
-}
-
-func TestBuildToolResultContinuationPromptCarriesResultsAndPriorAnswer(t *testing.T) {
-	got := buildToolResultContinuationPrompt(
-		"base prompt",
-		"I found the customer list.",
-		[]streamToolExecution{{
-			Name:    "crm.list_customers",
-			Status:  "success",
-			Summary: "Found 2 customers.",
-			Output:  map[string]any{"total": 2},
-		}},
-	)
-
-	for _, want := range []string{
-		"base prompt",
-		"Tool results are now available",
-		"Prefer each result summary",
-		"I found the customer list.",
-		"crm.list_customers",
-		"Found 2 customers.",
-		`"total":2`,
-		"Continue now with the final user-facing answer.",
-	} {
-		if !strings.Contains(got, want) {
-			t.Fatalf("continuation prompt missing %q\nprompt:\n%s", want, got)
-		}
-	}
-}
-
-func TestBoundedToolResultsKeepContinuationJSONValidWhenOutputIsHuge(t *testing.T) {
-	results := []streamToolExecution{{
-		Name:   "crm.list_customers",
-		Status: "success",
-		Output: map[string]any{"rows": strings.Repeat("customer-data ", maxToolResultPromptBytes)},
-	}}
-
-	got := boundedToolResultsJSON(results)
-	if len(got) > maxToolResultPromptBytes {
-		t.Fatalf("bounded tool results length = %d, want <= %d", len(got), maxToolResultPromptBytes)
-	}
-	var decoded boundedToolResults
-	if err := json.Unmarshal(got, &decoded); err != nil {
-		t.Fatalf("bounded tool results are invalid JSON: %v; payload prefix=%q", err, got[:min(len(got), 200)])
-	}
-	if !decoded.Truncated {
-		t.Fatalf("bounded tool results should disclose truncation: %s", got)
-	}
-	if !strings.Contains(string(got), "Do not infer omitted values") {
-		t.Fatalf("bounded tool results missing anti-fabrication notice: %s", got)
 	}
 }
 
@@ -796,6 +744,61 @@ func TestStreamRendererExecutesReadToolMarkerWithExecutor(t *testing.T) {
 	}
 	if results[0].Output["total"] != 0 {
 		t.Fatalf("expected collected output total, got %#v", results[0].Output)
+	}
+}
+
+type recordingRendererToolExecutor struct {
+	input  map[string]any
+	output map[string]any
+}
+
+func (e *recordingRendererToolExecutor) ExecuteCaretTool(_ context.Context, _ string, input map[string]any) (map[string]any, bool, error) {
+	e.input = input
+	return e.output, true, nil
+}
+
+func TestPlannerOnlyRendererSuppressesProviderProseAndBindsSelectedScope(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	executor := &recordingRendererToolExecutor{output: map[string]any{"name": "Ada Secret"}}
+	renderer := newStreamEventRenderer(
+		rec,
+		nil,
+		"assistant-1",
+		full,
+		withStreamMode(ModeAsk),
+		withStreamPlannerOnly(true),
+		withStreamPageContext(map[string]any{
+			"selected": map[string]any{"customer_id": "cus_server_scope", "name": "Ada Secret"},
+		}),
+		withStreamToolExecution(context.Background(), []ToolExecutor{executor}),
+	)
+
+	if err := renderer.AppendText(`<thinking>private provider reasoning</thinking>I already know Ada Secret. <tool>{"name":"crm.get_customer","input":{}}</tool>`); err != nil {
+		t.Fatalf("append planner stream: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish planner stream: %v", err)
+	}
+
+	if full.String() != "" {
+		t.Fatalf("provider prose crossed the planner boundary: %q", full.String())
+	}
+	if strings.Contains(rec.Body.String(), "I already know Ada Secret") || strings.Contains(rec.Body.String(), "private provider reasoning") {
+		t.Fatalf("provider prose crossed the SSE boundary: %s", rec.Body.String())
+	}
+	if executor.input["customer_id"] != "cus_server_scope" {
+		t.Fatalf("selected scope was not bound server-side: %#v", executor.input)
+	}
+	events := decodeSSEEvents(t, rec.Body.String())
+	var foundToolResult bool
+	for _, event := range events {
+		if event.Type == EventToolResult && event.Status == "success" {
+			foundToolResult = true
+		}
+	}
+	if !foundToolResult {
+		t.Fatalf("expected server-rendered tool result, got %#v", events)
 	}
 }
 

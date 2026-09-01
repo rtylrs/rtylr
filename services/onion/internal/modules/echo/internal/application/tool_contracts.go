@@ -63,7 +63,7 @@ func contractForTool(tool ToolDef) toolContract {
 		}
 	case "analytics.query":
 		return toolContract{
-			Input:      `{"view":"allowlisted view","columns":["field"],"where":[...],"limit":number}`,
+			Input:      `{"question":"the user's business analytics question"}`,
 			Output:     "Rows and a count from the authenticated tenant's allowlisted analytics view.",
 			Freshness:  "live at request time",
 			SideEffect: "read-only; no business data is changed",

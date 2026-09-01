@@ -34,7 +34,10 @@ func NewModule(ctx context.Context, memoryService application.MemoryService, quo
 		snipsService = nil
 	}
 	if analystService != nil {
-		toolExecutors = append([]application.ToolExecutor{application.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
+		toolExecutors = append([]application.ToolExecutor{
+			application.NewBusinessSnapshotToolExecutor(analystService),
+			application.NewAnalyticsQueryToolExecutor(snipsService, analystService),
+		}, toolExecutors...)
 	}
 
 	return &Module{

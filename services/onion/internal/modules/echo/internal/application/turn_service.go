@@ -14,7 +14,6 @@ type MemoryService interface {
 	CreateSession(ctx context.Context, userID int, title string) (string, error)
 	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
 	SummarizeSession(ctx context.Context, sessionID string, userID int) error
-	BuildEnhancedPrompt(ctx context.Context, sessionID string, userID int, currentRequest string) string
 }
 
 type MemorySessionAuthorizer interface {
@@ -53,8 +52,8 @@ func NormalizeTurnRequest(req TurnRequest) TurnRequest {
 }
 
 // PrepareTurn owns the non-HTTP work required before an SSE stream starts:
-// session ownership, user-message persistence, conversation retrieval,
-// prompt construction, and one request policy decision.
+// session ownership, user-message persistence, prompt construction, and one
+// request policy decision.
 func PrepareTurn(ctx context.Context, memory MemoryService, request TurnRequest, now time.Time) (PreparedTurn, error) {
 	if memory == nil {
 		return PreparedTurn{}, fmt.Errorf("memory service is not available")
@@ -87,13 +86,11 @@ func PrepareTurn(ctx context.Context, memory MemoryService, request TurnRequest,
 	}
 
 	mode := ParseMode(request.Mode)
-	conversationPrompt := memory.BuildEnhancedPrompt(ctx, request.SessionID, int(request.UserID), request.Prompt)
 	enhancedPrompt := BuildCaretPrompt(PromptInput{
-		Mode:               mode,
-		ConversationPrompt: conversationPrompt,
-		CurrentRequest:     request.Prompt,
-		SystemContext:      request.SystemContext,
-		Now:                now,
+		Mode:           mode,
+		CurrentRequest: request.Prompt,
+		SystemContext:  request.SystemContext,
+		Now:            now,
 	})
 
 	return PreparedTurn{

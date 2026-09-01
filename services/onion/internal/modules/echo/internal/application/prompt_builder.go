@@ -7,7 +7,7 @@ import (
 
 const (
 	promptContractName  = "1homsi-caret"
-	promptContractMajor = "7"
+	promptContractMajor = "8"
 	promptContractMinor = "0"
 	promptContractPatch = "0"
 
@@ -43,7 +43,11 @@ func BuildCaretPrompt(in PromptInput) string {
 		now = time.Now()
 	}
 
-	clarificationHint := ClarificationHintForRequest(in.CurrentRequest, in.SystemContext)
+	// Re-apply the provider-boundary filter here as defense in depth. Callers
+	// should pass the normalized context, but this function is the final prompt
+	// assembly point and must not trust an arbitrary context string.
+	plannerContext := BuildRequestSystemContext(in.SystemContext, nil)
+	clarificationHint := ClarificationHintForRequest(in.CurrentRequest, plannerContext)
 	clarificationSection := ""
 	if clarificationHint != "" {
 		clarification := "- " + clarificationHint + "\n- Ask exactly one short clarifying question now. Do not emit tool markers until the user answers."
@@ -51,7 +55,7 @@ func BuildCaretPrompt(in PromptInput) string {
 	}
 
 	toolCatalog := "No capability catalog was supplied for this request. Do not emit a tool marker."
-	tools := PromptToolsForRequest(mode, in.CurrentRequest, in.SystemContext)
+	tools := PromptToolsForRequest(mode, in.CurrentRequest, plannerContext)
 	if len(tools) > 0 && clarificationHint == "" {
 		var catalog strings.Builder
 		catalog.WriteString("Internal runtime capabilities for this request:\n")
@@ -67,15 +71,15 @@ func BuildCaretPrompt(in PromptInput) string {
 	}
 
 	currentContext := "No current application context was supplied. Do not assume page-specific business facts."
-	if ctx := strings.TrimSpace(in.SystemContext); ctx != "" {
+	if ctx := strings.TrimSpace(plannerContext); ctx != "" {
 		currentContext = ctx
 	}
 	currentContext = escapeCaretPromptData(currentContext)
 
-	conversation := strings.TrimSpace(in.ConversationPrompt)
-	if conversation == "" {
-		conversation = "Current request: "
-	}
+	// Historical messages, summaries, memories, and prior tool output are kept
+	// server-side. Do not accept ConversationPrompt as a data-bearing escape
+	// hatch, even when a future caller supplies one.
+	conversation := "Server-side conversation history, saved memories, and prior tool results are not included in this provider request.\nCurrent request: " + TruncateUTF8ToBytes(in.CurrentRequest, maxCaretRequestBytes)
 	conversation = TruncateUTF8ToBytes(conversation, maxCaretConversationPromptBytes)
 	conversation = escapeCaretPromptData(conversation)
 	currentRequest := TruncateUTF8ToBytes(in.CurrentRequest, maxCaretRequestBytes)
@@ -87,7 +91,7 @@ func BuildCaretPrompt(in PromptInput) string {
 		"{{MODE_ADDENDUM}}", mode.SystemPromptAddendum(),
 		"{{CLARIFICATION_SECTION}}", clarificationSection,
 		"{{TOOL_CATALOG}}", toolCatalog,
-		"{{REQUEST_PLAN}}", ClassifyCaretRequest(currentRequest, in.SystemContext).PromptText(),
+		"{{REQUEST_PLAN}}", ClassifyCaretRequest(currentRequest, plannerContext).PromptText(),
 		"{{CURRENT_CONTEXT}}", currentContext,
 		"{{CONVERSATION}}", conversation,
 	).Replace(caretSystemPromptTemplate))

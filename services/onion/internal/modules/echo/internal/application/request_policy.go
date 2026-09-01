@@ -22,8 +22,12 @@ type CaretResponsePolicy struct {
 	CacheReason        string
 	ToolBudget         int
 	ContinuationBudget int
-	AskClarification   bool
-	AnswerShape        string
+	// ProviderPlannerOnly means the provider may select a capability but must
+	// not author a data-dependent answer. The application renders tool results
+	// directly to the client.
+	ProviderPlannerOnly bool
+	AskClarification    bool
+	AnswerShape         string
 }
 
 func BuildCaretResponsePolicy(mode CaretMode, request, systemContext string, pageContext map[string]any) CaretResponsePolicy {
@@ -54,10 +58,14 @@ func BuildCaretResponsePolicy(mode CaretMode, request, systemContext string, pag
 		result.Grounding = GroundingAnalytics
 	}
 
-	result.GroundBeforeCache = result.Grounding != GroundingNone && mode != ModeSupport
-	if result.GroundBeforeCache {
+	// Business-data turns are executed through server-side tools. Keep the old
+	// grounding classification for policy/telemetry compatibility, but never
+	// prefetch rows into the provider prompt.
+	result.GroundBeforeCache = false
+	result.ProviderPlannerOnly = mode.AllowsTools() && (plan.NeedsTool || result.Grounding != GroundingNone)
+	if result.ProviderPlannerOnly {
 		result.ExactCacheEligible = false
-		result.CacheReason = "fresh business evidence is required before replay"
+		result.CacheReason = "business data is resolved by a server-side tool"
 	}
 	if result.AskClarification {
 		result.ToolBudget = 0
@@ -69,6 +77,11 @@ func BuildCaretResponsePolicy(mode CaretMode, request, systemContext string, pag
 		result.ToolBudget = minInt(result.ToolBudget, 3)
 		result.ExactCacheEligible = false
 		result.CacheReason = "mutating requests are never replayed"
+	}
+	// There is no safe provider continuation after a tool result: the result is
+	// delivered to the client directly and never serialized into another prompt.
+	if result.ProviderPlannerOnly {
+		result.ContinuationBudget = 0
 	}
 	return result
 }

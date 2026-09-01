@@ -10,15 +10,16 @@ import (
 // The handler may read it to replay or persist a response, but it does not
 // decide eligibility, identity, freshness, or budgets.
 type CacheWritePlan struct {
-	Enabled            bool
-	Key                string
-	Mode               string
-	Provider           string
-	Policy             aicache.ExactPolicy
-	StartedAt          time.Time
-	PromptChars        int
-	ToolBudget         int
-	ContinuationBudget int
+	Enabled             bool
+	Key                 string
+	Mode                string
+	Provider            string
+	Policy              aicache.ExactPolicy
+	StartedAt           time.Time
+	PromptChars         int
+	ToolBudget          int
+	ContinuationBudget  int
+	ProviderPlannerOnly bool
 }
 
 func BuildCacheWritePlan(mode CaretMode, request TurnRequest, enhancedPrompt string, businessID, userID int64, provider string, now time.Time, groundings ...*AnalystGroundingResult) CacheWritePlan {
@@ -30,16 +31,17 @@ func BuildCacheWritePlan(mode CaretMode, request TurnRequest, enhancedPrompt str
 	}
 
 	plan := CacheWritePlan{
-		Enabled:            policy.Enabled,
-		Mode:               string(mode),
-		Provider:           provider,
-		Policy:             policy,
-		StartedAt:          time.Now(),
-		PromptChars:        len(enhancedPrompt),
-		ToolBudget:         requestPolicy.ToolBudget,
-		ContinuationBudget: requestPolicy.ContinuationBudget,
+		Enabled:             policy.Enabled,
+		Mode:                string(mode),
+		Provider:            provider,
+		Policy:              policy,
+		StartedAt:           time.Now(),
+		PromptChars:         len(enhancedPrompt),
+		ToolBudget:          requestPolicy.ToolBudget,
+		ContinuationBudget:  requestPolicy.ContinuationBudget,
+		ProviderPlannerOnly: requestPolicy.ProviderPlannerOnly,
 	}
-	if policy.Enabled {
+	if policy.Enabled && requestPolicy.ExactCacheEligible {
 		plan.Key = aicache.ExactKey(aicache.ExactKeyParts{
 			BusinessID:    businessID,
 			UserID:        userID,
@@ -51,7 +53,7 @@ func BuildCacheWritePlan(mode CaretMode, request TurnRequest, enhancedPrompt str
 			Prompt:        request.Prompt,
 		})
 	}
-	if requestPolicy.AskClarification || requestPolicy.Plan.Kind == IntentAction || requestPolicy.Plan.Kind == IntentMemory {
+	if requestPolicy.AskClarification || requestPolicy.ProviderPlannerOnly || !requestPolicy.ExactCacheEligible || requestPolicy.Plan.Kind == IntentAction || requestPolicy.Plan.Kind == IntentMemory {
 		plan = DisableExactCachePlan(plan, requestPolicy.CacheReason)
 	}
 	return plan
