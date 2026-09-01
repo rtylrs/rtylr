@@ -30,7 +30,7 @@ func (m *detachedMemoryFake) SummarizeSession(ctx context.Context, _ string, _ i
 	return nil
 }
 
-func (m *detachedMemoryFake) BuildEnhancedPrompt(context.Context, string, int, string) string {
+func (m *detachedMemoryFake) BuildPlannerPrompt(context.Context, string, int, string) string {
 	return ""
 }
 

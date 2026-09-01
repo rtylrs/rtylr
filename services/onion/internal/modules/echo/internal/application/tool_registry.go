@@ -184,6 +184,7 @@ var promptExecutableTools = map[string]struct{}{
 	"business.snapshot":                   {},
 	"business.get_kpis":                   {},
 	"memory.remember":                     {},
+	"analytics.query":                     {},
 	"insights.get_dashboard":              {},
 	"insights.get_revenue_series":         {},
 	"insights.get_revenue_comparison":     {},

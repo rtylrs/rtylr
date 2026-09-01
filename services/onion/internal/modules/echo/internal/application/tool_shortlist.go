@@ -134,6 +134,12 @@ func promptToolScoreForPlan(tool ToolDef, plan CaretRequestPlan) int {
 	if plan.Action == "remember" && tool.Name == "memory.remember" {
 		score += 300
 	}
+	if tool.Name == "analytics.query" && plan.Kind == IntentAnalytics {
+		// This is the generic read fallback for questions that do not map to a
+		// narrower module tool. The server validates the generated spec and
+		// enforces the tenant boundary before returning any rows.
+		score += 700
+	}
 	return score
 }
 

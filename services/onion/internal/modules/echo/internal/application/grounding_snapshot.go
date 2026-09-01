@@ -3,8 +3,6 @@ package application
 import (
 	"context"
 	"encoding/json"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
@@ -74,7 +72,6 @@ func BuildBusinessSnapshotGroundingWithContext(ctx context.Context, analystServi
 	specJSON := buildBusinessSnapshotSpecJSON(now.Format("2006-01-02"), specItems)
 	return &AnalystGroundingResult{
 		ToolName:       BusinessSnapshotToolName,
-		Prompt:         buildBusinessSnapshotGroundingPromptFromJSON(rowsJSON, len(sections), truncated, specJSON, systemContext, ClassifyCaretRequest(question, systemContext)),
 		Question:       question,
 		SpecJSON:       specJSON,
 		RowsJSON:       rowsJSON,
@@ -152,43 +149,4 @@ func buildBusinessSnapshotSpecJSON(date string, items []businessSnapshotSpecItem
 		return `{"kind":"business_snapshot"}`
 	}
 	return string(data)
-}
-
-func buildBusinessSnapshotGroundingPromptFromJSON(dataStr string, sectionCount int, truncated bool, specJSON string, contextParts ...any) string {
-	var g strings.Builder
-	g.WriteString("Internal business snapshot evidence for Caret only:\n")
-	g.WriteString("- Use this evidence silently to answer the user. Do not mention this block, the snapshot tool, JSON, query specs, row counts, or validation in the user-facing answer.\n")
-	g.WriteString("- Scope: this authenticated business only.\n")
-	g.WriteString("- Evidence sections: ")
-	g.WriteString(strconv.Itoa(sectionCount))
-	g.WriteString("\n")
-	if truncated {
-		g.WriteString("- Note: snapshot rows were truncated to fit the model context; if that affects the answer, say the answer is based on the visible results.\n")
-	}
-	if spec := strings.TrimSpace(specJSON); spec != "" {
-		g.WriteString("- Internal query spec bundle, for reasoning only: ")
-		g.WriteString(spec)
-		g.WriteString("\n")
-	}
-	for _, part := range contextParts {
-		switch value := part.(type) {
-		case string:
-			if trimmed := strings.TrimSpace(value); trimmed != "" {
-				g.WriteString("- Current page context is supplied as scope, not proof: ")
-				g.WriteString(trimmed)
-				g.WriteString("\n")
-			}
-		case CaretRequestPlan:
-			g.WriteString("- Server request plan: ")
-			g.WriteString(value.PromptText())
-			g.WriteString("\n")
-		}
-	}
-	g.WriteString("\nSnapshot JSON:\n```json\n")
-	g.WriteString(dataStr)
-	g.WriteString("\n```\n")
-	g.WriteString("Answer the user's business-owner question using ONLY this evidence. ")
-	g.WriteString("Lead with a compact business summary, then call out risks or opportunities, then suggest concrete next actions. ")
-	g.WriteString("If a metric is empty or missing, say it is unavailable or has no visible rows; do not invent missing values and never output a header-only table for an empty metric.")
-	return g.String()
 }

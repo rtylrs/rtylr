@@ -29,16 +29,19 @@ const (
 )
 
 type streamEventRenderer struct {
-	w            io.Writer
-	flush        func()
-	messageID    string
-	fullResponse *strings.Builder
-	pending      string
-	ctx          context.Context
-	executors    []ToolExecutor
-	toolResults  []streamToolExecution
-	mode         CaretMode
-	toolState    *toolCallExecutionState
+	w                io.Writer
+	flush            func()
+	messageID        string
+	fullResponse     *strings.Builder
+	pending          string
+	ctx              context.Context
+	executors        []ToolExecutor
+	toolResults      []streamToolExecution
+	mode             CaretMode
+	toolState        *toolCallExecutionState
+	plannerOnly      bool
+	pageContext      map[string]any
+	pendingApprovals int
 }
 
 type streamRendererOption func(*streamEventRenderer)
@@ -62,6 +65,18 @@ func withStreamToolExecution(ctx context.Context, executors []ToolExecutor) stre
 func withStreamMode(mode CaretMode) streamRendererOption {
 	return func(r *streamEventRenderer) {
 		r.mode = mode
+	}
+}
+
+func withStreamPlannerOnly(enabled bool) streamRendererOption {
+	return func(r *streamEventRenderer) {
+		r.plannerOnly = enabled
+	}
+}
+
+func withStreamPageContext(pageContext map[string]any) streamRendererOption {
+	return func(r *streamEventRenderer) {
+		r.pageContext = pageContext
 	}
 }
 
@@ -102,6 +117,13 @@ func (r *streamEventRenderer) AppendText(text string) error {
 	return r.drain(false)
 }
 
+// AppendServerText writes application-generated text. Provider prose is
+// suppressed for planner-only turns, but the server may still need to render
+// a bounded fallback after a tool result or execution failure.
+func (r *streamEventRenderer) AppendServerText(text string) error {
+	return r.emitPublicText(text)
+}
+
 func (r *streamEventRenderer) Finish() error {
 	if err := r.drain(true); err != nil {
 		return err
@@ -118,6 +140,10 @@ func (r *streamEventRenderer) FlushPending() error {
 
 func (r *streamEventRenderer) ToolResultCount() int {
 	return len(r.toolResults)
+}
+
+func (r *streamEventRenderer) PendingApprovalCount() int {
+	return r.pendingApprovals
 }
 
 func (r *streamEventRenderer) ToolResultsSince(index int) []streamToolExecution {
@@ -195,13 +221,19 @@ func (r *streamEventRenderer) drainThinking(final bool) (bool, error) {
 	end := strings.Index(r.pending, thinkingCloseTag)
 	if end < 0 {
 		if final {
-			if err := r.emitText(r.pending); err != nil {
-				return false, err
+			if !r.plannerOnly {
+				if err := r.emitText(r.pending); err != nil {
+					return false, err
+				}
 			}
 			r.pending = ""
 			return true, nil
 		}
 		return false, nil
+	}
+	if r.plannerOnly {
+		r.pending = r.pending[end+len(thinkingCloseTag):]
+		return true, nil
 	}
 
 	content := strings.TrimSpace(r.pending[len(thinkingOpenTag):end])
@@ -244,6 +276,16 @@ func (r *streamEventRenderer) emitText(text string) error {
 	if text == "" {
 		return nil
 	}
+	if r.plannerOnly {
+		return nil
+	}
+	return r.emitPublicText(text)
+}
+
+func (r *streamEventRenderer) emitPublicText(text string) error {
+	if text == "" {
+		return nil
+	}
 	text = polishCaretAnswerText(text)
 	if text == "" {
 		return nil
@@ -275,6 +317,8 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		return nil
 	}
 	call.Input = echoapp.NormalizeToolInput(call.Name, call.Input)
+	call.Input = echoapp.BindToolInputToPageScope(call.Name, call.Input, r.pageContext)
+	call.Input = echoapp.NormalizeToolInput(call.Name, call.Input)
 	if err := echoapp.ValidateToolInvocation(r.mode, def, call.Input); err != nil {
 		return r.emitToolExecutionNotice(call, "error", "I could not run that business check because the requested inputs were invalid.", err.Error())
 	}
@@ -292,6 +336,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	if err := echoapp.RegisterPendingToolApproval(r.ctx, blockID, def, call.Input, r.mode); err != nil {
 		return r.emitToolExecutionNotice(call, "error", "I could not create a safe approval request for that action. No changes were made.", "approval request registry is full")
 	}
+	r.pendingApprovals++
 
 	return WriteEvent(r.w, r.flush, StreamEvent{
 		Type:             EventToolCall,

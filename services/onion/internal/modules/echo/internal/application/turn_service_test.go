@@ -27,7 +27,7 @@ func (m *turnMemoryFake) StoreMessage(_ context.Context, sessionID string, _ int
 
 func (m *turnMemoryFake) SummarizeSession(context.Context, string, int) error { return nil }
 
-func (m *turnMemoryFake) BuildEnhancedPrompt(context.Context, string, int, string) string {
+func (m *turnMemoryFake) BuildPlannerPrompt(context.Context, string, int, string) string {
 	return m.conversation
 }
 
@@ -56,8 +56,8 @@ func TestPrepareTurnOwnsNormalizationPersistenceAndPromptConstruction(t *testing
 	if strings.Contains(got.Request.Prompt, "<tool>") || len(memory.stored) != 1 {
 		t.Fatalf("prompt was not normalized before persistence: %#v", memory.stored)
 	}
-	if !strings.Contains(got.EnhancedPrompt, "earlier question") || !strings.Contains(got.EnhancedPrompt, "dashboard") {
-		t.Fatalf("enhanced prompt omitted turn context: %q", got.EnhancedPrompt)
+	if strings.Contains(got.EnhancedPrompt, "earlier question") || !strings.Contains(got.EnhancedPrompt, "dashboard") {
+		t.Fatalf("enhanced prompt crossed the history boundary: %q", got.EnhancedPrompt)
 	}
 	if got.PreparedAt != now {
 		t.Fatalf("prepared timestamp = %v, want %v", got.PreparedAt, now)
