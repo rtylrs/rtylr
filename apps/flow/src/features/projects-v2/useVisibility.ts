@@ -23,6 +23,9 @@ export function useSetProjectVisibility() {
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['project-v2', vars.id] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      // 'projects' (the sidebar) is a separate query key mid-migration and
+      // also renders a lock icon from this same visibility field.
+      qc.invalidateQueries({ queryKey: ['projects'] });
       toast.success(t('flow.projectSettings.visibilitySaved'));
     },
     onError: () => toast.error(t('toasts.project.visibilityFailed')),

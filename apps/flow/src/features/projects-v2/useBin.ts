@@ -13,6 +13,9 @@ export function useRestoreProject() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['archived-projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      // 'projects' (the sidebar) is a separate query key from 'projects-v2'
+      // (this page) mid-migration - a restored project must reappear in both.
+      qc.invalidateQueries({ queryKey: ['projects'] });
       toast.success(t('flow.bin.restored'));
     },
     onError: () => toast.error(t('toasts.project.restoreFailed')),
