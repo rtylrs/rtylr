@@ -5,6 +5,7 @@ import {
   projectMembersQueryOptions,
   useProjectMembers,
 } from '../../features/projects/useProjectMembers';
+import { useProject } from '../../features/projects-v2/useAllProjects';
 import type { ApiProjectMember, FlowProjectRole } from '../services/flowApi';
 
 /** Fallback user id when no authenticated user is available (dev only) */
@@ -49,14 +50,30 @@ export function findProjectRole(
  * admin and still only a viewer on a given project, and the project role is the
  * one that governs what they may do inside it.
  *
- * Returns undefined while the member list is loading, when no projectId is known
- * yet, or when the user isn't a member of the project - callers must treat that
- * as "not permitted" (fail closed).
+ * Mirrors onion's `projectRoleFor` ownership fallback: a project's owner has
+ * full (admin) access even with no membership row - which is the normal state
+ * right after creating a project, since CreateProject does not add one.
+ * Without this fallback a project's own creator sees every task as
+ * permanently view-only until someone is added as a member.
+ *
+ * Returns undefined while the member list and project are loading, when no
+ * projectId is known yet, or when the user is neither the owner nor a member
+ * of the project - callers must treat that as "not permitted" (fail closed).
  */
 export function useCurrentProjectRole(projectId?: string): FlowProjectRole | undefined {
   const userId = useCurrentUserId();
   const { data: members } = useProjectMembers(projectId);
-  return findProjectRole(members, userId);
+  const { data: project } = useProject(projectId);
+  const memberRole = findProjectRole(members, userId);
+  if (memberRole !== undefined) return memberRole;
+  if (
+    userId !== null &&
+    project !== undefined &&
+    (String(project.ownerId) === String(userId) || String(project.createdBy) === String(userId))
+  ) {
+    return 'admin';
+  }
+  return undefined;
 }
 
 /**
