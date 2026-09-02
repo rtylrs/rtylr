@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { canEffectiveAccess } from '@voxire/permissions';
 import { Archive, Check, Pencil, Plus } from 'lucide-react';
@@ -25,6 +26,8 @@ import { useUserStore } from '../../shared/stores/userStore';
 
 const Roles: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const search = useSearch({ from: '/business/roles' });
   const user = useUserStore((s) => s.user);
   const { data = [], isLoading } = useCustomRoles();
   const { data: permissionMatrix } = usePermissions();
@@ -47,6 +50,31 @@ const Roles: React.FC = () => {
   const canArchiveRole = user?.effectiveAccess
     ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:archive')
     : canCreateRole;
+
+  const openCreateRole = () => {
+    setRoleName('');
+    setRoleDescription('');
+    setRoleAppId('dash');
+    setRolePermissions([]);
+    setOpen(true);
+  };
+
+  const closeCreateRole = () => {
+    setOpen(false);
+    if (search.create === 1) {
+      void navigate({ to: '/roles', search: {}, replace: true });
+    }
+  };
+
+  useEffect(() => {
+    if (search.create === 1 && canCreateRole) {
+      setRoleName('');
+      setRoleDescription('');
+      setRoleAppId('dash');
+      setRolePermissions([]);
+      setOpen(true);
+    }
+  }, [search.create, canCreateRole]);
 
   const handleCreateRole = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,13 +123,7 @@ const Roles: React.FC = () => {
             </p>
           </div>
           {canCreateRole && (
-            <Button
-              onClick={() => {
-                setRoleAppId('dash');
-                setRolePermissions([]);
-                setOpen(true);
-              }}
-            >
+            <Button onClick={openCreateRole}>
               <Plus size={14} />
               New role
             </Button>
@@ -189,7 +211,10 @@ const Roles: React.FC = () => {
         )}
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen) => (nextOpen ? setOpen(true) : closeCreateRole())}
+      >
         <DialogContent className="max-w-md">
           <form onSubmit={handleCreateRole} className="space-y-4">
             <DialogHeader>
@@ -298,7 +323,7 @@ const Roles: React.FC = () => {
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button type="button" variant="outline" onClick={closeCreateRole}>
                 {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={!roleName.trim() || createRole.isPending}>
