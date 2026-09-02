@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import { z } from 'zod';
 import {
   createRootRoute,
   createRoute,
@@ -201,6 +202,9 @@ const permissionsRoute = createRoute({
 const rolesRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/roles',
+  validateSearch: z.object({
+    create: z.literal(1).optional().catch(undefined),
+  }),
   beforeLoad: requireAdminOrOwner,
   component: () => wrap(<Roles />),
 });
