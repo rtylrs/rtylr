@@ -4,6 +4,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import VendorDashboard from './VendorDashboard';
 import { useUserStore } from '../../../shared/stores/userStore';
 
+const navigateMock = vi.hoisted(() => vi.fn());
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigateMock,
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 vi.mock('@voxire/ui', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -38,6 +48,7 @@ vi.mock('./widgets', () => ({
 
 describe('VendorDashboard', () => {
   beforeEach(() => {
+    navigateMock.mockClear();
     useUserStore.setState({ user: null });
   });
 
@@ -52,6 +63,19 @@ describe('VendorDashboard', () => {
       expect(screen.queryByText(/Welcome to rtylr/i)).toBeNull();
     }
   );
+
+  it('shows the custom role action and opens role creation from the dashboard', async () => {
+    useUserStore.setState({ user: { id: 1, role: 'admin' } });
+
+    render(<VendorDashboard />);
+
+    const createRoleButton = await screen.findByRole('button', {
+      name: 'dashboard.createCustomRole',
+    });
+    createRoleButton.click();
+
+    expect(navigateMock).toHaveBeenCalledWith({ to: '/roles', search: { create: 1 } });
+  });
 
   it.each(['operator', 'billing', 'menu_manager', 'store_manager', 'staff', 'viewer'])(
     'renders StaffDashboard, not AdminDashboard, for role "%s"',
