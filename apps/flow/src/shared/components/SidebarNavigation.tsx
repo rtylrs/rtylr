@@ -544,7 +544,7 @@ const SidebarGroup: React.FC<{
                 />
                 <span className="relative min-w-0 flex-1 truncate font-medium">{project.name}</span>
                 <span className="relative text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
-                  {project.taskCount - project.completedCount}
+                  {(project.taskCount ?? 0) - (project.completedCount ?? 0)}
                 </span>
               </Link>
             );

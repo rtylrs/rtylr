@@ -521,7 +521,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         visibleRows: sidebarProjects.slice(0, 12).map((project) => ({
           id: project.id,
           name: project.name,
-          open_tasks: Math.max(0, project.taskCount - project.completedCount),
+          open_tasks: Math.max(0, (project.taskCount ?? 0) - (project.completedCount ?? 0)),
         })),
         hints: [
           t('flow.shell.assignedOpenTasks', { count: myIssuesCount }),
@@ -1066,7 +1066,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                                         className="relative text-[10px]"
                                         style={{ color: 'var(--flow-text-dim)' }}
                                       >
-                                        {project.taskCount - project.completedCount}
+                                        {(project.taskCount ?? 0) - (project.completedCount ?? 0)}
                                       </span>
                                     </Link>
                                   </React.Fragment>
