@@ -526,7 +526,10 @@ function BusinessRoute(): React.JSX.Element | null {
   // Freshly-registered owners have no business yet (registration no longer
   // auto-creates one). Gate them into onboarding to create their first business
   // before anything else loads.
-  const currentBusinessId = (user?.businessId as number | undefined) ?? 0;
+  // businessId arrives over the wire as an int64-string (e.g. "0"), so it must
+  // be parsed with Number() before a truthiness check - a bare cast leaves it
+  // a non-empty string, and `!"0"` is false.
+  const currentBusinessId = Number(user?.businessId ?? 0);
   if (user && !currentBusinessId) {
     return <CreateBusinessOnboarding />;
   }
