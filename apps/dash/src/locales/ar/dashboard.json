@@ -1,11 +1,12 @@
 {
+  "createCustomRole": "إنشاء دور مخصص",
   "activityWidget": {
     "emptyTitle": "لا يوجد نشاط بعد",
     "emptyDescription": "ستظهر الإجراءات هنا"
   },
   "teamWidget": {
     "emptyTitle": "لا يوجد أعضاء فريق بعد",
-    "inviteSomeone": "دعوة شخص"
+    "addMember": "إضافة عضو"
   },
   "revenueByAppWidget": {
     "emptyTitle": "لا توجد إيرادات بعد",

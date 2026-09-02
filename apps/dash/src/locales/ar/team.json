@@ -52,7 +52,7 @@
   },
   "list": {
     "noMembersTitle": "لا يوجد أعضاء فريق بعد",
-    "noMembersDescription": "قم بدعوة أول عضو في فريقك للبدء.",
+    "noMembersDescription": "أضف أول عضو في فريقك للبدء.",
     "noMembersMatchTitle": "لا يوجد أعضاء مطابقون لبحثك",
     "noMembersMatchDescription": "جرّب كلمة بحث مختلفة.",
     "membersCountSingular": "{{count}} عضو",
