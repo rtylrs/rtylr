@@ -1,11 +1,12 @@
 {
+  "createCustomRole": "Create custom role",
   "activityWidget": {
     "emptyTitle": "No activity yet",
     "emptyDescription": "Actions will appear here"
   },
   "teamWidget": {
     "emptyTitle": "No team members yet",
-    "inviteSomeone": "Invite someone"
+    "addMember": "Add a member"
   },
   "revenueByAppWidget": {
     "emptyTitle": "No revenue yet",

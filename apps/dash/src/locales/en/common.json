@@ -116,7 +116,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "team": "Team",
-    "inviteMember": "Invite member",
+    "addMember": "Add a member",
     "permissions": "Permissions",
     "roles": "Roles",
     "apps": "Apps",
