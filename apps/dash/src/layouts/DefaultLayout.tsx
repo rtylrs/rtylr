@@ -86,7 +86,7 @@ const routeKeys: Record<string, { key: string; fallback: string }> = {
   '/create-item': { key: 'createItem', fallback: 'Create Item' },
   '/create-banner': { key: 'createBanner', fallback: 'Create Banner' },
   '/team': { key: 'team', fallback: 'Team' },
-  '/team/invite': { key: 'inviteMember', fallback: 'Invite member' },
+  '/team/invite': { key: 'addMember', fallback: 'Add a member' },
   '/permissions': { key: 'permissions', fallback: 'Permissions' },
   '/roles': { key: 'roles', fallback: 'Roles' },
   '/apps': { key: 'apps', fallback: 'Apps' },

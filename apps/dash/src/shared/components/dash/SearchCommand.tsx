@@ -79,7 +79,7 @@ export const SearchCommand: React.FC = () => {
       },
       {
         id: 'nav-invite',
-        label: t('nav.inviteMember', 'Invite Member'),
+        label: t('nav.addMember', 'Add a member'),
         group: groupNavigate,
         icon: UserCog,
         action: go('/team/invite'),

@@ -488,11 +488,11 @@ const InviteUser: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Invite member · rtylr" />
+      <HelmetContainer title={`${t('common.nav.addMember')} · rtylr`} />
       <div className="space-y-6 max-w-2xl">
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-            Invite member
+            {t('common.nav.addMember')}
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--dash-text-muted)' }}>
             Add a new member to your organization.
