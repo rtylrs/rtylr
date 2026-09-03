@@ -136,8 +136,8 @@ func (c *TimeServiceClient) ListWorkDays(ctx context.Context, req *ListWorkDaysR
 	}
 	path := "/flow/time/v2/work-days/range"
 	query := url.Values{}
-	query.Set("from", req.From)
-	query.Set("to", req.To)
+	query.Set("from", req.FromDate)
+	query.Set("to", req.ToDate)
 	if req.EmployeeId != nil {
 		query.Set("employee_id", strconv.FormatInt(int64(*req.EmployeeId), 10))
 	}
@@ -181,8 +181,8 @@ func (c *TimeServiceClient) ListTeamWorkDays(ctx context.Context, req *ListTeamW
 	}
 	path := "/flow/time/v2/work-days/team"
 	query := url.Values{}
-	query.Set("from", req.From)
-	query.Set("to", req.To)
+	query.Set("from", req.FromDate)
+	query.Set("to", req.ToDate)
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
 	if len(query) > 0 {

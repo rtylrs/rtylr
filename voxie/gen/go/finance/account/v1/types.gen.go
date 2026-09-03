@@ -207,12 +207,12 @@ func (x *ChartOfAccountsNode) GetChildren() []*ChartOfAccountsNode {
 }
 
 type CreateAccountRequest struct {
-	Name     string  `json:"name,omitempty"`
-	Type     string  `json:"type,omitempty"`
-	Currency string  `json:"currency,omitempty"`
-	Balance  float64 `json:"balance,omitempty"`
-	IsActive bool    `json:"is_active,omitempty"`
-	Code     string  `json:"code,omitempty"`
+	Name     string   `json:"name,omitempty"`
+	Type     string   `json:"type,omitempty"`
+	Currency string   `json:"currency,omitempty"`
+	Balance  *float64 `json:"balance,omitempty"`
+	IsActive bool     `json:"is_active,omitempty"`
+	Code     string   `json:"code,omitempty"`
 }
 
 func (x *CreateAccountRequest) GetName() string {
@@ -244,7 +244,11 @@ func (x *CreateAccountRequest) GetBalance() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Balance
+	if x.Balance == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Balance
 }
 
 func (x *CreateAccountRequest) GetIsActive() bool {

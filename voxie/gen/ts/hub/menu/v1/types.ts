@@ -275,7 +275,7 @@ return violations;
 }
 
 export interface UpdateMenuBannerRequest {
-id: string;
+id?: string;
 title: string;
 body?: string;
 imageUrl?: string;
@@ -318,7 +318,6 @@ return out;
 export function validateUpdateMenuBannerRequest(v: UpdateMenuBannerRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
@@ -357,7 +356,7 @@ return violations;
 }
 
 export interface DeleteMenuBannerRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteMenuBannerRequest(v: any): DeleteMenuBannerRequest {
@@ -376,7 +375,6 @@ return out;
 export function validateDeleteMenuBannerRequest(v: DeleteMenuBannerRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

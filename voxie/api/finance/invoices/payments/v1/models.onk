@@ -2,7 +2,7 @@ package finance.invoices.payments.v1
 
 message RecordPaymentRequest {
   /// invoice_id is the invoice id value for this contract.
-  invoice_id: int64 @required @gt(0)
+  invoice_id: int64 @gt(0)
   /// amount is the amount value for this contract.
   amount: float64 @gte(0)
   /// currency is the currency value for this contract.

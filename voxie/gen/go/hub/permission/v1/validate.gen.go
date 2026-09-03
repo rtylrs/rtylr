@@ -191,6 +191,268 @@ func (m *UpdateRoleResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.Role != nil {
+		if err := m.Role.Validate(); err != nil {
+			violations = append(violations, "role: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Role != nil {
+		if err := m.Role.Validate(); err != nil {
+			violations = append(violations, "role: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CloneRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Name == "" {
+		violations = append(violations, "name is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CloneRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Role != nil {
+		if err := m.Role.Validate(); err != nil {
+			violations = append(violations, "role: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ArchiveRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ArchiveRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Role != nil {
+		if err := m.Role.Validate(); err != nil {
+			violations = append(violations, "role: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RoleAssignment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRoleAssignmentsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRoleAssignmentsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Assignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "assignments: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AssignRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.RoleId == nil {
+		violations = append(violations, "role_id is required")
+	}
+	if m.RoleId != nil {
+		if *m.RoleId <= 0 {
+			violations = append(violations, "role_id must be greater than 0")
+		}
+	}
+	if m.AppId == "" {
+		violations = append(violations, "app_id is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AssignRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Assignment != nil {
+		if err := m.Assignment.Validate(); err != nil {
+			violations = append(violations, "assignment: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RemoveRoleAssignmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RemoveRoleAssignmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PreviewPermissionImpactRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PreviewPermissionImpactResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RoleAuditEvent) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRoleAuditRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRoleAuditResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Events {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "events: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

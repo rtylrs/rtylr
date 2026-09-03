@@ -178,7 +178,7 @@ return violations;
 }
 
 export interface UpdateEntryRequest {
-id: string;
+id?: string;
 serviceId?: string;
 customerName?: string;
 customerEmail?: string;
@@ -218,7 +218,6 @@ return out;
 export function validateUpdateEntryRequest(v: UpdateEntryRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
 if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");

@@ -65,14 +65,24 @@ func (m *CreateTimeEntryRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if m.Date == "" {
 		violations = append(violations, "date is required")
 	}
-	if m.DurationMinutes <= 0 {
-		violations = append(violations, "duration_minutes must be greater than 0")
+	if m.DurationMinutes == nil {
+		violations = append(violations, "duration_minutes is required")
+	}
+	if m.DurationMinutes != nil {
+		if *m.DurationMinutes <= 0 {
+			violations = append(violations, "duration_minutes must be greater than 0")
+		}
 	}
 	if m.Description == "" {
 		violations = append(violations, "description is required")
@@ -134,8 +144,13 @@ func (m *SubmitTimesheetRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.TimesheetId <= 0 {
-		violations = append(violations, "timesheet_id must be greater than 0")
+	if m.TimesheetId == nil {
+		violations = append(violations, "timesheet_id is required")
+	}
+	if m.TimesheetId != nil {
+		if *m.TimesheetId <= 0 {
+			violations = append(violations, "timesheet_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -216,14 +231,16 @@ func (m *MarkTimeEntriesInvoicedBody) Validate() error {
 		return nil
 	}
 	var violations []string
-	if len(m.EntryIds) == 0 {
-		violations = append(violations, "entry_ids is required")
-	}
 	if len(m.EntryIds) < 1 {
 		violations = append(violations, "entry_ids must have at least 1 items")
 	}
-	if m.InvoiceId <= 0 {
-		violations = append(violations, "invoice_id must be greater than 0")
+	if m.InvoiceId == nil {
+		violations = append(violations, "invoice_id is required")
+	}
+	if m.InvoiceId != nil {
+		if *m.InvoiceId <= 0 {
+			violations = append(violations, "invoice_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

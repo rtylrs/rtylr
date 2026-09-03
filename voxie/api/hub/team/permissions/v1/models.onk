@@ -1,10 +1,19 @@
 package hub.team.permissions.v1
 
 message UpdatePermissionsRequest {
-  user_id: int64 @required @gt(0)
-  apps: string[] @min_items(1)
-  role: string @required
+  user_id: int64 @gt(0)
+  apps: string[]
+  role: string?
   full_name: string?
+  /// Independent Dash role assignment.
+  dash_role: string?
+  /// Independent application role assignments.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Groups that provide inherited access.
+  group_ids: int64[]
 }
 
-message UpdatePermissionsResponse {}
+message UpdatePermissionsResponse {
+  /// Effective access after the update.
+  effective_access: hub.user.v1.EffectiveAccess?
+}

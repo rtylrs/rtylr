@@ -327,7 +327,7 @@ func (x *PurchaseOrder) GetItems() []*PurchaseOrderItem {
 }
 
 type CreatePurchaseOrderItemRequest struct {
-	ProductId       int64   `json:"product_id,omitempty"`
+	ProductId       *int64  `json:"product_id,omitempty"`
 	QuantityOrdered float64 `json:"quantity_ordered,omitempty"`
 	UnitCost        float64 `json:"unit_cost,omitempty"`
 }
@@ -336,9 +336,12 @@ func (m *CreatePurchaseOrderItemRequest) MarshalJSON() ([]byte, error) {
 	type alias CreatePurchaseOrderItemRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
 	return json.Marshal(aux)
 }
 
@@ -346,17 +349,17 @@ func (m *CreatePurchaseOrderItemRequest) UnmarshalJSON(data []byte) error {
 	type alias CreatePurchaseOrderItemRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
 	return nil
 }
@@ -366,7 +369,11 @@ func (x *CreatePurchaseOrderItemRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *CreatePurchaseOrderItemRequest) GetQuantityOrdered() float64 {
@@ -455,7 +462,7 @@ func (x *ListPurchaseOrdersResponse) GetPageSize() int32 {
 }
 
 type CreatePurchaseOrderRequest struct {
-	SupplierId       int64                             `json:"supplier_id,omitempty"`
+	SupplierId       *int64                            `json:"supplier_id,omitempty"`
 	PoNumber         string                            `json:"po_number,omitempty"`
 	TaxAmount        float64                           `json:"tax_amount,omitempty"`
 	ExpectedDelivery string                            `json:"expected_delivery,omitempty"`
@@ -467,9 +474,12 @@ func (m *CreatePurchaseOrderRequest) MarshalJSON() ([]byte, error) {
 	type alias CreatePurchaseOrderRequest
 	aux := struct {
 		*alias
-		SupplierId string `json:"supplier_id,omitempty"`
+		SupplierId *string `json:"supplier_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.SupplierId = strconv.FormatInt(m.SupplierId, 10)
+	if m.SupplierId != nil {
+		encodedSupplierId := strconv.FormatInt(*m.SupplierId, 10)
+		aux.SupplierId = &encodedSupplierId
+	}
 	return json.Marshal(aux)
 }
 
@@ -477,17 +487,17 @@ func (m *CreatePurchaseOrderRequest) UnmarshalJSON(data []byte) error {
 	type alias CreatePurchaseOrderRequest
 	aux := struct {
 		*alias
-		SupplierId string `json:"supplier_id,omitempty"`
+		SupplierId *string `json:"supplier_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.SupplierId != "" {
-		v, err := strconv.ParseInt(aux.SupplierId, 10, 64)
+	if aux.SupplierId != nil {
+		v, err := strconv.ParseInt(*aux.SupplierId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SupplierId = v
+		m.SupplierId = &v
 	}
 	return nil
 }
@@ -497,7 +507,11 @@ func (x *CreatePurchaseOrderRequest) GetSupplierId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SupplierId
+	if x.SupplierId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SupplierId
 }
 
 func (x *CreatePurchaseOrderRequest) GetPoNumber() string {

@@ -32,7 +32,7 @@ message CreateTemplateResponse {
 }
 
 message DeleteTemplateRequest {
-  id: int64 @required
+  id: int64
 }
 
 message DeleteTemplateResponse {
@@ -56,7 +56,7 @@ message UpdateTemplateBody {
 }
 
 message UpdateTemplateRequest {
-  id: int64 @required
+  id: int64
   body: UpdateTemplateBody
 }
 

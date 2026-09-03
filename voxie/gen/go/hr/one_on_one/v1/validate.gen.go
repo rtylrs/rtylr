@@ -49,11 +49,21 @@ func (m *CreateOneOnOneRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ManagerId <= 0 {
-		violations = append(violations, "manager_id must be greater than 0")
+	if m.ManagerId == nil {
+		violations = append(violations, "manager_id is required")
 	}
-	if m.StaffId <= 0 {
-		violations = append(violations, "staff_id must be greater than 0")
+	if m.ManagerId != nil {
+		if *m.ManagerId <= 0 {
+			violations = append(violations, "manager_id must be greater than 0")
+		}
+	}
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
+	if m.StaffId != nil {
+		if *m.StaffId <= 0 {
+			violations = append(violations, "staff_id must be greater than 0")
+		}
 	}
 	if m.ScheduledAt == "" {
 		violations = append(violations, "scheduled_at is required")

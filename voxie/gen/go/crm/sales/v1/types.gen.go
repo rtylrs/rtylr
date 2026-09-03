@@ -296,7 +296,7 @@ func (x *GetContractResponse) GetContract() *Contract {
 }
 
 type CreateContractRequest struct {
-	LeadId       int64   `json:"lead_id,omitempty"`
+	LeadId       *int64  `json:"lead_id,omitempty"`
 	Plan         string  `json:"plan,omitempty"`
 	Mrr          string  `json:"mrr,omitempty"`
 	Seats        int32   `json:"seats,omitempty"`
@@ -309,9 +309,12 @@ func (m *CreateContractRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateContractRequest
 	aux := struct {
 		*alias
-		LeadId string `json:"lead_id,omitempty"`
+		LeadId *string `json:"lead_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.LeadId = strconv.FormatInt(m.LeadId, 10)
+	if m.LeadId != nil {
+		encodedLeadId := strconv.FormatInt(*m.LeadId, 10)
+		aux.LeadId = &encodedLeadId
+	}
 	return json.Marshal(aux)
 }
 
@@ -319,17 +322,17 @@ func (m *CreateContractRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateContractRequest
 	aux := struct {
 		*alias
-		LeadId string `json:"lead_id,omitempty"`
+		LeadId *string `json:"lead_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.LeadId != "" {
-		v, err := strconv.ParseInt(aux.LeadId, 10, 64)
+	if aux.LeadId != nil {
+		v, err := strconv.ParseInt(*aux.LeadId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LeadId = v
+		m.LeadId = &v
 	}
 	return nil
 }
@@ -339,7 +342,11 @@ func (x *CreateContractRequest) GetLeadId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LeadId
+	if x.LeadId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LeadId
 }
 
 func (x *CreateContractRequest) GetPlan() string {

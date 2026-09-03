@@ -3,7 +3,7 @@ package hr.overtime.v1
 /// OvertimeRequestPayload is a single employee's request to work overtime.
 message OvertimeRequestPayload {
   /// Unique identifier for the overtime request.
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
   /// Tenant owner this request belongs to.
   owner_id: int64
   /// Employee requesting overtime.
@@ -48,11 +48,11 @@ message ListOvertimeRequestsResponse {
 
 message CreateOvertimeRequestRequest {
   /// Employee requesting overtime.
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
   /// Date the overtime is planned for (ISO-8601 date).
   date: string @required
   /// Number of extra minutes planned beyond the regular shift.
-  planned_extra_minutes: int32 @required @gt(0)
+  planned_extra_minutes: int32? @required @gt(0)
   /// Justification for the overtime work.
   reason: string @required
 }
@@ -74,7 +74,7 @@ message ApproveOvertimeBody {
 
 message ApproveOvertimeRequest {
   /// ID of the overtime request being reviewed.
-  overtime_request_id: int64 @required @gt(0)
+  overtime_request_id: int64 @gt(0)
   body: ApproveOvertimeBody
 }
 

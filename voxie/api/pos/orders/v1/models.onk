@@ -119,7 +119,7 @@ message CreatePublicOrderResponse {
 // ── Get Order Detail ──────────────────────────────────────────────
 
 message GetOrderDetailRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
 }
 
 message GetOrderDetailResponse {
@@ -129,10 +129,10 @@ message GetOrderDetailResponse {
 // ── Get Public Order Status ───────────────────────────────────────
 
 message GetPublicOrderStatusRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
   /// business_id scopes the lookup to the business the order belongs to,
   /// preventing cross-tenant order enumeration on this anonymous endpoint.
-  business_id: int64 @required @gt(0) @query("business_id")
+  business_id: int64? @required @gt(0) @query("business_id")
   /// Single-use? No: this credential is scoped to this order and is safe to
   /// present repeatedly for status polling. It must never be replaced by the
   /// sequential order ID alone.
@@ -148,7 +148,7 @@ message GetPublicOrderStatusResponse {
 // ── List Orders ───────────────────────────────────────────────────
 
 message ListOrdersRequest {
-  session_id: int64 @required @gt(0) @query("session_id")
+  session_id: int64? @required @gt(0) @query("session_id")
   /// status is the current lifecycle state.
   status: string @query("status")
   date_from: string @query("date_from")
@@ -176,7 +176,7 @@ message ListOrdersResponse {
 // ── Send To Kitchen ───────────────────────────────────────────────
 
 message SendToKitchenRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
 }
 
 message SendToKitchenResponse {
@@ -186,8 +186,8 @@ message SendToKitchenResponse {
 // ── Transfer Table ────────────────────────────────────────────────
 
 message TransferTableRequest {
-  order_id: int64 @required @gt(0)
-  new_table_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
+  new_table_id: int64? @required @gt(0)
 }
 
 message TransferTableResponse {
@@ -202,7 +202,7 @@ message UpdateOrderStatusBody {
 }
 
 message UpdateOrderStatusRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
   /// body carries the new order status bound from the HTTP payload.
   body: UpdateOrderStatusBody
 }
@@ -214,7 +214,7 @@ message UpdateOrderStatusResponse {
 // ── Void Order ────────────────────────────────────────────────────
 
 message VoidOrderRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
   reason: string @required
 }
 

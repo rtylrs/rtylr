@@ -70,8 +70,13 @@ func (m *CreateMilestoneRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")

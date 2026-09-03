@@ -2,7 +2,7 @@
 import * as finance_invoices_v1 from "../../v1/types";
 
 export interface RecordPaymentRequest {
-invoiceId: string;
+invoiceId?: string;
 amount?: number;
 currency: string;
 paymentDate: string;
@@ -39,7 +39,6 @@ return out;
 export function validateRecordPaymentRequest(v: RecordPaymentRequest): string[] {
 const violations: string[] = [];
 if (v.invoiceId !== undefined && v.invoiceId !== null && !(typeof v.invoiceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.invoiceId))) violations.push("invoice_id has invalid type");
-if (!(v.invoiceId !== undefined && v.invoiceId !== null)) violations.push("invoice_id is required");
 if (v.invoiceId !== undefined && v.invoiceId !== null && !(Number(v.invoiceId) > 0)) violations.push("invoice_id violates @gt");
 if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");

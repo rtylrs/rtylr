@@ -7,35 +7,44 @@ import (
 )
 
 type TimeOffRequest struct {
-	Id         int64   `json:"id,omitempty"`
-	OwnerId    int64   `json:"owner_id,omitempty"`
-	StaffId    int64   `json:"staff_id,omitempty"`
-	Type       string  `json:"type,omitempty"`
-	StartDate  string  `json:"start_date,omitempty"`
-	EndDate    string  `json:"end_date,omitempty"`
-	DaysCount  float64 `json:"days_count,omitempty"`
-	Status     string  `json:"status,omitempty"`
-	Reason     string  `json:"reason,omitempty"`
-	ApprovedBy int64   `json:"approved_by,omitempty"`
-	ApprovedAt string  `json:"approved_at,omitempty"`
-	Notes      string  `json:"notes,omitempty"`
-	CreatedAt  string  `json:"created_at,omitempty"`
-	UpdatedAt  string  `json:"updated_at,omitempty"`
+	Id         *int64   `json:"id,omitempty"`
+	OwnerId    *int64   `json:"owner_id,omitempty"`
+	StaffId    *int64   `json:"staff_id,omitempty"`
+	Type       string   `json:"type,omitempty"`
+	StartDate  string   `json:"start_date,omitempty"`
+	EndDate    string   `json:"end_date,omitempty"`
+	DaysCount  *float64 `json:"days_count,omitempty"`
+	Status     string   `json:"status,omitempty"`
+	Reason     string   `json:"reason,omitempty"`
+	ApprovedBy int64    `json:"approved_by,omitempty"`
+	ApprovedAt string   `json:"approved_at,omitempty"`
+	Notes      string   `json:"notes,omitempty"`
+	CreatedAt  string   `json:"created_at,omitempty"`
+	UpdatedAt  string   `json:"updated_at,omitempty"`
 }
 
 func (m *TimeOffRequest) MarshalJSON() ([]byte, error) {
 	type alias TimeOffRequest
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		StaffId    string `json:"staff_id,omitempty"`
-		ApprovedBy string `json:"approved_by,omitempty"`
+		ApprovedBy string  `json:"approved_by,omitempty"`
+		Id         *string `json:"id,omitempty"`
+		OwnerId    *string `json:"owner_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Id = strconv.FormatInt(m.Id, 10)
-	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
 	aux.ApprovedBy = strconv.FormatInt(m.ApprovedBy, 10)
+	if m.Id != nil {
+		encodedId := strconv.FormatInt(*m.Id, 10)
+		aux.Id = &encodedId
+	}
+	if m.OwnerId != nil {
+		encodedOwnerId := strconv.FormatInt(*m.OwnerId, 10)
+		aux.OwnerId = &encodedOwnerId
+	}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -43,34 +52,13 @@ func (m *TimeOffRequest) UnmarshalJSON(data []byte) error {
 	type alias TimeOffRequest
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		StaffId    string `json:"staff_id,omitempty"`
-		ApprovedBy string `json:"approved_by,omitempty"`
+		ApprovedBy string  `json:"approved_by,omitempty"`
+		Id         *string `json:"id,omitempty"`
+		OwnerId    *string `json:"owner_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.Id != "" {
-		v, err := strconv.ParseInt(aux.Id, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.Id = v
-	}
-	if aux.OwnerId != "" {
-		v, err := strconv.ParseInt(aux.OwnerId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.OwnerId = v
-	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.StaffId = v
 	}
 	if aux.ApprovedBy != "" {
 		v, err := strconv.ParseInt(aux.ApprovedBy, 10, 64)
@@ -78,6 +66,27 @@ func (m *TimeOffRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ApprovedBy = v
+	}
+	if aux.Id != nil {
+		v, err := strconv.ParseInt(*aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = &v
+	}
+	if aux.OwnerId != nil {
+		v, err := strconv.ParseInt(*aux.OwnerId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.OwnerId = &v
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -87,7 +96,11 @@ func (x *TimeOffRequest) GetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Id
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
 }
 
 func (x *TimeOffRequest) GetOwnerId() int64 {
@@ -95,7 +108,11 @@ func (x *TimeOffRequest) GetOwnerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.OwnerId
+	if x.OwnerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.OwnerId
 }
 
 func (x *TimeOffRequest) GetStaffId() int64 {
@@ -103,7 +120,11 @@ func (x *TimeOffRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 func (x *TimeOffRequest) GetType() string {
@@ -135,7 +156,11 @@ func (x *TimeOffRequest) GetDaysCount() float64 {
 		var zero float64
 		return zero
 	}
-	return x.DaysCount
+	if x.DaysCount == nil {
+		var zero float64
+		return zero
+	}
+	return *x.DaysCount
 }
 
 func (x *TimeOffRequest) GetStatus() string {
@@ -281,22 +306,25 @@ func (x *ListTimeOffResponse) GetRequests() []*TimeOffRequest {
 }
 
 type SubmitTimeOffRequest struct {
-	StaffId   int64   `json:"staff_id,omitempty"`
-	Type      string  `json:"type,omitempty"`
-	StartDate string  `json:"start_date,omitempty"`
-	EndDate   string  `json:"end_date,omitempty"`
-	DaysCount float64 `json:"days_count,omitempty"`
-	Reason    string  `json:"reason,omitempty"`
-	Notes     string  `json:"notes,omitempty"`
+	StaffId   *int64   `json:"staff_id,omitempty"`
+	Type      string   `json:"type,omitempty"`
+	StartDate string   `json:"start_date,omitempty"`
+	EndDate   string   `json:"end_date,omitempty"`
+	DaysCount *float64 `json:"days_count,omitempty"`
+	Reason    string   `json:"reason,omitempty"`
+	Notes     string   `json:"notes,omitempty"`
 }
 
 func (m *SubmitTimeOffRequest) MarshalJSON() ([]byte, error) {
 	type alias SubmitTimeOffRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -304,17 +332,17 @@ func (m *SubmitTimeOffRequest) UnmarshalJSON(data []byte) error {
 	type alias SubmitTimeOffRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.StaffId = v
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -324,7 +352,11 @@ func (x *SubmitTimeOffRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 func (x *SubmitTimeOffRequest) GetType() string {
@@ -356,7 +388,11 @@ func (x *SubmitTimeOffRequest) GetDaysCount() float64 {
 		var zero float64
 		return zero
 	}
-	return x.DaysCount
+	if x.DaysCount == nil {
+		var zero float64
+		return zero
+	}
+	return *x.DaysCount
 }
 
 func (x *SubmitTimeOffRequest) GetReason() string {

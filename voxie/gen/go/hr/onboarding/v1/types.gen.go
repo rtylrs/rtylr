@@ -1034,7 +1034,7 @@ func (x *AddItemToChecklistTemplateResponse) GetItem() *ChecklistItemPayload {
 }
 
 type ListEmployeeChecklistsRequest struct {
-	EmployeeId int64  `json:"employee_id,omitempty"`
+	EmployeeId *int64 `json:"employee_id,omitempty"`
 	Limit      *int32 `json:"limit,omitempty"`
 	Offset     *int32 `json:"offset,omitempty"`
 }
@@ -1043,9 +1043,12 @@ func (m *ListEmployeeChecklistsRequest) MarshalJSON() ([]byte, error) {
 	type alias ListEmployeeChecklistsRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1053,17 +1056,17 @@ func (m *ListEmployeeChecklistsRequest) UnmarshalJSON(data []byte) error {
 	type alias ListEmployeeChecklistsRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -1073,7 +1076,11 @@ func (x *ListEmployeeChecklistsRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *ListEmployeeChecklistsRequest) GetLimit() int32 {
@@ -1194,7 +1201,7 @@ func (x *GetEmployeeChecklistResponse) GetChecklist() *EmployeeChecklistPayload 
 
 type TriggerChecklistRequest struct {
 	EmployeeId  int64  `json:"employee_id,omitempty"`
-	TemplateId  int64  `json:"template_id,omitempty"`
+	TemplateId  *int64 `json:"template_id,omitempty"`
 	TriggerDate string `json:"trigger_date,omitempty"`
 }
 
@@ -1202,11 +1209,14 @@ func (m *TriggerChecklistRequest) MarshalJSON() ([]byte, error) {
 	type alias TriggerChecklistRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
-		TemplateId string `json:"template_id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		TemplateId *string `json:"template_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
-	aux.TemplateId = strconv.FormatInt(m.TemplateId, 10)
+	if m.TemplateId != nil {
+		encodedTemplateId := strconv.FormatInt(*m.TemplateId, 10)
+		aux.TemplateId = &encodedTemplateId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1214,8 +1224,8 @@ func (m *TriggerChecklistRequest) UnmarshalJSON(data []byte) error {
 	type alias TriggerChecklistRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
-		TemplateId string `json:"template_id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		TemplateId *string `json:"template_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1227,12 +1237,12 @@ func (m *TriggerChecklistRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.EmployeeId = v
 	}
-	if aux.TemplateId != "" {
-		v, err := strconv.ParseInt(aux.TemplateId, 10, 64)
+	if aux.TemplateId != nil {
+		v, err := strconv.ParseInt(*aux.TemplateId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TemplateId = v
+		m.TemplateId = &v
 	}
 	return nil
 }
@@ -1250,7 +1260,11 @@ func (x *TriggerChecklistRequest) GetTemplateId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TemplateId
+	if x.TemplateId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TemplateId
 }
 
 func (x *TriggerChecklistRequest) GetTriggerDate() string {

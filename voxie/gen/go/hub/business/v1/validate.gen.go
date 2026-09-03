@@ -104,8 +104,13 @@ func (m *CreateSubBusinessRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.ParentBusinessId <= 0 {
-		violations = append(violations, "parent_business_id must be greater than 0")
+	if m.ParentBusinessId == nil {
+		violations = append(violations, "parent_business_id is required")
+	}
+	if m.ParentBusinessId != nil {
+		if *m.ParentBusinessId <= 0 {
+			violations = append(violations, "parent_business_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

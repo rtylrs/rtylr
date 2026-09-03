@@ -132,7 +132,7 @@ message CreateShiftResponse {
 /// fields present are applied; absent fields keep their stored value.
 message UpdateShiftRequest {
   /// Identifier of the shift row to update.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// New location for a template row.
   location_id: int64?
   /// New shift name for a template row.
@@ -162,7 +162,7 @@ message UpdateShiftResponse {
 
 message DeleteShiftRequest {
   /// Identifier of the shift row to delete.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteShiftResponse {
@@ -172,9 +172,9 @@ message DeleteShiftResponse {
 
 message CreateShiftAssignmentRequest {
   /// Employee to assign.
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
   /// Shift template to assign.
-  shift_id: int64 @required @gt(0)
+  shift_id: int64? @required @gt(0)
   /// Date of the assignment (ISO-8601 date).
   date: string @required
 }
@@ -200,7 +200,7 @@ message CreateShiftAssignmentResponse {
 
 message GetRosterRequest {
   /// Location to fetch the roster for.
-  location_id: int64 @required @gt(0)
+  location_id: int64 @gt(0)
   /// Monday of the week to retrieve (ISO-8601 date).
   week_start: string @required @query("week_start")
 }
@@ -319,7 +319,7 @@ message SetAvailabilityRequest {
   /// Entry to replace; absent creates the entry or upserts it by natural key.
   id: int64?
   /// Staff member this availability is for.
-  staff_id: int64 @required @gt(0)
+  staff_id: int64? @required @gt(0)
   /// Weekday for a recurring pattern: 0 = Monday through 6 = Sunday.
   day_of_week: int32? @gte(0) @lte(6)
   /// Calendar date for a single-date override (ISO-8601).
@@ -344,7 +344,7 @@ message SetAvailabilityResponse {
 
 message DeleteAvailabilityRequest {
   /// Identifier of the availability entry to delete.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteAvailabilityResponse {

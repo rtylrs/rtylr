@@ -122,18 +122,21 @@ func (x *Floor) GetCreatedAt() string {
 }
 
 type CreateFloorRequest struct {
-	BranchId  int64  `json:"branch_id,omitempty"`
+	BranchId  *int64 `json:"branch_id,omitempty"`
 	Name      string `json:"name,omitempty"`
-	SortOrder int32  `json:"sort_order,omitempty"`
+	SortOrder *int32 `json:"sort_order,omitempty"`
 }
 
 func (m *CreateFloorRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateFloorRequest
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
 	return json.Marshal(aux)
 }
 
@@ -141,17 +144,17 @@ func (m *CreateFloorRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateFloorRequest
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
 	return nil
 }
@@ -161,7 +164,11 @@ func (x *CreateFloorRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *CreateFloorRequest) GetName() string {
@@ -177,7 +184,11 @@ func (x *CreateFloorRequest) GetSortOrder() int32 {
 		var zero int32
 		return zero
 	}
-	return x.SortOrder
+	if x.SortOrder == nil {
+		var zero int32
+		return zero
+	}
+	return *x.SortOrder
 }
 
 type CreateFloorResponse struct {
@@ -232,7 +243,7 @@ func (x *CreateFloorResponse) GetMessage() string {
 
 type UpdateFloorBody struct {
 	Name      string `json:"name,omitempty"`
-	SortOrder int32  `json:"sort_order,omitempty"`
+	SortOrder *int32 `json:"sort_order,omitempty"`
 }
 
 func (x *UpdateFloorBody) GetName() string {
@@ -248,7 +259,11 @@ func (x *UpdateFloorBody) GetSortOrder() int32 {
 		var zero int32
 		return zero
 	}
-	return x.SortOrder
+	if x.SortOrder == nil {
+		var zero int32
+		return zero
+	}
+	return *x.SortOrder
 }
 
 type UpdateFloorRequest struct {

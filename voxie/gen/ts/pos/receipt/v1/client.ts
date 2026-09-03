@@ -76,11 +76,11 @@ const violations = validateListReceiptsRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/pos/receipt/v1/receipts";
 const query = new URLSearchParams();
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }

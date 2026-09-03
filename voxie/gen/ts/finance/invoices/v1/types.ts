@@ -453,7 +453,7 @@ return violations;
 }
 
 export interface DeleteInvoiceRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteInvoiceRequest(v: any): DeleteInvoiceRequest {
@@ -472,7 +472,6 @@ return out;
 export function validateDeleteInvoiceRequest(v: DeleteInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -501,7 +500,7 @@ return violations;
 }
 
 export interface GetInvoiceRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetInvoiceRequest(v: any): GetInvoiceRequest {
@@ -520,7 +519,6 @@ return out;
 export function validateGetInvoiceRequest(v: GetInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -638,7 +636,7 @@ return violations;
 }
 
 export interface SendInvoiceRequest {
-id: string;
+id?: string;
 }
 
 export function decodeSendInvoiceRequest(v: any): SendInvoiceRequest {
@@ -657,7 +655,6 @@ return out;
 export function validateSendInvoiceRequest(v: SendInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -768,7 +765,7 @@ return violations;
 }
 
 export interface UpdateInvoiceRequest {
-id: string;
+id?: string;
 body?: UpdateInvoiceBody;
 }
 
@@ -790,7 +787,6 @@ return out;
 export function validateUpdateInvoiceRequest(v: UpdateInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateInvoiceBody(v.body).map((message) => "body: " + message));
@@ -846,7 +842,7 @@ return violations;
 }
 
 export interface UpdateInvoiceStatusRequest {
-id: string;
+id?: string;
 body?: UpdateInvoiceStatusBody;
 }
 
@@ -868,7 +864,6 @@ return out;
 export function validateUpdateInvoiceStatusRequest(v: UpdateInvoiceStatusRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateInvoiceStatusBody(v.body).map((message) => "body: " + message));

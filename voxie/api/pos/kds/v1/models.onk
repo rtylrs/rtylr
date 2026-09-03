@@ -39,7 +39,7 @@ message UpdateKDSItemByIDBody {
 
 message UpdateKDSItemByIDRequest {
   /// item_id is the unique identifier for the order item.
-  item_id: int64 @required @gt(0)
+  item_id: int64 @gt(0)
   /// body carries the new KDS item status bound from the HTTP payload.
   body: UpdateKDSItemByIDBody
 }
@@ -57,7 +57,7 @@ message UpdateKDSItemStatusRequest {
   /// order_id is the unique identifier for the order.
   order_id: int64 @gt(0)
   /// item_id is the unique identifier for the order item.
-  item_id: int64 @required @gt(0)
+  item_id: int64 @gt(0)
   /// body carries the new KDS item status bound from the HTTP payload.
   body: UpdateKDSItemStatusBody
 }

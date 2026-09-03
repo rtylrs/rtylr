@@ -17,11 +17,11 @@ message CashMovement {
 }
 
 message CashAdjustRequest {
-  branch_id: int64 @required @gt(0)
-  terminal_id: int64 @required @gt(0)
-  session_id: int64 @required @gt(0)
-  employee_id: int64 @required @gt(0)
-  amount: float64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  session_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
+  amount: float64? @required @gt(0)
   reason: string @required
 }
 
@@ -31,11 +31,11 @@ message CashAdjustResponse {
 }
 
 message CashDropRequest {
-  branch_id: int64 @required @gt(0)
-  terminal_id: int64 @required @gt(0)
-  session_id: int64 @required @gt(0)
-  employee_id: int64 @required @gt(0)
-  amount: float64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  session_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
+  amount: float64? @required @gt(0)
   reason: string @required
 }
 
@@ -45,11 +45,11 @@ message CashDropResponse {
 }
 
 message CashPickupRequest {
-  branch_id: int64 @required @gt(0)
-  terminal_id: int64 @required @gt(0)
-  session_id: int64 @required @gt(0)
-  employee_id: int64 @required @gt(0)
-  amount: float64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  session_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
+  amount: float64? @required @gt(0)
   reason: string @required
 }
 
@@ -59,7 +59,7 @@ message CashPickupResponse {
 }
 
 message ListCashMovementsRequest {
-  session_id: int64 @required @gt(0) @query("session_id")
+  session_id: int64? @required @gt(0) @query("session_id")
 }
 
 message ListCashMovementsResponse {

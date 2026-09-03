@@ -3,7 +3,7 @@ package pos.orders.splits.v1
 // ── Split Order ───────────────────────────────────────────────────
 
 message SplitOrderRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
   splits: SplitGroup[] @min_items(1)
 }
 

@@ -386,7 +386,7 @@ func RegisterOnboardingServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter employee_id: "+err.Error())
 				return
 			}
-			req.EmployeeId = parsedEmployeeId
+			req.EmployeeId = &parsedEmployeeId
 		}
 		if values := r.URL.Query()["limit"]; len(values) > 0 {
 			value := values[0]

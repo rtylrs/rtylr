@@ -54,7 +54,9 @@ func (c *CashServiceClient) ListCashMovements(ctx context.Context, req *ListCash
 	}
 	path := "/pos/cash/v1/movements"
 	query := url.Values{}
-	query.Set("session_id", strconv.FormatInt(int64(req.SessionId), 10))
+	if req.SessionId != nil {
+		query.Set("session_id", strconv.FormatInt(int64(*req.SessionId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

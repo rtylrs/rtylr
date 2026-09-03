@@ -118,7 +118,7 @@ return violations;
 }
 
 export interface DeleteSegmentRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteSegmentRequest(v: any): DeleteSegmentRequest {
@@ -137,7 +137,6 @@ return out;
 export function validateDeleteSegmentRequest(v: DeleteSegmentRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -166,7 +165,7 @@ return violations;
 }
 
 export interface GetSegmentCustomersRequest {
-segmentId: string;
+segmentId?: string;
 page: string;
 pageSize: string;
 }
@@ -191,7 +190,6 @@ return out;
 export function validateGetSegmentCustomersRequest(v: GetSegmentCustomersRequest): string[] {
 const violations: string[] = [];
 if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
-if (!(v.segmentId !== undefined && v.segmentId !== null)) violations.push("segment_id is required");
 if (v.segmentId !== undefined && v.segmentId !== null && !(Number(v.segmentId) > 0)) violations.push("segment_id violates @gt");
 if (v.page !== undefined && v.page !== null && !(typeof v.page === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.page))) violations.push("page has invalid type");
 if (!(v.page !== undefined && v.page !== null)) violations.push("page is required");
@@ -239,7 +237,7 @@ return violations;
 }
 
 export interface GetSegmentDetailRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetSegmentDetailRequest(v: any): GetSegmentDetailRequest {
@@ -258,7 +256,6 @@ return out;
 export function validateGetSegmentDetailRequest(v: GetSegmentDetailRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -370,7 +367,7 @@ return violations;
 }
 
 export interface UpdateSegmentRequest {
-id: string;
+id?: string;
 body?: UpdateSegmentBody;
 }
 
@@ -392,7 +389,6 @@ return out;
 export function validateUpdateSegmentRequest(v: UpdateSegmentRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateSegmentBody(v.body).map((message) => "body: " + message));

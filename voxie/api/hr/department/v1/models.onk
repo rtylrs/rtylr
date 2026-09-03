@@ -29,7 +29,7 @@ message CreateDepartmentResponse {
 }
 
 message DeleteDepartmentRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteDepartmentResponse {
@@ -51,7 +51,7 @@ message UpdateDepartmentBody {
 
 message UpdateDepartmentRequest {
   /// ID of the department to update.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable department fields bound from the HTTP payload.
   body: UpdateDepartmentBody
 }

@@ -29,7 +29,7 @@ message CreateModifierResponse {
 
 message DeleteModifierRequest {
   /// id is the unique identifier for the modifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteModifierResponse {
@@ -51,7 +51,7 @@ message UpdateModifierBody {
 
 message UpdateModifierRequest {
   /// id is the unique identifier for the modifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable modifier fields bound from the HTTP payload.
   body: UpdateModifierBody
 }

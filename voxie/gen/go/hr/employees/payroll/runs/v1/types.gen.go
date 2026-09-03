@@ -557,16 +557,19 @@ func (x *ApprovePayrollRunResponse) GetRun() *PayrollRunPayload {
 }
 
 type ExportPayrollRequest struct {
-	RunId int64 `json:"run_id,omitempty"`
+	RunId *int64 `json:"run_id,omitempty"`
 }
 
 func (m *ExportPayrollRequest) MarshalJSON() ([]byte, error) {
 	type alias ExportPayrollRequest
 	aux := struct {
 		*alias
-		RunId string `json:"run_id,omitempty"`
+		RunId *string `json:"run_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.RunId = strconv.FormatInt(m.RunId, 10)
+	if m.RunId != nil {
+		encodedRunId := strconv.FormatInt(*m.RunId, 10)
+		aux.RunId = &encodedRunId
+	}
 	return json.Marshal(aux)
 }
 
@@ -574,17 +577,17 @@ func (m *ExportPayrollRequest) UnmarshalJSON(data []byte) error {
 	type alias ExportPayrollRequest
 	aux := struct {
 		*alias
-		RunId string `json:"run_id,omitempty"`
+		RunId *string `json:"run_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.RunId != "" {
-		v, err := strconv.ParseInt(aux.RunId, 10, 64)
+	if aux.RunId != nil {
+		v, err := strconv.ParseInt(*aux.RunId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.RunId = v
+		m.RunId = &v
 	}
 	return nil
 }
@@ -594,7 +597,11 @@ func (x *ExportPayrollRequest) GetRunId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.RunId
+	if x.RunId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RunId
 }
 
 type ExportPayrollResponse struct {

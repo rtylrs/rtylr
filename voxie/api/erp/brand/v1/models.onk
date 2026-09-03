@@ -29,7 +29,7 @@ message UpdateBrandBody {
 }
 
 message UpdateBrandRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateBrandBody
 }
 
@@ -38,7 +38,7 @@ message UpdateBrandResponse {
 }
 
 message DeleteBrandRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteBrandResponse {

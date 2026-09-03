@@ -137,7 +137,7 @@ func (x *GetSettingsResponse) GetSettings() *Settings {
 
 type UpdateSettingsRequest struct {
 	AutoAssign        bool   `json:"auto_assign,omitempty"`
-	SlaHours          int32  `json:"sla_hours,omitempty"`
+	SlaHours          *int32 `json:"sla_hours,omitempty"`
 	BusinessHours     string `json:"business_hours,omitempty"`
 	NotificationEmail string `json:"notification_email,omitempty"`
 }
@@ -155,7 +155,11 @@ func (x *UpdateSettingsRequest) GetSlaHours() int32 {
 		var zero int32
 		return zero
 	}
-	return x.SlaHours
+	if x.SlaHours == nil {
+		var zero int32
+		return zero
+	}
+	return *x.SlaHours
 }
 
 func (x *UpdateSettingsRequest) GetBusinessHours() string {

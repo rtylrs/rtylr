@@ -39,7 +39,7 @@ message UpdateComboBody {
 
 message UpdateComboRequest {
   /// id is the unique identifier for the combo.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable combo fields bound from the HTTP payload.
   body: UpdateComboBody
 }
@@ -50,7 +50,7 @@ message UpdateComboResponse {
 
 message DeleteComboRequest {
   /// id is the unique identifier for the combo.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteComboResponse {

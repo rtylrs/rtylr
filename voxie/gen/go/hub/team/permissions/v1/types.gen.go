@@ -3,23 +3,32 @@ package v1
 
 import (
 	"encoding/json"
+	hub_user_v1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 	"strconv"
 )
 
 type UpdatePermissionsRequest struct {
-	UserId   int64    `json:"user_id,omitempty"`
-	Apps     []string `json:"apps,omitempty"`
-	Role     string   `json:"role,omitempty"`
-	FullName *string  `json:"full_name,omitempty"`
+	UserId         int64                            `json:"user_id,omitempty"`
+	Apps           []string                         `json:"apps,omitempty"`
+	Role           *string                          `json:"role,omitempty"`
+	FullName       *string                          `json:"full_name,omitempty"`
+	DashRole       *string                          `json:"dash_role,omitempty"`
+	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
+	GroupIds       []int64                          `json:"group_ids,omitempty"`
 }
 
 func (m *UpdatePermissionsRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdatePermissionsRequest
 	aux := struct {
 		*alias
-		UserId string `json:"user_id,omitempty"`
+		UserId   string   `json:"user_id,omitempty"`
+		GroupIds []string `json:"group_ids,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	aux.GroupIds = make([]string, len(m.GroupIds))
+	for i, v := range m.GroupIds {
+		aux.GroupIds[i] = strconv.FormatInt(v, 10)
+	}
 	return json.Marshal(aux)
 }
 
@@ -27,7 +36,8 @@ func (m *UpdatePermissionsRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdatePermissionsRequest
 	aux := struct {
 		*alias
-		UserId string `json:"user_id,omitempty"`
+		UserId   string   `json:"user_id,omitempty"`
+		GroupIds []string `json:"group_ids,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -38,6 +48,16 @@ func (m *UpdatePermissionsRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UserId = v
+	}
+	if aux.GroupIds != nil {
+		m.GroupIds = make([]int64, len(aux.GroupIds))
+		for i, s := range aux.GroupIds {
+			v, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				return err
+			}
+			m.GroupIds[i] = v
+		}
 	}
 	return nil
 }
@@ -63,7 +83,11 @@ func (x *UpdatePermissionsRequest) GetRole() string {
 		var zero string
 		return zero
 	}
-	return x.Role
+	if x.Role == nil {
+		var zero string
+		return zero
+	}
+	return *x.Role
 }
 
 func (x *UpdatePermissionsRequest) GetFullName() string {
@@ -78,5 +102,42 @@ func (x *UpdatePermissionsRequest) GetFullName() string {
 	return *x.FullName
 }
 
+func (x *UpdatePermissionsRequest) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *UpdatePermissionsRequest) GetAppAssignments() []*hub_user_v1.AppRoleAssignment {
+	if x == nil {
+		var zero []*hub_user_v1.AppRoleAssignment
+		return zero
+	}
+	return x.AppAssignments
+}
+
+func (x *UpdatePermissionsRequest) GetGroupIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.GroupIds
+}
+
 type UpdatePermissionsResponse struct {
+	EffectiveAccess *hub_user_v1.EffectiveAccess `json:"effective_access,omitempty"`
+}
+
+func (x *UpdatePermissionsResponse) GetEffectiveAccess() *hub_user_v1.EffectiveAccess {
+	if x == nil {
+		var zero *hub_user_v1.EffectiveAccess
+		return zero
+	}
+	return x.EffectiveAccess
 }

@@ -23,7 +23,7 @@ message ConnectIntegrationResponse {
 }
 
 message DisconnectIntegrationRequest {
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
 }
 
 message DisconnectIntegrationResponse {

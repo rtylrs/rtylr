@@ -49,8 +49,13 @@ func (m *CreateTerminalRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
+	}
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -80,8 +85,13 @@ func (m *UpdateTerminalBody) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
+	}
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -130,8 +140,13 @@ func (m *HeartbeatTerminalRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.TerminalId <= 0 {
-		violations = append(violations, "terminal_id must be greater than 0")
+	if m.TerminalId == nil {
+		violations = append(violations, "terminal_id is required")
+	}
+	if m.TerminalId != nil {
+		if *m.TerminalId <= 0 {
+			violations = append(violations, "terminal_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

@@ -21,7 +21,7 @@ message RecurringInvoice {
 
 message CreateRecurringInvoiceRequest {
   /// The invoice used as the recurring invoice template.
-  template_invoice_id: int64 @required @gt(0)
+  template_invoice_id: int64? @required @gt(0)
   /// How often the recurring invoice should be generated.
   frequency: string @required
   /// The next generation date, formatted as YYYY-MM-DD.
@@ -40,7 +40,7 @@ message CreateRecurringInvoiceResponse {
 }
 
 message GetRecurringInvoiceRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetRecurringInvoiceResponse {
@@ -62,7 +62,7 @@ message ListRecurringInvoicesResponse {
 
 message PauseRecurringInvoiceRequest {
   /// The recurring invoice to pause.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message PauseRecurringInvoiceResponse {
@@ -72,7 +72,7 @@ message PauseRecurringInvoiceResponse {
 
 message ResumeRecurringInvoiceRequest {
   /// The recurring invoice to resume.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message ResumeRecurringInvoiceResponse {
@@ -95,7 +95,7 @@ message UpdateRecurringInvoiceBody {
 
 message UpdateRecurringInvoiceRequest {
   /// The recurring invoice to update.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// Carries updatable recurring invoice fields bound from the HTTP payload.
   body: UpdateRecurringInvoiceBody
 }

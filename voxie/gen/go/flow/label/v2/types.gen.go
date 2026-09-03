@@ -293,7 +293,7 @@ func (x *DeleteLabelResponse) GetMessage() string {
 }
 
 type SetTaskLabelsRequest struct {
-	TaskId   int64   `json:"task_id,omitempty"`
+	TaskId   *int64  `json:"task_id,omitempty"`
 	LabelIds []int64 `json:"label_ids,omitempty"`
 }
 
@@ -301,10 +301,13 @@ func (m *SetTaskLabelsRequest) MarshalJSON() ([]byte, error) {
 	type alias SetTaskLabelsRequest
 	aux := struct {
 		*alias
-		TaskId   string   `json:"task_id,omitempty"`
+		TaskId   *string  `json:"task_id,omitempty"`
 		LabelIds []string `json:"label_ids,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
 	aux.LabelIds = make([]string, len(m.LabelIds))
 	for i, v := range m.LabelIds {
 		aux.LabelIds[i] = strconv.FormatInt(v, 10)
@@ -316,18 +319,18 @@ func (m *SetTaskLabelsRequest) UnmarshalJSON(data []byte) error {
 	type alias SetTaskLabelsRequest
 	aux := struct {
 		*alias
-		TaskId   string   `json:"task_id,omitempty"`
+		TaskId   *string  `json:"task_id,omitempty"`
 		LabelIds []string `json:"label_ids,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.TaskId != "" {
-		v, err := strconv.ParseInt(aux.TaskId, 10, 64)
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TaskId = v
+		m.TaskId = &v
 	}
 	if aux.LabelIds != nil {
 		m.LabelIds = make([]int64, len(aux.LabelIds))
@@ -347,7 +350,11 @@ func (x *SetTaskLabelsRequest) GetTaskId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TaskId
+	if x.TaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TaskId
 }
 
 func (x *SetTaskLabelsRequest) GetLabelIds() []int64 {

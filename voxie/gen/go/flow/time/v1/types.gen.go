@@ -901,8 +901,8 @@ func (x *UpsertWorkDayResponse) GetWorkDay() *WorkDay {
 }
 
 type ListWorkDaysRequest struct {
-	From       string `json:"from,omitempty"`
-	To         string `json:"to,omitempty"`
+	FromDate   string `json:"from_date,omitempty"`
+	ToDate     string `json:"to_date,omitempty"`
 	EmployeeId *int64 `json:"employee_id,omitempty"`
 	Page       int32  `json:"page,omitempty"`
 	Limit      int32  `json:"limit,omitempty"`
@@ -940,20 +940,20 @@ func (m *ListWorkDaysRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (x *ListWorkDaysRequest) GetFrom() string {
+func (x *ListWorkDaysRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *ListWorkDaysRequest) GetTo() string {
+func (x *ListWorkDaysRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 func (x *ListWorkDaysRequest) GetEmployeeId() int64 {
@@ -1006,9 +1006,9 @@ func (x *ListWorkDaysResponse) GetPagination() *common_pagination_v1.PaginationR
 }
 
 type ListWorkDaysForWorkspaceRequest struct {
-	WorkspaceId int64  `json:"workspace_id,omitempty"`
-	From        string `json:"from,omitempty"`
-	To          string `json:"to,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
+	FromDate    string `json:"from_date,omitempty"`
+	ToDate      string `json:"to_date,omitempty"`
 	Page        int32  `json:"page,omitempty"`
 	Limit       int32  `json:"limit,omitempty"`
 }
@@ -1017,9 +1017,12 @@ func (m *ListWorkDaysForWorkspaceRequest) MarshalJSON() ([]byte, error) {
 	type alias ListWorkDaysForWorkspaceRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1027,17 +1030,17 @@ func (m *ListWorkDaysForWorkspaceRequest) UnmarshalJSON(data []byte) error {
 	type alias ListWorkDaysForWorkspaceRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
 	return nil
 }
@@ -1047,23 +1050,27 @@ func (x *ListWorkDaysForWorkspaceRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
-func (x *ListWorkDaysForWorkspaceRequest) GetFrom() string {
+func (x *ListWorkDaysForWorkspaceRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *ListWorkDaysForWorkspaceRequest) GetTo() string {
+func (x *ListWorkDaysForWorkspaceRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 func (x *ListWorkDaysForWorkspaceRequest) GetPage() int32 {
@@ -1106,7 +1113,7 @@ func (x *ListWorkDaysForWorkspaceResponse) GetPagination() *common_pagination_v1
 type CreateWorkDayLineRequest struct {
 	WorkDayId       int64   `json:"work_day_id,omitempty"`
 	ClientKey       string  `json:"client_key,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
+	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	Description     string  `json:"description,omitempty"`
 	ProjectId       *int64  `json:"project_id,omitempty"`
 	TaskId          *int64  `json:"task_id,omitempty"`
@@ -1204,7 +1211,11 @@ func (x *CreateWorkDayLineRequest) GetDurationMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *CreateWorkDayLineRequest) GetDescription() string {
@@ -1285,7 +1296,7 @@ func (x *CreateWorkDayLineResponse) GetLine() *WorkDayLine {
 
 type UpdateWorkDayLineRequest struct {
 	Id              int64   `json:"id,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
+	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	Description     string  `json:"description,omitempty"`
 	ProjectId       *int64  `json:"project_id,omitempty"`
 	TaskId          *int64  `json:"task_id,omitempty"`
@@ -1375,7 +1386,11 @@ func (x *UpdateWorkDayLineRequest) GetDurationMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *UpdateWorkDayLineRequest) GetDescription() string {

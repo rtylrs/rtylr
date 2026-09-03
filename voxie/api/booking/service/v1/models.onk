@@ -17,7 +17,7 @@ message BookingService {
 message CreateServiceRequest {
   name: string @required
   description: string
-  duration_minutes: int32 @required @gt(0)
+  duration_minutes: int32? @required @gt(0)
   price: float64 @gte(0)
   color: string
   is_active: bool
@@ -29,7 +29,7 @@ message CreateServiceResponse {
 }
 
 message DeleteServiceRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteServiceResponse {
@@ -43,10 +43,10 @@ message ListServicesResponse {
 }
 
 message UpdateServiceRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   name: string @required
   description: string
-  duration_minutes: int32 @required @gt(0)
+  duration_minutes: int32? @required @gt(0)
   price: float64 @gte(0)
   color: string
   is_active: bool

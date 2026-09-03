@@ -76,8 +76,13 @@ func (m *CreateProjectRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
+	}
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -205,8 +210,13 @@ func (m *ListProjectColumnsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -240,8 +250,13 @@ func (m *CreateProjectColumnRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -326,8 +341,13 @@ func (m *MoveTaskToColumnRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.TaskId <= 0 {
-		violations = append(violations, "task_id must be greater than 0")
+	if m.TaskId == nil {
+		violations = append(violations, "task_id is required")
+	}
+	if m.TaskId != nil {
+		if *m.TaskId <= 0 {
+			violations = append(violations, "task_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -351,8 +371,13 @@ func (m *ListProjectMembersRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -386,11 +411,21 @@ func (m *AddProjectMemberRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
+	}
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -414,11 +449,21 @@ func (m *RemoveProjectMemberRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
+	}
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -442,11 +487,21 @@ func (m *UpdateProjectMemberRoleRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
+	}
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if m.Role == "" {
 		violations = append(violations, "role is required")
@@ -473,8 +528,13 @@ func (m *InviteProjectMemberRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
 	}
 	if m.Email == "" {
 		violations = append(violations, "email is required")
@@ -501,11 +561,21 @@ func (m *TransferProjectOwnershipRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
 	}
-	if m.NewOwnerId <= 0 {
-		violations = append(violations, "new_owner_id must be greater than 0")
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
+	}
+	if m.NewOwnerId == nil {
+		violations = append(violations, "new_owner_id is required")
+	}
+	if m.NewOwnerId != nil {
+		if *m.NewOwnerId <= 0 {
+			violations = append(violations, "new_owner_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -529,11 +599,21 @@ func (m *MoveProjectRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
 	}
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
+	}
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
+	}
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

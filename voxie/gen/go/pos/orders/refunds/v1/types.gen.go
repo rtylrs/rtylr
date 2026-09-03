@@ -7,9 +7,9 @@ import (
 )
 
 type ProcessRefundRequest struct {
-	OrderId int64   `json:"order_id,omitempty"`
-	Amount  float64 `json:"amount,omitempty"`
-	Reason  string  `json:"reason,omitempty"`
+	OrderId int64    `json:"order_id,omitempty"`
+	Amount  *float64 `json:"amount,omitempty"`
+	Reason  string   `json:"reason,omitempty"`
 }
 
 func (m *ProcessRefundRequest) MarshalJSON() ([]byte, error) {
@@ -54,7 +54,11 @@ func (x *ProcessRefundRequest) GetAmount() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Amount
+	if x.Amount == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Amount
 }
 
 func (x *ProcessRefundRequest) GetReason() string {

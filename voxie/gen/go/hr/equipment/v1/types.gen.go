@@ -604,7 +604,7 @@ func (x *ListEquipmentRequestsResponse) GetOffset() int32 {
 }
 
 type CreateEquipmentRequestRequest struct {
-	EmployeeId    int64   `json:"employee_id,omitempty"`
+	EmployeeId    *int64  `json:"employee_id,omitempty"`
 	EquipmentType string  `json:"equipment_type,omitempty"`
 	Description   string  `json:"description,omitempty"`
 	Urgency       string  `json:"urgency,omitempty"`
@@ -615,9 +615,12 @@ func (m *CreateEquipmentRequestRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateEquipmentRequestRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -625,17 +628,17 @@ func (m *CreateEquipmentRequestRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateEquipmentRequestRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -645,7 +648,11 @@ func (x *CreateEquipmentRequestRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CreateEquipmentRequestRequest) GetEquipmentType() string {

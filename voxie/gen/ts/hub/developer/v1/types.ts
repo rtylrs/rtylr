@@ -211,7 +211,7 @@ return violations;
 }
 
 export interface DeleteWebhookRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteWebhookRequest(v: any): DeleteWebhookRequest {
@@ -230,7 +230,6 @@ return out;
 export function validateDeleteWebhookRequest(v: DeleteWebhookRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -345,7 +344,7 @@ return violations;
 }
 
 export interface RevokeApiKeyRequest {
-id: string;
+id?: string;
 }
 
 export function decodeRevokeApiKeyRequest(v: any): RevokeApiKeyRequest {
@@ -364,7 +363,6 @@ return out;
 export function validateRevokeApiKeyRequest(v: RevokeApiKeyRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -393,7 +391,7 @@ return violations;
 }
 
 export interface UpdateWebhookRequest {
-id: string;
+id?: string;
 url: string;
 events?: (string)[];
 isActive?: boolean;
@@ -421,7 +419,6 @@ return out;
 export function validateUpdateWebhookRequest(v: UpdateWebhookRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
 if (!(v.url !== undefined && v.url !== null) || v.url === "") violations.push("url is required");

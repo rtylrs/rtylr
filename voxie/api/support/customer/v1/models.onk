@@ -12,7 +12,7 @@ message Customer {
   /// customers yet: matching on email alone is not reliable enough to assert
   /// the link, so the server sets it only on a confident match or when a human
   /// confirms one.
-  customer_id: int64? @nullable
+  customer_id: int64?
   total_tickets: int32
   last_ticket_at: string
   created_at: string
@@ -31,7 +31,7 @@ message ListCustomersResponse {
 }
 
 message GetCustomerRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetCustomerResponse {

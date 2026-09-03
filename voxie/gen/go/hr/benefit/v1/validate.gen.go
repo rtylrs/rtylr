@@ -85,6 +85,9 @@ func (m *EnrollInBenefitRequest) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.PlanId == nil {
+		violations = append(violations, "plan_id is required")
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

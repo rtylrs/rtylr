@@ -117,14 +117,29 @@ func (m *OpenSessionRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
+	if m.LocationId == nil {
+		violations = append(violations, "location_id is required")
 	}
-	if m.StaffId <= 0 {
-		violations = append(violations, "staff_id must be greater than 0")
+	if m.LocationId != nil {
+		if *m.LocationId <= 0 {
+			violations = append(violations, "location_id must be greater than 0")
+		}
 	}
-	if m.OpeningFloat < 0 {
-		violations = append(violations, "opening_float must be greater than or equal to 0")
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
+	if m.StaffId != nil {
+		if *m.StaffId <= 0 {
+			violations = append(violations, "staff_id must be greater than 0")
+		}
+	}
+	if m.OpeningFloat == nil {
+		violations = append(violations, "opening_float is required")
+	}
+	if m.OpeningFloat != nil {
+		if *m.OpeningFloat < 0 {
+			violations = append(violations, "opening_float must be greater than or equal to 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -148,8 +163,13 @@ func (m *CloseSessionRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ClosingFloat < 0 {
-		violations = append(violations, "closing_float must be greater than or equal to 0")
+	if m.ClosingFloat == nil {
+		violations = append(violations, "closing_float is required")
+	}
+	if m.ClosingFloat != nil {
+		if *m.ClosingFloat < 0 {
+			violations = append(violations, "closing_float must be greater than or equal to 0")
+		}
 	}
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")

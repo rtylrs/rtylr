@@ -883,8 +883,8 @@ func (x *UpsertWorkDayResponse) GetWorkDay() *WorkDay {
 }
 
 type ListWorkDaysRequest struct {
-	From       string `json:"from,omitempty"`
-	To         string `json:"to,omitempty"`
+	FromDate   string `json:"from_date,omitempty"`
+	ToDate     string `json:"to_date,omitempty"`
 	EmployeeId *int64 `json:"employee_id,omitempty"`
 	Page       int32  `json:"page,omitempty"`
 	Limit      int32  `json:"limit,omitempty"`
@@ -922,20 +922,20 @@ func (m *ListWorkDaysRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (x *ListWorkDaysRequest) GetFrom() string {
+func (x *ListWorkDaysRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *ListWorkDaysRequest) GetTo() string {
+func (x *ListWorkDaysRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 func (x *ListWorkDaysRequest) GetEmployeeId() int64 {
@@ -988,26 +988,26 @@ func (x *ListWorkDaysResponse) GetPagination() *common_pagination_v1.PaginationR
 }
 
 type ListTeamWorkDaysRequest struct {
-	From  string `json:"from,omitempty"`
-	To    string `json:"to,omitempty"`
-	Page  int32  `json:"page,omitempty"`
-	Limit int32  `json:"limit,omitempty"`
+	FromDate string `json:"from_date,omitempty"`
+	ToDate   string `json:"to_date,omitempty"`
+	Page     int32  `json:"page,omitempty"`
+	Limit    int32  `json:"limit,omitempty"`
 }
 
-func (x *ListTeamWorkDaysRequest) GetFrom() string {
+func (x *ListTeamWorkDaysRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *ListTeamWorkDaysRequest) GetTo() string {
+func (x *ListTeamWorkDaysRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 func (x *ListTeamWorkDaysRequest) GetPage() int32 {
@@ -1050,7 +1050,7 @@ func (x *ListTeamWorkDaysResponse) GetPagination() *common_pagination_v1.Paginat
 type CreateWorkDayLineRequest struct {
 	WorkDayId       int64   `json:"work_day_id,omitempty"`
 	ClientKey       string  `json:"client_key,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
+	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	Description     string  `json:"description,omitempty"`
 	ProjectId       *int64  `json:"project_id,omitempty"`
 	TaskId          *int64  `json:"task_id,omitempty"`
@@ -1148,7 +1148,11 @@ func (x *CreateWorkDayLineRequest) GetDurationMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *CreateWorkDayLineRequest) GetDescription() string {
@@ -1229,7 +1233,7 @@ func (x *CreateWorkDayLineResponse) GetLine() *WorkDayLine {
 
 type UpdateWorkDayLineRequest struct {
 	Id              int64   `json:"id,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
+	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	Description     string  `json:"description,omitempty"`
 	ProjectId       *int64  `json:"project_id,omitempty"`
 	TaskId          *int64  `json:"task_id,omitempty"`
@@ -1319,7 +1323,11 @@ func (x *UpdateWorkDayLineRequest) GetDurationMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *UpdateWorkDayLineRequest) GetDescription() string {

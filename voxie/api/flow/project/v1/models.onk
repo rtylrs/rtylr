@@ -96,7 +96,7 @@ message ListProjectsResponse {
 
 message CreateProjectRequest {
   /// workspace_id is the workspace id value for this contract.
-  workspace_id: int64 @required @gt(0)
+  workspace_id: int64? @required @gt(0)
   /// name is the name value for this contract.
   name: string @required
   /// description is the description value for this contract.
@@ -135,7 +135,7 @@ message UpdateProjectBody {
 
 message UpdateProjectRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable project fields bound from the HTTP payload.
   body: UpdateProjectBody
 }
@@ -147,7 +147,7 @@ message UpdateProjectResponse {
 
 message DeleteProjectRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteProjectResponse {
@@ -157,7 +157,7 @@ message DeleteProjectResponse {
 
 message ListProjectColumnsRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0) @query("project_id")
+  project_id: int64? @required @gt(0) @query("project_id")
   /// The current result page.
   page: int32 @query("page")
   /// The maximum number of records to return.
@@ -176,7 +176,7 @@ message ListProjectColumnsResponse {
 
 message CreateProjectColumnRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   /// workspace_id is the workspace id value for this contract.
   workspace_id: int64
   /// name is the column name.
@@ -194,7 +194,7 @@ message CreateProjectColumnResponse {
 
 message UpdateProjectColumnRequest {
   /// id is the column identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// name is the column name.
   name: string @required
   /// color is the column color.
@@ -210,7 +210,7 @@ message UpdateProjectColumnResponse {
 
 message DeleteProjectColumnRequest {
   /// id is the column identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteProjectColumnResponse {
@@ -220,7 +220,7 @@ message DeleteProjectColumnResponse {
 
 message MoveTaskToColumnRequest {
   /// task_id is the task identifier.
-  task_id: int64 @required @gt(0)
+  task_id: int64? @required @gt(0)
   /// column_id is the destination column identifier.
   column_id: int64
 }
@@ -232,7 +232,7 @@ message MoveTaskToColumnResponse {
 
 message ListProjectMembersRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0) @query("project_id")
+  project_id: int64? @required @gt(0) @query("project_id")
   /// The current result page.
   page: int32 @query("page")
   /// The maximum number of records to return.
@@ -251,9 +251,9 @@ message ListProjectMembersResponse {
 
 message AddProjectMemberRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   /// user_id identifies the user associated with this request.
-  user_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
   /// role is the role value for this contract.
   role: string
 }
@@ -265,9 +265,9 @@ message AddProjectMemberResponse {
 
 message RemoveProjectMemberRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0) @query("project_id")
+  project_id: int64? @required @gt(0) @query("project_id")
   /// user_id identifies the user associated with this request.
-  user_id: int64 @required @gt(0) @query("user_id")
+  user_id: int64? @required @gt(0) @query("user_id")
 }
 
 message RemoveProjectMemberResponse {
@@ -277,9 +277,9 @@ message RemoveProjectMemberResponse {
 
 message UpdateProjectMemberRoleRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   /// user_id identifies the user associated with this request.
-  user_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
   /// role is the role value for this contract.
   role: string @required
 }
@@ -291,7 +291,7 @@ message UpdateProjectMemberRoleResponse {
 
 message InviteProjectMemberRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   /// email is the invitee email address.
   email: string @required
   /// role is the role value for this contract.
@@ -305,9 +305,9 @@ message InviteProjectMemberResponse {
 
 message TransferProjectOwnershipRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   /// new_owner_id is the new owner user id.
-  new_owner_id: int64 @required @gt(0)
+  new_owner_id: int64? @required @gt(0)
 }
 
 message TransferProjectOwnershipResponse {
@@ -317,9 +317,9 @@ message TransferProjectOwnershipResponse {
 
 message MoveProjectRequest {
   /// project_id is the project id value for this contract.
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   /// workspace_id is the destination workspace id.
-  workspace_id: int64 @required @gt(0)
+  workspace_id: int64? @required @gt(0)
 }
 
 message MoveProjectResponse {

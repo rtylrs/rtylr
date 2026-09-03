@@ -10,6 +10,12 @@ message StaffUserPayload {
   apps: string[]
   role: string
   is_active: bool
+  /// Independent Dash role assignment.
+  dash_role: string?
+  /// Independent application role assignments.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Server-resolved effective access.
+  effective_access: hub.user.v1.EffectiveAccess?
 }
 
 message StaffUserWithGroups {
@@ -22,6 +28,12 @@ message StaffUserWithGroups {
   apps: string[]
   role: string
   is_active: bool
+  /// Independent Dash role assignment.
+  dash_role: string?
+  /// Independent application role assignments.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Server-resolved effective access.
+  effective_access: hub.user.v1.EffectiveAccess?
   /// Groups the staff user belongs to.
   groups: GroupSummary[]
 }
@@ -41,7 +53,7 @@ message ListTeamResponse {
 
 message GetMemberRequest {
   /// Identifies the member to fetch.
-  user_id: int64 @required @gt(0)
+  user_id: int64 @gt(0)
 }
 
 message GetMemberResponse {
@@ -49,7 +61,7 @@ message GetMemberResponse {
 }
 
 message RemoveMemberRequest {
-  user_id: int64 @required @gt(0)
+  user_id: int64 @gt(0)
 }
 
 message RemoveMemberResponse {

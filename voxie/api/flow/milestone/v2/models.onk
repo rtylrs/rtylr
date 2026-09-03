@@ -39,7 +39,7 @@ message ListMilestonesResponse {
 }
 
 message CreateMilestoneRequest {
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   name: string @required
   description: string
   target_date: string
@@ -50,7 +50,7 @@ message CreateMilestoneResponse {
 }
 
 message UpdateMilestoneRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   name: string
   description: string
   status: string

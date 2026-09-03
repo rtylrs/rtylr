@@ -33,7 +33,7 @@ message CreateJournalEntryResponse {
 }
 
 message GetJournalEntryRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetJournalEntryResponse {

@@ -81,8 +81,14 @@ func (m *MatchRequest) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.BankFeedId == nil {
+		violations = append(violations, "bank_feed_id is required")
+	}
 	if m.TargetType == "" {
 		violations = append(violations, "target_type is required")
+	}
+	if m.TargetId == nil {
+		violations = append(violations, "target_id is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

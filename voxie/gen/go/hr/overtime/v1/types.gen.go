@@ -7,7 +7,7 @@ import (
 )
 
 type OvertimeRequestPayload struct {
-	Id                   int64    `json:"id,omitempty"`
+	Id                   *int64   `json:"id,omitempty"`
 	OwnerId              int64    `json:"owner_id,omitempty"`
 	EmployeeId           int64    `json:"employee_id,omitempty"`
 	Date                 string   `json:"date,omitempty"`
@@ -25,18 +25,21 @@ func (m *OvertimeRequestPayload) MarshalJSON() ([]byte, error) {
 	type alias OvertimeRequestPayload
 	aux := struct {
 		*alias
-		Id         string  `json:"id,omitempty"`
 		OwnerId    string  `json:"owner_id,omitempty"`
 		EmployeeId string  `json:"employee_id,omitempty"`
 		CreatedAt  string  `json:"created_at,omitempty"`
 		UpdatedAt  string  `json:"updated_at,omitempty"`
+		Id         *string `json:"id,omitempty"`
 		ApprovedBy *string `json:"approved_by,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.Id != nil {
+		encodedId := strconv.FormatInt(*m.Id, 10)
+		aux.Id = &encodedId
+	}
 	if m.ApprovedBy != nil {
 		encodedApprovedBy := strconv.FormatInt(*m.ApprovedBy, 10)
 		aux.ApprovedBy = &encodedApprovedBy
@@ -48,22 +51,15 @@ func (m *OvertimeRequestPayload) UnmarshalJSON(data []byte) error {
 	type alias OvertimeRequestPayload
 	aux := struct {
 		*alias
-		Id         string  `json:"id,omitempty"`
 		OwnerId    string  `json:"owner_id,omitempty"`
 		EmployeeId string  `json:"employee_id,omitempty"`
 		CreatedAt  string  `json:"created_at,omitempty"`
 		UpdatedAt  string  `json:"updated_at,omitempty"`
+		Id         *string `json:"id,omitempty"`
 		ApprovedBy *string `json:"approved_by,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.Id != "" {
-		v, err := strconv.ParseInt(aux.Id, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.Id = v
 	}
 	if aux.OwnerId != "" {
 		v, err := strconv.ParseInt(aux.OwnerId, 10, 64)
@@ -93,6 +89,13 @@ func (m *OvertimeRequestPayload) UnmarshalJSON(data []byte) error {
 		}
 		m.UpdatedAt = v
 	}
+	if aux.Id != nil {
+		v, err := strconv.ParseInt(*aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = &v
+	}
 	if aux.ApprovedBy != nil {
 		v, err := strconv.ParseInt(*aux.ApprovedBy, 10, 64)
 		if err != nil {
@@ -108,7 +111,11 @@ func (x *OvertimeRequestPayload) GetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Id
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
 }
 
 func (x *OvertimeRequestPayload) GetOwnerId() int64 {
@@ -308,9 +315,9 @@ func (x *ListOvertimeRequestsResponse) GetOffset() int32 {
 }
 
 type CreateOvertimeRequestRequest struct {
-	EmployeeId          int64  `json:"employee_id,omitempty"`
+	EmployeeId          *int64 `json:"employee_id,omitempty"`
 	Date                string `json:"date,omitempty"`
-	PlannedExtraMinutes int32  `json:"planned_extra_minutes,omitempty"`
+	PlannedExtraMinutes *int32 `json:"planned_extra_minutes,omitempty"`
 	Reason              string `json:"reason,omitempty"`
 }
 
@@ -318,9 +325,12 @@ func (m *CreateOvertimeRequestRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateOvertimeRequestRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -328,17 +338,17 @@ func (m *CreateOvertimeRequestRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateOvertimeRequestRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -348,7 +358,11 @@ func (x *CreateOvertimeRequestRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CreateOvertimeRequestRequest) GetDate() string {
@@ -364,7 +378,11 @@ func (x *CreateOvertimeRequestRequest) GetPlannedExtraMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.PlannedExtraMinutes
+	if x.PlannedExtraMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.PlannedExtraMinutes
 }
 
 func (x *CreateOvertimeRequestRequest) GetReason() string {

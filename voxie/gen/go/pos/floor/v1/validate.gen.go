@@ -22,14 +22,24 @@ func (m *CreateFloorRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
+	}
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.SortOrder <= 0 {
-		violations = append(violations, "sort_order must be greater than 0")
+	if m.SortOrder == nil {
+		violations = append(violations, "sort_order is required")
+	}
+	if m.SortOrder != nil {
+		if *m.SortOrder <= 0 {
+			violations = append(violations, "sort_order must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -56,8 +66,13 @@ func (m *UpdateFloorBody) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.SortOrder <= 0 {
-		violations = append(violations, "sort_order must be greater than 0")
+	if m.SortOrder == nil {
+		violations = append(violations, "sort_order is required")
+	}
+	if m.SortOrder != nil {
+		if *m.SortOrder <= 0 {
+			violations = append(violations, "sort_order must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

@@ -133,7 +133,7 @@ return violations;
 }
 
 export interface DeleteTemplateRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteTemplateRequest(v: any): DeleteTemplateRequest {
@@ -152,7 +152,6 @@ return out;
 export function validateDeleteTemplateRequest(v: DeleteTemplateRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 return violations;
 }
 
@@ -267,7 +266,7 @@ return violations;
 }
 
 export interface UpdateTemplateRequest {
-id: string;
+id?: string;
 body?: UpdateTemplateBody;
 }
 
@@ -289,7 +288,6 @@ return out;
 export function validateUpdateTemplateRequest(v: UpdateTemplateRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTemplateBody(v.body).map((message) => "body: " + message));
 return violations;

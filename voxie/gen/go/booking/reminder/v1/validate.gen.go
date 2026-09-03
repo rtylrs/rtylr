@@ -22,8 +22,13 @@ func (m *CreateReminderRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.AppointmentId <= 0 {
-		violations = append(violations, "appointment_id must be greater than 0")
+	if m.AppointmentId == nil {
+		violations = append(violations, "appointment_id is required")
+	}
+	if m.AppointmentId != nil {
+		if *m.AppointmentId <= 0 {
+			violations = append(violations, "appointment_id must be greater than 0")
+		}
 	}
 	if m.Type == "" {
 		violations = append(violations, "type is required")

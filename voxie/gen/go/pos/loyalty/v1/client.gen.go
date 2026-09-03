@@ -248,7 +248,9 @@ func (c *LoyaltyServiceClient) GetLoyaltyBalance(ctx context.Context, req *GetLo
 	}
 	path := "/pos/loyalty/v1/balance"
 	query := url.Values{}
-	query.Set("customer_id", strconv.FormatInt(int64(req.CustomerId), 10))
+	if req.CustomerId != nil {
+		query.Set("customer_id", strconv.FormatInt(int64(*req.CustomerId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

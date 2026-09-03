@@ -297,7 +297,7 @@ func RegisterAccessServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter user_id: "+err.Error())
 				return
 			}
-			req.UserId = parsedUserId
+			req.UserId = &parsedUserId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -322,7 +322,7 @@ func RegisterAccessServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter location_id: "+err.Error())
 				return
 			}
-			req.LocationId = parsedLocationId
+			req.LocationId = &parsedLocationId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

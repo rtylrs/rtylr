@@ -110,7 +110,7 @@ message ListTimeEntriesResponse {
 
 message CreateTimeEntryRequest {
   /// Employee who logged the time.
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
   /// Associated project; absent if not project-based.
   project_id: int64?
   /// Associated task; absent if not task-level tracking.
@@ -120,7 +120,7 @@ message CreateTimeEntryRequest {
   /// Date the work was performed (ISO-8601 format).
   date: string @required
   /// Total duration of work in minutes.
-  duration_minutes: int32 @required @gt(0)
+  duration_minutes: int32? @required @gt(0)
   /// Clock-in time; absent if duration-only entry.
   start_time: string?
   /// Clock-out time; absent if duration-only entry.
@@ -158,7 +158,7 @@ message ListTimesheetsResponse {
 
 message SubmitTimesheetRequest {
   /// ID of the timesheet to submit for approval.
-  timesheet_id: int64 @required @gt(0)
+  timesheet_id: int64? @required @gt(0)
 }
 
 message SubmitTimesheetResponse {
@@ -175,7 +175,7 @@ message ApproveTimesheetBody {
 
 message ApproveTimesheetRequest {
   /// ID of the timesheet being reviewed.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries approval decision fields bound from the HTTP payload.
   body: ApproveTimesheetBody
 }
@@ -200,9 +200,9 @@ message MarkTimeEntriesInvoicedBody {
   /// entry_ids are the time entries this invoice bills. Every entry must
   /// belong to the caller's business; foreign or missing ids are counted as
   /// skipped rather than failing the batch.
-  entry_ids: int64[] @required @min_items(1)
+  entry_ids: int64[] @min_items(1)
   /// invoice_id is the finance invoice that settles them.
-  invoice_id: int64 @required @gt(0)
+  invoice_id: int64? @required @gt(0)
 }
 
 /// MarkTimeEntriesInvoicedResponse reports how the batch landed, so a caller

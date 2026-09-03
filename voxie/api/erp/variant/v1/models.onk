@@ -1,10 +1,10 @@
 package erp.variant.v1
 
 message Variant {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   owner_id: int64
   business_id: int64
-  product_id: int64 @required @gt(0)
+  product_id: int64? @required @gt(0)
   name: string @required
   sku: string
   barcode: string
@@ -18,7 +18,7 @@ message Variant {
 }
 
 message CreateVariantRequest {
-  product_id: int64 @required @gt(0)
+  product_id: int64? @required @gt(0)
   name: string @required
   sku: string
   barcode: string
@@ -35,7 +35,7 @@ message CreateVariantResponse {
 }
 
 message DeleteVariantRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteVariantResponse {
@@ -71,7 +71,7 @@ message UpdateVariantBody {
 }
 
 message UpdateVariantRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateVariantBody
 }
 

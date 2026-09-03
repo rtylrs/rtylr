@@ -315,7 +315,7 @@ return violations;
 }
 
 export interface UpdateShiftRequest {
-id: string;
+id?: string;
 locationId?: string;
 name?: string;
 startTime?: string;
@@ -364,7 +364,6 @@ return out;
 export function validateUpdateShiftRequest(v: UpdateShiftRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
@@ -404,7 +403,7 @@ return violations;
 }
 
 export interface DeleteShiftRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteShiftRequest(v: any): DeleteShiftRequest {
@@ -423,7 +422,6 @@ return out;
 export function validateDeleteShiftRequest(v: DeleteShiftRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -516,7 +514,7 @@ return violations;
 }
 
 export interface GetRosterRequest {
-locationId: string;
+locationId?: string;
 weekStart: string;
 }
 
@@ -538,7 +536,6 @@ return out;
 export function validateGetRosterRequest(v: GetRosterRequest): string[] {
 const violations: string[] = [];
 if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
-if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
 if (v.weekStart !== undefined && v.weekStart !== null && !(typeof v.weekStart === "string")) violations.push("week_start has invalid type");
 if (!(v.weekStart !== undefined && v.weekStart !== null) || v.weekStart === "") violations.push("week_start is required");
@@ -840,7 +837,7 @@ return violations;
 }
 
 export interface DeleteAvailabilityRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteAvailabilityRequest(v: any): DeleteAvailabilityRequest {
@@ -859,7 +856,6 @@ return out;
 export function validateDeleteAvailabilityRequest(v: DeleteAvailabilityRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

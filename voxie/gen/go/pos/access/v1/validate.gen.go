@@ -44,11 +44,21 @@ func (m *AssignLocationRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
 	}
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
+	}
+	if m.LocationId == nil {
+		violations = append(violations, "location_id is required")
+	}
+	if m.LocationId != nil {
+		if *m.LocationId <= 0 {
+			violations = append(violations, "location_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -72,8 +82,13 @@ func (m *GetLocationRosterRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
+	if m.LocationId == nil {
+		violations = append(violations, "location_id is required")
+	}
+	if m.LocationId != nil {
+		if *m.LocationId <= 0 {
+			violations = append(violations, "location_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -102,8 +117,13 @@ func (m *GetMemberLocationsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -159,8 +179,13 @@ func (m *RemoveLocationRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
+	}
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

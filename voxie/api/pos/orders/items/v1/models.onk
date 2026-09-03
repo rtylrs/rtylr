@@ -8,8 +8,8 @@ message UpdateOrderItemStatusBody {
 }
 
 message UpdateOrderItemStatusRequest {
-  order_id: int64 @required @gt(0)
-  item_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
+  item_id: int64 @gt(0)
   /// body carries the new order item status bound from the HTTP payload.
   body: UpdateOrderItemStatusBody
 }
@@ -21,8 +21,8 @@ message UpdateOrderItemStatusResponse {
 // ── Void Order Item ───────────────────────────────────────────────
 
 message VoidOrderItemRequest {
-  order_id: int64 @required @gt(0)
-  item_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
+  item_id: int64 @gt(0)
 }
 
 message VoidOrderItemResponse {

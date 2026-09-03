@@ -58,13 +58,13 @@ message CreateWorkScheduleRequest {
   /// Shift end time in HH:MM 24-hour format.
   end_time: string @required
   /// Duration of the daily break in minutes.
-  break_minutes: int32 @required @gte(0)
+  break_minutes: int32? @required @gte(0)
   /// Total contracted hours per week.
   contracted_hours_per_week: float64 @gte(0)
   /// Daily overtime threshold in minutes.
-  daily_ot_threshold_minutes: int32 @required @gte(0)
+  daily_ot_threshold_minutes: int32? @required @gte(0)
   /// Weekly overtime threshold in minutes.
-  weekly_ot_threshold_minutes: int32 @required @gte(0)
+  weekly_ot_threshold_minutes: int32? @required @gte(0)
 }
 
 message CreateWorkScheduleResponse {
@@ -93,7 +93,7 @@ message UpdateWorkScheduleBody {
 
 message UpdateWorkScheduleRequest {
   /// ID of the schedule to update.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable work schedule fields bound from the HTTP payload.
   body: UpdateWorkScheduleBody
 }

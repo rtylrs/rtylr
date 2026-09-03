@@ -182,8 +182,13 @@ func (m *ListWorkspaceMembersRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
+	}
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -217,11 +222,21 @@ func (m *AddWorkspaceMemberRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
+	}
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if m.Role == "" {
 		violations = append(violations, "role is required")
@@ -248,11 +263,21 @@ func (m *RemoveWorkspaceMemberRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
+	}
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -276,11 +301,21 @@ func (m *UpdateWorkspaceMemberRoleRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
+	}
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if m.Role == "" {
 		violations = append(violations, "role is required")

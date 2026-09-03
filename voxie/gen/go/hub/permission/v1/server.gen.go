@@ -238,6 +238,14 @@ type PermissionServiceServer interface {
 	CreateRole(ctx context.Context, req *CreateRoleRequest) (*CreateRoleResponse, error)
 	UpdateRole(ctx context.Context, req *UpdateRoleRequest) (*UpdateRoleResponse, error)
 	DeleteRole(ctx context.Context, req *DeleteRoleRequest) (*DeleteRoleResponse, error)
+	GetRole(ctx context.Context, req *GetRoleRequest) (*GetRoleResponse, error)
+	CloneRole(ctx context.Context, req *CloneRoleRequest) (*CloneRoleResponse, error)
+	ArchiveRole(ctx context.Context, req *ArchiveRoleRequest) (*ArchiveRoleResponse, error)
+	ListRoleAssignments(ctx context.Context, req *ListRoleAssignmentsRequest) (*ListRoleAssignmentsResponse, error)
+	AssignRole(ctx context.Context, req *AssignRoleRequest) (*AssignRoleResponse, error)
+	RemoveRoleAssignment(ctx context.Context, req *RemoveRoleAssignmentRequest) (*RemoveRoleAssignmentResponse, error)
+	PreviewPermissionImpact(ctx context.Context, req *PreviewPermissionImpactRequest) (*PreviewPermissionImpactResponse, error)
+	ListRoleAudit(ctx context.Context, req *ListRoleAuditRequest) (*ListRoleAuditResponse, error)
 	UpdatePermissionMatrix(ctx context.Context, req *UpdatePermissionMatrixRequest) (*UpdatePermissionMatrixResponse, error)
 }
 
@@ -291,6 +299,29 @@ func RegisterPermissionServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "PermissionService", Method: "getPermissions", HTTPMethod: "GET", Route: "/hub/permission/v1/permissions", AuthSchemes: nil}))
 	mux.Handle("GET /hub/permission/v1/roles", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListRolesRequest)
+		if values := r.URL.Query()["app_id"]; len(values) > 0 {
+			value := values[0]
+			appIdVal := value
+			req.AppId = &appIdVal
+		}
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = &parsedPage
+		}
+		if values := r.URL.Query()["page_size"]; len(values) > 0 {
+			value := values[0]
+			parsedPageSize, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
+				return
+			}
+			req.PageSize = &parsedPageSize
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -379,6 +410,251 @@ func RegisterPermissionServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "PermissionService", Method: "deleteRole", HTTPMethod: "DELETE", Route: "/hub/permission/v1/roles/{id}", AuthSchemes: nil}))
+	mux.Handle("GET /hub/permission/v1/roles/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(GetRoleRequest)
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.GetRole(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "getRole", HTTPMethod: "GET", Route: "/hub/permission/v1/roles/{id}", AuthSchemes: nil}))
+	mux.Handle("POST /hub/permission/v1/roles/{id}/clone", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(CloneRoleRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.CloneRole(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "cloneRole", HTTPMethod: "POST", Route: "/hub/permission/v1/roles/{id}/clone", AuthSchemes: nil}))
+	mux.Handle("POST /hub/permission/v1/roles/{id}/archive", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ArchiveRoleRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ArchiveRole(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "archiveRole", HTTPMethod: "POST", Route: "/hub/permission/v1/roles/{id}/archive", AuthSchemes: nil}))
+	mux.Handle("GET /hub/permission/v1/role-assignments", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListRoleAssignmentsRequest)
+		if values := r.URL.Query()["role_id"]; len(values) > 0 {
+			value := values[0]
+			parsedRoleId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter role_id: "+err.Error())
+				return
+			}
+			req.RoleId = &parsedRoleId
+		}
+		if values := r.URL.Query()["app_id"]; len(values) > 0 {
+			value := values[0]
+			appIdVal := value
+			req.AppId = &appIdVal
+		}
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = &parsedPage
+		}
+		if values := r.URL.Query()["page_size"]; len(values) > 0 {
+			value := values[0]
+			parsedPageSize, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
+				return
+			}
+			req.PageSize = &parsedPageSize
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListRoleAssignments(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "listRoleAssignments", HTTPMethod: "GET", Route: "/hub/permission/v1/role-assignments", AuthSchemes: nil}))
+	mux.Handle("POST /hub/permission/v1/role-assignments", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(AssignRoleRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.AssignRole(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "assignRole", HTTPMethod: "POST", Route: "/hub/permission/v1/role-assignments", AuthSchemes: nil}))
+	mux.Handle("DELETE /hub/permission/v1/role-assignments/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(RemoveRoleAssignmentRequest)
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.RemoveRoleAssignment(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "removeRoleAssignment", HTTPMethod: "DELETE", Route: "/hub/permission/v1/role-assignments/{id}", AuthSchemes: nil}))
+	mux.Handle("POST /hub/permission/v1/roles/{id}/preview", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(PreviewPermissionImpactRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.PreviewPermissionImpact(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "previewPermissionImpact", HTTPMethod: "POST", Route: "/hub/permission/v1/roles/{id}/preview", AuthSchemes: nil}))
+	mux.Handle("GET /hub/permission/v1/roles/audit", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListRoleAuditRequest)
+		if values := r.URL.Query()["role_id"]; len(values) > 0 {
+			value := values[0]
+			parsedRoleId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter role_id: "+err.Error())
+				return
+			}
+			req.RoleId = &parsedRoleId
+		}
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = &parsedPage
+		}
+		if values := r.URL.Query()["page_size"]; len(values) > 0 {
+			value := values[0]
+			parsedPageSize, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
+				return
+			}
+			req.PageSize = &parsedPageSize
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListRoleAudit(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "PermissionService", Method: "listRoleAudit", HTTPMethod: "GET", Route: "/hub/permission/v1/roles/audit", AuthSchemes: nil}))
 	mux.Handle("PATCH /hub/permission/v1/matrix", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdatePermissionMatrixRequest)
 		if r.Body != nil {

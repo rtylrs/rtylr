@@ -123,7 +123,7 @@ return violations;
 }
 
 export interface GetRecurringInvoiceRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetRecurringInvoiceRequest(v: any): GetRecurringInvoiceRequest {
@@ -142,7 +142,6 @@ return out;
 export function validateGetRecurringInvoiceRequest(v: GetRecurringInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -235,7 +234,7 @@ return violations;
 }
 
 export interface PauseRecurringInvoiceRequest {
-id: string;
+id?: string;
 }
 
 export function decodePauseRecurringInvoiceRequest(v: any): PauseRecurringInvoiceRequest {
@@ -254,7 +253,6 @@ return out;
 export function validatePauseRecurringInvoiceRequest(v: PauseRecurringInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -283,7 +281,7 @@ return violations;
 }
 
 export interface ResumeRecurringInvoiceRequest {
-id: string;
+id?: string;
 }
 
 export function decodeResumeRecurringInvoiceRequest(v: any): ResumeRecurringInvoiceRequest {
@@ -302,7 +300,6 @@ return out;
 export function validateResumeRecurringInvoiceRequest(v: ResumeRecurringInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -373,7 +370,7 @@ return violations;
 }
 
 export interface UpdateRecurringInvoiceRequest {
-id: string;
+id?: string;
 body?: UpdateRecurringInvoiceBody;
 }
 
@@ -395,7 +392,6 @@ return out;
 export function validateUpdateRecurringInvoiceRequest(v: UpdateRecurringInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateRecurringInvoiceBody(v.body).map((message) => "body: " + message));

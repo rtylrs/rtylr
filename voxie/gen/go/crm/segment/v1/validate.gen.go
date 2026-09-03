@@ -81,11 +81,21 @@ func (m *GetSegmentCustomersRequest) Validate() error {
 	if m.SegmentId <= 0 {
 		violations = append(violations, "segment_id must be greater than 0")
 	}
-	if m.Page <= 0 {
-		violations = append(violations, "page must be greater than 0")
+	if m.Page == nil {
+		violations = append(violations, "page is required")
 	}
-	if m.PageSize <= 0 {
-		violations = append(violations, "page_size must be greater than 0")
+	if m.Page != nil {
+		if *m.Page <= 0 {
+			violations = append(violations, "page must be greater than 0")
+		}
+	}
+	if m.PageSize == nil {
+		violations = append(violations, "page_size is required")
+	}
+	if m.PageSize != nil {
+		if *m.PageSize <= 0 {
+			violations = append(violations, "page_size must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

@@ -324,7 +324,7 @@ return violations;
 }
 
 export interface GetStaffRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetStaffRequest(v: any): GetStaffRequest {
@@ -343,7 +343,6 @@ return out;
 export function validateGetStaffRequest(v: GetStaffRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -484,7 +483,7 @@ return violations;
 }
 
 export interface UpdateStaffRequest {
-id: string;
+id?: string;
 body?: UpdateStaffBody;
 }
 
@@ -506,7 +505,6 @@ return out;
 export function validateUpdateStaffRequest(v: UpdateStaffRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateStaffBody(v.body).map((message) => "body: " + message));
@@ -537,7 +535,7 @@ return violations;
 }
 
 export interface DeleteStaffRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteStaffRequest(v: any): DeleteStaffRequest {
@@ -556,7 +554,6 @@ return out;
 export function validateDeleteStaffRequest(v: DeleteStaffRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

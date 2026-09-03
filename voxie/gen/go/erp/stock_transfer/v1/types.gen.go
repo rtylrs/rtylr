@@ -247,17 +247,20 @@ func (x *StockTransfer) GetUpdatedAt() string {
 }
 
 type CreateStockTransferItemRequest struct {
-	ProductId int64   `json:"product_id,omitempty"`
-	Quantity  float64 `json:"quantity,omitempty"`
+	ProductId *int64   `json:"product_id,omitempty"`
+	Quantity  *float64 `json:"quantity,omitempty"`
 }
 
 func (m *CreateStockTransferItemRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateStockTransferItemRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
 	return json.Marshal(aux)
 }
 
@@ -265,17 +268,17 @@ func (m *CreateStockTransferItemRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateStockTransferItemRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
 	return nil
 }
@@ -285,7 +288,11 @@ func (x *CreateStockTransferItemRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *CreateStockTransferItemRequest) GetQuantity() float64 {
@@ -293,12 +300,16 @@ func (x *CreateStockTransferItemRequest) GetQuantity() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Quantity
+	if x.Quantity == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Quantity
 }
 
 type CreateStockTransferRequest struct {
-	FromWarehouseId int64                             `json:"from_warehouse_id,omitempty"`
-	ToWarehouseId   int64                             `json:"to_warehouse_id,omitempty"`
+	FromWarehouseId *int64                            `json:"from_warehouse_id,omitempty"`
+	ToWarehouseId   *int64                            `json:"to_warehouse_id,omitempty"`
 	Notes           string                            `json:"notes,omitempty"`
 	Items           []*CreateStockTransferItemRequest `json:"items,omitempty"`
 }
@@ -307,11 +318,17 @@ func (m *CreateStockTransferRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateStockTransferRequest
 	aux := struct {
 		*alias
-		FromWarehouseId string `json:"from_warehouse_id,omitempty"`
-		ToWarehouseId   string `json:"to_warehouse_id,omitempty"`
+		FromWarehouseId *string `json:"from_warehouse_id,omitempty"`
+		ToWarehouseId   *string `json:"to_warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.FromWarehouseId = strconv.FormatInt(m.FromWarehouseId, 10)
-	aux.ToWarehouseId = strconv.FormatInt(m.ToWarehouseId, 10)
+	if m.FromWarehouseId != nil {
+		encodedFromWarehouseId := strconv.FormatInt(*m.FromWarehouseId, 10)
+		aux.FromWarehouseId = &encodedFromWarehouseId
+	}
+	if m.ToWarehouseId != nil {
+		encodedToWarehouseId := strconv.FormatInt(*m.ToWarehouseId, 10)
+		aux.ToWarehouseId = &encodedToWarehouseId
+	}
 	return json.Marshal(aux)
 }
 
@@ -319,25 +336,25 @@ func (m *CreateStockTransferRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateStockTransferRequest
 	aux := struct {
 		*alias
-		FromWarehouseId string `json:"from_warehouse_id,omitempty"`
-		ToWarehouseId   string `json:"to_warehouse_id,omitempty"`
+		FromWarehouseId *string `json:"from_warehouse_id,omitempty"`
+		ToWarehouseId   *string `json:"to_warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.FromWarehouseId != "" {
-		v, err := strconv.ParseInt(aux.FromWarehouseId, 10, 64)
+	if aux.FromWarehouseId != nil {
+		v, err := strconv.ParseInt(*aux.FromWarehouseId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.FromWarehouseId = v
+		m.FromWarehouseId = &v
 	}
-	if aux.ToWarehouseId != "" {
-		v, err := strconv.ParseInt(aux.ToWarehouseId, 10, 64)
+	if aux.ToWarehouseId != nil {
+		v, err := strconv.ParseInt(*aux.ToWarehouseId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ToWarehouseId = v
+		m.ToWarehouseId = &v
 	}
 	return nil
 }
@@ -347,7 +364,11 @@ func (x *CreateStockTransferRequest) GetFromWarehouseId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.FromWarehouseId
+	if x.FromWarehouseId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.FromWarehouseId
 }
 
 func (x *CreateStockTransferRequest) GetToWarehouseId() int64 {
@@ -355,7 +376,11 @@ func (x *CreateStockTransferRequest) GetToWarehouseId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ToWarehouseId
+	if x.ToWarehouseId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ToWarehouseId
 }
 
 func (x *CreateStockTransferRequest) GetNotes() string {

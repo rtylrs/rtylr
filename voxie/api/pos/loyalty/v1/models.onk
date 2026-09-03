@@ -32,9 +32,9 @@ message LoyaltyTransaction {
 }
 
 message EarnPointsRequest {
-  customer_id: int64 @required @gt(0)
-  order_id: int64 @required @gt(0)
-  points: int32 @required @gt(0)
+  customer_id: int64? @required @gt(0)
+  order_id: int64? @required @gt(0)
+  points: int32? @required @gt(0)
 }
 
 message EarnPointsResponse {
@@ -43,7 +43,7 @@ message EarnPointsResponse {
 }
 
 message GetLoyaltyBalanceRequest {
-  customer_id: int64 @required @gt(0) @query("customer_id")
+  customer_id: int64? @required @gt(0) @query("customer_id")
 }
 
 message GetLoyaltyBalanceResponse {
@@ -66,8 +66,8 @@ message ListLoyaltyTransactionsResponse {
 }
 
 message RedeemPointsRequest {
-  customer_id: int64 @required @gt(0)
-  points: int32 @required @gt(0)
+  customer_id: int64? @required @gt(0)
+  points: int32? @required @gt(0)
 }
 
 message RedeemPointsResponse {
@@ -77,9 +77,9 @@ message RedeemPointsResponse {
 
 message UpdateLoyaltyConfigRequest {
   is_enabled: bool
-  points_per_dollar: float64 @required @gt(0)
+  points_per_dollar: float64? @required @gt(0)
   redemption_rate: float64 @gte(0)
-  min_redeem_points: int32 @required @gt(0)
+  min_redeem_points: int32? @required @gt(0)
 }
 
 message UpdateLoyaltyConfigResponse {

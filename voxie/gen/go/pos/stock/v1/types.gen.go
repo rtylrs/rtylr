@@ -408,24 +408,33 @@ func (x *BranchInventory) GetLowStockThreshold() float64 {
 }
 
 type AdjustStockRequest struct {
-	BranchId   int64   `json:"branch_id,omitempty"`
-	ProductId  int64   `json:"product_id,omitempty"`
-	Quantity   float64 `json:"quantity,omitempty"`
-	Note       string  `json:"note,omitempty"`
-	EmployeeId int64   `json:"employee_id,omitempty"`
+	BranchId   *int64   `json:"branch_id,omitempty"`
+	ProductId  *int64   `json:"product_id,omitempty"`
+	Quantity   *float64 `json:"quantity,omitempty"`
+	Note       string   `json:"note,omitempty"`
+	EmployeeId *int64   `json:"employee_id,omitempty"`
 }
 
 func (m *AdjustStockRequest) MarshalJSON() ([]byte, error) {
 	type alias AdjustStockRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -433,33 +442,33 @@ func (m *AdjustStockRequest) UnmarshalJSON(data []byte) error {
 	type alias AdjustStockRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -469,7 +478,11 @@ func (x *AdjustStockRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *AdjustStockRequest) GetProductId() int64 {
@@ -477,7 +490,11 @@ func (x *AdjustStockRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *AdjustStockRequest) GetQuantity() float64 {
@@ -485,7 +502,11 @@ func (x *AdjustStockRequest) GetQuantity() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Quantity
+	if x.Quantity == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Quantity
 }
 
 func (x *AdjustStockRequest) GetNote() string {
@@ -501,7 +522,11 @@ func (x *AdjustStockRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 type AdjustStockResponse struct {
@@ -680,16 +705,19 @@ func (x *ListStockMovementsResponse) GetMovements() []*StockMovement {
 }
 
 type LowStockRequest struct {
-	BranchId int64 `json:"branch_id,omitempty"`
+	BranchId *int64 `json:"branch_id,omitempty"`
 }
 
 func (m *LowStockRequest) MarshalJSON() ([]byte, error) {
 	type alias LowStockRequest
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
 	return json.Marshal(aux)
 }
 
@@ -697,17 +725,17 @@ func (m *LowStockRequest) UnmarshalJSON(data []byte) error {
 	type alias LowStockRequest
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
 	return nil
 }
@@ -717,7 +745,11 @@ func (x *LowStockRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 type LowStockResponse struct {
@@ -733,24 +765,33 @@ func (x *LowStockResponse) GetItems() []*BranchInventory {
 }
 
 type ReceiveStockRequest struct {
-	BranchId   int64   `json:"branch_id,omitempty"`
-	ProductId  int64   `json:"product_id,omitempty"`
-	Quantity   float64 `json:"quantity,omitempty"`
-	Note       string  `json:"note,omitempty"`
-	EmployeeId int64   `json:"employee_id,omitempty"`
+	BranchId   *int64   `json:"branch_id,omitempty"`
+	ProductId  *int64   `json:"product_id,omitempty"`
+	Quantity   *float64 `json:"quantity,omitempty"`
+	Note       string   `json:"note,omitempty"`
+	EmployeeId *int64   `json:"employee_id,omitempty"`
 }
 
 func (m *ReceiveStockRequest) MarshalJSON() ([]byte, error) {
 	type alias ReceiveStockRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -758,33 +799,33 @@ func (m *ReceiveStockRequest) UnmarshalJSON(data []byte) error {
 	type alias ReceiveStockRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -794,7 +835,11 @@ func (x *ReceiveStockRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *ReceiveStockRequest) GetProductId() int64 {
@@ -802,7 +847,11 @@ func (x *ReceiveStockRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *ReceiveStockRequest) GetQuantity() float64 {
@@ -810,7 +859,11 @@ func (x *ReceiveStockRequest) GetQuantity() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Quantity
+	if x.Quantity == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Quantity
 }
 
 func (x *ReceiveStockRequest) GetNote() string {
@@ -826,7 +879,11 @@ func (x *ReceiveStockRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 type ReceiveStockResponse struct {
@@ -880,27 +937,39 @@ func (x *ReceiveStockResponse) GetMessage() string {
 }
 
 type TransferStockRequest struct {
-	FromBranchId int64   `json:"from_branch_id,omitempty"`
-	ToBranchId   int64   `json:"to_branch_id,omitempty"`
-	ProductId    int64   `json:"product_id,omitempty"`
-	Quantity     float64 `json:"quantity,omitempty"`
-	Note         string  `json:"note,omitempty"`
-	EmployeeId   int64   `json:"employee_id,omitempty"`
+	FromBranchId *int64   `json:"from_branch_id,omitempty"`
+	ToBranchId   *int64   `json:"to_branch_id,omitempty"`
+	ProductId    *int64   `json:"product_id,omitempty"`
+	Quantity     *float64 `json:"quantity,omitempty"`
+	Note         string   `json:"note,omitempty"`
+	EmployeeId   *int64   `json:"employee_id,omitempty"`
 }
 
 func (m *TransferStockRequest) MarshalJSON() ([]byte, error) {
 	type alias TransferStockRequest
 	aux := struct {
 		*alias
-		FromBranchId string `json:"from_branch_id,omitempty"`
-		ToBranchId   string `json:"to_branch_id,omitempty"`
-		ProductId    string `json:"product_id,omitempty"`
-		EmployeeId   string `json:"employee_id,omitempty"`
+		FromBranchId *string `json:"from_branch_id,omitempty"`
+		ToBranchId   *string `json:"to_branch_id,omitempty"`
+		ProductId    *string `json:"product_id,omitempty"`
+		EmployeeId   *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.FromBranchId = strconv.FormatInt(m.FromBranchId, 10)
-	aux.ToBranchId = strconv.FormatInt(m.ToBranchId, 10)
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.FromBranchId != nil {
+		encodedFromBranchId := strconv.FormatInt(*m.FromBranchId, 10)
+		aux.FromBranchId = &encodedFromBranchId
+	}
+	if m.ToBranchId != nil {
+		encodedToBranchId := strconv.FormatInt(*m.ToBranchId, 10)
+		aux.ToBranchId = &encodedToBranchId
+	}
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -908,41 +977,41 @@ func (m *TransferStockRequest) UnmarshalJSON(data []byte) error {
 	type alias TransferStockRequest
 	aux := struct {
 		*alias
-		FromBranchId string `json:"from_branch_id,omitempty"`
-		ToBranchId   string `json:"to_branch_id,omitempty"`
-		ProductId    string `json:"product_id,omitempty"`
-		EmployeeId   string `json:"employee_id,omitempty"`
+		FromBranchId *string `json:"from_branch_id,omitempty"`
+		ToBranchId   *string `json:"to_branch_id,omitempty"`
+		ProductId    *string `json:"product_id,omitempty"`
+		EmployeeId   *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.FromBranchId != "" {
-		v, err := strconv.ParseInt(aux.FromBranchId, 10, 64)
+	if aux.FromBranchId != nil {
+		v, err := strconv.ParseInt(*aux.FromBranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.FromBranchId = v
+		m.FromBranchId = &v
 	}
-	if aux.ToBranchId != "" {
-		v, err := strconv.ParseInt(aux.ToBranchId, 10, 64)
+	if aux.ToBranchId != nil {
+		v, err := strconv.ParseInt(*aux.ToBranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ToBranchId = v
+		m.ToBranchId = &v
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -952,7 +1021,11 @@ func (x *TransferStockRequest) GetFromBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.FromBranchId
+	if x.FromBranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.FromBranchId
 }
 
 func (x *TransferStockRequest) GetToBranchId() int64 {
@@ -960,7 +1033,11 @@ func (x *TransferStockRequest) GetToBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ToBranchId
+	if x.ToBranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ToBranchId
 }
 
 func (x *TransferStockRequest) GetProductId() int64 {
@@ -968,7 +1045,11 @@ func (x *TransferStockRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *TransferStockRequest) GetQuantity() float64 {
@@ -976,7 +1057,11 @@ func (x *TransferStockRequest) GetQuantity() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Quantity
+	if x.Quantity == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Quantity
 }
 
 func (x *TransferStockRequest) GetNote() string {
@@ -992,7 +1077,11 @@ func (x *TransferStockRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 type TransferStockResponse struct {
@@ -1046,24 +1135,33 @@ func (x *TransferStockResponse) GetMessage() string {
 }
 
 type WasteStockRequest struct {
-	BranchId   int64   `json:"branch_id,omitempty"`
-	ProductId  int64   `json:"product_id,omitempty"`
-	Quantity   float64 `json:"quantity,omitempty"`
-	Note       string  `json:"note,omitempty"`
-	EmployeeId int64   `json:"employee_id,omitempty"`
+	BranchId   *int64   `json:"branch_id,omitempty"`
+	ProductId  *int64   `json:"product_id,omitempty"`
+	Quantity   *float64 `json:"quantity,omitempty"`
+	Note       string   `json:"note,omitempty"`
+	EmployeeId *int64   `json:"employee_id,omitempty"`
 }
 
 func (m *WasteStockRequest) MarshalJSON() ([]byte, error) {
 	type alias WasteStockRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1071,33 +1169,33 @@ func (m *WasteStockRequest) UnmarshalJSON(data []byte) error {
 	type alias WasteStockRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -1107,7 +1205,11 @@ func (x *WasteStockRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *WasteStockRequest) GetProductId() int64 {
@@ -1115,7 +1217,11 @@ func (x *WasteStockRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *WasteStockRequest) GetQuantity() float64 {
@@ -1123,7 +1229,11 @@ func (x *WasteStockRequest) GetQuantity() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Quantity
+	if x.Quantity == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Quantity
 }
 
 func (x *WasteStockRequest) GetNote() string {
@@ -1139,7 +1249,11 @@ func (x *WasteStockRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 type WasteStockResponse struct {

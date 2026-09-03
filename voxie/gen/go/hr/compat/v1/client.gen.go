@@ -290,11 +290,11 @@ func (c *CompatibilityServiceClient) GetShifts(ctx context.Context, req *QueryRe
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -397,11 +397,11 @@ func (c *CompatibilityServiceClient) GetAvailability(ctx context.Context, req *Q
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -621,11 +621,11 @@ func (c *CompatibilityServiceClient) GetRoster(ctx context.Context, req *QueryRe
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -806,11 +806,11 @@ func (c *CompatibilityServiceClient) GetTimesheets(ctx context.Context, req *Que
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -1110,11 +1110,11 @@ func (c *CompatibilityServiceClient) GetTraining(ctx context.Context, req *Query
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -1256,11 +1256,11 @@ func (c *CompatibilityServiceClient) GetDocuments(ctx context.Context, req *Quer
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -1363,11 +1363,11 @@ func (c *CompatibilityServiceClient) GetExpiringDocuments(ctx context.Context, r
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -1548,11 +1548,11 @@ func (c *CompatibilityServiceClient) GetBenefits(ctx context.Context, req *Query
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -1655,11 +1655,11 @@ func (c *CompatibilityServiceClient) GetStaff(ctx context.Context, req *QueryReq
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -2149,11 +2149,11 @@ func (c *CompatibilityServiceClient) GetEmployees(ctx context.Context, req *Quer
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -2413,11 +2413,11 @@ func (c *CompatibilityServiceClient) GetAttendance(ctx context.Context, req *Que
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -2869,11 +2869,11 @@ func (c *CompatibilityServiceClient) GetOnboardingChecklists(ctx context.Context
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -2976,11 +2976,11 @@ func (c *CompatibilityServiceClient) GetOnboardingSummary(ctx context.Context, r
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -3123,11 +3123,11 @@ func (c *CompatibilityServiceClient) GetReviewCycles(ctx context.Context, req *Q
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -3348,11 +3348,11 @@ func (c *CompatibilityServiceClient) GetGoals(ctx context.Context, req *QueryReq
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -3534,11 +3534,11 @@ func (c *CompatibilityServiceClient) GetPerformanceReviews(ctx context.Context, 
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -3721,11 +3721,11 @@ func (c *CompatibilityServiceClient) GetLeaveCalendar(ctx context.Context, req *
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -4099,11 +4099,11 @@ func (c *CompatibilityServiceClient) GetPayrollRuns(ctx context.Context, req *Qu
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -4245,11 +4245,11 @@ func (c *CompatibilityServiceClient) GetMyPayrollRuns(ctx context.Context, req *
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)
@@ -4470,11 +4470,11 @@ func (c *CompatibilityServiceClient) GetTimeEntries(ctx context.Context, req *Qu
 	if req.EndDate != nil {
 		query.Set("end_date", *req.EndDate)
 	}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if req.EmployeeId != nil {
 		query.Set("employee_id", *req.EmployeeId)

@@ -49,11 +49,18 @@ func (m *UpdateSettingsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.SlaHours <= 0 {
-		violations = append(violations, "sla_hours must be greater than 0")
+	if m.SlaHours == nil {
+		violations = append(violations, "sla_hours is required")
 	}
-	if m.SlaHours > 1000 {
-		violations = append(violations, "sla_hours must be less than or equal to 1000")
+	if m.SlaHours != nil {
+		if *m.SlaHours <= 0 {
+			violations = append(violations, "sla_hours must be greater than 0")
+		}
+	}
+	if m.SlaHours != nil {
+		if *m.SlaHours > 1000 {
+			violations = append(violations, "sla_hours must be less than or equal to 1000")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

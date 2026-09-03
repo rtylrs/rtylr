@@ -33,7 +33,7 @@ message CreateBankAccountRequest {
   /// last_four is the last four value for this contract.
   last_four: string @required
   /// balance is the balance value for this contract.
-  balance: float64 @required @gte(0)
+  balance: float64? @required @gte(0)
   /// currency is the currency value for this contract.
   currency: string @required
   /// is_primary is the is primary value for this contract.
@@ -47,7 +47,7 @@ message CreateBankAccountResponse {
 
 message GetBankAccountRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetBankAccountResponse {

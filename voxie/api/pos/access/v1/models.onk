@@ -37,8 +37,8 @@ message MemberLocationEntry {
 
 message AssignLocationRequest {
   /// user_id identifies the user associated with this request.
-  user_id: int64 @required @gt(0)
-  location_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
+  location_id: int64? @required @gt(0)
   can_manage_pos_users: bool
   can_manage_terminals: bool
   can_view_reports: bool
@@ -49,7 +49,7 @@ message AssignLocationResponse {
 }
 
 message GetLocationRosterRequest {
-  location_id: int64 @required @gt(0) @query("location_id")
+  location_id: int64? @required @gt(0) @query("location_id")
 }
 
 message GetLocationRosterResponse {
@@ -57,7 +57,7 @@ message GetLocationRosterResponse {
 }
 
 message GetMemberLocationsRequest {
-  user_id: int64 @required @gt(0) @query("user_id")
+  user_id: int64? @required @gt(0) @query("user_id")
 }
 
 message GetMemberLocationsResponse {
@@ -71,7 +71,7 @@ message GetMyLocationsResponse {
 }
 
 message RemoveLocationRequest {
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
 }
 
 message RemoveLocationResponse {

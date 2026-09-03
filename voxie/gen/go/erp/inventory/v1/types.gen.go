@@ -215,19 +215,22 @@ func (x *ValuationItem) GetTotalCost() float64 {
 }
 
 type AdjustInventoryRequest struct {
-	ProductId int64   `json:"product_id,omitempty"`
-	Change    float64 `json:"change,omitempty"`
-	Type      string  `json:"type,omitempty"`
-	Notes     string  `json:"notes,omitempty"`
+	ProductId *int64   `json:"product_id,omitempty"`
+	Change    *float64 `json:"change,omitempty"`
+	Type      string   `json:"type,omitempty"`
+	Notes     string   `json:"notes,omitempty"`
 }
 
 func (m *AdjustInventoryRequest) MarshalJSON() ([]byte, error) {
 	type alias AdjustInventoryRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
 	return json.Marshal(aux)
 }
 
@@ -235,17 +238,17 @@ func (m *AdjustInventoryRequest) UnmarshalJSON(data []byte) error {
 	type alias AdjustInventoryRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
 	return nil
 }
@@ -255,7 +258,11 @@ func (x *AdjustInventoryRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *AdjustInventoryRequest) GetChange() float64 {
@@ -263,7 +270,11 @@ func (x *AdjustInventoryRequest) GetChange() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Change
+	if x.Change == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Change
 }
 
 func (x *AdjustInventoryRequest) GetType() string {

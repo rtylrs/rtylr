@@ -52,11 +52,11 @@ func (c *CompatibilityServiceClient) GetCashFlow(ctx context.Context, req *GetCa
 	}
 	path := "/insights/financial/cash-flow"
 	query := url.Values{}
-	if req.From != nil {
-		query.Set("from", *req.From)
+	if req.FromDate != nil {
+		query.Set("from", *req.FromDate)
 	}
-	if req.To != nil {
-		query.Set("to", *req.To)
+	if req.ToDate != nil {
+		query.Set("to", *req.ToDate)
 	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

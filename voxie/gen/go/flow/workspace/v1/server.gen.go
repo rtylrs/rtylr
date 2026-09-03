@@ -400,7 +400,7 @@ func RegisterWorkspaceServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter workspace_id: "+err.Error())
 				return
 			}
-			req.WorkspaceId = parsedWorkspaceId
+			req.WorkspaceId = &parsedWorkspaceId
 		}
 		if values := r.URL.Query()["page"]; len(values) > 0 {
 			value := values[0]
@@ -474,7 +474,7 @@ func RegisterWorkspaceServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter workspace_id: "+err.Error())
 				return
 			}
-			req.WorkspaceId = parsedWorkspaceId
+			req.WorkspaceId = &parsedWorkspaceId
 		}
 		if values := r.URL.Query()["user_id"]; len(values) > 0 {
 			value := values[0]
@@ -483,7 +483,7 @@ func RegisterWorkspaceServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter user_id: "+err.Error())
 				return
 			}
-			req.UserId = parsedUserId
+			req.UserId = &parsedUserId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

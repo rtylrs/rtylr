@@ -154,7 +154,7 @@ func (x *ListTerminalsResponse) GetTerminals() []*Terminal {
 }
 
 type CreateTerminalRequest struct {
-	BranchId int64  `json:"branch_id,omitempty"`
+	BranchId *int64 `json:"branch_id,omitempty"`
 	Name     string `json:"name,omitempty"`
 	DeviceId string `json:"device_id,omitempty"`
 }
@@ -163,9 +163,12 @@ func (m *CreateTerminalRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateTerminalRequest
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
 	return json.Marshal(aux)
 }
 
@@ -173,17 +176,17 @@ func (m *CreateTerminalRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateTerminalRequest
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
 	return nil
 }
@@ -193,7 +196,11 @@ func (x *CreateTerminalRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *CreateTerminalRequest) GetName() string {
@@ -263,7 +270,7 @@ func (x *CreateTerminalResponse) GetMessage() string {
 }
 
 type UpdateTerminalBody struct {
-	BranchId int64  `json:"branch_id,omitempty"`
+	BranchId *int64 `json:"branch_id,omitempty"`
 	Name     string `json:"name,omitempty"`
 	DeviceId string `json:"device_id,omitempty"`
 	IsActive bool   `json:"is_active,omitempty"`
@@ -273,9 +280,12 @@ func (m *UpdateTerminalBody) MarshalJSON() ([]byte, error) {
 	type alias UpdateTerminalBody
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
 	return json.Marshal(aux)
 }
 
@@ -283,17 +293,17 @@ func (m *UpdateTerminalBody) UnmarshalJSON(data []byte) error {
 	type alias UpdateTerminalBody
 	aux := struct {
 		*alias
-		BranchId string `json:"branch_id,omitempty"`
+		BranchId *string `json:"branch_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
 	return nil
 }
@@ -303,7 +313,11 @@ func (x *UpdateTerminalBody) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *UpdateTerminalBody) GetName() string {
@@ -393,16 +407,19 @@ func (x *UpdateTerminalResponse) GetMessage() string {
 }
 
 type HeartbeatTerminalRequest struct {
-	TerminalId int64 `json:"terminal_id,omitempty"`
+	TerminalId *int64 `json:"terminal_id,omitempty"`
 }
 
 func (m *HeartbeatTerminalRequest) MarshalJSON() ([]byte, error) {
 	type alias HeartbeatTerminalRequest
 	aux := struct {
 		*alias
-		TerminalId string `json:"terminal_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.TerminalId = strconv.FormatInt(m.TerminalId, 10)
+	if m.TerminalId != nil {
+		encodedTerminalId := strconv.FormatInt(*m.TerminalId, 10)
+		aux.TerminalId = &encodedTerminalId
+	}
 	return json.Marshal(aux)
 }
 
@@ -410,17 +427,17 @@ func (m *HeartbeatTerminalRequest) UnmarshalJSON(data []byte) error {
 	type alias HeartbeatTerminalRequest
 	aux := struct {
 		*alias
-		TerminalId string `json:"terminal_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.TerminalId != "" {
-		v, err := strconv.ParseInt(aux.TerminalId, 10, 64)
+	if aux.TerminalId != nil {
+		v, err := strconv.ParseInt(*aux.TerminalId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TerminalId = v
+		m.TerminalId = &v
 	}
 	return nil
 }
@@ -430,7 +447,11 @@ func (x *HeartbeatTerminalRequest) GetTerminalId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TerminalId
+	if x.TerminalId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TerminalId
 }
 
 type HeartbeatTerminalResponse struct {

@@ -171,7 +171,7 @@ return violations;
 }
 
 export interface DeleteAppointmentRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteAppointmentRequest(v: any): DeleteAppointmentRequest {
@@ -190,7 +190,6 @@ return out;
 export function validateDeleteAppointmentRequest(v: DeleteAppointmentRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -305,7 +304,7 @@ return violations;
 }
 
 export interface UpdateAppointmentRequest {
-id: string;
+id?: string;
 serviceId?: string;
 resourceId?: string;
 staffId?: string;
@@ -354,7 +353,6 @@ return out;
 export function validateUpdateAppointmentRequest(v: UpdateAppointmentRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
 if (v.resourceId !== undefined && v.resourceId !== null && !(typeof v.resourceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.resourceId))) violations.push("resource_id has invalid type");

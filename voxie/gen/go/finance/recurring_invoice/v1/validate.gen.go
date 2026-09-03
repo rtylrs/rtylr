@@ -26,8 +26,13 @@ func (m *CreateRecurringInvoiceRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.TemplateInvoiceId <= 0 {
-		violations = append(violations, "template_invoice_id must be greater than 0")
+	if m.TemplateInvoiceId == nil {
+		violations = append(violations, "template_invoice_id is required")
+	}
+	if m.TemplateInvoiceId != nil {
+		if *m.TemplateInvoiceId <= 0 {
+			violations = append(violations, "template_invoice_id must be greater than 0")
+		}
 	}
 	if m.Frequency == "" {
 		violations = append(violations, "frequency is required")

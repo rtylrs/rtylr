@@ -58,8 +58,13 @@ func (m *CreateQuoteRequest) Validate() error {
 	if m.ValidUntil == "" {
 		violations = append(violations, "valid_until is required")
 	}
-	if m.Discount < 0 {
-		violations = append(violations, "discount must be greater than or equal to 0")
+	if m.Discount == nil {
+		violations = append(violations, "discount is required")
+	}
+	if m.Discount != nil {
+		if *m.Discount < 0 {
+			violations = append(violations, "discount must be greater than or equal to 0")
+		}
 	}
 	if m.Total < 0 {
 		violations = append(violations, "total must be greater than or equal to 0")

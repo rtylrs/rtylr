@@ -7,17 +7,18 @@ import (
 )
 
 type POSUser struct {
-	Id               int64   `json:"id,omitempty"`
-	BusinessId       int64   `json:"business_id,omitempty"`
-	LocationId       int64   `json:"location_id,omitempty"`
-	Name             string  `json:"name,omitempty"`
-	Role             string  `json:"role,omitempty"`
-	IsActive         bool    `json:"is_active,omitempty"`
-	MaxDiscountPct   float64 `json:"max_discount_pct,omitempty"`
-	CanVoid          bool    `json:"can_void,omitempty"`
-	CanRefund        bool    `json:"can_refund,omitempty"`
-	CanOpenDrawer    bool    `json:"can_open_drawer,omitempty"`
-	CanApplyDiscount bool    `json:"can_apply_discount,omitempty"`
+	Id               int64                        `json:"id,omitempty"`
+	BusinessId       int64                        `json:"business_id,omitempty"`
+	LocationId       int64                        `json:"location_id,omitempty"`
+	Name             string                       `json:"name,omitempty"`
+	Role             string                       `json:"role,omitempty"`
+	IsActive         bool                         `json:"is_active,omitempty"`
+	MaxDiscountPct   float64                      `json:"max_discount_pct,omitempty"`
+	CanVoid          bool                         `json:"can_void,omitempty"`
+	CanRefund        bool                         `json:"can_refund,omitempty"`
+	CanOpenDrawer    bool                         `json:"can_open_drawer,omitempty"`
+	CanApplyDiscount bool                         `json:"can_apply_discount,omitempty"`
+	RoleManagement   *RoleManagementManagedInDash `json:"role_management,omitempty"`
 }
 
 func (m *POSUser) MarshalJSON() ([]byte, error) {
@@ -157,6 +158,35 @@ func (x *POSUser) GetCanApplyDiscount() bool {
 	return x.CanApplyDiscount
 }
 
+func (x *POSUser) GetRoleManagement() *RoleManagementManagedInDash {
+	if x == nil {
+		var zero *RoleManagementManagedInDash
+		return zero
+	}
+	return x.RoleManagement
+}
+
+type RoleManagementManagedInDash struct {
+	Code    string `json:"code,omitempty"`
+	DashUrl string `json:"dash_url,omitempty"`
+}
+
+func (x *RoleManagementManagedInDash) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+func (x *RoleManagementManagedInDash) GetDashUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DashUrl
+}
+
 type ListPOSUsersRequest struct {
 	LocationId int64 `json:"location_id,omitempty"`
 }
@@ -211,25 +241,28 @@ func (x *ListPOSUsersResponse) GetUsers() []*POSUser {
 }
 
 type CreatePOSUserRequest struct {
-	LocationId       int64   `json:"location_id,omitempty"`
-	Name             string  `json:"name,omitempty"`
-	Pin              string  `json:"pin,omitempty"`
-	Role             string  `json:"role,omitempty"`
-	HourlyRate       float64 `json:"hourly_rate,omitempty"`
-	MaxDiscountPct   float64 `json:"max_discount_pct,omitempty"`
-	CanVoid          bool    `json:"can_void,omitempty"`
-	CanRefund        bool    `json:"can_refund,omitempty"`
-	CanOpenDrawer    bool    `json:"can_open_drawer,omitempty"`
-	CanApplyDiscount bool    `json:"can_apply_discount,omitempty"`
+	UserId     *int64  `json:"user_id,omitempty"`
+	LocationId *int64  `json:"location_id,omitempty"`
+	Name       string  `json:"name,omitempty"`
+	Pin        string  `json:"pin,omitempty"`
+	HourlyRate float64 `json:"hourly_rate,omitempty"`
 }
 
 func (m *CreatePOSUserRequest) MarshalJSON() ([]byte, error) {
 	type alias CreatePOSUserRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
 	return json.Marshal(aux)
 }
 
@@ -237,19 +270,39 @@ func (m *CreatePOSUserRequest) UnmarshalJSON(data []byte) error {
 	type alias CreatePOSUserRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LocationId = v
+		m.UserId = &v
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
 	}
 	return nil
+}
+
+func (x *CreatePOSUserRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *CreatePOSUserRequest) GetLocationId() int64 {
@@ -257,7 +310,11 @@ func (x *CreatePOSUserRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *CreatePOSUserRequest) GetName() string {
@@ -276,14 +333,6 @@ func (x *CreatePOSUserRequest) GetPin() string {
 	return x.Pin
 }
 
-func (x *CreatePOSUserRequest) GetRole() string {
-	if x == nil {
-		var zero string
-		return zero
-	}
-	return x.Role
-}
-
 func (x *CreatePOSUserRequest) GetHourlyRate() float64 {
 	if x == nil {
 		var zero float64
@@ -292,48 +341,9 @@ func (x *CreatePOSUserRequest) GetHourlyRate() float64 {
 	return x.HourlyRate
 }
 
-func (x *CreatePOSUserRequest) GetMaxDiscountPct() float64 {
-	if x == nil {
-		var zero float64
-		return zero
-	}
-	return x.MaxDiscountPct
-}
-
-func (x *CreatePOSUserRequest) GetCanVoid() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanVoid
-}
-
-func (x *CreatePOSUserRequest) GetCanRefund() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanRefund
-}
-
-func (x *CreatePOSUserRequest) GetCanOpenDrawer() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanOpenDrawer
-}
-
-func (x *CreatePOSUserRequest) GetCanApplyDiscount() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanApplyDiscount
-}
-
 type CreatePOSUserResponse struct {
-	Id int64 `json:"id,omitempty"`
+	Id             int64                        `json:"id,omitempty"`
+	RoleManagement *RoleManagementManagedInDash `json:"role_management,omitempty"`
 }
 
 func (m *CreatePOSUserResponse) MarshalJSON() ([]byte, error) {
@@ -373,27 +383,32 @@ func (x *CreatePOSUserResponse) GetId() int64 {
 	return x.Id
 }
 
+func (x *CreatePOSUserResponse) GetRoleManagement() *RoleManagementManagedInDash {
+	if x == nil {
+		var zero *RoleManagementManagedInDash
+		return zero
+	}
+	return x.RoleManagement
+}
+
 type UpdatePOSUserRequest struct {
-	Id               int64   `json:"id,omitempty"`
-	Name             string  `json:"name,omitempty"`
-	Pin              string  `json:"pin,omitempty"`
-	Role             string  `json:"role,omitempty"`
-	IsActive         bool    `json:"is_active,omitempty"`
-	HourlyRate       float64 `json:"hourly_rate,omitempty"`
-	MaxDiscountPct   float64 `json:"max_discount_pct,omitempty"`
-	CanVoid          bool    `json:"can_void,omitempty"`
-	CanRefund        bool    `json:"can_refund,omitempty"`
-	CanOpenDrawer    bool    `json:"can_open_drawer,omitempty"`
-	CanApplyDiscount bool    `json:"can_apply_discount,omitempty"`
+	Id         *int64  `json:"id,omitempty"`
+	Name       string  `json:"name,omitempty"`
+	Pin        string  `json:"pin,omitempty"`
+	IsActive   bool    `json:"is_active,omitempty"`
+	HourlyRate float64 `json:"hourly_rate,omitempty"`
 }
 
 func (m *UpdatePOSUserRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdatePOSUserRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.Id != nil {
+		encodedId := strconv.FormatInt(*m.Id, 10)
+		aux.Id = &encodedId
+	}
 	return json.Marshal(aux)
 }
 
@@ -401,17 +416,17 @@ func (m *UpdatePOSUserRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdatePOSUserRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.Id != "" {
-		v, err := strconv.ParseInt(aux.Id, 10, 64)
+	if aux.Id != nil {
+		v, err := strconv.ParseInt(*aux.Id, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Id = v
+		m.Id = &v
 	}
 	return nil
 }
@@ -421,7 +436,11 @@ func (x *UpdatePOSUserRequest) GetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Id
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
 }
 
 func (x *UpdatePOSUserRequest) GetName() string {
@@ -440,14 +459,6 @@ func (x *UpdatePOSUserRequest) GetPin() string {
 	return x.Pin
 }
 
-func (x *UpdatePOSUserRequest) GetRole() string {
-	if x == nil {
-		var zero string
-		return zero
-	}
-	return x.Role
-}
-
 func (x *UpdatePOSUserRequest) GetIsActive() bool {
 	if x == nil {
 		var zero bool
@@ -464,48 +475,9 @@ func (x *UpdatePOSUserRequest) GetHourlyRate() float64 {
 	return x.HourlyRate
 }
 
-func (x *UpdatePOSUserRequest) GetMaxDiscountPct() float64 {
-	if x == nil {
-		var zero float64
-		return zero
-	}
-	return x.MaxDiscountPct
-}
-
-func (x *UpdatePOSUserRequest) GetCanVoid() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanVoid
-}
-
-func (x *UpdatePOSUserRequest) GetCanRefund() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanRefund
-}
-
-func (x *UpdatePOSUserRequest) GetCanOpenDrawer() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanOpenDrawer
-}
-
-func (x *UpdatePOSUserRequest) GetCanApplyDiscount() bool {
-	if x == nil {
-		var zero bool
-		return zero
-	}
-	return x.CanApplyDiscount
-}
-
 type UpdatePOSUserResponse struct {
-	Success bool `json:"success,omitempty"`
+	Success        bool                         `json:"success,omitempty"`
+	RoleManagement *RoleManagementManagedInDash `json:"role_management,omitempty"`
 }
 
 func (x *UpdatePOSUserResponse) GetSuccess() bool {
@@ -516,17 +488,28 @@ func (x *UpdatePOSUserResponse) GetSuccess() bool {
 	return x.Success
 }
 
+func (x *UpdatePOSUserResponse) GetRoleManagement() *RoleManagementManagedInDash {
+	if x == nil {
+		var zero *RoleManagementManagedInDash
+		return zero
+	}
+	return x.RoleManagement
+}
+
 type DeactivatePOSUserRequest struct {
-	Id int64 `json:"id,omitempty"`
+	Id *int64 `json:"id,omitempty"`
 }
 
 func (m *DeactivatePOSUserRequest) MarshalJSON() ([]byte, error) {
 	type alias DeactivatePOSUserRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.Id != nil {
+		encodedId := strconv.FormatInt(*m.Id, 10)
+		aux.Id = &encodedId
+	}
 	return json.Marshal(aux)
 }
 
@@ -534,17 +517,17 @@ func (m *DeactivatePOSUserRequest) UnmarshalJSON(data []byte) error {
 	type alias DeactivatePOSUserRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.Id != "" {
-		v, err := strconv.ParseInt(aux.Id, 10, 64)
+	if aux.Id != nil {
+		v, err := strconv.ParseInt(*aux.Id, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Id = v
+		m.Id = &v
 	}
 	return nil
 }
@@ -554,7 +537,11 @@ func (x *DeactivatePOSUserRequest) GetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Id
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
 }
 
 type DeactivatePOSUserResponse struct {
@@ -570,8 +557,8 @@ func (x *DeactivatePOSUserResponse) GetSuccess() bool {
 }
 
 type VerifyPOSUserPINRequest struct {
-	LocationId int64  `json:"location_id,omitempty"`
-	UserId     int64  `json:"user_id,omitempty"`
+	LocationId *int64 `json:"location_id,omitempty"`
+	UserId     *int64 `json:"user_id,omitempty"`
 	Pin        string `json:"pin,omitempty"`
 }
 
@@ -579,11 +566,17 @@ func (m *VerifyPOSUserPINRequest) MarshalJSON() ([]byte, error) {
 	type alias VerifyPOSUserPINRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
-		UserId     string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -591,25 +584,25 @@ func (m *VerifyPOSUserPINRequest) UnmarshalJSON(data []byte) error {
 	type alias VerifyPOSUserPINRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
-		UserId     string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LocationId = v
+		m.LocationId = &v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -619,7 +612,11 @@ func (x *VerifyPOSUserPINRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *VerifyPOSUserPINRequest) GetUserId() int64 {
@@ -627,7 +624,11 @@ func (x *VerifyPOSUserPINRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *VerifyPOSUserPINRequest) GetPin() string {
@@ -639,29 +640,33 @@ func (x *VerifyPOSUserPINRequest) GetPin() string {
 }
 
 type VerifyPOSUserPINResponse struct {
-	UserId           int64   `json:"user_id,omitempty"`
-	PosUserId        int64   `json:"pos_user_id,omitempty"`
-	LocationId       int64   `json:"location_id,omitempty"`
-	Role             string  `json:"role,omitempty"`
-	DisplayName      string  `json:"display_name,omitempty"`
-	CanVoid          bool    `json:"can_void,omitempty"`
-	CanRefund        bool    `json:"can_refund,omitempty"`
-	CanOpenDrawer    bool    `json:"can_open_drawer,omitempty"`
-	CanApplyDiscount bool    `json:"can_apply_discount,omitempty"`
-	MaxDiscountPct   float64 `json:"max_discount_pct,omitempty"`
+	UserId               int64                        `json:"user_id,omitempty"`
+	PosUserId            int64                        `json:"pos_user_id,omitempty"`
+	LocationId           int64                        `json:"location_id,omitempty"`
+	Role                 string                       `json:"role,omitempty"`
+	DisplayName          string                       `json:"display_name,omitempty"`
+	CanVoid              bool                         `json:"can_void,omitempty"`
+	CanRefund            bool                         `json:"can_refund,omitempty"`
+	CanOpenDrawer        bool                         `json:"can_open_drawer,omitempty"`
+	CanApplyDiscount     bool                         `json:"can_apply_discount,omitempty"`
+	MaxDiscountPct       float64                      `json:"max_discount_pct,omitempty"`
+	AuthorizationVersion int64                        `json:"authorization_version,omitempty"`
+	RoleManagement       *RoleManagementManagedInDash `json:"role_management,omitempty"`
 }
 
 func (m *VerifyPOSUserPINResponse) MarshalJSON() ([]byte, error) {
 	type alias VerifyPOSUserPINResponse
 	aux := struct {
 		*alias
-		UserId     string `json:"user_id,omitempty"`
-		PosUserId  string `json:"pos_user_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
+		UserId               string `json:"user_id,omitempty"`
+		PosUserId            string `json:"pos_user_id,omitempty"`
+		LocationId           string `json:"location_id,omitempty"`
+		AuthorizationVersion string `json:"authorization_version,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.UserId = strconv.FormatInt(m.UserId, 10)
 	aux.PosUserId = strconv.FormatInt(m.PosUserId, 10)
 	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
+	aux.AuthorizationVersion = strconv.FormatInt(m.AuthorizationVersion, 10)
 	return json.Marshal(aux)
 }
 
@@ -669,9 +674,10 @@ func (m *VerifyPOSUserPINResponse) UnmarshalJSON(data []byte) error {
 	type alias VerifyPOSUserPINResponse
 	aux := struct {
 		*alias
-		UserId     string `json:"user_id,omitempty"`
-		PosUserId  string `json:"pos_user_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
+		UserId               string `json:"user_id,omitempty"`
+		PosUserId            string `json:"pos_user_id,omitempty"`
+		LocationId           string `json:"location_id,omitempty"`
+		AuthorizationVersion string `json:"authorization_version,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -696,6 +702,13 @@ func (m *VerifyPOSUserPINResponse) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.LocationId = v
+	}
+	if aux.AuthorizationVersion != "" {
+		v, err := strconv.ParseInt(aux.AuthorizationVersion, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.AuthorizationVersion = v
 	}
 	return nil
 }
@@ -780,9 +793,25 @@ func (x *VerifyPOSUserPINResponse) GetMaxDiscountPct() float64 {
 	return x.MaxDiscountPct
 }
 
+func (x *VerifyPOSUserPINResponse) GetAuthorizationVersion() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AuthorizationVersion
+}
+
+func (x *VerifyPOSUserPINResponse) GetRoleManagement() *RoleManagementManagedInDash {
+	if x == nil {
+		var zero *RoleManagementManagedInDash
+		return zero
+	}
+	return x.RoleManagement
+}
+
 type SetPINRequest struct {
-	UserId     int64  `json:"user_id,omitempty"`
-	LocationId int64  `json:"location_id,omitempty"`
+	UserId     *int64 `json:"user_id,omitempty"`
+	LocationId *int64 `json:"location_id,omitempty"`
 	Name       string `json:"name,omitempty"`
 	Pin        string `json:"pin,omitempty"`
 }
@@ -791,11 +820,17 @@ func (m *SetPINRequest) MarshalJSON() ([]byte, error) {
 	type alias SetPINRequest
 	aux := struct {
 		*alias
-		UserId     string `json:"user_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
 	return json.Marshal(aux)
 }
 
@@ -803,25 +838,25 @@ func (m *SetPINRequest) UnmarshalJSON(data []byte) error {
 	type alias SetPINRequest
 	aux := struct {
 		*alias
-		UserId     string `json:"user_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LocationId = v
+		m.LocationId = &v
 	}
 	return nil
 }
@@ -831,7 +866,11 @@ func (x *SetPINRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *SetPINRequest) GetLocationId() int64 {
@@ -839,7 +878,11 @@ func (x *SetPINRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *SetPINRequest) GetName() string {

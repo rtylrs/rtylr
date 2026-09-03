@@ -370,7 +370,7 @@ return violations;
 }
 
 export interface UpdateChecklistTemplateRequest {
-roleId: string;
+roleId?: string;
 body?: UpdateChecklistTemplateBody;
 }
 
@@ -392,7 +392,6 @@ return out;
 export function validateUpdateChecklistTemplateRequest(v: UpdateChecklistTemplateRequest): string[] {
 const violations: string[] = [];
 if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
-if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
 if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateChecklistTemplateBody(v.body).map((message) => "body: " + message));
@@ -423,7 +422,7 @@ return violations;
 }
 
 export interface AddItemToChecklistTemplateRequest {
-roleId: string;
+roleId?: string;
 title: string;
 description?: string;
 assigneeRole?: string;
@@ -457,7 +456,6 @@ return out;
 export function validateAddItemToChecklistTemplateRequest(v: AddItemToChecklistTemplateRequest): string[] {
 const violations: string[] = [];
 if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
-if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
 if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
 if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
@@ -562,7 +560,7 @@ return violations;
 }
 
 export interface GetEmployeeChecklistRequest {
-employeeId: string;
+employeeId?: string;
 }
 
 export function decodeGetEmployeeChecklistRequest(v: any): GetEmployeeChecklistRequest {
@@ -581,7 +579,6 @@ return out;
 export function validateGetEmployeeChecklistRequest(v: GetEmployeeChecklistRequest): string[] {
 const violations: string[] = [];
 if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
-if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
 return violations;
 }
@@ -611,7 +608,7 @@ return violations;
 }
 
 export interface TriggerChecklistRequest {
-employeeId: string;
+employeeId?: string;
 templateId: string;
 triggerDate: string;
 }
@@ -636,7 +633,6 @@ return out;
 export function validateTriggerChecklistRequest(v: TriggerChecklistRequest): string[] {
 const violations: string[] = [];
 if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
-if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
 if (v.templateId !== undefined && v.templateId !== null && !(typeof v.templateId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.templateId))) violations.push("template_id has invalid type");
 if (!(v.templateId !== undefined && v.templateId !== null)) violations.push("template_id is required");

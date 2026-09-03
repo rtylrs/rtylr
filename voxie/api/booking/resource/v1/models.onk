@@ -24,7 +24,7 @@ message CreateResourceResponse {
 }
 
 message DeleteResourceRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteResourceResponse {
@@ -38,7 +38,7 @@ message ListResourcesResponse {
 }
 
 message UpdateResourceRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   name: string
   type: string
   capacity: int32

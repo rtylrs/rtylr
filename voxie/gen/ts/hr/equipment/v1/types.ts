@@ -348,7 +348,7 @@ return violations;
 }
 
 export interface ApproveEquipmentRequest {
-equipmentRequestId: string;
+equipmentRequestId?: string;
 body?: ApproveEquipmentBody;
 }
 
@@ -370,7 +370,6 @@ return out;
 export function validateApproveEquipmentRequest(v: ApproveEquipmentRequest): string[] {
 const violations: string[] = [];
 if (v.equipmentRequestId !== undefined && v.equipmentRequestId !== null && !(typeof v.equipmentRequestId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.equipmentRequestId))) violations.push("equipment_request_id has invalid type");
-if (!(v.equipmentRequestId !== undefined && v.equipmentRequestId !== null)) violations.push("equipment_request_id is required");
 if (v.equipmentRequestId !== undefined && v.equipmentRequestId !== null && !(Number(v.equipmentRequestId) > 0)) violations.push("equipment_request_id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateApproveEquipmentBody(v.body).map((message) => "body: " + message));

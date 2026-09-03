@@ -46,7 +46,7 @@ message CreateLabelResponse {
 
 message UpdateLabelRequest {
   /// id is the label identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// name is the label name.
   name: string @required
   /// color is the label color.
@@ -60,7 +60,7 @@ message UpdateLabelResponse {
 
 message DeleteLabelRequest {
   /// id is the label identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteLabelResponse {
@@ -69,7 +69,7 @@ message DeleteLabelResponse {
 }
 
 message SetTaskLabelsRequest {
-  task_id: int64 @required @gt(0)
+  task_id: int64? @required @gt(0)
   label_ids: int64[]
 }
 

@@ -8,6 +8,8 @@ import (
 
 type SecurityState struct {
 	TwoFactorEnabled bool             `json:"two_factor_enabled,omitempty"`
+	MfaRequired      bool             `json:"mfa_required,omitempty"`
+	MfaEnrolled      bool             `json:"mfa_enrolled,omitempty"`
 	ActiveSessions   []*ActiveSession `json:"active_sessions,omitempty"`
 }
 
@@ -17,6 +19,22 @@ func (x *SecurityState) GetTwoFactorEnabled() bool {
 		return zero
 	}
 	return x.TwoFactorEnabled
+}
+
+func (x *SecurityState) GetMfaRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.MfaRequired
+}
+
+func (x *SecurityState) GetMfaEnrolled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.MfaEnrolled
 }
 
 func (x *SecurityState) GetActiveSessions() []*ActiveSession {
@@ -291,4 +309,109 @@ func (x *Update2FAResponse) GetMessage() string {
 		return zero
 	}
 	return x.Message
+}
+
+type BeginMFAEnrollmentRequest struct {
+}
+
+type BeginMFAEnrollmentResponse struct {
+	Secret     string `json:"secret,omitempty"`
+	OtpauthUri string `json:"otpauth_uri,omitempty"`
+}
+
+func (x *BeginMFAEnrollmentResponse) GetSecret() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Secret
+}
+
+func (x *BeginMFAEnrollmentResponse) GetOtpauthUri() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OtpauthUri
+}
+
+type CompleteMFAEnrollmentRequest struct {
+	Code string `json:"code,omitempty"`
+}
+
+func (x *CompleteMFAEnrollmentRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+type CompleteMFAEnrollmentResponse struct {
+	Verified      bool     `json:"verified,omitempty"`
+	RecoveryCodes []string `json:"recovery_codes,omitempty"`
+}
+
+func (x *CompleteMFAEnrollmentResponse) GetVerified() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Verified
+}
+
+func (x *CompleteMFAEnrollmentResponse) GetRecoveryCodes() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.RecoveryCodes
+}
+
+type VerifyMFARequest struct {
+	Code string `json:"code,omitempty"`
+}
+
+func (x *VerifyMFARequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+type VerifyMFAResponse struct {
+	Verified bool `json:"verified,omitempty"`
+}
+
+func (x *VerifyMFAResponse) GetVerified() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Verified
+}
+
+type UseMFARecoveryCodeRequest struct {
+	Code string `json:"code,omitempty"`
+}
+
+func (x *UseMFARecoveryCodeRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+type UseMFARecoveryCodeResponse struct {
+	Verified bool `json:"verified,omitempty"`
+}
+
+func (x *UseMFARecoveryCodeResponse) GetVerified() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Verified
 }

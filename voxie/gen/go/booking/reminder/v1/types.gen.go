@@ -141,7 +141,7 @@ func (x *Reminder) GetCreatedAt() string {
 }
 
 type CreateReminderRequest struct {
-	AppointmentId int64  `json:"appointment_id,omitempty"`
+	AppointmentId *int64 `json:"appointment_id,omitempty"`
 	Type          string `json:"type,omitempty"`
 	ScheduledAt   string `json:"scheduled_at,omitempty"`
 }
@@ -150,9 +150,12 @@ func (m *CreateReminderRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateReminderRequest
 	aux := struct {
 		*alias
-		AppointmentId string `json:"appointment_id,omitempty"`
+		AppointmentId *string `json:"appointment_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.AppointmentId = strconv.FormatInt(m.AppointmentId, 10)
+	if m.AppointmentId != nil {
+		encodedAppointmentId := strconv.FormatInt(*m.AppointmentId, 10)
+		aux.AppointmentId = &encodedAppointmentId
+	}
 	return json.Marshal(aux)
 }
 
@@ -160,17 +163,17 @@ func (m *CreateReminderRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateReminderRequest
 	aux := struct {
 		*alias
-		AppointmentId string `json:"appointment_id,omitempty"`
+		AppointmentId *string `json:"appointment_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.AppointmentId != "" {
-		v, err := strconv.ParseInt(aux.AppointmentId, 10, 64)
+	if aux.AppointmentId != nil {
+		v, err := strconv.ParseInt(*aux.AppointmentId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.AppointmentId = v
+		m.AppointmentId = &v
 	}
 	return nil
 }
@@ -180,7 +183,11 @@ func (x *CreateReminderRequest) GetAppointmentId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.AppointmentId
+	if x.AppointmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.AppointmentId
 }
 
 func (x *CreateReminderRequest) GetType() string {

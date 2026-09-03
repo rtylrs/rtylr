@@ -276,7 +276,7 @@ func RegisterDashboardServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter workspace_id: "+err.Error())
 				return
 			}
-			req.WorkspaceId = parsedWorkspaceId
+			req.WorkspaceId = &parsedWorkspaceId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

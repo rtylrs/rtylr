@@ -16,8 +16,8 @@ message CalendarDay {
 }
 
 message GetCalendarRequest {
-  from: string @required @query("from")
-  to: string @required @query("to")
+  from_date: string @required @query("from")
+  to_date: string @required @query("to")
 }
 
 message GetCalendarResponse {

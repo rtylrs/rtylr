@@ -92,7 +92,7 @@ message ListEquipmentRequestsResponse {
 
 message CreateEquipmentRequestRequest {
   /// Employee who needs the equipment.
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
   /// Category of equipment being requested.
   equipment_type: string @required
   /// Free-text description of the specific equipment needed.
@@ -116,7 +116,7 @@ message ApproveEquipmentBody {
 
 message ApproveEquipmentRequest {
   /// ID of the equipment request being reviewed.
-  equipment_request_id: int64 @required @gt(0)
+  equipment_request_id: int64 @gt(0)
   body: ApproveEquipmentBody
 }
 

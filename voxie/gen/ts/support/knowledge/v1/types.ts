@@ -191,7 +191,7 @@ return violations;
 }
 
 export interface UpdateArticleRequest {
-id: string;
+id?: string;
 title?: string;
 slug?: string;
 body?: string;
@@ -225,7 +225,6 @@ return out;
 export function validateUpdateArticleRequest(v: UpdateArticleRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
@@ -259,7 +258,7 @@ return violations;
 }
 
 export interface DeleteArticleRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteArticleRequest(v: any): DeleteArticleRequest {
@@ -278,7 +277,6 @@ return out;
 export function validateDeleteArticleRequest(v: DeleteArticleRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

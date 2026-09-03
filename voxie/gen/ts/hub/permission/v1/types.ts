@@ -68,6 +68,15 @@ id?: string;
 name?: string;
 description?: string;
 permissions?: (string)[];
+appId?: string;
+roleKey?: string;
+level?: number;
+parentRoleId?: string;
+scopeRules?: (string)[];
+isSystem?: boolean;
+isArchived?: boolean;
+lifecycle?: string;
+version?: string;
 memberCount?: number;
 createdAt?: string;
 }
@@ -79,6 +88,15 @@ id: v.id,
 name: v.name,
 description: v.description,
 permissions: v.permissions,
+appId: v.app_id,
+roleKey: v.role_key,
+level: v.level,
+parentRoleId: v.parent_role_id,
+scopeRules: v.scope_rules,
+isSystem: v.is_system,
+isArchived: v.is_archived,
+lifecycle: v.lifecycle,
+version: v.version,
 memberCount: v.member_count,
 createdAt: v.created_at,
 };
@@ -90,6 +108,15 @@ if (v.id !== undefined) { out.id = v.id; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.permissions !== undefined) { out.permissions = v.permissions; }
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.roleKey !== undefined) { out.role_key = v.roleKey; }
+if (v.level !== undefined) { out.level = v.level; }
+if (v.parentRoleId !== undefined) { out.parent_role_id = v.parentRoleId; }
+if (v.scopeRules !== undefined) { out.scope_rules = v.scopeRules; }
+if (v.isSystem !== undefined) { out.is_system = v.isSystem; }
+if (v.isArchived !== undefined) { out.is_archived = v.isArchived; }
+if (v.lifecycle !== undefined) { out.lifecycle = v.lifecycle; }
+if (v.version !== undefined) { out.version = v.version; }
 if (v.memberCount !== undefined) { out.member_count = v.memberCount; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
@@ -101,6 +128,15 @@ if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (v.permissions !== undefined && v.permissions !== null && !(Array.isArray(v.permissions) && (v.permissions).every((item: any) => typeof item === "string"))) violations.push("permissions has invalid type");
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (v.roleKey !== undefined && v.roleKey !== null && !(typeof v.roleKey === "string")) violations.push("role_key has invalid type");
+if (v.level !== undefined && v.level !== null && !(typeof v.level === "number" && Number.isInteger(v.level) && v.level >= -2147483648 && v.level <= 2147483647)) violations.push("level has invalid type");
+if (v.parentRoleId !== undefined && v.parentRoleId !== null && !(typeof v.parentRoleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentRoleId))) violations.push("parent_role_id has invalid type");
+if (v.scopeRules !== undefined && v.scopeRules !== null && !(Array.isArray(v.scopeRules) && (v.scopeRules).every((item: any) => typeof item === "string"))) violations.push("scope_rules has invalid type");
+if (v.isSystem !== undefined && v.isSystem !== null && !(typeof v.isSystem === "boolean")) violations.push("is_system has invalid type");
+if (v.isArchived !== undefined && v.isArchived !== null && !(typeof v.isArchived === "boolean")) violations.push("is_archived has invalid type");
+if (v.lifecycle !== undefined && v.lifecycle !== null && !(typeof v.lifecycle === "string")) violations.push("lifecycle has invalid type");
+if (v.version !== undefined && v.version !== null && !(typeof v.version === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.version))) violations.push("version has invalid type");
 if (v.memberCount !== undefined && v.memberCount !== null && !(typeof v.memberCount === "number" && Number.isInteger(v.memberCount) && v.memberCount >= -2147483648 && v.memberCount <= 2147483647)) violations.push("member_count has invalid type");
 if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
@@ -150,38 +186,62 @@ return violations;
 }
 
 export interface ListRolesRequest {
+appId?: string;
+page?: number;
+pageSize?: number;
 }
 
 export function decodeListRolesRequest(v: any): ListRolesRequest {
 if (v === null || v === undefined) return v;
 return {
+appId: v.app_id,
+page: v.page,
+pageSize: v.page_size,
 };
 }
 
 export function encodeListRolesRequest(v: ListRolesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
 export function validateListRolesRequest(v: ListRolesRequest): string[] {
 const violations: string[] = [];
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
 export interface ListRolesResponse {
 roles?: (CustomRole)[];
+page?: number;
+pageSize?: number;
+total?: string;
+nextPage?: number;
 }
 
 export function decodeListRolesResponse(v: any): ListRolesResponse {
 if (v === null || v === undefined) return v;
 return {
 roles: (v.roles !== undefined ? (v.roles as any[]).map(decodeCustomRole) : v.roles),
+page: v.page,
+pageSize: v.page_size,
+total: v.total,
+nextPage: v.next_page,
 };
 }
 
 export function encodeListRolesResponse(v: ListRolesResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.roles !== undefined) { out.roles = (v.roles as any[]).map(encodeCustomRole); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.nextPage !== undefined) { out.next_page = v.nextPage; }
 return out;
 }
 
@@ -189,12 +249,21 @@ export function validateListRolesResponse(v: ListRolesResponse): string[] {
 const violations: string[] = [];
 if (v.roles !== undefined && v.roles !== null && !(Array.isArray(v.roles) && (v.roles).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("roles has invalid type");
 if (v.roles !== undefined && v.roles !== null) for (const item of v.roles) violations.push(...validateCustomRole(item).map((message) => "roles: " + message));
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.total))) violations.push("total has invalid type");
+if (v.nextPage !== undefined && v.nextPage !== null && !(typeof v.nextPage === "number" && Number.isInteger(v.nextPage) && v.nextPage >= -2147483648 && v.nextPage <= 2147483647)) violations.push("next_page has invalid type");
 return violations;
 }
 
 export interface CreateRoleRequest {
 name: string;
 description?: string;
+appId?: string;
+roleKey?: string;
+level?: number;
+parentRoleId?: string;
+scopeRules?: (string)[];
 permissions?: (string)[];
 }
 
@@ -203,6 +272,11 @@ if (v === null || v === undefined) return v;
 return {
 name: v.name,
 description: v.description,
+appId: v.app_id,
+roleKey: v.role_key,
+level: v.level,
+parentRoleId: v.parent_role_id,
+scopeRules: v.scope_rules,
 permissions: v.permissions,
 };
 }
@@ -211,6 +285,11 @@ export function encodeCreateRoleRequest(v: CreateRoleRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 if (v.description !== undefined) { out.description = v.description; }
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.roleKey !== undefined) { out.role_key = v.roleKey; }
+if (v.level !== undefined) { out.level = v.level; }
+if (v.parentRoleId !== undefined) { out.parent_role_id = v.parentRoleId; }
+if (v.scopeRules !== undefined) { out.scope_rules = v.scopeRules; }
 if (v.permissions !== undefined) { out.permissions = v.permissions; }
 return out;
 }
@@ -220,6 +299,11 @@ const violations: string[] = [];
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (v.roleKey !== undefined && v.roleKey !== null && !(typeof v.roleKey === "string")) violations.push("role_key has invalid type");
+if (v.level !== undefined && v.level !== null && !(typeof v.level === "number" && Number.isInteger(v.level) && v.level >= -2147483648 && v.level <= 2147483647)) violations.push("level has invalid type");
+if (v.parentRoleId !== undefined && v.parentRoleId !== null && !(typeof v.parentRoleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentRoleId))) violations.push("parent_role_id has invalid type");
+if (v.scopeRules !== undefined && v.scopeRules !== null && !(Array.isArray(v.scopeRules) && (v.scopeRules).every((item: any) => typeof item === "string"))) violations.push("scope_rules has invalid type");
 if (v.permissions !== undefined && v.permissions !== null && !(Array.isArray(v.permissions) && (v.permissions).every((item: any) => typeof item === "string"))) violations.push("permissions has invalid type");
 return violations;
 }
@@ -249,7 +333,7 @@ return violations;
 }
 
 export interface DeleteRoleRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteRoleRequest(v: any): DeleteRoleRequest {
@@ -268,7 +352,6 @@ return out;
 export function validateDeleteRoleRequest(v: DeleteRoleRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -298,6 +381,11 @@ return violations;
 
 export interface UpdateRoleBody {
 name: string;
+description?: string;
+appId?: string;
+level?: number;
+parentRoleId?: string;
+scopeRules?: (string)[];
 permissions?: (string)[];
 }
 
@@ -305,6 +393,11 @@ export function decodeUpdateRoleBody(v: any): UpdateRoleBody {
 if (v === null || v === undefined) return v;
 return {
 name: v.name,
+description: v.description,
+appId: v.app_id,
+level: v.level,
+parentRoleId: v.parent_role_id,
+scopeRules: v.scope_rules,
 permissions: v.permissions,
 };
 }
@@ -312,6 +405,11 @@ permissions: v.permissions,
 export function encodeUpdateRoleBody(v: UpdateRoleBody): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.level !== undefined) { out.level = v.level; }
+if (v.parentRoleId !== undefined) { out.parent_role_id = v.parentRoleId; }
+if (v.scopeRules !== undefined) { out.scope_rules = v.scopeRules; }
 if (v.permissions !== undefined) { out.permissions = v.permissions; }
 return out;
 }
@@ -320,12 +418,17 @@ export function validateUpdateRoleBody(v: UpdateRoleBody): string[] {
 const violations: string[] = [];
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (v.level !== undefined && v.level !== null && !(typeof v.level === "number" && Number.isInteger(v.level) && v.level >= -2147483648 && v.level <= 2147483647)) violations.push("level has invalid type");
+if (v.parentRoleId !== undefined && v.parentRoleId !== null && !(typeof v.parentRoleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentRoleId))) violations.push("parent_role_id has invalid type");
+if (v.scopeRules !== undefined && v.scopeRules !== null && !(Array.isArray(v.scopeRules) && (v.scopeRules).every((item: any) => typeof item === "string"))) violations.push("scope_rules has invalid type");
 if (v.permissions !== undefined && v.permissions !== null && !(Array.isArray(v.permissions) && (v.permissions).every((item: any) => typeof item === "string"))) violations.push("permissions has invalid type");
 return violations;
 }
 
 export interface UpdateRoleRequest {
-id: string;
+id?: string;
 body?: UpdateRoleBody;
 }
 
@@ -347,7 +450,6 @@ return out;
 export function validateUpdateRoleRequest(v: UpdateRoleRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateRoleBody(v.body).map((message) => "body: " + message));
@@ -356,24 +458,630 @@ return violations;
 
 export interface UpdateRoleResponse {
 message?: string;
+role?: CustomRole;
 }
 
 export function decodeUpdateRoleResponse(v: any): UpdateRoleResponse {
 if (v === null || v === undefined) return v;
 return {
 message: v.message,
+role: (v.role !== undefined ? decodeCustomRole(v.role) : v.role),
 };
 }
 
 export function encodeUpdateRoleResponse(v: UpdateRoleResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
+if (v.role !== undefined) { out.role = encodeCustomRole(v.role); }
 return out;
 }
 
 export function validateUpdateRoleResponse(v: UpdateRoleResponse): string[] {
 const violations: string[] = [];
 if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "object" && v.role !== null && !Array.isArray(v.role))) violations.push("role has invalid type");
+if (v.role !== undefined && v.role !== null) violations.push(...validateCustomRole(v.role).map((message) => "role: " + message));
+return violations;
+}
+
+export interface GetRoleRequest {
+id?: string;
+}
+
+export function decodeGetRoleRequest(v: any): GetRoleRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetRoleRequest(v: GetRoleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
+export function validateGetRoleRequest(v: GetRoleRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
+export interface GetRoleResponse {
+role?: CustomRole;
+}
+
+export function decodeGetRoleResponse(v: any): GetRoleResponse {
+if (v === null || v === undefined) return v;
+return {
+role: (v.role !== undefined ? decodeCustomRole(v.role) : v.role),
+};
+}
+
+export function encodeGetRoleResponse(v: GetRoleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.role !== undefined) { out.role = encodeCustomRole(v.role); }
+return out;
+}
+
+export function validateGetRoleResponse(v: GetRoleResponse): string[] {
+const violations: string[] = [];
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "object" && v.role !== null && !Array.isArray(v.role))) violations.push("role has invalid type");
+if (v.role !== undefined && v.role !== null) violations.push(...validateCustomRole(v.role).map((message) => "role: " + message));
+return violations;
+}
+
+export interface CloneRoleRequest {
+id?: string;
+name: string;
+description?: string;
+}
+
+export function decodeCloneRoleRequest(v: any): CloneRoleRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+description: v.description,
+};
+}
+
+export function encodeCloneRoleRequest(v: CloneRoleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+return out;
+}
+
+export function validateCloneRoleRequest(v: CloneRoleRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+return violations;
+}
+
+export interface CloneRoleResponse {
+role?: CustomRole;
+}
+
+export function decodeCloneRoleResponse(v: any): CloneRoleResponse {
+if (v === null || v === undefined) return v;
+return {
+role: (v.role !== undefined ? decodeCustomRole(v.role) : v.role),
+};
+}
+
+export function encodeCloneRoleResponse(v: CloneRoleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.role !== undefined) { out.role = encodeCustomRole(v.role); }
+return out;
+}
+
+export function validateCloneRoleResponse(v: CloneRoleResponse): string[] {
+const violations: string[] = [];
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "object" && v.role !== null && !Array.isArray(v.role))) violations.push("role has invalid type");
+if (v.role !== undefined && v.role !== null) violations.push(...validateCustomRole(v.role).map((message) => "role: " + message));
+return violations;
+}
+
+export interface ArchiveRoleRequest {
+id?: string;
+reason?: string;
+}
+
+export function decodeArchiveRoleRequest(v: any): ArchiveRoleRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+reason: v.reason,
+};
+}
+
+export function encodeArchiveRoleRequest(v: ArchiveRoleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+return out;
+}
+
+export function validateArchiveRoleRequest(v: ArchiveRoleRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
+return violations;
+}
+
+export interface ArchiveRoleResponse {
+role?: CustomRole;
+}
+
+export function decodeArchiveRoleResponse(v: any): ArchiveRoleResponse {
+if (v === null || v === undefined) return v;
+return {
+role: (v.role !== undefined ? decodeCustomRole(v.role) : v.role),
+};
+}
+
+export function encodeArchiveRoleResponse(v: ArchiveRoleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.role !== undefined) { out.role = encodeCustomRole(v.role); }
+return out;
+}
+
+export function validateArchiveRoleResponse(v: ArchiveRoleResponse): string[] {
+const violations: string[] = [];
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "object" && v.role !== null && !Array.isArray(v.role))) violations.push("role has invalid type");
+if (v.role !== undefined && v.role !== null) violations.push(...validateCustomRole(v.role).map((message) => "role: " + message));
+return violations;
+}
+
+export interface RoleAssignment {
+id?: string;
+roleId?: string;
+appId?: string;
+userId?: string;
+groupId?: string;
+status?: string;
+source?: string;
+isPrimary?: boolean;
+scopes?: (string)[];
+grantedAt?: string;
+}
+
+export function decodeRoleAssignment(v: any): RoleAssignment {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+roleId: v.role_id,
+appId: v.app_id,
+userId: v.user_id,
+groupId: v.group_id,
+status: v.status,
+source: v.source,
+isPrimary: v.is_primary,
+scopes: v.scopes,
+grantedAt: v.granted_at,
+};
+}
+
+export function encodeRoleAssignment(v: RoleAssignment): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.roleId !== undefined) { out.role_id = v.roleId; }
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.groupId !== undefined) { out.group_id = v.groupId; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.source !== undefined) { out.source = v.source; }
+if (v.isPrimary !== undefined) { out.is_primary = v.isPrimary; }
+if (v.scopes !== undefined) { out.scopes = v.scopes; }
+if (v.grantedAt !== undefined) { out.granted_at = v.grantedAt; }
+return out;
+}
+
+export function validateRoleAssignment(v: RoleAssignment): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.groupId !== undefined && v.groupId !== null && !(typeof v.groupId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.groupId))) violations.push("group_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.source !== undefined && v.source !== null && !(typeof v.source === "string")) violations.push("source has invalid type");
+if (v.isPrimary !== undefined && v.isPrimary !== null && !(typeof v.isPrimary === "boolean")) violations.push("is_primary has invalid type");
+if (v.scopes !== undefined && v.scopes !== null && !(Array.isArray(v.scopes) && (v.scopes).every((item: any) => typeof item === "string"))) violations.push("scopes has invalid type");
+if (v.grantedAt !== undefined && v.grantedAt !== null && !(typeof v.grantedAt === "string")) violations.push("granted_at has invalid type");
+return violations;
+}
+
+export interface ListRoleAssignmentsRequest {
+roleId?: string;
+appId?: string;
+page?: number;
+pageSize?: number;
+}
+
+export function decodeListRoleAssignmentsRequest(v: any): ListRoleAssignmentsRequest {
+if (v === null || v === undefined) return v;
+return {
+roleId: v.role_id,
+appId: v.app_id,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListRoleAssignmentsRequest(v: ListRoleAssignmentsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.roleId !== undefined) { out.role_id = v.roleId; }
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
+}
+
+export function validateListRoleAssignmentsRequest(v: ListRoleAssignmentsRequest): string[] {
+const violations: string[] = [];
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
+return violations;
+}
+
+export interface ListRoleAssignmentsResponse {
+assignments?: (RoleAssignment)[];
+page?: number;
+pageSize?: number;
+total?: string;
+nextPage?: number;
+}
+
+export function decodeListRoleAssignmentsResponse(v: any): ListRoleAssignmentsResponse {
+if (v === null || v === undefined) return v;
+return {
+assignments: (v.assignments !== undefined ? (v.assignments as any[]).map(decodeRoleAssignment) : v.assignments),
+page: v.page,
+pageSize: v.page_size,
+total: v.total,
+nextPage: v.next_page,
+};
+}
+
+export function encodeListRoleAssignmentsResponse(v: ListRoleAssignmentsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.assignments !== undefined) { out.assignments = (v.assignments as any[]).map(encodeRoleAssignment); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.nextPage !== undefined) { out.next_page = v.nextPage; }
+return out;
+}
+
+export function validateListRoleAssignmentsResponse(v: ListRoleAssignmentsResponse): string[] {
+const violations: string[] = [];
+if (v.assignments !== undefined && v.assignments !== null && !(Array.isArray(v.assignments) && (v.assignments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("assignments has invalid type");
+if (v.assignments !== undefined && v.assignments !== null) for (const item of v.assignments) violations.push(...validateRoleAssignment(item).map((message) => "assignments: " + message));
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.total))) violations.push("total has invalid type");
+if (v.nextPage !== undefined && v.nextPage !== null && !(typeof v.nextPage === "number" && Number.isInteger(v.nextPage) && v.nextPage >= -2147483648 && v.nextPage <= 2147483647)) violations.push("next_page has invalid type");
+return violations;
+}
+
+export interface AssignRoleRequest {
+roleId: string;
+appId: string;
+userId?: string;
+groupId?: string;
+isPrimary?: boolean;
+scopes?: (string)[];
+}
+
+export function decodeAssignRoleRequest(v: any): AssignRoleRequest {
+if (v === null || v === undefined) return v;
+return {
+roleId: v.role_id,
+appId: v.app_id,
+userId: v.user_id,
+groupId: v.group_id,
+isPrimary: v.is_primary,
+scopes: v.scopes,
+};
+}
+
+export function encodeAssignRoleRequest(v: AssignRoleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.roleId !== undefined) { out.role_id = v.roleId; }
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.groupId !== undefined) { out.group_id = v.groupId; }
+if (v.isPrimary !== undefined) { out.is_primary = v.isPrimary; }
+if (v.scopes !== undefined) { out.scopes = v.scopes; }
+return out;
+}
+
+export function validateAssignRoleRequest(v: AssignRoleRequest): string[] {
+const violations: string[] = [];
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
+if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
+if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (!(v.appId !== undefined && v.appId !== null) || v.appId === "") violations.push("app_id is required");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.groupId !== undefined && v.groupId !== null && !(typeof v.groupId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.groupId))) violations.push("group_id has invalid type");
+if (v.isPrimary !== undefined && v.isPrimary !== null && !(typeof v.isPrimary === "boolean")) violations.push("is_primary has invalid type");
+if (v.scopes !== undefined && v.scopes !== null && !(Array.isArray(v.scopes) && (v.scopes).every((item: any) => typeof item === "string"))) violations.push("scopes has invalid type");
+return violations;
+}
+
+export interface AssignRoleResponse {
+assignment?: RoleAssignment;
+}
+
+export function decodeAssignRoleResponse(v: any): AssignRoleResponse {
+if (v === null || v === undefined) return v;
+return {
+assignment: (v.assignment !== undefined ? decodeRoleAssignment(v.assignment) : v.assignment),
+};
+}
+
+export function encodeAssignRoleResponse(v: AssignRoleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.assignment !== undefined) { out.assignment = encodeRoleAssignment(v.assignment); }
+return out;
+}
+
+export function validateAssignRoleResponse(v: AssignRoleResponse): string[] {
+const violations: string[] = [];
+if (v.assignment !== undefined && v.assignment !== null && !(typeof v.assignment === "object" && v.assignment !== null && !Array.isArray(v.assignment))) violations.push("assignment has invalid type");
+if (v.assignment !== undefined && v.assignment !== null) violations.push(...validateRoleAssignment(v.assignment).map((message) => "assignment: " + message));
+return violations;
+}
+
+export interface RemoveRoleAssignmentRequest {
+id?: string;
+}
+
+export function decodeRemoveRoleAssignmentRequest(v: any): RemoveRoleAssignmentRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeRemoveRoleAssignmentRequest(v: RemoveRoleAssignmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
+export function validateRemoveRoleAssignmentRequest(v: RemoveRoleAssignmentRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
+export interface RemoveRoleAssignmentResponse {
+message?: string;
+}
+
+export function decodeRemoveRoleAssignmentResponse(v: any): RemoveRoleAssignmentResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeRemoveRoleAssignmentResponse(v: RemoveRoleAssignmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
+export function validateRemoveRoleAssignmentResponse(v: RemoveRoleAssignmentResponse): string[] {
+const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
+return violations;
+}
+
+export interface PreviewPermissionImpactRequest {
+id?: string;
+permissions?: (string)[];
+}
+
+export function decodePreviewPermissionImpactRequest(v: any): PreviewPermissionImpactRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+permissions: v.permissions,
+};
+}
+
+export function encodePreviewPermissionImpactRequest(v: PreviewPermissionImpactRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.permissions !== undefined) { out.permissions = v.permissions; }
+return out;
+}
+
+export function validatePreviewPermissionImpactRequest(v: PreviewPermissionImpactRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.permissions !== undefined && v.permissions !== null && !(Array.isArray(v.permissions) && (v.permissions).every((item: any) => typeof item === "string"))) violations.push("permissions has invalid type");
+return violations;
+}
+
+export interface PreviewPermissionImpactResponse {
+addedPermissions?: (string)[];
+removedPermissions?: (string)[];
+affectedMemberCount?: number;
+}
+
+export function decodePreviewPermissionImpactResponse(v: any): PreviewPermissionImpactResponse {
+if (v === null || v === undefined) return v;
+return {
+addedPermissions: v.added_permissions,
+removedPermissions: v.removed_permissions,
+affectedMemberCount: v.affected_member_count,
+};
+}
+
+export function encodePreviewPermissionImpactResponse(v: PreviewPermissionImpactResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.addedPermissions !== undefined) { out.added_permissions = v.addedPermissions; }
+if (v.removedPermissions !== undefined) { out.removed_permissions = v.removedPermissions; }
+if (v.affectedMemberCount !== undefined) { out.affected_member_count = v.affectedMemberCount; }
+return out;
+}
+
+export function validatePreviewPermissionImpactResponse(v: PreviewPermissionImpactResponse): string[] {
+const violations: string[] = [];
+if (v.addedPermissions !== undefined && v.addedPermissions !== null && !(Array.isArray(v.addedPermissions) && (v.addedPermissions).every((item: any) => typeof item === "string"))) violations.push("added_permissions has invalid type");
+if (v.removedPermissions !== undefined && v.removedPermissions !== null && !(Array.isArray(v.removedPermissions) && (v.removedPermissions).every((item: any) => typeof item === "string"))) violations.push("removed_permissions has invalid type");
+if (v.affectedMemberCount !== undefined && v.affectedMemberCount !== null && !(typeof v.affectedMemberCount === "number" && Number.isInteger(v.affectedMemberCount) && v.affectedMemberCount >= -2147483648 && v.affectedMemberCount <= 2147483647)) violations.push("affected_member_count has invalid type");
+return violations;
+}
+
+export interface RoleAuditEvent {
+id?: string;
+action?: string;
+appId?: string;
+roleId?: string;
+actorUserId?: string;
+targetUserId?: string;
+targetGroupId?: string;
+beforeJson?: string;
+afterJson?: string;
+reason?: string;
+createdAt?: string;
+}
+
+export function decodeRoleAuditEvent(v: any): RoleAuditEvent {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+action: v.action,
+appId: v.app_id,
+roleId: v.role_id,
+actorUserId: v.actor_user_id,
+targetUserId: v.target_user_id,
+targetGroupId: v.target_group_id,
+beforeJson: v.before_json,
+afterJson: v.after_json,
+reason: v.reason,
+createdAt: v.created_at,
+};
+}
+
+export function encodeRoleAuditEvent(v: RoleAuditEvent): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.action !== undefined) { out.action = v.action; }
+if (v.appId !== undefined) { out.app_id = v.appId; }
+if (v.roleId !== undefined) { out.role_id = v.roleId; }
+if (v.actorUserId !== undefined) { out.actor_user_id = v.actorUserId; }
+if (v.targetUserId !== undefined) { out.target_user_id = v.targetUserId; }
+if (v.targetGroupId !== undefined) { out.target_group_id = v.targetGroupId; }
+if (v.beforeJson !== undefined) { out.before_json = v.beforeJson; }
+if (v.afterJson !== undefined) { out.after_json = v.afterJson; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
+}
+
+export function validateRoleAuditEvent(v: RoleAuditEvent): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.action !== undefined && v.action !== null && !(typeof v.action === "string")) violations.push("action has invalid type");
+if (v.appId !== undefined && v.appId !== null && !(typeof v.appId === "string")) violations.push("app_id has invalid type");
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
+if (v.actorUserId !== undefined && v.actorUserId !== null && !(typeof v.actorUserId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.actorUserId))) violations.push("actor_user_id has invalid type");
+if (v.targetUserId !== undefined && v.targetUserId !== null && !(typeof v.targetUserId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.targetUserId))) violations.push("target_user_id has invalid type");
+if (v.targetGroupId !== undefined && v.targetGroupId !== null && !(typeof v.targetGroupId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.targetGroupId))) violations.push("target_group_id has invalid type");
+if (v.beforeJson !== undefined && v.beforeJson !== null && !(typeof v.beforeJson === "string")) violations.push("before_json has invalid type");
+if (v.afterJson !== undefined && v.afterJson !== null && !(typeof v.afterJson === "string")) violations.push("after_json has invalid type");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+return violations;
+}
+
+export interface ListRoleAuditRequest {
+roleId?: string;
+page?: number;
+pageSize?: number;
+}
+
+export function decodeListRoleAuditRequest(v: any): ListRoleAuditRequest {
+if (v === null || v === undefined) return v;
+return {
+roleId: v.role_id,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListRoleAuditRequest(v: ListRoleAuditRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.roleId !== undefined) { out.role_id = v.roleId; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
+}
+
+export function validateListRoleAuditRequest(v: ListRoleAuditRequest): string[] {
+const violations: string[] = [];
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
+return violations;
+}
+
+export interface ListRoleAuditResponse {
+events?: (RoleAuditEvent)[];
+page?: number;
+pageSize?: number;
+total?: string;
+nextPage?: number;
+}
+
+export function decodeListRoleAuditResponse(v: any): ListRoleAuditResponse {
+if (v === null || v === undefined) return v;
+return {
+events: (v.events !== undefined ? (v.events as any[]).map(decodeRoleAuditEvent) : v.events),
+page: v.page,
+pageSize: v.page_size,
+total: v.total,
+nextPage: v.next_page,
+};
+}
+
+export function encodeListRoleAuditResponse(v: ListRoleAuditResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.events !== undefined) { out.events = (v.events as any[]).map(encodeRoleAuditEvent); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.nextPage !== undefined) { out.next_page = v.nextPage; }
+return out;
+}
+
+export function validateListRoleAuditResponse(v: ListRoleAuditResponse): string[] {
+const violations: string[] = [];
+if (v.events !== undefined && v.events !== null && !(Array.isArray(v.events) && (v.events).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("events has invalid type");
+if (v.events !== undefined && v.events !== null) for (const item of v.events) violations.push(...validateRoleAuditEvent(item).map((message) => "events: " + message));
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.total))) violations.push("total has invalid type");
+if (v.nextPage !== undefined && v.nextPage !== null && !(typeof v.nextPage === "number" && Number.isInteger(v.nextPage) && v.nextPage >= -2147483648 && v.nextPage <= 2147483647)) violations.push("next_page has invalid type");
 return violations;
 }
 

@@ -43,9 +43,9 @@ message GetOverviewResponse {
 }
 
 message MatchRequest {
-  bank_feed_id: int64 @required
+  bank_feed_id: int64? @required
   target_type: string @required
-  target_id: int64 @required
+  target_id: int64? @required
 }
 
 message MatchResponse {

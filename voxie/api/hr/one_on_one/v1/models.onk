@@ -19,8 +19,8 @@ message ListOneOnOnesResponse {
 }
 
 message CreateOneOnOneRequest {
-  manager_id: int64 @required @gt(0)
-  staff_id: int64 @required @gt(0)
+  manager_id: int64? @required @gt(0)
+  staff_id: int64? @required @gt(0)
   scheduled_at: string @required
   notes: string
   action_items: string

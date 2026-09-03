@@ -41,7 +41,7 @@ message CreateDocumentResponse {
 }
 
 message DeleteDocumentRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteDocumentResponse {

@@ -203,7 +203,7 @@ return violations;
 }
 
 export interface GetProjectRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetProjectRequest(v: any): GetProjectRequest {
@@ -222,7 +222,6 @@ return out;
 export function validateGetProjectRequest(v: GetProjectRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -252,7 +251,7 @@ return violations;
 }
 
 export interface SetProjectVisibilityRequest {
-id: string;
+id?: string;
 visibility: string;
 }
 
@@ -274,7 +273,6 @@ return out;
 export function validateSetProjectVisibilityRequest(v: SetProjectVisibilityRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.visibility !== undefined && v.visibility !== null && !(typeof v.visibility === "string")) violations.push("visibility has invalid type");
 if (!(v.visibility !== undefined && v.visibility !== null) || v.visibility === "") violations.push("visibility is required");
@@ -462,8 +460,8 @@ description: string;
 icon: string;
 color: string;
 status: string;
-startDate: string;
-dueDate: string;
+startDate?: string;
+dueDate?: string;
 }
 
 export function decodeUpdateProjectBody(v: any): UpdateProjectBody {
@@ -504,14 +502,12 @@ if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.p
 if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
-if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
 if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
-if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
 return violations;
 }
 
 export interface UpdateProjectRequest {
-id: string;
+id?: string;
 body?: UpdateProjectBody;
 }
 
@@ -533,7 +529,6 @@ return out;
 export function validateUpdateProjectRequest(v: UpdateProjectRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateProjectBody(v.body).map((message) => "body: " + message));
@@ -564,7 +559,7 @@ return violations;
 }
 
 export interface ArchiveProjectRequest {
-id: string;
+id?: string;
 }
 
 export function decodeArchiveProjectRequest(v: any): ArchiveProjectRequest {
@@ -583,7 +578,6 @@ return out;
 export function validateArchiveProjectRequest(v: ArchiveProjectRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -669,7 +663,7 @@ return violations;
 }
 
 export interface RestoreProjectRequest {
-id: string;
+id?: string;
 }
 
 export function decodeRestoreProjectRequest(v: any): RestoreProjectRequest {
@@ -688,7 +682,6 @@ return out;
 export function validateRestoreProjectRequest(v: RestoreProjectRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -718,7 +711,7 @@ return violations;
 }
 
 export interface PurgeProjectRequest {
-id: string;
+id?: string;
 }
 
 export function decodePurgeProjectRequest(v: any): PurgeProjectRequest {
@@ -737,7 +730,6 @@ return out;
 export function validatePurgeProjectRequest(v: PurgeProjectRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -898,7 +890,7 @@ return violations;
 }
 
 export interface UpdateProjectColumnRequest {
-id: string;
+id?: string;
 name: string;
 color?: string;
 sortOrder?: number;
@@ -926,7 +918,6 @@ return out;
 export function validateUpdateProjectColumnRequest(v: UpdateProjectColumnRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
@@ -959,7 +950,7 @@ return violations;
 }
 
 export interface DeleteProjectColumnRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteProjectColumnRequest(v: any): DeleteProjectColumnRequest {
@@ -978,7 +969,6 @@ return out;
 export function validateDeleteProjectColumnRequest(v: DeleteProjectColumnRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -1450,7 +1440,7 @@ return violations;
 }
 
 export interface GetProjectLabourCostRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetProjectLabourCostRequest(v: any): GetProjectLabourCostRequest {
@@ -1469,7 +1459,6 @@ return out;
 export function validateGetProjectLabourCostRequest(v: GetProjectLabourCostRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

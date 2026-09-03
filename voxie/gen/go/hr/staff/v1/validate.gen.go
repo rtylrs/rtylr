@@ -52,11 +52,21 @@ func (m *CreateStaffRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
 	}
-	if m.DepartmentId <= 0 {
-		violations = append(violations, "department_id must be greater than 0")
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
+	}
+	if m.DepartmentId == nil {
+		violations = append(violations, "department_id is required")
+	}
+	if m.DepartmentId != nil {
+		if *m.DepartmentId <= 0 {
+			violations = append(violations, "department_id must be greater than 0")
+		}
 	}
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
@@ -143,8 +153,13 @@ func (m *UpdateStaffBody) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.DepartmentId <= 0 {
-		violations = append(violations, "department_id must be greater than 0")
+	if m.DepartmentId == nil {
+		violations = append(violations, "department_id is required")
+	}
+	if m.DepartmentId != nil {
+		if *m.DepartmentId <= 0 {
+			violations = append(violations, "department_id must be greater than 0")
+		}
 	}
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
@@ -242,8 +257,13 @@ func (m *ClockInRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.StaffId <= 0 {
-		violations = append(violations, "staff_id must be greater than 0")
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
+	if m.StaffId != nil {
+		if *m.StaffId <= 0 {
+			violations = append(violations, "staff_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -267,8 +287,13 @@ func (m *ClockOutRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.StaffId <= 0 {
-		violations = append(violations, "staff_id must be greater than 0")
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
+	if m.StaffId != nil {
+		if *m.StaffId <= 0 {
+			violations = append(violations, "staff_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -303,11 +328,21 @@ func (m *ListStaffDirectoryRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Page <= 0 {
-		violations = append(violations, "page must be greater than 0")
+	if m.Page == nil {
+		violations = append(violations, "page is required")
 	}
-	if m.PageSize <= 0 {
-		violations = append(violations, "page_size must be greater than 0")
+	if m.Page != nil {
+		if *m.Page <= 0 {
+			violations = append(violations, "page must be greater than 0")
+		}
+	}
+	if m.PageSize == nil {
+		violations = append(violations, "page_size is required")
+	}
+	if m.PageSize != nil {
+		if *m.PageSize <= 0 {
+			violations = append(violations, "page_size must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

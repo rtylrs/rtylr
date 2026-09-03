@@ -22,20 +22,45 @@ func (m *CashAdjustRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
 	}
-	if m.TerminalId <= 0 {
-		violations = append(violations, "terminal_id must be greater than 0")
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
-	if m.SessionId <= 0 {
-		violations = append(violations, "session_id must be greater than 0")
+	if m.TerminalId == nil {
+		violations = append(violations, "terminal_id is required")
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.TerminalId != nil {
+		if *m.TerminalId <= 0 {
+			violations = append(violations, "terminal_id must be greater than 0")
+		}
 	}
-	if m.Amount <= 0 {
-		violations = append(violations, "amount must be greater than 0")
+	if m.SessionId == nil {
+		violations = append(violations, "session_id is required")
+	}
+	if m.SessionId != nil {
+		if *m.SessionId <= 0 {
+			violations = append(violations, "session_id must be greater than 0")
+		}
+	}
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
+	}
+	if m.Amount == nil {
+		violations = append(violations, "amount is required")
+	}
+	if m.Amount != nil {
+		if *m.Amount <= 0 {
+			violations = append(violations, "amount must be greater than 0")
+		}
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
@@ -62,20 +87,45 @@ func (m *CashDropRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
 	}
-	if m.TerminalId <= 0 {
-		violations = append(violations, "terminal_id must be greater than 0")
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
-	if m.SessionId <= 0 {
-		violations = append(violations, "session_id must be greater than 0")
+	if m.TerminalId == nil {
+		violations = append(violations, "terminal_id is required")
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.TerminalId != nil {
+		if *m.TerminalId <= 0 {
+			violations = append(violations, "terminal_id must be greater than 0")
+		}
 	}
-	if m.Amount <= 0 {
-		violations = append(violations, "amount must be greater than 0")
+	if m.SessionId == nil {
+		violations = append(violations, "session_id is required")
+	}
+	if m.SessionId != nil {
+		if *m.SessionId <= 0 {
+			violations = append(violations, "session_id must be greater than 0")
+		}
+	}
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
+	}
+	if m.Amount == nil {
+		violations = append(violations, "amount is required")
+	}
+	if m.Amount != nil {
+		if *m.Amount <= 0 {
+			violations = append(violations, "amount must be greater than 0")
+		}
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
@@ -102,20 +152,45 @@ func (m *CashPickupRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
 	}
-	if m.TerminalId <= 0 {
-		violations = append(violations, "terminal_id must be greater than 0")
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
-	if m.SessionId <= 0 {
-		violations = append(violations, "session_id must be greater than 0")
+	if m.TerminalId == nil {
+		violations = append(violations, "terminal_id is required")
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.TerminalId != nil {
+		if *m.TerminalId <= 0 {
+			violations = append(violations, "terminal_id must be greater than 0")
+		}
 	}
-	if m.Amount <= 0 {
-		violations = append(violations, "amount must be greater than 0")
+	if m.SessionId == nil {
+		violations = append(violations, "session_id is required")
+	}
+	if m.SessionId != nil {
+		if *m.SessionId <= 0 {
+			violations = append(violations, "session_id must be greater than 0")
+		}
+	}
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
+	}
+	if m.Amount == nil {
+		violations = append(violations, "amount is required")
+	}
+	if m.Amount != nil {
+		if *m.Amount <= 0 {
+			violations = append(violations, "amount must be greater than 0")
+		}
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
@@ -142,8 +217,13 @@ func (m *ListCashMovementsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.SessionId <= 0 {
-		violations = append(violations, "session_id must be greater than 0")
+	if m.SessionId == nil {
+		violations = append(violations, "session_id is required")
+	}
+	if m.SessionId != nil {
+		if *m.SessionId <= 0 {
+			violations = append(violations, "session_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

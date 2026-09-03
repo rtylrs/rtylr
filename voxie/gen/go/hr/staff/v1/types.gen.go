@@ -355,8 +355,8 @@ func (x *ListStaffResponse) GetStaff() []*Staff {
 }
 
 type CreateStaffRequest struct {
-	UserId                int64   `json:"user_id,omitempty"`
-	DepartmentId          int64   `json:"department_id,omitempty"`
+	UserId                *int64  `json:"user_id,omitempty"`
+	DepartmentId          *int64  `json:"department_id,omitempty"`
 	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
 	FirstName             string  `json:"first_name,omitempty"`
 	LastName              string  `json:"last_name,omitempty"`
@@ -383,13 +383,19 @@ func (m *CreateStaffRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateStaffRequest
 	aux := struct {
 		*alias
-		UserId         string `json:"user_id,omitempty"`
-		DepartmentId   string `json:"department_id,omitempty"`
-		ManagerStaffId string `json:"manager_staff_id,omitempty"`
+		ManagerStaffId string  `json:"manager_staff_id,omitempty"`
+		UserId         *string `json:"user_id,omitempty"`
+		DepartmentId   *string `json:"department_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
-	aux.DepartmentId = strconv.FormatInt(m.DepartmentId, 10)
 	aux.ManagerStaffId = strconv.FormatInt(m.ManagerStaffId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
+	if m.DepartmentId != nil {
+		encodedDepartmentId := strconv.FormatInt(*m.DepartmentId, 10)
+		aux.DepartmentId = &encodedDepartmentId
+	}
 	return json.Marshal(aux)
 }
 
@@ -397,26 +403,12 @@ func (m *CreateStaffRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateStaffRequest
 	aux := struct {
 		*alias
-		UserId         string `json:"user_id,omitempty"`
-		DepartmentId   string `json:"department_id,omitempty"`
-		ManagerStaffId string `json:"manager_staff_id,omitempty"`
+		ManagerStaffId string  `json:"manager_staff_id,omitempty"`
+		UserId         *string `json:"user_id,omitempty"`
+		DepartmentId   *string `json:"department_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.UserId = v
-	}
-	if aux.DepartmentId != "" {
-		v, err := strconv.ParseInt(aux.DepartmentId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.DepartmentId = v
 	}
 	if aux.ManagerStaffId != "" {
 		v, err := strconv.ParseInt(aux.ManagerStaffId, 10, 64)
@@ -424,6 +416,20 @@ func (m *CreateStaffRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ManagerStaffId = v
+	}
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.UserId = &v
+	}
+	if aux.DepartmentId != nil {
+		v, err := strconv.ParseInt(*aux.DepartmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DepartmentId = &v
 	}
 	return nil
 }
@@ -433,7 +439,11 @@ func (x *CreateStaffRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *CreateStaffRequest) GetDepartmentId() int64 {
@@ -441,7 +451,11 @@ func (x *CreateStaffRequest) GetDepartmentId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.DepartmentId
+	if x.DepartmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DepartmentId
 }
 
 func (x *CreateStaffRequest) GetManagerStaffId() int64 {
@@ -699,7 +713,7 @@ func (x *GetStaffResponse) GetStaff() *Staff {
 }
 
 type UpdateStaffBody struct {
-	DepartmentId          int64   `json:"department_id,omitempty"`
+	DepartmentId          *int64  `json:"department_id,omitempty"`
 	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
 	FirstName             string  `json:"first_name,omitempty"`
 	LastName              string  `json:"last_name,omitempty"`
@@ -725,11 +739,14 @@ func (m *UpdateStaffBody) MarshalJSON() ([]byte, error) {
 	type alias UpdateStaffBody
 	aux := struct {
 		*alias
-		DepartmentId   string `json:"department_id,omitempty"`
-		ManagerStaffId string `json:"manager_staff_id,omitempty"`
+		ManagerStaffId string  `json:"manager_staff_id,omitempty"`
+		DepartmentId   *string `json:"department_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.DepartmentId = strconv.FormatInt(m.DepartmentId, 10)
 	aux.ManagerStaffId = strconv.FormatInt(m.ManagerStaffId, 10)
+	if m.DepartmentId != nil {
+		encodedDepartmentId := strconv.FormatInt(*m.DepartmentId, 10)
+		aux.DepartmentId = &encodedDepartmentId
+	}
 	return json.Marshal(aux)
 }
 
@@ -737,18 +754,11 @@ func (m *UpdateStaffBody) UnmarshalJSON(data []byte) error {
 	type alias UpdateStaffBody
 	aux := struct {
 		*alias
-		DepartmentId   string `json:"department_id,omitempty"`
-		ManagerStaffId string `json:"manager_staff_id,omitempty"`
+		ManagerStaffId string  `json:"manager_staff_id,omitempty"`
+		DepartmentId   *string `json:"department_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.DepartmentId != "" {
-		v, err := strconv.ParseInt(aux.DepartmentId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.DepartmentId = v
 	}
 	if aux.ManagerStaffId != "" {
 		v, err := strconv.ParseInt(aux.ManagerStaffId, 10, 64)
@@ -756,6 +766,13 @@ func (m *UpdateStaffBody) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ManagerStaffId = v
+	}
+	if aux.DepartmentId != nil {
+		v, err := strconv.ParseInt(*aux.DepartmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DepartmentId = &v
 	}
 	return nil
 }
@@ -765,7 +782,11 @@ func (x *UpdateStaffBody) GetDepartmentId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.DepartmentId
+	if x.DepartmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DepartmentId
 }
 
 func (x *UpdateStaffBody) GetManagerStaffId() int64 {
@@ -1036,16 +1057,19 @@ func (x *DeleteStaffResponse) GetSuccess() bool {
 }
 
 type ClockInRequest struct {
-	StaffId int64 `json:"staff_id,omitempty"`
+	StaffId *int64 `json:"staff_id,omitempty"`
 }
 
 func (m *ClockInRequest) MarshalJSON() ([]byte, error) {
 	type alias ClockInRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1053,17 +1077,17 @@ func (m *ClockInRequest) UnmarshalJSON(data []byte) error {
 	type alias ClockInRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.StaffId = v
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -1073,7 +1097,11 @@ func (x *ClockInRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 type ClockInResponse struct {
@@ -1089,16 +1117,19 @@ func (x *ClockInResponse) GetSuccess() bool {
 }
 
 type ClockOutRequest struct {
-	StaffId int64 `json:"staff_id,omitempty"`
+	StaffId *int64 `json:"staff_id,omitempty"`
 }
 
 func (m *ClockOutRequest) MarshalJSON() ([]byte, error) {
 	type alias ClockOutRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1106,17 +1137,17 @@ func (m *ClockOutRequest) UnmarshalJSON(data []byte) error {
 	type alias ClockOutRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.StaffId = v
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -1126,7 +1157,11 @@ func (x *ClockOutRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 type ClockOutResponse struct {
@@ -1265,19 +1300,25 @@ func (x *DirectoryStaffEntry) GetPhone() string {
 }
 
 type ListStaffDirectoryRequest struct {
-	Page     int64 `json:"page,omitempty"`
-	PageSize int64 `json:"page_size,omitempty"`
+	Page     *int64 `json:"page,omitempty"`
+	PageSize *int64 `json:"page_size,omitempty"`
 }
 
 func (m *ListStaffDirectoryRequest) MarshalJSON() ([]byte, error) {
 	type alias ListStaffDirectoryRequest
 	aux := struct {
 		*alias
-		Page     string `json:"page,omitempty"`
-		PageSize string `json:"page_size,omitempty"`
+		Page     *string `json:"page,omitempty"`
+		PageSize *string `json:"page_size,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Page = strconv.FormatInt(m.Page, 10)
-	aux.PageSize = strconv.FormatInt(m.PageSize, 10)
+	if m.Page != nil {
+		encodedPage := strconv.FormatInt(*m.Page, 10)
+		aux.Page = &encodedPage
+	}
+	if m.PageSize != nil {
+		encodedPageSize := strconv.FormatInt(*m.PageSize, 10)
+		aux.PageSize = &encodedPageSize
+	}
 	return json.Marshal(aux)
 }
 
@@ -1285,25 +1326,25 @@ func (m *ListStaffDirectoryRequest) UnmarshalJSON(data []byte) error {
 	type alias ListStaffDirectoryRequest
 	aux := struct {
 		*alias
-		Page     string `json:"page,omitempty"`
-		PageSize string `json:"page_size,omitempty"`
+		Page     *string `json:"page,omitempty"`
+		PageSize *string `json:"page_size,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.Page != "" {
-		v, err := strconv.ParseInt(aux.Page, 10, 64)
+	if aux.Page != nil {
+		v, err := strconv.ParseInt(*aux.Page, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Page = v
+		m.Page = &v
 	}
-	if aux.PageSize != "" {
-		v, err := strconv.ParseInt(aux.PageSize, 10, 64)
+	if aux.PageSize != nil {
+		v, err := strconv.ParseInt(*aux.PageSize, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.PageSize = v
+		m.PageSize = &v
 	}
 	return nil
 }
@@ -1313,7 +1354,11 @@ func (x *ListStaffDirectoryRequest) GetPage() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Page
+	if x.Page == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Page
 }
 
 func (x *ListStaffDirectoryRequest) GetPageSize() int64 {
@@ -1321,7 +1366,11 @@ func (x *ListStaffDirectoryRequest) GetPageSize() int64 {
 		var zero int64
 		return zero
 	}
-	return x.PageSize
+	if x.PageSize == nil {
+		var zero int64
+		return zero
+	}
+	return *x.PageSize
 }
 
 type ListStaffDirectoryResponse struct {

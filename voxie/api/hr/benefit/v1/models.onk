@@ -51,7 +51,7 @@ message BenefitEnrollment {
 
 message EnrollInBenefitRequest {
   /// plan_id is the BenefitPlan to enroll in. The employee is resolved from auth context, not client-supplied.
-  plan_id: int64 @required
+  plan_id: int64? @required
 }
 
 message EnrollInBenefitResponse {

@@ -47,8 +47,13 @@ func (m *CreateAccountRequest) Validate() error {
 	if m.Currency == "" {
 		violations = append(violations, "currency is required")
 	}
-	if m.Balance < 0 {
-		violations = append(violations, "balance must be greater than or equal to 0")
+	if m.Balance == nil {
+		violations = append(violations, "balance is required")
+	}
+	if m.Balance != nil {
+		if *m.Balance < 0 {
+			violations = append(violations, "balance must be greater than or equal to 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

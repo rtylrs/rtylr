@@ -216,7 +216,9 @@ func (c *ProjectServiceClient) ListProjectColumns(ctx context.Context, req *List
 	}
 	path := "/flow/project/v1/projects/columns"
 	query := url.Values{}
-	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
+	if req.ProjectId != nil {
+		query.Set("project_id", strconv.FormatInt(int64(*req.ProjectId), 10))
+	}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
 	query.Set("sort_by", req.SortBy)
@@ -416,7 +418,9 @@ func (c *ProjectServiceClient) ListProjectMembers(ctx context.Context, req *List
 	}
 	path := "/flow/project/v1/projects/members"
 	query := url.Values{}
-	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
+	if req.ProjectId != nil {
+		query.Set("project_id", strconv.FormatInt(int64(*req.ProjectId), 10))
+	}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
 	query.Set("sort_by", req.SortBy)
@@ -498,8 +502,12 @@ func (c *ProjectServiceClient) RemoveProjectMember(ctx context.Context, req *Rem
 	}
 	path := "/flow/project/v1/projects/members"
 	query := url.Values{}
-	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
-	query.Set("user_id", strconv.FormatInt(int64(req.UserId), 10))
+	if req.ProjectId != nil {
+		query.Set("project_id", strconv.FormatInt(int64(*req.ProjectId), 10))
+	}
+	if req.UserId != nil {
+		query.Set("user_id", strconv.FormatInt(int64(*req.UserId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

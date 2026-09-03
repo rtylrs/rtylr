@@ -43,7 +43,7 @@ message CreateWebhookResponse {
 }
 
 message DeleteWebhookRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteWebhookResponse {
@@ -63,7 +63,7 @@ message ListWebhooksResponse {
 }
 
 message RevokeApiKeyRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message RevokeApiKeyResponse {
@@ -71,7 +71,7 @@ message RevokeApiKeyResponse {
 }
 
 message UpdateWebhookRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   url: string @required
   events: string[] @min_items(1)
   is_active: bool

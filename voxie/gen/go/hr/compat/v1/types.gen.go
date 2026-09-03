@@ -120,8 +120,8 @@ type QueryRequest struct {
 	Days         *int32  `json:"days,omitempty"`
 	StartDate    *string `json:"start_date,omitempty"`
 	EndDate      *string `json:"end_date,omitempty"`
-	From         *string `json:"from,omitempty"`
-	To           *string `json:"to,omitempty"`
+	FromDate     *string `json:"from_date,omitempty"`
+	ToDate       *string `json:"to_date,omitempty"`
 	EmployeeId   *string `json:"employee_id,omitempty"`
 	DepartmentId *string `json:"department_id,omitempty"`
 	LocationId   *string `json:"location_id,omitempty"`
@@ -299,28 +299,28 @@ func (x *QueryRequest) GetEndDate() string {
 	return *x.EndDate
 }
 
-func (x *QueryRequest) GetFrom() string {
+func (x *QueryRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	if x.From == nil {
+	if x.FromDate == nil {
 		var zero string
 		return zero
 	}
-	return *x.From
+	return *x.FromDate
 }
 
-func (x *QueryRequest) GetTo() string {
+func (x *QueryRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	if x.To == nil {
+	if x.ToDate == nil {
 		var zero string
 		return zero
 	}
-	return *x.To
+	return *x.ToDate
 }
 
 func (x *QueryRequest) GetEmployeeId() string {

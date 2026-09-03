@@ -21,13 +21,13 @@ message StockTransfer {
 }
 
 message CreateStockTransferItemRequest {
-  product_id: int64 @required @gt(0)
-  quantity: float64 @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
 }
 
 message CreateStockTransferRequest {
-  from_warehouse_id: int64 @required @gt(0)
-  to_warehouse_id: int64 @required @gt(0)
+  from_warehouse_id: int64? @required @gt(0)
+  to_warehouse_id: int64? @required @gt(0)
   notes: string
   items: CreateStockTransferItemRequest[] @min_items(1)
 }
@@ -54,7 +54,7 @@ message UpdateStockTransferStatusBody {
 }
 
 message UpdateStockTransferStatusRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateStockTransferStatusBody
 }
 

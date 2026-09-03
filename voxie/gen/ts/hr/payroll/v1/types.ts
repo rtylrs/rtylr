@@ -196,7 +196,7 @@ return violations;
 }
 
 export interface MarkPayrollPaidRequest {
-id: number;
+id?: number;
 }
 
 export function decodeMarkPayrollPaidRequest(v: any): MarkPayrollPaidRequest {
@@ -215,7 +215,6 @@ return out;
 export function validateMarkPayrollPaidRequest(v: MarkPayrollPaidRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

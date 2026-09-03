@@ -143,24 +143,24 @@ func (x *CalendarDay) GetAppointments() []*CalendarAppointment {
 }
 
 type GetCalendarRequest struct {
-	From string `json:"from,omitempty"`
-	To   string `json:"to,omitempty"`
+	FromDate string `json:"from_date,omitempty"`
+	ToDate   string `json:"to_date,omitempty"`
 }
 
-func (x *GetCalendarRequest) GetFrom() string {
+func (x *GetCalendarRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *GetCalendarRequest) GetTo() string {
+func (x *GetCalendarRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 type GetCalendarResponse struct {

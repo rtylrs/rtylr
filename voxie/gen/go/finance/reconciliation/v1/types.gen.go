@@ -402,20 +402,26 @@ func (x *GetOverviewResponse) GetPreviewLimit() int32 {
 }
 
 type MatchRequest struct {
-	BankFeedId int64  `json:"bank_feed_id,omitempty"`
+	BankFeedId *int64 `json:"bank_feed_id,omitempty"`
 	TargetType string `json:"target_type,omitempty"`
-	TargetId   int64  `json:"target_id,omitempty"`
+	TargetId   *int64 `json:"target_id,omitempty"`
 }
 
 func (m *MatchRequest) MarshalJSON() ([]byte, error) {
 	type alias MatchRequest
 	aux := struct {
 		*alias
-		BankFeedId string `json:"bank_feed_id,omitempty"`
-		TargetId   string `json:"target_id,omitempty"`
+		BankFeedId *string `json:"bank_feed_id,omitempty"`
+		TargetId   *string `json:"target_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BankFeedId = strconv.FormatInt(m.BankFeedId, 10)
-	aux.TargetId = strconv.FormatInt(m.TargetId, 10)
+	if m.BankFeedId != nil {
+		encodedBankFeedId := strconv.FormatInt(*m.BankFeedId, 10)
+		aux.BankFeedId = &encodedBankFeedId
+	}
+	if m.TargetId != nil {
+		encodedTargetId := strconv.FormatInt(*m.TargetId, 10)
+		aux.TargetId = &encodedTargetId
+	}
 	return json.Marshal(aux)
 }
 
@@ -423,25 +429,25 @@ func (m *MatchRequest) UnmarshalJSON(data []byte) error {
 	type alias MatchRequest
 	aux := struct {
 		*alias
-		BankFeedId string `json:"bank_feed_id,omitempty"`
-		TargetId   string `json:"target_id,omitempty"`
+		BankFeedId *string `json:"bank_feed_id,omitempty"`
+		TargetId   *string `json:"target_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BankFeedId != "" {
-		v, err := strconv.ParseInt(aux.BankFeedId, 10, 64)
+	if aux.BankFeedId != nil {
+		v, err := strconv.ParseInt(*aux.BankFeedId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BankFeedId = v
+		m.BankFeedId = &v
 	}
-	if aux.TargetId != "" {
-		v, err := strconv.ParseInt(aux.TargetId, 10, 64)
+	if aux.TargetId != nil {
+		v, err := strconv.ParseInt(*aux.TargetId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TargetId = v
+		m.TargetId = &v
 	}
 	return nil
 }
@@ -451,7 +457,11 @@ func (x *MatchRequest) GetBankFeedId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BankFeedId
+	if x.BankFeedId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BankFeedId
 }
 
 func (x *MatchRequest) GetTargetType() string {
@@ -467,7 +477,11 @@ func (x *MatchRequest) GetTargetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TargetId
+	if x.TargetId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TargetId
 }
 
 type MatchResponse struct {

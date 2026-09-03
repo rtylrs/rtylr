@@ -59,7 +59,7 @@ message InvoiceDetail {
   /// for a party that is not a customer record. The client_* fields stay the
   /// values printed on the document at issue time and are deliberately not
   /// re-derived from the customer record.
-  customer_id: int64? @nullable
+  customer_id: int64?
   /// invoice_number is the invoice number value for this contract.
   invoice_number: string
   /// client_name is the client name value for this contract.
@@ -163,7 +163,7 @@ message CreateInvoiceRequest {
   /// server requires client_name and client_email, which is the existing
   /// behaviour. The server must verify the referenced customer belongs to
   /// the caller's business before accepting the link.
-  customer_id: int64? @nullable
+  customer_id: int64?
   /// issue_date is the issue date value for this contract.
   issue_date: string @required
   /// due_date is the due date value for this contract.
@@ -191,7 +191,7 @@ message CreateInvoiceResponse {
 
 message DeleteInvoiceRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteInvoiceResponse {
@@ -201,7 +201,7 @@ message DeleteInvoiceResponse {
 
 message GetInvoiceRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetInvoiceResponse {
@@ -218,7 +218,7 @@ message ListInvoicesRequest {
   search: string @query("search")
   /// customer_id filters by the linked CRM customer; absent to include
   /// invoices for all customers and invoices with no customer link.
-  customer_id: int64? @query("customer_id") @nullable
+  customer_id: int64? @query("customer_id")
   /// date_from is the inclusive start date filter.
   date_from: string @query("date_from")
   /// date_to is the inclusive end date filter.
@@ -242,7 +242,7 @@ message ListInvoicesResponse {
 
 message SendInvoiceRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message SendInvoiceResponse {
@@ -281,7 +281,7 @@ message UpdateInvoiceBody {
 
 message UpdateInvoiceRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable invoice fields bound from the HTTP payload.
   body: UpdateInvoiceBody
 }
@@ -298,7 +298,7 @@ message UpdateInvoiceStatusBody {
 
 message UpdateInvoiceStatusRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries status update fields bound from the HTTP payload.
   body: UpdateInvoiceStatusBody
 }

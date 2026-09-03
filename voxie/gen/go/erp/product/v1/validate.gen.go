@@ -132,11 +132,21 @@ func (m *CreateProductRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.CategoryId <= 0 {
-		violations = append(violations, "category_id must be greater than 0")
+	if m.CategoryId == nil {
+		violations = append(violations, "category_id is required")
 	}
-	if m.SupplierId <= 0 {
-		violations = append(violations, "supplier_id must be greater than 0")
+	if m.CategoryId != nil {
+		if *m.CategoryId <= 0 {
+			violations = append(violations, "category_id must be greater than 0")
+		}
+	}
+	if m.SupplierId == nil {
+		violations = append(violations, "supplier_id is required")
+	}
+	if m.SupplierId != nil {
+		if *m.SupplierId <= 0 {
+			violations = append(violations, "supplier_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -331,11 +341,21 @@ func (m *UpdateProductBody) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.CategoryId <= 0 {
-		violations = append(violations, "category_id must be greater than 0")
+	if m.CategoryId == nil {
+		violations = append(violations, "category_id is required")
 	}
-	if m.SupplierId <= 0 {
-		violations = append(violations, "supplier_id must be greater than 0")
+	if m.CategoryId != nil {
+		if *m.CategoryId <= 0 {
+			violations = append(violations, "category_id must be greater than 0")
+		}
+	}
+	if m.SupplierId == nil {
+		violations = append(violations, "supplier_id is required")
+	}
+	if m.SupplierId != nil {
+		if *m.SupplierId <= 0 {
+			violations = append(violations, "supplier_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")

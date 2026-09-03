@@ -170,8 +170,8 @@ date?: string;
 days?: number;
 startDate?: string;
 endDate?: string;
-from?: string;
-to?: string;
+fromDate?: string;
+toDate?: string;
 employeeId?: string;
 departmentId?: string;
 locationId?: string;
@@ -198,8 +198,8 @@ date: v.date,
 days: v.days,
 startDate: v.start_date,
 endDate: v.end_date,
-from: v.from,
-to: v.to,
+fromDate: v.from_date,
+toDate: v.to_date,
 employeeId: v.employee_id,
 departmentId: v.department_id,
 locationId: v.location_id,
@@ -226,8 +226,8 @@ if (v.date !== undefined) { out.date = v.date; }
 if (v.days !== undefined) { out.days = v.days; }
 if (v.startDate !== undefined) { out.start_date = v.startDate; }
 if (v.endDate !== undefined) { out.end_date = v.endDate; }
-if (v.from !== undefined) { out.from = v.from; }
-if (v.to !== undefined) { out.to = v.to; }
+if (v.fromDate !== undefined) { out.from_date = v.fromDate; }
+if (v.toDate !== undefined) { out.to_date = v.toDate; }
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
@@ -254,8 +254,8 @@ if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) vi
 if (v.days !== undefined && v.days !== null && !(typeof v.days === "number" && Number.isInteger(v.days) && v.days >= -2147483648 && v.days <= 2147483647)) violations.push("days has invalid type");
 if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
-if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
-if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
 if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string")) violations.push("employee_id has invalid type");
 if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string")) violations.push("department_id has invalid type");
 if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string")) violations.push("location_id has invalid type");

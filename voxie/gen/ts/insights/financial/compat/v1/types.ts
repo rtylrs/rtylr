@@ -32,29 +32,29 @@ return violations;
 }
 
 export interface GetCashFlowRequest {
-from?: string;
-to?: string;
+fromDate?: string;
+toDate?: string;
 }
 
 export function decodeGetCashFlowRequest(v: any): GetCashFlowRequest {
 if (v === null || v === undefined) return v;
 return {
-from: v.from,
-to: v.to,
+fromDate: v.from_date,
+toDate: v.to_date,
 };
 }
 
 export function encodeGetCashFlowRequest(v: GetCashFlowRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
-if (v.from !== undefined) { out.from = v.from; }
-if (v.to !== undefined) { out.to = v.to; }
+if (v.fromDate !== undefined) { out.from_date = v.fromDate; }
+if (v.toDate !== undefined) { out.to_date = v.toDate; }
 return out;
 }
 
 export function validateGetCashFlowRequest(v: GetCashFlowRequest): string[] {
 const violations: string[] = [];
-if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
-if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
 return violations;
 }
 

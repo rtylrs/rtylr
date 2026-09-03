@@ -315,7 +315,7 @@ return violations;
 }
 
 export interface GetGroupDetailRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetGroupDetailRequest(v: any): GetGroupDetailRequest {
@@ -334,7 +334,6 @@ return out;
 export function validateGetGroupDetailRequest(v: GetGroupDetailRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -364,7 +363,7 @@ return violations;
 }
 
 export interface UpdateGroupRequest {
-id: string;
+id?: string;
 name: string;
 description?: string;
 color?: string;
@@ -395,7 +394,6 @@ return out;
 export function validateUpdateGroupRequest(v: UpdateGroupRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
@@ -431,7 +429,7 @@ return violations;
 }
 
 export interface DeleteGroupRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteGroupRequest(v: any): DeleteGroupRequest {
@@ -450,7 +448,6 @@ return out;
 export function validateDeleteGroupRequest(v: DeleteGroupRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -479,7 +476,7 @@ return violations;
 }
 
 export interface AddGroupMembersRequest {
-id: string;
+id?: string;
 userIds?: (string)[];
 }
 
@@ -501,7 +498,6 @@ return out;
 export function validateAddGroupMembersRequest(v: AddGroupMembersRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.userIds !== undefined && v.userIds !== null && !(Array.isArray(v.userIds) && (v.userIds).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("user_ids has invalid type");
 if (v.userIds !== undefined && v.userIds !== null && v.userIds.length < 1) violations.push("user_ids must contain at least 1 items");
@@ -536,8 +532,8 @@ return violations;
 }
 
 export interface RemoveGroupMemberRequest {
-id: string;
-userId: string;
+id?: string;
+userId?: string;
 }
 
 export function decodeRemoveGroupMemberRequest(v: any): RemoveGroupMemberRequest {
@@ -558,10 +554,8 @@ return out;
 export function validateRemoveGroupMemberRequest(v: RemoveGroupMemberRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
-if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
 }
@@ -590,7 +584,7 @@ return violations;
 }
 
 export interface GetUserGroupsRequest {
-userId: string;
+userId?: string;
 }
 
 export function decodeGetUserGroupsRequest(v: any): GetUserGroupsRequest {
@@ -609,7 +603,6 @@ return out;
 export function validateGetUserGroupsRequest(v: GetUserGroupsRequest): string[] {
 const violations: string[] = [];
 if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
-if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
 }

@@ -230,7 +230,7 @@ type CreateQuoteRequest struct {
 	Subtotal      float64      `json:"subtotal,omitempty"`
 	Tax           float64      `json:"tax,omitempty"`
 	ValidUntil    string       `json:"valid_until,omitempty"`
-	Discount      float64      `json:"discount,omitempty"`
+	Discount      *float64     `json:"discount,omitempty"`
 	Total         float64      `json:"total,omitempty"`
 	Notes         string       `json:"notes,omitempty"`
 }
@@ -296,7 +296,11 @@ func (x *CreateQuoteRequest) GetDiscount() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Discount
+	if x.Discount == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Discount
 }
 
 func (x *CreateQuoteRequest) GetTotal() float64 {

@@ -55,7 +55,7 @@ message ListStatusesRequest {
   /// project_id scopes the listing to one project's set. Required: there is no
   /// business-wide set to fall back on, and a listing across projects would
   /// mix pipelines that have nothing to do with each other.
-  project_id: int64 @query("project_id") @required @gt(0)
+  project_id: int64? @query("project_id") @required @gt(0)
 }
 
 message ListStatusesResponse {
@@ -67,7 +67,7 @@ message ListStatusesResponse {
 
 message CreateStatusRequest {
   /// project_id is the project to add the status to.
-  project_id: int64 @required @gt(0)
+  project_id: int64? @required @gt(0)
   /// name must be unique within the project. A duplicate is rejected with 409.
   name: string @required
   /// bucket is one of "backlog", "active", "done", "cancelled".
@@ -92,7 +92,7 @@ message CreateStatusResponse {
 
 message UpdateStatusRequest {
   /// id is the status identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateStatusBody @required
 }
 
@@ -126,7 +126,7 @@ message UpdateStatusResponse {
 
 message DeleteStatusRequest {
   /// id is the status identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteStatusResponse {
@@ -143,7 +143,7 @@ message DeleteStatusResponse {
 
 message SetTaskStatusRequest {
   /// task_id is the task to move.
-  task_id: int64 @required @gt(0)
+  task_id: int64? @required @gt(0)
   /// status_id is the custom status to apply. Zero clears it, putting the task
   /// back on its built-in string status.
   ///

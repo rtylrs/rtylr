@@ -483,7 +483,7 @@ return violations;
 }
 
 export interface ApproveTimesheetRequest {
-id: string;
+id?: string;
 body?: ApproveTimesheetBody;
 }
 
@@ -505,7 +505,6 @@ return out;
 export function validateApproveTimesheetRequest(v: ApproveTimesheetRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateApproveTimesheetBody(v.body).map((message) => "body: " + message));
@@ -564,7 +563,7 @@ return violations;
 }
 
 export interface MarkTimeEntriesInvoicedBody {
-entryIds: (string)[];
+entryIds?: (string)[];
 invoiceId: string;
 }
 
@@ -586,7 +585,6 @@ return out;
 export function validateMarkTimeEntriesInvoicedBody(v: MarkTimeEntriesInvoicedBody): string[] {
 const violations: string[] = [];
 if (v.entryIds !== undefined && v.entryIds !== null && !(Array.isArray(v.entryIds) && (v.entryIds).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("entry_ids has invalid type");
-if (!(v.entryIds !== undefined && v.entryIds !== null)) violations.push("entry_ids is required");
 if (v.entryIds !== undefined && v.entryIds !== null && v.entryIds.length < 1) violations.push("entry_ids must contain at least 1 items");
 if (v.invoiceId !== undefined && v.invoiceId !== null && !(typeof v.invoiceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.invoiceId))) violations.push("invoice_id has invalid type");
 if (!(v.invoiceId !== undefined && v.invoiceId !== null)) violations.push("invoice_id is required");

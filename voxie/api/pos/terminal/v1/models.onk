@@ -20,7 +20,7 @@ message ListTerminalsResponse {
 }
 
 message CreateTerminalRequest {
-  branch_id: int64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
   name: string @required
   device_id: string @required
 }
@@ -31,14 +31,14 @@ message CreateTerminalResponse {
 }
 
 message UpdateTerminalBody {
-  branch_id: int64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
   name: string @required
   device_id: string @required
   is_active: bool
 }
 
 message UpdateTerminalRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable terminal fields bound from the HTTP payload.
   body: UpdateTerminalBody
 }
@@ -48,7 +48,7 @@ message UpdateTerminalResponse {
 }
 
 message HeartbeatTerminalRequest {
-  terminal_id: int64 @required @gt(0)
+  terminal_id: int64? @required @gt(0)
 }
 
 message HeartbeatTerminalResponse {

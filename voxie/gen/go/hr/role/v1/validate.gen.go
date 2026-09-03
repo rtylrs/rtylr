@@ -146,11 +146,21 @@ func (m *AssignRoleRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
 	}
-	if m.RoleId <= 0 {
-		violations = append(violations, "role_id must be greater than 0")
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
+	}
+	if m.RoleId == nil {
+		violations = append(violations, "role_id is required")
+	}
+	if m.RoleId != nil {
+		if *m.RoleId <= 0 {
+			violations = append(violations, "role_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

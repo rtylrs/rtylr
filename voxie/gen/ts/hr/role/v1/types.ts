@@ -187,7 +187,7 @@ return violations;
 }
 
 export interface UpdateRoleRequest {
-id: string;
+id?: string;
 body?: UpdateRoleBody;
 }
 
@@ -209,7 +209,6 @@ return out;
 export function validateUpdateRoleRequest(v: UpdateRoleRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateRoleBody(v.body).map((message) => "body: " + message));

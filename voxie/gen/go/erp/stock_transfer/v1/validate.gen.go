@@ -38,11 +38,21 @@ func (m *CreateStockTransferItemRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
 	}
-	if m.Quantity <= 0 {
-		violations = append(violations, "quantity must be greater than 0")
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
+	}
+	if m.Quantity == nil {
+		violations = append(violations, "quantity is required")
+	}
+	if m.Quantity != nil {
+		if *m.Quantity <= 0 {
+			violations = append(violations, "quantity must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -55,11 +65,21 @@ func (m *CreateStockTransferRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.FromWarehouseId <= 0 {
-		violations = append(violations, "from_warehouse_id must be greater than 0")
+	if m.FromWarehouseId == nil {
+		violations = append(violations, "from_warehouse_id is required")
 	}
-	if m.ToWarehouseId <= 0 {
-		violations = append(violations, "to_warehouse_id must be greater than 0")
+	if m.FromWarehouseId != nil {
+		if *m.FromWarehouseId <= 0 {
+			violations = append(violations, "from_warehouse_id must be greater than 0")
+		}
+	}
+	if m.ToWarehouseId == nil {
+		violations = append(violations, "to_warehouse_id is required")
+	}
+	if m.ToWarehouseId != nil {
+		if *m.ToWarehouseId <= 0 {
+			violations = append(violations, "to_warehouse_id must be greater than 0")
+		}
 	}
 	if len(m.Items) < 1 {
 		violations = append(violations, "items must have at least 1 items")

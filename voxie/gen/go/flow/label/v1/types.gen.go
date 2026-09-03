@@ -193,7 +193,7 @@ func (x *ListLabelsResponse) GetPagination() *common_pagination_v1.PaginationRes
 }
 
 type CreateLabelRequest struct {
-	WorkspaceId int64  `json:"workspace_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Color       string `json:"color,omitempty"`
 }
@@ -202,9 +202,12 @@ func (m *CreateLabelRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateLabelRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -212,17 +215,17 @@ func (m *CreateLabelRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateLabelRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
 	return nil
 }
@@ -232,7 +235,11 @@ func (x *CreateLabelRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 func (x *CreateLabelRequest) GetName() string {
@@ -388,7 +395,7 @@ func (x *DeleteLabelResponse) GetMessage() string {
 }
 
 type SetTaskLabelsRequest struct {
-	TaskId   int64   `json:"task_id,omitempty"`
+	TaskId   *int64  `json:"task_id,omitempty"`
 	LabelIds []int64 `json:"label_ids,omitempty"`
 }
 
@@ -396,10 +403,13 @@ func (m *SetTaskLabelsRequest) MarshalJSON() ([]byte, error) {
 	type alias SetTaskLabelsRequest
 	aux := struct {
 		*alias
-		TaskId   string   `json:"task_id,omitempty"`
+		TaskId   *string  `json:"task_id,omitempty"`
 		LabelIds []string `json:"label_ids,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
 	aux.LabelIds = make([]string, len(m.LabelIds))
 	for i, v := range m.LabelIds {
 		aux.LabelIds[i] = strconv.FormatInt(v, 10)
@@ -411,18 +421,18 @@ func (m *SetTaskLabelsRequest) UnmarshalJSON(data []byte) error {
 	type alias SetTaskLabelsRequest
 	aux := struct {
 		*alias
-		TaskId   string   `json:"task_id,omitempty"`
+		TaskId   *string  `json:"task_id,omitempty"`
 		LabelIds []string `json:"label_ids,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.TaskId != "" {
-		v, err := strconv.ParseInt(aux.TaskId, 10, 64)
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TaskId = v
+		m.TaskId = &v
 	}
 	if aux.LabelIds != nil {
 		m.LabelIds = make([]int64, len(aux.LabelIds))
@@ -442,7 +452,11 @@ func (x *SetTaskLabelsRequest) GetTaskId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TaskId
+	if x.TaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TaskId
 }
 
 func (x *SetTaskLabelsRequest) GetLabelIds() []int64 {

@@ -14,8 +14,13 @@ func (m *Variant) Validate() error {
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
+	}
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -31,8 +36,13 @@ func (m *CreateVariantRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
+	}
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")

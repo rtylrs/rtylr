@@ -107,7 +107,7 @@ return violations;
 }
 
 export interface DeleteDepartmentRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteDepartmentRequest(v: any): DeleteDepartmentRequest {
@@ -126,7 +126,6 @@ return out;
 export function validateDeleteDepartmentRequest(v: DeleteDepartmentRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -230,7 +229,7 @@ return violations;
 }
 
 export interface UpdateDepartmentRequest {
-id: string;
+id?: string;
 body?: UpdateDepartmentBody;
 }
 
@@ -252,7 +251,6 @@ return out;
 export function validateUpdateDepartmentRequest(v: UpdateDepartmentRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateDepartmentBody(v.body).map((message) => "body: " + message));

@@ -201,7 +201,7 @@ func (x *ListReviewsResponse) GetReviews() []*Review {
 }
 
 type CreateReviewRequest struct {
-	StaffId      int64   `json:"staff_id,omitempty"`
+	StaffId      *int64  `json:"staff_id,omitempty"`
 	ReviewerId   int64   `json:"reviewer_id,omitempty"`
 	Period       string  `json:"period,omitempty"`
 	Rating       float64 `json:"rating,omitempty"`
@@ -216,11 +216,14 @@ func (m *CreateReviewRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateReviewRequest
 	aux := struct {
 		*alias
-		StaffId    string `json:"staff_id,omitempty"`
-		ReviewerId string `json:"reviewer_id,omitempty"`
+		ReviewerId string  `json:"reviewer_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
 	aux.ReviewerId = strconv.FormatInt(m.ReviewerId, 10)
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -228,18 +231,11 @@ func (m *CreateReviewRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateReviewRequest
 	aux := struct {
 		*alias
-		StaffId    string `json:"staff_id,omitempty"`
-		ReviewerId string `json:"reviewer_id,omitempty"`
+		ReviewerId string  `json:"reviewer_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.StaffId = v
 	}
 	if aux.ReviewerId != "" {
 		v, err := strconv.ParseInt(aux.ReviewerId, 10, 64)
@@ -247,6 +243,13 @@ func (m *CreateReviewRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ReviewerId = v
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -256,7 +259,11 @@ func (x *CreateReviewRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 func (x *CreateReviewRequest) GetReviewerId() int64 {

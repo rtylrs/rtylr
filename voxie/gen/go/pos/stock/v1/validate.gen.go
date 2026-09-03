@@ -33,17 +33,37 @@ func (m *AdjustStockRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
 	}
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
-	if m.Quantity <= 0 {
-		violations = append(violations, "quantity must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
+	}
+	if m.Quantity == nil {
+		violations = append(violations, "quantity is required")
+	}
+	if m.Quantity != nil {
+		if *m.Quantity <= 0 {
+			violations = append(violations, "quantity must be greater than 0")
+		}
+	}
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -121,8 +141,13 @@ func (m *LowStockRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
+	}
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -151,20 +176,40 @@ func (m *ReceiveStockRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
 	}
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
-	if m.Quantity <= 0 {
-		violations = append(violations, "quantity must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
+	}
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
+	}
+	if m.Quantity == nil {
+		violations = append(violations, "quantity is required")
+	}
+	if m.Quantity != nil {
+		if *m.Quantity <= 0 {
+			violations = append(violations, "quantity must be greater than 0")
+		}
 	}
 	if m.Note == "" {
 		violations = append(violations, "note is required")
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -188,23 +233,48 @@ func (m *TransferStockRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.FromBranchId <= 0 {
-		violations = append(violations, "from_branch_id must be greater than 0")
+	if m.FromBranchId == nil {
+		violations = append(violations, "from_branch_id is required")
 	}
-	if m.ToBranchId <= 0 {
-		violations = append(violations, "to_branch_id must be greater than 0")
+	if m.FromBranchId != nil {
+		if *m.FromBranchId <= 0 {
+			violations = append(violations, "from_branch_id must be greater than 0")
+		}
 	}
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.ToBranchId == nil {
+		violations = append(violations, "to_branch_id is required")
 	}
-	if m.Quantity <= 0 {
-		violations = append(violations, "quantity must be greater than 0")
+	if m.ToBranchId != nil {
+		if *m.ToBranchId <= 0 {
+			violations = append(violations, "to_branch_id must be greater than 0")
+		}
+	}
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
+	}
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
+	}
+	if m.Quantity == nil {
+		violations = append(violations, "quantity is required")
+	}
+	if m.Quantity != nil {
+		if *m.Quantity <= 0 {
+			violations = append(violations, "quantity must be greater than 0")
+		}
 	}
 	if m.Note == "" {
 		violations = append(violations, "note is required")
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -228,20 +298,40 @@ func (m *WasteStockRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
 	}
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
-	if m.Quantity <= 0 {
-		violations = append(violations, "quantity must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
+	}
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
+	}
+	if m.Quantity == nil {
+		violations = append(violations, "quantity is required")
+	}
+	if m.Quantity != nil {
+		if *m.Quantity <= 0 {
+			violations = append(violations, "quantity must be greater than 0")
+		}
 	}
 	if m.Note == "" {
 		violations = append(violations, "note is required")
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

@@ -372,7 +372,7 @@ func (x *ApprovalChainPayload) GetUpdatedAt() int64 {
 }
 
 type UpsertApprovalChainRequest struct {
-	Id                int64                        `json:"id,omitempty"`
+	Id                *int64                       `json:"id,omitempty"`
 	RequestType       string                       `json:"request_type,omitempty"`
 	Name              string                       `json:"name,omitempty"`
 	DelegationEnabled bool                         `json:"delegation_enabled,omitempty"`
@@ -383,9 +383,12 @@ func (m *UpsertApprovalChainRequest) MarshalJSON() ([]byte, error) {
 	type alias UpsertApprovalChainRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.Id != nil {
+		encodedId := strconv.FormatInt(*m.Id, 10)
+		aux.Id = &encodedId
+	}
 	return json.Marshal(aux)
 }
 
@@ -393,17 +396,17 @@ func (m *UpsertApprovalChainRequest) UnmarshalJSON(data []byte) error {
 	type alias UpsertApprovalChainRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.Id != "" {
-		v, err := strconv.ParseInt(aux.Id, 10, 64)
+	if aux.Id != nil {
+		v, err := strconv.ParseInt(*aux.Id, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Id = v
+		m.Id = &v
 	}
 	return nil
 }
@@ -413,7 +416,11 @@ func (x *UpsertApprovalChainRequest) GetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Id
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
 }
 
 func (x *UpsertApprovalChainRequest) GetRequestType() string {

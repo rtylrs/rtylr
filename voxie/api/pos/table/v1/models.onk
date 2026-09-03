@@ -25,7 +25,7 @@ message ListTablesResponse {
 message CreateTableRequest {
   location_id: int64?
   label: string @required
-  seats: int32 @required @gt(0)
+  seats: int32? @required @gt(0)
 }
 
 message CreateTableResponse {
@@ -36,13 +36,13 @@ message CreateTableResponse {
 message UpdateTableBody {
   location_id: int64?
   label: string @required
-  seats: int32 @required @gt(0)
+  seats: int32? @required @gt(0)
   /// status is the current lifecycle state.
   status: string @required
 }
 
 message UpdateTableRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable table fields bound from the HTTP payload.
   body: UpdateTableBody
 }
@@ -57,7 +57,7 @@ message UpdateTableStatusBody {
 }
 
 message UpdateTableStatusRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries the new table status bound from the HTTP payload.
   body: UpdateTableStatusBody
 }
@@ -67,7 +67,7 @@ message UpdateTableStatusResponse {
 }
 
 message DeleteTableRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteTableResponse {

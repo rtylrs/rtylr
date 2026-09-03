@@ -29,7 +29,7 @@ message CreateCannedResponseResponse {
 }
 
 message UpdateCannedResponseRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   name: string
   body: string
   category: string
@@ -41,7 +41,7 @@ message UpdateCannedResponseResponse {
 }
 
 message DeleteCannedResponseRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteCannedResponseResponse {

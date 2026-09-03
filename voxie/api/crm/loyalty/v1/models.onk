@@ -48,8 +48,8 @@ message LoyaltyTier {
 }
 
 message AwardPointsRequest {
-  customer_id: int64 @required @gt(0)
-  points: int64 @required @gt(0)
+  customer_id: int64? @required @gt(0)
+  points: int64? @required @gt(0)
   description: string @required
   reference_id: int64?
   reference_type: string @required
@@ -61,10 +61,10 @@ message AwardPointsResponse {
 
 message CreateLoyaltyTierRequest {
   name: string @required
-  min_points: int64 @required @gt(0)
-  discount_pct: float64 @required @gt(0)
+  min_points: int64? @required @gt(0)
+  discount_pct: float64? @required @gt(0)
   perks: string @required
-  sort_order: int64 @required @gt(0)
+  sort_order: int64? @required @gt(0)
 }
 
 message CreateLoyaltyTierResponse {
@@ -99,8 +99,8 @@ message ListLoyaltyTransactionsResponse {
 }
 
 message RedeemPointsRequest {
-  customer_id: int64 @required @gt(0)
-  points: int64 @required @gt(0)
+  customer_id: int64? @required @gt(0)
+  points: int64? @required @gt(0)
   description: string @required
   reference_id: int64?
   reference_type: string @required
@@ -112,17 +112,17 @@ message RedeemPointsResponse {
 
 message UpdateLoyaltyConfigRequest {
   is_enabled: bool
-  points_per_currency_unit: float64 @required @gt(0)
-  currency_per_point: float64 @required @gt(0)
-  bronze_min: int64 @required @gt(0)
-  silver_min: int64 @required @gt(0)
-  gold_min: int64 @required @gt(0)
-  platinum_min: int64 @required @gt(0)
-  bronze_discount_pct: float64 @required @gt(0)
-  silver_discount_pct: float64 @required @gt(0)
-  gold_discount_pct: float64 @required @gt(0)
-  platinum_discount_pct: float64 @required @gt(0)
-  points_expiry_days: int64 @required @gt(0)
+  points_per_currency_unit: float64? @required @gt(0)
+  currency_per_point: float64? @required @gt(0)
+  bronze_min: int64? @required @gt(0)
+  silver_min: int64? @required @gt(0)
+  gold_min: int64? @required @gt(0)
+  platinum_min: int64? @required @gt(0)
+  bronze_discount_pct: float64? @required @gt(0)
+  silver_discount_pct: float64? @required @gt(0)
+  gold_discount_pct: float64? @required @gt(0)
+  platinum_discount_pct: float64? @required @gt(0)
+  points_expiry_days: int64? @required @gt(0)
 }
 
 message UpdateLoyaltyConfigResponse {
@@ -131,14 +131,14 @@ message UpdateLoyaltyConfigResponse {
 
 message UpdateLoyaltyTierBody {
   name: string @required
-  min_points: int64 @required @gt(0)
-  discount_pct: float64 @required @gt(0)
+  min_points: int64? @required @gt(0)
+  discount_pct: float64? @required @gt(0)
   perks: string @required
-  sort_order: int64 @required @gt(0)
+  sort_order: int64? @required @gt(0)
 }
 
 message UpdateLoyaltyTierRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateLoyaltyTierBody
 }
 

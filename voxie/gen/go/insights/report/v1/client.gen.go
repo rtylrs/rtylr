@@ -375,8 +375,8 @@ func (c *ReportServiceClient) ExportRevenueReport(ctx context.Context, req *Expo
 	}
 	path := "/insights/report/v1/reports/revenue/export"
 	query := url.Values{}
-	query.Set("from", req.From)
-	query.Set("to", req.To)
+	query.Set("from", req.FromDate)
+	query.Set("to", req.ToDate)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

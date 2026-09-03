@@ -294,19 +294,25 @@ func (x *UpdateRoleResponse) GetRole() *RolePayload {
 }
 
 type AssignRoleRequest struct {
-	EmployeeId int64 `json:"employee_id,omitempty"`
-	RoleId     int64 `json:"role_id,omitempty"`
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	RoleId     *int64 `json:"role_id,omitempty"`
 }
 
 func (m *AssignRoleRequest) MarshalJSON() ([]byte, error) {
 	type alias AssignRoleRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
-		RoleId     string `json:"role_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
+		RoleId     *string `json:"role_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
-	aux.RoleId = strconv.FormatInt(m.RoleId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	if m.RoleId != nil {
+		encodedRoleId := strconv.FormatInt(*m.RoleId, 10)
+		aux.RoleId = &encodedRoleId
+	}
 	return json.Marshal(aux)
 }
 
@@ -314,25 +320,25 @@ func (m *AssignRoleRequest) UnmarshalJSON(data []byte) error {
 	type alias AssignRoleRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
-		RoleId     string `json:"role_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
+		RoleId     *string `json:"role_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
-	if aux.RoleId != "" {
-		v, err := strconv.ParseInt(aux.RoleId, 10, 64)
+	if aux.RoleId != nil {
+		v, err := strconv.ParseInt(*aux.RoleId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.RoleId = v
+		m.RoleId = &v
 	}
 	return nil
 }
@@ -342,7 +348,11 @@ func (x *AssignRoleRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *AssignRoleRequest) GetRoleId() int64 {
@@ -350,7 +360,11 @@ func (x *AssignRoleRequest) GetRoleId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.RoleId
+	if x.RoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RoleId
 }
 
 type AssignRoleResponse struct {

@@ -33,11 +33,21 @@ func (m *AdjustInventoryRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
 	}
-	if m.Change <= 0 {
-		violations = append(violations, "change must be greater than 0")
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
+	}
+	if m.Change == nil {
+		violations = append(violations, "change is required")
+	}
+	if m.Change != nil {
+		if *m.Change <= 0 {
+			violations = append(violations, "change must be greater than 0")
+		}
 	}
 	if m.Type == "" {
 		violations = append(violations, "type is required")

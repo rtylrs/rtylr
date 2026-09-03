@@ -9,6 +9,92 @@ import (
 
 var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
 
+func (m *RoleScope) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AppRoleAssignment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Scopes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "scopes: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *LicenseAssignment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *EffectiveAppAccess) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Scopes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "scopes: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *EffectiveAccess) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Licenses {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "licenses: "+err.Error())
+		}
+	}
+	for _, value := range m.Apps {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "apps: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ProvisioningStatus) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetMeRequest) Validate() error {
 	if m == nil {
 		return nil
@@ -25,6 +111,16 @@ func (m *GetMeResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.EffectiveAccess != nil {
+		if err := m.EffectiveAccess.Validate(); err != nil {
+			violations = append(violations, "effective_access: "+err.Error())
+		}
+	}
+	if m.ProvisioningStatus != nil {
+		if err := m.ProvisioningStatus.Validate(); err != nil {
+			violations = append(violations, "provisioning_status: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -99,8 +195,13 @@ func (m *SwitchBusinessRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BusinessId <= 0 {
-		violations = append(violations, "business_id must be greater than 0")
+	if m.BusinessId == nil {
+		violations = append(violations, "business_id is required")
+	}
+	if m.BusinessId != nil {
+		if *m.BusinessId <= 0 {
+			violations = append(violations, "business_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

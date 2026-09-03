@@ -575,8 +575,8 @@ func (x *LoyaltyTier) GetUpdatedAt() string {
 }
 
 type AwardPointsRequest struct {
-	CustomerId    int64  `json:"customer_id,omitempty"`
-	Points        int64  `json:"points,omitempty"`
+	CustomerId    *int64 `json:"customer_id,omitempty"`
+	Points        *int64 `json:"points,omitempty"`
 	Description   string `json:"description,omitempty"`
 	ReferenceId   *int64 `json:"reference_id,omitempty"`
 	ReferenceType string `json:"reference_type,omitempty"`
@@ -586,12 +586,18 @@ func (m *AwardPointsRequest) MarshalJSON() ([]byte, error) {
 	type alias AwardPointsRequest
 	aux := struct {
 		*alias
-		CustomerId  string  `json:"customer_id,omitempty"`
-		Points      string  `json:"points,omitempty"`
+		CustomerId  *string `json:"customer_id,omitempty"`
+		Points      *string `json:"points,omitempty"`
 		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CustomerId = strconv.FormatInt(m.CustomerId, 10)
-	aux.Points = strconv.FormatInt(m.Points, 10)
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
+	if m.Points != nil {
+		encodedPoints := strconv.FormatInt(*m.Points, 10)
+		aux.Points = &encodedPoints
+	}
 	if m.ReferenceId != nil {
 		encodedReferenceId := strconv.FormatInt(*m.ReferenceId, 10)
 		aux.ReferenceId = &encodedReferenceId
@@ -603,26 +609,26 @@ func (m *AwardPointsRequest) UnmarshalJSON(data []byte) error {
 	type alias AwardPointsRequest
 	aux := struct {
 		*alias
-		CustomerId  string  `json:"customer_id,omitempty"`
-		Points      string  `json:"points,omitempty"`
+		CustomerId  *string `json:"customer_id,omitempty"`
+		Points      *string `json:"points,omitempty"`
 		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.CustomerId != "" {
-		v, err := strconv.ParseInt(aux.CustomerId, 10, 64)
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.CustomerId = v
+		m.CustomerId = &v
 	}
-	if aux.Points != "" {
-		v, err := strconv.ParseInt(aux.Points, 10, 64)
+	if aux.Points != nil {
+		v, err := strconv.ParseInt(*aux.Points, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Points = v
+		m.Points = &v
 	}
 	if aux.ReferenceId != nil {
 		v, err := strconv.ParseInt(*aux.ReferenceId, 10, 64)
@@ -639,7 +645,11 @@ func (x *AwardPointsRequest) GetCustomerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CustomerId
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *AwardPointsRequest) GetPoints() int64 {
@@ -647,7 +657,11 @@ func (x *AwardPointsRequest) GetPoints() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Points
+	if x.Points == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Points
 }
 
 func (x *AwardPointsRequest) GetDescription() string {
@@ -691,22 +705,28 @@ func (x *AwardPointsResponse) GetMessage() string {
 }
 
 type CreateLoyaltyTierRequest struct {
-	Name        string  `json:"name,omitempty"`
-	MinPoints   int64   `json:"min_points,omitempty"`
-	DiscountPct float64 `json:"discount_pct,omitempty"`
-	Perks       string  `json:"perks,omitempty"`
-	SortOrder   int64   `json:"sort_order,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	MinPoints   *int64   `json:"min_points,omitempty"`
+	DiscountPct *float64 `json:"discount_pct,omitempty"`
+	Perks       string   `json:"perks,omitempty"`
+	SortOrder   *int64   `json:"sort_order,omitempty"`
 }
 
 func (m *CreateLoyaltyTierRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateLoyaltyTierRequest
 	aux := struct {
 		*alias
-		MinPoints string `json:"min_points,omitempty"`
-		SortOrder string `json:"sort_order,omitempty"`
+		MinPoints *string `json:"min_points,omitempty"`
+		SortOrder *string `json:"sort_order,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.MinPoints = strconv.FormatInt(m.MinPoints, 10)
-	aux.SortOrder = strconv.FormatInt(m.SortOrder, 10)
+	if m.MinPoints != nil {
+		encodedMinPoints := strconv.FormatInt(*m.MinPoints, 10)
+		aux.MinPoints = &encodedMinPoints
+	}
+	if m.SortOrder != nil {
+		encodedSortOrder := strconv.FormatInt(*m.SortOrder, 10)
+		aux.SortOrder = &encodedSortOrder
+	}
 	return json.Marshal(aux)
 }
 
@@ -714,25 +734,25 @@ func (m *CreateLoyaltyTierRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateLoyaltyTierRequest
 	aux := struct {
 		*alias
-		MinPoints string `json:"min_points,omitempty"`
-		SortOrder string `json:"sort_order,omitempty"`
+		MinPoints *string `json:"min_points,omitempty"`
+		SortOrder *string `json:"sort_order,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.MinPoints != "" {
-		v, err := strconv.ParseInt(aux.MinPoints, 10, 64)
+	if aux.MinPoints != nil {
+		v, err := strconv.ParseInt(*aux.MinPoints, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.MinPoints = v
+		m.MinPoints = &v
 	}
-	if aux.SortOrder != "" {
-		v, err := strconv.ParseInt(aux.SortOrder, 10, 64)
+	if aux.SortOrder != nil {
+		v, err := strconv.ParseInt(*aux.SortOrder, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SortOrder = v
+		m.SortOrder = &v
 	}
 	return nil
 }
@@ -750,7 +770,11 @@ func (x *CreateLoyaltyTierRequest) GetMinPoints() int64 {
 		var zero int64
 		return zero
 	}
-	return x.MinPoints
+	if x.MinPoints == nil {
+		var zero int64
+		return zero
+	}
+	return *x.MinPoints
 }
 
 func (x *CreateLoyaltyTierRequest) GetDiscountPct() float64 {
@@ -758,7 +782,11 @@ func (x *CreateLoyaltyTierRequest) GetDiscountPct() float64 {
 		var zero float64
 		return zero
 	}
-	return x.DiscountPct
+	if x.DiscountPct == nil {
+		var zero float64
+		return zero
+	}
+	return *x.DiscountPct
 }
 
 func (x *CreateLoyaltyTierRequest) GetPerks() string {
@@ -774,7 +802,11 @@ func (x *CreateLoyaltyTierRequest) GetSortOrder() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SortOrder
+	if x.SortOrder == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SortOrder
 }
 
 type CreateLoyaltyTierResponse struct {
@@ -1025,8 +1057,8 @@ func (x *ListLoyaltyTransactionsResponse) GetPageSize() int64 {
 }
 
 type RedeemPointsRequest struct {
-	CustomerId    int64  `json:"customer_id,omitempty"`
-	Points        int64  `json:"points,omitempty"`
+	CustomerId    *int64 `json:"customer_id,omitempty"`
+	Points        *int64 `json:"points,omitempty"`
 	Description   string `json:"description,omitempty"`
 	ReferenceId   *int64 `json:"reference_id,omitempty"`
 	ReferenceType string `json:"reference_type,omitempty"`
@@ -1036,12 +1068,18 @@ func (m *RedeemPointsRequest) MarshalJSON() ([]byte, error) {
 	type alias RedeemPointsRequest
 	aux := struct {
 		*alias
-		CustomerId  string  `json:"customer_id,omitempty"`
-		Points      string  `json:"points,omitempty"`
+		CustomerId  *string `json:"customer_id,omitempty"`
+		Points      *string `json:"points,omitempty"`
 		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CustomerId = strconv.FormatInt(m.CustomerId, 10)
-	aux.Points = strconv.FormatInt(m.Points, 10)
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
+	if m.Points != nil {
+		encodedPoints := strconv.FormatInt(*m.Points, 10)
+		aux.Points = &encodedPoints
+	}
 	if m.ReferenceId != nil {
 		encodedReferenceId := strconv.FormatInt(*m.ReferenceId, 10)
 		aux.ReferenceId = &encodedReferenceId
@@ -1053,26 +1091,26 @@ func (m *RedeemPointsRequest) UnmarshalJSON(data []byte) error {
 	type alias RedeemPointsRequest
 	aux := struct {
 		*alias
-		CustomerId  string  `json:"customer_id,omitempty"`
-		Points      string  `json:"points,omitempty"`
+		CustomerId  *string `json:"customer_id,omitempty"`
+		Points      *string `json:"points,omitempty"`
 		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.CustomerId != "" {
-		v, err := strconv.ParseInt(aux.CustomerId, 10, 64)
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.CustomerId = v
+		m.CustomerId = &v
 	}
-	if aux.Points != "" {
-		v, err := strconv.ParseInt(aux.Points, 10, 64)
+	if aux.Points != nil {
+		v, err := strconv.ParseInt(*aux.Points, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Points = v
+		m.Points = &v
 	}
 	if aux.ReferenceId != nil {
 		v, err := strconv.ParseInt(*aux.ReferenceId, 10, 64)
@@ -1089,7 +1127,11 @@ func (x *RedeemPointsRequest) GetCustomerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CustomerId
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *RedeemPointsRequest) GetPoints() int64 {
@@ -1097,7 +1139,11 @@ func (x *RedeemPointsRequest) GetPoints() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Points
+	if x.Points == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Points
 }
 
 func (x *RedeemPointsRequest) GetDescription() string {
@@ -1141,35 +1187,50 @@ func (x *RedeemPointsResponse) GetMessage() string {
 }
 
 type UpdateLoyaltyConfigRequest struct {
-	IsEnabled             bool    `json:"is_enabled,omitempty"`
-	PointsPerCurrencyUnit float64 `json:"points_per_currency_unit,omitempty"`
-	CurrencyPerPoint      float64 `json:"currency_per_point,omitempty"`
-	BronzeMin             int64   `json:"bronze_min,omitempty"`
-	SilverMin             int64   `json:"silver_min,omitempty"`
-	GoldMin               int64   `json:"gold_min,omitempty"`
-	PlatinumMin           int64   `json:"platinum_min,omitempty"`
-	BronzeDiscountPct     float64 `json:"bronze_discount_pct,omitempty"`
-	SilverDiscountPct     float64 `json:"silver_discount_pct,omitempty"`
-	GoldDiscountPct       float64 `json:"gold_discount_pct,omitempty"`
-	PlatinumDiscountPct   float64 `json:"platinum_discount_pct,omitempty"`
-	PointsExpiryDays      int64   `json:"points_expiry_days,omitempty"`
+	IsEnabled             bool     `json:"is_enabled,omitempty"`
+	PointsPerCurrencyUnit *float64 `json:"points_per_currency_unit,omitempty"`
+	CurrencyPerPoint      *float64 `json:"currency_per_point,omitempty"`
+	BronzeMin             *int64   `json:"bronze_min,omitempty"`
+	SilverMin             *int64   `json:"silver_min,omitempty"`
+	GoldMin               *int64   `json:"gold_min,omitempty"`
+	PlatinumMin           *int64   `json:"platinum_min,omitempty"`
+	BronzeDiscountPct     *float64 `json:"bronze_discount_pct,omitempty"`
+	SilverDiscountPct     *float64 `json:"silver_discount_pct,omitempty"`
+	GoldDiscountPct       *float64 `json:"gold_discount_pct,omitempty"`
+	PlatinumDiscountPct   *float64 `json:"platinum_discount_pct,omitempty"`
+	PointsExpiryDays      *int64   `json:"points_expiry_days,omitempty"`
 }
 
 func (m *UpdateLoyaltyConfigRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdateLoyaltyConfigRequest
 	aux := struct {
 		*alias
-		BronzeMin        string `json:"bronze_min,omitempty"`
-		SilverMin        string `json:"silver_min,omitempty"`
-		GoldMin          string `json:"gold_min,omitempty"`
-		PlatinumMin      string `json:"platinum_min,omitempty"`
-		PointsExpiryDays string `json:"points_expiry_days,omitempty"`
+		BronzeMin        *string `json:"bronze_min,omitempty"`
+		SilverMin        *string `json:"silver_min,omitempty"`
+		GoldMin          *string `json:"gold_min,omitempty"`
+		PlatinumMin      *string `json:"platinum_min,omitempty"`
+		PointsExpiryDays *string `json:"points_expiry_days,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BronzeMin = strconv.FormatInt(m.BronzeMin, 10)
-	aux.SilverMin = strconv.FormatInt(m.SilverMin, 10)
-	aux.GoldMin = strconv.FormatInt(m.GoldMin, 10)
-	aux.PlatinumMin = strconv.FormatInt(m.PlatinumMin, 10)
-	aux.PointsExpiryDays = strconv.FormatInt(m.PointsExpiryDays, 10)
+	if m.BronzeMin != nil {
+		encodedBronzeMin := strconv.FormatInt(*m.BronzeMin, 10)
+		aux.BronzeMin = &encodedBronzeMin
+	}
+	if m.SilverMin != nil {
+		encodedSilverMin := strconv.FormatInt(*m.SilverMin, 10)
+		aux.SilverMin = &encodedSilverMin
+	}
+	if m.GoldMin != nil {
+		encodedGoldMin := strconv.FormatInt(*m.GoldMin, 10)
+		aux.GoldMin = &encodedGoldMin
+	}
+	if m.PlatinumMin != nil {
+		encodedPlatinumMin := strconv.FormatInt(*m.PlatinumMin, 10)
+		aux.PlatinumMin = &encodedPlatinumMin
+	}
+	if m.PointsExpiryDays != nil {
+		encodedPointsExpiryDays := strconv.FormatInt(*m.PointsExpiryDays, 10)
+		aux.PointsExpiryDays = &encodedPointsExpiryDays
+	}
 	return json.Marshal(aux)
 }
 
@@ -1177,49 +1238,49 @@ func (m *UpdateLoyaltyConfigRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdateLoyaltyConfigRequest
 	aux := struct {
 		*alias
-		BronzeMin        string `json:"bronze_min,omitempty"`
-		SilverMin        string `json:"silver_min,omitempty"`
-		GoldMin          string `json:"gold_min,omitempty"`
-		PlatinumMin      string `json:"platinum_min,omitempty"`
-		PointsExpiryDays string `json:"points_expiry_days,omitempty"`
+		BronzeMin        *string `json:"bronze_min,omitempty"`
+		SilverMin        *string `json:"silver_min,omitempty"`
+		GoldMin          *string `json:"gold_min,omitempty"`
+		PlatinumMin      *string `json:"platinum_min,omitempty"`
+		PointsExpiryDays *string `json:"points_expiry_days,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BronzeMin != "" {
-		v, err := strconv.ParseInt(aux.BronzeMin, 10, 64)
+	if aux.BronzeMin != nil {
+		v, err := strconv.ParseInt(*aux.BronzeMin, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BronzeMin = v
+		m.BronzeMin = &v
 	}
-	if aux.SilverMin != "" {
-		v, err := strconv.ParseInt(aux.SilverMin, 10, 64)
+	if aux.SilverMin != nil {
+		v, err := strconv.ParseInt(*aux.SilverMin, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SilverMin = v
+		m.SilverMin = &v
 	}
-	if aux.GoldMin != "" {
-		v, err := strconv.ParseInt(aux.GoldMin, 10, 64)
+	if aux.GoldMin != nil {
+		v, err := strconv.ParseInt(*aux.GoldMin, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.GoldMin = v
+		m.GoldMin = &v
 	}
-	if aux.PlatinumMin != "" {
-		v, err := strconv.ParseInt(aux.PlatinumMin, 10, 64)
+	if aux.PlatinumMin != nil {
+		v, err := strconv.ParseInt(*aux.PlatinumMin, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.PlatinumMin = v
+		m.PlatinumMin = &v
 	}
-	if aux.PointsExpiryDays != "" {
-		v, err := strconv.ParseInt(aux.PointsExpiryDays, 10, 64)
+	if aux.PointsExpiryDays != nil {
+		v, err := strconv.ParseInt(*aux.PointsExpiryDays, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.PointsExpiryDays = v
+		m.PointsExpiryDays = &v
 	}
 	return nil
 }
@@ -1237,7 +1298,11 @@ func (x *UpdateLoyaltyConfigRequest) GetPointsPerCurrencyUnit() float64 {
 		var zero float64
 		return zero
 	}
-	return x.PointsPerCurrencyUnit
+	if x.PointsPerCurrencyUnit == nil {
+		var zero float64
+		return zero
+	}
+	return *x.PointsPerCurrencyUnit
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetCurrencyPerPoint() float64 {
@@ -1245,7 +1310,11 @@ func (x *UpdateLoyaltyConfigRequest) GetCurrencyPerPoint() float64 {
 		var zero float64
 		return zero
 	}
-	return x.CurrencyPerPoint
+	if x.CurrencyPerPoint == nil {
+		var zero float64
+		return zero
+	}
+	return *x.CurrencyPerPoint
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetBronzeMin() int64 {
@@ -1253,7 +1322,11 @@ func (x *UpdateLoyaltyConfigRequest) GetBronzeMin() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BronzeMin
+	if x.BronzeMin == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BronzeMin
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetSilverMin() int64 {
@@ -1261,7 +1334,11 @@ func (x *UpdateLoyaltyConfigRequest) GetSilverMin() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SilverMin
+	if x.SilverMin == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SilverMin
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetGoldMin() int64 {
@@ -1269,7 +1346,11 @@ func (x *UpdateLoyaltyConfigRequest) GetGoldMin() int64 {
 		var zero int64
 		return zero
 	}
-	return x.GoldMin
+	if x.GoldMin == nil {
+		var zero int64
+		return zero
+	}
+	return *x.GoldMin
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetPlatinumMin() int64 {
@@ -1277,7 +1358,11 @@ func (x *UpdateLoyaltyConfigRequest) GetPlatinumMin() int64 {
 		var zero int64
 		return zero
 	}
-	return x.PlatinumMin
+	if x.PlatinumMin == nil {
+		var zero int64
+		return zero
+	}
+	return *x.PlatinumMin
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetBronzeDiscountPct() float64 {
@@ -1285,7 +1370,11 @@ func (x *UpdateLoyaltyConfigRequest) GetBronzeDiscountPct() float64 {
 		var zero float64
 		return zero
 	}
-	return x.BronzeDiscountPct
+	if x.BronzeDiscountPct == nil {
+		var zero float64
+		return zero
+	}
+	return *x.BronzeDiscountPct
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetSilverDiscountPct() float64 {
@@ -1293,7 +1382,11 @@ func (x *UpdateLoyaltyConfigRequest) GetSilverDiscountPct() float64 {
 		var zero float64
 		return zero
 	}
-	return x.SilverDiscountPct
+	if x.SilverDiscountPct == nil {
+		var zero float64
+		return zero
+	}
+	return *x.SilverDiscountPct
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetGoldDiscountPct() float64 {
@@ -1301,7 +1394,11 @@ func (x *UpdateLoyaltyConfigRequest) GetGoldDiscountPct() float64 {
 		var zero float64
 		return zero
 	}
-	return x.GoldDiscountPct
+	if x.GoldDiscountPct == nil {
+		var zero float64
+		return zero
+	}
+	return *x.GoldDiscountPct
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetPlatinumDiscountPct() float64 {
@@ -1309,7 +1406,11 @@ func (x *UpdateLoyaltyConfigRequest) GetPlatinumDiscountPct() float64 {
 		var zero float64
 		return zero
 	}
-	return x.PlatinumDiscountPct
+	if x.PlatinumDiscountPct == nil {
+		var zero float64
+		return zero
+	}
+	return *x.PlatinumDiscountPct
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetPointsExpiryDays() int64 {
@@ -1317,7 +1418,11 @@ func (x *UpdateLoyaltyConfigRequest) GetPointsExpiryDays() int64 {
 		var zero int64
 		return zero
 	}
-	return x.PointsExpiryDays
+	if x.PointsExpiryDays == nil {
+		var zero int64
+		return zero
+	}
+	return *x.PointsExpiryDays
 }
 
 type UpdateLoyaltyConfigResponse struct {
@@ -1333,22 +1438,28 @@ func (x *UpdateLoyaltyConfigResponse) GetMessage() string {
 }
 
 type UpdateLoyaltyTierBody struct {
-	Name        string  `json:"name,omitempty"`
-	MinPoints   int64   `json:"min_points,omitempty"`
-	DiscountPct float64 `json:"discount_pct,omitempty"`
-	Perks       string  `json:"perks,omitempty"`
-	SortOrder   int64   `json:"sort_order,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	MinPoints   *int64   `json:"min_points,omitempty"`
+	DiscountPct *float64 `json:"discount_pct,omitempty"`
+	Perks       string   `json:"perks,omitempty"`
+	SortOrder   *int64   `json:"sort_order,omitempty"`
 }
 
 func (m *UpdateLoyaltyTierBody) MarshalJSON() ([]byte, error) {
 	type alias UpdateLoyaltyTierBody
 	aux := struct {
 		*alias
-		MinPoints string `json:"min_points,omitempty"`
-		SortOrder string `json:"sort_order,omitempty"`
+		MinPoints *string `json:"min_points,omitempty"`
+		SortOrder *string `json:"sort_order,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.MinPoints = strconv.FormatInt(m.MinPoints, 10)
-	aux.SortOrder = strconv.FormatInt(m.SortOrder, 10)
+	if m.MinPoints != nil {
+		encodedMinPoints := strconv.FormatInt(*m.MinPoints, 10)
+		aux.MinPoints = &encodedMinPoints
+	}
+	if m.SortOrder != nil {
+		encodedSortOrder := strconv.FormatInt(*m.SortOrder, 10)
+		aux.SortOrder = &encodedSortOrder
+	}
 	return json.Marshal(aux)
 }
 
@@ -1356,25 +1467,25 @@ func (m *UpdateLoyaltyTierBody) UnmarshalJSON(data []byte) error {
 	type alias UpdateLoyaltyTierBody
 	aux := struct {
 		*alias
-		MinPoints string `json:"min_points,omitempty"`
-		SortOrder string `json:"sort_order,omitempty"`
+		MinPoints *string `json:"min_points,omitempty"`
+		SortOrder *string `json:"sort_order,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.MinPoints != "" {
-		v, err := strconv.ParseInt(aux.MinPoints, 10, 64)
+	if aux.MinPoints != nil {
+		v, err := strconv.ParseInt(*aux.MinPoints, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.MinPoints = v
+		m.MinPoints = &v
 	}
-	if aux.SortOrder != "" {
-		v, err := strconv.ParseInt(aux.SortOrder, 10, 64)
+	if aux.SortOrder != nil {
+		v, err := strconv.ParseInt(*aux.SortOrder, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SortOrder = v
+		m.SortOrder = &v
 	}
 	return nil
 }
@@ -1392,7 +1503,11 @@ func (x *UpdateLoyaltyTierBody) GetMinPoints() int64 {
 		var zero int64
 		return zero
 	}
-	return x.MinPoints
+	if x.MinPoints == nil {
+		var zero int64
+		return zero
+	}
+	return *x.MinPoints
 }
 
 func (x *UpdateLoyaltyTierBody) GetDiscountPct() float64 {
@@ -1400,7 +1515,11 @@ func (x *UpdateLoyaltyTierBody) GetDiscountPct() float64 {
 		var zero float64
 		return zero
 	}
-	return x.DiscountPct
+	if x.DiscountPct == nil {
+		var zero float64
+		return zero
+	}
+	return *x.DiscountPct
 }
 
 func (x *UpdateLoyaltyTierBody) GetPerks() string {
@@ -1416,7 +1535,11 @@ func (x *UpdateLoyaltyTierBody) GetSortOrder() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SortOrder
+	if x.SortOrder == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SortOrder
 }
 
 type UpdateLoyaltyTierRequest struct {

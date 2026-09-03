@@ -8,16 +8,19 @@ import (
 )
 
 type GetFlowDashboardRequest struct {
-	WorkspaceId int64 `json:"workspace_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
 }
 
 func (m *GetFlowDashboardRequest) MarshalJSON() ([]byte, error) {
 	type alias GetFlowDashboardRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -25,17 +28,17 @@ func (m *GetFlowDashboardRequest) UnmarshalJSON(data []byte) error {
 	type alias GetFlowDashboardRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
 	return nil
 }
@@ -45,7 +48,11 @@ func (x *GetFlowDashboardRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 type GetFlowDashboardResponse struct {

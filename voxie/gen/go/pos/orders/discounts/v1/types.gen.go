@@ -7,10 +7,10 @@ import (
 )
 
 type DiscountOrderRequest struct {
-	OrderId       int64   `json:"order_id,omitempty"`
-	DiscountType  string  `json:"discount_type,omitempty"`
-	DiscountValue float64 `json:"discount_value,omitempty"`
-	Reason        string  `json:"reason,omitempty"`
+	OrderId       int64    `json:"order_id,omitempty"`
+	DiscountType  string   `json:"discount_type,omitempty"`
+	DiscountValue *float64 `json:"discount_value,omitempty"`
+	Reason        string   `json:"reason,omitempty"`
 }
 
 func (m *DiscountOrderRequest) MarshalJSON() ([]byte, error) {
@@ -63,7 +63,11 @@ func (x *DiscountOrderRequest) GetDiscountValue() float64 {
 		var zero float64
 		return zero
 	}
-	return x.DiscountValue
+	if x.DiscountValue == nil {
+		var zero float64
+		return zero
+	}
+	return *x.DiscountValue
 }
 
 func (x *DiscountOrderRequest) GetReason() string {

@@ -244,7 +244,7 @@ return violations;
 }
 
 export interface GetReportTemplateRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetReportTemplateRequest(v: any): GetReportTemplateRequest {
@@ -263,7 +263,6 @@ return out;
 export function validateGetReportTemplateRequest(v: GetReportTemplateRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -425,7 +424,7 @@ return violations;
 }
 
 export interface UpdateScheduledReportRequest {
-id: string;
+id?: string;
 templateSlug: string;
 frequency: string;
 channel: string;
@@ -459,7 +458,6 @@ return out;
 export function validateUpdateScheduledReportRequest(v: UpdateScheduledReportRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.templateSlug !== undefined && v.templateSlug !== null && !(typeof v.templateSlug === "string")) violations.push("template_slug has invalid type");
 if (!(v.templateSlug !== undefined && v.templateSlug !== null) || v.templateSlug === "") violations.push("template_slug is required");
@@ -499,7 +497,7 @@ return violations;
 }
 
 export interface DeleteScheduledReportRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteScheduledReportRequest(v: any): DeleteScheduledReportRequest {
@@ -518,7 +516,6 @@ return out;
 export function validateDeleteScheduledReportRequest(v: DeleteScheduledReportRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -547,32 +544,32 @@ return violations;
 }
 
 export interface GenerateRevenueReportRequest {
-from?: string;
-to?: string;
+fromDate?: string;
+toDate?: string;
 format?: string;
 }
 
 export function decodeGenerateRevenueReportRequest(v: any): GenerateRevenueReportRequest {
 if (v === null || v === undefined) return v;
 return {
-from: v.from,
-to: v.to,
+fromDate: v.from_date,
+toDate: v.to_date,
 format: v.format,
 };
 }
 
 export function encodeGenerateRevenueReportRequest(v: GenerateRevenueReportRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
-if (v.from !== undefined) { out.from = v.from; }
-if (v.to !== undefined) { out.to = v.to; }
+if (v.fromDate !== undefined) { out.from_date = v.fromDate; }
+if (v.toDate !== undefined) { out.to_date = v.toDate; }
 if (v.format !== undefined) { out.format = v.format; }
 return out;
 }
 
 export function validateGenerateRevenueReportRequest(v: GenerateRevenueReportRequest): string[] {
 const violations: string[] = [];
-if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
-if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
 if (v.format !== undefined && v.format !== null && !(typeof v.format === "string")) violations.push("format has invalid type");
 return violations;
 }
@@ -609,29 +606,29 @@ return violations;
 }
 
 export interface ExportRevenueReportRequest {
-from?: string;
-to?: string;
+fromDate?: string;
+toDate?: string;
 }
 
 export function decodeExportRevenueReportRequest(v: any): ExportRevenueReportRequest {
 if (v === null || v === undefined) return v;
 return {
-from: v.from,
-to: v.to,
+fromDate: v.from_date,
+toDate: v.to_date,
 };
 }
 
 export function encodeExportRevenueReportRequest(v: ExportRevenueReportRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
-if (v.from !== undefined) { out.from = v.from; }
-if (v.to !== undefined) { out.to = v.to; }
+if (v.fromDate !== undefined) { out.from_date = v.fromDate; }
+if (v.toDate !== undefined) { out.to_date = v.toDate; }
 return out;
 }
 
 export function validateExportRevenueReportRequest(v: ExportRevenueReportRequest): string[] {
 const violations: string[] = [];
-if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
-if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
 return violations;
 }
 

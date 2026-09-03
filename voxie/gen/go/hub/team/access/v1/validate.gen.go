@@ -11,6 +11,11 @@ func (m *AccessRequest) Validate() error {
 		return nil
 	}
 	var violations []string
+	for _, value := range m.Scopes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "scopes: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -24,6 +29,11 @@ func (m *RequestAccessRequest) Validate() error {
 	var violations []string
 	if m.App == "" {
 		violations = append(violations, "app is required")
+	}
+	for _, value := range m.Scopes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "scopes: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -77,11 +87,21 @@ func (m *ApproveAccessRequestRequest) Validate() error {
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if m.App == "" {
 		violations = append(violations, "app is required")
+	}
+	for _, value := range m.Scopes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "scopes: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

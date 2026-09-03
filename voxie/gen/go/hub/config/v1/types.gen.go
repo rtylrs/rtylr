@@ -879,15 +879,15 @@ func (x *UpdateConfigResponse) GetConfig() *ConfigPayload {
 }
 
 type SendTestEmailRequest struct {
-	To string `json:"to,omitempty"`
+	Recipient string `json:"recipient,omitempty"`
 }
 
-func (x *SendTestEmailRequest) GetTo() string {
+func (x *SendTestEmailRequest) GetRecipient() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.Recipient
 }
 
 type SendTestEmailResponse struct {

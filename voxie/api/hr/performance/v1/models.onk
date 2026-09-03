@@ -29,7 +29,7 @@ message ReviewGoalPayload {
 /// PerformanceReviewPayload is a single reviewer's evaluation of an employee within a review cycle.
 message PerformanceReviewPayload {
   /// Unique identifier for the performance review.
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
   /// Tenant owner this review belongs to.
   owner_id: int64
   /// Employee being reviewed.
@@ -57,7 +57,7 @@ message PerformanceReviewPayload {
 /// ReviewCyclePayload is a recurring performance review period (e.g. an annual cycle).
 message ReviewCyclePayload {
   /// Unique identifier for the review cycle.
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
   /// Tenant owner this cycle belongs to.
   owner_id: int64
   /// Human-readable name for the cycle (e.g. "2026 Annual Review").
@@ -107,7 +107,7 @@ message CreateReviewCycleResponse {
 
 message OpenReviewCycleRequest {
   /// ID of the review cycle to open for submissions.
-  cycle_id: int64 @required @gt(0)
+  cycle_id: int64? @required @gt(0)
 }
 
 message OpenReviewCycleResponse {
@@ -135,7 +135,7 @@ message ListGoalsResponse {
 
 message SubmitReviewRequest {
   /// ID of the performance review being submitted.
-  review_id: int64 @required @gt(0)
+  review_id: int64? @required @gt(0)
   /// Overall rating assigned by the reviewer.
   overall_rating: string @required
   /// Free-form written feedback from the reviewer.

@@ -116,7 +116,7 @@ message UpdateConfigResponse {
 }
 
 message SendTestEmailRequest {
-  to: string @required
+  recipient: string @required
 }
 
 message SendTestEmailResponse {

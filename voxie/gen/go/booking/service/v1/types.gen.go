@@ -160,7 +160,7 @@ func (x *BookingService) GetUpdatedAt() string {
 type CreateServiceRequest struct {
 	Name            string  `json:"name,omitempty"`
 	Description     string  `json:"description,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
+	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	Price           float64 `json:"price,omitempty"`
 	Color           string  `json:"color,omitempty"`
 	IsActive        bool    `json:"is_active,omitempty"`
@@ -187,7 +187,11 @@ func (x *CreateServiceRequest) GetDurationMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *CreateServiceRequest) GetPrice() float64 {
@@ -336,7 +340,7 @@ type UpdateServiceRequest struct {
 	Id              int64   `json:"id,omitempty"`
 	Name            string  `json:"name,omitempty"`
 	Description     string  `json:"description,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
+	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	Price           float64 `json:"price,omitempty"`
 	Color           string  `json:"color,omitempty"`
 	IsActive        bool    `json:"is_active,omitempty"`
@@ -400,7 +404,11 @@ func (x *UpdateServiceRequest) GetDurationMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *UpdateServiceRequest) GetPrice() float64 {

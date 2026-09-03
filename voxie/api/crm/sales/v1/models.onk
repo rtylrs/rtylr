@@ -13,7 +13,7 @@ message Contract {
   id: int64
   /// lead_id is the CRM lead this contract closes; absent for contracts
   /// recorded without a lead.
-  lead_id: int64? @nullable
+  lead_id: int64?
   /// plan is what was bought, as CRM displays it (e.g. "pro", "enterprise").
   plan: string
   /// mrr is monthly recurring revenue as a decimal string, because money
@@ -24,7 +24,7 @@ message Contract {
   seats: int32
   /// signed_at is when the customer signed (ISO-8601); absent on unsigned
   /// drafts. Presence of this field is what makes a contract billable.
-  signed_at: string? @nullable
+  signed_at: string?
   /// signed_by_name is the customer-side signer as written at signature time.
   signed_by_name: string
   /// notes are free-text sales notes; not for invoice prefill.
@@ -41,7 +41,7 @@ message Contract {
 message ListContractsRequest {
   /// signed filters to contracts whose signing is complete when true, or
   /// incomplete when false; absent to include both.
-  signed: bool? @query("signed") @nullable
+  signed: bool? @query("signed")
   /// Maximum number of records to return, capped by the server.
   limit: int32 @query("limit")
   /// Number of records to skip for pagination.
@@ -78,7 +78,7 @@ message GetContractResponse {
 /// happen now or later via update.
 message CreateContractRequest {
   /// lead_id links the contract to its winning lead.
-  lead_id: int64 @required @gt(0)
+  lead_id: int64? @required @gt(0)
   /// plan is what was bought, as CRM displays it.
   plan: string @required
   /// mrr is monthly recurring revenue as a decimal string.
@@ -87,7 +87,7 @@ message CreateContractRequest {
   seats: int32 @gte(0)
   /// signed_at completes the signature at creation time; absent means an
   /// unsigned draft.
-  signed_at: string? @nullable
+  signed_at: string?
   /// signed_by_name names the customer-side signer.
   signed_by_name: string
   /// notes are free-text sales notes.
@@ -120,7 +120,7 @@ message UpdateContractBody {
   /// signed_at records the signature; setting it on an unsigned draft makes
   /// the contract billable. Already-signed contracts keep their original
   /// timestamp unless explicitly replaced here.
-  signed_at: string? @nullable
+  signed_at: string?
   /// signed_by_name replaces the customer-side signer.
   signed_by_name: string
   /// notes replace the free-text sales notes.

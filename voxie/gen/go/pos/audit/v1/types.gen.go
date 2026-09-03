@@ -210,12 +210,12 @@ func (x *AuditLog) GetCreatedAt() string {
 }
 
 type CreateAuditRequest struct {
-	BranchId   int64  `json:"branch_id,omitempty"`
-	TerminalId int64  `json:"terminal_id,omitempty"`
-	EmployeeId int64  `json:"employee_id,omitempty"`
+	BranchId   *int64 `json:"branch_id,omitempty"`
+	TerminalId *int64 `json:"terminal_id,omitempty"`
+	EmployeeId *int64 `json:"employee_id,omitempty"`
 	Action     string `json:"action,omitempty"`
 	EntityType string `json:"entity_type,omitempty"`
-	EntityId   int64  `json:"entity_id,omitempty"`
+	EntityId   *int64 `json:"entity_id,omitempty"`
 	Details    string `json:"details,omitempty"`
 	IpAddress  string `json:"ip_address,omitempty"`
 }
@@ -224,15 +224,27 @@ func (m *CreateAuditRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateAuditRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
-		EntityId   string `json:"entity_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
+		EntityId   *string `json:"entity_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
-	aux.TerminalId = strconv.FormatInt(m.TerminalId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
-	aux.EntityId = strconv.FormatInt(m.EntityId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
+	if m.TerminalId != nil {
+		encodedTerminalId := strconv.FormatInt(*m.TerminalId, 10)
+		aux.TerminalId = &encodedTerminalId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	if m.EntityId != nil {
+		encodedEntityId := strconv.FormatInt(*m.EntityId, 10)
+		aux.EntityId = &encodedEntityId
+	}
 	return json.Marshal(aux)
 }
 
@@ -240,41 +252,41 @@ func (m *CreateAuditRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateAuditRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
-		EntityId   string `json:"entity_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
+		EntityId   *string `json:"entity_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
-	if aux.TerminalId != "" {
-		v, err := strconv.ParseInt(aux.TerminalId, 10, 64)
+	if aux.TerminalId != nil {
+		v, err := strconv.ParseInt(*aux.TerminalId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TerminalId = v
+		m.TerminalId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
-	if aux.EntityId != "" {
-		v, err := strconv.ParseInt(aux.EntityId, 10, 64)
+	if aux.EntityId != nil {
+		v, err := strconv.ParseInt(*aux.EntityId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EntityId = v
+		m.EntityId = &v
 	}
 	return nil
 }
@@ -284,7 +296,11 @@ func (x *CreateAuditRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *CreateAuditRequest) GetTerminalId() int64 {
@@ -292,7 +308,11 @@ func (x *CreateAuditRequest) GetTerminalId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TerminalId
+	if x.TerminalId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TerminalId
 }
 
 func (x *CreateAuditRequest) GetEmployeeId() int64 {
@@ -300,7 +320,11 @@ func (x *CreateAuditRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CreateAuditRequest) GetAction() string {
@@ -324,7 +348,11 @@ func (x *CreateAuditRequest) GetEntityId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EntityId
+	if x.EntityId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EntityId
 }
 
 func (x *CreateAuditRequest) GetDetails() string {

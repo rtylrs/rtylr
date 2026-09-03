@@ -55,7 +55,7 @@ message UpdateRoleBody {
 
 message UpdateRoleRequest {
   /// ID of the role to update.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable role fields bound from the HTTP payload.
   body: UpdateRoleBody
 }
@@ -67,9 +67,9 @@ message UpdateRoleResponse {
 
 message AssignRoleRequest {
   /// ID of the employee to assign the role to.
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
   /// ID of the role to assign.
-  role_id: int64 @required @gt(0)
+  role_id: int64? @required @gt(0)
 }
 
 message AssignRoleResponse {

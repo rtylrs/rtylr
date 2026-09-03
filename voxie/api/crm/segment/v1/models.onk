@@ -26,7 +26,7 @@ message CreateSegmentResponse {
 }
 
 message DeleteSegmentRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteSegmentResponse {
@@ -34,9 +34,9 @@ message DeleteSegmentResponse {
 }
 
 message GetSegmentCustomersRequest {
-  segment_id: int64 @required @gt(0)
-  page: int64 @required @gt(0) @query("page")
-  page_size: int64 @required @gt(0) @query("page_size")
+  segment_id: int64 @gt(0)
+  page: int64? @required @gt(0) @query("page")
+  page_size: int64? @required @gt(0) @query("page_size")
 }
 
 message GetSegmentCustomersResponse {
@@ -50,7 +50,7 @@ message GetSegmentCustomersResponse {
 }
 
 message GetSegmentDetailRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetSegmentDetailResponse {
@@ -74,7 +74,7 @@ message UpdateSegmentBody {
 }
 
 message UpdateSegmentRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateSegmentBody
 }
 

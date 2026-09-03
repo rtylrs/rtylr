@@ -52,7 +52,7 @@ message ApprovalChainPayload {
 
 message UpsertApprovalChainRequest {
   /// Chain ID for update; absent (zero) to create a new chain.
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
   /// Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
   request_type: string @required
   /// Human-readable name for the chain.

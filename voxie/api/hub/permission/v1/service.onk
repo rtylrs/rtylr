@@ -14,8 +14,32 @@ service PermissionService {
   /// Updates a custom role.
   updateRole(UpdateRoleRequest) -> UpdateRoleResponse @put("/roles/{id}") @body("body")
 
-  /// Deletes a custom role.
+  /// Archives a custom role. Assigned roles are revoked as part of archiving.
   deleteRole(DeleteRoleRequest) -> DeleteRoleResponse @delete("/roles/{id}")
+
+  /// Returns one role with its normalized lifecycle metadata.
+  getRole(GetRoleRequest) -> GetRoleResponse @get("/roles/{id}")
+
+  /// Clones a role into a new custom role.
+  cloneRole(CloneRoleRequest) -> CloneRoleResponse @post("/roles/{id}/clone")
+
+  /// Archives a custom role with an audit reason.
+  archiveRole(ArchiveRoleRequest) -> ArchiveRoleResponse @post("/roles/{id}/archive")
+
+  /// Lists normalized role assignments.
+  listRoleAssignments(ListRoleAssignmentsRequest) -> ListRoleAssignmentsResponse @get("/role-assignments")
+
+  /// Assigns a role to one member or group.
+  assignRole(AssignRoleRequest) -> AssignRoleResponse @post("/role-assignments")
+
+  /// Revokes one normalized role assignment.
+  removeRoleAssignment(RemoveRoleAssignmentRequest) -> RemoveRoleAssignmentResponse @delete("/role-assignments/{id}")
+
+  /// Previews the permission delta for a role update.
+  previewPermissionImpact(PreviewPermissionImpactRequest) -> PreviewPermissionImpactResponse @post("/roles/{id}/preview")
+
+  /// Lists role lifecycle and assignment audit events.
+  listRoleAudit(ListRoleAuditRequest) -> ListRoleAuditResponse @get("/roles/audit")
 
   /// Toggles a single permission cell.
   updatePermissionMatrix(UpdatePermissionMatrixRequest) -> UpdatePermissionMatrixResponse @patch("/matrix")

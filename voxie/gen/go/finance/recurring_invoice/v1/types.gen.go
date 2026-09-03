@@ -135,7 +135,7 @@ func (x *RecurringInvoice) GetCreatedAt() string {
 }
 
 type CreateRecurringInvoiceRequest struct {
-	TemplateInvoiceId int64   `json:"template_invoice_id,omitempty"`
+	TemplateInvoiceId *int64  `json:"template_invoice_id,omitempty"`
 	Frequency         string  `json:"frequency,omitempty"`
 	NextInvoiceDate   string  `json:"next_invoice_date,omitempty"`
 	EndDate           *string `json:"end_date,omitempty"`
@@ -146,9 +146,12 @@ func (m *CreateRecurringInvoiceRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateRecurringInvoiceRequest
 	aux := struct {
 		*alias
-		TemplateInvoiceId string `json:"template_invoice_id,omitempty"`
+		TemplateInvoiceId *string `json:"template_invoice_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.TemplateInvoiceId = strconv.FormatInt(m.TemplateInvoiceId, 10)
+	if m.TemplateInvoiceId != nil {
+		encodedTemplateInvoiceId := strconv.FormatInt(*m.TemplateInvoiceId, 10)
+		aux.TemplateInvoiceId = &encodedTemplateInvoiceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -156,17 +159,17 @@ func (m *CreateRecurringInvoiceRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateRecurringInvoiceRequest
 	aux := struct {
 		*alias
-		TemplateInvoiceId string `json:"template_invoice_id,omitempty"`
+		TemplateInvoiceId *string `json:"template_invoice_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.TemplateInvoiceId != "" {
-		v, err := strconv.ParseInt(aux.TemplateInvoiceId, 10, 64)
+	if aux.TemplateInvoiceId != nil {
+		v, err := strconv.ParseInt(*aux.TemplateInvoiceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TemplateInvoiceId = v
+		m.TemplateInvoiceId = &v
 	}
 	return nil
 }
@@ -176,7 +179,11 @@ func (x *CreateRecurringInvoiceRequest) GetTemplateInvoiceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TemplateInvoiceId
+	if x.TemplateInvoiceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TemplateInvoiceId
 }
 
 func (x *CreateRecurringInvoiceRequest) GetFrequency() string {

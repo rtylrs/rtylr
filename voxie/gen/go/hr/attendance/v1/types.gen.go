@@ -273,7 +273,7 @@ func (x *AttendanceRecordPayload) GetUpdatedAt() int64 {
 
 type AttendanceClockInRequest struct {
 	Method     string   `json:"method,omitempty"`
-	LocationId int64    `json:"location_id,omitempty"`
+	LocationId *int64   `json:"location_id,omitempty"`
 	Lat        *float64 `json:"lat,omitempty"`
 	Lng        *float64 `json:"lng,omitempty"`
 	QrToken    *string  `json:"qr_token,omitempty"`
@@ -284,9 +284,12 @@ func (m *AttendanceClockInRequest) MarshalJSON() ([]byte, error) {
 	type alias AttendanceClockInRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
 	return json.Marshal(aux)
 }
 
@@ -294,17 +297,17 @@ func (m *AttendanceClockInRequest) UnmarshalJSON(data []byte) error {
 	type alias AttendanceClockInRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LocationId = v
+		m.LocationId = &v
 	}
 	return nil
 }
@@ -322,7 +325,11 @@ func (x *AttendanceClockInRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *AttendanceClockInRequest) GetLat() float64 {
@@ -386,16 +393,19 @@ func (x *AttendanceClockInResponse) GetRecord() *AttendanceRecordPayload {
 }
 
 type AttendanceClockOutRequest struct {
-	AttendanceRecordId int64 `json:"attendance_record_id,omitempty"`
+	AttendanceRecordId *int64 `json:"attendance_record_id,omitempty"`
 }
 
 func (m *AttendanceClockOutRequest) MarshalJSON() ([]byte, error) {
 	type alias AttendanceClockOutRequest
 	aux := struct {
 		*alias
-		AttendanceRecordId string `json:"attendance_record_id,omitempty"`
+		AttendanceRecordId *string `json:"attendance_record_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.AttendanceRecordId = strconv.FormatInt(m.AttendanceRecordId, 10)
+	if m.AttendanceRecordId != nil {
+		encodedAttendanceRecordId := strconv.FormatInt(*m.AttendanceRecordId, 10)
+		aux.AttendanceRecordId = &encodedAttendanceRecordId
+	}
 	return json.Marshal(aux)
 }
 
@@ -403,17 +413,17 @@ func (m *AttendanceClockOutRequest) UnmarshalJSON(data []byte) error {
 	type alias AttendanceClockOutRequest
 	aux := struct {
 		*alias
-		AttendanceRecordId string `json:"attendance_record_id,omitempty"`
+		AttendanceRecordId *string `json:"attendance_record_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.AttendanceRecordId != "" {
-		v, err := strconv.ParseInt(aux.AttendanceRecordId, 10, 64)
+	if aux.AttendanceRecordId != nil {
+		v, err := strconv.ParseInt(*aux.AttendanceRecordId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.AttendanceRecordId = v
+		m.AttendanceRecordId = &v
 	}
 	return nil
 }
@@ -423,7 +433,11 @@ func (x *AttendanceClockOutRequest) GetAttendanceRecordId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.AttendanceRecordId
+	if x.AttendanceRecordId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.AttendanceRecordId
 }
 
 type AttendanceClockOutResponse struct {

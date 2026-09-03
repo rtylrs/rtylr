@@ -65,7 +65,7 @@ message PublicBusinessProfile {
 }
 
 message GetBusinessRequest {
-  business_id: int64 @required @gt(0)
+  business_id: int64 @gt(0)
 }
 
 message GetBusinessResponse {
@@ -74,7 +74,7 @@ message GetBusinessResponse {
 
 message CreateSubBusinessRequest {
   name: string @required
-  parent_business_id: int64 @required @gt(0)
+  parent_business_id: int64? @required @gt(0)
 }
 
 message CreateSubBusinessResponse {
@@ -131,7 +131,7 @@ message SetSlugResponse {
 }
 
 message UpdateBusinessRequest {
-  business_id: int64 @required @gt(0)
+  business_id: int64 @gt(0)
   name: string @required
   type: string @required
   address: string
@@ -148,7 +148,7 @@ message UpdateBusinessResponse {
 }
 
 message RenameBusinessRequest {
-  business_id: int64 @required @gt(0)
+  business_id: int64 @gt(0)
   name: string @required
 }
 
@@ -157,7 +157,7 @@ message RenameBusinessResponse {
 }
 
 message SetLogoRequest {
-  business_id: int64 @required @gt(0)
+  business_id: int64 @gt(0)
   /// Public URL of an already-uploaded asset (see @voxire/api uploadAsset).
   logo_url: string @required
 }
@@ -167,7 +167,7 @@ message SetLogoResponse {
 }
 
 message DeleteBusinessRequest {
-  business_id: int64 @required @gt(0)
+  business_id: int64 @gt(0)
 }
 
 message DeleteBusinessResponse {

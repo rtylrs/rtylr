@@ -74,7 +74,7 @@ message ProductMargin {
   /// cost_minor_units is units_sold multiplied by the product's cost price,
   /// in the same minor unit. Absent when the product has no cost price on
   /// record, which is distinct from a cost of zero.
-  cost_minor_units: int64? @nullable
+  cost_minor_units: int64?
 }
 
 message GetProductMarginsResponse {

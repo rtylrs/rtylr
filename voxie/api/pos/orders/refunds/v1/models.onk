@@ -3,8 +3,8 @@ package pos.orders.refunds.v1
 // ── Process Refund ────────────────────────────────────────────────
 
 message ProcessRefundRequest {
-  order_id: int64 @required @gt(0)
-  amount: float64 @required @gt(0)
+  order_id: int64 @gt(0)
+  amount: float64? @required @gt(0)
   reason: string @required
 }
 

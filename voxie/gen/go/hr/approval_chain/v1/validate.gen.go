@@ -38,8 +38,13 @@ func (m *UpsertApprovalChainRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
+	}
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
 	if m.RequestType == "" {
 		violations = append(violations, "request_type is required")

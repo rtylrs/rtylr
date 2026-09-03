@@ -314,7 +314,7 @@ func (x *CreateStockTakeItemRequest) GetCountedQty() float64 {
 }
 
 type CreateStockTakeRequest struct {
-	WarehouseId int64                         `json:"warehouse_id,omitempty"`
+	WarehouseId *int64                        `json:"warehouse_id,omitempty"`
 	Notes       string                        `json:"notes,omitempty"`
 	Items       []*CreateStockTakeItemRequest `json:"items,omitempty"`
 }
@@ -323,9 +323,12 @@ func (m *CreateStockTakeRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateStockTakeRequest
 	aux := struct {
 		*alias
-		WarehouseId string `json:"warehouse_id,omitempty"`
+		WarehouseId *string `json:"warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WarehouseId = strconv.FormatInt(m.WarehouseId, 10)
+	if m.WarehouseId != nil {
+		encodedWarehouseId := strconv.FormatInt(*m.WarehouseId, 10)
+		aux.WarehouseId = &encodedWarehouseId
+	}
 	return json.Marshal(aux)
 }
 
@@ -333,17 +336,17 @@ func (m *CreateStockTakeRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateStockTakeRequest
 	aux := struct {
 		*alias
-		WarehouseId string `json:"warehouse_id,omitempty"`
+		WarehouseId *string `json:"warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WarehouseId != "" {
-		v, err := strconv.ParseInt(aux.WarehouseId, 10, 64)
+	if aux.WarehouseId != nil {
+		v, err := strconv.ParseInt(*aux.WarehouseId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WarehouseId = v
+		m.WarehouseId = &v
 	}
 	return nil
 }
@@ -353,7 +356,11 @@ func (x *CreateStockTakeRequest) GetWarehouseId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WarehouseId
+	if x.WarehouseId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WarehouseId
 }
 
 func (x *CreateStockTakeRequest) GetNotes() string {

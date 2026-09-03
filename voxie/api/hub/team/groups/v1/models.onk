@@ -72,7 +72,7 @@ message CreateGroupResponse {
 }
 
 message GetGroupDetailRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetGroupDetailResponse {
@@ -80,7 +80,7 @@ message GetGroupDetailResponse {
 }
 
 message UpdateGroupRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   name: string @required
   description: string
   color: string
@@ -92,7 +92,7 @@ message UpdateGroupResponse {
 }
 
 message DeleteGroupRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteGroupResponse {
@@ -100,7 +100,7 @@ message DeleteGroupResponse {
 }
 
 message AddGroupMembersRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   user_ids: int64[] @min_items(1)
 }
 
@@ -111,8 +111,8 @@ message AddGroupMembersResponse {
 }
 
 message RemoveGroupMemberRequest {
-  id: int64 @required @gt(0)
-  user_id: int64 @required @gt(0)
+  id: int64 @gt(0)
+  user_id: int64 @gt(0)
 }
 
 message RemoveGroupMemberResponse {
@@ -120,7 +120,7 @@ message RemoveGroupMemberResponse {
 }
 
 message GetUserGroupsRequest {
-  user_id: int64 @required @gt(0)
+  user_id: int64 @gt(0)
 }
 
 message GetUserGroupsResponse {

@@ -418,7 +418,7 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
 				return
 			}
-			req.ProjectId = parsedProjectId
+			req.ProjectId = &parsedProjectId
 		}
 		if values := r.URL.Query()["page"]; len(values) > 0 {
 			value := values[0]
@@ -566,7 +566,7 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
 				return
 			}
-			req.ProjectId = parsedProjectId
+			req.ProjectId = &parsedProjectId
 		}
 		if values := r.URL.Query()["page"]; len(values) > 0 {
 			value := values[0]
@@ -640,7 +640,7 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
 				return
 			}
-			req.ProjectId = parsedProjectId
+			req.ProjectId = &parsedProjectId
 		}
 		if values := r.URL.Query()["user_id"]; len(values) > 0 {
 			value := values[0]
@@ -649,7 +649,7 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter user_id: "+err.Error())
 				return
 			}
-			req.UserId = parsedUserId
+			req.UserId = &parsedUserId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

@@ -11,6 +11,28 @@ func (m *POSUser) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.RoleManagement != nil {
+		if err := m.RoleManagement.Validate(); err != nil {
+			violations = append(violations, "role_management: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RoleManagementManagedInDash) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Code == "" {
+		violations = append(violations, "code is required")
+	}
+	if m.DashUrl == "" {
+		violations = append(violations, "dash_url is required")
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -49,8 +71,21 @@ func (m *CreatePOSUserRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
+	}
+	if m.LocationId == nil {
+		violations = append(violations, "location_id is required")
+	}
+	if m.LocationId != nil {
+		if *m.LocationId <= 0 {
+			violations = append(violations, "location_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -58,14 +93,8 @@ func (m *CreatePOSUserRequest) Validate() error {
 	if m.Pin == "" {
 		violations = append(violations, "pin is required")
 	}
-	if m.Role == "" {
-		violations = append(violations, "role is required")
-	}
 	if m.HourlyRate < 0 {
 		violations = append(violations, "hourly_rate must be greater than or equal to 0")
-	}
-	if m.MaxDiscountPct < 0 {
-		violations = append(violations, "max_discount_pct must be greater than or equal to 0")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -78,6 +107,14 @@ func (m *CreatePOSUserResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.RoleManagement == nil {
+		violations = append(violations, "role_management is required")
+	}
+	if m.RoleManagement != nil {
+		if err := m.RoleManagement.Validate(); err != nil {
+			violations = append(violations, "role_management: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -89,20 +126,19 @@ func (m *UpdatePOSUserRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
+	}
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.Role == "" {
-		violations = append(violations, "role is required")
-	}
 	if m.HourlyRate < 0 {
 		violations = append(violations, "hourly_rate must be greater than or equal to 0")
-	}
-	if m.MaxDiscountPct < 0 {
-		violations = append(violations, "max_discount_pct must be greater than or equal to 0")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -115,6 +151,14 @@ func (m *UpdatePOSUserResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.RoleManagement == nil {
+		violations = append(violations, "role_management is required")
+	}
+	if m.RoleManagement != nil {
+		if err := m.RoleManagement.Validate(); err != nil {
+			violations = append(violations, "role_management: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -126,8 +170,13 @@ func (m *DeactivatePOSUserRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
+	}
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -151,11 +200,21 @@ func (m *VerifyPOSUserPINRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
+	if m.LocationId == nil {
+		violations = append(violations, "location_id is required")
 	}
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.LocationId != nil {
+		if *m.LocationId <= 0 {
+			violations = append(violations, "location_id must be greater than 0")
+		}
+	}
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
+	}
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
 	}
 	if m.Pin == "" {
 		violations = append(violations, "pin is required")
@@ -171,6 +230,14 @@ func (m *VerifyPOSUserPINResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.RoleManagement == nil {
+		violations = append(violations, "role_management is required")
+	}
+	if m.RoleManagement != nil {
+		if err := m.RoleManagement.Validate(); err != nil {
+			violations = append(violations, "role_management: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -182,11 +249,21 @@ func (m *SetPINRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.UserId <= 0 {
-		violations = append(violations, "user_id must be greater than 0")
+	if m.UserId == nil {
+		violations = append(violations, "user_id is required")
 	}
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
+	if m.UserId != nil {
+		if *m.UserId <= 0 {
+			violations = append(violations, "user_id must be greater than 0")
+		}
+	}
+	if m.LocationId == nil {
+		violations = append(violations, "location_id is required")
+	}
+	if m.LocationId != nil {
+		if *m.LocationId <= 0 {
+			violations = append(violations, "location_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")

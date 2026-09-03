@@ -289,7 +289,9 @@ func (c *StockServiceClient) LowStock(ctx context.Context, req *LowStockRequest)
 	}
 	path := "/pos/stock/v1/low-stock"
 	query := url.Values{}
-	query.Set("branch_id", strconv.FormatInt(int64(req.BranchId), 10))
+	if req.BranchId != nil {
+		query.Set("branch_id", strconv.FormatInt(int64(*req.BranchId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

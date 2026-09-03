@@ -484,7 +484,7 @@ return violations;
 }
 
 export interface GetOrderDetailRequest {
-orderId: string;
+orderId?: string;
 }
 
 export function decodeGetOrderDetailRequest(v: any): GetOrderDetailRequest {
@@ -503,7 +503,6 @@ return out;
 export function validateGetOrderDetailRequest(v: GetOrderDetailRequest): string[] {
 const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
-if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 return violations;
 }
@@ -533,7 +532,7 @@ return violations;
 }
 
 export interface GetPublicOrderStatusRequest {
-orderId: string;
+orderId?: string;
 businessId: string;
 publicToken: string;
 }
@@ -558,7 +557,6 @@ return out;
 export function validateGetPublicOrderStatusRequest(v: GetPublicOrderStatusRequest): string[] {
 const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
-if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
@@ -689,7 +687,7 @@ return violations;
 }
 
 export interface SendToKitchenRequest {
-orderId: string;
+orderId?: string;
 }
 
 export function decodeSendToKitchenRequest(v: any): SendToKitchenRequest {
@@ -708,7 +706,6 @@ return out;
 export function validateSendToKitchenRequest(v: SendToKitchenRequest): string[] {
 const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
-if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 return violations;
 }
@@ -737,7 +734,7 @@ return violations;
 }
 
 export interface TransferTableRequest {
-orderId: string;
+orderId?: string;
 newTableId: string;
 }
 
@@ -759,7 +756,6 @@ return out;
 export function validateTransferTableRequest(v: TransferTableRequest): string[] {
 const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
-if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 if (v.newTableId !== undefined && v.newTableId !== null && !(typeof v.newTableId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.newTableId))) violations.push("new_table_id has invalid type");
 if (!(v.newTableId !== undefined && v.newTableId !== null)) violations.push("new_table_id is required");
@@ -815,7 +811,7 @@ return violations;
 }
 
 export interface UpdateOrderStatusRequest {
-orderId: string;
+orderId?: string;
 body?: UpdateOrderStatusBody;
 }
 
@@ -837,7 +833,6 @@ return out;
 export function validateUpdateOrderStatusRequest(v: UpdateOrderStatusRequest): string[] {
 const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
-if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateOrderStatusBody(v.body).map((message) => "body: " + message));
@@ -868,7 +863,7 @@ return violations;
 }
 
 export interface VoidOrderRequest {
-orderId: string;
+orderId?: string;
 reason: string;
 }
 
@@ -890,7 +885,6 @@ return out;
 export function validateVoidOrderRequest(v: VoidOrderRequest): string[] {
 const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
-if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");

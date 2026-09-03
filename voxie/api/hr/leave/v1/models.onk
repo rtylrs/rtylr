@@ -31,7 +31,7 @@ message LeaveTypePayload {
 /// LeaveRequestPayload is a single employee's request for time off.
 message LeaveRequestPayload {
   /// Unique identifier for the leave request.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// Tenant owner this request belongs to.
   owner_id: int64
   /// Employee who is requesting leave.
@@ -115,15 +115,15 @@ message ListLeaveRequestsResponse {
 
 message CreateLeaveRequestRequest {
   /// Employee requesting leave.
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
   /// Leave type being requested.
-  leave_type_id: int64 @required @gt(0)
+  leave_type_id: int64? @required @gt(0)
   /// First day of leave (ISO-8601 date).
   start_date: string @required
   /// Last day of leave (ISO-8601 date).
   end_date: string @required
   /// Total number of working days requested.
-  total_days: float64 @required @gt(0)
+  total_days: float64? @required @gt(0)
   /// Additional context from the employee; absent if none provided.
   notes: string?
 }
@@ -143,7 +143,7 @@ message ApproveLeaveBody {
 
 message ApproveLeaveRequest {
   /// request_id is the leave request being reviewed.
-  request_id: int64 @required @gt(0)
+  request_id: int64 @gt(0)
   body: ApproveLeaveBody
 }
 
@@ -156,7 +156,7 @@ message CancelLeaveRequestRequest {
   /// request_id is the leave request being withdrawn. Only the request's own
   /// subject may cancel it, and only while it is still pending - the leave
   /// approval permission grants no override here.
-  request_id: int64 @required @gt(0)
+  request_id: int64 @gt(0)
 }
 
 message CancelLeaveResponse {
@@ -187,9 +187,9 @@ message CreateLeaveTypeRequest {
   /// Accrual rule; absent if entitlement is fixed.
   accrual_rule: string?
   /// Maximum unused days that may carry over to the next year.
-  max_carryover_days: int32 @required @gt(0)
+  max_carryover_days: int32? @required @gt(0)
   /// Minimum calendar days of notice required.
-  min_notice_days: int32 @required @gt(0)
+  min_notice_days: int32? @required @gt(0)
   /// Consecutive days after which documentation is required; absent if never.
   requires_documentation_after_days: int32?
 }
@@ -221,7 +221,7 @@ message UpdateLeaveTypeBody {
 
 message UpdateLeaveTypeRequest {
   /// ID of the leave type to update.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateLeaveTypeBody
 }
 

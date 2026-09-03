@@ -52,8 +52,8 @@ func (c *CalendarServiceClient) GetCalendar(ctx context.Context, req *GetCalenda
 	}
 	path := "/booking/calendar/v1/calendar"
 	query := url.Values{}
-	query.Set("from", req.From)
-	query.Set("to", req.To)
+	query.Set("from", req.FromDate)
+	query.Set("to", req.ToDate)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

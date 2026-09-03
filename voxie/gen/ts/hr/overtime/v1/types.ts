@@ -229,7 +229,7 @@ return violations;
 }
 
 export interface ApproveOvertimeRequest {
-overtimeRequestId: string;
+overtimeRequestId?: string;
 body?: ApproveOvertimeBody;
 }
 
@@ -251,7 +251,6 @@ return out;
 export function validateApproveOvertimeRequest(v: ApproveOvertimeRequest): string[] {
 const violations: string[] = [];
 if (v.overtimeRequestId !== undefined && v.overtimeRequestId !== null && !(typeof v.overtimeRequestId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.overtimeRequestId))) violations.push("overtime_request_id has invalid type");
-if (!(v.overtimeRequestId !== undefined && v.overtimeRequestId !== null)) violations.push("overtime_request_id is required");
 if (v.overtimeRequestId !== undefined && v.overtimeRequestId !== null && !(Number(v.overtimeRequestId) > 0)) violations.push("overtime_request_id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateApproveOvertimeBody(v.body).map((message) => "body: " + message));

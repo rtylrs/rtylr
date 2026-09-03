@@ -29,7 +29,7 @@ message CreateStockTakeItemRequest {
 }
 
 message CreateStockTakeRequest {
-  warehouse_id: int64 @required @gt(0)
+  warehouse_id: int64? @required @gt(0)
   notes: string
   items: CreateStockTakeItemRequest[]
 }
@@ -64,7 +64,7 @@ message UpdateStockTakeBody {
 }
 
 message UpdateStockTakeRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateStockTakeBody
 }
 

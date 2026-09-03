@@ -14,8 +14,13 @@ func (m *ProcessRefundRequest) Validate() error {
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
 	}
-	if m.Amount <= 0 {
-		violations = append(violations, "amount must be greater than 0")
+	if m.Amount == nil {
+		violations = append(violations, "amount is required")
+	}
+	if m.Amount != nil {
+		if *m.Amount <= 0 {
+			violations = append(violations, "amount must be greater than 0")
+		}
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")

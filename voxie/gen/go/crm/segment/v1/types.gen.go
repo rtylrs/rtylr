@@ -278,22 +278,28 @@ func (x *DeleteSegmentResponse) GetMessage() string {
 }
 
 type GetSegmentCustomersRequest struct {
-	SegmentId int64 `json:"segment_id,omitempty"`
-	Page      int64 `json:"page,omitempty"`
-	PageSize  int64 `json:"page_size,omitempty"`
+	SegmentId int64  `json:"segment_id,omitempty"`
+	Page      *int64 `json:"page,omitempty"`
+	PageSize  *int64 `json:"page_size,omitempty"`
 }
 
 func (m *GetSegmentCustomersRequest) MarshalJSON() ([]byte, error) {
 	type alias GetSegmentCustomersRequest
 	aux := struct {
 		*alias
-		SegmentId string `json:"segment_id,omitempty"`
-		Page      string `json:"page,omitempty"`
-		PageSize  string `json:"page_size,omitempty"`
+		SegmentId string  `json:"segment_id,omitempty"`
+		Page      *string `json:"page,omitempty"`
+		PageSize  *string `json:"page_size,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.SegmentId = strconv.FormatInt(m.SegmentId, 10)
-	aux.Page = strconv.FormatInt(m.Page, 10)
-	aux.PageSize = strconv.FormatInt(m.PageSize, 10)
+	if m.Page != nil {
+		encodedPage := strconv.FormatInt(*m.Page, 10)
+		aux.Page = &encodedPage
+	}
+	if m.PageSize != nil {
+		encodedPageSize := strconv.FormatInt(*m.PageSize, 10)
+		aux.PageSize = &encodedPageSize
+	}
 	return json.Marshal(aux)
 }
 
@@ -301,9 +307,9 @@ func (m *GetSegmentCustomersRequest) UnmarshalJSON(data []byte) error {
 	type alias GetSegmentCustomersRequest
 	aux := struct {
 		*alias
-		SegmentId string `json:"segment_id,omitempty"`
-		Page      string `json:"page,omitempty"`
-		PageSize  string `json:"page_size,omitempty"`
+		SegmentId string  `json:"segment_id,omitempty"`
+		Page      *string `json:"page,omitempty"`
+		PageSize  *string `json:"page_size,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -315,19 +321,19 @@ func (m *GetSegmentCustomersRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.SegmentId = v
 	}
-	if aux.Page != "" {
-		v, err := strconv.ParseInt(aux.Page, 10, 64)
+	if aux.Page != nil {
+		v, err := strconv.ParseInt(*aux.Page, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Page = v
+		m.Page = &v
 	}
-	if aux.PageSize != "" {
-		v, err := strconv.ParseInt(aux.PageSize, 10, 64)
+	if aux.PageSize != nil {
+		v, err := strconv.ParseInt(*aux.PageSize, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.PageSize = v
+		m.PageSize = &v
 	}
 	return nil
 }
@@ -345,7 +351,11 @@ func (x *GetSegmentCustomersRequest) GetPage() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Page
+	if x.Page == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Page
 }
 
 func (x *GetSegmentCustomersRequest) GetPageSize() int64 {
@@ -353,7 +363,11 @@ func (x *GetSegmentCustomersRequest) GetPageSize() int64 {
 		var zero int64
 		return zero
 	}
-	return x.PageSize
+	if x.PageSize == nil {
+		var zero int64
+		return zero
+	}
+	return *x.PageSize
 }
 
 type GetSegmentCustomersResponse struct {

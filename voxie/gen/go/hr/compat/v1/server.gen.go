@@ -547,13 +547,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -698,13 +698,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -918,13 +918,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -1115,13 +1115,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -1371,13 +1371,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -1545,13 +1545,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -1696,13 +1696,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -1887,13 +1887,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -2038,13 +2038,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -2398,13 +2398,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -2636,13 +2636,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -2974,13 +2974,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -3125,13 +3125,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -3300,13 +3300,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -3515,13 +3515,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -3713,13 +3713,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -3912,13 +3912,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -4204,13 +4204,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -4372,13 +4372,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]
@@ -4587,13 +4587,13 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			fromVal := value
-			req.From = &fromVal
+			fromDateVal := value
+			req.FromDate = &fromDateVal
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			toVal := value
-			req.To = &toVal
+			toDateVal := value
+			req.ToDate = &toDateVal
 		}
 		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
 			value := values[0]

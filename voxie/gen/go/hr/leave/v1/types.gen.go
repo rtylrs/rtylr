@@ -717,23 +717,29 @@ func (x *ListLeaveRequestsResponse) GetOffset() int32 {
 }
 
 type CreateLeaveRequestRequest struct {
-	EmployeeId  int64   `json:"employee_id,omitempty"`
-	LeaveTypeId int64   `json:"leave_type_id,omitempty"`
-	StartDate   string  `json:"start_date,omitempty"`
-	EndDate     string  `json:"end_date,omitempty"`
-	TotalDays   float64 `json:"total_days,omitempty"`
-	Notes       *string `json:"notes,omitempty"`
+	EmployeeId  *int64   `json:"employee_id,omitempty"`
+	LeaveTypeId *int64   `json:"leave_type_id,omitempty"`
+	StartDate   string   `json:"start_date,omitempty"`
+	EndDate     string   `json:"end_date,omitempty"`
+	TotalDays   *float64 `json:"total_days,omitempty"`
+	Notes       *string  `json:"notes,omitempty"`
 }
 
 func (m *CreateLeaveRequestRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateLeaveRequestRequest
 	aux := struct {
 		*alias
-		EmployeeId  string `json:"employee_id,omitempty"`
-		LeaveTypeId string `json:"leave_type_id,omitempty"`
+		EmployeeId  *string `json:"employee_id,omitempty"`
+		LeaveTypeId *string `json:"leave_type_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
-	aux.LeaveTypeId = strconv.FormatInt(m.LeaveTypeId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	if m.LeaveTypeId != nil {
+		encodedLeaveTypeId := strconv.FormatInt(*m.LeaveTypeId, 10)
+		aux.LeaveTypeId = &encodedLeaveTypeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -741,25 +747,25 @@ func (m *CreateLeaveRequestRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateLeaveRequestRequest
 	aux := struct {
 		*alias
-		EmployeeId  string `json:"employee_id,omitempty"`
-		LeaveTypeId string `json:"leave_type_id,omitempty"`
+		EmployeeId  *string `json:"employee_id,omitempty"`
+		LeaveTypeId *string `json:"leave_type_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
-	if aux.LeaveTypeId != "" {
-		v, err := strconv.ParseInt(aux.LeaveTypeId, 10, 64)
+	if aux.LeaveTypeId != nil {
+		v, err := strconv.ParseInt(*aux.LeaveTypeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LeaveTypeId = v
+		m.LeaveTypeId = &v
 	}
 	return nil
 }
@@ -769,7 +775,11 @@ func (x *CreateLeaveRequestRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CreateLeaveRequestRequest) GetLeaveTypeId() int64 {
@@ -777,7 +787,11 @@ func (x *CreateLeaveRequestRequest) GetLeaveTypeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LeaveTypeId
+	if x.LeaveTypeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LeaveTypeId
 }
 
 func (x *CreateLeaveRequestRequest) GetStartDate() string {
@@ -801,7 +815,11 @@ func (x *CreateLeaveRequestRequest) GetTotalDays() float64 {
 		var zero float64
 		return zero
 	}
-	return x.TotalDays
+	if x.TotalDays == nil {
+		var zero float64
+		return zero
+	}
+	return *x.TotalDays
 }
 
 func (x *CreateLeaveRequestRequest) GetNotes() string {
@@ -1015,8 +1033,8 @@ type CreateLeaveTypeRequest struct {
 	IsPaid                         bool    `json:"is_paid,omitempty"`
 	RequiresApproval               bool    `json:"requires_approval,omitempty"`
 	AccrualRule                    *string `json:"accrual_rule,omitempty"`
-	MaxCarryoverDays               int32   `json:"max_carryover_days,omitempty"`
-	MinNoticeDays                  int32   `json:"min_notice_days,omitempty"`
+	MaxCarryoverDays               *int32  `json:"max_carryover_days,omitempty"`
+	MinNoticeDays                  *int32  `json:"min_notice_days,omitempty"`
 	RequiresDocumentationAfterDays *int32  `json:"requires_documentation_after_days,omitempty"`
 }
 
@@ -1061,7 +1079,11 @@ func (x *CreateLeaveTypeRequest) GetMaxCarryoverDays() int32 {
 		var zero int32
 		return zero
 	}
-	return x.MaxCarryoverDays
+	if x.MaxCarryoverDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MaxCarryoverDays
 }
 
 func (x *CreateLeaveTypeRequest) GetMinNoticeDays() int32 {
@@ -1069,7 +1091,11 @@ func (x *CreateLeaveTypeRequest) GetMinNoticeDays() int32 {
 		var zero int32
 		return zero
 	}
-	return x.MinNoticeDays
+	if x.MinNoticeDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MinNoticeDays
 }
 
 func (x *CreateLeaveTypeRequest) GetRequiresDocumentationAfterDays() int32 {

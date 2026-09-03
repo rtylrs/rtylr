@@ -25,8 +25,13 @@ func (m *AttendanceClockInRequest) Validate() error {
 	if m.Method == "" {
 		violations = append(violations, "method is required")
 	}
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
+	if m.LocationId == nil {
+		violations = append(violations, "location_id is required")
+	}
+	if m.LocationId != nil {
+		if *m.LocationId <= 0 {
+			violations = append(violations, "location_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -55,8 +60,13 @@ func (m *AttendanceClockOutRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.AttendanceRecordId <= 0 {
-		violations = append(violations, "attendance_record_id must be greater than 0")
+	if m.AttendanceRecordId == nil {
+		violations = append(violations, "attendance_record_id is required")
+	}
+	if m.AttendanceRecordId != nil {
+		if *m.AttendanceRecordId <= 0 {
+			violations = append(violations, "attendance_record_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

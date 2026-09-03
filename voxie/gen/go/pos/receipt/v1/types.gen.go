@@ -155,24 +155,24 @@ func (x *EmailReceiptResponse) GetMessage() string {
 }
 
 type ListReceiptsRequest struct {
-	From string `json:"from,omitempty"`
-	To   string `json:"to,omitempty"`
+	FromDate string `json:"from_date,omitempty"`
+	ToDate   string `json:"to_date,omitempty"`
 }
 
-func (x *ListReceiptsRequest) GetFrom() string {
+func (x *ListReceiptsRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *ListReceiptsRequest) GetTo() string {
+func (x *ListReceiptsRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 type ListReceiptsResponse struct {

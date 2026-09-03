@@ -185,7 +185,7 @@ return violations;
 }
 
 export interface UpdateCycleRequest {
-id: string;
+id?: string;
 name?: string;
 status?: string;
 endDate?: string;
@@ -213,7 +213,6 @@ return out;
 export function validateUpdateCycleRequest(v: UpdateCycleRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");

@@ -19,7 +19,7 @@ message Appointment {
 }
 
 message CreateAppointmentRequest {
-  service_id: int64 @required @gt(0)
+  service_id: int64? @required @gt(0)
   resource_id: int64
   staff_id: int64
   customer_name: string @required
@@ -37,7 +37,7 @@ message CreateAppointmentResponse {
 }
 
 message DeleteAppointmentRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteAppointmentResponse {
@@ -57,7 +57,7 @@ message ListTodayAppointmentsResponse {
 }
 
 message UpdateAppointmentRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   service_id: int64
   resource_id: int64
   staff_id: int64

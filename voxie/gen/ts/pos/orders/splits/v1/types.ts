@@ -2,7 +2,7 @@
 import * as pos_orders_v1 from "../../v1/types";
 
 export interface SplitOrderRequest {
-orderId: string;
+orderId?: string;
 splits?: (pos_orders_v1.SplitGroup)[];
 }
 
@@ -24,7 +24,6 @@ return out;
 export function validateSplitOrderRequest(v: SplitOrderRequest): string[] {
 const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
-if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 if (v.splits !== undefined && v.splits !== null && !(Array.isArray(v.splits) && (v.splits).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("splits has invalid type");
 if (v.splits !== undefined && v.splits !== null && v.splits.length < 1) violations.push("splits must contain at least 1 items");

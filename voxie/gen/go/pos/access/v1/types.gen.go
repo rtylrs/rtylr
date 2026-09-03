@@ -239,22 +239,28 @@ func (x *MemberLocationEntry) GetCanViewReports() bool {
 }
 
 type AssignLocationRequest struct {
-	UserId             int64 `json:"user_id,omitempty"`
-	LocationId         int64 `json:"location_id,omitempty"`
-	CanManagePosUsers  bool  `json:"can_manage_pos_users,omitempty"`
-	CanManageTerminals bool  `json:"can_manage_terminals,omitempty"`
-	CanViewReports     bool  `json:"can_view_reports,omitempty"`
+	UserId             *int64 `json:"user_id,omitempty"`
+	LocationId         *int64 `json:"location_id,omitempty"`
+	CanManagePosUsers  bool   `json:"can_manage_pos_users,omitempty"`
+	CanManageTerminals bool   `json:"can_manage_terminals,omitempty"`
+	CanViewReports     bool   `json:"can_view_reports,omitempty"`
 }
 
 func (m *AssignLocationRequest) MarshalJSON() ([]byte, error) {
 	type alias AssignLocationRequest
 	aux := struct {
 		*alias
-		UserId     string `json:"user_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
 	return json.Marshal(aux)
 }
 
@@ -262,25 +268,25 @@ func (m *AssignLocationRequest) UnmarshalJSON(data []byte) error {
 	type alias AssignLocationRequest
 	aux := struct {
 		*alias
-		UserId     string `json:"user_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LocationId = v
+		m.LocationId = &v
 	}
 	return nil
 }
@@ -290,7 +296,11 @@ func (x *AssignLocationRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *AssignLocationRequest) GetLocationId() int64 {
@@ -298,7 +308,11 @@ func (x *AssignLocationRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *AssignLocationRequest) GetCanManagePosUsers() bool {
@@ -367,16 +381,19 @@ func (x *AssignLocationResponse) GetId() int64 {
 }
 
 type GetLocationRosterRequest struct {
-	LocationId int64 `json:"location_id,omitempty"`
+	LocationId *int64 `json:"location_id,omitempty"`
 }
 
 func (m *GetLocationRosterRequest) MarshalJSON() ([]byte, error) {
 	type alias GetLocationRosterRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
 	return json.Marshal(aux)
 }
 
@@ -384,17 +401,17 @@ func (m *GetLocationRosterRequest) UnmarshalJSON(data []byte) error {
 	type alias GetLocationRosterRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LocationId = v
+		m.LocationId = &v
 	}
 	return nil
 }
@@ -404,7 +421,11 @@ func (x *GetLocationRosterRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 type GetLocationRosterResponse struct {
@@ -420,16 +441,19 @@ func (x *GetLocationRosterResponse) GetRoster() []*RosterEntry {
 }
 
 type GetMemberLocationsRequest struct {
-	UserId int64 `json:"user_id,omitempty"`
+	UserId *int64 `json:"user_id,omitempty"`
 }
 
 func (m *GetMemberLocationsRequest) MarshalJSON() ([]byte, error) {
 	type alias GetMemberLocationsRequest
 	aux := struct {
 		*alias
-		UserId string `json:"user_id,omitempty"`
+		UserId *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -437,17 +461,17 @@ func (m *GetMemberLocationsRequest) UnmarshalJSON(data []byte) error {
 	type alias GetMemberLocationsRequest
 	aux := struct {
 		*alias
-		UserId string `json:"user_id,omitempty"`
+		UserId *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -457,7 +481,11 @@ func (x *GetMemberLocationsRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 type GetMemberLocationsResponse struct {
@@ -488,16 +516,19 @@ func (x *GetMyLocationsResponse) GetLocations() []*MyLocation {
 }
 
 type RemoveLocationRequest struct {
-	Id int64 `json:"id,omitempty"`
+	Id *int64 `json:"id,omitempty"`
 }
 
 func (m *RemoveLocationRequest) MarshalJSON() ([]byte, error) {
 	type alias RemoveLocationRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.Id != nil {
+		encodedId := strconv.FormatInt(*m.Id, 10)
+		aux.Id = &encodedId
+	}
 	return json.Marshal(aux)
 }
 
@@ -505,17 +536,17 @@ func (m *RemoveLocationRequest) UnmarshalJSON(data []byte) error {
 	type alias RemoveLocationRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.Id != "" {
-		v, err := strconv.ParseInt(aux.Id, 10, 64)
+	if aux.Id != nil {
+		v, err := strconv.ParseInt(*aux.Id, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Id = v
+		m.Id = &v
 	}
 	return nil
 }
@@ -525,7 +556,11 @@ func (x *RemoveLocationRequest) GetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Id
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
 }
 
 type RemoveLocationResponse struct {

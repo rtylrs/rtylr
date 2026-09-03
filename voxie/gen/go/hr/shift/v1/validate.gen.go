@@ -148,11 +148,21 @@ func (m *CreateShiftAssignmentRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
 	}
-	if m.ShiftId <= 0 {
-		violations = append(violations, "shift_id must be greater than 0")
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
+	}
+	if m.ShiftId == nil {
+		violations = append(violations, "shift_id is required")
+	}
+	if m.ShiftId != nil {
+		if *m.ShiftId <= 0 {
+			violations = append(violations, "shift_id must be greater than 0")
+		}
 	}
 	if m.Date == "" {
 		violations = append(violations, "date is required")
@@ -280,8 +290,13 @@ func (m *SetAvailabilityRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.StaffId <= 0 {
-		violations = append(violations, "staff_id must be greater than 0")
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
+	if m.StaffId != nil {
+		if *m.StaffId <= 0 {
+			violations = append(violations, "staff_id must be greater than 0")
+		}
 	}
 	if m.DayOfWeek != nil {
 		if *m.DayOfWeek < 0 {

@@ -121,13 +121,13 @@ func (x *BankAccount) GetCreatedAt() string {
 }
 
 type CreateBankAccountRequest struct {
-	Name        string  `json:"name,omitempty"`
-	BankName    string  `json:"bank_name,omitempty"`
-	AccountType string  `json:"account_type,omitempty"`
-	LastFour    string  `json:"last_four,omitempty"`
-	Balance     float64 `json:"balance,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	IsPrimary   bool    `json:"is_primary,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	BankName    string   `json:"bank_name,omitempty"`
+	AccountType string   `json:"account_type,omitempty"`
+	LastFour    string   `json:"last_four,omitempty"`
+	Balance     *float64 `json:"balance,omitempty"`
+	Currency    string   `json:"currency,omitempty"`
+	IsPrimary   bool     `json:"is_primary,omitempty"`
 }
 
 func (x *CreateBankAccountRequest) GetName() string {
@@ -167,7 +167,11 @@ func (x *CreateBankAccountRequest) GetBalance() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Balance
+	if x.Balance == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Balance
 }
 
 func (x *CreateBankAccountRequest) GetCurrency() string {

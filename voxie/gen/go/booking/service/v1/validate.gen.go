@@ -25,8 +25,13 @@ func (m *CreateServiceRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.DurationMinutes <= 0 {
-		violations = append(violations, "duration_minutes must be greater than 0")
+	if m.DurationMinutes == nil {
+		violations = append(violations, "duration_minutes is required")
+	}
+	if m.DurationMinutes != nil {
+		if *m.DurationMinutes <= 0 {
+			violations = append(violations, "duration_minutes must be greater than 0")
+		}
 	}
 	if m.Price < 0 {
 		violations = append(violations, "price must be greater than or equal to 0")
@@ -111,8 +116,13 @@ func (m *UpdateServiceRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.DurationMinutes <= 0 {
-		violations = append(violations, "duration_minutes must be greater than 0")
+	if m.DurationMinutes == nil {
+		violations = append(violations, "duration_minutes is required")
+	}
+	if m.DurationMinutes != nil {
+		if *m.DurationMinutes <= 0 {
+			violations = append(violations, "duration_minutes must be greater than 0")
+		}
 	}
 	if m.Price < 0 {
 		violations = append(violations, "price must be greater than or equal to 0")

@@ -80,7 +80,7 @@ message CreateEmployeeResponse {
 
 message InviteEmployeeRequest {
   /// ID of the employee to invite.
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
   /// Channel to deliver the invite (email | sms).
   send_via: string @required
 }
@@ -171,7 +171,7 @@ message UpdateEmployeeBody {
 
 message UpdateEmployeeRequest {
   /// id is the employee ID from the route.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable employee fields bound from the HTTP payload.
   body: UpdateEmployeeBody
 }

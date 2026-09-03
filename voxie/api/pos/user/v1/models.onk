@@ -14,6 +14,15 @@ message POSUser {
   can_refund: bool
   can_open_drawer: bool
   can_apply_discount: bool
+  /// role_management identifies the authoritative Dash control-plane surface.
+  role_management: RoleManagementManagedInDash?
+}
+
+/// RoleManagementManagedInDash explains that POS role and capability changes
+/// must be completed in Dash.
+message RoleManagementManagedInDash {
+  code: string @required
+  dash_url: string @required
 }
 
 message ListPOSUsersRequest {
@@ -25,46 +34,35 @@ message ListPOSUsersResponse {
 }
 
 message CreatePOSUserRequest {
-  location_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
+  location_id: int64? @required @gt(0)
   name: string @required
   /// pin is the pin value for this contract.
   pin: string @required
-  /// role is the role value for this contract.
-  role: string @required
   hourly_rate: float64 @gte(0)
-  max_discount_pct: float64 @required @gte(0)
-  can_void: bool
-  can_refund: bool
-  can_open_drawer: bool
-  can_apply_discount: bool
 }
 
 message CreatePOSUserResponse {
   id: int64
+  role_management: RoleManagementManagedInDash @required
 }
 
 message UpdatePOSUserRequest {
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
   name: string @required
   /// Optional replacement PIN. Omit it to preserve the current PIN.
   pin: string
-  /// role is the role value for this contract.
-  role: string @required
   is_active: bool
   hourly_rate: float64 @gte(0)
-  max_discount_pct: float64 @required @gte(0)
-  can_void: bool
-  can_refund: bool
-  can_open_drawer: bool
-  can_apply_discount: bool
 }
 
 message UpdatePOSUserResponse {
   success: bool
+  role_management: RoleManagementManagedInDash @required
 }
 
 message DeactivatePOSUserRequest {
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
 }
 
 message DeactivatePOSUserResponse {
@@ -73,9 +71,9 @@ message DeactivatePOSUserResponse {
 
 message VerifyPOSUserPINRequest {
   /// location_id is the POS location where the operator is signing in.
-  location_id: int64 @required @gt(0)
+  location_id: int64? @required @gt(0)
   /// user_id is the hub user id of the roster operator.
-  user_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
   /// pin is the operator PIN. Sensitive: do not log this field.
   pin: string @required
 }
@@ -100,11 +98,14 @@ message VerifyPOSUserPINResponse {
   /// can_apply_discount grants discount permission for this session.
   can_apply_discount: bool
   max_discount_pct: float64
+  /// authorization_version changes whenever Dash authorization changes.
+  authorization_version: int64
+  role_management: RoleManagementManagedInDash @required
 }
 
 message SetPINRequest {
-  user_id: int64 @required @gt(0)
-  location_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
+  location_id: int64? @required @gt(0)
   name: string @required
   /// pin is the pin value for this contract. Sensitive: do not log this field.
   pin: string @required

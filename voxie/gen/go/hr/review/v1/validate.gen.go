@@ -49,6 +49,9 @@ func (m *CreateReviewRequest) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
 	if m.Period == "" {
 		violations = append(violations, "period is required")
 	}

@@ -2121,7 +2121,7 @@ func (x *DeleteTaskResponse) GetMessage() string {
 }
 
 type CreateSubtaskRequest struct {
-	ParentTaskId   int64    `json:"parent_task_id,omitempty"`
+	ParentTaskId   *int64   `json:"parent_task_id,omitempty"`
 	Title          string   `json:"title,omitempty"`
 	Description    string   `json:"description,omitempty"`
 	Priority       string   `json:"priority,omitempty"`
@@ -2135,10 +2135,13 @@ func (m *CreateSubtaskRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateSubtaskRequest
 	aux := struct {
 		*alias
-		ParentTaskId string  `json:"parent_task_id,omitempty"`
+		ParentTaskId *string `json:"parent_task_id,omitempty"`
 		AssigneeId   *string `json:"assignee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ParentTaskId = strconv.FormatInt(m.ParentTaskId, 10)
+	if m.ParentTaskId != nil {
+		encodedParentTaskId := strconv.FormatInt(*m.ParentTaskId, 10)
+		aux.ParentTaskId = &encodedParentTaskId
+	}
 	if m.AssigneeId != nil {
 		encodedAssigneeId := strconv.FormatInt(*m.AssigneeId, 10)
 		aux.AssigneeId = &encodedAssigneeId
@@ -2150,18 +2153,18 @@ func (m *CreateSubtaskRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateSubtaskRequest
 	aux := struct {
 		*alias
-		ParentTaskId string  `json:"parent_task_id,omitempty"`
+		ParentTaskId *string `json:"parent_task_id,omitempty"`
 		AssigneeId   *string `json:"assignee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ParentTaskId != "" {
-		v, err := strconv.ParseInt(aux.ParentTaskId, 10, 64)
+	if aux.ParentTaskId != nil {
+		v, err := strconv.ParseInt(*aux.ParentTaskId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ParentTaskId = v
+		m.ParentTaskId = &v
 	}
 	if aux.AssigneeId != nil {
 		v, err := strconv.ParseInt(*aux.AssigneeId, 10, 64)
@@ -2178,7 +2181,11 @@ func (x *CreateSubtaskRequest) GetParentTaskId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ParentTaskId
+	if x.ParentTaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ParentTaskId
 }
 
 func (x *CreateSubtaskRequest) GetTitle() string {
@@ -2565,18 +2572,21 @@ type CreateAttachmentRequest struct {
 	TaskId int64  `json:"task_id,omitempty"`
 	Name   string `json:"name,omitempty"`
 	Url    string `json:"url,omitempty"`
-	Size   int64  `json:"size,omitempty"`
+	Size   *int64 `json:"size,omitempty"`
 }
 
 func (m *CreateAttachmentRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateAttachmentRequest
 	aux := struct {
 		*alias
-		TaskId string `json:"task_id,omitempty"`
-		Size   string `json:"size,omitempty"`
+		TaskId string  `json:"task_id,omitempty"`
+		Size   *string `json:"size,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
-	aux.Size = strconv.FormatInt(m.Size, 10)
+	if m.Size != nil {
+		encodedSize := strconv.FormatInt(*m.Size, 10)
+		aux.Size = &encodedSize
+	}
 	return json.Marshal(aux)
 }
 
@@ -2584,8 +2594,8 @@ func (m *CreateAttachmentRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateAttachmentRequest
 	aux := struct {
 		*alias
-		TaskId string `json:"task_id,omitempty"`
-		Size   string `json:"size,omitempty"`
+		TaskId string  `json:"task_id,omitempty"`
+		Size   *string `json:"size,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -2597,12 +2607,12 @@ func (m *CreateAttachmentRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.TaskId = v
 	}
-	if aux.Size != "" {
-		v, err := strconv.ParseInt(aux.Size, 10, 64)
+	if aux.Size != nil {
+		v, err := strconv.ParseInt(*aux.Size, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.Size = v
+		m.Size = &v
 	}
 	return nil
 }
@@ -2636,7 +2646,11 @@ func (x *CreateAttachmentRequest) GetSize() int64 {
 		var zero int64
 		return zero
 	}
-	return x.Size
+	if x.Size == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Size
 }
 
 type CreateAttachmentResponse struct {
@@ -2796,7 +2810,7 @@ func (x *DeleteAttachmentResponse) GetMessage() string {
 }
 
 type CreateTimeLogRequest struct {
-	DurationMinutes int64  `json:"duration_minutes,omitempty"`
+	DurationMinutes *int64 `json:"duration_minutes,omitempty"`
 	Description     string `json:"description,omitempty"`
 	TaskId          int64  `json:"task_id,omitempty"`
 }
@@ -2805,11 +2819,14 @@ func (m *CreateTimeLogRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateTimeLogRequest
 	aux := struct {
 		*alias
-		DurationMinutes string `json:"duration_minutes,omitempty"`
-		TaskId          string `json:"task_id,omitempty"`
+		TaskId          string  `json:"task_id,omitempty"`
+		DurationMinutes *string `json:"duration_minutes,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.DurationMinutes = strconv.FormatInt(m.DurationMinutes, 10)
 	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
+	if m.DurationMinutes != nil {
+		encodedDurationMinutes := strconv.FormatInt(*m.DurationMinutes, 10)
+		aux.DurationMinutes = &encodedDurationMinutes
+	}
 	return json.Marshal(aux)
 }
 
@@ -2817,18 +2834,11 @@ func (m *CreateTimeLogRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateTimeLogRequest
 	aux := struct {
 		*alias
-		DurationMinutes string `json:"duration_minutes,omitempty"`
-		TaskId          string `json:"task_id,omitempty"`
+		TaskId          string  `json:"task_id,omitempty"`
+		DurationMinutes *string `json:"duration_minutes,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.DurationMinutes != "" {
-		v, err := strconv.ParseInt(aux.DurationMinutes, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.DurationMinutes = v
 	}
 	if aux.TaskId != "" {
 		v, err := strconv.ParseInt(aux.TaskId, 10, 64)
@@ -2836,6 +2846,13 @@ func (m *CreateTimeLogRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.TaskId = v
+	}
+	if aux.DurationMinutes != nil {
+		v, err := strconv.ParseInt(*aux.DurationMinutes, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DurationMinutes = &v
 	}
 	return nil
 }
@@ -2845,7 +2862,11 @@ func (x *CreateTimeLogRequest) GetDurationMinutes() int64 {
 		var zero int64
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *CreateTimeLogRequest) GetDescription() string {

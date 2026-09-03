@@ -11,6 +11,16 @@ func (m *StaffUserPayload) Validate() error {
 		return nil
 	}
 	var violations []string
+	for _, value := range m.AppAssignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "app_assignments: "+err.Error())
+		}
+	}
+	if m.EffectiveAccess != nil {
+		if err := m.EffectiveAccess.Validate(); err != nil {
+			violations = append(violations, "effective_access: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -22,6 +32,16 @@ func (m *StaffUserWithGroups) Validate() error {
 		return nil
 	}
 	var violations []string
+	for _, value := range m.AppAssignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "app_assignments: "+err.Error())
+		}
+	}
+	if m.EffectiveAccess != nil {
+		if err := m.EffectiveAccess.Validate(); err != nil {
+			violations = append(violations, "effective_access: "+err.Error())
+		}
+	}
 	for _, value := range m.Groups {
 		if err := value.Validate(); err != nil {
 			violations = append(violations, "groups: "+err.Error())

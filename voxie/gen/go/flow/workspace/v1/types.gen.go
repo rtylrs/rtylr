@@ -567,7 +567,7 @@ func (x *DeleteWorkspaceResponse) GetMessage() string {
 }
 
 type ListWorkspaceMembersRequest struct {
-	WorkspaceId int64  `json:"workspace_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
 	Page        int32  `json:"page,omitempty"`
 	Limit       int32  `json:"limit,omitempty"`
 	SortBy      string `json:"sort_by,omitempty"`
@@ -578,9 +578,12 @@ func (m *ListWorkspaceMembersRequest) MarshalJSON() ([]byte, error) {
 	type alias ListWorkspaceMembersRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -588,17 +591,17 @@ func (m *ListWorkspaceMembersRequest) UnmarshalJSON(data []byte) error {
 	type alias ListWorkspaceMembersRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
 	return nil
 }
@@ -608,7 +611,11 @@ func (x *ListWorkspaceMembersRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 func (x *ListWorkspaceMembersRequest) GetPage() int32 {
@@ -665,8 +672,8 @@ func (x *ListWorkspaceMembersResponse) GetPagination() *common_pagination_v1.Pag
 }
 
 type AddWorkspaceMemberRequest struct {
-	WorkspaceId int64  `json:"workspace_id,omitempty"`
-	UserId      int64  `json:"user_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
+	UserId      *int64 `json:"user_id,omitempty"`
 	Role        string `json:"role,omitempty"`
 }
 
@@ -674,11 +681,17 @@ func (m *AddWorkspaceMemberRequest) MarshalJSON() ([]byte, error) {
 	type alias AddWorkspaceMemberRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
-		UserId      string `json:"user_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
+		UserId      *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -686,25 +699,25 @@ func (m *AddWorkspaceMemberRequest) UnmarshalJSON(data []byte) error {
 	type alias AddWorkspaceMemberRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
-		UserId      string `json:"user_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
+		UserId      *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -714,7 +727,11 @@ func (x *AddWorkspaceMemberRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 func (x *AddWorkspaceMemberRequest) GetUserId() int64 {
@@ -722,7 +739,11 @@ func (x *AddWorkspaceMemberRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *AddWorkspaceMemberRequest) GetRole() string {
@@ -746,19 +767,25 @@ func (x *AddWorkspaceMemberResponse) GetMessage() string {
 }
 
 type RemoveWorkspaceMemberRequest struct {
-	WorkspaceId int64 `json:"workspace_id,omitempty"`
-	UserId      int64 `json:"user_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
+	UserId      *int64 `json:"user_id,omitempty"`
 }
 
 func (m *RemoveWorkspaceMemberRequest) MarshalJSON() ([]byte, error) {
 	type alias RemoveWorkspaceMemberRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
-		UserId      string `json:"user_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
+		UserId      *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -766,25 +793,25 @@ func (m *RemoveWorkspaceMemberRequest) UnmarshalJSON(data []byte) error {
 	type alias RemoveWorkspaceMemberRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
-		UserId      string `json:"user_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
+		UserId      *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -794,7 +821,11 @@ func (x *RemoveWorkspaceMemberRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 func (x *RemoveWorkspaceMemberRequest) GetUserId() int64 {
@@ -802,7 +833,11 @@ func (x *RemoveWorkspaceMemberRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 type RemoveWorkspaceMemberResponse struct {
@@ -818,8 +853,8 @@ func (x *RemoveWorkspaceMemberResponse) GetMessage() string {
 }
 
 type UpdateWorkspaceMemberRoleRequest struct {
-	WorkspaceId int64  `json:"workspace_id,omitempty"`
-	UserId      int64  `json:"user_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
+	UserId      *int64 `json:"user_id,omitempty"`
 	Role        string `json:"role,omitempty"`
 }
 
@@ -827,11 +862,17 @@ func (m *UpdateWorkspaceMemberRoleRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdateWorkspaceMemberRoleRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
-		UserId      string `json:"user_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
+		UserId      *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -839,25 +880,25 @@ func (m *UpdateWorkspaceMemberRoleRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdateWorkspaceMemberRoleRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
-		UserId      string `json:"user_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
+		UserId      *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -867,7 +908,11 @@ func (x *UpdateWorkspaceMemberRoleRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 func (x *UpdateWorkspaceMemberRoleRequest) GetUserId() int64 {
@@ -875,7 +920,11 @@ func (x *UpdateWorkspaceMemberRoleRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *UpdateWorkspaceMemberRoleRequest) GetRole() string {

@@ -49,7 +49,7 @@ message CreateCustomerResponse {
 }
 
 message DeleteCustomerRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteCustomerResponse {
@@ -57,7 +57,7 @@ message DeleteCustomerResponse {
 }
 
 message GetCustomerRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetCustomerResponse {
@@ -100,7 +100,7 @@ message UpdateCustomerBody {
 }
 
 message UpdateCustomerRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateCustomerBody
 }
 

@@ -165,8 +165,8 @@ func (x *ListOneOnOnesResponse) GetOneOnOnes() []*OneOnOne {
 }
 
 type CreateOneOnOneRequest struct {
-	ManagerId   int64  `json:"manager_id,omitempty"`
-	StaffId     int64  `json:"staff_id,omitempty"`
+	ManagerId   *int64 `json:"manager_id,omitempty"`
+	StaffId     *int64 `json:"staff_id,omitempty"`
 	ScheduledAt string `json:"scheduled_at,omitempty"`
 	Notes       string `json:"notes,omitempty"`
 	ActionItems string `json:"action_items,omitempty"`
@@ -177,11 +177,17 @@ func (m *CreateOneOnOneRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateOneOnOneRequest
 	aux := struct {
 		*alias
-		ManagerId string `json:"manager_id,omitempty"`
-		StaffId   string `json:"staff_id,omitempty"`
+		ManagerId *string `json:"manager_id,omitempty"`
+		StaffId   *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ManagerId = strconv.FormatInt(m.ManagerId, 10)
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	if m.ManagerId != nil {
+		encodedManagerId := strconv.FormatInt(*m.ManagerId, 10)
+		aux.ManagerId = &encodedManagerId
+	}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -189,25 +195,25 @@ func (m *CreateOneOnOneRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateOneOnOneRequest
 	aux := struct {
 		*alias
-		ManagerId string `json:"manager_id,omitempty"`
-		StaffId   string `json:"staff_id,omitempty"`
+		ManagerId *string `json:"manager_id,omitempty"`
+		StaffId   *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ManagerId != "" {
-		v, err := strconv.ParseInt(aux.ManagerId, 10, 64)
+	if aux.ManagerId != nil {
+		v, err := strconv.ParseInt(*aux.ManagerId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ManagerId = v
+		m.ManagerId = &v
 	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.StaffId = v
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -217,7 +223,11 @@ func (x *CreateOneOnOneRequest) GetManagerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ManagerId
+	if x.ManagerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ManagerId
 }
 
 func (x *CreateOneOnOneRequest) GetStaffId() int64 {
@@ -225,7 +235,11 @@ func (x *CreateOneOnOneRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 func (x *CreateOneOnOneRequest) GetScheduledAt() string {

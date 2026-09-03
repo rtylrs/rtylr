@@ -76,8 +76,13 @@ func (m *CreateContractRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.LeadId <= 0 {
-		violations = append(violations, "lead_id must be greater than 0")
+	if m.LeadId == nil {
+		violations = append(violations, "lead_id is required")
+	}
+	if m.LeadId != nil {
+		if *m.LeadId <= 0 {
+			violations = append(violations, "lead_id must be greater than 0")
+		}
 	}
 	if m.Plan == "" {
 		violations = append(violations, "plan is required")

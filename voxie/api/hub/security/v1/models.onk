@@ -2,6 +2,8 @@ package hub.security.v1
 
 message SecurityState {
   two_factor_enabled: bool
+  mfa_required: bool
+  mfa_enrolled: bool
   active_sessions: ActiveSession[]
 }
 
@@ -64,4 +66,36 @@ message Update2FARequest {
 
 message Update2FAResponse {
   message: string
+}
+
+message BeginMFAEnrollmentRequest {}
+
+message BeginMFAEnrollmentResponse {
+  secret: string
+  otpauth_uri: string
+}
+
+message CompleteMFAEnrollmentRequest {
+  code: string @required
+}
+
+message CompleteMFAEnrollmentResponse {
+  verified: bool
+  recovery_codes: string[]
+}
+
+message VerifyMFARequest {
+  code: string @required
+}
+
+message VerifyMFAResponse {
+  verified: bool
+}
+
+message UseMFARecoveryCodeRequest {
+  code: string @required
+}
+
+message UseMFARecoveryCodeResponse {
+  verified: bool
 }

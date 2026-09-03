@@ -279,7 +279,7 @@ func RegisterCycleServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
 				return
 			}
-			req.ProjectId = parsedProjectId
+			req.ProjectId = &parsedProjectId
 		}
 		if values := r.URL.Query()["page"]; len(values) > 0 {
 			value := values[0]

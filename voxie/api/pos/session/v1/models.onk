@@ -42,7 +42,7 @@ message CurrentSession {
 }
 
 message GetSessionRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetSessionResponse {
@@ -63,9 +63,9 @@ message ListSessionsResponse {
 }
 
 message OpenSessionRequest {
-  location_id: int64 @required @gt(0)
-  staff_id: int64 @required @gt(0)
-  opening_float: float64 @required @gte(0)
+  location_id: int64? @required @gt(0)
+  staff_id: int64? @required @gt(0)
+  opening_float: float64? @required @gte(0)
 }
 
 message OpenSessionResponse {
@@ -74,8 +74,8 @@ message OpenSessionResponse {
 }
 
 message CloseSessionRequest {
-  closing_float: float64 @required @gte(0)
-  id: int64 @required @gt(0)
+  closing_float: float64? @required @gte(0)
+  id: int64 @gt(0)
 }
 
 message CloseSessionResponse {

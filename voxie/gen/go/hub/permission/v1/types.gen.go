@@ -67,21 +67,37 @@ func (x *PermissionRow) GetRoleValues() map[string]bool {
 }
 
 type CustomRole struct {
-	Id          int64    `json:"id,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
-	MemberCount int32    `json:"member_count,omitempty"`
-	CreatedAt   string   `json:"created_at,omitempty"`
+	Id           int64    `json:"id,omitempty"`
+	Name         string   `json:"name,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	Permissions  []string `json:"permissions,omitempty"`
+	AppId        string   `json:"app_id,omitempty"`
+	RoleKey      string   `json:"role_key,omitempty"`
+	Level        int32    `json:"level,omitempty"`
+	ParentRoleId *int64   `json:"parent_role_id,omitempty"`
+	ScopeRules   []string `json:"scope_rules,omitempty"`
+	IsSystem     bool     `json:"is_system,omitempty"`
+	IsArchived   bool     `json:"is_archived,omitempty"`
+	Lifecycle    string   `json:"lifecycle,omitempty"`
+	Version      int64    `json:"version,omitempty"`
+	MemberCount  int32    `json:"member_count,omitempty"`
+	CreatedAt    string   `json:"created_at,omitempty"`
 }
 
 func (m *CustomRole) MarshalJSON() ([]byte, error) {
 	type alias CustomRole
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		Version      string  `json:"version,omitempty"`
+		ParentRoleId *string `json:"parent_role_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.Version = strconv.FormatInt(m.Version, 10)
+	if m.ParentRoleId != nil {
+		encodedParentRoleId := strconv.FormatInt(*m.ParentRoleId, 10)
+		aux.ParentRoleId = &encodedParentRoleId
+	}
 	return json.Marshal(aux)
 }
 
@@ -89,7 +105,9 @@ func (m *CustomRole) UnmarshalJSON(data []byte) error {
 	type alias CustomRole
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		Version      string  `json:"version,omitempty"`
+		ParentRoleId *string `json:"parent_role_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -100,6 +118,20 @@ func (m *CustomRole) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Id = v
+	}
+	if aux.Version != "" {
+		v, err := strconv.ParseInt(aux.Version, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Version = v
+	}
+	if aux.ParentRoleId != nil {
+		v, err := strconv.ParseInt(*aux.ParentRoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentRoleId = &v
 	}
 	return nil
 }
@@ -136,6 +168,82 @@ func (x *CustomRole) GetPermissions() []string {
 	return x.Permissions
 }
 
+func (x *CustomRole) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AppId
+}
+
+func (x *CustomRole) GetRoleKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RoleKey
+}
+
+func (x *CustomRole) GetLevel() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Level
+}
+
+func (x *CustomRole) GetParentRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ParentRoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ParentRoleId
+}
+
+func (x *CustomRole) GetScopeRules() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.ScopeRules
+}
+
+func (x *CustomRole) GetIsSystem() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsSystem
+}
+
+func (x *CustomRole) GetIsArchived() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsArchived
+}
+
+func (x *CustomRole) GetLifecycle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Lifecycle
+}
+
+func (x *CustomRole) GetVersion() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Version
+}
+
 func (x *CustomRole) GetMemberCount() int32 {
 	if x == nil {
 		var zero int32
@@ -168,10 +276,82 @@ func (x *GetPermissionsResponse) GetMatrix() *PermissionMatrix {
 }
 
 type ListRolesRequest struct {
+	AppId    *string `json:"app_id,omitempty"`
+	Page     *int32  `json:"page,omitempty"`
+	PageSize *int32  `json:"page_size,omitempty"`
+}
+
+func (x *ListRolesRequest) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AppId == nil {
+		var zero string
+		return zero
+	}
+	return *x.AppId
+}
+
+func (x *ListRolesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Page == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Page
+}
+
+func (x *ListRolesRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.PageSize == nil {
+		var zero int32
+		return zero
+	}
+	return *x.PageSize
 }
 
 type ListRolesResponse struct {
-	Roles []*CustomRole `json:"roles,omitempty"`
+	Roles    []*CustomRole `json:"roles,omitempty"`
+	Page     int32         `json:"page,omitempty"`
+	PageSize int32         `json:"page_size,omitempty"`
+	Total    int64         `json:"total,omitempty"`
+	NextPage *int32        `json:"next_page,omitempty"`
+}
+
+func (m *ListRolesResponse) MarshalJSON() ([]byte, error) {
+	type alias ListRolesResponse
+	aux := struct {
+		*alias
+		Total string `json:"total,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Total = strconv.FormatInt(m.Total, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListRolesResponse) UnmarshalJSON(data []byte) error {
+	type alias ListRolesResponse
+	aux := struct {
+		*alias
+		Total string `json:"total,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Total != "" {
+		v, err := strconv.ParseInt(aux.Total, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Total = v
+	}
+	return nil
 }
 
 func (x *ListRolesResponse) GetRoles() []*CustomRole {
@@ -182,10 +362,83 @@ func (x *ListRolesResponse) GetRoles() []*CustomRole {
 	return x.Roles
 }
 
+func (x *ListRolesResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListRolesResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListRolesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListRolesResponse) GetNextPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.NextPage == nil {
+		var zero int32
+		return zero
+	}
+	return *x.NextPage
+}
+
 type CreateRoleRequest struct {
-	Name        string   `json:"name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
+	Name         string   `json:"name,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	AppId        *string  `json:"app_id,omitempty"`
+	RoleKey      *string  `json:"role_key,omitempty"`
+	Level        *int32   `json:"level,omitempty"`
+	ParentRoleId *int64   `json:"parent_role_id,omitempty"`
+	ScopeRules   []string `json:"scope_rules,omitempty"`
+	Permissions  []string `json:"permissions,omitempty"`
+}
+
+func (m *CreateRoleRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateRoleRequest
+	aux := struct {
+		*alias
+		ParentRoleId *string `json:"parent_role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.ParentRoleId != nil {
+		encodedParentRoleId := strconv.FormatInt(*m.ParentRoleId, 10)
+		aux.ParentRoleId = &encodedParentRoleId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateRoleRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateRoleRequest
+	aux := struct {
+		*alias
+		ParentRoleId *string `json:"parent_role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.ParentRoleId != nil {
+		v, err := strconv.ParseInt(*aux.ParentRoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentRoleId = &v
+	}
+	return nil
 }
 
 func (x *CreateRoleRequest) GetName() string {
@@ -202,6 +455,62 @@ func (x *CreateRoleRequest) GetDescription() string {
 		return zero
 	}
 	return x.Description
+}
+
+func (x *CreateRoleRequest) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AppId == nil {
+		var zero string
+		return zero
+	}
+	return *x.AppId
+}
+
+func (x *CreateRoleRequest) GetRoleKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.RoleKey == nil {
+		var zero string
+		return zero
+	}
+	return *x.RoleKey
+}
+
+func (x *CreateRoleRequest) GetLevel() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Level == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Level
+}
+
+func (x *CreateRoleRequest) GetParentRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ParentRoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ParentRoleId
+}
+
+func (x *CreateRoleRequest) GetScopeRules() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.ScopeRules
 }
 
 func (x *CreateRoleRequest) GetPermissions() []string {
@@ -278,8 +587,45 @@ func (x *DeleteRoleResponse) GetMessage() string {
 }
 
 type UpdateRoleBody struct {
-	Name        string   `json:"name,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
+	Name         string   `json:"name,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	AppId        *string  `json:"app_id,omitempty"`
+	Level        *int32   `json:"level,omitempty"`
+	ParentRoleId *int64   `json:"parent_role_id,omitempty"`
+	ScopeRules   []string `json:"scope_rules,omitempty"`
+	Permissions  []string `json:"permissions,omitempty"`
+}
+
+func (m *UpdateRoleBody) MarshalJSON() ([]byte, error) {
+	type alias UpdateRoleBody
+	aux := struct {
+		*alias
+		ParentRoleId *string `json:"parent_role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.ParentRoleId != nil {
+		encodedParentRoleId := strconv.FormatInt(*m.ParentRoleId, 10)
+		aux.ParentRoleId = &encodedParentRoleId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *UpdateRoleBody) UnmarshalJSON(data []byte) error {
+	type alias UpdateRoleBody
+	aux := struct {
+		*alias
+		ParentRoleId *string `json:"parent_role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.ParentRoleId != nil {
+		v, err := strconv.ParseInt(*aux.ParentRoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentRoleId = &v
+	}
+	return nil
 }
 
 func (x *UpdateRoleBody) GetName() string {
@@ -288,6 +634,58 @@ func (x *UpdateRoleBody) GetName() string {
 		return zero
 	}
 	return x.Name
+}
+
+func (x *UpdateRoleBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateRoleBody) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AppId == nil {
+		var zero string
+		return zero
+	}
+	return *x.AppId
+}
+
+func (x *UpdateRoleBody) GetLevel() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Level == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Level
+}
+
+func (x *UpdateRoleBody) GetParentRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ParentRoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ParentRoleId
+}
+
+func (x *UpdateRoleBody) GetScopeRules() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.ScopeRules
 }
 
 func (x *UpdateRoleBody) GetPermissions() []string {
@@ -349,7 +747,8 @@ func (x *UpdateRoleRequest) GetBody() *UpdateRoleBody {
 }
 
 type UpdateRoleResponse struct {
-	Message string `json:"message,omitempty"`
+	Message string      `json:"message,omitempty"`
+	Role    *CustomRole `json:"role,omitempty"`
 }
 
 func (x *UpdateRoleResponse) GetMessage() string {
@@ -358,6 +757,1160 @@ func (x *UpdateRoleResponse) GetMessage() string {
 		return zero
 	}
 	return x.Message
+}
+
+func (x *UpdateRoleResponse) GetRole() *CustomRole {
+	if x == nil {
+		var zero *CustomRole
+		return zero
+	}
+	return x.Role
+}
+
+type GetRoleRequest struct {
+	Id int64 `json:"id,omitempty"`
+}
+
+func (m *GetRoleRequest) MarshalJSON() ([]byte, error) {
+	type alias GetRoleRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *GetRoleRequest) UnmarshalJSON(data []byte) error {
+	type alias GetRoleRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *GetRoleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+type GetRoleResponse struct {
+	Role *CustomRole `json:"role,omitempty"`
+}
+
+func (x *GetRoleResponse) GetRole() *CustomRole {
+	if x == nil {
+		var zero *CustomRole
+		return zero
+	}
+	return x.Role
+}
+
+type CloneRoleRequest struct {
+	Id          int64  `json:"id,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+func (m *CloneRoleRequest) MarshalJSON() ([]byte, error) {
+	type alias CloneRoleRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *CloneRoleRequest) UnmarshalJSON(data []byte) error {
+	type alias CloneRoleRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *CloneRoleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CloneRoleRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CloneRoleRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+type CloneRoleResponse struct {
+	Role *CustomRole `json:"role,omitempty"`
+}
+
+func (x *CloneRoleResponse) GetRole() *CustomRole {
+	if x == nil {
+		var zero *CustomRole
+		return zero
+	}
+	return x.Role
+}
+
+type ArchiveRoleRequest struct {
+	Id     int64  `json:"id,omitempty"`
+	Reason string `json:"reason,omitempty"`
+}
+
+func (m *ArchiveRoleRequest) MarshalJSON() ([]byte, error) {
+	type alias ArchiveRoleRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ArchiveRoleRequest) UnmarshalJSON(data []byte) error {
+	type alias ArchiveRoleRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *ArchiveRoleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ArchiveRoleRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
+type ArchiveRoleResponse struct {
+	Role *CustomRole `json:"role,omitempty"`
+}
+
+func (x *ArchiveRoleResponse) GetRole() *CustomRole {
+	if x == nil {
+		var zero *CustomRole
+		return zero
+	}
+	return x.Role
+}
+
+type RoleAssignment struct {
+	Id        int64    `json:"id,omitempty"`
+	RoleId    int64    `json:"role_id,omitempty"`
+	AppId     string   `json:"app_id,omitempty"`
+	UserId    *int64   `json:"user_id,omitempty"`
+	GroupId   *int64   `json:"group_id,omitempty"`
+	Status    string   `json:"status,omitempty"`
+	Source    string   `json:"source,omitempty"`
+	IsPrimary bool     `json:"is_primary,omitempty"`
+	Scopes    []string `json:"scopes,omitempty"`
+	GrantedAt string   `json:"granted_at,omitempty"`
+}
+
+func (m *RoleAssignment) MarshalJSON() ([]byte, error) {
+	type alias RoleAssignment
+	aux := struct {
+		*alias
+		Id      string  `json:"id,omitempty"`
+		RoleId  string  `json:"role_id,omitempty"`
+		UserId  *string `json:"user_id,omitempty"`
+		GroupId *string `json:"group_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.RoleId = strconv.FormatInt(m.RoleId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
+	if m.GroupId != nil {
+		encodedGroupId := strconv.FormatInt(*m.GroupId, 10)
+		aux.GroupId = &encodedGroupId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *RoleAssignment) UnmarshalJSON(data []byte) error {
+	type alias RoleAssignment
+	aux := struct {
+		*alias
+		Id      string  `json:"id,omitempty"`
+		RoleId  string  `json:"role_id,omitempty"`
+		UserId  *string `json:"user_id,omitempty"`
+		GroupId *string `json:"group_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.RoleId != "" {
+		v, err := strconv.ParseInt(aux.RoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RoleId = v
+	}
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.UserId = &v
+	}
+	if aux.GroupId != nil {
+		v, err := strconv.ParseInt(*aux.GroupId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.GroupId = &v
+	}
+	return nil
+}
+
+func (x *RoleAssignment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *RoleAssignment) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RoleId
+}
+
+func (x *RoleAssignment) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AppId
+}
+
+func (x *RoleAssignment) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
+}
+
+func (x *RoleAssignment) GetGroupId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.GroupId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.GroupId
+}
+
+func (x *RoleAssignment) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *RoleAssignment) GetSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Source
+}
+
+func (x *RoleAssignment) GetIsPrimary() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPrimary
+}
+
+func (x *RoleAssignment) GetScopes() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Scopes
+}
+
+func (x *RoleAssignment) GetGrantedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GrantedAt
+}
+
+type ListRoleAssignmentsRequest struct {
+	RoleId   *int64  `json:"role_id,omitempty"`
+	AppId    *string `json:"app_id,omitempty"`
+	Page     *int32  `json:"page,omitempty"`
+	PageSize *int32  `json:"page_size,omitempty"`
+}
+
+func (m *ListRoleAssignmentsRequest) MarshalJSON() ([]byte, error) {
+	type alias ListRoleAssignmentsRequest
+	aux := struct {
+		*alias
+		RoleId *string `json:"role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.RoleId != nil {
+		encodedRoleId := strconv.FormatInt(*m.RoleId, 10)
+		aux.RoleId = &encodedRoleId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListRoleAssignmentsRequest) UnmarshalJSON(data []byte) error {
+	type alias ListRoleAssignmentsRequest
+	aux := struct {
+		*alias
+		RoleId *string `json:"role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.RoleId != nil {
+		v, err := strconv.ParseInt(*aux.RoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RoleId = &v
+	}
+	return nil
+}
+
+func (x *ListRoleAssignmentsRequest) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.RoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RoleId
+}
+
+func (x *ListRoleAssignmentsRequest) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AppId == nil {
+		var zero string
+		return zero
+	}
+	return *x.AppId
+}
+
+func (x *ListRoleAssignmentsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Page == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Page
+}
+
+func (x *ListRoleAssignmentsRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.PageSize == nil {
+		var zero int32
+		return zero
+	}
+	return *x.PageSize
+}
+
+type ListRoleAssignmentsResponse struct {
+	Assignments []*RoleAssignment `json:"assignments,omitempty"`
+	Page        int32             `json:"page,omitempty"`
+	PageSize    int32             `json:"page_size,omitempty"`
+	Total       int64             `json:"total,omitempty"`
+	NextPage    *int32            `json:"next_page,omitempty"`
+}
+
+func (m *ListRoleAssignmentsResponse) MarshalJSON() ([]byte, error) {
+	type alias ListRoleAssignmentsResponse
+	aux := struct {
+		*alias
+		Total string `json:"total,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Total = strconv.FormatInt(m.Total, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListRoleAssignmentsResponse) UnmarshalJSON(data []byte) error {
+	type alias ListRoleAssignmentsResponse
+	aux := struct {
+		*alias
+		Total string `json:"total,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Total != "" {
+		v, err := strconv.ParseInt(aux.Total, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Total = v
+	}
+	return nil
+}
+
+func (x *ListRoleAssignmentsResponse) GetAssignments() []*RoleAssignment {
+	if x == nil {
+		var zero []*RoleAssignment
+		return zero
+	}
+	return x.Assignments
+}
+
+func (x *ListRoleAssignmentsResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListRoleAssignmentsResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListRoleAssignmentsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListRoleAssignmentsResponse) GetNextPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.NextPage == nil {
+		var zero int32
+		return zero
+	}
+	return *x.NextPage
+}
+
+type AssignRoleRequest struct {
+	RoleId    *int64   `json:"role_id,omitempty"`
+	AppId     string   `json:"app_id,omitempty"`
+	UserId    *int64   `json:"user_id,omitempty"`
+	GroupId   *int64   `json:"group_id,omitempty"`
+	IsPrimary bool     `json:"is_primary,omitempty"`
+	Scopes    []string `json:"scopes,omitempty"`
+}
+
+func (m *AssignRoleRequest) MarshalJSON() ([]byte, error) {
+	type alias AssignRoleRequest
+	aux := struct {
+		*alias
+		RoleId  *string `json:"role_id,omitempty"`
+		UserId  *string `json:"user_id,omitempty"`
+		GroupId *string `json:"group_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.RoleId != nil {
+		encodedRoleId := strconv.FormatInt(*m.RoleId, 10)
+		aux.RoleId = &encodedRoleId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
+	if m.GroupId != nil {
+		encodedGroupId := strconv.FormatInt(*m.GroupId, 10)
+		aux.GroupId = &encodedGroupId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *AssignRoleRequest) UnmarshalJSON(data []byte) error {
+	type alias AssignRoleRequest
+	aux := struct {
+		*alias
+		RoleId  *string `json:"role_id,omitempty"`
+		UserId  *string `json:"user_id,omitempty"`
+		GroupId *string `json:"group_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.RoleId != nil {
+		v, err := strconv.ParseInt(*aux.RoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RoleId = &v
+	}
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.UserId = &v
+	}
+	if aux.GroupId != nil {
+		v, err := strconv.ParseInt(*aux.GroupId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.GroupId = &v
+	}
+	return nil
+}
+
+func (x *AssignRoleRequest) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.RoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RoleId
+}
+
+func (x *AssignRoleRequest) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AppId
+}
+
+func (x *AssignRoleRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
+}
+
+func (x *AssignRoleRequest) GetGroupId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.GroupId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.GroupId
+}
+
+func (x *AssignRoleRequest) GetIsPrimary() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPrimary
+}
+
+func (x *AssignRoleRequest) GetScopes() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Scopes
+}
+
+type AssignRoleResponse struct {
+	Assignment *RoleAssignment `json:"assignment,omitempty"`
+}
+
+func (x *AssignRoleResponse) GetAssignment() *RoleAssignment {
+	if x == nil {
+		var zero *RoleAssignment
+		return zero
+	}
+	return x.Assignment
+}
+
+type RemoveRoleAssignmentRequest struct {
+	Id int64 `json:"id,omitempty"`
+}
+
+func (m *RemoveRoleAssignmentRequest) MarshalJSON() ([]byte, error) {
+	type alias RemoveRoleAssignmentRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *RemoveRoleAssignmentRequest) UnmarshalJSON(data []byte) error {
+	type alias RemoveRoleAssignmentRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *RemoveRoleAssignmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+type RemoveRoleAssignmentResponse struct {
+	Message string `json:"message,omitempty"`
+}
+
+func (x *RemoveRoleAssignmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+type PreviewPermissionImpactRequest struct {
+	Id          int64    `json:"id,omitempty"`
+	Permissions []string `json:"permissions,omitempty"`
+}
+
+func (m *PreviewPermissionImpactRequest) MarshalJSON() ([]byte, error) {
+	type alias PreviewPermissionImpactRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *PreviewPermissionImpactRequest) UnmarshalJSON(data []byte) error {
+	type alias PreviewPermissionImpactRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *PreviewPermissionImpactRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PreviewPermissionImpactRequest) GetPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Permissions
+}
+
+type PreviewPermissionImpactResponse struct {
+	AddedPermissions    []string `json:"added_permissions,omitempty"`
+	RemovedPermissions  []string `json:"removed_permissions,omitempty"`
+	AffectedMemberCount int32    `json:"affected_member_count,omitempty"`
+}
+
+func (x *PreviewPermissionImpactResponse) GetAddedPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.AddedPermissions
+}
+
+func (x *PreviewPermissionImpactResponse) GetRemovedPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.RemovedPermissions
+}
+
+func (x *PreviewPermissionImpactResponse) GetAffectedMemberCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.AffectedMemberCount
+}
+
+type RoleAuditEvent struct {
+	Id            int64  `json:"id,omitempty"`
+	Action        string `json:"action,omitempty"`
+	AppId         string `json:"app_id,omitempty"`
+	RoleId        *int64 `json:"role_id,omitempty"`
+	ActorUserId   *int64 `json:"actor_user_id,omitempty"`
+	TargetUserId  *int64 `json:"target_user_id,omitempty"`
+	TargetGroupId *int64 `json:"target_group_id,omitempty"`
+	BeforeJson    string `json:"before_json,omitempty"`
+	AfterJson     string `json:"after_json,omitempty"`
+	Reason        string `json:"reason,omitempty"`
+	CreatedAt     string `json:"created_at,omitempty"`
+}
+
+func (m *RoleAuditEvent) MarshalJSON() ([]byte, error) {
+	type alias RoleAuditEvent
+	aux := struct {
+		*alias
+		Id            string  `json:"id,omitempty"`
+		RoleId        *string `json:"role_id,omitempty"`
+		ActorUserId   *string `json:"actor_user_id,omitempty"`
+		TargetUserId  *string `json:"target_user_id,omitempty"`
+		TargetGroupId *string `json:"target_group_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.RoleId != nil {
+		encodedRoleId := strconv.FormatInt(*m.RoleId, 10)
+		aux.RoleId = &encodedRoleId
+	}
+	if m.ActorUserId != nil {
+		encodedActorUserId := strconv.FormatInt(*m.ActorUserId, 10)
+		aux.ActorUserId = &encodedActorUserId
+	}
+	if m.TargetUserId != nil {
+		encodedTargetUserId := strconv.FormatInt(*m.TargetUserId, 10)
+		aux.TargetUserId = &encodedTargetUserId
+	}
+	if m.TargetGroupId != nil {
+		encodedTargetGroupId := strconv.FormatInt(*m.TargetGroupId, 10)
+		aux.TargetGroupId = &encodedTargetGroupId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *RoleAuditEvent) UnmarshalJSON(data []byte) error {
+	type alias RoleAuditEvent
+	aux := struct {
+		*alias
+		Id            string  `json:"id,omitempty"`
+		RoleId        *string `json:"role_id,omitempty"`
+		ActorUserId   *string `json:"actor_user_id,omitempty"`
+		TargetUserId  *string `json:"target_user_id,omitempty"`
+		TargetGroupId *string `json:"target_group_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.RoleId != nil {
+		v, err := strconv.ParseInt(*aux.RoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RoleId = &v
+	}
+	if aux.ActorUserId != nil {
+		v, err := strconv.ParseInt(*aux.ActorUserId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ActorUserId = &v
+	}
+	if aux.TargetUserId != nil {
+		v, err := strconv.ParseInt(*aux.TargetUserId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TargetUserId = &v
+	}
+	if aux.TargetGroupId != nil {
+		v, err := strconv.ParseInt(*aux.TargetGroupId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TargetGroupId = &v
+	}
+	return nil
+}
+
+func (x *RoleAuditEvent) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *RoleAuditEvent) GetAction() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Action
+}
+
+func (x *RoleAuditEvent) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AppId
+}
+
+func (x *RoleAuditEvent) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.RoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RoleId
+}
+
+func (x *RoleAuditEvent) GetActorUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ActorUserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ActorUserId
+}
+
+func (x *RoleAuditEvent) GetTargetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TargetUserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TargetUserId
+}
+
+func (x *RoleAuditEvent) GetTargetGroupId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TargetGroupId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TargetGroupId
+}
+
+func (x *RoleAuditEvent) GetBeforeJson() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BeforeJson
+}
+
+func (x *RoleAuditEvent) GetAfterJson() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AfterJson
+}
+
+func (x *RoleAuditEvent) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
+func (x *RoleAuditEvent) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+type ListRoleAuditRequest struct {
+	RoleId   *int64 `json:"role_id,omitempty"`
+	Page     *int32 `json:"page,omitempty"`
+	PageSize *int32 `json:"page_size,omitempty"`
+}
+
+func (m *ListRoleAuditRequest) MarshalJSON() ([]byte, error) {
+	type alias ListRoleAuditRequest
+	aux := struct {
+		*alias
+		RoleId *string `json:"role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.RoleId != nil {
+		encodedRoleId := strconv.FormatInt(*m.RoleId, 10)
+		aux.RoleId = &encodedRoleId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListRoleAuditRequest) UnmarshalJSON(data []byte) error {
+	type alias ListRoleAuditRequest
+	aux := struct {
+		*alias
+		RoleId *string `json:"role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.RoleId != nil {
+		v, err := strconv.ParseInt(*aux.RoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RoleId = &v
+	}
+	return nil
+}
+
+func (x *ListRoleAuditRequest) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.RoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RoleId
+}
+
+func (x *ListRoleAuditRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Page == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Page
+}
+
+func (x *ListRoleAuditRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.PageSize == nil {
+		var zero int32
+		return zero
+	}
+	return *x.PageSize
+}
+
+type ListRoleAuditResponse struct {
+	Events   []*RoleAuditEvent `json:"events,omitempty"`
+	Page     int32             `json:"page,omitempty"`
+	PageSize int32             `json:"page_size,omitempty"`
+	Total    int64             `json:"total,omitempty"`
+	NextPage *int32            `json:"next_page,omitempty"`
+}
+
+func (m *ListRoleAuditResponse) MarshalJSON() ([]byte, error) {
+	type alias ListRoleAuditResponse
+	aux := struct {
+		*alias
+		Total string `json:"total,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Total = strconv.FormatInt(m.Total, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListRoleAuditResponse) UnmarshalJSON(data []byte) error {
+	type alias ListRoleAuditResponse
+	aux := struct {
+		*alias
+		Total string `json:"total,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Total != "" {
+		v, err := strconv.ParseInt(aux.Total, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Total = v
+	}
+	return nil
+}
+
+func (x *ListRoleAuditResponse) GetEvents() []*RoleAuditEvent {
+	if x == nil {
+		var zero []*RoleAuditEvent
+		return zero
+	}
+	return x.Events
+}
+
+func (x *ListRoleAuditResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListRoleAuditResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListRoleAuditResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListRoleAuditResponse) GetNextPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.NextPage == nil {
+		var zero int32
+		return zero
+	}
+	return *x.NextPage
 }
 
 type UpdatePermissionMatrixRequest struct {

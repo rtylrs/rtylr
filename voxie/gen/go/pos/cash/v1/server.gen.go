@@ -280,7 +280,7 @@ func RegisterCashServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter session_id: "+err.Error())
 				return
 			}
-			req.SessionId = parsedSessionId
+			req.SessionId = &parsedSessionId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

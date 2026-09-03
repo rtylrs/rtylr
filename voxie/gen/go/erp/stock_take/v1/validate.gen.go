@@ -49,8 +49,13 @@ func (m *CreateStockTakeRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.WarehouseId <= 0 {
-		violations = append(violations, "warehouse_id must be greater than 0")
+	if m.WarehouseId == nil {
+		violations = append(violations, "warehouse_id is required")
+	}
+	if m.WarehouseId != nil {
+		if *m.WarehouseId <= 0 {
+			violations = append(violations, "warehouse_id must be greater than 0")
+		}
 	}
 	for _, value := range m.Items {
 		if err := value.Validate(); err != nil {

@@ -2,13 +2,13 @@ package hr.time_off.v1
 
 /// TimeOffRequest is an employee's request for leave.
 message TimeOffRequest {
-  id: int64 @required @gt(0)
-  owner_id: int64 @required @gt(0)
-  staff_id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
+  owner_id: int64? @required @gt(0)
+  staff_id: int64? @required @gt(0)
   type: string @required
   start_date: string @required
   end_date: string @required
-  days_count: float64 @required @gt(0)
+  days_count: float64? @required @gt(0)
   /// The current lifecycle state.
   status: string @required
   reason: string @required
@@ -43,11 +43,11 @@ message ListTimeOffResponse {
 }
 
 message SubmitTimeOffRequest {
-  staff_id: int64 @required @gt(0)
+  staff_id: int64? @required @gt(0)
   type: string @required
   start_date: string @required
   end_date: string @required
-  days_count: float64 @required @gt(0)
+  days_count: float64? @required @gt(0)
   reason: string @required
   notes: string
 }

@@ -55,7 +55,9 @@ func (c *OrderServiceClient) ListOrders(ctx context.Context, req *ListOrdersRequ
 	}
 	path := "/pos/orders/v1/orders"
 	query := url.Values{}
-	query.Set("session_id", strconv.FormatInt(int64(req.SessionId), 10))
+	if req.SessionId != nil {
+		query.Set("session_id", strconv.FormatInt(int64(*req.SessionId), 10))
+	}
 	query.Set("status", req.Status)
 	query.Set("date_from", req.DateFrom)
 	query.Set("date_to", req.DateTo)
@@ -179,7 +181,9 @@ func (c *OrderServiceClient) GetPublicOrderStatus(ctx context.Context, req *GetP
 	path := "/pos/orders/v1/orders/{order_id}/public-status"
 	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	query := url.Values{}
-	query.Set("business_id", strconv.FormatInt(int64(req.BusinessId), 10))
+	if req.BusinessId != nil {
+		query.Set("business_id", strconv.FormatInt(int64(*req.BusinessId), 10))
+	}
 	query.Set("public_token", req.PublicToken)
 	if len(query) > 0 {
 		path += "?" + query.Encode()

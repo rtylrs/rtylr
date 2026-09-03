@@ -128,8 +128,13 @@ func (m *ExportPayrollRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.RunId <= 0 {
-		violations = append(violations, "run_id must be greater than 0")
+	if m.RunId == nil {
+		violations = append(violations, "run_id is required")
+	}
+	if m.RunId != nil {
+		if *m.RunId <= 0 {
+			violations = append(violations, "run_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

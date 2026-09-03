@@ -222,11 +222,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -312,11 +312,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -459,11 +459,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -587,11 +587,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -780,11 +780,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -889,11 +889,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -979,11 +979,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -1110,11 +1110,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -1200,11 +1200,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -1486,11 +1486,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -1656,11 +1656,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -1924,11 +1924,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -2014,11 +2014,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -2124,11 +2124,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -2275,11 +2275,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -2404,11 +2404,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -2534,11 +2534,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -2764,11 +2764,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -2876,11 +2876,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -3027,11 +3027,11 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));

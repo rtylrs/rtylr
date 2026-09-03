@@ -174,7 +174,9 @@ func (c *CampaignServiceClient) GetCampaignStats(ctx context.Context, req *GetCa
 	}
 	path := "/crm/campaign/v1/campaigns/stats"
 	query := url.Values{}
-	query.Set("campaign_id", strconv.FormatInt(int64(req.CampaignId), 10))
+	if req.CampaignId != nil {
+		query.Set("campaign_id", strconv.FormatInt(int64(*req.CampaignId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

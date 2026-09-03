@@ -42,11 +42,11 @@ message BranchInventory {
 }
 
 message AdjustStockRequest {
-  branch_id: int64 @required @gt(0)
-  product_id: int64 @required @gt(0)
-  quantity: float64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
   note: string
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
 }
 
 message AdjustStockResponse {
@@ -72,7 +72,7 @@ message ListStockMovementsResponse {
 }
 
 message LowStockRequest {
-  branch_id: int64 @required @gt(0) @query("branch_id")
+  branch_id: int64? @required @gt(0) @query("branch_id")
 }
 
 message LowStockResponse {
@@ -80,11 +80,11 @@ message LowStockResponse {
 }
 
 message ReceiveStockRequest {
-  branch_id: int64 @required @gt(0)
-  product_id: int64 @required @gt(0)
-  quantity: float64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
   note: string @required
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
 }
 
 message ReceiveStockResponse {
@@ -93,12 +93,12 @@ message ReceiveStockResponse {
 }
 
 message TransferStockRequest {
-  from_branch_id: int64 @required @gt(0)
-  to_branch_id: int64 @required @gt(0)
-  product_id: int64 @required @gt(0)
-  quantity: float64 @required @gt(0)
+  from_branch_id: int64? @required @gt(0)
+  to_branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
   note: string @required
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
 }
 
 message TransferStockResponse {
@@ -107,11 +107,11 @@ message TransferStockResponse {
 }
 
 message WasteStockRequest {
-  branch_id: int64 @required @gt(0)
-  product_id: int64 @required @gt(0)
-  quantity: float64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
   note: string @required
-  employee_id: int64 @required @gt(0)
+  employee_id: int64? @required @gt(0)
 }
 
 message WasteStockResponse {

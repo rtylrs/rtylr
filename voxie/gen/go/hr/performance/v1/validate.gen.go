@@ -22,8 +22,13 @@ func (m *PerformanceReviewPayload) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
+	}
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -36,8 +41,13 @@ func (m *ReviewCyclePayload) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
+	}
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -116,8 +126,13 @@ func (m *OpenReviewCycleRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.CycleId <= 0 {
-		violations = append(violations, "cycle_id must be greater than 0")
+	if m.CycleId == nil {
+		violations = append(violations, "cycle_id is required")
+	}
+	if m.CycleId != nil {
+		if *m.CycleId <= 0 {
+			violations = append(violations, "cycle_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -173,8 +188,13 @@ func (m *SubmitReviewRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ReviewId <= 0 {
-		violations = append(violations, "review_id must be greater than 0")
+	if m.ReviewId == nil {
+		violations = append(violations, "review_id is required")
+	}
+	if m.ReviewId != nil {
+		if *m.ReviewId <= 0 {
+			violations = append(violations, "review_id must be greater than 0")
+		}
 	}
 	if m.OverallRating == "" {
 		violations = append(violations, "overall_rating is required")

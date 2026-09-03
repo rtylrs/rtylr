@@ -83,7 +83,7 @@ message CreateReportTemplateResponse {
 
 message GetReportTemplateRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetReportTemplateResponse {
@@ -129,7 +129,7 @@ message CreateScheduledReportResponse {
 
 message UpdateScheduledReportRequest {
   /// id is the scheduled report identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// template_slug is the template slug (e.g. revenue-monthly).
   template_slug: string @required
   /// frequency is the delivery frequency (daily, weekly, monthly).
@@ -149,7 +149,7 @@ message UpdateScheduledReportResponse {
 
 message DeleteScheduledReportRequest {
   /// id is the scheduled report identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteScheduledReportResponse {
@@ -158,10 +158,10 @@ message DeleteScheduledReportResponse {
 }
 
 message GenerateRevenueReportRequest {
-  /// from is the inclusive start date (YYYY-MM-DD).
-  from: string
-  /// to is the inclusive end date (YYYY-MM-DD).
-  to: string
+  /// from_date is the inclusive start date (YYYY-MM-DD).
+  from_date: string
+  /// to_date is the inclusive end date (YYYY-MM-DD).
+  to_date: string
   /// format is the export format (csv, pdf).
   format: string
 }
@@ -176,10 +176,10 @@ message GenerateRevenueReportResponse {
 }
 
 message ExportRevenueReportRequest {
-  /// from is the inclusive start date (YYYY-MM-DD).
-  from: string @query("from")
-  /// to is the inclusive end date (YYYY-MM-DD).
-  to: string @query("to")
+  /// from_date is the inclusive start date (YYYY-MM-DD).
+  from_date: string @query("from")
+  /// to_date is the inclusive end date (YYYY-MM-DD).
+  to_date: string @query("to")
 }
 
 message ExportRevenueRow {

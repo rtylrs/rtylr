@@ -87,8 +87,13 @@ func (m *CreateEquipmentRequestRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if m.EquipmentType == "" {
 		violations = append(violations, "equipment_type is required")

@@ -365,7 +365,7 @@ func RegisterCampaignServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter campaign_id: "+err.Error())
 				return
 			}
-			req.CampaignId = parsedCampaignId
+			req.CampaignId = &parsedCampaignId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

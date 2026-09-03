@@ -198,11 +198,21 @@ func (m *CreateTaskRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
 	}
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
+	}
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
+	}
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
 	}
 	if m.Title == "" {
 		violations = append(violations, "title is required")
@@ -404,14 +414,29 @@ func (m *CreateSubtaskRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ParentTaskId <= 0 {
-		violations = append(violations, "parent_task_id must be greater than 0")
+	if m.ParentTaskId == nil {
+		violations = append(violations, "parent_task_id is required")
 	}
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ParentTaskId != nil {
+		if *m.ParentTaskId <= 0 {
+			violations = append(violations, "parent_task_id must be greater than 0")
+		}
 	}
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
+	}
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
+	}
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
 	}
 	if m.Title == "" {
 		violations = append(violations, "title is required")
@@ -582,8 +607,13 @@ func (m *CreateAttachmentRequest) Validate() error {
 	if m.Url == "" {
 		violations = append(violations, "url is required")
 	}
-	if m.Size <= 0 {
-		violations = append(violations, "size must be greater than 0")
+	if m.Size == nil {
+		violations = append(violations, "size is required")
+	}
+	if m.Size != nil {
+		if *m.Size <= 0 {
+			violations = append(violations, "size must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -662,8 +692,13 @@ func (m *CreateTimeLogRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.DurationMinutes <= 0 {
-		violations = append(violations, "duration_minutes must be greater than 0")
+	if m.DurationMinutes == nil {
+		violations = append(violations, "duration_minutes is required")
+	}
+	if m.DurationMinutes != nil {
+		if *m.DurationMinutes <= 0 {
+			violations = append(violations, "duration_minutes must be greater than 0")
+		}
 	}
 	if m.Description == "" {
 		violations = append(violations, "description is required")

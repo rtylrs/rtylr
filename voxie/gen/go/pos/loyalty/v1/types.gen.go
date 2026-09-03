@@ -264,20 +264,26 @@ func (x *LoyaltyTransaction) GetCreatedAt() string {
 }
 
 type EarnPointsRequest struct {
-	CustomerId int64 `json:"customer_id,omitempty"`
-	OrderId    int64 `json:"order_id,omitempty"`
-	Points     int32 `json:"points,omitempty"`
+	CustomerId *int64 `json:"customer_id,omitempty"`
+	OrderId    *int64 `json:"order_id,omitempty"`
+	Points     *int32 `json:"points,omitempty"`
 }
 
 func (m *EarnPointsRequest) MarshalJSON() ([]byte, error) {
 	type alias EarnPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
-		OrderId    string `json:"order_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
+		OrderId    *string `json:"order_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CustomerId = strconv.FormatInt(m.CustomerId, 10)
-	aux.OrderId = strconv.FormatInt(m.OrderId, 10)
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
+	if m.OrderId != nil {
+		encodedOrderId := strconv.FormatInt(*m.OrderId, 10)
+		aux.OrderId = &encodedOrderId
+	}
 	return json.Marshal(aux)
 }
 
@@ -285,25 +291,25 @@ func (m *EarnPointsRequest) UnmarshalJSON(data []byte) error {
 	type alias EarnPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
-		OrderId    string `json:"order_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
+		OrderId    *string `json:"order_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.CustomerId != "" {
-		v, err := strconv.ParseInt(aux.CustomerId, 10, 64)
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.CustomerId = v
+		m.CustomerId = &v
 	}
-	if aux.OrderId != "" {
-		v, err := strconv.ParseInt(aux.OrderId, 10, 64)
+	if aux.OrderId != nil {
+		v, err := strconv.ParseInt(*aux.OrderId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.OrderId = v
+		m.OrderId = &v
 	}
 	return nil
 }
@@ -313,7 +319,11 @@ func (x *EarnPointsRequest) GetCustomerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CustomerId
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *EarnPointsRequest) GetOrderId() int64 {
@@ -321,7 +331,11 @@ func (x *EarnPointsRequest) GetOrderId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.OrderId
+	if x.OrderId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.OrderId
 }
 
 func (x *EarnPointsRequest) GetPoints() int32 {
@@ -329,7 +343,11 @@ func (x *EarnPointsRequest) GetPoints() int32 {
 		var zero int32
 		return zero
 	}
-	return x.Points
+	if x.Points == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Points
 }
 
 type EarnPointsResponse struct {
@@ -383,16 +401,19 @@ func (x *EarnPointsResponse) GetMessage() string {
 }
 
 type GetLoyaltyBalanceRequest struct {
-	CustomerId int64 `json:"customer_id,omitempty"`
+	CustomerId *int64 `json:"customer_id,omitempty"`
 }
 
 func (m *GetLoyaltyBalanceRequest) MarshalJSON() ([]byte, error) {
 	type alias GetLoyaltyBalanceRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CustomerId = strconv.FormatInt(m.CustomerId, 10)
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
 	return json.Marshal(aux)
 }
 
@@ -400,17 +421,17 @@ func (m *GetLoyaltyBalanceRequest) UnmarshalJSON(data []byte) error {
 	type alias GetLoyaltyBalanceRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.CustomerId != "" {
-		v, err := strconv.ParseInt(aux.CustomerId, 10, 64)
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.CustomerId = v
+		m.CustomerId = &v
 	}
 	return nil
 }
@@ -420,7 +441,11 @@ func (x *GetLoyaltyBalanceRequest) GetCustomerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CustomerId
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 type GetLoyaltyBalanceResponse struct {
@@ -542,17 +567,20 @@ func (x *ListLoyaltyTransactionsResponse) GetTransactions() []*LoyaltyTransactio
 }
 
 type RedeemPointsRequest struct {
-	CustomerId int64 `json:"customer_id,omitempty"`
-	Points     int32 `json:"points,omitempty"`
+	CustomerId *int64 `json:"customer_id,omitempty"`
+	Points     *int32 `json:"points,omitempty"`
 }
 
 func (m *RedeemPointsRequest) MarshalJSON() ([]byte, error) {
 	type alias RedeemPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CustomerId = strconv.FormatInt(m.CustomerId, 10)
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
 	return json.Marshal(aux)
 }
 
@@ -560,17 +588,17 @@ func (m *RedeemPointsRequest) UnmarshalJSON(data []byte) error {
 	type alias RedeemPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.CustomerId != "" {
-		v, err := strconv.ParseInt(aux.CustomerId, 10, 64)
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.CustomerId = v
+		m.CustomerId = &v
 	}
 	return nil
 }
@@ -580,7 +608,11 @@ func (x *RedeemPointsRequest) GetCustomerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CustomerId
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *RedeemPointsRequest) GetPoints() int32 {
@@ -588,7 +620,11 @@ func (x *RedeemPointsRequest) GetPoints() int32 {
 		var zero int32
 		return zero
 	}
-	return x.Points
+	if x.Points == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Points
 }
 
 type RedeemPointsResponse struct {
@@ -642,10 +678,10 @@ func (x *RedeemPointsResponse) GetMessage() string {
 }
 
 type UpdateLoyaltyConfigRequest struct {
-	IsEnabled       bool    `json:"is_enabled,omitempty"`
-	PointsPerDollar float64 `json:"points_per_dollar,omitempty"`
-	RedemptionRate  float64 `json:"redemption_rate,omitempty"`
-	MinRedeemPoints int32   `json:"min_redeem_points,omitempty"`
+	IsEnabled       bool     `json:"is_enabled,omitempty"`
+	PointsPerDollar *float64 `json:"points_per_dollar,omitempty"`
+	RedemptionRate  float64  `json:"redemption_rate,omitempty"`
+	MinRedeemPoints *int32   `json:"min_redeem_points,omitempty"`
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetIsEnabled() bool {
@@ -661,7 +697,11 @@ func (x *UpdateLoyaltyConfigRequest) GetPointsPerDollar() float64 {
 		var zero float64
 		return zero
 	}
-	return x.PointsPerDollar
+	if x.PointsPerDollar == nil {
+		var zero float64
+		return zero
+	}
+	return *x.PointsPerDollar
 }
 
 func (x *UpdateLoyaltyConfigRequest) GetRedemptionRate() float64 {
@@ -677,7 +717,11 @@ func (x *UpdateLoyaltyConfigRequest) GetMinRedeemPoints() int32 {
 		var zero int32
 		return zero
 	}
-	return x.MinRedeemPoints
+	if x.MinRedeemPoints == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MinRedeemPoints
 }
 
 type UpdateLoyaltyConfigResponse struct {

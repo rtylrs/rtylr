@@ -22,8 +22,13 @@ func (m *ListCyclesRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -60,8 +65,13 @@ func (m *CreateCycleRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.ProjectId <= 0 {
-		violations = append(violations, "project_id must be greater than 0")
+	if m.ProjectId == nil {
+		violations = append(violations, "project_id is required")
+	}
+	if m.ProjectId != nil {
+		if *m.ProjectId <= 0 {
+			violations = append(violations, "project_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

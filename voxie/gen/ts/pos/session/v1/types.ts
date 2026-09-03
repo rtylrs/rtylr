@@ -123,7 +123,7 @@ return violations;
 }
 
 export interface GetSessionRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetSessionRequest(v: any): GetSessionRequest {
@@ -142,7 +142,6 @@ return out;
 export function validateGetSessionRequest(v: GetSessionRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -323,7 +322,7 @@ return violations;
 
 export interface CloseSessionRequest {
 closingFloat: number;
-id: string;
+id?: string;
 }
 
 export function decodeCloseSessionRequest(v: any): CloseSessionRequest {
@@ -347,7 +346,6 @@ if (v.closingFloat !== undefined && v.closingFloat !== null && !(typeof v.closin
 if (!(v.closingFloat !== undefined && v.closingFloat !== null)) violations.push("closing_float is required");
 if (v.closingFloat !== undefined && v.closingFloat !== null && !(Number(v.closingFloat) >= 0)) violations.push("closing_float violates @gte");
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

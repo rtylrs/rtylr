@@ -215,7 +215,9 @@ func (c *OnboardingServiceClient) ListEmployeeChecklists(ctx context.Context, re
 	}
 	path := "/hr/onboarding/v1/checklists"
 	query := url.Values{}
-	query.Set("employee_id", strconv.FormatInt(int64(req.EmployeeId), 10))
+	if req.EmployeeId != nil {
+		query.Set("employee_id", strconv.FormatInt(int64(*req.EmployeeId), 10))
+	}
 	if req.Limit != nil {
 		query.Set("limit", strconv.FormatInt(int64(*req.Limit), 10))
 	}

@@ -79,8 +79,13 @@ func (m *InviteEmployeeRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if m.SendVia == "" {
 		violations = append(violations, "send_via is required")

@@ -271,11 +271,11 @@ func RegisterCalendarServiceServer(first any, rest ...any) error {
 		req := new(GetCalendarRequest)
 		if values := r.URL.Query()["from"]; len(values) > 0 {
 			value := values[0]
-			req.From = value
+			req.FromDate = value
 		}
 		if values := r.URL.Query()["to"]; len(values) > 0 {
 			value := values[0]
-			req.To = value
+			req.ToDate = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

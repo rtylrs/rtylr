@@ -1,7 +1,7 @@
 package erp.category.v1
 
 message Category {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   owner_id: int64
   name: string
   description: string
@@ -25,7 +25,7 @@ message UpdateCategoryBody {
 }
 
 message UpdateCategoryRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateCategoryBody
 }
 
@@ -34,7 +34,7 @@ message UpdateCategoryResponse {
 }
 
 message DeleteCategoryRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteCategoryResponse {

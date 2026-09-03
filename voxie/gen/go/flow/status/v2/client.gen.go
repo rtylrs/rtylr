@@ -55,7 +55,9 @@ func (c *StatusServiceClient) ListStatuses(ctx context.Context, req *ListStatuse
 	}
 	path := "/flow/status/v2/statuses"
 	query := url.Values{}
-	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
+	if req.ProjectId != nil {
+		query.Set("project_id", strconv.FormatInt(int64(*req.ProjectId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

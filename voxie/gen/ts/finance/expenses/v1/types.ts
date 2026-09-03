@@ -219,7 +219,7 @@ return violations;
 }
 
 export interface DeleteExpenseRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteExpenseRequest(v: any): DeleteExpenseRequest {
@@ -238,7 +238,6 @@ return out;
 export function validateDeleteExpenseRequest(v: DeleteExpenseRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -267,7 +266,7 @@ return violations;
 }
 
 export interface GetExpenseRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetExpenseRequest(v: any): GetExpenseRequest {
@@ -286,7 +285,6 @@ return out;
 export function validateGetExpenseRequest(v: GetExpenseRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -491,7 +489,7 @@ return violations;
 }
 
 export interface UpdateExpenseRequest {
-id: string;
+id?: string;
 body?: UpdateExpenseBody;
 }
 
@@ -513,7 +511,6 @@ return out;
 export function validateUpdateExpenseRequest(v: UpdateExpenseRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateExpenseBody(v.body).map((message) => "body: " + message));
@@ -568,7 +565,7 @@ return violations;
 }
 
 export interface UpdateExpenseStatusRequest {
-id: string;
+id?: string;
 body?: UpdateExpenseStatusBody;
 }
 
@@ -590,7 +587,6 @@ return out;
 export function validateUpdateExpenseStatusRequest(v: UpdateExpenseStatusRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateExpenseStatusBody(v.body).map((message) => "body: " + message));

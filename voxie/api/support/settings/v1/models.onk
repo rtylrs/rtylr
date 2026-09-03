@@ -19,7 +19,7 @@ message GetSettingsResponse {
 
 message UpdateSettingsRequest {
   auto_assign: bool
-  sla_hours: int32 @required @gt(0) @lte(1000)
+  sla_hours: int32? @required @gt(0) @lte(1000)
   business_hours: string
   notification_email: string
 }

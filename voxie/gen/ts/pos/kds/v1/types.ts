@@ -167,7 +167,7 @@ return violations;
 }
 
 export interface UpdateKDSItemByIDRequest {
-itemId: string;
+itemId?: string;
 body?: UpdateKDSItemByIDBody;
 }
 
@@ -189,7 +189,6 @@ return out;
 export function validateUpdateKDSItemByIDRequest(v: UpdateKDSItemByIDRequest): string[] {
 const violations: string[] = [];
 if (v.itemId !== undefined && v.itemId !== null && !(typeof v.itemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.itemId))) violations.push("item_id has invalid type");
-if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
 if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateKDSItemByIDBody(v.body).map((message) => "body: " + message));
@@ -245,7 +244,7 @@ return violations;
 
 export interface UpdateKDSItemStatusRequest {
 orderId?: string;
-itemId: string;
+itemId?: string;
 body?: UpdateKDSItemStatusBody;
 }
 
@@ -271,7 +270,6 @@ const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 if (v.itemId !== undefined && v.itemId !== null && !(typeof v.itemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.itemId))) violations.push("item_id has invalid type");
-if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
 if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateKDSItemStatusBody(v.body).map((message) => "body: " + message));

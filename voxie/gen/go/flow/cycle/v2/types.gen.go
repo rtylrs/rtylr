@@ -122,7 +122,7 @@ func (x *Cycle) GetCompleted() int32 {
 }
 
 type ListCyclesRequest struct {
-	ProjectId int64  `json:"project_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
 	Page      int32  `json:"page,omitempty"`
 	Limit     int32  `json:"limit,omitempty"`
 	SortBy    string `json:"sort_by,omitempty"`
@@ -133,9 +133,12 @@ func (m *ListCyclesRequest) MarshalJSON() ([]byte, error) {
 	type alias ListCyclesRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -143,17 +146,17 @@ func (m *ListCyclesRequest) UnmarshalJSON(data []byte) error {
 	type alias ListCyclesRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -163,7 +166,11 @@ func (x *ListCyclesRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *ListCyclesRequest) GetPage() int32 {
@@ -221,7 +228,7 @@ func (x *ListCyclesResponse) GetPagination() *common_pagination_v1.PaginationRes
 
 type CreateCycleRequest struct {
 	Name      string `json:"name,omitempty"`
-	ProjectId int64  `json:"project_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
 	StartDate string `json:"start_date,omitempty"`
 	EndDate   string `json:"end_date,omitempty"`
 }
@@ -230,9 +237,12 @@ func (m *CreateCycleRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateCycleRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -240,17 +250,17 @@ func (m *CreateCycleRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateCycleRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -268,7 +278,11 @@ func (x *CreateCycleRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *CreateCycleRequest) GetStartDate() string {

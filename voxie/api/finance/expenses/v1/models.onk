@@ -84,7 +84,7 @@ message CreateExpenseResponse {
 
 message DeleteExpenseRequest {
   /// id is the unique identifier for the expense.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteExpenseResponse {
@@ -94,7 +94,7 @@ message DeleteExpenseResponse {
 
 message GetExpenseRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetExpenseResponse {
@@ -149,7 +149,7 @@ message UpdateExpenseBody {
 
 message UpdateExpenseRequest {
   /// id is the unique identifier for the expense.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable expense fields bound from the HTTP payload.
   body: UpdateExpenseBody
 }
@@ -166,7 +166,7 @@ message UpdateExpenseStatusBody {
 
 message UpdateExpenseStatusRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries status update fields bound from the HTTP payload.
   body: UpdateExpenseStatusBody
 }

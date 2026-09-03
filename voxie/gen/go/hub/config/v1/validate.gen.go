@@ -158,8 +158,8 @@ func (m *SendTestEmailRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.To == "" {
-		violations = append(violations, "to is required")
+	if m.Recipient == "" {
+		violations = append(violations, "recipient is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

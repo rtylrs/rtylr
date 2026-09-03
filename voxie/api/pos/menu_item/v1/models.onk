@@ -30,11 +30,11 @@ message MenuItem {
   /// that are not stocked as a single product. When it is absent, cost and
   /// ERP-side stock for this item are unknown rather than zero. The server
   /// must verify the referenced product belongs to the caller's business.
-  product_id: int64? @nullable
+  product_id: int64?
   /// unit_cost is the cost of one unit at the time of the read, copied from
   /// the linked ERP product. Absent when product_id is absent. Reported for
   /// display and margin only: the authoritative value is the ERP product's.
-  unit_cost: float64? @nullable
+  unit_cost: float64?
 }
 
 message CreateMenuItemRequest {
@@ -77,7 +77,7 @@ message UpdateMenuItemBody {
 
 message UpdateMenuItemRequest {
   /// id is the unique identifier for the menu item.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable menu item fields bound from the HTTP payload.
   body: UpdateMenuItemBody
 }

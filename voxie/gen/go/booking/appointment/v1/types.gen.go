@@ -224,7 +224,7 @@ func (x *Appointment) GetUpdatedAt() string {
 }
 
 type CreateAppointmentRequest struct {
-	ServiceId     int64  `json:"service_id,omitempty"`
+	ServiceId     *int64 `json:"service_id,omitempty"`
 	ResourceId    int64  `json:"resource_id,omitempty"`
 	StaffId       int64  `json:"staff_id,omitempty"`
 	CustomerName  string `json:"customer_name,omitempty"`
@@ -240,13 +240,16 @@ func (m *CreateAppointmentRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateAppointmentRequest
 	aux := struct {
 		*alias
-		ServiceId  string `json:"service_id,omitempty"`
-		ResourceId string `json:"resource_id,omitempty"`
-		StaffId    string `json:"staff_id,omitempty"`
+		ResourceId string  `json:"resource_id,omitempty"`
+		StaffId    string  `json:"staff_id,omitempty"`
+		ServiceId  *string `json:"service_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ServiceId = strconv.FormatInt(m.ServiceId, 10)
 	aux.ResourceId = strconv.FormatInt(m.ResourceId, 10)
 	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	if m.ServiceId != nil {
+		encodedServiceId := strconv.FormatInt(*m.ServiceId, 10)
+		aux.ServiceId = &encodedServiceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -254,19 +257,12 @@ func (m *CreateAppointmentRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateAppointmentRequest
 	aux := struct {
 		*alias
-		ServiceId  string `json:"service_id,omitempty"`
-		ResourceId string `json:"resource_id,omitempty"`
-		StaffId    string `json:"staff_id,omitempty"`
+		ResourceId string  `json:"resource_id,omitempty"`
+		StaffId    string  `json:"staff_id,omitempty"`
+		ServiceId  *string `json:"service_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.ServiceId != "" {
-		v, err := strconv.ParseInt(aux.ServiceId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.ServiceId = v
 	}
 	if aux.ResourceId != "" {
 		v, err := strconv.ParseInt(aux.ResourceId, 10, 64)
@@ -282,6 +278,13 @@ func (m *CreateAppointmentRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.StaffId = v
 	}
+	if aux.ServiceId != nil {
+		v, err := strconv.ParseInt(*aux.ServiceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ServiceId = &v
+	}
 	return nil
 }
 
@@ -290,7 +293,11 @@ func (x *CreateAppointmentRequest) GetServiceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ServiceId
+	if x.ServiceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ServiceId
 }
 
 func (x *CreateAppointmentRequest) GetResourceId() int64 {

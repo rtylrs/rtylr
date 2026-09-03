@@ -283,7 +283,7 @@ func RegisterOrderServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter session_id: "+err.Error())
 				return
 			}
-			req.SessionId = parsedSessionId
+			req.SessionId = &parsedSessionId
 		}
 		if values := r.URL.Query()["status"]; len(values) > 0 {
 			value := values[0]
@@ -394,7 +394,7 @@ func RegisterOrderServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter business_id: "+err.Error())
 				return
 			}
-			req.BusinessId = parsedBusinessId
+			req.BusinessId = &parsedBusinessId
 		}
 		if values := r.URL.Query()["public_token"]; len(values) > 0 {
 			value := values[0]

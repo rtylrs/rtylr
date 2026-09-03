@@ -117,7 +117,7 @@ return violations;
 }
 
 export interface DeleteModifierRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteModifierRequest(v: any): DeleteModifierRequest {
@@ -136,7 +136,6 @@ return out;
 export function validateDeleteModifierRequest(v: DeleteModifierRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -246,7 +245,7 @@ return violations;
 }
 
 export interface UpdateModifierRequest {
-id: string;
+id?: string;
 body?: UpdateModifierBody;
 }
 
@@ -268,7 +267,6 @@ return out;
 export function validateUpdateModifierRequest(v: UpdateModifierRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateModifierBody(v.body).map((message) => "body: " + message));

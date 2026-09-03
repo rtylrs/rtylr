@@ -521,7 +521,7 @@ func (x *CreateEmployeeResponse) GetEmployee() *hr_staff_v1.Staff {
 }
 
 type InviteEmployeeRequest struct {
-	EmployeeId int64  `json:"employee_id,omitempty"`
+	EmployeeId *int64 `json:"employee_id,omitempty"`
 	SendVia    string `json:"send_via,omitempty"`
 }
 
@@ -529,9 +529,12 @@ func (m *InviteEmployeeRequest) MarshalJSON() ([]byte, error) {
 	type alias InviteEmployeeRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -539,17 +542,17 @@ func (m *InviteEmployeeRequest) UnmarshalJSON(data []byte) error {
 	type alias InviteEmployeeRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -559,7 +562,11 @@ func (x *InviteEmployeeRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *InviteEmployeeRequest) GetSendVia() string {

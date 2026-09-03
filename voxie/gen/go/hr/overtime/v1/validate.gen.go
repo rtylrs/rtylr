@@ -11,8 +11,13 @@ func (m *OvertimeRequestPayload) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
+	}
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -52,14 +57,24 @@ func (m *CreateOvertimeRequestRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if m.Date == "" {
 		violations = append(violations, "date is required")
 	}
-	if m.PlannedExtraMinutes <= 0 {
-		violations = append(violations, "planned_extra_minutes must be greater than 0")
+	if m.PlannedExtraMinutes == nil {
+		violations = append(violations, "planned_extra_minutes is required")
+	}
+	if m.PlannedExtraMinutes != nil {
+		if *m.PlannedExtraMinutes <= 0 {
+			violations = append(violations, "planned_extra_minutes must be greater than 0")
+		}
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")

@@ -17,12 +17,12 @@ message AuditLog {
 }
 
 message CreateAuditRequest {
-  branch_id: int64 @required @gt(0)
-  terminal_id: int64 @required @gt(0)
-  employee_id: int64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
   action: string @required
   entity_type: string @required
-  entity_id: int64 @required @gt(0)
+  entity_id: int64? @required @gt(0)
   details: string @required
   ip_address: string @required
 }

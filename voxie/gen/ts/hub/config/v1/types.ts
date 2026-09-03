@@ -525,26 +525,26 @@ return violations;
 }
 
 export interface SendTestEmailRequest {
-to: string;
+recipient: string;
 }
 
 export function decodeSendTestEmailRequest(v: any): SendTestEmailRequest {
 if (v === null || v === undefined) return v;
 return {
-to: v.to,
+recipient: v.recipient,
 };
 }
 
 export function encodeSendTestEmailRequest(v: SendTestEmailRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
-if (v.to !== undefined) { out.to = v.to; }
+if (v.recipient !== undefined) { out.recipient = v.recipient; }
 return out;
 }
 
 export function validateSendTestEmailRequest(v: SendTestEmailRequest): string[] {
 const violations: string[] = [];
-if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
-if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
+if (v.recipient !== undefined && v.recipient !== null && !(typeof v.recipient === "string")) violations.push("recipient has invalid type");
+if (!(v.recipient !== undefined && v.recipient !== null) || v.recipient === "") violations.push("recipient is required");
 return violations;
 }
 

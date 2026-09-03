@@ -60,8 +60,8 @@ message ListStaffResponse {
 }
 
 message CreateStaffRequest {
-  user_id: int64 @required @gt(0)
-  department_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
+  department_id: int64? @required @gt(0)
   /// Optional, unlike department_id: most staff have no explicit manager, and
   /// @required @gt(0) would force callers to invent one.
   manager_staff_id: int64
@@ -108,7 +108,7 @@ message CreateStaffResponse {
 }
 
 message GetStaffRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetStaffResponse {
@@ -116,7 +116,7 @@ message GetStaffResponse {
 }
 
 message UpdateStaffBody {
-  department_id: int64 @required @gt(0)
+  department_id: int64? @required @gt(0)
   /// Optional for the same reason as on create. Zero clears the reporting line.
   manager_staff_id: int64
   first_name: string @required
@@ -157,7 +157,7 @@ message UpdateStaffBody {
 }
 
 message UpdateStaffRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateStaffBody
 }
 
@@ -166,7 +166,7 @@ message UpdateStaffResponse {
 }
 
 message DeleteStaffRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteStaffResponse {
@@ -174,7 +174,7 @@ message DeleteStaffResponse {
 }
 
 message ClockInRequest {
-  staff_id: int64 @required @gt(0)
+  staff_id: int64? @required @gt(0)
 }
 
 message ClockInResponse {
@@ -182,7 +182,7 @@ message ClockInResponse {
 }
 
 message ClockOutRequest {
-  staff_id: int64 @required @gt(0)
+  staff_id: int64? @required @gt(0)
 }
 
 message ClockOutResponse {
@@ -208,8 +208,8 @@ message DirectoryStaffEntry {
 }
 
 message ListStaffDirectoryRequest {
-  page: int64 @required @gt(0) @query("page")
-  page_size: int64 @required @gt(0) @query("page_size")
+  page: int64? @required @gt(0) @query("page")
+  page_size: int64? @required @gt(0) @query("page_size")
 }
 
 message ListStaffDirectoryResponse {

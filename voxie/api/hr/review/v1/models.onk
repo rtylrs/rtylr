@@ -23,7 +23,7 @@ message ListReviewsResponse {
 }
 
 message CreateReviewRequest {
-  staff_id: int64 @required
+  staff_id: int64? @required
   reviewer_id: int64
   period: string @required
   rating: float64

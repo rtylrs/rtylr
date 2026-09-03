@@ -23,8 +23,8 @@ message ValuationItem {
 }
 
 message AdjustInventoryRequest {
-  product_id: int64 @required @gt(0)
-  change: float64 @required @gt(0)
+  product_id: int64? @required @gt(0)
+  change: float64? @required @gt(0)
   type: string @required
   notes: string
 }

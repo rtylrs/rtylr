@@ -13,9 +13,9 @@ message Floor {
 }
 
 message CreateFloorRequest {
-  branch_id: int64 @required @gt(0)
+  branch_id: int64? @required @gt(0)
   name: string @required
-  sort_order: int32 @required @gt(0)
+  sort_order: int32? @required @gt(0)
 }
 
 message CreateFloorResponse {
@@ -25,12 +25,12 @@ message CreateFloorResponse {
 
 message UpdateFloorBody {
   name: string @required
-  sort_order: int32 @required @gt(0)
+  sort_order: int32? @required @gt(0)
 }
 
 message UpdateFloorRequest {
   /// id is the unique identifier for the floor.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable floor fields bound from the HTTP payload.
   body: UpdateFloorBody
 }
@@ -41,7 +41,7 @@ message UpdateFloorResponse {
 
 message DeleteFloorRequest {
   /// id is the unique identifier for the floor.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteFloorResponse {

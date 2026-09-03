@@ -54,8 +54,13 @@ func (m *CreateLabelRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.WorkspaceId <= 0 {
-		violations = append(violations, "workspace_id must be greater than 0")
+	if m.WorkspaceId == nil {
+		violations = append(violations, "workspace_id is required")
+	}
+	if m.WorkspaceId != nil {
+		if *m.WorkspaceId <= 0 {
+			violations = append(violations, "workspace_id must be greater than 0")
+		}
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -146,8 +151,13 @@ func (m *SetTaskLabelsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.TaskId <= 0 {
-		violations = append(violations, "task_id must be greater than 0")
+	if m.TaskId == nil {
+		violations = append(violations, "task_id is required")
+	}
+	if m.TaskId != nil {
+		if *m.TaskId <= 0 {
+			violations = append(violations, "task_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

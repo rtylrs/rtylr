@@ -425,20 +425,26 @@ func (x *ListSessionsResponse) GetSessions() []*Session {
 }
 
 type OpenSessionRequest struct {
-	LocationId   int64   `json:"location_id,omitempty"`
-	StaffId      int64   `json:"staff_id,omitempty"`
-	OpeningFloat float64 `json:"opening_float,omitempty"`
+	LocationId   *int64   `json:"location_id,omitempty"`
+	StaffId      *int64   `json:"staff_id,omitempty"`
+	OpeningFloat *float64 `json:"opening_float,omitempty"`
 }
 
 func (m *OpenSessionRequest) MarshalJSON() ([]byte, error) {
 	type alias OpenSessionRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
-		StaffId    string `json:"staff_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -446,25 +452,25 @@ func (m *OpenSessionRequest) UnmarshalJSON(data []byte) error {
 	type alias OpenSessionRequest
 	aux := struct {
 		*alias
-		LocationId string `json:"location_id,omitempty"`
-		StaffId    string `json:"staff_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.LocationId = v
+		m.LocationId = &v
 	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.StaffId = v
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -474,7 +480,11 @@ func (x *OpenSessionRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *OpenSessionRequest) GetStaffId() int64 {
@@ -482,7 +492,11 @@ func (x *OpenSessionRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 func (x *OpenSessionRequest) GetOpeningFloat() float64 {
@@ -490,7 +504,11 @@ func (x *OpenSessionRequest) GetOpeningFloat() float64 {
 		var zero float64
 		return zero
 	}
-	return x.OpeningFloat
+	if x.OpeningFloat == nil {
+		var zero float64
+		return zero
+	}
+	return *x.OpeningFloat
 }
 
 type OpenSessionResponse struct {
@@ -544,8 +562,8 @@ func (x *OpenSessionResponse) GetMessage() string {
 }
 
 type CloseSessionRequest struct {
-	ClosingFloat float64 `json:"closing_float,omitempty"`
-	Id           int64   `json:"id,omitempty"`
+	ClosingFloat *float64 `json:"closing_float,omitempty"`
+	Id           int64    `json:"id,omitempty"`
 }
 
 func (m *CloseSessionRequest) MarshalJSON() ([]byte, error) {
@@ -582,7 +600,11 @@ func (x *CloseSessionRequest) GetClosingFloat() float64 {
 		var zero float64
 		return zero
 	}
-	return x.ClosingFloat
+	if x.ClosingFloat == nil {
+		var zero float64
+		return zero
+	}
+	return *x.ClosingFloat
 }
 
 func (x *CloseSessionRequest) GetId() int64 {

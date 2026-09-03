@@ -10,7 +10,7 @@ type Variant struct {
 	Id            int64   `json:"id,omitempty"`
 	OwnerId       int64   `json:"owner_id,omitempty"`
 	BusinessId    int64   `json:"business_id,omitempty"`
-	ProductId     int64   `json:"product_id,omitempty"`
+	ProductId     *int64  `json:"product_id,omitempty"`
 	Name          string  `json:"name,omitempty"`
 	Sku           string  `json:"sku,omitempty"`
 	Barcode       string  `json:"barcode,omitempty"`
@@ -27,15 +27,18 @@ func (m *Variant) MarshalJSON() ([]byte, error) {
 	type alias Variant
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
 	return json.Marshal(aux)
 }
 
@@ -43,10 +46,10 @@ func (m *Variant) UnmarshalJSON(data []byte) error {
 	type alias Variant
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -72,12 +75,12 @@ func (m *Variant) UnmarshalJSON(data []byte) error {
 		}
 		m.BusinessId = v
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
 	return nil
 }
@@ -111,7 +114,11 @@ func (x *Variant) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *Variant) GetName() string {
@@ -195,7 +202,7 @@ func (x *Variant) GetUpdatedAt() string {
 }
 
 type CreateVariantRequest struct {
-	ProductId     int64   `json:"product_id,omitempty"`
+	ProductId     *int64  `json:"product_id,omitempty"`
 	Name          string  `json:"name,omitempty"`
 	Sku           string  `json:"sku,omitempty"`
 	Barcode       string  `json:"barcode,omitempty"`
@@ -210,9 +217,12 @@ func (m *CreateVariantRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateVariantRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
 	return json.Marshal(aux)
 }
 
@@ -220,17 +230,17 @@ func (m *CreateVariantRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateVariantRequest
 	aux := struct {
 		*alias
-		ProductId string `json:"product_id,omitempty"`
+		ProductId *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProductId != "" {
-		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProductId = v
+		m.ProductId = &v
 	}
 	return nil
 }
@@ -240,7 +250,11 @@ func (x *CreateVariantRequest) GetProductId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProductId
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
 }
 
 func (x *CreateVariantRequest) GetName() string {

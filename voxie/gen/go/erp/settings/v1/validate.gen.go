@@ -14,17 +14,34 @@ func (m *ErpBusinessSettings) Validate() error {
 	if m.Currency == "" {
 		violations = append(violations, "currency is required")
 	}
-	if m.TaxRate < 0 {
-		violations = append(violations, "tax_rate must be greater than or equal to 0")
+	if m.TaxRate == nil {
+		violations = append(violations, "tax_rate is required")
 	}
-	if m.TaxRate > 100 {
-		violations = append(violations, "tax_rate must be less than or equal to 100")
+	if m.TaxRate != nil {
+		if *m.TaxRate < 0 {
+			violations = append(violations, "tax_rate must be greater than or equal to 0")
+		}
 	}
-	if m.LowStockThreshold < 0 {
-		violations = append(violations, "low_stock_threshold must be greater than or equal to 0")
+	if m.TaxRate != nil {
+		if *m.TaxRate > 100 {
+			violations = append(violations, "tax_rate must be less than or equal to 100")
+		}
 	}
-	if m.DefaultWarehouseId <= 0 {
-		violations = append(violations, "default_warehouse_id must be greater than 0")
+	if m.LowStockThreshold == nil {
+		violations = append(violations, "low_stock_threshold is required")
+	}
+	if m.LowStockThreshold != nil {
+		if *m.LowStockThreshold < 0 {
+			violations = append(violations, "low_stock_threshold must be greater than or equal to 0")
+		}
+	}
+	if m.DefaultWarehouseId == nil {
+		violations = append(violations, "default_warehouse_id is required")
+	}
+	if m.DefaultWarehouseId != nil {
+		if *m.DefaultWarehouseId <= 0 {
+			violations = append(violations, "default_warehouse_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -70,17 +87,34 @@ func (m *UpdateErpSettingsRequest) Validate() error {
 	if m.Currency == "" {
 		violations = append(violations, "currency is required")
 	}
-	if m.TaxRate < 0 {
-		violations = append(violations, "tax_rate must be greater than or equal to 0")
+	if m.TaxRate == nil {
+		violations = append(violations, "tax_rate is required")
 	}
-	if m.TaxRate > 100 {
-		violations = append(violations, "tax_rate must be less than or equal to 100")
+	if m.TaxRate != nil {
+		if *m.TaxRate < 0 {
+			violations = append(violations, "tax_rate must be greater than or equal to 0")
+		}
 	}
-	if m.LowStockThreshold < 0 {
-		violations = append(violations, "low_stock_threshold must be greater than or equal to 0")
+	if m.TaxRate != nil {
+		if *m.TaxRate > 100 {
+			violations = append(violations, "tax_rate must be less than or equal to 100")
+		}
 	}
-	if m.DefaultWarehouseId <= 0 {
-		violations = append(violations, "default_warehouse_id must be greater than 0")
+	if m.LowStockThreshold == nil {
+		violations = append(violations, "low_stock_threshold is required")
+	}
+	if m.LowStockThreshold != nil {
+		if *m.LowStockThreshold < 0 {
+			violations = append(violations, "low_stock_threshold must be greater than or equal to 0")
+		}
+	}
+	if m.DefaultWarehouseId == nil {
+		violations = append(violations, "default_warehouse_id is required")
+	}
+	if m.DefaultWarehouseId != nil {
+		if *m.DefaultWarehouseId <= 0 {
+			violations = append(violations, "default_warehouse_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

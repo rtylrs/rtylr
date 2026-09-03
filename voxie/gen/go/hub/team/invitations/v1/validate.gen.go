@@ -23,11 +23,10 @@ func (m *InviteUserRequest) Validate() error {
 	if m.FullName == "" {
 		violations = append(violations, "full_name is required")
 	}
-	if m.Role == "" {
-		violations = append(violations, "role is required")
-	}
-	if len(m.Apps) < 1 {
-		violations = append(violations, "apps must have at least 1 items")
+	for _, value := range m.AppAssignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "app_assignments: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -53,6 +52,11 @@ func (m *BulkInviteRequest) Validate() error {
 	var violations []string
 	if len(m.Emails) < 1 {
 		violations = append(violations, "emails must have at least 1 items")
+	}
+	for _, value := range m.AppAssignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "app_assignments: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -106,6 +110,11 @@ func (m *VerifyInviteResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	for _, value := range m.AppAssignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "app_assignments: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

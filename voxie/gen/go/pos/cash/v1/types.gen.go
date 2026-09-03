@@ -216,27 +216,39 @@ func (x *CashMovement) GetCreatedAt() string {
 }
 
 type CashAdjustRequest struct {
-	BranchId   int64   `json:"branch_id,omitempty"`
-	TerminalId int64   `json:"terminal_id,omitempty"`
-	SessionId  int64   `json:"session_id,omitempty"`
-	EmployeeId int64   `json:"employee_id,omitempty"`
-	Amount     float64 `json:"amount,omitempty"`
-	Reason     string  `json:"reason,omitempty"`
+	BranchId   *int64   `json:"branch_id,omitempty"`
+	TerminalId *int64   `json:"terminal_id,omitempty"`
+	SessionId  *int64   `json:"session_id,omitempty"`
+	EmployeeId *int64   `json:"employee_id,omitempty"`
+	Amount     *float64 `json:"amount,omitempty"`
+	Reason     string   `json:"reason,omitempty"`
 }
 
 func (m *CashAdjustRequest) MarshalJSON() ([]byte, error) {
 	type alias CashAdjustRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		SessionId  *string `json:"session_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
-	aux.TerminalId = strconv.FormatInt(m.TerminalId, 10)
-	aux.SessionId = strconv.FormatInt(m.SessionId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
+	if m.TerminalId != nil {
+		encodedTerminalId := strconv.FormatInt(*m.TerminalId, 10)
+		aux.TerminalId = &encodedTerminalId
+	}
+	if m.SessionId != nil {
+		encodedSessionId := strconv.FormatInt(*m.SessionId, 10)
+		aux.SessionId = &encodedSessionId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -244,41 +256,41 @@ func (m *CashAdjustRequest) UnmarshalJSON(data []byte) error {
 	type alias CashAdjustRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		SessionId  *string `json:"session_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
-	if aux.TerminalId != "" {
-		v, err := strconv.ParseInt(aux.TerminalId, 10, 64)
+	if aux.TerminalId != nil {
+		v, err := strconv.ParseInt(*aux.TerminalId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TerminalId = v
+		m.TerminalId = &v
 	}
-	if aux.SessionId != "" {
-		v, err := strconv.ParseInt(aux.SessionId, 10, 64)
+	if aux.SessionId != nil {
+		v, err := strconv.ParseInt(*aux.SessionId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SessionId = v
+		m.SessionId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -288,7 +300,11 @@ func (x *CashAdjustRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *CashAdjustRequest) GetTerminalId() int64 {
@@ -296,7 +312,11 @@ func (x *CashAdjustRequest) GetTerminalId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TerminalId
+	if x.TerminalId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TerminalId
 }
 
 func (x *CashAdjustRequest) GetSessionId() int64 {
@@ -304,7 +324,11 @@ func (x *CashAdjustRequest) GetSessionId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SessionId
+	if x.SessionId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SessionId
 }
 
 func (x *CashAdjustRequest) GetEmployeeId() int64 {
@@ -312,7 +336,11 @@ func (x *CashAdjustRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CashAdjustRequest) GetAmount() float64 {
@@ -320,7 +348,11 @@ func (x *CashAdjustRequest) GetAmount() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Amount
+	if x.Amount == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Amount
 }
 
 func (x *CashAdjustRequest) GetReason() string {
@@ -382,27 +414,39 @@ func (x *CashAdjustResponse) GetMessage() string {
 }
 
 type CashDropRequest struct {
-	BranchId   int64   `json:"branch_id,omitempty"`
-	TerminalId int64   `json:"terminal_id,omitempty"`
-	SessionId  int64   `json:"session_id,omitempty"`
-	EmployeeId int64   `json:"employee_id,omitempty"`
-	Amount     float64 `json:"amount,omitempty"`
-	Reason     string  `json:"reason,omitempty"`
+	BranchId   *int64   `json:"branch_id,omitempty"`
+	TerminalId *int64   `json:"terminal_id,omitempty"`
+	SessionId  *int64   `json:"session_id,omitempty"`
+	EmployeeId *int64   `json:"employee_id,omitempty"`
+	Amount     *float64 `json:"amount,omitempty"`
+	Reason     string   `json:"reason,omitempty"`
 }
 
 func (m *CashDropRequest) MarshalJSON() ([]byte, error) {
 	type alias CashDropRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		SessionId  *string `json:"session_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
-	aux.TerminalId = strconv.FormatInt(m.TerminalId, 10)
-	aux.SessionId = strconv.FormatInt(m.SessionId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
+	if m.TerminalId != nil {
+		encodedTerminalId := strconv.FormatInt(*m.TerminalId, 10)
+		aux.TerminalId = &encodedTerminalId
+	}
+	if m.SessionId != nil {
+		encodedSessionId := strconv.FormatInt(*m.SessionId, 10)
+		aux.SessionId = &encodedSessionId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -410,41 +454,41 @@ func (m *CashDropRequest) UnmarshalJSON(data []byte) error {
 	type alias CashDropRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		SessionId  *string `json:"session_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
-	if aux.TerminalId != "" {
-		v, err := strconv.ParseInt(aux.TerminalId, 10, 64)
+	if aux.TerminalId != nil {
+		v, err := strconv.ParseInt(*aux.TerminalId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TerminalId = v
+		m.TerminalId = &v
 	}
-	if aux.SessionId != "" {
-		v, err := strconv.ParseInt(aux.SessionId, 10, 64)
+	if aux.SessionId != nil {
+		v, err := strconv.ParseInt(*aux.SessionId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SessionId = v
+		m.SessionId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -454,7 +498,11 @@ func (x *CashDropRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *CashDropRequest) GetTerminalId() int64 {
@@ -462,7 +510,11 @@ func (x *CashDropRequest) GetTerminalId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TerminalId
+	if x.TerminalId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TerminalId
 }
 
 func (x *CashDropRequest) GetSessionId() int64 {
@@ -470,7 +522,11 @@ func (x *CashDropRequest) GetSessionId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SessionId
+	if x.SessionId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SessionId
 }
 
 func (x *CashDropRequest) GetEmployeeId() int64 {
@@ -478,7 +534,11 @@ func (x *CashDropRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CashDropRequest) GetAmount() float64 {
@@ -486,7 +546,11 @@ func (x *CashDropRequest) GetAmount() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Amount
+	if x.Amount == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Amount
 }
 
 func (x *CashDropRequest) GetReason() string {
@@ -548,27 +612,39 @@ func (x *CashDropResponse) GetMessage() string {
 }
 
 type CashPickupRequest struct {
-	BranchId   int64   `json:"branch_id,omitempty"`
-	TerminalId int64   `json:"terminal_id,omitempty"`
-	SessionId  int64   `json:"session_id,omitempty"`
-	EmployeeId int64   `json:"employee_id,omitempty"`
-	Amount     float64 `json:"amount,omitempty"`
-	Reason     string  `json:"reason,omitempty"`
+	BranchId   *int64   `json:"branch_id,omitempty"`
+	TerminalId *int64   `json:"terminal_id,omitempty"`
+	SessionId  *int64   `json:"session_id,omitempty"`
+	EmployeeId *int64   `json:"employee_id,omitempty"`
+	Amount     *float64 `json:"amount,omitempty"`
+	Reason     string   `json:"reason,omitempty"`
 }
 
 func (m *CashPickupRequest) MarshalJSON() ([]byte, error) {
 	type alias CashPickupRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		SessionId  *string `json:"session_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
-	aux.TerminalId = strconv.FormatInt(m.TerminalId, 10)
-	aux.SessionId = strconv.FormatInt(m.SessionId, 10)
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.BranchId != nil {
+		encodedBranchId := strconv.FormatInt(*m.BranchId, 10)
+		aux.BranchId = &encodedBranchId
+	}
+	if m.TerminalId != nil {
+		encodedTerminalId := strconv.FormatInt(*m.TerminalId, 10)
+		aux.TerminalId = &encodedTerminalId
+	}
+	if m.SessionId != nil {
+		encodedSessionId := strconv.FormatInt(*m.SessionId, 10)
+		aux.SessionId = &encodedSessionId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -576,41 +652,41 @@ func (m *CashPickupRequest) UnmarshalJSON(data []byte) error {
 	type alias CashPickupRequest
 	aux := struct {
 		*alias
-		BranchId   string `json:"branch_id,omitempty"`
-		TerminalId string `json:"terminal_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		BranchId   *string `json:"branch_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		SessionId  *string `json:"session_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BranchId != "" {
-		v, err := strconv.ParseInt(aux.BranchId, 10, 64)
+	if aux.BranchId != nil {
+		v, err := strconv.ParseInt(*aux.BranchId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BranchId = v
+		m.BranchId = &v
 	}
-	if aux.TerminalId != "" {
-		v, err := strconv.ParseInt(aux.TerminalId, 10, 64)
+	if aux.TerminalId != nil {
+		v, err := strconv.ParseInt(*aux.TerminalId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TerminalId = v
+		m.TerminalId = &v
 	}
-	if aux.SessionId != "" {
-		v, err := strconv.ParseInt(aux.SessionId, 10, 64)
+	if aux.SessionId != nil {
+		v, err := strconv.ParseInt(*aux.SessionId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SessionId = v
+		m.SessionId = &v
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	return nil
 }
@@ -620,7 +696,11 @@ func (x *CashPickupRequest) GetBranchId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BranchId
+	if x.BranchId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BranchId
 }
 
 func (x *CashPickupRequest) GetTerminalId() int64 {
@@ -628,7 +708,11 @@ func (x *CashPickupRequest) GetTerminalId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TerminalId
+	if x.TerminalId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TerminalId
 }
 
 func (x *CashPickupRequest) GetSessionId() int64 {
@@ -636,7 +720,11 @@ func (x *CashPickupRequest) GetSessionId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SessionId
+	if x.SessionId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SessionId
 }
 
 func (x *CashPickupRequest) GetEmployeeId() int64 {
@@ -644,7 +732,11 @@ func (x *CashPickupRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CashPickupRequest) GetAmount() float64 {
@@ -652,7 +744,11 @@ func (x *CashPickupRequest) GetAmount() float64 {
 		var zero float64
 		return zero
 	}
-	return x.Amount
+	if x.Amount == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Amount
 }
 
 func (x *CashPickupRequest) GetReason() string {
@@ -714,16 +810,19 @@ func (x *CashPickupResponse) GetMessage() string {
 }
 
 type ListCashMovementsRequest struct {
-	SessionId int64 `json:"session_id,omitempty"`
+	SessionId *int64 `json:"session_id,omitempty"`
 }
 
 func (m *ListCashMovementsRequest) MarshalJSON() ([]byte, error) {
 	type alias ListCashMovementsRequest
 	aux := struct {
 		*alias
-		SessionId string `json:"session_id,omitempty"`
+		SessionId *string `json:"session_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.SessionId = strconv.FormatInt(m.SessionId, 10)
+	if m.SessionId != nil {
+		encodedSessionId := strconv.FormatInt(*m.SessionId, 10)
+		aux.SessionId = &encodedSessionId
+	}
 	return json.Marshal(aux)
 }
 
@@ -731,17 +830,17 @@ func (m *ListCashMovementsRequest) UnmarshalJSON(data []byte) error {
 	type alias ListCashMovementsRequest
 	aux := struct {
 		*alias
-		SessionId string `json:"session_id,omitempty"`
+		SessionId *string `json:"session_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.SessionId != "" {
-		v, err := strconv.ParseInt(aux.SessionId, 10, 64)
+	if aux.SessionId != nil {
+		v, err := strconv.ParseInt(*aux.SessionId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SessionId = v
+		m.SessionId = &v
 	}
 	return nil
 }
@@ -751,7 +850,11 @@ func (x *ListCashMovementsRequest) GetSessionId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SessionId
+	if x.SessionId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SessionId
 }
 
 type ListCashMovementsResponse struct {

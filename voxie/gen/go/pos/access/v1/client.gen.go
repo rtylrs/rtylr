@@ -92,7 +92,9 @@ func (c *AccessServiceClient) GetMemberLocations(ctx context.Context, req *GetMe
 	}
 	path := "/pos/access/v1/member-locations"
 	query := url.Values{}
-	query.Set("user_id", strconv.FormatInt(int64(req.UserId), 10))
+	if req.UserId != nil {
+		query.Set("user_id", strconv.FormatInt(int64(*req.UserId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -131,7 +133,9 @@ func (c *AccessServiceClient) GetLocationRoster(ctx context.Context, req *GetLoc
 	}
 	path := "/pos/access/v1/location-roster"
 	query := url.Values{}
-	query.Set("location_id", strconv.FormatInt(int64(req.LocationId), 10))
+	if req.LocationId != nil {
+		query.Set("location_id", strconv.FormatInt(int64(*req.LocationId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

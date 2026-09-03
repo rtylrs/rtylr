@@ -76,31 +76,31 @@ return violations;
 }
 
 export interface GetCalendarRequest {
-from: string;
-to: string;
+fromDate: string;
+toDate: string;
 }
 
 export function decodeGetCalendarRequest(v: any): GetCalendarRequest {
 if (v === null || v === undefined) return v;
 return {
-from: v.from,
-to: v.to,
+fromDate: v.from_date,
+toDate: v.to_date,
 };
 }
 
 export function encodeGetCalendarRequest(v: GetCalendarRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
-if (v.from !== undefined) { out.from = v.from; }
-if (v.to !== undefined) { out.to = v.to; }
+if (v.fromDate !== undefined) { out.from_date = v.fromDate; }
+if (v.toDate !== undefined) { out.to_date = v.toDate; }
 return out;
 }
 
 export function validateGetCalendarRequest(v: GetCalendarRequest): string[] {
 const violations: string[] = [];
-if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
-if (!(v.from !== undefined && v.from !== null) || v.from === "") violations.push("from is required");
-if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
-if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (!(v.fromDate !== undefined && v.fromDate !== null) || v.fromDate === "") violations.push("from_date is required");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
+if (!(v.toDate !== undefined && v.toDate !== null) || v.toDate === "") violations.push("to_date is required");
 return violations;
 }
 

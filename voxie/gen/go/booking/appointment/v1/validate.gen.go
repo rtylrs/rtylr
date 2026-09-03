@@ -22,8 +22,13 @@ func (m *CreateAppointmentRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ServiceId <= 0 {
-		violations = append(violations, "service_id must be greater than 0")
+	if m.ServiceId == nil {
+		violations = append(violations, "service_id is required")
+	}
+	if m.ServiceId != nil {
+		if *m.ServiceId <= 0 {
+			violations = append(violations, "service_id must be greater than 0")
+		}
 	}
 	if m.CustomerName == "" {
 		violations = append(violations, "customer_name is required")

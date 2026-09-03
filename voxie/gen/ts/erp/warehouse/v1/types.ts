@@ -147,7 +147,7 @@ return violations;
 }
 
 export interface DeleteWarehouseRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteWarehouseRequest(v: any): DeleteWarehouseRequest {
@@ -166,7 +166,6 @@ return out;
 export function validateDeleteWarehouseRequest(v: DeleteWarehouseRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -314,7 +313,7 @@ return violations;
 }
 
 export interface UpdateWarehouseRequest {
-id: string;
+id?: string;
 body?: UpdateWarehouseBody;
 }
 
@@ -336,7 +335,6 @@ return out;
 export function validateUpdateWarehouseRequest(v: UpdateWarehouseRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateWarehouseBody(v.body).map((message) => "body: " + message));

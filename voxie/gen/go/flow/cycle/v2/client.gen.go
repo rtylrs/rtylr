@@ -55,7 +55,9 @@ func (c *CycleServiceClient) ListCycles(ctx context.Context, req *ListCyclesRequ
 	}
 	path := "/flow/cycle/v2/cycles"
 	query := url.Values{}
-	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
+	if req.ProjectId != nil {
+		query.Set("project_id", strconv.FormatInt(int64(*req.ProjectId), 10))
+	}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
 	query.Set("sort_by", req.SortBy)

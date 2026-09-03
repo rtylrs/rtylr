@@ -154,10 +154,10 @@ message UpsertWorkDayResponse {
 }
 
 message ListWorkDaysRequest {
-  /// from is the inclusive start of the range, as YYYY-MM-DD.
-  from: string @required @query("from")
-  /// to is the inclusive end of the range, as YYYY-MM-DD.
-  to: string @required @query("to")
+  /// from_date is the inclusive start of the range, as YYYY-MM-DD.
+  from_date: string @required @query("from")
+  /// to_date is the inclusive end of the range, as YYYY-MM-DD.
+  to_date: string @required @query("to")
   /// employee_id lists another person's days.
   employee_id: int64? @query("employee_id")
   /// The current result page.
@@ -174,11 +174,11 @@ message ListWorkDaysResponse {
 message ListWorkDaysForWorkspaceRequest {
   /// workspace_id is whose members' days this lists. The caller must hold at
   /// least admin on this workspace.
-  workspace_id: int64 @required @gt(0) @query("workspace_id")
-  /// from is the inclusive start of the range, as YYYY-MM-DD.
-  from: string @required @query("from")
-  /// to is the inclusive end of the range, as YYYY-MM-DD.
-  to: string @required @query("to")
+  workspace_id: int64? @required @gt(0) @query("workspace_id")
+  /// from_date is the inclusive start of the range, as YYYY-MM-DD.
+  from_date: string @required @query("from")
+  /// to_date is the inclusive end of the range, as YYYY-MM-DD.
+  to_date: string @required @query("to")
   /// The current result page.
   page: int32 @query("page")
   /// The maximum number of records to return.
@@ -192,11 +192,11 @@ message ListWorkDaysForWorkspaceResponse {
 
 message CreateWorkDayLineRequest {
   /// work_day_id is the day to add the line to.
-  work_day_id: int64 @required @gt(0)
+  work_day_id: int64 @gt(0)
   /// client_key makes the create idempotent across an offline retry.
   client_key: string @required
   /// duration_minutes is the time spent.
-  duration_minutes: int32 @required @gt(0)
+  duration_minutes: int32? @required @gt(0)
   /// description is what was done.
   description: string @required
   project_id: int64?
@@ -213,8 +213,8 @@ message CreateWorkDayLineResponse {
 
 message UpdateWorkDayLineRequest {
   /// id is the line to change.
-  id: int64 @required @gt(0)
-  duration_minutes: int32 @required @gt(0)
+  id: int64 @gt(0)
+  duration_minutes: int32? @required @gt(0)
   description: string @required
   project_id: int64?
   task_id: int64?
@@ -229,7 +229,7 @@ message UpdateWorkDayLineResponse {
 
 message DeleteWorkDayLineRequest {
   /// id is the line to remove.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteWorkDayLineResponse {
@@ -263,7 +263,7 @@ message CreateWorkTypeResponse {
 }
 
 message UpdateWorkTypeRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   name: string @required
   /// description is shown to employees as the task description once picked.
   description: string
@@ -278,7 +278,7 @@ message UpdateWorkTypeResponse {
 }
 
 message DeleteWorkTypeRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteWorkTypeResponse {

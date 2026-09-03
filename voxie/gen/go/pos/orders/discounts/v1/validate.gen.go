@@ -17,8 +17,13 @@ func (m *DiscountOrderRequest) Validate() error {
 	if m.DiscountType == "" {
 		violations = append(violations, "discount_type is required")
 	}
-	if m.DiscountValue < 0 {
-		violations = append(violations, "discount_value must be greater than or equal to 0")
+	if m.DiscountValue == nil {
+		violations = append(violations, "discount_value is required")
+	}
+	if m.DiscountValue != nil {
+		if *m.DiscountValue < 0 {
+			violations = append(violations, "discount_value must be greater than or equal to 0")
+		}
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")

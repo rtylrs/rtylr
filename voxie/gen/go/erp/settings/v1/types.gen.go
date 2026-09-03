@@ -7,29 +7,32 @@ import (
 )
 
 type ErpBusinessSettings struct {
-	Id                 int64   `json:"id,omitempty"`
-	BusinessId         int64   `json:"business_id,omitempty"`
-	Currency           string  `json:"currency,omitempty"`
-	TaxRate            float64 `json:"tax_rate,omitempty"`
-	LowStockThreshold  float64 `json:"low_stock_threshold,omitempty"`
-	DefaultWarehouseId int64   `json:"default_warehouse_id,omitempty"`
-	NotifyOnLowStock   bool    `json:"notify_on_low_stock,omitempty"`
-	NotifyOnExpiry     bool    `json:"notify_on_expiry,omitempty"`
-	CreatedAt          string  `json:"created_at,omitempty"`
-	UpdatedAt          string  `json:"updated_at,omitempty"`
+	Id                 int64    `json:"id,omitempty"`
+	BusinessId         int64    `json:"business_id,omitempty"`
+	Currency           string   `json:"currency,omitempty"`
+	TaxRate            *float64 `json:"tax_rate,omitempty"`
+	LowStockThreshold  *float64 `json:"low_stock_threshold,omitempty"`
+	DefaultWarehouseId *int64   `json:"default_warehouse_id,omitempty"`
+	NotifyOnLowStock   bool     `json:"notify_on_low_stock,omitempty"`
+	NotifyOnExpiry     bool     `json:"notify_on_expiry,omitempty"`
+	CreatedAt          string   `json:"created_at,omitempty"`
+	UpdatedAt          string   `json:"updated_at,omitempty"`
 }
 
 func (m *ErpBusinessSettings) MarshalJSON() ([]byte, error) {
 	type alias ErpBusinessSettings
 	aux := struct {
 		*alias
-		Id                 string `json:"id,omitempty"`
-		BusinessId         string `json:"business_id,omitempty"`
-		DefaultWarehouseId string `json:"default_warehouse_id,omitempty"`
+		Id                 string  `json:"id,omitempty"`
+		BusinessId         string  `json:"business_id,omitempty"`
+		DefaultWarehouseId *string `json:"default_warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
-	aux.DefaultWarehouseId = strconv.FormatInt(m.DefaultWarehouseId, 10)
+	if m.DefaultWarehouseId != nil {
+		encodedDefaultWarehouseId := strconv.FormatInt(*m.DefaultWarehouseId, 10)
+		aux.DefaultWarehouseId = &encodedDefaultWarehouseId
+	}
 	return json.Marshal(aux)
 }
 
@@ -37,9 +40,9 @@ func (m *ErpBusinessSettings) UnmarshalJSON(data []byte) error {
 	type alias ErpBusinessSettings
 	aux := struct {
 		*alias
-		Id                 string `json:"id,omitempty"`
-		BusinessId         string `json:"business_id,omitempty"`
-		DefaultWarehouseId string `json:"default_warehouse_id,omitempty"`
+		Id                 string  `json:"id,omitempty"`
+		BusinessId         string  `json:"business_id,omitempty"`
+		DefaultWarehouseId *string `json:"default_warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -58,12 +61,12 @@ func (m *ErpBusinessSettings) UnmarshalJSON(data []byte) error {
 		}
 		m.BusinessId = v
 	}
-	if aux.DefaultWarehouseId != "" {
-		v, err := strconv.ParseInt(aux.DefaultWarehouseId, 10, 64)
+	if aux.DefaultWarehouseId != nil {
+		v, err := strconv.ParseInt(*aux.DefaultWarehouseId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.DefaultWarehouseId = v
+		m.DefaultWarehouseId = &v
 	}
 	return nil
 }
@@ -97,7 +100,11 @@ func (x *ErpBusinessSettings) GetTaxRate() float64 {
 		var zero float64
 		return zero
 	}
-	return x.TaxRate
+	if x.TaxRate == nil {
+		var zero float64
+		return zero
+	}
+	return *x.TaxRate
 }
 
 func (x *ErpBusinessSettings) GetLowStockThreshold() float64 {
@@ -105,7 +112,11 @@ func (x *ErpBusinessSettings) GetLowStockThreshold() float64 {
 		var zero float64
 		return zero
 	}
-	return x.LowStockThreshold
+	if x.LowStockThreshold == nil {
+		var zero float64
+		return zero
+	}
+	return *x.LowStockThreshold
 }
 
 func (x *ErpBusinessSettings) GetDefaultWarehouseId() int64 {
@@ -113,7 +124,11 @@ func (x *ErpBusinessSettings) GetDefaultWarehouseId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.DefaultWarehouseId
+	if x.DefaultWarehouseId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DefaultWarehouseId
 }
 
 func (x *ErpBusinessSettings) GetNotifyOnLowStock() bool {
@@ -164,21 +179,24 @@ func (x *GetErpSettingsResponse) GetSettings() *ErpBusinessSettings {
 }
 
 type UpdateErpSettingsRequest struct {
-	Currency           string  `json:"currency,omitempty"`
-	TaxRate            float64 `json:"tax_rate,omitempty"`
-	LowStockThreshold  float64 `json:"low_stock_threshold,omitempty"`
-	DefaultWarehouseId int64   `json:"default_warehouse_id,omitempty"`
-	NotifyOnLowStock   bool    `json:"notify_on_low_stock,omitempty"`
-	NotifyOnExpiry     bool    `json:"notify_on_expiry,omitempty"`
+	Currency           string   `json:"currency,omitempty"`
+	TaxRate            *float64 `json:"tax_rate,omitempty"`
+	LowStockThreshold  *float64 `json:"low_stock_threshold,omitempty"`
+	DefaultWarehouseId *int64   `json:"default_warehouse_id,omitempty"`
+	NotifyOnLowStock   bool     `json:"notify_on_low_stock,omitempty"`
+	NotifyOnExpiry     bool     `json:"notify_on_expiry,omitempty"`
 }
 
 func (m *UpdateErpSettingsRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdateErpSettingsRequest
 	aux := struct {
 		*alias
-		DefaultWarehouseId string `json:"default_warehouse_id,omitempty"`
+		DefaultWarehouseId *string `json:"default_warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.DefaultWarehouseId = strconv.FormatInt(m.DefaultWarehouseId, 10)
+	if m.DefaultWarehouseId != nil {
+		encodedDefaultWarehouseId := strconv.FormatInt(*m.DefaultWarehouseId, 10)
+		aux.DefaultWarehouseId = &encodedDefaultWarehouseId
+	}
 	return json.Marshal(aux)
 }
 
@@ -186,17 +204,17 @@ func (m *UpdateErpSettingsRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdateErpSettingsRequest
 	aux := struct {
 		*alias
-		DefaultWarehouseId string `json:"default_warehouse_id,omitempty"`
+		DefaultWarehouseId *string `json:"default_warehouse_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.DefaultWarehouseId != "" {
-		v, err := strconv.ParseInt(aux.DefaultWarehouseId, 10, 64)
+	if aux.DefaultWarehouseId != nil {
+		v, err := strconv.ParseInt(*aux.DefaultWarehouseId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.DefaultWarehouseId = v
+		m.DefaultWarehouseId = &v
 	}
 	return nil
 }
@@ -214,7 +232,11 @@ func (x *UpdateErpSettingsRequest) GetTaxRate() float64 {
 		var zero float64
 		return zero
 	}
-	return x.TaxRate
+	if x.TaxRate == nil {
+		var zero float64
+		return zero
+	}
+	return *x.TaxRate
 }
 
 func (x *UpdateErpSettingsRequest) GetLowStockThreshold() float64 {
@@ -222,7 +244,11 @@ func (x *UpdateErpSettingsRequest) GetLowStockThreshold() float64 {
 		var zero float64
 		return zero
 	}
-	return x.LowStockThreshold
+	if x.LowStockThreshold == nil {
+		var zero float64
+		return zero
+	}
+	return *x.LowStockThreshold
 }
 
 func (x *UpdateErpSettingsRequest) GetDefaultWarehouseId() int64 {
@@ -230,7 +256,11 @@ func (x *UpdateErpSettingsRequest) GetDefaultWarehouseId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.DefaultWarehouseId
+	if x.DefaultWarehouseId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DefaultWarehouseId
 }
 
 func (x *UpdateErpSettingsRequest) GetNotifyOnLowStock() bool {

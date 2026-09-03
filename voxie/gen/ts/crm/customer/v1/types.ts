@@ -203,7 +203,7 @@ return violations;
 }
 
 export interface DeleteCustomerRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteCustomerRequest(v: any): DeleteCustomerRequest {
@@ -222,7 +222,6 @@ return out;
 export function validateDeleteCustomerRequest(v: DeleteCustomerRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -251,7 +250,7 @@ return violations;
 }
 
 export interface GetCustomerRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetCustomerRequest(v: any): GetCustomerRequest {
@@ -270,7 +269,6 @@ return out;
 export function validateGetCustomerRequest(v: GetCustomerRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -447,7 +445,7 @@ return violations;
 }
 
 export interface UpdateCustomerRequest {
-id: string;
+id?: string;
 body?: UpdateCustomerBody;
 }
 
@@ -469,7 +467,6 @@ return out;
 export function validateUpdateCustomerRequest(v: UpdateCustomerRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCustomerBody(v.body).map((message) => "body: " + message));

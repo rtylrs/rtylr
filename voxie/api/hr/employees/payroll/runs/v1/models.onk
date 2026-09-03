@@ -87,7 +87,7 @@ message TriggerPayrollRunResponse {
 
 message ApprovePayrollRunRequest {
   /// ID of the payroll run to approve.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message ApprovePayrollRunResponse {
@@ -97,7 +97,7 @@ message ApprovePayrollRunResponse {
 
 message ExportPayrollRequest {
   /// ID of the payroll run to export.
-  run_id: int64 @required @gt(0)
+  run_id: int64? @required @gt(0)
 }
 
 message ExportPayrollResponse {

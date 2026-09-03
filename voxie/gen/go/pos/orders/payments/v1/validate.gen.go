@@ -17,8 +17,13 @@ func (m *ProcessPaymentRequest) Validate() error {
 	if m.PaymentMethod == "" {
 		violations = append(violations, "payment_method is required")
 	}
-	if m.AmountPaid <= 0 {
-		violations = append(violations, "amount_paid must be greater than 0")
+	if m.AmountPaid == nil {
+		violations = append(violations, "amount_paid is required")
+	}
+	if m.AmountPaid != nil {
+		if *m.AmountPaid <= 0 {
+			violations = append(violations, "amount_paid must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

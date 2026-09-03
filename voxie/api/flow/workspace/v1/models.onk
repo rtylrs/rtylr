@@ -93,7 +93,7 @@ message UpdateWorkspaceBody {
 
 message UpdateWorkspaceRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable workspace fields bound from the HTTP payload.
   body: UpdateWorkspaceBody
 }
@@ -105,7 +105,7 @@ message UpdateWorkspaceResponse {
 
 message DeleteWorkspaceRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteWorkspaceResponse {
@@ -115,7 +115,7 @@ message DeleteWorkspaceResponse {
 
 message ListWorkspaceMembersRequest {
   /// workspace_id is the workspace id value for this contract.
-  workspace_id: int64 @required @gt(0) @query("workspace_id")
+  workspace_id: int64? @required @gt(0) @query("workspace_id")
   /// The current result page.
   page: int32 @query("page")
   /// The maximum number of records to return.
@@ -134,9 +134,9 @@ message ListWorkspaceMembersResponse {
 
 message AddWorkspaceMemberRequest {
   /// workspace_id is the workspace id value for this contract.
-  workspace_id: int64 @required @gt(0)
+  workspace_id: int64? @required @gt(0)
   /// user_id identifies the user associated with this request.
-  user_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
   /// role is the role value for this contract.
   role: string @required
 }
@@ -148,9 +148,9 @@ message AddWorkspaceMemberResponse {
 
 message RemoveWorkspaceMemberRequest {
   /// workspace_id is the workspace id value for this contract.
-  workspace_id: int64 @required @gt(0) @query("workspace_id")
+  workspace_id: int64? @required @gt(0) @query("workspace_id")
   /// user_id identifies the user associated with this request.
-  user_id: int64 @required @gt(0) @query("user_id")
+  user_id: int64? @required @gt(0) @query("user_id")
 }
 
 message RemoveWorkspaceMemberResponse {
@@ -160,9 +160,9 @@ message RemoveWorkspaceMemberResponse {
 
 message UpdateWorkspaceMemberRoleRequest {
   /// workspace_id is the workspace id value for this contract.
-  workspace_id: int64 @required @gt(0)
+  workspace_id: int64? @required @gt(0)
   /// user_id identifies the user associated with this request.
-  user_id: int64 @required @gt(0)
+  user_id: int64? @required @gt(0)
   /// role is the role value for this contract.
   role: string @required
 }

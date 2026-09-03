@@ -38,11 +38,11 @@ func (m *GetCalendarRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.From == "" {
-		violations = append(violations, "from is required")
+	if m.FromDate == "" {
+		violations = append(violations, "from_date is required")
 	}
-	if m.To == "" {
-		violations = append(violations, "to is required")
+	if m.ToDate == "" {
+		violations = append(violations, "to_date is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

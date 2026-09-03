@@ -63,7 +63,7 @@ message CreateSupplierResponse {
 }
 
 message DeleteSupplierRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteSupplierResponse {
@@ -113,7 +113,7 @@ message UpdateSupplierBody {
 
 message UpdateSupplierRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable supplier fields bound from the HTTP payload.
   body: UpdateSupplierBody
 }

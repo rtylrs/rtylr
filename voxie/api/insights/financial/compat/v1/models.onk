@@ -7,8 +7,8 @@ message CashFlowPoint {
 }
 
 message GetCashFlowRequest {
-  from: string? @query("from")
-  to: string? @query("to")
+  from_date: string? @query("from")
+  to_date: string? @query("to")
 }
 
 message GetCashFlowResponse {

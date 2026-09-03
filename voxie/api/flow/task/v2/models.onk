@@ -279,7 +279,7 @@ message CreateTaskResponse {
 
 message GetTaskDetailRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetTaskDetailResponse {
@@ -342,7 +342,7 @@ message UpdateTaskBody {
 
 message UpdateTaskRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries updatable task fields bound from the HTTP payload.
   body: UpdateTaskBody
 }
@@ -359,7 +359,7 @@ message UpdateTaskStatusBody {
 
 message UpdateTaskStatusRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// body carries the new task status bound from the HTTP payload.
   body: UpdateTaskStatusBody
 }
@@ -371,7 +371,7 @@ message UpdateTaskStatusResponse {
 
 message DeleteTaskRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteTaskResponse {
@@ -383,7 +383,7 @@ message CreateSubtaskRequest {
   /// parent_task_id is the parent task id value for this contract. The new
   /// subtask inherits the parent's project; v1 made clients pass it again,
   /// which only ever invited mismatches.
-  parent_task_id: int64 @required @gt(0)
+  parent_task_id: int64? @required @gt(0)
   /// title is the title value for this contract.
   title: string @required
   /// description is the description value for this contract.
@@ -409,7 +409,7 @@ message CreateSubtaskResponse {
 
 message GetSubtasksRequest {
   /// task_id is the task id value for this contract.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
   /// The current result page.
   page: int32 @query("page")
   /// The maximum number of records to return.
@@ -428,7 +428,7 @@ message GetSubtasksResponse {
 
 message AddCommentRequest {
   /// task_id is the task id value for this contract.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
   /// content is the content value for this contract.
   content: string @required
 }
@@ -440,7 +440,7 @@ message AddCommentResponse {
 
 message DeleteCommentRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteCommentResponse {
@@ -450,7 +450,7 @@ message DeleteCommentResponse {
 
 message GetTaskActivityRequest {
   /// task_id is the task id value for this contract.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
 }
 
 message GetTaskActivityResponse {
@@ -460,13 +460,13 @@ message GetTaskActivityResponse {
 
 message CreateAttachmentRequest {
   /// task_id identifies the task the attachment belongs to.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
   /// name is the name value for this contract.
   name: string @required
   /// url is the url value for this contract.
   url: string @required
   /// size is the size value for this contract.
-  size: int64 @required @gt(0)
+  size: int64? @required @gt(0)
 }
 
 message CreateAttachmentResponse {
@@ -478,7 +478,7 @@ message CreateAttachmentResponse {
 
 message GetAttachmentsRequest {
   /// task_id is the task id value for this contract.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
 }
 
 message GetAttachmentsResponse {
@@ -488,7 +488,7 @@ message GetAttachmentsResponse {
 
 message DeleteAttachmentRequest {
   /// id is the unique identifier for the resource.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteAttachmentResponse {
@@ -498,11 +498,11 @@ message DeleteAttachmentResponse {
 
 message CreateTimeLogRequest {
   /// duration_minutes is the duration minutes value for this contract.
-  duration_minutes: int64 @required @gt(0)
+  duration_minutes: int64? @required @gt(0)
   /// description is the description value for this contract.
   description: string @required
   /// task_id identifies the task the time log belongs to.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
 }
 
 message CreateTimeLogResponse {
@@ -514,7 +514,7 @@ message CreateTimeLogResponse {
 
 message GetTimeLogsRequest {
   /// task_id is the task id value for this contract.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
 }
 
 message GetTimeLogsResponse {
@@ -524,7 +524,7 @@ message GetTimeLogsResponse {
 
 message DeleteTimeLogRequest {
   /// id is the time log identifier.
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteTimeLogResponse {
@@ -534,12 +534,12 @@ message DeleteTimeLogResponse {
 
 message AddTaskDependencyBody {
   /// depends_on_task_id is the task this task is blocked by.
-  depends_on_task_id: int64 @required @gt(0)
+  depends_on_task_id: int64 @gt(0)
 }
 
 message AddTaskDependencyRequest {
   /// task_id is the task gaining the dependency.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
   /// body carries the dependency target bound from the HTTP payload.
   body: AddTaskDependencyBody
 }
@@ -551,9 +551,9 @@ message AddTaskDependencyResponse {
 
 message RemoveTaskDependencyRequest {
   /// task_id is the task losing the dependency.
-  task_id: int64 @required @gt(0)
+  task_id: int64 @gt(0)
   /// depends_on_task_id is the dependency being removed.
-  depends_on_task_id: int64 @required @gt(0)
+  depends_on_task_id: int64 @gt(0)
 }
 
 message RemoveTaskDependencyResponse {

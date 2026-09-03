@@ -3,9 +3,9 @@ package pos.orders.payments.v1
 // ── Process Payment ───────────────────────────────────────────────
 
 message ProcessPaymentRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
   payment_method: string @required
-  amount_paid: float64 @required @gt(0)
+  amount_paid: float64? @required @gt(0)
 }
 
 message ProcessPaymentResponse {

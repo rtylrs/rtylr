@@ -9,6 +9,8 @@ message GetUserSettingsResponse {
   status_changes: bool
   weekly_digest: bool
   email_notifications: bool
+  /// JSON-encoded per-user Flow sidebar layout and visibility preferences.
+  sidebar_preferences: string?
 }
 
 message UpdateUserSettingsRequest {
@@ -18,6 +20,8 @@ message UpdateUserSettingsRequest {
   status_changes: bool
   weekly_digest: bool
   email_notifications: bool
+  /// JSON-encoded per-user Flow sidebar layout and visibility preferences.
+  sidebar_preferences: string?
 }
 
 message UpdateUserSettingsResponse {}

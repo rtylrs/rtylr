@@ -28,11 +28,21 @@ func (m *CreateGiftCardRequest) Validate() error {
 	if m.Code == "" {
 		violations = append(violations, "code is required")
 	}
-	if m.PaidOrderId <= 0 {
-		violations = append(violations, "paid_order_id must be greater than 0")
+	if m.PaidOrderId == nil {
+		violations = append(violations, "paid_order_id is required")
 	}
-	if m.InitialAmount <= 0 {
-		violations = append(violations, "initial_amount must be greater than 0")
+	if m.PaidOrderId != nil {
+		if *m.PaidOrderId <= 0 {
+			violations = append(violations, "paid_order_id must be greater than 0")
+		}
+	}
+	if m.InitialAmount == nil {
+		violations = append(violations, "initial_amount is required")
+	}
+	if m.InitialAmount != nil {
+		if *m.InitialAmount <= 0 {
+			violations = append(violations, "initial_amount must be greater than 0")
+		}
 	}
 	if m.CustomerName == "" {
 		violations = append(violations, "customer_name is required")
@@ -128,11 +138,21 @@ func (m *RedeemGiftCardRequest) Validate() error {
 	if m.Code == "" {
 		violations = append(violations, "code is required")
 	}
-	if m.OrderId <= 0 {
-		violations = append(violations, "order_id must be greater than 0")
+	if m.OrderId == nil {
+		violations = append(violations, "order_id is required")
 	}
-	if m.Amount <= 0 {
-		violations = append(violations, "amount must be greater than 0")
+	if m.OrderId != nil {
+		if *m.OrderId <= 0 {
+			violations = append(violations, "order_id must be greater than 0")
+		}
+	}
+	if m.Amount == nil {
+		violations = append(violations, "amount is required")
+	}
+	if m.Amount != nil {
+		if *m.Amount <= 0 {
+			violations = append(violations, "amount must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

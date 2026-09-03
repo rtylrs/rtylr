@@ -1368,8 +1368,8 @@ func (x *ListProductsResponse) GetTotal() int64 {
 }
 
 type CreateProductRequest struct {
-	CategoryId        int64   `json:"category_id,omitempty"`
-	SupplierId        int64   `json:"supplier_id,omitempty"`
+	CategoryId        *int64  `json:"category_id,omitempty"`
+	SupplierId        *int64  `json:"supplier_id,omitempty"`
 	Name              string  `json:"name,omitempty"`
 	Sku               string  `json:"sku,omitempty"`
 	Barcode           string  `json:"barcode,omitempty"`
@@ -1403,13 +1403,19 @@ func (m *CreateProductRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateProductRequest
 	aux := struct {
 		*alias
-		CategoryId string `json:"category_id,omitempty"`
-		SupplierId string `json:"supplier_id,omitempty"`
-		BrandId    string `json:"brand_id,omitempty"`
+		BrandId    string  `json:"brand_id,omitempty"`
+		CategoryId *string `json:"category_id,omitempty"`
+		SupplierId *string `json:"supplier_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CategoryId = strconv.FormatInt(m.CategoryId, 10)
-	aux.SupplierId = strconv.FormatInt(m.SupplierId, 10)
 	aux.BrandId = strconv.FormatInt(m.BrandId, 10)
+	if m.CategoryId != nil {
+		encodedCategoryId := strconv.FormatInt(*m.CategoryId, 10)
+		aux.CategoryId = &encodedCategoryId
+	}
+	if m.SupplierId != nil {
+		encodedSupplierId := strconv.FormatInt(*m.SupplierId, 10)
+		aux.SupplierId = &encodedSupplierId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1417,26 +1423,12 @@ func (m *CreateProductRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateProductRequest
 	aux := struct {
 		*alias
-		CategoryId string `json:"category_id,omitempty"`
-		SupplierId string `json:"supplier_id,omitempty"`
-		BrandId    string `json:"brand_id,omitempty"`
+		BrandId    string  `json:"brand_id,omitempty"`
+		CategoryId *string `json:"category_id,omitempty"`
+		SupplierId *string `json:"supplier_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.CategoryId != "" {
-		v, err := strconv.ParseInt(aux.CategoryId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.CategoryId = v
-	}
-	if aux.SupplierId != "" {
-		v, err := strconv.ParseInt(aux.SupplierId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.SupplierId = v
 	}
 	if aux.BrandId != "" {
 		v, err := strconv.ParseInt(aux.BrandId, 10, 64)
@@ -1444,6 +1436,20 @@ func (m *CreateProductRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.BrandId = v
+	}
+	if aux.CategoryId != nil {
+		v, err := strconv.ParseInt(*aux.CategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CategoryId = &v
+	}
+	if aux.SupplierId != nil {
+		v, err := strconv.ParseInt(*aux.SupplierId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SupplierId = &v
 	}
 	return nil
 }
@@ -1453,7 +1459,11 @@ func (x *CreateProductRequest) GetCategoryId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CategoryId
+	if x.CategoryId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CategoryId
 }
 
 func (x *CreateProductRequest) GetSupplierId() int64 {
@@ -1461,7 +1471,11 @@ func (x *CreateProductRequest) GetSupplierId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SupplierId
+	if x.SupplierId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SupplierId
 }
 
 func (x *CreateProductRequest) GetName() string {
@@ -1914,8 +1928,8 @@ func (x *ListProductAttributesResponse) GetAttributes() []*ProductAttribute {
 }
 
 type UpdateProductBody struct {
-	CategoryId        int64   `json:"category_id,omitempty"`
-	SupplierId        int64   `json:"supplier_id,omitempty"`
+	CategoryId        *int64  `json:"category_id,omitempty"`
+	SupplierId        *int64  `json:"supplier_id,omitempty"`
 	Name              string  `json:"name,omitempty"`
 	Sku               string  `json:"sku,omitempty"`
 	Barcode           string  `json:"barcode,omitempty"`
@@ -1949,13 +1963,19 @@ func (m *UpdateProductBody) MarshalJSON() ([]byte, error) {
 	type alias UpdateProductBody
 	aux := struct {
 		*alias
-		CategoryId string `json:"category_id,omitempty"`
-		SupplierId string `json:"supplier_id,omitempty"`
-		BrandId    string `json:"brand_id,omitempty"`
+		BrandId    string  `json:"brand_id,omitempty"`
+		CategoryId *string `json:"category_id,omitempty"`
+		SupplierId *string `json:"supplier_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CategoryId = strconv.FormatInt(m.CategoryId, 10)
-	aux.SupplierId = strconv.FormatInt(m.SupplierId, 10)
 	aux.BrandId = strconv.FormatInt(m.BrandId, 10)
+	if m.CategoryId != nil {
+		encodedCategoryId := strconv.FormatInt(*m.CategoryId, 10)
+		aux.CategoryId = &encodedCategoryId
+	}
+	if m.SupplierId != nil {
+		encodedSupplierId := strconv.FormatInt(*m.SupplierId, 10)
+		aux.SupplierId = &encodedSupplierId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1963,26 +1983,12 @@ func (m *UpdateProductBody) UnmarshalJSON(data []byte) error {
 	type alias UpdateProductBody
 	aux := struct {
 		*alias
-		CategoryId string `json:"category_id,omitempty"`
-		SupplierId string `json:"supplier_id,omitempty"`
-		BrandId    string `json:"brand_id,omitempty"`
+		BrandId    string  `json:"brand_id,omitempty"`
+		CategoryId *string `json:"category_id,omitempty"`
+		SupplierId *string `json:"supplier_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.CategoryId != "" {
-		v, err := strconv.ParseInt(aux.CategoryId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.CategoryId = v
-	}
-	if aux.SupplierId != "" {
-		v, err := strconv.ParseInt(aux.SupplierId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.SupplierId = v
 	}
 	if aux.BrandId != "" {
 		v, err := strconv.ParseInt(aux.BrandId, 10, 64)
@@ -1990,6 +1996,20 @@ func (m *UpdateProductBody) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.BrandId = v
+	}
+	if aux.CategoryId != nil {
+		v, err := strconv.ParseInt(*aux.CategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CategoryId = &v
+	}
+	if aux.SupplierId != nil {
+		v, err := strconv.ParseInt(*aux.SupplierId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SupplierId = &v
 	}
 	return nil
 }
@@ -1999,7 +2019,11 @@ func (x *UpdateProductBody) GetCategoryId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CategoryId
+	if x.CategoryId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CategoryId
 }
 
 func (x *UpdateProductBody) GetSupplierId() int64 {
@@ -2007,7 +2031,11 @@ func (x *UpdateProductBody) GetSupplierId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SupplierId
+	if x.SupplierId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SupplierId
 }
 
 func (x *UpdateProductBody) GetName() string {

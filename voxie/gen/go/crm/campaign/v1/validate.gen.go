@@ -99,8 +99,13 @@ func (m *GetCampaignStatsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.CampaignId <= 0 {
-		violations = append(violations, "campaign_id must be greater than 0")
+	if m.CampaignId == nil {
+		violations = append(violations, "campaign_id is required")
+	}
+	if m.CampaignId != nil {
+		if *m.CampaignId <= 0 {
+			violations = append(violations, "campaign_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

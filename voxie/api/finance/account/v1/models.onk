@@ -39,7 +39,7 @@ message CreateAccountRequest {
   /// currency is the currency value for this contract.
   currency: string @required
   /// balance is the balance value for this contract.
-  balance: float64 @required @gte(0)
+  balance: float64? @required @gte(0)
   /// is_active is the is active value for this contract.
   is_active: bool
   /// code is the optional account code/number.
@@ -54,7 +54,7 @@ message CreateAccountResponse {
 }
 
 message DeleteAccountRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteAccountResponse {
@@ -91,7 +91,7 @@ message UpdateAccountBody {
 }
 
 message UpdateAccountRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdateAccountBody
 }
 

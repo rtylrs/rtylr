@@ -12,6 +12,7 @@ canVoid?: boolean;
 canRefund?: boolean;
 canOpenDrawer?: boolean;
 canApplyDiscount?: boolean;
+roleManagement?: RoleManagementManagedInDash;
 }
 
 export function decodePOSUser(v: any): POSUser {
@@ -28,6 +29,7 @@ canVoid: v.can_void,
 canRefund: v.can_refund,
 canOpenDrawer: v.can_open_drawer,
 canApplyDiscount: v.can_apply_discount,
+roleManagement: (v.role_management !== undefined ? decodeRoleManagementManagedInDash(v.role_management) : v.role_management),
 };
 }
 
@@ -44,6 +46,7 @@ if (v.canVoid !== undefined) { out.can_void = v.canVoid; }
 if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
 if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
 if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
+if (v.roleManagement !== undefined) { out.role_management = encodeRoleManagementManagedInDash(v.roleManagement); }
 return out;
 }
 
@@ -60,6 +63,37 @@ if (v.canVoid !== undefined && v.canVoid !== null && !(typeof v.canVoid === "boo
 if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund === "boolean")) violations.push("can_refund has invalid type");
 if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
 if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
+if (v.roleManagement !== undefined && v.roleManagement !== null && !(typeof v.roleManagement === "object" && v.roleManagement !== null && !Array.isArray(v.roleManagement))) violations.push("role_management has invalid type");
+if (v.roleManagement !== undefined && v.roleManagement !== null) violations.push(...validateRoleManagementManagedInDash(v.roleManagement).map((message) => "role_management: " + message));
+return violations;
+}
+
+export interface RoleManagementManagedInDash {
+code: string;
+dashUrl: string;
+}
+
+export function decodeRoleManagementManagedInDash(v: any): RoleManagementManagedInDash {
+if (v === null || v === undefined) return v;
+return {
+code: v.code,
+dashUrl: v.dash_url,
+};
+}
+
+export function encodeRoleManagementManagedInDash(v: RoleManagementManagedInDash): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.code !== undefined) { out.code = v.code; }
+if (v.dashUrl !== undefined) { out.dash_url = v.dashUrl; }
+return out;
+}
+
+export function validateRoleManagementManagedInDash(v: RoleManagementManagedInDash): string[] {
+const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+if (v.dashUrl !== undefined && v.dashUrl !== null && !(typeof v.dashUrl === "string")) violations.push("dash_url has invalid type");
+if (!(v.dashUrl !== undefined && v.dashUrl !== null) || v.dashUrl === "") violations.push("dash_url is required");
 return violations;
 }
 
@@ -111,51 +145,39 @@ return violations;
 }
 
 export interface CreatePOSUserRequest {
+userId: string;
 locationId: string;
 name: string;
 pin: string;
-role: string;
 hourlyRate?: number;
-maxDiscountPct: number;
-canVoid?: boolean;
-canRefund?: boolean;
-canOpenDrawer?: boolean;
-canApplyDiscount?: boolean;
 }
 
 export function decodeCreatePOSUserRequest(v: any): CreatePOSUserRequest {
 if (v === null || v === undefined) return v;
 return {
+userId: v.user_id,
 locationId: v.location_id,
 name: v.name,
 pin: v.pin,
-role: v.role,
 hourlyRate: v.hourly_rate,
-maxDiscountPct: v.max_discount_pct,
-canVoid: v.can_void,
-canRefund: v.can_refund,
-canOpenDrawer: v.can_open_drawer,
-canApplyDiscount: v.can_apply_discount,
 };
 }
 
 export function encodeCreatePOSUserRequest(v: CreatePOSUserRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.pin !== undefined) { out.pin = v.pin; }
-if (v.role !== undefined) { out.role = v.role; }
 if (v.hourlyRate !== undefined) { out.hourly_rate = v.hourlyRate; }
-if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
-if (v.canVoid !== undefined) { out.can_void = v.canVoid; }
-if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
-if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
-if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
 return out;
 }
 
 export function validateCreatePOSUserRequest(v: CreatePOSUserRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
@@ -163,40 +185,37 @@ if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) vi
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.pin !== undefined && v.pin !== null && !(typeof v.pin === "string")) violations.push("pin has invalid type");
 if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
-if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
-if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
 if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(typeof v.hourlyRate === "number" && Number.isFinite(v.hourlyRate))) violations.push("hourly_rate has invalid type");
 if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
-if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(typeof v.maxDiscountPct === "number" && Number.isFinite(v.maxDiscountPct))) violations.push("max_discount_pct has invalid type");
-if (!(v.maxDiscountPct !== undefined && v.maxDiscountPct !== null)) violations.push("max_discount_pct is required");
-if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(Number(v.maxDiscountPct) >= 0)) violations.push("max_discount_pct violates @gte");
-if (v.canVoid !== undefined && v.canVoid !== null && !(typeof v.canVoid === "boolean")) violations.push("can_void has invalid type");
-if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund === "boolean")) violations.push("can_refund has invalid type");
-if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
-if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
 return violations;
 }
 
 export interface CreatePOSUserResponse {
 id?: string;
+roleManagement: RoleManagementManagedInDash;
 }
 
 export function decodeCreatePOSUserResponse(v: any): CreatePOSUserResponse {
 if (v === null || v === undefined) return v;
 return {
 id: v.id,
+roleManagement: (v.role_management !== undefined ? decodeRoleManagementManagedInDash(v.role_management) : v.role_management),
 };
 }
 
 export function encodeCreatePOSUserResponse(v: CreatePOSUserResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
+if (v.roleManagement !== undefined) { out.role_management = encodeRoleManagementManagedInDash(v.roleManagement); }
 return out;
 }
 
 export function validateCreatePOSUserResponse(v: CreatePOSUserResponse): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.roleManagement !== undefined && v.roleManagement !== null && !(typeof v.roleManagement === "object" && v.roleManagement !== null && !Array.isArray(v.roleManagement))) violations.push("role_management has invalid type");
+if (!(v.roleManagement !== undefined && v.roleManagement !== null)) violations.push("role_management is required");
+if (v.roleManagement !== undefined && v.roleManagement !== null) violations.push(...validateRoleManagementManagedInDash(v.roleManagement).map((message) => "role_management: " + message));
 return violations;
 }
 
@@ -204,14 +223,8 @@ export interface UpdatePOSUserRequest {
 id: string;
 name: string;
 pin?: string;
-role: string;
 isActive?: boolean;
 hourlyRate?: number;
-maxDiscountPct: number;
-canVoid?: boolean;
-canRefund?: boolean;
-canOpenDrawer?: boolean;
-canApplyDiscount?: boolean;
 }
 
 export function decodeUpdatePOSUserRequest(v: any): UpdatePOSUserRequest {
@@ -220,14 +233,8 @@ return {
 id: v.id,
 name: v.name,
 pin: v.pin,
-role: v.role,
 isActive: v.is_active,
 hourlyRate: v.hourly_rate,
-maxDiscountPct: v.max_discount_pct,
-canVoid: v.can_void,
-canRefund: v.can_refund,
-canOpenDrawer: v.can_open_drawer,
-canApplyDiscount: v.can_apply_discount,
 };
 }
 
@@ -236,14 +243,8 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.pin !== undefined) { out.pin = v.pin; }
-if (v.role !== undefined) { out.role = v.role; }
 if (v.isActive !== undefined) { out.is_active = v.isActive; }
 if (v.hourlyRate !== undefined) { out.hourly_rate = v.hourlyRate; }
-if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
-if (v.canVoid !== undefined) { out.can_void = v.canVoid; }
-if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
-if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
-if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
 return out;
 }
 
@@ -255,41 +256,38 @@ if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push(
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.pin !== undefined && v.pin !== null && !(typeof v.pin === "string")) violations.push("pin has invalid type");
-if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
-if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
 if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(typeof v.hourlyRate === "number" && Number.isFinite(v.hourlyRate))) violations.push("hourly_rate has invalid type");
 if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
-if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(typeof v.maxDiscountPct === "number" && Number.isFinite(v.maxDiscountPct))) violations.push("max_discount_pct has invalid type");
-if (!(v.maxDiscountPct !== undefined && v.maxDiscountPct !== null)) violations.push("max_discount_pct is required");
-if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(Number(v.maxDiscountPct) >= 0)) violations.push("max_discount_pct violates @gte");
-if (v.canVoid !== undefined && v.canVoid !== null && !(typeof v.canVoid === "boolean")) violations.push("can_void has invalid type");
-if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund === "boolean")) violations.push("can_refund has invalid type");
-if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
-if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
 return violations;
 }
 
 export interface UpdatePOSUserResponse {
 success?: boolean;
+roleManagement: RoleManagementManagedInDash;
 }
 
 export function decodeUpdatePOSUserResponse(v: any): UpdatePOSUserResponse {
 if (v === null || v === undefined) return v;
 return {
 success: v.success,
+roleManagement: (v.role_management !== undefined ? decodeRoleManagementManagedInDash(v.role_management) : v.role_management),
 };
 }
 
 export function encodeUpdatePOSUserResponse(v: UpdatePOSUserResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
+if (v.roleManagement !== undefined) { out.role_management = encodeRoleManagementManagedInDash(v.roleManagement); }
 return out;
 }
 
 export function validateUpdatePOSUserResponse(v: UpdatePOSUserResponse): string[] {
 const violations: string[] = [];
 if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
+if (v.roleManagement !== undefined && v.roleManagement !== null && !(typeof v.roleManagement === "object" && v.roleManagement !== null && !Array.isArray(v.roleManagement))) violations.push("role_management has invalid type");
+if (!(v.roleManagement !== undefined && v.roleManagement !== null)) violations.push("role_management is required");
+if (v.roleManagement !== undefined && v.roleManagement !== null) violations.push(...validateRoleManagementManagedInDash(v.roleManagement).map((message) => "role_management: " + message));
 return violations;
 }
 
@@ -388,6 +386,8 @@ canRefund?: boolean;
 canOpenDrawer?: boolean;
 canApplyDiscount?: boolean;
 maxDiscountPct?: number;
+authorizationVersion?: string;
+roleManagement: RoleManagementManagedInDash;
 }
 
 export function decodeVerifyPOSUserPINResponse(v: any): VerifyPOSUserPINResponse {
@@ -403,6 +403,8 @@ canRefund: v.can_refund,
 canOpenDrawer: v.can_open_drawer,
 canApplyDiscount: v.can_apply_discount,
 maxDiscountPct: v.max_discount_pct,
+authorizationVersion: v.authorization_version,
+roleManagement: (v.role_management !== undefined ? decodeRoleManagementManagedInDash(v.role_management) : v.role_management),
 };
 }
 
@@ -418,6 +420,8 @@ if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
 if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
 if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
 if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
+if (v.authorizationVersion !== undefined) { out.authorization_version = v.authorizationVersion; }
+if (v.roleManagement !== undefined) { out.role_management = encodeRoleManagementManagedInDash(v.roleManagement); }
 return out;
 }
 
@@ -433,6 +437,10 @@ if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund ==
 if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
 if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
 if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(typeof v.maxDiscountPct === "number" && Number.isFinite(v.maxDiscountPct))) violations.push("max_discount_pct has invalid type");
+if (v.authorizationVersion !== undefined && v.authorizationVersion !== null && !(typeof v.authorizationVersion === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.authorizationVersion))) violations.push("authorization_version has invalid type");
+if (v.roleManagement !== undefined && v.roleManagement !== null && !(typeof v.roleManagement === "object" && v.roleManagement !== null && !Array.isArray(v.roleManagement))) violations.push("role_management has invalid type");
+if (!(v.roleManagement !== undefined && v.roleManagement !== null)) violations.push("role_management is required");
+if (v.roleManagement !== undefined && v.roleManagement !== null) violations.push(...validateRoleManagementManagedInDash(v.roleManagement).map((message) => "role_management: " + message));
 return violations;
 }
 

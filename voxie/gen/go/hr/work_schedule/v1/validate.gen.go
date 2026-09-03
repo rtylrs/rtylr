@@ -61,17 +61,32 @@ func (m *CreateWorkScheduleRequest) Validate() error {
 	if m.EndTime == "" {
 		violations = append(violations, "end_time is required")
 	}
-	if m.BreakMinutes < 0 {
-		violations = append(violations, "break_minutes must be greater than or equal to 0")
+	if m.BreakMinutes == nil {
+		violations = append(violations, "break_minutes is required")
+	}
+	if m.BreakMinutes != nil {
+		if *m.BreakMinutes < 0 {
+			violations = append(violations, "break_minutes must be greater than or equal to 0")
+		}
 	}
 	if m.ContractedHoursPerWeek < 0 {
 		violations = append(violations, "contracted_hours_per_week must be greater than or equal to 0")
 	}
-	if m.DailyOtThresholdMinutes < 0 {
-		violations = append(violations, "daily_ot_threshold_minutes must be greater than or equal to 0")
+	if m.DailyOtThresholdMinutes == nil {
+		violations = append(violations, "daily_ot_threshold_minutes is required")
 	}
-	if m.WeeklyOtThresholdMinutes < 0 {
-		violations = append(violations, "weekly_ot_threshold_minutes must be greater than or equal to 0")
+	if m.DailyOtThresholdMinutes != nil {
+		if *m.DailyOtThresholdMinutes < 0 {
+			violations = append(violations, "daily_ot_threshold_minutes must be greater than or equal to 0")
+		}
+	}
+	if m.WeeklyOtThresholdMinutes == nil {
+		violations = append(violations, "weekly_ot_threshold_minutes is required")
+	}
+	if m.WeeklyOtThresholdMinutes != nil {
+		if *m.WeeklyOtThresholdMinutes < 0 {
+			violations = append(violations, "weekly_ot_threshold_minutes must be greater than or equal to 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

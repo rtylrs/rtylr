@@ -7,9 +7,9 @@ import (
 )
 
 type ProcessPaymentRequest struct {
-	OrderId       int64   `json:"order_id,omitempty"`
-	PaymentMethod string  `json:"payment_method,omitempty"`
-	AmountPaid    float64 `json:"amount_paid,omitempty"`
+	OrderId       int64    `json:"order_id,omitempty"`
+	PaymentMethod string   `json:"payment_method,omitempty"`
+	AmountPaid    *float64 `json:"amount_paid,omitempty"`
 }
 
 func (m *ProcessPaymentRequest) MarshalJSON() ([]byte, error) {
@@ -62,7 +62,11 @@ func (x *ProcessPaymentRequest) GetAmountPaid() float64 {
 		var zero float64
 		return zero
 	}
-	return x.AmountPaid
+	if x.AmountPaid == nil {
+		var zero float64
+		return zero
+	}
+	return *x.AmountPaid
 }
 
 type ProcessPaymentResponse struct {

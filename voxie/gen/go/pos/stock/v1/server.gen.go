@@ -434,7 +434,7 @@ func RegisterStockServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter branch_id: "+err.Error())
 				return
 			}
-			req.BranchId = parsedBranchId
+			req.BranchId = &parsedBranchId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

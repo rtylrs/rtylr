@@ -1149,7 +1149,7 @@ func (x *GetOrderDetailResponse) GetOrder() *Order {
 
 type GetPublicOrderStatusRequest struct {
 	OrderId     int64  `json:"order_id,omitempty"`
-	BusinessId  int64  `json:"business_id,omitempty"`
+	BusinessId  *int64 `json:"business_id,omitempty"`
 	PublicToken string `json:"public_token,omitempty"`
 }
 
@@ -1157,11 +1157,14 @@ func (m *GetPublicOrderStatusRequest) MarshalJSON() ([]byte, error) {
 	type alias GetPublicOrderStatusRequest
 	aux := struct {
 		*alias
-		OrderId    string `json:"order_id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
+		OrderId    string  `json:"order_id,omitempty"`
+		BusinessId *string `json:"business_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.OrderId = strconv.FormatInt(m.OrderId, 10)
-	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
+	if m.BusinessId != nil {
+		encodedBusinessId := strconv.FormatInt(*m.BusinessId, 10)
+		aux.BusinessId = &encodedBusinessId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1169,8 +1172,8 @@ func (m *GetPublicOrderStatusRequest) UnmarshalJSON(data []byte) error {
 	type alias GetPublicOrderStatusRequest
 	aux := struct {
 		*alias
-		OrderId    string `json:"order_id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
+		OrderId    string  `json:"order_id,omitempty"`
+		BusinessId *string `json:"business_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1182,12 +1185,12 @@ func (m *GetPublicOrderStatusRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.OrderId = v
 	}
-	if aux.BusinessId != "" {
-		v, err := strconv.ParseInt(aux.BusinessId, 10, 64)
+	if aux.BusinessId != nil {
+		v, err := strconv.ParseInt(*aux.BusinessId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BusinessId = v
+		m.BusinessId = &v
 	}
 	return nil
 }
@@ -1205,7 +1208,11 @@ func (x *GetPublicOrderStatusRequest) GetBusinessId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BusinessId
+	if x.BusinessId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BusinessId
 }
 
 func (x *GetPublicOrderStatusRequest) GetPublicToken() string {
@@ -1276,7 +1283,7 @@ func (x *GetPublicOrderStatusResponse) GetStatus() string {
 }
 
 type ListOrdersRequest struct {
-	SessionId int64  `json:"session_id,omitempty"`
+	SessionId *int64 `json:"session_id,omitempty"`
 	Status    string `json:"status,omitempty"`
 	DateFrom  string `json:"date_from,omitempty"`
 	DateTo    string `json:"date_to,omitempty"`
@@ -1289,9 +1296,12 @@ func (m *ListOrdersRequest) MarshalJSON() ([]byte, error) {
 	type alias ListOrdersRequest
 	aux := struct {
 		*alias
-		SessionId string `json:"session_id,omitempty"`
+		SessionId *string `json:"session_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.SessionId = strconv.FormatInt(m.SessionId, 10)
+	if m.SessionId != nil {
+		encodedSessionId := strconv.FormatInt(*m.SessionId, 10)
+		aux.SessionId = &encodedSessionId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1299,17 +1309,17 @@ func (m *ListOrdersRequest) UnmarshalJSON(data []byte) error {
 	type alias ListOrdersRequest
 	aux := struct {
 		*alias
-		SessionId string `json:"session_id,omitempty"`
+		SessionId *string `json:"session_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.SessionId != "" {
-		v, err := strconv.ParseInt(aux.SessionId, 10, 64)
+	if aux.SessionId != nil {
+		v, err := strconv.ParseInt(*aux.SessionId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.SessionId = v
+		m.SessionId = &v
 	}
 	return nil
 }
@@ -1319,7 +1329,11 @@ func (x *ListOrdersRequest) GetSessionId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.SessionId
+	if x.SessionId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SessionId
 }
 
 func (x *ListOrdersRequest) GetStatus() string {
@@ -1472,19 +1486,22 @@ func (x *SendToKitchenResponse) GetSuccess() bool {
 }
 
 type TransferTableRequest struct {
-	OrderId    int64 `json:"order_id,omitempty"`
-	NewTableId int64 `json:"new_table_id,omitempty"`
+	OrderId    int64  `json:"order_id,omitempty"`
+	NewTableId *int64 `json:"new_table_id,omitempty"`
 }
 
 func (m *TransferTableRequest) MarshalJSON() ([]byte, error) {
 	type alias TransferTableRequest
 	aux := struct {
 		*alias
-		OrderId    string `json:"order_id,omitempty"`
-		NewTableId string `json:"new_table_id,omitempty"`
+		OrderId    string  `json:"order_id,omitempty"`
+		NewTableId *string `json:"new_table_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.OrderId = strconv.FormatInt(m.OrderId, 10)
-	aux.NewTableId = strconv.FormatInt(m.NewTableId, 10)
+	if m.NewTableId != nil {
+		encodedNewTableId := strconv.FormatInt(*m.NewTableId, 10)
+		aux.NewTableId = &encodedNewTableId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1492,8 +1509,8 @@ func (m *TransferTableRequest) UnmarshalJSON(data []byte) error {
 	type alias TransferTableRequest
 	aux := struct {
 		*alias
-		OrderId    string `json:"order_id,omitempty"`
-		NewTableId string `json:"new_table_id,omitempty"`
+		OrderId    string  `json:"order_id,omitempty"`
+		NewTableId *string `json:"new_table_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1505,12 +1522,12 @@ func (m *TransferTableRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.OrderId = v
 	}
-	if aux.NewTableId != "" {
-		v, err := strconv.ParseInt(aux.NewTableId, 10, 64)
+	if aux.NewTableId != nil {
+		v, err := strconv.ParseInt(*aux.NewTableId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.NewTableId = v
+		m.NewTableId = &v
 	}
 	return nil
 }
@@ -1528,7 +1545,11 @@ func (x *TransferTableRequest) GetNewTableId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.NewTableId
+	if x.NewTableId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.NewTableId
 }
 
 type TransferTableResponse struct {

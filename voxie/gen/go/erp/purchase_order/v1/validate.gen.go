@@ -38,8 +38,13 @@ func (m *CreatePurchaseOrderItemRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ProductId <= 0 {
-		violations = append(violations, "product_id must be greater than 0")
+	if m.ProductId == nil {
+		violations = append(violations, "product_id is required")
+	}
+	if m.ProductId != nil {
+		if *m.ProductId <= 0 {
+			violations = append(violations, "product_id must be greater than 0")
+		}
 	}
 	if m.QuantityOrdered < 0 {
 		violations = append(violations, "quantity_ordered must be greater than or equal to 0")
@@ -85,8 +90,13 @@ func (m *CreatePurchaseOrderRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.SupplierId <= 0 {
-		violations = append(violations, "supplier_id must be greater than 0")
+	if m.SupplierId == nil {
+		violations = append(violations, "supplier_id is required")
+	}
+	if m.SupplierId != nil {
+		if *m.SupplierId <= 0 {
+			violations = append(violations, "supplier_id must be greater than 0")
+		}
 	}
 	if m.PoNumber == "" {
 		violations = append(violations, "po_number is required")

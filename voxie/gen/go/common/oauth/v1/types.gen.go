@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	hub_user_v1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 	"strconv"
 )
 
@@ -208,9 +209,10 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	UserId     int64  `json:"user_id,omitempty"`
-	BusinessId int64  `json:"business_id,omitempty"`
-	Role       string `json:"role,omitempty"`
+	UserId          int64                        `json:"user_id,omitempty"`
+	BusinessId      int64                        `json:"business_id,omitempty"`
+	Role            string                       `json:"role,omitempty"`
+	EffectiveAccess *hub_user_v1.EffectiveAccess `json:"effective_access,omitempty"`
 }
 
 func (m *MeResponse) MarshalJSON() ([]byte, error) {
@@ -274,4 +276,12 @@ func (x *MeResponse) GetRole() string {
 		return zero
 	}
 	return x.Role
+}
+
+func (x *MeResponse) GetEffectiveAccess() *hub_user_v1.EffectiveAccess {
+	if x == nil {
+		var zero *hub_user_v1.EffectiveAccess
+		return zero
+	}
+	return x.EffectiveAccess
 }

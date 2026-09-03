@@ -44,7 +44,7 @@ return violations;
 }
 
 export interface EmailReceiptRequest {
-id: string;
+id?: string;
 email: string;
 }
 
@@ -66,7 +66,6 @@ return out;
 export function validateEmailReceiptRequest(v: EmailReceiptRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
@@ -97,29 +96,29 @@ return violations;
 }
 
 export interface ListReceiptsRequest {
-from?: string;
-to?: string;
+fromDate?: string;
+toDate?: string;
 }
 
 export function decodeListReceiptsRequest(v: any): ListReceiptsRequest {
 if (v === null || v === undefined) return v;
 return {
-from: v.from,
-to: v.to,
+fromDate: v.from_date,
+toDate: v.to_date,
 };
 }
 
 export function encodeListReceiptsRequest(v: ListReceiptsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
-if (v.from !== undefined) { out.from = v.from; }
-if (v.to !== undefined) { out.to = v.to; }
+if (v.fromDate !== undefined) { out.from_date = v.fromDate; }
+if (v.toDate !== undefined) { out.to_date = v.toDate; }
 return out;
 }
 
 export function validateListReceiptsRequest(v: ListReceiptsRequest): string[] {
 const violations: string[] = [];
-if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
-if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
 return violations;
 }
 

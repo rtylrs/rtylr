@@ -121,6 +121,11 @@ func (m *MeResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.EffectiveAccess != nil {
+		if err := m.EffectiveAccess.Validate(); err != nil {
+			violations = append(violations, "effective_access: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

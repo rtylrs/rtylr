@@ -40,7 +40,7 @@ message RunPayrollResponse {
 }
 
 message MarkPayrollPaidRequest {
-  id: int64 @required @gt(0) @encode(number)
+  id: int64 @gt(0) @encode(number)
 }
 
 message MarkPayrollPaidResponse {

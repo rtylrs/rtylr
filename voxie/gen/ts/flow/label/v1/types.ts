@@ -168,7 +168,7 @@ return violations;
 }
 
 export interface UpdateLabelRequest {
-id: string;
+id?: string;
 name: string;
 color: string;
 }
@@ -193,7 +193,6 @@ return out;
 export function validateUpdateLabelRequest(v: UpdateLabelRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
@@ -226,7 +225,7 @@ return violations;
 }
 
 export interface DeleteLabelRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteLabelRequest(v: any): DeleteLabelRequest {
@@ -245,7 +244,6 @@ return out;
 export function validateDeleteLabelRequest(v: DeleteLabelRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

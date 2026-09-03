@@ -714,12 +714,12 @@ func (x *ListTimeEntriesResponse) GetOffset() int32 {
 }
 
 type CreateTimeEntryRequest struct {
-	EmployeeId      int64   `json:"employee_id,omitempty"`
+	EmployeeId      *int64  `json:"employee_id,omitempty"`
 	ProjectId       *int64  `json:"project_id,omitempty"`
 	TaskId          *int64  `json:"task_id,omitempty"`
 	CategoryId      *int64  `json:"category_id,omitempty"`
 	Date            string  `json:"date,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
+	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	StartTime       *string `json:"start_time,omitempty"`
 	EndTime         *string `json:"end_time,omitempty"`
 	Description     string  `json:"description,omitempty"`
@@ -731,12 +731,15 @@ func (m *CreateTimeEntryRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateTimeEntryRequest
 	aux := struct {
 		*alias
-		EmployeeId string  `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 		ProjectId  *string `json:"project_id,omitempty"`
 		TaskId     *string `json:"task_id,omitempty"`
 		CategoryId *string `json:"category_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	if m.ProjectId != nil {
 		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
 		aux.ProjectId = &encodedProjectId
@@ -756,7 +759,7 @@ func (m *CreateTimeEntryRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateTimeEntryRequest
 	aux := struct {
 		*alias
-		EmployeeId string  `json:"employee_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
 		ProjectId  *string `json:"project_id,omitempty"`
 		TaskId     *string `json:"task_id,omitempty"`
 		CategoryId *string `json:"category_id,omitempty"`
@@ -764,12 +767,12 @@ func (m *CreateTimeEntryRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
 	if aux.ProjectId != nil {
 		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
@@ -800,7 +803,11 @@ func (x *CreateTimeEntryRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CreateTimeEntryRequest) GetProjectId() int64 {
@@ -852,7 +859,11 @@ func (x *CreateTimeEntryRequest) GetDurationMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DurationMinutes
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
 }
 
 func (x *CreateTimeEntryRequest) GetStartTime() string {
@@ -1016,16 +1027,19 @@ func (x *ListTimesheetsResponse) GetOffset() int32 {
 }
 
 type SubmitTimesheetRequest struct {
-	TimesheetId int64 `json:"timesheet_id,omitempty"`
+	TimesheetId *int64 `json:"timesheet_id,omitempty"`
 }
 
 func (m *SubmitTimesheetRequest) MarshalJSON() ([]byte, error) {
 	type alias SubmitTimesheetRequest
 	aux := struct {
 		*alias
-		TimesheetId string `json:"timesheet_id,omitempty"`
+		TimesheetId *string `json:"timesheet_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.TimesheetId = strconv.FormatInt(m.TimesheetId, 10)
+	if m.TimesheetId != nil {
+		encodedTimesheetId := strconv.FormatInt(*m.TimesheetId, 10)
+		aux.TimesheetId = &encodedTimesheetId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1033,17 +1047,17 @@ func (m *SubmitTimesheetRequest) UnmarshalJSON(data []byte) error {
 	type alias SubmitTimesheetRequest
 	aux := struct {
 		*alias
-		TimesheetId string `json:"timesheet_id,omitempty"`
+		TimesheetId *string `json:"timesheet_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.TimesheetId != "" {
-		v, err := strconv.ParseInt(aux.TimesheetId, 10, 64)
+	if aux.TimesheetId != nil {
+		v, err := strconv.ParseInt(*aux.TimesheetId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.TimesheetId = v
+		m.TimesheetId = &v
 	}
 	return nil
 }
@@ -1053,7 +1067,11 @@ func (x *SubmitTimesheetRequest) GetTimesheetId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TimesheetId
+	if x.TimesheetId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TimesheetId
 }
 
 type SubmitTimesheetResponse struct {
@@ -1207,17 +1225,20 @@ func (x *MarkTimeEntriesInvoicedRequest) GetBody() *MarkTimeEntriesInvoicedBody 
 
 type MarkTimeEntriesInvoicedBody struct {
 	EntryIds  []int64 `json:"entry_ids,omitempty"`
-	InvoiceId int64   `json:"invoice_id,omitempty"`
+	InvoiceId *int64  `json:"invoice_id,omitempty"`
 }
 
 func (m *MarkTimeEntriesInvoicedBody) MarshalJSON() ([]byte, error) {
 	type alias MarkTimeEntriesInvoicedBody
 	aux := struct {
 		*alias
-		InvoiceId string   `json:"invoice_id,omitempty"`
+		InvoiceId *string  `json:"invoice_id,omitempty"`
 		EntryIds  []string `json:"entry_ids,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.InvoiceId = strconv.FormatInt(m.InvoiceId, 10)
+	if m.InvoiceId != nil {
+		encodedInvoiceId := strconv.FormatInt(*m.InvoiceId, 10)
+		aux.InvoiceId = &encodedInvoiceId
+	}
 	aux.EntryIds = make([]string, len(m.EntryIds))
 	for i, v := range m.EntryIds {
 		aux.EntryIds[i] = strconv.FormatInt(v, 10)
@@ -1229,18 +1250,18 @@ func (m *MarkTimeEntriesInvoicedBody) UnmarshalJSON(data []byte) error {
 	type alias MarkTimeEntriesInvoicedBody
 	aux := struct {
 		*alias
-		InvoiceId string   `json:"invoice_id,omitempty"`
+		InvoiceId *string  `json:"invoice_id,omitempty"`
 		EntryIds  []string `json:"entry_ids,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.InvoiceId != "" {
-		v, err := strconv.ParseInt(aux.InvoiceId, 10, 64)
+	if aux.InvoiceId != nil {
+		v, err := strconv.ParseInt(*aux.InvoiceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.InvoiceId = v
+		m.InvoiceId = &v
 	}
 	if aux.EntryIds != nil {
 		m.EntryIds = make([]int64, len(aux.EntryIds))
@@ -1268,7 +1289,11 @@ func (x *MarkTimeEntriesInvoicedBody) GetInvoiceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.InvoiceId
+	if x.InvoiceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.InvoiceId
 }
 
 type MarkTimeEntriesInvoicedResponse struct {

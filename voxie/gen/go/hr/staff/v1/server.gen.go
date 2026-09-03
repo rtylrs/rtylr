@@ -454,7 +454,7 @@ func RegisterStaffServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
 				return
 			}
-			req.Page = parsedPage
+			req.Page = &parsedPage
 		}
 		if values := r.URL.Query()["page_size"]; len(values) > 0 {
 			value := values[0]
@@ -463,7 +463,7 @@ func RegisterStaffServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
 				return
 			}
-			req.PageSize = parsedPageSize
+			req.PageSize = &parsedPageSize
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

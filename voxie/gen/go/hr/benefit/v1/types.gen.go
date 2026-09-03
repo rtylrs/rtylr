@@ -382,16 +382,19 @@ func (x *BenefitEnrollment) GetCancelledAt() string {
 }
 
 type EnrollInBenefitRequest struct {
-	PlanId int64 `json:"plan_id,omitempty"`
+	PlanId *int64 `json:"plan_id,omitempty"`
 }
 
 func (m *EnrollInBenefitRequest) MarshalJSON() ([]byte, error) {
 	type alias EnrollInBenefitRequest
 	aux := struct {
 		*alias
-		PlanId string `json:"plan_id,omitempty"`
+		PlanId *string `json:"plan_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.PlanId = strconv.FormatInt(m.PlanId, 10)
+	if m.PlanId != nil {
+		encodedPlanId := strconv.FormatInt(*m.PlanId, 10)
+		aux.PlanId = &encodedPlanId
+	}
 	return json.Marshal(aux)
 }
 
@@ -399,17 +402,17 @@ func (m *EnrollInBenefitRequest) UnmarshalJSON(data []byte) error {
 	type alias EnrollInBenefitRequest
 	aux := struct {
 		*alias
-		PlanId string `json:"plan_id,omitempty"`
+		PlanId *string `json:"plan_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.PlanId != "" {
-		v, err := strconv.ParseInt(aux.PlanId, 10, 64)
+	if aux.PlanId != nil {
+		v, err := strconv.ParseInt(*aux.PlanId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.PlanId = v
+		m.PlanId = &v
 	}
 	return nil
 }
@@ -419,7 +422,11 @@ func (x *EnrollInBenefitRequest) GetPlanId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.PlanId
+	if x.PlanId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.PlanId
 }
 
 type EnrollInBenefitResponse struct {

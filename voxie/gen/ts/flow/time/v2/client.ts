@@ -122,11 +122,11 @@ const violations = validateListWorkDaysRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/flow/time/v2/work-days/range";
 const query = new URLSearchParams();
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.employeeId !== undefined) {
 query.set("employee_id", String(req.employeeId));
@@ -158,11 +158,11 @@ const violations = validateListTeamWorkDaysRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/flow/time/v2/work-days/team";
 const query = new URLSearchParams();
-if (req.from !== undefined) {
-query.set("from", String(req.from));
+if (req.fromDate !== undefined) {
+query.set("from", String(req.fromDate));
 }
-if (req.to !== undefined) {
-query.set("to", String(req.to));
+if (req.toDate !== undefined) {
+query.set("to", String(req.toDate));
 }
 if (req.page !== undefined) {
 query.set("page", String(req.page));

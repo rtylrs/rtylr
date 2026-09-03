@@ -40,7 +40,7 @@ message AttendanceClockInRequest {
   /// Method used to clock in (app | qr | gps | pin | facial).
   method: string @required
   /// Work location where the employee is clocking in.
-  location_id: int64 @required @gt(0)
+  location_id: int64? @required @gt(0)
   /// Latitude at clock-in; absent if location not available.
   lat: float64?
   /// Longitude at clock-in; absent if location not available.
@@ -58,7 +58,7 @@ message AttendanceClockInResponse {
 
 message AttendanceClockOutRequest {
   /// ID of the attendance record to close.
-  attendance_record_id: int64 @required @gt(0)
+  attendance_record_id: int64? @required @gt(0)
 }
 
 message AttendanceClockOutResponse {

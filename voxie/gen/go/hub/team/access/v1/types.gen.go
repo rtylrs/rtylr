@@ -3,27 +3,39 @@ package v1
 
 import (
 	"encoding/json"
+	hub_user_v1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 	"strconv"
 )
 
 type AccessRequest struct {
-	Id             int64  `json:"id,omitempty"`
-	UserId         int64  `json:"user_id,omitempty"`
-	App            string `json:"app,omitempty"`
-	RequesterName  string `json:"requester_name,omitempty"`
-	RequesterEmail string `json:"requester_email,omitempty"`
-	CreatedAt      string `json:"created_at,omitempty"`
+	Id             int64                    `json:"id,omitempty"`
+	UserId         int64                    `json:"user_id,omitempty"`
+	App            string                   `json:"app,omitempty"`
+	RoleIds        []string                 `json:"role_ids,omitempty"`
+	Scopes         []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
+	Reason         *string                  `json:"reason,omitempty"`
+	Status         string                   `json:"status,omitempty"`
+	ApproverId     *int64                   `json:"approver_id,omitempty"`
+	ApprovedAt     *string                  `json:"approved_at,omitempty"`
+	RequesterName  string                   `json:"requester_name,omitempty"`
+	RequesterEmail string                   `json:"requester_email,omitempty"`
+	CreatedAt      string                   `json:"created_at,omitempty"`
 }
 
 func (m *AccessRequest) MarshalJSON() ([]byte, error) {
 	type alias AccessRequest
 	aux := struct {
 		*alias
-		Id     string `json:"id,omitempty"`
-		UserId string `json:"user_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		UserId     string  `json:"user_id,omitempty"`
+		ApproverId *string `json:"approver_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.ApproverId != nil {
+		encodedApproverId := strconv.FormatInt(*m.ApproverId, 10)
+		aux.ApproverId = &encodedApproverId
+	}
 	return json.Marshal(aux)
 }
 
@@ -31,8 +43,9 @@ func (m *AccessRequest) UnmarshalJSON(data []byte) error {
 	type alias AccessRequest
 	aux := struct {
 		*alias
-		Id     string `json:"id,omitempty"`
-		UserId string `json:"user_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		UserId     string  `json:"user_id,omitempty"`
+		ApproverId *string `json:"approver_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -50,6 +63,13 @@ func (m *AccessRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UserId = v
+	}
+	if aux.ApproverId != nil {
+		v, err := strconv.ParseInt(*aux.ApproverId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ApproverId = &v
 	}
 	return nil
 }
@@ -78,6 +98,66 @@ func (x *AccessRequest) GetApp() string {
 	return x.App
 }
 
+func (x *AccessRequest) GetRoleIds() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.RoleIds
+}
+
+func (x *AccessRequest) GetScopes() []*hub_user_v1.RoleScope {
+	if x == nil {
+		var zero []*hub_user_v1.RoleScope
+		return zero
+	}
+	return x.Scopes
+}
+
+func (x *AccessRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Reason == nil {
+		var zero string
+		return zero
+	}
+	return *x.Reason
+}
+
+func (x *AccessRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *AccessRequest) GetApproverId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApproverId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApproverId
+}
+
+func (x *AccessRequest) GetApprovedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ApprovedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.ApprovedAt
+}
+
 func (x *AccessRequest) GetRequesterName() string {
 	if x == nil {
 		var zero string
@@ -103,7 +183,10 @@ func (x *AccessRequest) GetCreatedAt() string {
 }
 
 type RequestAccessRequest struct {
-	App string `json:"app,omitempty"`
+	App     string                   `json:"app,omitempty"`
+	RoleIds []string                 `json:"role_ids,omitempty"`
+	Scopes  []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
+	Reason  *string                  `json:"reason,omitempty"`
 }
 
 func (x *RequestAccessRequest) GetApp() string {
@@ -112,6 +195,34 @@ func (x *RequestAccessRequest) GetApp() string {
 		return zero
 	}
 	return x.App
+}
+
+func (x *RequestAccessRequest) GetRoleIds() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.RoleIds
+}
+
+func (x *RequestAccessRequest) GetScopes() []*hub_user_v1.RoleScope {
+	if x == nil {
+		var zero []*hub_user_v1.RoleScope
+		return zero
+	}
+	return x.Scopes
+}
+
+func (x *RequestAccessRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Reason == nil {
+		var zero string
+		return zero
+	}
+	return *x.Reason
 }
 
 type RequestAccessResponse struct {
@@ -142,20 +253,25 @@ func (x *ListAccessRequestsResponse) GetRequests() []*AccessRequest {
 }
 
 type ApproveAccessRequestRequest struct {
-	Id     int64  `json:"id,omitempty"`
-	UserId int64  `json:"user_id,omitempty"`
-	App    string `json:"app,omitempty"`
+	Id      int64                    `json:"id,omitempty"`
+	UserId  *int64                   `json:"user_id,omitempty"`
+	App     string                   `json:"app,omitempty"`
+	RoleIds []string                 `json:"role_ids,omitempty"`
+	Scopes  []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
 }
 
 func (m *ApproveAccessRequestRequest) MarshalJSON() ([]byte, error) {
 	type alias ApproveAccessRequestRequest
 	aux := struct {
 		*alias
-		Id     string `json:"id,omitempty"`
-		UserId string `json:"user_id,omitempty"`
+		Id     string  `json:"id,omitempty"`
+		UserId *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -163,8 +279,8 @@ func (m *ApproveAccessRequestRequest) UnmarshalJSON(data []byte) error {
 	type alias ApproveAccessRequestRequest
 	aux := struct {
 		*alias
-		Id     string `json:"id,omitempty"`
-		UserId string `json:"user_id,omitempty"`
+		Id     string  `json:"id,omitempty"`
+		UserId *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -176,12 +292,12 @@ func (m *ApproveAccessRequestRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.Id = v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -199,7 +315,11 @@ func (x *ApproveAccessRequestRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *ApproveAccessRequestRequest) GetApp() string {
@@ -208,6 +328,22 @@ func (x *ApproveAccessRequestRequest) GetApp() string {
 		return zero
 	}
 	return x.App
+}
+
+func (x *ApproveAccessRequestRequest) GetRoleIds() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.RoleIds
+}
+
+func (x *ApproveAccessRequestRequest) GetScopes() []*hub_user_v1.RoleScope {
+	if x == nil {
+		var zero []*hub_user_v1.RoleScope
+		return zero
+	}
+	return x.Scopes
 }
 
 type ApproveAccessRequestResponse struct {

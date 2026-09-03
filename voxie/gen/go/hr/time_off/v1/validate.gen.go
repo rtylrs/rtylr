@@ -11,14 +11,29 @@ func (m *TimeOffRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if m.Id == nil {
+		violations = append(violations, "id is required")
 	}
-	if m.OwnerId <= 0 {
-		violations = append(violations, "owner_id must be greater than 0")
+	if m.Id != nil {
+		if *m.Id <= 0 {
+			violations = append(violations, "id must be greater than 0")
+		}
 	}
-	if m.StaffId <= 0 {
-		violations = append(violations, "staff_id must be greater than 0")
+	if m.OwnerId == nil {
+		violations = append(violations, "owner_id is required")
+	}
+	if m.OwnerId != nil {
+		if *m.OwnerId <= 0 {
+			violations = append(violations, "owner_id must be greater than 0")
+		}
+	}
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
+	if m.StaffId != nil {
+		if *m.StaffId <= 0 {
+			violations = append(violations, "staff_id must be greater than 0")
+		}
 	}
 	if m.Type == "" {
 		violations = append(violations, "type is required")
@@ -29,8 +44,13 @@ func (m *TimeOffRequest) Validate() error {
 	if m.EndDate == "" {
 		violations = append(violations, "end_date is required")
 	}
-	if m.DaysCount <= 0 {
-		violations = append(violations, "days_count must be greater than 0")
+	if m.DaysCount == nil {
+		violations = append(violations, "days_count is required")
+	}
+	if m.DaysCount != nil {
+		if *m.DaysCount <= 0 {
+			violations = append(violations, "days_count must be greater than 0")
+		}
 	}
 	if m.Status == "" {
 		violations = append(violations, "status is required")
@@ -98,8 +118,13 @@ func (m *SubmitTimeOffRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.StaffId <= 0 {
-		violations = append(violations, "staff_id must be greater than 0")
+	if m.StaffId == nil {
+		violations = append(violations, "staff_id is required")
+	}
+	if m.StaffId != nil {
+		if *m.StaffId <= 0 {
+			violations = append(violations, "staff_id must be greater than 0")
+		}
 	}
 	if m.Type == "" {
 		violations = append(violations, "type is required")
@@ -110,8 +135,13 @@ func (m *SubmitTimeOffRequest) Validate() error {
 	if m.EndDate == "" {
 		violations = append(violations, "end_date is required")
 	}
-	if m.DaysCount <= 0 {
-		violations = append(violations, "days_count must be greater than 0")
+	if m.DaysCount == nil {
+		violations = append(violations, "days_count is required")
+	}
+	if m.DaysCount != nil {
+		if *m.DaysCount <= 0 {
+			violations = append(violations, "days_count must be greater than 0")
+		}
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")

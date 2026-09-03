@@ -100,7 +100,7 @@ return violations;
 }
 
 export interface GetProfileRequest {
-userId: string;
+userId?: string;
 }
 
 export function decodeGetProfileRequest(v: any): GetProfileRequest {
@@ -119,7 +119,6 @@ return out;
 export function validateGetProfileRequest(v: GetProfileRequest): string[] {
 const violations: string[] = [];
 if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
-if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
 }

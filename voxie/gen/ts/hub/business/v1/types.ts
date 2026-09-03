@@ -248,7 +248,7 @@ return violations;
 }
 
 export interface GetBusinessRequest {
-businessId: string;
+businessId?: string;
 }
 
 export function decodeGetBusinessRequest(v: any): GetBusinessRequest {
@@ -267,7 +267,6 @@ return out;
 export function validateGetBusinessRequest(v: GetBusinessRequest): string[] {
 const violations: string[] = [];
 if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
-if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 return violations;
 }
@@ -637,7 +636,7 @@ return violations;
 }
 
 export interface UpdateBusinessRequest {
-businessId: string;
+businessId?: string;
 name: string;
 type: string;
 address?: string;
@@ -683,7 +682,6 @@ return out;
 export function validateUpdateBusinessRequest(v: UpdateBusinessRequest): string[] {
 const violations: string[] = [];
 if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
-if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
@@ -728,7 +726,7 @@ return violations;
 }
 
 export interface RenameBusinessRequest {
-businessId: string;
+businessId?: string;
 name: string;
 }
 
@@ -750,7 +748,6 @@ return out;
 export function validateRenameBusinessRequest(v: RenameBusinessRequest): string[] {
 const violations: string[] = [];
 if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
-if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
@@ -782,7 +779,7 @@ return violations;
 }
 
 export interface SetLogoRequest {
-businessId: string;
+businessId?: string;
 logoUrl: string;
 }
 
@@ -804,7 +801,6 @@ return out;
 export function validateSetLogoRequest(v: SetLogoRequest): string[] {
 const violations: string[] = [];
 if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
-if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
 if (!(v.logoUrl !== undefined && v.logoUrl !== null) || v.logoUrl === "") violations.push("logo_url is required");
@@ -836,7 +832,7 @@ return violations;
 }
 
 export interface DeleteBusinessRequest {
-businessId: string;
+businessId?: string;
 }
 
 export function decodeDeleteBusinessRequest(v: any): DeleteBusinessRequest {
@@ -855,7 +851,6 @@ return out;
 export function validateDeleteBusinessRequest(v: DeleteBusinessRequest): string[] {
 const violations: string[] = [];
 if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
-if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 return violations;
 }

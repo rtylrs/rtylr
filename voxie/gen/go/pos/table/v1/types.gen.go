@@ -155,7 +155,7 @@ func (x *ListTablesResponse) GetTables() []*Table {
 type CreateTableRequest struct {
 	LocationId *int64 `json:"location_id,omitempty"`
 	Label      string `json:"label,omitempty"`
-	Seats      int32  `json:"seats,omitempty"`
+	Seats      *int32 `json:"seats,omitempty"`
 }
 
 func (m *CreateTableRequest) MarshalJSON() ([]byte, error) {
@@ -215,7 +215,11 @@ func (x *CreateTableRequest) GetSeats() int32 {
 		var zero int32
 		return zero
 	}
-	return x.Seats
+	if x.Seats == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Seats
 }
 
 type CreateTableResponse struct {
@@ -271,7 +275,7 @@ func (x *CreateTableResponse) GetMessage() string {
 type UpdateTableBody struct {
 	LocationId *int64 `json:"location_id,omitempty"`
 	Label      string `json:"label,omitempty"`
-	Seats      int32  `json:"seats,omitempty"`
+	Seats      *int32 `json:"seats,omitempty"`
 	Status     string `json:"status,omitempty"`
 }
 
@@ -332,7 +336,11 @@ func (x *UpdateTableBody) GetSeats() int32 {
 		var zero int32
 		return zero
 	}
-	return x.Seats
+	if x.Seats == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Seats
 }
 
 func (x *UpdateTableBody) GetStatus() string {

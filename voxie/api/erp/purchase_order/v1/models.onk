@@ -32,7 +32,7 @@ message PurchaseOrder {
 }
 
 message CreatePurchaseOrderItemRequest {
-  product_id: int64 @required @gt(0)
+  product_id: int64? @required @gt(0)
   quantity_ordered: float64 @gte(0)
   unit_cost: float64 @gte(0)
 }
@@ -57,7 +57,7 @@ message ListPurchaseOrdersResponse {
 }
 
 message CreatePurchaseOrderRequest {
-  supplier_id: int64 @required @gt(0)
+  supplier_id: int64? @required @gt(0)
   po_number: string @required
   tax_amount: float64 @gte(0)
   expected_delivery: string @required
@@ -72,7 +72,7 @@ message CreatePurchaseOrderResponse {
 }
 
 message GetPurchaseOrderRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetPurchaseOrderResponse {
@@ -87,7 +87,7 @@ message UpdatePurchaseOrderStatusBody {
 }
 
 message UpdatePurchaseOrderStatusRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   body: UpdatePurchaseOrderStatusBody
 }
 
@@ -96,7 +96,7 @@ message UpdatePurchaseOrderStatusResponse {
 }
 
 message ApprovePurchaseOrderRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message ApprovePurchaseOrderResponse {

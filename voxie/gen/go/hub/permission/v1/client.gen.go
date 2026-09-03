@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -92,6 +93,15 @@ func (c *PermissionServiceClient) ListRoles(ctx context.Context, req *ListRolesR
 	}
 	path := "/hub/permission/v1/roles"
 	query := url.Values{}
+	if req.AppId != nil {
+		query.Set("app_id", *req.AppId)
+	}
+	if req.Page != nil {
+		query.Set("page", strconv.FormatInt(int64(*req.Page), 10))
+	}
+	if req.PageSize != nil {
+		query.Set("page_size", strconv.FormatInt(int64(*req.PageSize), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -234,6 +244,340 @@ func (c *PermissionServiceClient) DeleteRole(ctx context.Context, req *DeleteRol
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(DeleteRoleResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) GetRole(ctx context.Context, req *GetRoleRequest) (*GetRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/roles/{id}"
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	query := url.Values{}
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(GetRoleResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) CloneRole(ctx context.Context, req *CloneRoleRequest) (*CloneRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/roles/{id}/clone"
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.BaseURL+path, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(CloneRoleResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) ArchiveRole(ctx context.Context, req *ArchiveRoleRequest) (*ArchiveRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/roles/{id}/archive"
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.BaseURL+path, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(ArchiveRoleResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) ListRoleAssignments(ctx context.Context, req *ListRoleAssignmentsRequest) (*ListRoleAssignmentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/role-assignments"
+	query := url.Values{}
+	if req.RoleId != nil {
+		query.Set("role_id", strconv.FormatInt(int64(*req.RoleId), 10))
+	}
+	if req.AppId != nil {
+		query.Set("app_id", *req.AppId)
+	}
+	if req.Page != nil {
+		query.Set("page", strconv.FormatInt(int64(*req.Page), 10))
+	}
+	if req.PageSize != nil {
+		query.Set("page_size", strconv.FormatInt(int64(*req.PageSize), 10))
+	}
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(ListRoleAssignmentsResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) AssignRole(ctx context.Context, req *AssignRoleRequest) (*AssignRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/role-assignments"
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.BaseURL+path, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(AssignRoleResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) RemoveRoleAssignment(ctx context.Context, req *RemoveRoleAssignmentRequest) (*RemoveRoleAssignmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/role-assignments/{id}"
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	query := url.Values{}
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(RemoveRoleAssignmentResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) PreviewPermissionImpact(ctx context.Context, req *PreviewPermissionImpactRequest) (*PreviewPermissionImpactResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/roles/{id}/preview"
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.BaseURL+path, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(PreviewPermissionImpactResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *PermissionServiceClient) ListRoleAudit(ctx context.Context, req *ListRoleAuditRequest) (*ListRoleAuditResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/permission/v1/roles/audit"
+	query := url.Values{}
+	if req.RoleId != nil {
+		query.Set("role_id", strconv.FormatInt(int64(*req.RoleId), 10))
+	}
+	if req.Page != nil {
+		query.Set("page", strconv.FormatInt(int64(*req.Page), 10))
+	}
+	if req.PageSize != nil {
+		query.Set("page_size", strconv.FormatInt(int64(*req.PageSize), 10))
+	}
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(ListRoleAuditResponse)
 	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

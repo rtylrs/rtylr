@@ -173,8 +173,13 @@ func (m *GetPublicOrderStatusRequest) Validate() error {
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
 	}
-	if m.BusinessId <= 0 {
-		violations = append(violations, "business_id must be greater than 0")
+	if m.BusinessId == nil {
+		violations = append(violations, "business_id is required")
+	}
+	if m.BusinessId != nil {
+		if *m.BusinessId <= 0 {
+			violations = append(violations, "business_id must be greater than 0")
+		}
 	}
 	if m.PublicToken == "" {
 		violations = append(violations, "public_token is required")
@@ -201,8 +206,13 @@ func (m *ListOrdersRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.SessionId <= 0 {
-		violations = append(violations, "session_id must be greater than 0")
+	if m.SessionId == nil {
+		violations = append(violations, "session_id is required")
+	}
+	if m.SessionId != nil {
+		if *m.SessionId <= 0 {
+			violations = append(violations, "session_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -259,8 +269,13 @@ func (m *TransferTableRequest) Validate() error {
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
 	}
-	if m.NewTableId <= 0 {
-		violations = append(violations, "new_table_id must be greater than 0")
+	if m.NewTableId == nil {
+		violations = append(violations, "new_table_id is required")
+	}
+	if m.NewTableId != nil {
+		if *m.NewTableId <= 0 {
+			violations = append(violations, "new_table_id must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

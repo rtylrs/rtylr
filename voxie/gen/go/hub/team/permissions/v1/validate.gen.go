@@ -14,11 +14,10 @@ func (m *UpdatePermissionsRequest) Validate() error {
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
 	}
-	if len(m.Apps) < 1 {
-		violations = append(violations, "apps must have at least 1 items")
-	}
-	if m.Role == "" {
-		violations = append(violations, "role is required")
+	for _, value := range m.AppAssignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "app_assignments: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -31,6 +30,11 @@ func (m *UpdatePermissionsResponse) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.EffectiveAccess != nil {
+		if err := m.EffectiveAccess.Validate(); err != nil {
+			violations = append(violations, "effective_access: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

@@ -130,16 +130,19 @@ func (x *Status) GetCreatedAt() string {
 }
 
 type ListStatusesRequest struct {
-	ProjectId int64 `json:"project_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
 }
 
 func (m *ListStatusesRequest) MarshalJSON() ([]byte, error) {
 	type alias ListStatusesRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -147,17 +150,17 @@ func (m *ListStatusesRequest) UnmarshalJSON(data []byte) error {
 	type alias ListStatusesRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -167,7 +170,11 @@ func (x *ListStatusesRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 type ListStatusesResponse struct {
@@ -183,7 +190,7 @@ func (x *ListStatusesResponse) GetStatuses() []*Status {
 }
 
 type CreateStatusRequest struct {
-	ProjectId    int64  `json:"project_id,omitempty"`
+	ProjectId    *int64 `json:"project_id,omitempty"`
 	Name         string `json:"name,omitempty"`
 	Bucket       string `json:"bucket,omitempty"`
 	LegacyStatus string `json:"legacy_status,omitempty"`
@@ -196,9 +203,12 @@ func (m *CreateStatusRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateStatusRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -206,17 +216,17 @@ func (m *CreateStatusRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateStatusRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -226,7 +236,11 @@ func (x *CreateStatusRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *CreateStatusRequest) GetName() string {
@@ -471,19 +485,22 @@ func (x *DeleteStatusResponse) GetReassignedTaskCount() int32 {
 }
 
 type SetTaskStatusRequest struct {
-	TaskId   int64 `json:"task_id,omitempty"`
-	StatusId int64 `json:"status_id,omitempty"`
+	TaskId   *int64 `json:"task_id,omitempty"`
+	StatusId int64  `json:"status_id,omitempty"`
 }
 
 func (m *SetTaskStatusRequest) MarshalJSON() ([]byte, error) {
 	type alias SetTaskStatusRequest
 	aux := struct {
 		*alias
-		TaskId   string `json:"task_id,omitempty"`
-		StatusId string `json:"status_id,omitempty"`
+		StatusId string  `json:"status_id,omitempty"`
+		TaskId   *string `json:"task_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
 	aux.StatusId = strconv.FormatInt(m.StatusId, 10)
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
 	return json.Marshal(aux)
 }
 
@@ -491,18 +508,11 @@ func (m *SetTaskStatusRequest) UnmarshalJSON(data []byte) error {
 	type alias SetTaskStatusRequest
 	aux := struct {
 		*alias
-		TaskId   string `json:"task_id,omitempty"`
-		StatusId string `json:"status_id,omitempty"`
+		StatusId string  `json:"status_id,omitempty"`
+		TaskId   *string `json:"task_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.TaskId != "" {
-		v, err := strconv.ParseInt(aux.TaskId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.TaskId = v
 	}
 	if aux.StatusId != "" {
 		v, err := strconv.ParseInt(aux.StatusId, 10, 64)
@@ -510,6 +520,13 @@ func (m *SetTaskStatusRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.StatusId = v
+	}
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = &v
 	}
 	return nil
 }
@@ -519,7 +536,11 @@ func (x *SetTaskStatusRequest) GetTaskId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TaskId
+	if x.TaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TaskId
 }
 
 func (x *SetTaskStatusRequest) GetStatusId() int64 {

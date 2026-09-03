@@ -6,20 +6,521 @@ import (
 	"strconv"
 )
 
+type RoleScope struct {
+	ScopeType string `json:"scope_type,omitempty"`
+	ScopeId   string `json:"scope_id,omitempty"`
+}
+
+func (x *RoleScope) GetScopeType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScopeType
+}
+
+func (x *RoleScope) GetScopeId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScopeId
+}
+
+type AppRoleAssignment struct {
+	AppId            string       `json:"app_id,omitempty"`
+	RoleIds          []string     `json:"role_ids,omitempty"`
+	PrimaryRoleId    *string      `json:"primary_role_id,omitempty"`
+	AssignmentSource string       `json:"assignment_source,omitempty"`
+	Status           string       `json:"status,omitempty"`
+	Scopes           []*RoleScope `json:"scopes,omitempty"`
+	GroupId          *string      `json:"group_id,omitempty"`
+}
+
+func (x *AppRoleAssignment) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AppId
+}
+
+func (x *AppRoleAssignment) GetRoleIds() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.RoleIds
+}
+
+func (x *AppRoleAssignment) GetPrimaryRoleId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PrimaryRoleId == nil {
+		var zero string
+		return zero
+	}
+	return *x.PrimaryRoleId
+}
+
+func (x *AppRoleAssignment) GetAssignmentSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AssignmentSource
+}
+
+func (x *AppRoleAssignment) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *AppRoleAssignment) GetScopes() []*RoleScope {
+	if x == nil {
+		var zero []*RoleScope
+		return zero
+	}
+	return x.Scopes
+}
+
+func (x *AppRoleAssignment) GetGroupId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.GroupId == nil {
+		var zero string
+		return zero
+	}
+	return *x.GroupId
+}
+
+type LicenseAssignment struct {
+	AppId            string  `json:"app_id,omitempty"`
+	Status           string  `json:"status,omitempty"`
+	AssignmentSource string  `json:"assignment_source,omitempty"`
+	GroupId          *string `json:"group_id,omitempty"`
+	GrantedAt        string  `json:"granted_at,omitempty"`
+	RevokedAt        *string `json:"revoked_at,omitempty"`
+}
+
+func (x *LicenseAssignment) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AppId
+}
+
+func (x *LicenseAssignment) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *LicenseAssignment) GetAssignmentSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AssignmentSource
+}
+
+func (x *LicenseAssignment) GetGroupId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.GroupId == nil {
+		var zero string
+		return zero
+	}
+	return *x.GroupId
+}
+
+func (x *LicenseAssignment) GetGrantedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GrantedAt
+}
+
+func (x *LicenseAssignment) GetRevokedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.RevokedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.RevokedAt
+}
+
+type EffectiveAppAccess struct {
+	AppId             string            `json:"app_id,omitempty"`
+	Licensed          bool              `json:"licensed,omitempty"`
+	HasAccess         bool              `json:"has_access,omitempty"`
+	RoleIds           []string          `json:"role_ids,omitempty"`
+	PrimaryRoleId     *string           `json:"primary_role_id,omitempty"`
+	DisplayRole       *string           `json:"display_role,omitempty"`
+	Permissions       []string          `json:"permissions,omitempty"`
+	Scopes            []*RoleScope      `json:"scopes,omitempty"`
+	Sources           []string          `json:"sources,omitempty"`
+	PermissionSources map[string]string `json:"permission_sources,omitempty"`
+}
+
+func (x *EffectiveAppAccess) GetAppId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AppId
+}
+
+func (x *EffectiveAppAccess) GetLicensed() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Licensed
+}
+
+func (x *EffectiveAppAccess) GetHasAccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasAccess
+}
+
+func (x *EffectiveAppAccess) GetRoleIds() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.RoleIds
+}
+
+func (x *EffectiveAppAccess) GetPrimaryRoleId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PrimaryRoleId == nil {
+		var zero string
+		return zero
+	}
+	return *x.PrimaryRoleId
+}
+
+func (x *EffectiveAppAccess) GetDisplayRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DisplayRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DisplayRole
+}
+
+func (x *EffectiveAppAccess) GetPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Permissions
+}
+
+func (x *EffectiveAppAccess) GetScopes() []*RoleScope {
+	if x == nil {
+		var zero []*RoleScope
+		return zero
+	}
+	return x.Scopes
+}
+
+func (x *EffectiveAppAccess) GetSources() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Sources
+}
+
+func (x *EffectiveAppAccess) GetPermissionSources() map[string]string {
+	if x == nil {
+		var zero map[string]string
+		return zero
+	}
+	return x.PermissionSources
+}
+
+type EffectiveAccess struct {
+	BusinessId           string                `json:"business_id,omitempty"`
+	DashRole             *string               `json:"dash_role,omitempty"`
+	DashRoleId           *string               `json:"dash_role_id,omitempty"`
+	DashPermissions      []string              `json:"dash_permissions,omitempty"`
+	SubscribedApps       []string              `json:"subscribed_apps,omitempty"`
+	Licenses             []*LicenseAssignment  `json:"licenses,omitempty"`
+	Apps                 []*EffectiveAppAccess `json:"apps,omitempty"`
+	IsOwner              bool                  `json:"is_owner,omitempty"`
+	IsAdmin              bool                  `json:"is_admin,omitempty"`
+	AuthorizationVersion int64                 `json:"authorization_version,omitempty"`
+}
+
+func (m *EffectiveAccess) MarshalJSON() ([]byte, error) {
+	type alias EffectiveAccess
+	aux := struct {
+		*alias
+		AuthorizationVersion string `json:"authorization_version,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.AuthorizationVersion = strconv.FormatInt(m.AuthorizationVersion, 10)
+	return json.Marshal(aux)
+}
+
+func (m *EffectiveAccess) UnmarshalJSON(data []byte) error {
+	type alias EffectiveAccess
+	aux := struct {
+		*alias
+		AuthorizationVersion string `json:"authorization_version,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.AuthorizationVersion != "" {
+		v, err := strconv.ParseInt(aux.AuthorizationVersion, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.AuthorizationVersion = v
+	}
+	return nil
+}
+
+func (x *EffectiveAccess) GetBusinessId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *EffectiveAccess) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *EffectiveAccess) GetDashRoleId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRoleId == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRoleId
+}
+
+func (x *EffectiveAccess) GetDashPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.DashPermissions
+}
+
+func (x *EffectiveAccess) GetSubscribedApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.SubscribedApps
+}
+
+func (x *EffectiveAccess) GetLicenses() []*LicenseAssignment {
+	if x == nil {
+		var zero []*LicenseAssignment
+		return zero
+	}
+	return x.Licenses
+}
+
+func (x *EffectiveAccess) GetApps() []*EffectiveAppAccess {
+	if x == nil {
+		var zero []*EffectiveAppAccess
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *EffectiveAccess) GetIsOwner() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsOwner
+}
+
+func (x *EffectiveAccess) GetIsAdmin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsAdmin
+}
+
+func (x *EffectiveAccess) GetAuthorizationVersion() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AuthorizationVersion
+}
+
+type ProvisioningStatus struct {
+	Mode                   *string `json:"mode,omitempty"`
+	State                  *string `json:"state,omitempty"`
+	EmailVerified          *bool   `json:"email_verified,omitempty"`
+	PasswordChangeRequired *bool   `json:"password_change_required,omitempty"`
+	MfaRequired            *bool   `json:"mfa_required,omitempty"`
+	MfaEnrolled            *bool   `json:"mfa_enrolled,omitempty"`
+	MfaVerified            *bool   `json:"mfa_verified,omitempty"`
+	RecoveryAvailable      *bool   `json:"recovery_available,omitempty"`
+}
+
+func (x *ProvisioningStatus) GetMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Mode == nil {
+		var zero string
+		return zero
+	}
+	return *x.Mode
+}
+
+func (x *ProvisioningStatus) GetState() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.State == nil {
+		var zero string
+		return zero
+	}
+	return *x.State
+}
+
+func (x *ProvisioningStatus) GetEmailVerified() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.EmailVerified == nil {
+		var zero bool
+		return zero
+	}
+	return *x.EmailVerified
+}
+
+func (x *ProvisioningStatus) GetPasswordChangeRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.PasswordChangeRequired == nil {
+		var zero bool
+		return zero
+	}
+	return *x.PasswordChangeRequired
+}
+
+func (x *ProvisioningStatus) GetMfaRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.MfaRequired == nil {
+		var zero bool
+		return zero
+	}
+	return *x.MfaRequired
+}
+
+func (x *ProvisioningStatus) GetMfaEnrolled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.MfaEnrolled == nil {
+		var zero bool
+		return zero
+	}
+	return *x.MfaEnrolled
+}
+
+func (x *ProvisioningStatus) GetMfaVerified() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.MfaVerified == nil {
+		var zero bool
+		return zero
+	}
+	return *x.MfaVerified
+}
+
+func (x *ProvisioningStatus) GetRecoveryAvailable() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.RecoveryAvailable == nil {
+		var zero bool
+		return zero
+	}
+	return *x.RecoveryAvailable
+}
+
 type GetMeRequest struct {
 }
 
 type GetMeResponse struct {
-	Id             int64    `json:"id,omitempty"`
-	Email          string   `json:"email,omitempty"`
-	FullName       string   `json:"full_name,omitempty"`
-	Apps           []string `json:"apps,omitempty"`
-	Role           string   `json:"role,omitempty"`
-	BusinessId     int64    `json:"business_id,omitempty"`
-	BusinessName   string   `json:"business_name,omitempty"`
-	IsOwner        bool     `json:"is_owner,omitempty"`
-	IsConsoleAdmin bool     `json:"is_console_admin,omitempty"`
-	Onboarded      bool     `json:"onboarded,omitempty"`
+	Id                 int64               `json:"id,omitempty"`
+	Email              string              `json:"email,omitempty"`
+	FullName           string              `json:"full_name,omitempty"`
+	Apps               []string            `json:"apps,omitempty"`
+	Role               string              `json:"role,omitempty"`
+	BusinessId         int64               `json:"business_id,omitempty"`
+	BusinessName       string              `json:"business_name,omitempty"`
+	IsOwner            bool                `json:"is_owner,omitempty"`
+	IsConsoleAdmin     bool                `json:"is_console_admin,omitempty"`
+	Onboarded          bool                `json:"onboarded,omitempty"`
+	DashRole           *string             `json:"dash_role,omitempty"`
+	EffectiveAccess    *EffectiveAccess    `json:"effective_access,omitempty"`
+	ProvisioningStatus *ProvisioningStatus `json:"provisioning_status,omitempty"`
 }
 
 func (m *GetMeResponse) MarshalJSON() ([]byte, error) {
@@ -141,6 +642,34 @@ func (x *GetMeResponse) GetOnboarded() bool {
 	return x.Onboarded
 }
 
+func (x *GetMeResponse) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *GetMeResponse) GetEffectiveAccess() *EffectiveAccess {
+	if x == nil {
+		var zero *EffectiveAccess
+		return zero
+	}
+	return x.EffectiveAccess
+}
+
+func (x *GetMeResponse) GetProvisioningStatus() *ProvisioningStatus {
+	if x == nil {
+		var zero *ProvisioningStatus
+		return zero
+	}
+	return x.ProvisioningStatus
+}
+
 type UpdateProfileRequest struct {
 	Name  string  `json:"name,omitempty"`
 	Email *string `json:"email,omitempty"`
@@ -203,16 +732,19 @@ type ChangePasswordResponse struct {
 }
 
 type SwitchBusinessRequest struct {
-	BusinessId int64 `json:"business_id,omitempty"`
+	BusinessId *int64 `json:"business_id,omitempty"`
 }
 
 func (m *SwitchBusinessRequest) MarshalJSON() ([]byte, error) {
 	type alias SwitchBusinessRequest
 	aux := struct {
 		*alias
-		BusinessId string `json:"business_id,omitempty"`
+		BusinessId *string `json:"business_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
+	if m.BusinessId != nil {
+		encodedBusinessId := strconv.FormatInt(*m.BusinessId, 10)
+		aux.BusinessId = &encodedBusinessId
+	}
 	return json.Marshal(aux)
 }
 
@@ -220,17 +752,17 @@ func (m *SwitchBusinessRequest) UnmarshalJSON(data []byte) error {
 	type alias SwitchBusinessRequest
 	aux := struct {
 		*alias
-		BusinessId string `json:"business_id,omitempty"`
+		BusinessId *string `json:"business_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.BusinessId != "" {
-		v, err := strconv.ParseInt(aux.BusinessId, 10, 64)
+	if aux.BusinessId != nil {
+		v, err := strconv.ParseInt(*aux.BusinessId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.BusinessId = v
+		m.BusinessId = &v
 	}
 	return nil
 }
@@ -240,7 +772,11 @@ func (x *SwitchBusinessRequest) GetBusinessId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.BusinessId
+	if x.BusinessId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BusinessId
 }
 
 type SwitchBusinessResponse struct {

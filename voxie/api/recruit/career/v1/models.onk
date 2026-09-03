@@ -53,7 +53,7 @@ message ListSubmissionsResponse {
 
 /// UpdateSubmissionStatusRequest advances a candidate through the funnel.
 message UpdateSubmissionStatusRequest {
-  id: int64 @required @gt(0)
+  id: int64? @required @gt(0)
   /// body carries the new status bound from the HTTP payload.
   body: UpdateSubmissionStatusBody
 }

@@ -172,8 +172,12 @@ func (c *SegmentServiceClient) GetSegmentCustomers(ctx context.Context, req *Get
 	path := "/crm/segment/v1/segments/{segment_id}/customers"
 	path = strings.ReplaceAll(path, "{segment_id}", url.PathEscape(fmt.Sprintf("%v", req.SegmentId)))
 	query := url.Values{}
-	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
-	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
+	if req.Page != nil {
+		query.Set("page", strconv.FormatInt(int64(*req.Page), 10))
+	}
+	if req.PageSize != nil {
+		query.Set("page_size", strconv.FormatInt(int64(*req.PageSize), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

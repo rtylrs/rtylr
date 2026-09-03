@@ -678,16 +678,19 @@ func (x *GetCampaignDetailResponse) GetStats() *CampaignStats {
 }
 
 type GetCampaignStatsRequest struct {
-	CampaignId int64 `json:"campaign_id,omitempty"`
+	CampaignId *int64 `json:"campaign_id,omitempty"`
 }
 
 func (m *GetCampaignStatsRequest) MarshalJSON() ([]byte, error) {
 	type alias GetCampaignStatsRequest
 	aux := struct {
 		*alias
-		CampaignId string `json:"campaign_id,omitempty"`
+		CampaignId *string `json:"campaign_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.CampaignId = strconv.FormatInt(m.CampaignId, 10)
+	if m.CampaignId != nil {
+		encodedCampaignId := strconv.FormatInt(*m.CampaignId, 10)
+		aux.CampaignId = &encodedCampaignId
+	}
 	return json.Marshal(aux)
 }
 
@@ -695,17 +698,17 @@ func (m *GetCampaignStatsRequest) UnmarshalJSON(data []byte) error {
 	type alias GetCampaignStatsRequest
 	aux := struct {
 		*alias
-		CampaignId string `json:"campaign_id,omitempty"`
+		CampaignId *string `json:"campaign_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.CampaignId != "" {
-		v, err := strconv.ParseInt(aux.CampaignId, 10, 64)
+	if aux.CampaignId != nil {
+		v, err := strconv.ParseInt(*aux.CampaignId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.CampaignId = v
+		m.CampaignId = &v
 	}
 	return nil
 }
@@ -715,7 +718,11 @@ func (x *GetCampaignStatsRequest) GetCampaignId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.CampaignId
+	if x.CampaignId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CampaignId
 }
 
 type GetCampaignStatsResponse struct {

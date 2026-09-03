@@ -2,6 +2,8 @@
 
 export interface SecurityState {
 twoFactorEnabled?: boolean;
+mfaRequired?: boolean;
+mfaEnrolled?: boolean;
 activeSessions?: (ActiveSession)[];
 }
 
@@ -9,6 +11,8 @@ export function decodeSecurityState(v: any): SecurityState {
 if (v === null || v === undefined) return v;
 return {
 twoFactorEnabled: v.two_factor_enabled,
+mfaRequired: v.mfa_required,
+mfaEnrolled: v.mfa_enrolled,
 activeSessions: (v.active_sessions !== undefined ? (v.active_sessions as any[]).map(decodeActiveSession) : v.active_sessions),
 };
 }
@@ -16,6 +20,8 @@ activeSessions: (v.active_sessions !== undefined ? (v.active_sessions as any[]).
 export function encodeSecurityState(v: SecurityState): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.twoFactorEnabled !== undefined) { out.two_factor_enabled = v.twoFactorEnabled; }
+if (v.mfaRequired !== undefined) { out.mfa_required = v.mfaRequired; }
+if (v.mfaEnrolled !== undefined) { out.mfa_enrolled = v.mfaEnrolled; }
 if (v.activeSessions !== undefined) { out.active_sessions = (v.activeSessions as any[]).map(encodeActiveSession); }
 return out;
 }
@@ -23,6 +29,8 @@ return out;
 export function validateSecurityState(v: SecurityState): string[] {
 const violations: string[] = [];
 if (v.twoFactorEnabled !== undefined && v.twoFactorEnabled !== null && !(typeof v.twoFactorEnabled === "boolean")) violations.push("two_factor_enabled has invalid type");
+if (v.mfaRequired !== undefined && v.mfaRequired !== null && !(typeof v.mfaRequired === "boolean")) violations.push("mfa_required has invalid type");
+if (v.mfaEnrolled !== undefined && v.mfaEnrolled !== null && !(typeof v.mfaEnrolled === "boolean")) violations.push("mfa_enrolled has invalid type");
 if (v.activeSessions !== undefined && v.activeSessions !== null && !(Array.isArray(v.activeSessions) && (v.activeSessions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("active_sessions has invalid type");
 if (v.activeSessions !== undefined && v.activeSessions !== null) for (const item of v.activeSessions) violations.push(...validateActiveSession(item).map((message) => "active_sessions: " + message));
 return violations;
@@ -309,6 +317,197 @@ return out;
 export function validateUpdate2FAResponse(v: Update2FAResponse): string[] {
 const violations: string[] = [];
 if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
+return violations;
+}
+
+export interface BeginMFAEnrollmentRequest {
+}
+
+export function decodeBeginMFAEnrollmentRequest(v: any): BeginMFAEnrollmentRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeBeginMFAEnrollmentRequest(v: BeginMFAEnrollmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
+export function validateBeginMFAEnrollmentRequest(v: BeginMFAEnrollmentRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface BeginMFAEnrollmentResponse {
+secret?: string;
+otpauthUri?: string;
+}
+
+export function decodeBeginMFAEnrollmentResponse(v: any): BeginMFAEnrollmentResponse {
+if (v === null || v === undefined) return v;
+return {
+secret: v.secret,
+otpauthUri: v.otpauth_uri,
+};
+}
+
+export function encodeBeginMFAEnrollmentResponse(v: BeginMFAEnrollmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.secret !== undefined) { out.secret = v.secret; }
+if (v.otpauthUri !== undefined) { out.otpauth_uri = v.otpauthUri; }
+return out;
+}
+
+export function validateBeginMFAEnrollmentResponse(v: BeginMFAEnrollmentResponse): string[] {
+const violations: string[] = [];
+if (v.secret !== undefined && v.secret !== null && !(typeof v.secret === "string")) violations.push("secret has invalid type");
+if (v.otpauthUri !== undefined && v.otpauthUri !== null && !(typeof v.otpauthUri === "string")) violations.push("otpauth_uri has invalid type");
+return violations;
+}
+
+export interface CompleteMFAEnrollmentRequest {
+code: string;
+}
+
+export function decodeCompleteMFAEnrollmentRequest(v: any): CompleteMFAEnrollmentRequest {
+if (v === null || v === undefined) return v;
+return {
+code: v.code,
+};
+}
+
+export function encodeCompleteMFAEnrollmentRequest(v: CompleteMFAEnrollmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.code !== undefined) { out.code = v.code; }
+return out;
+}
+
+export function validateCompleteMFAEnrollmentRequest(v: CompleteMFAEnrollmentRequest): string[] {
+const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+return violations;
+}
+
+export interface CompleteMFAEnrollmentResponse {
+verified?: boolean;
+recoveryCodes?: (string)[];
+}
+
+export function decodeCompleteMFAEnrollmentResponse(v: any): CompleteMFAEnrollmentResponse {
+if (v === null || v === undefined) return v;
+return {
+verified: v.verified,
+recoveryCodes: v.recovery_codes,
+};
+}
+
+export function encodeCompleteMFAEnrollmentResponse(v: CompleteMFAEnrollmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.verified !== undefined) { out.verified = v.verified; }
+if (v.recoveryCodes !== undefined) { out.recovery_codes = v.recoveryCodes; }
+return out;
+}
+
+export function validateCompleteMFAEnrollmentResponse(v: CompleteMFAEnrollmentResponse): string[] {
+const violations: string[] = [];
+if (v.verified !== undefined && v.verified !== null && !(typeof v.verified === "boolean")) violations.push("verified has invalid type");
+if (v.recoveryCodes !== undefined && v.recoveryCodes !== null && !(Array.isArray(v.recoveryCodes) && (v.recoveryCodes).every((item: any) => typeof item === "string"))) violations.push("recovery_codes has invalid type");
+return violations;
+}
+
+export interface VerifyMFARequest {
+code: string;
+}
+
+export function decodeVerifyMFARequest(v: any): VerifyMFARequest {
+if (v === null || v === undefined) return v;
+return {
+code: v.code,
+};
+}
+
+export function encodeVerifyMFARequest(v: VerifyMFARequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.code !== undefined) { out.code = v.code; }
+return out;
+}
+
+export function validateVerifyMFARequest(v: VerifyMFARequest): string[] {
+const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+return violations;
+}
+
+export interface VerifyMFAResponse {
+verified?: boolean;
+}
+
+export function decodeVerifyMFAResponse(v: any): VerifyMFAResponse {
+if (v === null || v === undefined) return v;
+return {
+verified: v.verified,
+};
+}
+
+export function encodeVerifyMFAResponse(v: VerifyMFAResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.verified !== undefined) { out.verified = v.verified; }
+return out;
+}
+
+export function validateVerifyMFAResponse(v: VerifyMFAResponse): string[] {
+const violations: string[] = [];
+if (v.verified !== undefined && v.verified !== null && !(typeof v.verified === "boolean")) violations.push("verified has invalid type");
+return violations;
+}
+
+export interface UseMFARecoveryCodeRequest {
+code: string;
+}
+
+export function decodeUseMFARecoveryCodeRequest(v: any): UseMFARecoveryCodeRequest {
+if (v === null || v === undefined) return v;
+return {
+code: v.code,
+};
+}
+
+export function encodeUseMFARecoveryCodeRequest(v: UseMFARecoveryCodeRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.code !== undefined) { out.code = v.code; }
+return out;
+}
+
+export function validateUseMFARecoveryCodeRequest(v: UseMFARecoveryCodeRequest): string[] {
+const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+return violations;
+}
+
+export interface UseMFARecoveryCodeResponse {
+verified?: boolean;
+}
+
+export function decodeUseMFARecoveryCodeResponse(v: any): UseMFARecoveryCodeResponse {
+if (v === null || v === undefined) return v;
+return {
+verified: v.verified,
+};
+}
+
+export function encodeUseMFARecoveryCodeResponse(v: UseMFARecoveryCodeResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.verified !== undefined) { out.verified = v.verified; }
+return out;
+}
+
+export function validateUseMFARecoveryCodeResponse(v: UseMFARecoveryCodeResponse): string[] {
+const violations: string[] = [];
+if (v.verified !== undefined && v.verified !== null && !(typeof v.verified === "boolean")) violations.push("verified has invalid type");
 return violations;
 }
 

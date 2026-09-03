@@ -1131,8 +1131,8 @@ func (x *DeleteShiftResponse) GetSuccess() bool {
 }
 
 type CreateShiftAssignmentRequest struct {
-	EmployeeId int64  `json:"employee_id,omitempty"`
-	ShiftId    int64  `json:"shift_id,omitempty"`
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	ShiftId    *int64 `json:"shift_id,omitempty"`
 	Date       string `json:"date,omitempty"`
 }
 
@@ -1140,11 +1140,17 @@ func (m *CreateShiftAssignmentRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateShiftAssignmentRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
-		ShiftId    string `json:"shift_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
+		ShiftId    *string `json:"shift_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
-	aux.ShiftId = strconv.FormatInt(m.ShiftId, 10)
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	if m.ShiftId != nil {
+		encodedShiftId := strconv.FormatInt(*m.ShiftId, 10)
+		aux.ShiftId = &encodedShiftId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1152,25 +1158,25 @@ func (m *CreateShiftAssignmentRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateShiftAssignmentRequest
 	aux := struct {
 		*alias
-		EmployeeId string `json:"employee_id,omitempty"`
-		ShiftId    string `json:"shift_id,omitempty"`
+		EmployeeId *string `json:"employee_id,omitempty"`
+		ShiftId    *string `json:"shift_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.EmployeeId != "" {
-		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.EmployeeId = v
+		m.EmployeeId = &v
 	}
-	if aux.ShiftId != "" {
-		v, err := strconv.ParseInt(aux.ShiftId, 10, 64)
+	if aux.ShiftId != nil {
+		v, err := strconv.ParseInt(*aux.ShiftId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ShiftId = v
+		m.ShiftId = &v
 	}
 	return nil
 }
@@ -1180,7 +1186,11 @@ func (x *CreateShiftAssignmentRequest) GetEmployeeId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.EmployeeId
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
 }
 
 func (x *CreateShiftAssignmentRequest) GetShiftId() int64 {
@@ -1188,7 +1198,11 @@ func (x *CreateShiftAssignmentRequest) GetShiftId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ShiftId
+	if x.ShiftId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ShiftId
 }
 
 func (x *CreateShiftAssignmentRequest) GetDate() string {
@@ -1684,7 +1698,7 @@ func (x *ListAvailabilityResponse) GetOffset() int32 {
 
 type SetAvailabilityRequest struct {
 	Id           *int64  `json:"id,omitempty"`
-	StaffId      int64   `json:"staff_id,omitempty"`
+	StaffId      *int64  `json:"staff_id,omitempty"`
 	DayOfWeek    *int32  `json:"day_of_week,omitempty"`
 	SpecificDate *string `json:"specific_date,omitempty"`
 	StartTime    string  `json:"start_time,omitempty"`
@@ -1696,13 +1710,16 @@ func (m *SetAvailabilityRequest) MarshalJSON() ([]byte, error) {
 	type alias SetAvailabilityRequest
 	aux := struct {
 		*alias
-		StaffId string  `json:"staff_id,omitempty"`
 		Id      *string `json:"id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
 	if m.Id != nil {
 		encodedId := strconv.FormatInt(*m.Id, 10)
 		aux.Id = &encodedId
+	}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
 	}
 	return json.Marshal(aux)
 }
@@ -1711,18 +1728,11 @@ func (m *SetAvailabilityRequest) UnmarshalJSON(data []byte) error {
 	type alias SetAvailabilityRequest
 	aux := struct {
 		*alias
-		StaffId string  `json:"staff_id,omitempty"`
 		Id      *string `json:"id,omitempty"`
+		StaffId *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.StaffId != "" {
-		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.StaffId = v
 	}
 	if aux.Id != nil {
 		v, err := strconv.ParseInt(*aux.Id, 10, 64)
@@ -1730,6 +1740,13 @@ func (m *SetAvailabilityRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Id = &v
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
 	}
 	return nil
 }
@@ -1751,7 +1768,11 @@ func (x *SetAvailabilityRequest) GetStaffId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.StaffId
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
 }
 
 func (x *SetAvailabilityRequest) GetDayOfWeek() int32 {

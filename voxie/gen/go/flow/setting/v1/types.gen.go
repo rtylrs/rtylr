@@ -5,12 +5,13 @@ type GetUserSettingsRequest struct {
 }
 
 type GetUserSettingsResponse struct {
-	TaskAssigned       bool `json:"task_assigned,omitempty"`
-	TaskComments       bool `json:"task_comments,omitempty"`
-	Mentions           bool `json:"mentions,omitempty"`
-	StatusChanges      bool `json:"status_changes,omitempty"`
-	WeeklyDigest       bool `json:"weekly_digest,omitempty"`
-	EmailNotifications bool `json:"email_notifications,omitempty"`
+	TaskAssigned       bool    `json:"task_assigned,omitempty"`
+	TaskComments       bool    `json:"task_comments,omitempty"`
+	Mentions           bool    `json:"mentions,omitempty"`
+	StatusChanges      bool    `json:"status_changes,omitempty"`
+	WeeklyDigest       bool    `json:"weekly_digest,omitempty"`
+	EmailNotifications bool    `json:"email_notifications,omitempty"`
+	SidebarPreferences *string `json:"sidebar_preferences,omitempty"`
 }
 
 func (x *GetUserSettingsResponse) GetTaskAssigned() bool {
@@ -61,13 +62,26 @@ func (x *GetUserSettingsResponse) GetEmailNotifications() bool {
 	return x.EmailNotifications
 }
 
+func (x *GetUserSettingsResponse) GetSidebarPreferences() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SidebarPreferences == nil {
+		var zero string
+		return zero
+	}
+	return *x.SidebarPreferences
+}
+
 type UpdateUserSettingsRequest struct {
-	TaskAssigned       bool `json:"task_assigned,omitempty"`
-	TaskComments       bool `json:"task_comments,omitempty"`
-	Mentions           bool `json:"mentions,omitempty"`
-	StatusChanges      bool `json:"status_changes,omitempty"`
-	WeeklyDigest       bool `json:"weekly_digest,omitempty"`
-	EmailNotifications bool `json:"email_notifications,omitempty"`
+	TaskAssigned       bool    `json:"task_assigned,omitempty"`
+	TaskComments       bool    `json:"task_comments,omitempty"`
+	Mentions           bool    `json:"mentions,omitempty"`
+	StatusChanges      bool    `json:"status_changes,omitempty"`
+	WeeklyDigest       bool    `json:"weekly_digest,omitempty"`
+	EmailNotifications bool    `json:"email_notifications,omitempty"`
+	SidebarPreferences *string `json:"sidebar_preferences,omitempty"`
 }
 
 func (x *UpdateUserSettingsRequest) GetTaskAssigned() bool {
@@ -116,6 +130,18 @@ func (x *UpdateUserSettingsRequest) GetEmailNotifications() bool {
 		return zero
 	}
 	return x.EmailNotifications
+}
+
+func (x *UpdateUserSettingsRequest) GetSidebarPreferences() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SidebarPreferences == nil {
+		var zero string
+		return zero
+	}
+	return *x.SidebarPreferences
 }
 
 type UpdateUserSettingsResponse struct {

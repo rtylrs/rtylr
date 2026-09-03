@@ -138,7 +138,7 @@ return violations;
 }
 
 export interface DeleteServiceRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteServiceRequest(v: any): DeleteServiceRequest {
@@ -157,7 +157,6 @@ return out;
 export function validateDeleteServiceRequest(v: DeleteServiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -229,7 +228,7 @@ return violations;
 }
 
 export interface UpdateServiceRequest {
-id: string;
+id?: string;
 name: string;
 description?: string;
 durationMinutes: number;
@@ -266,7 +265,6 @@ return out;
 export function validateUpdateServiceRequest(v: UpdateServiceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");

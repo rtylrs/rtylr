@@ -181,7 +181,7 @@ return violations;
 }
 
 export interface UpdateViewRequest {
-id: string;
+id?: string;
 name?: string;
 icon?: string;
 filters?: string;
@@ -221,7 +221,6 @@ return out;
 export function validateUpdateViewRequest(v: UpdateViewRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
@@ -253,7 +252,7 @@ return violations;
 }
 
 export interface DeleteViewRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteViewRequest(v: any): DeleteViewRequest {
@@ -272,7 +271,6 @@ return out;
 export function validateDeleteViewRequest(v: DeleteViewRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

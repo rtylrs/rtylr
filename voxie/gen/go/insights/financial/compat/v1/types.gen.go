@@ -32,32 +32,32 @@ func (x *CashFlowPoint) GetOutflowMinorUnits() float64 {
 }
 
 type GetCashFlowRequest struct {
-	From *string `json:"from,omitempty"`
-	To   *string `json:"to,omitempty"`
+	FromDate *string `json:"from_date,omitempty"`
+	ToDate   *string `json:"to_date,omitempty"`
 }
 
-func (x *GetCashFlowRequest) GetFrom() string {
+func (x *GetCashFlowRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	if x.From == nil {
+	if x.FromDate == nil {
 		var zero string
 		return zero
 	}
-	return *x.From
+	return *x.FromDate
 }
 
-func (x *GetCashFlowRequest) GetTo() string {
+func (x *GetCashFlowRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	if x.To == nil {
+	if x.ToDate == nil {
 		var zero string
 		return zero
 	}
-	return *x.To
+	return *x.ToDate
 }
 
 type GetCashFlowResponse struct {

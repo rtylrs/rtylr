@@ -74,11 +74,21 @@ func (m *CreateLeaveRequestRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
 	}
-	if m.LeaveTypeId <= 0 {
-		violations = append(violations, "leave_type_id must be greater than 0")
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
+	}
+	if m.LeaveTypeId == nil {
+		violations = append(violations, "leave_type_id is required")
+	}
+	if m.LeaveTypeId != nil {
+		if *m.LeaveTypeId <= 0 {
+			violations = append(violations, "leave_type_id must be greater than 0")
+		}
 	}
 	if m.StartDate == "" {
 		violations = append(violations, "start_date is required")
@@ -86,8 +96,13 @@ func (m *CreateLeaveRequestRequest) Validate() error {
 	if m.EndDate == "" {
 		violations = append(violations, "end_date is required")
 	}
-	if m.TotalDays <= 0 {
-		violations = append(violations, "total_days must be greater than 0")
+	if m.TotalDays == nil {
+		violations = append(violations, "total_days is required")
+	}
+	if m.TotalDays != nil {
+		if *m.TotalDays <= 0 {
+			violations = append(violations, "total_days must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -212,11 +227,21 @@ func (m *CreateLeaveTypeRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.MaxCarryoverDays <= 0 {
-		violations = append(violations, "max_carryover_days must be greater than 0")
+	if m.MaxCarryoverDays == nil {
+		violations = append(violations, "max_carryover_days is required")
 	}
-	if m.MinNoticeDays <= 0 {
-		violations = append(violations, "min_notice_days must be greater than 0")
+	if m.MaxCarryoverDays != nil {
+		if *m.MaxCarryoverDays <= 0 {
+			violations = append(violations, "max_carryover_days must be greater than 0")
+		}
+	}
+	if m.MinNoticeDays == nil {
+		violations = append(violations, "min_notice_days is required")
+	}
+	if m.MinNoticeDays != nil {
+		if *m.MinNoticeDays <= 0 {
+			violations = append(violations, "min_notice_days must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

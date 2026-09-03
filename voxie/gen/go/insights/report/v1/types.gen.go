@@ -688,25 +688,25 @@ func (x *DeleteScheduledReportResponse) GetDeleted() bool {
 }
 
 type GenerateRevenueReportRequest struct {
-	From   string `json:"from,omitempty"`
-	To     string `json:"to,omitempty"`
-	Format string `json:"format,omitempty"`
+	FromDate string `json:"from_date,omitempty"`
+	ToDate   string `json:"to_date,omitempty"`
+	Format   string `json:"format,omitempty"`
 }
 
-func (x *GenerateRevenueReportRequest) GetFrom() string {
+func (x *GenerateRevenueReportRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *GenerateRevenueReportRequest) GetTo() string {
+func (x *GenerateRevenueReportRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 func (x *GenerateRevenueReportRequest) GetFormat() string {
@@ -748,24 +748,24 @@ func (x *GenerateRevenueReportResponse) GetStatus() string {
 }
 
 type ExportRevenueReportRequest struct {
-	From string `json:"from,omitempty"`
-	To   string `json:"to,omitempty"`
+	FromDate string `json:"from_date,omitempty"`
+	ToDate   string `json:"to_date,omitempty"`
 }
 
-func (x *ExportRevenueReportRequest) GetFrom() string {
+func (x *ExportRevenueReportRequest) GetFromDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.From
+	return x.FromDate
 }
 
-func (x *ExportRevenueReportRequest) GetTo() string {
+func (x *ExportRevenueReportRequest) GetToDate() string {
 	if x == nil {
 		var zero string
 		return zero
 	}
-	return x.To
+	return x.ToDate
 }
 
 type ExportRevenueRow struct {

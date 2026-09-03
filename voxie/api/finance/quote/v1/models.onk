@@ -40,7 +40,7 @@ message CreateQuoteRequest {
   subtotal: float64 @gte(0)
   tax: float64 @gte(0)
   valid_until: string @required
-  discount: float64 @required @gte(0)
+  discount: float64? @required @gte(0)
   total: float64 @gte(0)
   notes: string
 }
@@ -50,7 +50,7 @@ message CreateQuoteResponse {
 }
 
 message GetQuoteRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message GetQuoteResponse {
@@ -79,7 +79,7 @@ message UpdateQuoteStatusBody {
 }
 
 message UpdateQuoteStatusRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   /// Carries status update fields bound from the HTTP payload.
   body: UpdateQuoteStatusBody
 }
@@ -89,7 +89,7 @@ message UpdateQuoteStatusResponse {
 }
 
 message ConvertQuoteRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message ConvertQuoteResponse {

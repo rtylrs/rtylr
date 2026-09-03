@@ -44,11 +44,21 @@ func (m *AwardPointsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.CustomerId <= 0 {
-		violations = append(violations, "customer_id must be greater than 0")
+	if m.CustomerId == nil {
+		violations = append(violations, "customer_id is required")
 	}
-	if m.Points <= 0 {
-		violations = append(violations, "points must be greater than 0")
+	if m.CustomerId != nil {
+		if *m.CustomerId <= 0 {
+			violations = append(violations, "customer_id must be greater than 0")
+		}
+	}
+	if m.Points == nil {
+		violations = append(violations, "points is required")
+	}
+	if m.Points != nil {
+		if *m.Points <= 0 {
+			violations = append(violations, "points must be greater than 0")
+		}
 	}
 	if m.Description == "" {
 		violations = append(violations, "description is required")
@@ -81,17 +91,32 @@ func (m *CreateLoyaltyTierRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.MinPoints <= 0 {
-		violations = append(violations, "min_points must be greater than 0")
+	if m.MinPoints == nil {
+		violations = append(violations, "min_points is required")
 	}
-	if m.DiscountPct <= 0 {
-		violations = append(violations, "discount_pct must be greater than 0")
+	if m.MinPoints != nil {
+		if *m.MinPoints <= 0 {
+			violations = append(violations, "min_points must be greater than 0")
+		}
+	}
+	if m.DiscountPct == nil {
+		violations = append(violations, "discount_pct is required")
+	}
+	if m.DiscountPct != nil {
+		if *m.DiscountPct <= 0 {
+			violations = append(violations, "discount_pct must be greater than 0")
+		}
 	}
 	if m.Perks == "" {
 		violations = append(violations, "perks is required")
 	}
-	if m.SortOrder <= 0 {
-		violations = append(violations, "sort_order must be greater than 0")
+	if m.SortOrder == nil {
+		violations = append(violations, "sort_order is required")
+	}
+	if m.SortOrder != nil {
+		if *m.SortOrder <= 0 {
+			violations = append(violations, "sort_order must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -196,11 +221,21 @@ func (m *RedeemPointsRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.CustomerId <= 0 {
-		violations = append(violations, "customer_id must be greater than 0")
+	if m.CustomerId == nil {
+		violations = append(violations, "customer_id is required")
 	}
-	if m.Points <= 0 {
-		violations = append(violations, "points must be greater than 0")
+	if m.CustomerId != nil {
+		if *m.CustomerId <= 0 {
+			violations = append(violations, "customer_id must be greater than 0")
+		}
+	}
+	if m.Points == nil {
+		violations = append(violations, "points is required")
+	}
+	if m.Points != nil {
+		if *m.Points <= 0 {
+			violations = append(violations, "points must be greater than 0")
+		}
 	}
 	if m.Description == "" {
 		violations = append(violations, "description is required")
@@ -230,38 +265,93 @@ func (m *UpdateLoyaltyConfigRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.PointsPerCurrencyUnit <= 0 {
-		violations = append(violations, "points_per_currency_unit must be greater than 0")
+	if m.PointsPerCurrencyUnit == nil {
+		violations = append(violations, "points_per_currency_unit is required")
 	}
-	if m.CurrencyPerPoint <= 0 {
-		violations = append(violations, "currency_per_point must be greater than 0")
+	if m.PointsPerCurrencyUnit != nil {
+		if *m.PointsPerCurrencyUnit <= 0 {
+			violations = append(violations, "points_per_currency_unit must be greater than 0")
+		}
 	}
-	if m.BronzeMin <= 0 {
-		violations = append(violations, "bronze_min must be greater than 0")
+	if m.CurrencyPerPoint == nil {
+		violations = append(violations, "currency_per_point is required")
 	}
-	if m.SilverMin <= 0 {
-		violations = append(violations, "silver_min must be greater than 0")
+	if m.CurrencyPerPoint != nil {
+		if *m.CurrencyPerPoint <= 0 {
+			violations = append(violations, "currency_per_point must be greater than 0")
+		}
 	}
-	if m.GoldMin <= 0 {
-		violations = append(violations, "gold_min must be greater than 0")
+	if m.BronzeMin == nil {
+		violations = append(violations, "bronze_min is required")
 	}
-	if m.PlatinumMin <= 0 {
-		violations = append(violations, "platinum_min must be greater than 0")
+	if m.BronzeMin != nil {
+		if *m.BronzeMin <= 0 {
+			violations = append(violations, "bronze_min must be greater than 0")
+		}
 	}
-	if m.BronzeDiscountPct <= 0 {
-		violations = append(violations, "bronze_discount_pct must be greater than 0")
+	if m.SilverMin == nil {
+		violations = append(violations, "silver_min is required")
 	}
-	if m.SilverDiscountPct <= 0 {
-		violations = append(violations, "silver_discount_pct must be greater than 0")
+	if m.SilverMin != nil {
+		if *m.SilverMin <= 0 {
+			violations = append(violations, "silver_min must be greater than 0")
+		}
 	}
-	if m.GoldDiscountPct <= 0 {
-		violations = append(violations, "gold_discount_pct must be greater than 0")
+	if m.GoldMin == nil {
+		violations = append(violations, "gold_min is required")
 	}
-	if m.PlatinumDiscountPct <= 0 {
-		violations = append(violations, "platinum_discount_pct must be greater than 0")
+	if m.GoldMin != nil {
+		if *m.GoldMin <= 0 {
+			violations = append(violations, "gold_min must be greater than 0")
+		}
 	}
-	if m.PointsExpiryDays <= 0 {
-		violations = append(violations, "points_expiry_days must be greater than 0")
+	if m.PlatinumMin == nil {
+		violations = append(violations, "platinum_min is required")
+	}
+	if m.PlatinumMin != nil {
+		if *m.PlatinumMin <= 0 {
+			violations = append(violations, "platinum_min must be greater than 0")
+		}
+	}
+	if m.BronzeDiscountPct == nil {
+		violations = append(violations, "bronze_discount_pct is required")
+	}
+	if m.BronzeDiscountPct != nil {
+		if *m.BronzeDiscountPct <= 0 {
+			violations = append(violations, "bronze_discount_pct must be greater than 0")
+		}
+	}
+	if m.SilverDiscountPct == nil {
+		violations = append(violations, "silver_discount_pct is required")
+	}
+	if m.SilverDiscountPct != nil {
+		if *m.SilverDiscountPct <= 0 {
+			violations = append(violations, "silver_discount_pct must be greater than 0")
+		}
+	}
+	if m.GoldDiscountPct == nil {
+		violations = append(violations, "gold_discount_pct is required")
+	}
+	if m.GoldDiscountPct != nil {
+		if *m.GoldDiscountPct <= 0 {
+			violations = append(violations, "gold_discount_pct must be greater than 0")
+		}
+	}
+	if m.PlatinumDiscountPct == nil {
+		violations = append(violations, "platinum_discount_pct is required")
+	}
+	if m.PlatinumDiscountPct != nil {
+		if *m.PlatinumDiscountPct <= 0 {
+			violations = append(violations, "platinum_discount_pct must be greater than 0")
+		}
+	}
+	if m.PointsExpiryDays == nil {
+		violations = append(violations, "points_expiry_days is required")
+	}
+	if m.PointsExpiryDays != nil {
+		if *m.PointsExpiryDays <= 0 {
+			violations = append(violations, "points_expiry_days must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -288,17 +378,32 @@ func (m *UpdateLoyaltyTierBody) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.MinPoints <= 0 {
-		violations = append(violations, "min_points must be greater than 0")
+	if m.MinPoints == nil {
+		violations = append(violations, "min_points is required")
 	}
-	if m.DiscountPct <= 0 {
-		violations = append(violations, "discount_pct must be greater than 0")
+	if m.MinPoints != nil {
+		if *m.MinPoints <= 0 {
+			violations = append(violations, "min_points must be greater than 0")
+		}
+	}
+	if m.DiscountPct == nil {
+		violations = append(violations, "discount_pct is required")
+	}
+	if m.DiscountPct != nil {
+		if *m.DiscountPct <= 0 {
+			violations = append(violations, "discount_pct must be greater than 0")
+		}
 	}
 	if m.Perks == "" {
 		violations = append(violations, "perks is required")
 	}
-	if m.SortOrder <= 0 {
-		violations = append(violations, "sort_order must be greater than 0")
+	if m.SortOrder == nil {
+		violations = append(violations, "sort_order is required")
+	}
+	if m.SortOrder != nil {
+		if *m.SortOrder <= 0 {
+			violations = append(violations, "sort_order must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

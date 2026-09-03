@@ -392,7 +392,7 @@ func RegisterLoyaltyServiceServer(first any, rest ...any) error {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter customer_id: "+err.Error())
 				return
 			}
-			req.CustomerId = parsedCustomerId
+			req.CustomerId = &parsedCustomerId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

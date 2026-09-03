@@ -115,11 +115,11 @@ func (m *ListWorkDaysRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.From == "" {
-		violations = append(violations, "from is required")
+	if m.FromDate == "" {
+		violations = append(violations, "from_date is required")
 	}
-	if m.To == "" {
-		violations = append(violations, "to is required")
+	if m.ToDate == "" {
+		violations = append(violations, "to_date is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -153,11 +153,11 @@ func (m *ListTeamWorkDaysRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.From == "" {
-		violations = append(violations, "from is required")
+	if m.FromDate == "" {
+		violations = append(violations, "from_date is required")
 	}
-	if m.To == "" {
-		violations = append(violations, "to is required")
+	if m.ToDate == "" {
+		violations = append(violations, "to_date is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -197,8 +197,13 @@ func (m *CreateWorkDayLineRequest) Validate() error {
 	if m.ClientKey == "" {
 		violations = append(violations, "client_key is required")
 	}
-	if m.DurationMinutes <= 0 {
-		violations = append(violations, "duration_minutes must be greater than 0")
+	if m.DurationMinutes == nil {
+		violations = append(violations, "duration_minutes is required")
+	}
+	if m.DurationMinutes != nil {
+		if *m.DurationMinutes <= 0 {
+			violations = append(violations, "duration_minutes must be greater than 0")
+		}
 	}
 	if m.Description == "" {
 		violations = append(violations, "description is required")
@@ -233,8 +238,13 @@ func (m *UpdateWorkDayLineRequest) Validate() error {
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
-	if m.DurationMinutes <= 0 {
-		violations = append(violations, "duration_minutes must be greater than 0")
+	if m.DurationMinutes == nil {
+		violations = append(violations, "duration_minutes is required")
+	}
+	if m.DurationMinutes != nil {
+		if *m.DurationMinutes <= 0 {
+			violations = append(violations, "duration_minutes must be greater than 0")
+		}
 	}
 	if m.Description == "" {
 		violations = append(violations, "description is required")

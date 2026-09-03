@@ -22,14 +22,29 @@ func (m *CreateAuditRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.BranchId <= 0 {
-		violations = append(violations, "branch_id must be greater than 0")
+	if m.BranchId == nil {
+		violations = append(violations, "branch_id is required")
 	}
-	if m.TerminalId <= 0 {
-		violations = append(violations, "terminal_id must be greater than 0")
+	if m.BranchId != nil {
+		if *m.BranchId <= 0 {
+			violations = append(violations, "branch_id must be greater than 0")
+		}
 	}
-	if m.EmployeeId <= 0 {
-		violations = append(violations, "employee_id must be greater than 0")
+	if m.TerminalId == nil {
+		violations = append(violations, "terminal_id is required")
+	}
+	if m.TerminalId != nil {
+		if *m.TerminalId <= 0 {
+			violations = append(violations, "terminal_id must be greater than 0")
+		}
+	}
+	if m.EmployeeId == nil {
+		violations = append(violations, "employee_id is required")
+	}
+	if m.EmployeeId != nil {
+		if *m.EmployeeId <= 0 {
+			violations = append(violations, "employee_id must be greater than 0")
+		}
 	}
 	if m.Action == "" {
 		violations = append(violations, "action is required")
@@ -37,8 +52,13 @@ func (m *CreateAuditRequest) Validate() error {
 	if m.EntityType == "" {
 		violations = append(violations, "entity_type is required")
 	}
-	if m.EntityId <= 0 {
-		violations = append(violations, "entity_id must be greater than 0")
+	if m.EntityId == nil {
+		violations = append(violations, "entity_id is required")
+	}
+	if m.EntityId != nil {
+		if *m.EntityId <= 0 {
+			violations = append(violations, "entity_id must be greater than 0")
+		}
 	}
 	if m.Details == "" {
 		violations = append(violations, "details is required")

@@ -141,3 +141,100 @@ func (m *Update2FAResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *BeginMFAEnrollmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *BeginMFAEnrollmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CompleteMFAEnrollmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Code == "" {
+		violations = append(violations, "code is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CompleteMFAEnrollmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *VerifyMFARequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Code == "" {
+		violations = append(violations, "code is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *VerifyMFAResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UseMFARecoveryCodeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Code == "" {
+		violations = append(violations, "code is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UseMFARecoveryCodeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

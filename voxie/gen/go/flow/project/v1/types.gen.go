@@ -579,7 +579,7 @@ func (x *ListProjectsResponse) GetPagination() *common_pagination_v1.PaginationR
 }
 
 type CreateProjectRequest struct {
-	WorkspaceId int64  `json:"workspace_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Icon        string `json:"icon,omitempty"`
@@ -592,9 +592,12 @@ func (m *CreateProjectRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateProjectRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -602,17 +605,17 @@ func (m *CreateProjectRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateProjectRequest
 	aux := struct {
 		*alias
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
 	return nil
 }
@@ -622,7 +625,11 @@ func (x *CreateProjectRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 func (x *CreateProjectRequest) GetName() string {
@@ -867,7 +874,7 @@ func (x *DeleteProjectResponse) GetMessage() string {
 }
 
 type ListProjectColumnsRequest struct {
-	ProjectId int64  `json:"project_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
 	Page      int32  `json:"page,omitempty"`
 	Limit     int32  `json:"limit,omitempty"`
 	SortBy    string `json:"sort_by,omitempty"`
@@ -878,9 +885,12 @@ func (m *ListProjectColumnsRequest) MarshalJSON() ([]byte, error) {
 	type alias ListProjectColumnsRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -888,17 +898,17 @@ func (m *ListProjectColumnsRequest) UnmarshalJSON(data []byte) error {
 	type alias ListProjectColumnsRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -908,7 +918,11 @@ func (x *ListProjectColumnsRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *ListProjectColumnsRequest) GetPage() int32 {
@@ -965,7 +979,7 @@ func (x *ListProjectColumnsResponse) GetPagination() *common_pagination_v1.Pagin
 }
 
 type CreateProjectColumnRequest struct {
-	ProjectId   int64  `json:"project_id,omitempty"`
+	ProjectId   *int64 `json:"project_id,omitempty"`
 	WorkspaceId int64  `json:"workspace_id,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Color       string `json:"color,omitempty"`
@@ -976,11 +990,14 @@ func (m *CreateProjectColumnRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateProjectColumnRequest
 	aux := struct {
 		*alias
-		ProjectId   string `json:"project_id,omitempty"`
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId string  `json:"workspace_id,omitempty"`
+		ProjectId   *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
 	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -988,18 +1005,11 @@ func (m *CreateProjectColumnRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateProjectColumnRequest
 	aux := struct {
 		*alias
-		ProjectId   string `json:"project_id,omitempty"`
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		WorkspaceId string  `json:"workspace_id,omitempty"`
+		ProjectId   *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.ProjectId = v
 	}
 	if aux.WorkspaceId != "" {
 		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
@@ -1007,6 +1017,13 @@ func (m *CreateProjectColumnRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.WorkspaceId = v
+	}
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -1016,7 +1033,11 @@ func (x *CreateProjectColumnRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *CreateProjectColumnRequest) GetWorkspaceId() int64 {
@@ -1197,19 +1218,22 @@ func (x *DeleteProjectColumnResponse) GetMessage() string {
 }
 
 type MoveTaskToColumnRequest struct {
-	TaskId   int64 `json:"task_id,omitempty"`
-	ColumnId int64 `json:"column_id,omitempty"`
+	TaskId   *int64 `json:"task_id,omitempty"`
+	ColumnId int64  `json:"column_id,omitempty"`
 }
 
 func (m *MoveTaskToColumnRequest) MarshalJSON() ([]byte, error) {
 	type alias MoveTaskToColumnRequest
 	aux := struct {
 		*alias
-		TaskId   string `json:"task_id,omitempty"`
-		ColumnId string `json:"column_id,omitempty"`
+		ColumnId string  `json:"column_id,omitempty"`
+		TaskId   *string `json:"task_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
 	aux.ColumnId = strconv.FormatInt(m.ColumnId, 10)
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1217,18 +1241,11 @@ func (m *MoveTaskToColumnRequest) UnmarshalJSON(data []byte) error {
 	type alias MoveTaskToColumnRequest
 	aux := struct {
 		*alias
-		TaskId   string `json:"task_id,omitempty"`
-		ColumnId string `json:"column_id,omitempty"`
+		ColumnId string  `json:"column_id,omitempty"`
+		TaskId   *string `json:"task_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.TaskId != "" {
-		v, err := strconv.ParseInt(aux.TaskId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.TaskId = v
 	}
 	if aux.ColumnId != "" {
 		v, err := strconv.ParseInt(aux.ColumnId, 10, 64)
@@ -1236,6 +1253,13 @@ func (m *MoveTaskToColumnRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ColumnId = v
+	}
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = &v
 	}
 	return nil
 }
@@ -1245,7 +1269,11 @@ func (x *MoveTaskToColumnRequest) GetTaskId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.TaskId
+	if x.TaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TaskId
 }
 
 func (x *MoveTaskToColumnRequest) GetColumnId() int64 {
@@ -1269,7 +1297,7 @@ func (x *MoveTaskToColumnResponse) GetMessage() string {
 }
 
 type ListProjectMembersRequest struct {
-	ProjectId int64  `json:"project_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
 	Page      int32  `json:"page,omitempty"`
 	Limit     int32  `json:"limit,omitempty"`
 	SortBy    string `json:"sort_by,omitempty"`
@@ -1280,9 +1308,12 @@ func (m *ListProjectMembersRequest) MarshalJSON() ([]byte, error) {
 	type alias ListProjectMembersRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1290,17 +1321,17 @@ func (m *ListProjectMembersRequest) UnmarshalJSON(data []byte) error {
 	type alias ListProjectMembersRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -1310,7 +1341,11 @@ func (x *ListProjectMembersRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *ListProjectMembersRequest) GetPage() int32 {
@@ -1367,8 +1402,8 @@ func (x *ListProjectMembersResponse) GetPagination() *common_pagination_v1.Pagin
 }
 
 type AddProjectMemberRequest struct {
-	ProjectId int64  `json:"project_id,omitempty"`
-	UserId    int64  `json:"user_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
+	UserId    *int64 `json:"user_id,omitempty"`
 	Role      string `json:"role,omitempty"`
 }
 
@@ -1376,11 +1411,17 @@ func (m *AddProjectMemberRequest) MarshalJSON() ([]byte, error) {
 	type alias AddProjectMemberRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
-		UserId    string `json:"user_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
+		UserId    *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1388,25 +1429,25 @@ func (m *AddProjectMemberRequest) UnmarshalJSON(data []byte) error {
 	type alias AddProjectMemberRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
-		UserId    string `json:"user_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
+		UserId    *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -1416,7 +1457,11 @@ func (x *AddProjectMemberRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *AddProjectMemberRequest) GetUserId() int64 {
@@ -1424,7 +1469,11 @@ func (x *AddProjectMemberRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *AddProjectMemberRequest) GetRole() string {
@@ -1448,19 +1497,25 @@ func (x *AddProjectMemberResponse) GetMessage() string {
 }
 
 type RemoveProjectMemberRequest struct {
-	ProjectId int64 `json:"project_id,omitempty"`
-	UserId    int64 `json:"user_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
+	UserId    *int64 `json:"user_id,omitempty"`
 }
 
 func (m *RemoveProjectMemberRequest) MarshalJSON() ([]byte, error) {
 	type alias RemoveProjectMemberRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
-		UserId    string `json:"user_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
+		UserId    *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1468,25 +1523,25 @@ func (m *RemoveProjectMemberRequest) UnmarshalJSON(data []byte) error {
 	type alias RemoveProjectMemberRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
-		UserId    string `json:"user_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
+		UserId    *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -1496,7 +1551,11 @@ func (x *RemoveProjectMemberRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *RemoveProjectMemberRequest) GetUserId() int64 {
@@ -1504,7 +1563,11 @@ func (x *RemoveProjectMemberRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 type RemoveProjectMemberResponse struct {
@@ -1520,8 +1583,8 @@ func (x *RemoveProjectMemberResponse) GetMessage() string {
 }
 
 type UpdateProjectMemberRoleRequest struct {
-	ProjectId int64  `json:"project_id,omitempty"`
-	UserId    int64  `json:"user_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
+	UserId    *int64 `json:"user_id,omitempty"`
 	Role      string `json:"role,omitempty"`
 }
 
@@ -1529,11 +1592,17 @@ func (m *UpdateProjectMemberRoleRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdateProjectMemberRoleRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
-		UserId    string `json:"user_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
+		UserId    *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
-	aux.UserId = strconv.FormatInt(m.UserId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1541,25 +1610,25 @@ func (m *UpdateProjectMemberRoleRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdateProjectMemberRoleRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
-		UserId    string `json:"user_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
+		UserId    *string `json:"user_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
-	if aux.UserId != "" {
-		v, err := strconv.ParseInt(aux.UserId, 10, 64)
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.UserId = v
+		m.UserId = &v
 	}
 	return nil
 }
@@ -1569,7 +1638,11 @@ func (x *UpdateProjectMemberRoleRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *UpdateProjectMemberRoleRequest) GetUserId() int64 {
@@ -1577,7 +1650,11 @@ func (x *UpdateProjectMemberRoleRequest) GetUserId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.UserId
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *UpdateProjectMemberRoleRequest) GetRole() string {
@@ -1601,7 +1678,7 @@ func (x *UpdateProjectMemberRoleResponse) GetMessage() string {
 }
 
 type InviteProjectMemberRequest struct {
-	ProjectId int64  `json:"project_id,omitempty"`
+	ProjectId *int64 `json:"project_id,omitempty"`
 	Email     string `json:"email,omitempty"`
 	Role      string `json:"role,omitempty"`
 }
@@ -1610,9 +1687,12 @@ func (m *InviteProjectMemberRequest) MarshalJSON() ([]byte, error) {
 	type alias InviteProjectMemberRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1620,17 +1700,17 @@ func (m *InviteProjectMemberRequest) UnmarshalJSON(data []byte) error {
 	type alias InviteProjectMemberRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -1640,7 +1720,11 @@ func (x *InviteProjectMemberRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *InviteProjectMemberRequest) GetEmail() string {
@@ -1672,19 +1756,25 @@ func (x *InviteProjectMemberResponse) GetMessage() string {
 }
 
 type TransferProjectOwnershipRequest struct {
-	ProjectId  int64 `json:"project_id,omitempty"`
-	NewOwnerId int64 `json:"new_owner_id,omitempty"`
+	ProjectId  *int64 `json:"project_id,omitempty"`
+	NewOwnerId *int64 `json:"new_owner_id,omitempty"`
 }
 
 func (m *TransferProjectOwnershipRequest) MarshalJSON() ([]byte, error) {
 	type alias TransferProjectOwnershipRequest
 	aux := struct {
 		*alias
-		ProjectId  string `json:"project_id,omitempty"`
-		NewOwnerId string `json:"new_owner_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		NewOwnerId *string `json:"new_owner_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
-	aux.NewOwnerId = strconv.FormatInt(m.NewOwnerId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.NewOwnerId != nil {
+		encodedNewOwnerId := strconv.FormatInt(*m.NewOwnerId, 10)
+		aux.NewOwnerId = &encodedNewOwnerId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1692,25 +1782,25 @@ func (m *TransferProjectOwnershipRequest) UnmarshalJSON(data []byte) error {
 	type alias TransferProjectOwnershipRequest
 	aux := struct {
 		*alias
-		ProjectId  string `json:"project_id,omitempty"`
-		NewOwnerId string `json:"new_owner_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		NewOwnerId *string `json:"new_owner_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
-	if aux.NewOwnerId != "" {
-		v, err := strconv.ParseInt(aux.NewOwnerId, 10, 64)
+	if aux.NewOwnerId != nil {
+		v, err := strconv.ParseInt(*aux.NewOwnerId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.NewOwnerId = v
+		m.NewOwnerId = &v
 	}
 	return nil
 }
@@ -1720,7 +1810,11 @@ func (x *TransferProjectOwnershipRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *TransferProjectOwnershipRequest) GetNewOwnerId() int64 {
@@ -1728,7 +1822,11 @@ func (x *TransferProjectOwnershipRequest) GetNewOwnerId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.NewOwnerId
+	if x.NewOwnerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.NewOwnerId
 }
 
 type TransferProjectOwnershipResponse struct {
@@ -1744,19 +1842,25 @@ func (x *TransferProjectOwnershipResponse) GetMessage() string {
 }
 
 type MoveProjectRequest struct {
-	ProjectId   int64 `json:"project_id,omitempty"`
-	WorkspaceId int64 `json:"workspace_id,omitempty"`
+	ProjectId   *int64 `json:"project_id,omitempty"`
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
 }
 
 func (m *MoveProjectRequest) MarshalJSON() ([]byte, error) {
 	type alias MoveProjectRequest
 	aux := struct {
 		*alias
-		ProjectId   string `json:"project_id,omitempty"`
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		ProjectId   *string `json:"project_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
-	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.WorkspaceId != nil {
+		encodedWorkspaceId := strconv.FormatInt(*m.WorkspaceId, 10)
+		aux.WorkspaceId = &encodedWorkspaceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1764,25 +1868,25 @@ func (m *MoveProjectRequest) UnmarshalJSON(data []byte) error {
 	type alias MoveProjectRequest
 	aux := struct {
 		*alias
-		ProjectId   string `json:"project_id,omitempty"`
-		WorkspaceId string `json:"workspace_id,omitempty"`
+		ProjectId   *string `json:"project_id,omitempty"`
+		WorkspaceId *string `json:"workspace_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
-	if aux.WorkspaceId != "" {
-		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+	if aux.WorkspaceId != nil {
+		v, err := strconv.ParseInt(*aux.WorkspaceId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.WorkspaceId = v
+		m.WorkspaceId = &v
 	}
 	return nil
 }
@@ -1792,7 +1896,11 @@ func (x *MoveProjectRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *MoveProjectRequest) GetWorkspaceId() int64 {
@@ -1800,7 +1908,11 @@ func (x *MoveProjectRequest) GetWorkspaceId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.WorkspaceId
+	if x.WorkspaceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkspaceId
 }
 
 type MoveProjectResponse struct {

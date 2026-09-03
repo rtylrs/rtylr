@@ -135,7 +135,7 @@ return violations;
 }
 
 export interface GetBankAccountRequest {
-id: string;
+id?: string;
 }
 
 export function decodeGetBankAccountRequest(v: any): GetBankAccountRequest {
@@ -154,7 +154,6 @@ return out;
 export function validateGetBankAccountRequest(v: GetBankAccountRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

@@ -52,8 +52,13 @@ func (m *CreateTableRequest) Validate() error {
 	if m.Label == "" {
 		violations = append(violations, "label is required")
 	}
-	if m.Seats <= 0 {
-		violations = append(violations, "seats must be greater than 0")
+	if m.Seats == nil {
+		violations = append(violations, "seats is required")
+	}
+	if m.Seats != nil {
+		if *m.Seats <= 0 {
+			violations = append(violations, "seats must be greater than 0")
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -80,8 +85,13 @@ func (m *UpdateTableBody) Validate() error {
 	if m.Label == "" {
 		violations = append(violations, "label is required")
 	}
-	if m.Seats <= 0 {
-		violations = append(violations, "seats must be greater than 0")
+	if m.Seats == nil {
+		violations = append(violations, "seats is required")
+	}
+	if m.Seats != nil {
+		if *m.Seats <= 0 {
+			violations = append(violations, "seats must be greater than 0")
+		}
 	}
 	if m.Status == "" {
 		violations = append(violations, "status is required")

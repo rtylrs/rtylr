@@ -32,7 +32,7 @@ message MarkAllReadResponse {
 }
 
 message MarkNotificationReadRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message MarkNotificationReadResponse {

@@ -3,15 +3,57 @@ package v1
 
 import (
 	"encoding/json"
+	hub_user_v1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 	"strconv"
 )
 
 type InviteUserRequest struct {
-	Email    string   `json:"email,omitempty"`
-	FullName string   `json:"full_name,omitempty"`
-	Role     string   `json:"role,omitempty"`
-	Apps     []string `json:"apps,omitempty"`
-	Password *string  `json:"password,omitempty"`
+	Email             string                           `json:"email,omitempty"`
+	FullName          string                           `json:"full_name,omitempty"`
+	Role              *string                          `json:"role,omitempty"`
+	Apps              []string                         `json:"apps,omitempty"`
+	DashRole          *string                          `json:"dash_role,omitempty"`
+	AppAssignments    []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
+	GroupIds          []int64                          `json:"group_ids,omitempty"`
+	Password          *string                          `json:"password,omitempty"`
+	Username          *string                          `json:"username,omitempty"`
+	TemporaryPassword *string                          `json:"temporary_password,omitempty"`
+	ProvisioningMode  *string                          `json:"provisioning_mode,omitempty"`
+}
+
+func (m *InviteUserRequest) MarshalJSON() ([]byte, error) {
+	type alias InviteUserRequest
+	aux := struct {
+		*alias
+		GroupIds []string `json:"group_ids,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.GroupIds = make([]string, len(m.GroupIds))
+	for i, v := range m.GroupIds {
+		aux.GroupIds[i] = strconv.FormatInt(v, 10)
+	}
+	return json.Marshal(aux)
+}
+
+func (m *InviteUserRequest) UnmarshalJSON(data []byte) error {
+	type alias InviteUserRequest
+	aux := struct {
+		*alias
+		GroupIds []string `json:"group_ids,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.GroupIds != nil {
+		m.GroupIds = make([]int64, len(aux.GroupIds))
+		for i, s := range aux.GroupIds {
+			v, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				return err
+			}
+			m.GroupIds[i] = v
+		}
+	}
+	return nil
 }
 
 func (x *InviteUserRequest) GetEmail() string {
@@ -35,7 +77,11 @@ func (x *InviteUserRequest) GetRole() string {
 		var zero string
 		return zero
 	}
-	return x.Role
+	if x.Role == nil {
+		var zero string
+		return zero
+	}
+	return *x.Role
 }
 
 func (x *InviteUserRequest) GetApps() []string {
@@ -44,6 +90,34 @@ func (x *InviteUserRequest) GetApps() []string {
 		return zero
 	}
 	return x.Apps
+}
+
+func (x *InviteUserRequest) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *InviteUserRequest) GetAppAssignments() []*hub_user_v1.AppRoleAssignment {
+	if x == nil {
+		var zero []*hub_user_v1.AppRoleAssignment
+		return zero
+	}
+	return x.AppAssignments
+}
+
+func (x *InviteUserRequest) GetGroupIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.GroupIds
 }
 
 func (x *InviteUserRequest) GetPassword() string {
@@ -56,6 +130,42 @@ func (x *InviteUserRequest) GetPassword() string {
 		return zero
 	}
 	return *x.Password
+}
+
+func (x *InviteUserRequest) GetUsername() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Username == nil {
+		var zero string
+		return zero
+	}
+	return *x.Username
+}
+
+func (x *InviteUserRequest) GetTemporaryPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TemporaryPassword == nil {
+		var zero string
+		return zero
+	}
+	return *x.TemporaryPassword
+}
+
+func (x *InviteUserRequest) GetProvisioningMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ProvisioningMode == nil {
+		var zero string
+		return zero
+	}
+	return *x.ProvisioningMode
 }
 
 type InviteUserResponse struct {
@@ -109,19 +219,27 @@ func (x *InviteUserResponse) GetMessage() string {
 }
 
 type BulkInviteRequest struct {
-	Emails  []string `json:"emails,omitempty"`
-	Role    string   `json:"role,omitempty"`
-	Apps    []string `json:"apps,omitempty"`
-	GroupId int64    `json:"group_id,omitempty"`
+	Emails         []string                         `json:"emails,omitempty"`
+	Role           *string                          `json:"role,omitempty"`
+	Apps           []string                         `json:"apps,omitempty"`
+	DashRole       *string                          `json:"dash_role,omitempty"`
+	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
+	GroupIds       []int64                          `json:"group_ids,omitempty"`
+	GroupId        int64                            `json:"group_id,omitempty"`
 }
 
 func (m *BulkInviteRequest) MarshalJSON() ([]byte, error) {
 	type alias BulkInviteRequest
 	aux := struct {
 		*alias
-		GroupId string `json:"group_id,omitempty"`
+		GroupId  string   `json:"group_id,omitempty"`
+		GroupIds []string `json:"group_ids,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.GroupId = strconv.FormatInt(m.GroupId, 10)
+	aux.GroupIds = make([]string, len(m.GroupIds))
+	for i, v := range m.GroupIds {
+		aux.GroupIds[i] = strconv.FormatInt(v, 10)
+	}
 	return json.Marshal(aux)
 }
 
@@ -129,7 +247,8 @@ func (m *BulkInviteRequest) UnmarshalJSON(data []byte) error {
 	type alias BulkInviteRequest
 	aux := struct {
 		*alias
-		GroupId string `json:"group_id,omitempty"`
+		GroupId  string   `json:"group_id,omitempty"`
+		GroupIds []string `json:"group_ids,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -140,6 +259,16 @@ func (m *BulkInviteRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.GroupId = v
+	}
+	if aux.GroupIds != nil {
+		m.GroupIds = make([]int64, len(aux.GroupIds))
+		for i, s := range aux.GroupIds {
+			v, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				return err
+			}
+			m.GroupIds[i] = v
+		}
 	}
 	return nil
 }
@@ -157,7 +286,11 @@ func (x *BulkInviteRequest) GetRole() string {
 		var zero string
 		return zero
 	}
-	return x.Role
+	if x.Role == nil {
+		var zero string
+		return zero
+	}
+	return *x.Role
 }
 
 func (x *BulkInviteRequest) GetApps() []string {
@@ -166,6 +299,34 @@ func (x *BulkInviteRequest) GetApps() []string {
 		return zero
 	}
 	return x.Apps
+}
+
+func (x *BulkInviteRequest) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *BulkInviteRequest) GetAppAssignments() []*hub_user_v1.AppRoleAssignment {
+	if x == nil {
+		var zero []*hub_user_v1.AppRoleAssignment
+		return zero
+	}
+	return x.AppAssignments
+}
+
+func (x *BulkInviteRequest) GetGroupIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.GroupIds
 }
 
 func (x *BulkInviteRequest) GetGroupId() int64 {
@@ -278,10 +439,12 @@ func (x *VerifyInviteRequest) GetToken() string {
 }
 
 type VerifyInviteResponse struct {
-	Email    string   `json:"email,omitempty"`
-	FullName string   `json:"full_name,omitempty"`
-	Valid    bool     `json:"valid,omitempty"`
-	Apps     []string `json:"apps,omitempty"`
+	Email          string                           `json:"email,omitempty"`
+	FullName       string                           `json:"full_name,omitempty"`
+	Valid          bool                             `json:"valid,omitempty"`
+	Apps           []string                         `json:"apps,omitempty"`
+	DashRole       *string                          `json:"dash_role,omitempty"`
+	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
 }
 
 func (x *VerifyInviteResponse) GetEmail() string {
@@ -314,6 +477,26 @@ func (x *VerifyInviteResponse) GetApps() []string {
 		return zero
 	}
 	return x.Apps
+}
+
+func (x *VerifyInviteResponse) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *VerifyInviteResponse) GetAppAssignments() []*hub_user_v1.AppRoleAssignment {
+	if x == nil {
+		var zero []*hub_user_v1.AppRoleAssignment
+		return zero
+	}
+	return x.AppAssignments
 }
 
 type AcceptInviteRequest struct {

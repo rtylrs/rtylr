@@ -46,7 +46,7 @@ message ProfileProject {
 
 message GetProfileRequest {
   /// user_id is the profile's subject.
-  user_id: int64 @required @gt(0)
+  user_id: int64 @gt(0)
 }
 
 message GetProfileResponse {

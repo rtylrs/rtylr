@@ -237,6 +237,10 @@ type SecurityServiceServer interface {
 	LoginHistory(ctx context.Context, req *LoginHistoryRequest) (*LoginHistoryResponse, error)
 	InvalidateSessions(ctx context.Context, req *InvalidateSessionsRequest) (*InvalidateSessionsResponse, error)
 	Update2FA(ctx context.Context, req *Update2FARequest) (*Update2FAResponse, error)
+	BeginMFAEnrollment(ctx context.Context, req *BeginMFAEnrollmentRequest) (*BeginMFAEnrollmentResponse, error)
+	CompleteMFAEnrollment(ctx context.Context, req *CompleteMFAEnrollmentRequest) (*CompleteMFAEnrollmentResponse, error)
+	VerifyMFA(ctx context.Context, req *VerifyMFARequest) (*VerifyMFAResponse, error)
+	UseMFARecoveryCode(ctx context.Context, req *UseMFARecoveryCodeRequest) (*UseMFARecoveryCodeResponse, error)
 }
 
 func RegisterSecurityServiceServer(first any, rest ...any) error {
@@ -367,5 +371,97 @@ func RegisterSecurityServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "SecurityService", Method: "update2FA", HTTPMethod: "PATCH", Route: "/hub/security/v1/2fa", AuthSchemes: nil}))
+	mux.Handle("POST /hub/security/v1/mfa/enroll", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(BeginMFAEnrollmentRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.BeginMFAEnrollment(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "SecurityService", Method: "beginMFAEnrollment", HTTPMethod: "POST", Route: "/hub/security/v1/mfa/enroll", AuthSchemes: nil}))
+	mux.Handle("POST /hub/security/v1/mfa/enroll/confirm", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(CompleteMFAEnrollmentRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.CompleteMFAEnrollment(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "SecurityService", Method: "completeMFAEnrollment", HTTPMethod: "POST", Route: "/hub/security/v1/mfa/enroll/confirm", AuthSchemes: nil}))
+	mux.Handle("POST /hub/security/v1/mfa/verify", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(VerifyMFARequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.VerifyMFA(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "SecurityService", Method: "verifyMFA", HTTPMethod: "POST", Route: "/hub/security/v1/mfa/verify", AuthSchemes: nil}))
+	mux.Handle("POST /hub/security/v1/mfa/recovery", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(UseMFARecoveryCodeRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.UseMFARecoveryCode(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "SecurityService", Method: "useMFARecoveryCode", HTTPMethod: "POST", Route: "/hub/security/v1/mfa/recovery", AuthSchemes: nil}))
 	return nil
 }

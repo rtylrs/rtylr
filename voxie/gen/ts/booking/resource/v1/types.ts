@@ -115,7 +115,7 @@ return violations;
 }
 
 export interface DeleteResourceRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteResourceRequest(v: any): DeleteResourceRequest {
@@ -134,7 +134,6 @@ return out;
 export function validateDeleteResourceRequest(v: DeleteResourceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -206,7 +205,7 @@ return violations;
 }
 
 export interface UpdateResourceRequest {
-id: string;
+id?: string;
 name?: string;
 type?: string;
 capacity?: number;
@@ -237,7 +236,6 @@ return out;
 export function validateUpdateResourceRequest(v: UpdateResourceRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");

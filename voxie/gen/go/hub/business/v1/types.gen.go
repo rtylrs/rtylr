@@ -573,16 +573,19 @@ func (x *GetBusinessResponse) GetBusiness() *Business {
 
 type CreateSubBusinessRequest struct {
 	Name             string `json:"name,omitempty"`
-	ParentBusinessId int64  `json:"parent_business_id,omitempty"`
+	ParentBusinessId *int64 `json:"parent_business_id,omitempty"`
 }
 
 func (m *CreateSubBusinessRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateSubBusinessRequest
 	aux := struct {
 		*alias
-		ParentBusinessId string `json:"parent_business_id,omitempty"`
+		ParentBusinessId *string `json:"parent_business_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ParentBusinessId = strconv.FormatInt(m.ParentBusinessId, 10)
+	if m.ParentBusinessId != nil {
+		encodedParentBusinessId := strconv.FormatInt(*m.ParentBusinessId, 10)
+		aux.ParentBusinessId = &encodedParentBusinessId
+	}
 	return json.Marshal(aux)
 }
 
@@ -590,17 +593,17 @@ func (m *CreateSubBusinessRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateSubBusinessRequest
 	aux := struct {
 		*alias
-		ParentBusinessId string `json:"parent_business_id,omitempty"`
+		ParentBusinessId *string `json:"parent_business_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ParentBusinessId != "" {
-		v, err := strconv.ParseInt(aux.ParentBusinessId, 10, 64)
+	if aux.ParentBusinessId != nil {
+		v, err := strconv.ParseInt(*aux.ParentBusinessId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ParentBusinessId = v
+		m.ParentBusinessId = &v
 	}
 	return nil
 }
@@ -618,7 +621,11 @@ func (x *CreateSubBusinessRequest) GetParentBusinessId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ParentBusinessId
+	if x.ParentBusinessId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ParentBusinessId
 }
 
 type CreateSubBusinessResponse struct {

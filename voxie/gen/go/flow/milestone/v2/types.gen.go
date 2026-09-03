@@ -275,7 +275,7 @@ func (x *ListMilestonesResponse) GetPagination() *common_pagination_v1.Paginatio
 }
 
 type CreateMilestoneRequest struct {
-	ProjectId   int64  `json:"project_id,omitempty"`
+	ProjectId   *int64 `json:"project_id,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	TargetDate  string `json:"target_date,omitempty"`
@@ -285,9 +285,12 @@ func (m *CreateMilestoneRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateMilestoneRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
 	return json.Marshal(aux)
 }
 
@@ -295,17 +298,17 @@ func (m *CreateMilestoneRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateMilestoneRequest
 	aux := struct {
 		*alias
-		ProjectId string `json:"project_id,omitempty"`
+		ProjectId *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	if aux.ProjectId != "" {
-		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
 		if err != nil {
 			return err
 		}
-		m.ProjectId = v
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -315,7 +318,11 @@ func (x *CreateMilestoneRequest) GetProjectId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.ProjectId
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
 }
 
 func (x *CreateMilestoneRequest) GetName() string {

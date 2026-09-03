@@ -39,7 +39,7 @@ message CreateArticleResponse {
 }
 
 message UpdateArticleRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   title: string
   slug: string
   body: string
@@ -52,7 +52,7 @@ message UpdateArticleResponse {
 }
 
 message DeleteArticleRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteArticleResponse {

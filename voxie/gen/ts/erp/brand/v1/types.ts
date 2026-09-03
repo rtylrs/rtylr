@@ -143,7 +143,7 @@ return violations;
 }
 
 export interface UpdateBrandRequest {
-id: string;
+id?: string;
 body?: UpdateBrandBody;
 }
 
@@ -165,7 +165,6 @@ return out;
 export function validateUpdateBrandRequest(v: UpdateBrandRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateBrandBody(v.body).map((message) => "body: " + message));
@@ -196,7 +195,7 @@ return violations;
 }
 
 export interface DeleteBrandRequest {
-id: string;
+id?: string;
 }
 
 export function decodeDeleteBrandRequest(v: any): DeleteBrandRequest {
@@ -215,7 +214,6 @@ return out;
 export function validateDeleteBrandRequest(v: DeleteBrandRequest): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
-if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }

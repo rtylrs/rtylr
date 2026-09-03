@@ -227,10 +227,10 @@ type CreateWorkScheduleRequest struct {
 	WorkingDays              []string `json:"working_days,omitempty"`
 	StartTime                string   `json:"start_time,omitempty"`
 	EndTime                  string   `json:"end_time,omitempty"`
-	BreakMinutes             int32    `json:"break_minutes,omitempty"`
+	BreakMinutes             *int32   `json:"break_minutes,omitempty"`
 	ContractedHoursPerWeek   float64  `json:"contracted_hours_per_week,omitempty"`
-	DailyOtThresholdMinutes  int32    `json:"daily_ot_threshold_minutes,omitempty"`
-	WeeklyOtThresholdMinutes int32    `json:"weekly_ot_threshold_minutes,omitempty"`
+	DailyOtThresholdMinutes  *int32   `json:"daily_ot_threshold_minutes,omitempty"`
+	WeeklyOtThresholdMinutes *int32   `json:"weekly_ot_threshold_minutes,omitempty"`
 }
 
 func (x *CreateWorkScheduleRequest) GetName() string {
@@ -270,7 +270,11 @@ func (x *CreateWorkScheduleRequest) GetBreakMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.BreakMinutes
+	if x.BreakMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.BreakMinutes
 }
 
 func (x *CreateWorkScheduleRequest) GetContractedHoursPerWeek() float64 {
@@ -286,7 +290,11 @@ func (x *CreateWorkScheduleRequest) GetDailyOtThresholdMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.DailyOtThresholdMinutes
+	if x.DailyOtThresholdMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DailyOtThresholdMinutes
 }
 
 func (x *CreateWorkScheduleRequest) GetWeeklyOtThresholdMinutes() int32 {
@@ -294,7 +302,11 @@ func (x *CreateWorkScheduleRequest) GetWeeklyOtThresholdMinutes() int32 {
 		var zero int32
 		return zero
 	}
-	return x.WeeklyOtThresholdMinutes
+	if x.WeeklyOtThresholdMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.WeeklyOtThresholdMinutes
 }
 
 type CreateWorkScheduleResponse struct {

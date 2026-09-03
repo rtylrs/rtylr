@@ -4,17 +4,21 @@ package v1
 import (
 	"encoding/json"
 	hub_team_groups_v1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
+	hub_user_v1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 	"strconv"
 )
 
 type StaffUserPayload struct {
-	Id        int64    `json:"id,omitempty"`
-	Email     string   `json:"email,omitempty"`
-	FullName  string   `json:"full_name,omitempty"`
-	CreatedAt string   `json:"created_at,omitempty"`
-	Apps      []string `json:"apps,omitempty"`
-	Role      string   `json:"role,omitempty"`
-	IsActive  bool     `json:"is_active,omitempty"`
+	Id              int64                            `json:"id,omitempty"`
+	Email           string                           `json:"email,omitempty"`
+	FullName        string                           `json:"full_name,omitempty"`
+	CreatedAt       string                           `json:"created_at,omitempty"`
+	Apps            []string                         `json:"apps,omitempty"`
+	Role            string                           `json:"role,omitempty"`
+	IsActive        bool                             `json:"is_active,omitempty"`
+	DashRole        *string                          `json:"dash_role,omitempty"`
+	AppAssignments  []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
+	EffectiveAccess *hub_user_v1.EffectiveAccess     `json:"effective_access,omitempty"`
 }
 
 func (m *StaffUserPayload) MarshalJSON() ([]byte, error) {
@@ -102,15 +106,46 @@ func (x *StaffUserPayload) GetIsActive() bool {
 	return x.IsActive
 }
 
+func (x *StaffUserPayload) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *StaffUserPayload) GetAppAssignments() []*hub_user_v1.AppRoleAssignment {
+	if x == nil {
+		var zero []*hub_user_v1.AppRoleAssignment
+		return zero
+	}
+	return x.AppAssignments
+}
+
+func (x *StaffUserPayload) GetEffectiveAccess() *hub_user_v1.EffectiveAccess {
+	if x == nil {
+		var zero *hub_user_v1.EffectiveAccess
+		return zero
+	}
+	return x.EffectiveAccess
+}
+
 type StaffUserWithGroups struct {
-	Id        int64                              `json:"id,omitempty"`
-	Email     string                             `json:"email,omitempty"`
-	FullName  string                             `json:"full_name,omitempty"`
-	CreatedAt string                             `json:"created_at,omitempty"`
-	Apps      []string                           `json:"apps,omitempty"`
-	Role      string                             `json:"role,omitempty"`
-	IsActive  bool                               `json:"is_active,omitempty"`
-	Groups    []*hub_team_groups_v1.GroupSummary `json:"groups,omitempty"`
+	Id              int64                              `json:"id,omitempty"`
+	Email           string                             `json:"email,omitempty"`
+	FullName        string                             `json:"full_name,omitempty"`
+	CreatedAt       string                             `json:"created_at,omitempty"`
+	Apps            []string                           `json:"apps,omitempty"`
+	Role            string                             `json:"role,omitempty"`
+	IsActive        bool                               `json:"is_active,omitempty"`
+	DashRole        *string                            `json:"dash_role,omitempty"`
+	AppAssignments  []*hub_user_v1.AppRoleAssignment   `json:"app_assignments,omitempty"`
+	EffectiveAccess *hub_user_v1.EffectiveAccess       `json:"effective_access,omitempty"`
+	Groups          []*hub_team_groups_v1.GroupSummary `json:"groups,omitempty"`
 }
 
 func (m *StaffUserWithGroups) MarshalJSON() ([]byte, error) {
@@ -196,6 +231,34 @@ func (x *StaffUserWithGroups) GetIsActive() bool {
 		return zero
 	}
 	return x.IsActive
+}
+
+func (x *StaffUserWithGroups) GetDashRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DashRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.DashRole
+}
+
+func (x *StaffUserWithGroups) GetAppAssignments() []*hub_user_v1.AppRoleAssignment {
+	if x == nil {
+		var zero []*hub_user_v1.AppRoleAssignment
+		return zero
+	}
+	return x.AppAssignments
+}
+
+func (x *StaffUserWithGroups) GetEffectiveAccess() *hub_user_v1.EffectiveAccess {
+	if x == nil {
+		var zero *hub_user_v1.EffectiveAccess
+		return zero
+	}
+	return x.EffectiveAccess
 }
 
 func (x *StaffUserWithGroups) GetGroups() []*hub_team_groups_v1.GroupSummary {

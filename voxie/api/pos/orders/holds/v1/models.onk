@@ -3,7 +3,7 @@ package pos.orders.holds.v1
 // ── Hold Order ────────────────────────────────────────────────────
 
 message HoldOrderRequest {
-  order_id: int64 @required @gt(0)
+  order_id: int64 @gt(0)
   reason: string @required
 }
 

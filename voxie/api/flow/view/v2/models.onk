@@ -52,7 +52,7 @@ message CreateViewResponse {
 }
 
 message UpdateViewRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
   name: string
   icon: string
   /// JSON-encoded filter criteria for this saved view.
@@ -70,7 +70,7 @@ message UpdateViewRequest {
 message UpdateViewResponse {}
 
 message DeleteViewRequest {
-  id: int64 @required @gt(0)
+  id: int64 @gt(0)
 }
 
 message DeleteViewResponse {}

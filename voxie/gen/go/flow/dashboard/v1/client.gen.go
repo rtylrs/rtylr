@@ -53,7 +53,9 @@ func (c *DashboardServiceClient) GetFlowDashboard(ctx context.Context, req *GetF
 	}
 	path := "/flow/dashboard/v1/dashboard"
 	query := url.Values{}
-	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))
+	if req.WorkspaceId != nil {
+		query.Set("workspace_id", strconv.FormatInt(int64(*req.WorkspaceId), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
