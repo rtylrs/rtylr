@@ -670,18 +670,18 @@ export const flowApi = {
       taskV2.updateTask({
         id,
         body: {
-          title: data.title ?? '-',
-          description: data.description ?? '-',
-          status: data.status ?? 'todo',
-          priority: data.priority ?? 'no_priority',
+          title: data.title,
+          description: data.description,
+          status: data.status,
+          priority: data.priority,
           assigneeId:
             data.assigneeId !== undefined
               ? data.assigneeId
                 ? String(Number(data.assigneeId))
                 : undefined
               : undefined,
-          dueDate: data.dueDate ?? '-',
-          startDate: data.startDate ?? '-',
+          dueDate: data.dueDate,
+          startDate: data.startDate,
           labels: data.labels?.map((l) => String(Number(l))),
           archived: data.archived,
         },
