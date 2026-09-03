@@ -317,6 +317,17 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 func (s *Service) ListTeamWorkDays(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
 	// Default policy gate: only the central Flow team-management permission
 	// grants business-wide visibility. Resource checks remain scope-bound.
+	days, total, err := s.listTeamWorkDaysForCaller(ctx, callerID, businessID, from, to, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err := s.stampWorkDayUserIDs(ctx, businessID, days); err != nil {
+		return nil, 0, err
+	}
+	return days, total, nil
+}
+
+func (s *Service) listTeamWorkDaysForCaller(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
 	if s.hubProfileBypasses(ctx, callerID, businessID) {
 		return s.listAllBusinessWorkDays(ctx, businessID, from, to, limit, offset)
 	}
@@ -324,6 +335,46 @@ func (s *Service) ListTeamWorkDays(ctx context.Context, callerID, businessID int
 	// see the people on those projects. This is a simplified default; the
 	// per-business config policy will refine it when the settings panel lands.
 	return s.listVisibleProjectMemberDays(ctx, callerID, businessID, from, to, limit, offset)
+}
+
+// stampWorkDayUserIDs attaches the auth user id to each day in the team view.
+//
+// A work day is keyed on hr_employees.id while every roster the client holds
+// comes from /hub/team/members and is keyed on users.id. Those are different id
+// spaces, so a day with no user id cannot be attached to a person: the client
+// drops it, and Team shows "Not started" and Reports 0:00 for everyone even
+// though the hours are in the response. The contract assigns this to the server
+// for exactly this view, because only the server has the roster join.
+//
+// Applied here rather than in either branch above so both visibility paths get
+// it, and so a third path cannot be added without it.
+func (s *Service) stampWorkDayUserIDs(ctx context.Context, businessID int64, days []domain.WorkDay) error {
+	if len(days) == 0 {
+		return nil
+	}
+
+	employeeIDs := make([]int64, 0, len(days))
+	seen := make(map[int64]bool, len(days))
+	for _, day := range days {
+		if day.EmployeeID > 0 && !seen[day.EmployeeID] {
+			seen[day.EmployeeID] = true
+			employeeIDs = append(employeeIDs, day.EmployeeID)
+		}
+	}
+
+	byEmployeeID, err := s.repo.EmployeeUserIDs(ctx, businessID, employeeIDs)
+	if err != nil {
+		return err
+	}
+
+	// An employee with no user row keeps UserID zero, which the API mapper
+	// already treats as unset rather than sending a user id of 0.
+	for i := range days {
+		if userID, ok := byEmployeeID[days[i].EmployeeID]; ok {
+			days[i].UserID = userID
+		}
+	}
+	return nil
 }
 
 func (s *Service) listAllBusinessWorkDays(ctx context.Context, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
