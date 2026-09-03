@@ -141,9 +141,23 @@ UPDATE flow_work_types
 SET name = ?, description = ?, parent_id = ?, hr_category_id = ?, sort_order = ?, archived = ?
 WHERE id = ? AND owner_id = ? AND business_id = ?;
 
+-- Archives rather than deletes, which is what the archived column was added for.
+-- There is no foreign key on hr_time_entries.work_type_id, so a hard DELETE left
+-- every entry that used the type pointing at an id that no longer exists, and
+-- timesheets that were already submitted and approved silently lost their
+-- classification. Those entries feed approvals and Finance's billable pull, so
+-- the classification has to stay readable.
+--
+-- ListWorkTypes already hides archived rows unless a caller asks for them, so
+-- the type disappears from Log Hours exactly as it did before.
+--
+-- archived = FALSE keeps the row count honest: archiving an already-archived
+-- type affects nothing, and the caller is told it was not found rather than
+-- that it was deleted a second time.
 -- name: DeleteWorkType :execresult
-DELETE FROM flow_work_types
-WHERE id = ? AND owner_id = ? AND business_id = ?;
+UPDATE flow_work_types
+SET archived = TRUE
+WHERE id = ? AND owner_id = ? AND business_id = ? AND archived = FALSE;
 
 -- Guards the two-level rule: a node may only be nested under a top-level type.
 -- name: CountWorkTypeChildren :one
