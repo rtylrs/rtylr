@@ -809,7 +809,8 @@
     "archiveConfirm": "Archiver le projet"
   },
   "bulkEdit": {
-    "clearSelectionLabel": "Effacer la sélection"
+    "clearSelectionLabel": "Effacer la sélection",
+    "unresolved": "Certaines tâches sélectionnées n'ont pas pu être chargées, cette action est donc indisponible."
   },
   "allProjects": {
     "title": "Tous les projets",
