@@ -1,9 +1,16 @@
+-- Labels are business-scoped in v2: ListLabelsV2 and CreateLabelV2 both key on
+-- flow_labels.business_id, and a v2 label carries workspace_id = 0. Guarding
+-- these two on the workspace pair alone therefore matched nothing, so a label
+-- could be created and listed but never renamed or deleted. business_id <> 0
+-- keeps a caller whose business could not be resolved from matching the legacy
+-- rows; the workspace pair is kept so a workspace-era label still resolves.
 -- name: UpdateLabel :execresult
 UPDATE flow_labels
 SET name = ?, color = ?
 WHERE flow_labels.id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_labels.workspace_id AND w.owner_id = ?)
+    (flow_labels.business_id <> 0 AND flow_labels.business_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_labels.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_labels.workspace_id AND wm.user_id = ?)
   );
 
@@ -11,7 +18,8 @@ WHERE flow_labels.id = ?
 DELETE FROM flow_labels
 WHERE flow_labels.id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_labels.workspace_id AND w.owner_id = ?)
+    (flow_labels.business_id <> 0 AND flow_labels.business_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_labels.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_labels.workspace_id AND wm.user_id = ?)
   );
 

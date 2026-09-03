@@ -130,22 +130,22 @@ func (a *LabelAPIV2) CreateLabel(ctx context.Context, req *flowlabelv2.CreateLab
 }
 
 func (a *LabelAPIV2) UpdateLabel(ctx context.Context, req *flowlabelv2.UpdateLabelRequest) (*flowlabelv2.UpdateLabelResponse, error) {
-	caller, _, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if err := a.Service.UpdateLabel(ctx, req.GetId(), caller.UserID, domain.LabelInput{Name: req.GetName(), Color: req.GetColor()}); err != nil {
+	if err := a.Service.UpdateLabel(ctx, req.GetId(), caller.UserID, businessID, domain.LabelInput{Name: req.GetName(), Color: req.GetColor()}); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update label")
 	}
 	return &flowlabelv2.UpdateLabelResponse{Message: "Label updated"}, nil
 }
 
 func (a *LabelAPIV2) DeleteLabel(ctx context.Context, req *flowlabelv2.DeleteLabelRequest) (*flowlabelv2.DeleteLabelResponse, error) {
-	caller, _, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if err := a.Service.DeleteLabel(ctx, req.GetId(), caller.UserID); err != nil {
+	if err := a.Service.DeleteLabel(ctx, req.GetId(), caller.UserID, businessID); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete label")
 	}
 	return &flowlabelv2.DeleteLabelResponse{Message: "Label deleted"}, nil

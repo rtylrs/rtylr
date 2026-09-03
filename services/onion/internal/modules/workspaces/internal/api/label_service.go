@@ -100,7 +100,12 @@ func (a *LabelAPI) UpdateLabel(ctx context.Context, req *flowlabelv1.UpdateLabel
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	if err := a.Service.UpdateLabel(ctx, req.GetId(), authUser.UserID, domain.LabelInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	if err := a.Service.UpdateLabel(ctx, req.GetId(), authUser.UserID, businessID, domain.LabelInput{
 		Name:  req.GetName(),
 		Color: req.GetColor(),
 	}); err != nil {
@@ -116,7 +121,12 @@ func (a *LabelAPI) DeleteLabel(ctx context.Context, req *flowlabelv1.DeleteLabel
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	if err := a.Service.DeleteLabel(ctx, req.GetId(), authUser.UserID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	if err := a.Service.DeleteLabel(ctx, req.GetId(), authUser.UserID, businessID); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete label")
 	}
 

@@ -9,12 +9,20 @@ LIMIT ? OFFSET ?;
 INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, created_by)
 VALUES (?, ?, ?, ?, ?, ?);
 
+-- Guarded on the project for the same reason DeleteColumn below is: a v2 column
+-- carries workspace_id = 0, so the workspace pair alone matches nothing and the
+-- rename silently affects no rows.
 -- name: UpdateColumn :execresult
 UPDATE flow_project_columns
 SET name = ?, color = ?, sort_order = ?, updated_at = NOW()
 WHERE flow_project_columns.id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_project_columns.workspace_id AND w.owner_id = ?)
+    EXISTS (SELECT 1 FROM flow_project_members pm
+            WHERE pm.project_id = flow_project_columns.project_id AND pm.user_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_projects p
+               WHERE p.id = flow_project_columns.project_id
+                 AND (p.owner_id = ? OR p.created_by = ?))
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_project_columns.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_project_columns.workspace_id AND wm.user_id = ?)
   );
 

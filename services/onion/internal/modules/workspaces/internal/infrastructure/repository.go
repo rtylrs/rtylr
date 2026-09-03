@@ -1003,17 +1003,18 @@ func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID, limi
 	return labels, total, nil
 }
 
-func (r *Repository) UpdateLabel(ctx context.Context, id, actorID int64, input domain.LabelInput) error {
+func (r *Repository) UpdateLabel(ctx context.Context, id, actorID, businessID int64, input domain.LabelInput) error {
 	color := input.Color
 	if color == "" {
 		color = "#6366f1"
 	}
 	res, err := r.queries.UpdateLabel(ctx, sqlc.UpdateLabelParams{
-		Name:    input.Name,
-		Color:   color,
-		ID:      id,
-		OwnerID: actorID,
-		UserID:  actorID,
+		Name:       input.Name,
+		Color:      color,
+		ID:         id,
+		BusinessID: businessID,
+		OwnerID:    actorID,
+		UserID:     actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateLabel failed", logger.Error(err))
@@ -1022,11 +1023,12 @@ func (r *Repository) UpdateLabel(ctx context.Context, id, actorID int64, input d
 	return requireAffected(res)
 }
 
-func (r *Repository) DeleteLabel(ctx context.Context, id, actorID int64) error {
+func (r *Repository) DeleteLabel(ctx context.Context, id, actorID, businessID int64) error {
 	res, err := r.queries.DeleteLabel(ctx, sqlc.DeleteLabelParams{
-		ID:      id,
-		OwnerID: actorID,
-		UserID:  actorID,
+		ID:         id,
+		BusinessID: businessID,
+		OwnerID:    actorID,
+		UserID:     actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteLabel failed", logger.Error(err))
@@ -1083,8 +1085,15 @@ func (r *Repository) RecalcActualHours(ctx context.Context, taskID, actorID int6
 		TaskID:   sql.NullInt64{Int64: taskID, Valid: true},
 		TaskID_2: taskID,
 		ID:       taskID,
-		OwnerID:  actorID,
-		UserID:   actorID,
+		// One actor across every branch: project member, project owner, project
+		// creator, then the two legacy workspace branches. Without the project
+		// clauses this UPDATE matched no row for a v2 task, so a task with hours
+		// logged against it kept actual_hours NULL (tryrtylr/rtylr#903).
+		UserID:    actorID,
+		OwnerID:   actorID,
+		CreatedBy: actorID,
+		OwnerID_2: actorID,
+		UserID_2:  actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("RecalcActualHours failed", logger.Error(err))
@@ -1691,8 +1700,13 @@ func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjec
 		Color:     sql.NullString{String: input.Color, Valid: input.Color != ""},
 		SortOrder: sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ID:        input.ID,
-		OwnerID:   input.ActorID,
+		// One actor across every branch, matching DeleteColumn: project member,
+		// project owner, project creator, then the two legacy workspace branches.
 		UserID:    input.ActorID,
+		OwnerID:   input.ActorID,
+		CreatedBy: input.ActorID,
+		OwnerID_2: input.ActorID,
+		UserID_2:  input.ActorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateColumn failed", logger.Error(err))

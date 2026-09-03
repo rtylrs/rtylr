@@ -1058,12 +1058,12 @@ func (s *Service) CreateLabel(ctx context.Context, input domain.LabelInput) (dom
 	}, nil
 }
 
-func (s *Service) UpdateLabel(ctx context.Context, id, actorID int64, input domain.LabelInput) error {
-	return s.repo.UpdateLabel(ctx, id, actorID, input)
+func (s *Service) UpdateLabel(ctx context.Context, id, actorID, businessID int64, input domain.LabelInput) error {
+	return s.repo.UpdateLabel(ctx, id, actorID, businessID, input)
 }
 
-func (s *Service) DeleteLabel(ctx context.Context, id, actorID int64) error {
-	return s.repo.DeleteLabel(ctx, id, actorID)
+func (s *Service) DeleteLabel(ctx context.Context, id, actorID, businessID int64) error {
+	return s.repo.DeleteLabel(ctx, id, actorID, businessID)
 }
 
 func (s *Service) SetTaskLabels(ctx context.Context, taskID, actorID int64, labelIDs []int64) error {

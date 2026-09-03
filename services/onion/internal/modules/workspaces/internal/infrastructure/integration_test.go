@@ -700,7 +700,7 @@ func TestWorkspaces_CreateLabel_ReturnsPositiveID(t *testing.T) {
 	if labelID <= 0 {
 		t.Errorf("expected positive label ID, got %d", labelID)
 	}
-	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID, testutil.OwnerID, testutil.BusinessID) })
 }
 
 func TestWorkspaces_GetLabelsByWorkspace_ReturnsLabel(t *testing.T) {
@@ -722,7 +722,7 @@ func TestWorkspaces_GetLabelsByWorkspace_ReturnsLabel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLabel: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID, testutil.OwnerID, testutil.BusinessID) })
 
 	labels, _, err := repo.GetLabelsByWorkspace(ctx, wsID, 100, 0)
 	if err != nil {

@@ -437,7 +437,9 @@ func TestWorkspaces_GetLabelsByWorkspace_PaginationAndTotal(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CreateLabel %d: %v", i, err)
 		}
-		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteLabel(ctx, id, testutil.OwnerID) } }(labelID))
+		t.Cleanup(func(id int64) func() {
+			return func() { _ = repo.DeleteLabel(ctx, id, testutil.OwnerID, testutil.BusinessID) }
+		}(labelID))
 	}
 
 	page1, total1, err := repo.GetLabelsByWorkspace(ctx, wsID, 2, 0)
