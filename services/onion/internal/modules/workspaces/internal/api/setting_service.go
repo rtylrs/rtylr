@@ -49,9 +49,9 @@ func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if err := requireFlowPermission(ctx, "flow:settings:manage"); err != nil {
-		return nil, err
-	}
+	// No permission check: the row written below is keyed on authUser.UserID,
+	// so a caller can only ever change their own preferences. The business is
+	// still resolved, which keeps a session with no business out.
 	if _, businessErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID); businessErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}

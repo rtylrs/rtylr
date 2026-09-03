@@ -310,10 +310,16 @@ func posFeaturePermission(method, path string) (string, bool) {
 	return "", false
 }
 
+// Flow's only /settings routes are GET and PUT /flow/setting/v1/settings, which
+// read and write one row keyed on the caller's own user id: notification
+// preferences and the sidebar layout. Nothing there is business-wide, so they
+// are deliberately absent from this table. Gating them on
+// flow:settings:manage stopped an ordinary member from turning off their own
+// email notifications, and the handlers' own GetAuthUser scoping is what keeps
+// a caller to their own row. Business-wide Flow settings, if any are ever
+// added, need their own path rather than this substring.
 func flowFeaturePermission(method, path string) (string, bool) {
 	switch {
-	case strings.Contains(path, "/settings"):
-		return "flow:settings:manage", true
 	case strings.Contains(path, "/managers"):
 		return "flow:managers:manage", true
 	case strings.Contains(path, "/team"):
