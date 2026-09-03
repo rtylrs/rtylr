@@ -26,7 +26,14 @@ export function useCreateProject() {
     // Invalidate by prefix - the caller's workspaceId may be the "personal"
     // sentinel while the fetched query keyed with the resolved numeric ID,
     // so keying the invalidation on variables.workspaceId would miss.
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+    // Both 'projects' (this hook, the sidebar) and 'projects-v2' (the All
+    // Projects page, features/projects-v2) read the same backend list and
+    // must both be invalidated - they're separate query keys mid-migration,
+    // not aliases of each other.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
+    },
     onError: () => toast.error(t('toasts.project.createFailed')),
   });
 }
@@ -38,7 +45,10 @@ export function useUpdateProject() {
     mutationFn: ({ id, data }: { id: string; data: ProjectUpdate }) => {
       return unwrap(flowApi.updateProject(id, data)).then(() => {});
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
+    },
     onError: () => toast.error(t('toasts.project.updateFailed')),
   });
 }
@@ -55,6 +65,7 @@ export function useArchiveProject() {
     },
     onSuccess: (res) => {
       void qc.invalidateQueries({ queryKey: ['projects'] });
+      void qc.invalidateQueries({ queryKey: ['projects-v2'] });
       void qc.invalidateQueries({ queryKey: ['archived-projects'] });
 
       // Ruling P3: state the scheduled permanent-deletion date explicitly. The

@@ -52,7 +52,7 @@
   },
   "list": {
     "noMembersTitle": "Aucun membre pour l'instant",
-    "noMembersDescription": "Invitez votre premier membre d'équipe pour commencer.",
+    "noMembersDescription": "Ajoutez votre premier membre d'équipe pour commencer.",
     "noMembersMatchTitle": "Aucun membre ne correspond à votre recherche",
     "noMembersMatchDescription": "Essayez un autre terme de recherche.",
     "membersCountSingular": "{{count}} membre",

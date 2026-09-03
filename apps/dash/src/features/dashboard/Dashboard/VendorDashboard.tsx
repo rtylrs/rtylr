@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from '@tanstack/react-router';
 import {
   Responsive as ResponsiveGridLayout,
   type Layout,
@@ -10,7 +11,10 @@ import { Settings2, X, Plus, GripVertical } from 'lucide-react';
 import { ErrorBoundary } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { toFiniteNumber } from '@voxire/api';
+import { canEffectiveAccess } from '@voxire/permissions';
+import { useTranslation } from 'react-i18next';
 import { useUserStore } from '../../../shared/stores/userStore';
+import { Button } from '../../../shared/components/ui';
 import {
   getWidgetComponent,
   WIDGET_CATALOG,
@@ -67,7 +71,12 @@ function layoutSignature(layout: ReadonlyArray<LayoutSignatureItem> | undefined)
 
 const AdminDashboard: React.FC = () => {
   const { user } = useUserStore();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
   const businessName = (user?.businessName as string | undefined) || 'Dashboard';
+  const canCreateRole = user?.effectiveAccess
+    ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:create')
+    : user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -158,7 +167,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <div ref={containerRef} className="space-y-4 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             {businessName}
@@ -167,21 +176,35 @@ const AdminDashboard: React.FC = () => {
             {today}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowCatalog(true)}
-          className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
-          style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'var(--dash-hover)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'transparent';
-          }}
-          title="Customize dashboard"
-        >
-          <Settings2 size={15} />
-        </button>
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          {canCreateRole && (
+            <Button
+              type="button"
+              size="lg"
+              className="min-h-11 flex-1 sm:flex-none"
+              onClick={() => void navigate({ to: '/roles', search: { create: 1 } })}
+              aria-label={t('dashboard.createCustomRole')}
+            >
+              <Plus size={16} />
+              {t('dashboard.createCustomRole')}
+            </Button>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowCatalog(true)}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-colors"
+            style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'var(--dash-hover)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+            }}
+            title="Customize dashboard"
+          >
+            <Settings2 size={15} />
+          </button>
+        </div>
       </div>
 
       {/* Grid */}

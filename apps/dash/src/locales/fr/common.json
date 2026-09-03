@@ -119,7 +119,7 @@
   "nav": {
     "dashboard": "Tableau de bord",
     "team": "Équipe",
-    "inviteMember": "Inviter un membre",
+    "addMember": "Ajouter un membre",
     "permissions": "Autorisations",
     "roles": "Rôles",
     "apps": "Applications",

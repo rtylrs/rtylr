@@ -47,7 +47,7 @@ const TOUR_STEPS: StepOptions[] = [
   {
     id: 'team',
     attachTo: { element: '[data-tour="team"]', on: 'right' },
-    text: 'Manage your team here. Invite members, assign roles, and control which apps they can access.',
+    text: 'Manage your team here. Add members, assign roles, and control which apps they can access.',
     buttons: [
       {
         text: 'Back',

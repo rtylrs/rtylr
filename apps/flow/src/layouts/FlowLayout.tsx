@@ -521,7 +521,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         visibleRows: sidebarProjects.slice(0, 12).map((project) => ({
           id: project.id,
           name: project.name,
-          open_tasks: Math.max(0, project.taskCount - project.completedCount),
+          open_tasks: Math.max(0, (project.taskCount ?? 0) - (project.completedCount ?? 0)),
         })),
         hints: [
           t('flow.shell.assignedOpenTasks', { count: myIssuesCount }),
@@ -1066,7 +1066,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                                         className="relative text-[10px]"
                                         style={{ color: 'var(--flow-text-dim)' }}
                                       >
-                                        {project.taskCount - project.completedCount}
+                                        {(project.taskCount ?? 0) - (project.completedCount ?? 0)}
                                       </span>
                                     </Link>
                                   </React.Fragment>
@@ -1402,7 +1402,16 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               </div>
             )}
             <LicenseBanner client={licenseClient} />
-            <AnimatePresence mode="wait">
+            {/* mode="wait" (the default AnimatePresence sequencing) would unmount
+                the outgoing <main> before mounting the incoming one - since this
+                is keyed on the full pathname, that gap opens on every navigation
+                between two projects, not just section changes. During it there
+                is no <main> in the DOM at all, so the layout's own background
+                (var(--flow-bg), near-black in dark mode) shows through with
+                nothing on top - a solid black flash until the incoming main
+                mounts. Overlapping the two (no mode prop) keeps the outgoing
+                page visible while the incoming one fades in underneath it. */}
+            <AnimatePresence>
               <motion.main
                 key={location.pathname}
                 initial={{ opacity: 0, y: 6 }}

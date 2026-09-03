@@ -31,14 +31,14 @@ describe('TeamWidget empty state', () => {
 
     expect(screen.getByText('dashboard.teamWidget.emptyTitle')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'dashboard.teamWidget.inviteSomeone' })
+      screen.getByRole('button', { name: 'dashboard.teamWidget.addMember' })
     ).toBeInTheDocument();
   });
 
   it('navigates to the invite screen when the call-to-action is clicked', () => {
     render(<TeamWidget />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'dashboard.teamWidget.inviteSomeone' }));
+    fireEvent.click(screen.getByRole('button', { name: 'dashboard.teamWidget.addMember' }));
 
     expect(navigateMock).toHaveBeenCalledWith({ to: '/team/invite' });
   });

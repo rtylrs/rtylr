@@ -67,18 +67,18 @@ beforeEach(() => {
 });
 
 describe('Team list empty state', () => {
-  it('shows the true-empty title, description and invite call-to-action when there are no members', () => {
+  it('shows the true-empty title, description and add-member call-to-action when there are no members', () => {
     render(<Team />);
 
     expect(screen.getByText('team.list.noMembersTitle')).toBeInTheDocument();
     expect(screen.getByText('team.list.noMembersDescription')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'common.nav.inviteMember' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'common.nav.addMember' })).toHaveLength(2);
   });
 
   it('navigates to the invite screen when the true-empty call-to-action is clicked', () => {
     render(<Team />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'common.nav.inviteMember' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'common.nav.addMember' })[1]);
 
     expect(navigateMock).toHaveBeenCalledWith({ to: '/team/invite' });
   });

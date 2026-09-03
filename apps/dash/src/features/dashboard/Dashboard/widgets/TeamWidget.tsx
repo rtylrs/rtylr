@@ -25,7 +25,7 @@ const TeamWidget: React.FC = () => {
             icon={Users}
             title={t('dashboard.teamWidget.emptyTitle')}
             action={{
-              label: t('dashboard.teamWidget.inviteSomeone'),
+              label: t('dashboard.teamWidget.addMember'),
               onClick: () => navigate({ to: '/team/invite' }),
             }}
             size="compact"

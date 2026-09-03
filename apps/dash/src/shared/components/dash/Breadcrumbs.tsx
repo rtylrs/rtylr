@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 const ROUTE_KEYS: Record<string, string> = {
   '': 'hub',
   team: 'team',
-  invite: 'inviteMember',
+  invite: 'addMember',
   permissions: 'permissions',
   roles: 'roles',
   apps: 'apps',

@@ -198,7 +198,7 @@ const Team: React.FC = (): React.JSX.Element => {
             </Button>
             <Button onClick={() => navigate({ to: '/team/invite' })}>
               <UserPlus size={14} />
-              Invite member
+              {t('common.nav.addMember')}
             </Button>
           </div>
         </motion.div>
@@ -323,7 +323,7 @@ const Team: React.FC = (): React.JSX.Element => {
                   query
                     ? { label: t('common.clearSearch'), onClick: () => setQuery('') }
                     : {
-                        label: t('common.nav.inviteMember'),
+                        label: t('common.nav.addMember'),
                         onClick: () => navigate({ to: '/team/invite' }),
                       }
                 }

@@ -1,11 +1,12 @@
 {
+  "createCustomRole": "Créer un rôle personnalisé",
   "activityWidget": {
     "emptyTitle": "Aucune activité pour l'instant",
     "emptyDescription": "Les actions apparaîtront ici"
   },
   "teamWidget": {
     "emptyTitle": "Aucun membre d'équipe pour l'instant",
-    "inviteSomeone": "Inviter quelqu'un"
+    "addMember": "Ajouter un membre"
   },
   "revenueByAppWidget": {
     "emptyTitle": "Aucun revenu pour l'instant",

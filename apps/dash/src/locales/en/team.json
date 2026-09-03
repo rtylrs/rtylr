@@ -52,7 +52,7 @@
   },
   "list": {
     "noMembersTitle": "No team members yet",
-    "noMembersDescription": "Invite your first team member to get started.",
+    "noMembersDescription": "Add your first team member to get started.",
     "noMembersMatchTitle": "No members match your search",
     "noMembersMatchDescription": "Try a different search term.",
     "membersCountSingular": "{{count}} member",
