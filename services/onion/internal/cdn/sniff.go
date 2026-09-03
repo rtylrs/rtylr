@@ -10,8 +10,17 @@ import (
 
 // sniffMIME reads up to the first 512 bytes of r to detect the content type by
 // magic bytes, then returns the detected type alongside a reader that replays
-// the entire original stream (the consumed prefix is prepended back). The
-// detected type never includes a charset parameter.
+// the entire original stream. The detected type never includes a charset
+// parameter.
+//
+// A seekable body is rewound rather than wrapped. Wrapping it in an
+// io.MultiReader silently downgraded an io.ReadSeeker to a plain io.Reader, and
+// the handler's body is a multipart.File, which is seekable. s3.PutObject needs
+// to seek back to the start to compute the payload hash whenever the endpoint
+// is not TLS, so every upload failed with 500 against a plaintext object store:
+// the shape onion ships for self-host and documents for local development.
+// Production was unaffected because the SDK signs a streaming body as
+// UNSIGNED-PAYLOAD over TLS, which is why this stayed invisible.
 func sniffMIME(r io.Reader) (string, io.Reader, error) {
 	head := make([]byte, 512)
 	n, err := io.ReadFull(r, head)
@@ -25,7 +34,18 @@ func sniffMIME(r io.Reader) (string, io.Reader, error) {
 		detected = strings.TrimSpace(detected[:i])
 	}
 
-	return strings.ToLower(detected), io.MultiReader(bytes.NewReader(head), r), nil
+	detected = strings.ToLower(detected)
+
+	// Rewinding preserves seekability and buffers nothing. The MultiReader
+	// below stays as the fallback for a body that cannot seek, which reads
+	// correctly and is only unusable for signing.
+	if seeker, ok := r.(io.ReadSeeker); ok {
+		if _, seekErr := seeker.Seek(0, io.SeekStart); seekErr == nil {
+			return detected, seeker, nil
+		}
+	}
+
+	return detected, io.MultiReader(bytes.NewReader(head), r), nil
 }
 
 // reconcileMIME decides the authoritative content type for an upload from the
