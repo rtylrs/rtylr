@@ -810,7 +810,11 @@
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",
-    "unresolved": "Certaines tâches sélectionnées n'ont pas pu être chargées, cette action est donc indisponible."
+    "unresolved": "Certaines tâches sélectionnées n'ont pas pu être chargées, cette action est donc indisponible.",
+    "markDone": "Marquer comme terminé",
+    "setUrgent": "Définir comme urgent",
+    "archive": "Archiver",
+    "selectedCount": "{{count}} sélectionnée(s)"
   },
   "allProjects": {
     "title": "Tous les projets",
