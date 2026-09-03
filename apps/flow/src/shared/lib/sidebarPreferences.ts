@@ -526,15 +526,21 @@ export function useSidebarPreferences() {
       showToast: boolean;
     }) => {
       const latest = queryClient.getQueryData<ApiUserSettings>(sidebarSettingsQueryKey);
-      return unwrap(
-        flowApi.updateUserSettings({
-          ...(latest ?? defaultSettings),
-          sidebarPreferences: serializeSidebarPreferences(next),
-        })
-      );
+      const sent: ApiUserSettings = {
+        ...(latest ?? defaultSettings),
+        sidebarPreferences: serializeSidebarPreferences(next),
+      };
+      await unwrap(flowApi.updateUserSettings(sent));
+      // Return what was sent, not what came back. UpdateUserSettingsResponse
+      // carries no fields, so the endpoint answers `200 {}`, and caching that
+      // response as the settings object made `settings.sidebarPreferences`
+      // undefined. The hook re-derives its state from this cache entry, so
+      // every group, pin, shortcut and recent entry reverted to the defaults
+      // immediately after a successful save.
+      return sent;
     },
-    onSuccess: (next, variables) => {
-      queryClient.setQueryData(sidebarSettingsQueryKey, next);
+    onSuccess: (sent, variables) => {
+      queryClient.setQueryData(sidebarSettingsQueryKey, sent);
       if (variables.showToast) toast.success(t('flow.sidebar.saved'));
     },
     onError: (_error, variables) => {
