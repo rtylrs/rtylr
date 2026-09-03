@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -190,10 +191,7 @@ func (a *CycleAPIV2) ListCycles(ctx context.Context, req *flowcyclev2.ListCycles
 	}
 	out := make([]*flowcyclev2.Cycle, 0, len(cycles))
 	for _, c := range cycles {
-		out = append(out, &flowcyclev2.Cycle{
-			Id: c.ID, Name: c.Name,
-			Scope: int32(c.Scope), Completed: int32(c.Completed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		})
+		out = append(out, toContractCycleV2(c))
 	}
 	return &flowcyclev2.ListCyclesResponse{Cycles: out, Pagination: buildPagination(page, limit, total, len(out))}, nil
 }
@@ -212,9 +210,45 @@ func (a *CycleAPIV2) CreateCycle(ctx context.Context, req *flowcyclev2.CreateCyc
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cycle")
 	}
-	return &flowcyclev2.CreateCycleResponse{Cycle: &flowcyclev2.Cycle{
-		Id: cycle.ID, Name: cycle.Name, Status: cycle.Status,
-	}}, nil
+	return &flowcyclev2.CreateCycleResponse{Cycle: toContractCycleV2(cycle)}, nil
+}
+
+// toContractCycleV2 is the single place a cycle becomes a contract cycle.
+//
+// The list and create mappers were written separately and each dropped a
+// different subset of the fields the contract declares. The list sent only id,
+// name, scope and completed, so every cycle serialised with project_id "0" and
+// no dates or status, and the Cycles page could neither match a cycle to the
+// selected project nor bucket it into Active, Upcoming or Completed. It
+// rendered nothing at all, not even its empty state, for a project that did
+// have a cycle.
+//
+// A zero date becomes an empty string rather than 0001-01-01, which is a date
+// the client would have to special-case to recognise as absent.
+func toContractCycleV2(c domain.Cycle) *flowcyclev2.Cycle {
+	out := &flowcyclev2.Cycle{
+		Id:        c.ID,
+		Name:      c.Name,
+		Status:    c.Status,
+		StartDate: formatCycleDate(c.StartDate),
+		EndDate:   formatCycleDate(c.EndDate),
+		Scope:     int32(c.Scope),     // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Completed: int32(c.Completed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	}
+	// ProjectID is a pointer on the domain because workspace-era cycles had
+	// none. The contract declares it non-optional, so an absent project stays
+	// zero rather than dereferencing nil.
+	if c.ProjectID != nil {
+		out.ProjectId = *c.ProjectID
+	}
+	return out
+}
+
+func formatCycleDate(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format("2006-01-02")
 }
 
 func (a *CycleAPIV2) UpdateCycle(ctx context.Context, req *flowcyclev2.UpdateCycleRequest) (*flowcyclev2.UpdateCycleResponse, error) {

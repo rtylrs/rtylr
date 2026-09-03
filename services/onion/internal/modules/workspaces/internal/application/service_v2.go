@@ -434,7 +434,13 @@ func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64
 	if now.After(sd) && now.Before(ed) {
 		status = "active"
 	}
-	return domain.Cycle{ID: id, ProjectID: &projectID, Name: name, Status: status}, nil
+	// The normalized dates go back out with the cycle. Without them the create
+	// response carries no dates, so a client that renders straight from it has
+	// to re-read the row to learn when the cycle runs.
+	return domain.Cycle{
+		ID: id, ProjectID: &projectID, Name: name, Status: status,
+		StartDate: sd, EndDate: ed,
+	}, nil
 }
 
 func (s *Service) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, callerID, limit, offset int64) ([]domain.Milestone, int64, error) {
