@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import i18next from '../../shared/services/i18next';
 import { flowApi, ApiAttachment, ApiTask } from '../../shared/services/flowApi';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 const t = (key: string, opts?: Record<string, unknown>): string => i18next.t(key, opts) as string;
@@ -15,18 +14,21 @@ export function useTasks(params: {
   activeOnly?: boolean;
   compact?: boolean;
 }) {
-  const { activeWorkspaceId } = useFlowStore();
-  const effectiveParams = {
-    ...params,
-    workspaceId: params.projectId ? undefined : activeWorkspaceId || undefined,
-  };
+  // v2's list endpoint is business-scoped, with project_id, status and
+  // assignee_id as its only filters. This used to add
+  // `workspaceId: activeWorkspaceId` and gate the query on
+  // `projectId || workspaceId`. The workspace layer is gone, so
+  // activeWorkspaceId is permanently '', and every caller that passes no
+  // projectId was permanently disabled: it rendered an empty state without
+  // issuing a request at all. That is triage, archive, the global calendar,
+  // Time's My Day and the command bar's task search. `workspaceId` was never
+  // a parameter of getTasks either, so it only ever affected this gate.
   return useQuery<ApiTask[]>({
-    queryKey: ['tasks', effectiveParams],
+    queryKey: ['tasks', params],
     queryFn: async () => {
-      const res = await unwrap(flowApi.getTasks(effectiveParams));
+      const res = await unwrap(flowApi.getTasks(params));
       return unwrapListResponse<ApiTask>(res, 'tasks');
     },
-    enabled: !!(effectiveParams.projectId || effectiveParams.workspaceId),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

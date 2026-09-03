@@ -39,6 +39,7 @@ import {
   useBulkUpdateArchive,
 } from './useTasks';
 import { flowApi } from '../../shared/services/flowApi';
+import { useFlowStore } from '../../shared/stores/flowStore';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -201,5 +202,58 @@ describe('useBulkUpdateArchive', () => {
     await act(() => result.current.mutateAsync({ ids: ['t-1', 't-2'] }));
     expect(flowApi.updateTask).toHaveBeenCalledWith('t-1', { archived: true });
     expect(flowApi.updateTask).toHaveBeenCalledWith('t-2', { archived: true });
+  });
+});
+
+// #1033: useTasks scoped itself by workspace and gated the query on
+// `projectId || workspaceId`. With the workspace layer removed,
+// activeWorkspaceId is permanently '', so every caller that passes no
+// projectId was permanently disabled and rendered an empty state with no
+// request issued.
+describe('useTasks without a projectId', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // The real post-workspace-removal store value.
+    (useFlowStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      activeWorkspaceId: '',
+    });
+  });
+
+  it('queries the business-scoped list when no projectId is given', async () => {
+    const data = [{ id: 't-1', title: 'Backlog item' }];
+    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(data);
+
+    const { result } = renderHook(() => useTasks({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(flowApi.getTasks).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(result.current.data).toEqual(data));
+  });
+
+  it('does not send a workspaceId, which the list endpoint has no parameter for', async () => {
+    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+
+    renderHook(() => useTasks({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(flowApi.getTasks).toHaveBeenCalledTimes(1));
+    const sent = (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(sent).not.toHaveProperty('workspaceId');
+  });
+
+  it('queries for the archive shape too, which passes activeOnly and no project', async () => {
+    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+
+    renderHook(() => useTasks({ activeOnly: false }), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(flowApi.getTasks).toHaveBeenCalledTimes(1));
+  });
+
+  it('still passes a projectId through when one is given', async () => {
+    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+
+    renderHook(() => useTasks({ projectId: 'p-9' }), { wrapper: createWrapper() });
+
+    await waitFor(() =>
+      expect(flowApi.getTasks).toHaveBeenCalledWith(expect.objectContaining({ projectId: 'p-9' }))
+    );
   });
 });
