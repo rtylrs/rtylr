@@ -1702,18 +1702,27 @@ func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjec
 }
 
 func (r *Repository) DeleteColumn(ctx context.Context, id, actorID int64) error {
+	// One actor across every branch, the same shape MoveTaskToColumn uses:
+	// project member, project owner, project creator, then the two legacy
+	// workspace branches.
 	if err := r.queries.ClearTasksSectionID(ctx, sqlc.ClearTasksSectionIDParams{
 		SectionID: sql.NullInt64{Int64: id, Valid: true},
-		OwnerID:   actorID,
 		UserID:    actorID,
+		OwnerID:   actorID,
+		CreatedBy: actorID,
+		OwnerID_2: actorID,
+		UserID_2:  actorID,
 	}); err != nil {
 		return err
 	}
 
 	res, err := r.queries.DeleteColumn(ctx, sqlc.DeleteColumnParams{
-		ID:      id,
-		OwnerID: actorID,
-		UserID:  actorID,
+		ID:        id,
+		UserID:    actorID,
+		OwnerID:   actorID,
+		CreatedBy: actorID,
+		OwnerID_2: actorID,
+		UserID_2:  actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteColumn failed", logger.Error(err))

@@ -18,20 +18,39 @@ WHERE flow_project_columns.id = ?
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_project_columns.workspace_id AND wm.user_id = ?)
   );
 
+-- Runs first in the column delete path, so it carries the same guard as
+-- DeleteColumn below. See the note there.
 -- name: ClearTasksSectionID :exec
 UPDATE flow_tasks
 SET section_id = NULL
 WHERE section_id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_tasks.workspace_id AND w.owner_id = ?)
+    EXISTS (SELECT 1 FROM flow_project_members pm
+            WHERE pm.project_id = flow_tasks.project_id AND pm.user_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_projects p
+               WHERE p.id = flow_tasks.project_id
+                 AND (p.owner_id = ? OR p.created_by = ?))
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_tasks.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_tasks.workspace_id AND wm.user_id = ?)
   );
 
+-- Guarded on the project, not the workspace. Every v2 column carries
+-- workspace_id = 0 and no workspace row has id 0, so the two workspace EXISTS
+-- clauses below can never be satisfied: on their own they matched zero rows,
+-- requireAffected turned that into ErrUnauthorized, and the endpoint returned
+-- 403 to everyone including the business owner. The project clauses in front
+-- are the shape MoveTaskToColumn already uses. The workspace pair is kept so
+-- any surviving workspace-era column still deletes.
 -- name: DeleteColumn :execresult
 DELETE FROM flow_project_columns
 WHERE flow_project_columns.id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_project_columns.workspace_id AND w.owner_id = ?)
+    EXISTS (SELECT 1 FROM flow_project_members pm
+            WHERE pm.project_id = flow_project_columns.project_id AND pm.user_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_projects p
+               WHERE p.id = flow_project_columns.project_id
+                 AND (p.owner_id = ? OR p.created_by = ?))
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_project_columns.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_project_columns.workspace_id AND wm.user_id = ?)
   );
 
