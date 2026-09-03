@@ -514,11 +514,6 @@ const Businesses: React.FC = () => {
                     : t('businesses.ownerAccess')}
                 </div>
               </div>
-              <CardContent className="p-5">
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--dash-text-dim)' }}>
-                  {t('businesses.manageNote')}
-                </p>
-              </CardContent>
             </Card>
           </div>
         </div>
