@@ -124,7 +124,13 @@ const NotificationsSection: React.FC = () => {
   });
 
   useEffect(() => {
-    if (remote) setSettings(remote);
+    // Adopt the server's settings only when they actually carry the booleans.
+    // The cache entry for ['flow-settings'] used to be overwritten with the
+    // save endpoint's empty `200 {}` response, and `{}` is truthy, so this
+    // wiped all six switches. The next toggle then spread that empty object
+    // and sent a one-field body, which the server reads as "the other five
+    // are false" - one click silently cleared five preferences (#1063).
+    if (remote && typeof remote.taskAssigned === 'boolean') setSettings(remote);
   }, [remote]);
 
   const toggle = (key: keyof ApiUserSettings): void => {
