@@ -840,7 +840,12 @@
     "archiveConfirm": "أرشفة المشروع"
   },
   "bulkEdit": {
-    "clearSelectionLabel": "إلغاء التحديد"
+    "clearSelectionLabel": "إلغاء التحديد",
+    "unresolved": "تعذر تحميل بعض المهام المحددة، لذا هذا الإجراء غير متاح.",
+    "markDone": "وضع علامة مكتمل",
+    "setUrgent": "تعيين كعاجل",
+    "archive": "أرشفة",
+    "selectedCount": "{{count}} محددة"
   },
   "allProjects": {
     "title": "جميع المشاريع",
