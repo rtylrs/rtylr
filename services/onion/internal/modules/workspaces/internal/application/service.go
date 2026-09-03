@@ -684,20 +684,24 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 	// this update touches the assignee.
 	defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
 
-	// This is a partial update — only log a change for a field the request
+	// This is a partial update — only record a change for a field the request
 	// actually supplied. An omitted field arrives as the zero value (empty
 	// string / nil) and means "leave unchanged", so comparing it against the
 	// existing value would otherwise log a spurious "changed to empty" entry.
+	//
+	// The entries are computed here, from existing versus input, and written
+	// only once the update has landed. Each LogActivity is its own write with
+	// no transaction around it, so writing them first left false history behind
+	// every time the update then failed: the task stayed as it was and its
+	// Activity tab claimed changes that never happened.
+	var activity []taskActivityEntry
+
 	if input.Status != "" && existing.Status != input.Status {
-		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "status_changed", existing.Status, input.Status); actErr != nil {
-			logger.Ctx(ctx).Error("UpdateTask: failed to log status activity", logger.Error(actErr))
-		}
+		activity = append(activity, taskActivityEntry{"status_changed", existing.Status, input.Status})
 	}
 
 	if input.Priority != "" && existing.Priority != input.Priority {
-		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "priority_changed", existing.Priority, input.Priority); actErr != nil {
-			logger.Ctx(ctx).Error("UpdateTask: failed to log priority activity", logger.Error(actErr))
-		}
+		activity = append(activity, taskActivityEntry{"priority_changed", existing.Priority, input.Priority})
 	}
 
 	var reassignment *assigneeChange
@@ -709,12 +713,11 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		newAssignee := *input.AssigneeID
 
 		if existingAssignee != newAssignee {
-			if actErr := s.repo.LogActivity(ctx, input.ID, userID, "assignee_changed",
+			activity = append(activity, taskActivityEntry{
+				"assignee_changed",
 				strconv.FormatInt(existingAssignee, 10),
 				strconv.FormatInt(newAssignee, 10),
-			); actErr != nil {
-				logger.Ctx(ctx).Error("UpdateTask: failed to log assignee activity", logger.Error(actErr))
-			}
+			})
 			// Both sides of a reassignment need evicting. The previous
 			// assignee's eviction is already deferred above; without this one
 			// the new assignee keeps serving pages that predate the task
@@ -744,8 +747,27 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		return updateErr
 	}
 
+	// The only place UpdateTask writes activity, and it is past the point of
+	// failure. A logging failure is reported and swallowed as before: the edit
+	// itself succeeded, and losing a history row is not a reason to tell the
+	// caller their change did not land.
+	for _, entry := range activity {
+		if actErr := s.repo.LogActivity(ctx, input.ID, userID, entry.kind, entry.from, entry.to); actErr != nil {
+			logger.Ctx(ctx).Error("UpdateTask: failed to log activity",
+				logger.Any("kind", entry.kind), logger.Error(actErr))
+		}
+	}
+
 	announced = reassignment
 	return nil
+}
+
+// taskActivityEntry is one history row an update will produce, held between
+// computing it from the request and writing it after the update succeeds.
+type taskActivityEntry struct {
+	kind string
+	from string
+	to   string
 }
 
 // assigneeChange is what a reassignment needs in order to announce itself once
