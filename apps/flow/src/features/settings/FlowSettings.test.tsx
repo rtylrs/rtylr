@@ -101,6 +101,9 @@ vi.mock('../../features/tasks/useLabels', () => ({
 const tokenState = vi.hoisted(() => ({ token: null as string | null }));
 const authState = vi.hoisted(() => ({
   effectiveAccess: undefined as EffectiveAccess | undefined,
+  // The legacy business role, which is all getMe sends when it does not send
+  // effectiveAccess. Kept separate so a test can present one without the other.
+  user: undefined as { role?: string } | undefined,
 }));
 vi.mock('@voxire/auth', () => ({
   getCookie: () => tokenState.token,
@@ -197,6 +200,7 @@ describe('FlowSettings section gating (#793)', () => {
     deactivateMutate.mockClear();
     searchState.section = undefined;
     authState.effectiveAccess = undefined;
+    authState.user = undefined;
   });
 
   it('shows Team, Workspaces and Time in the sidebar for an admin', () => {
@@ -351,5 +355,53 @@ describe('LabelsSection empty state', () => {
     const input = screen.getByPlaceholderText('flow.settings.labels.namePlaceholder');
     fireEvent.click(button);
     expect(input).toHaveFocus();
+  });
+});
+
+// #1025: getMe can answer with a role and no effectiveAccess. Reading that as
+// "no access" hid the management sections from the people who own the business.
+describe('FlowSettings gating on a legacy payload (#1025)', () => {
+  beforeEach(() => {
+    flowTeamData.data = [];
+    searchState.section = undefined;
+    authState.effectiveAccess = undefined;
+    authState.user = undefined;
+  });
+
+  it.each(['owner', 'admin'])(
+    'shows Team and Workspaces to %s when the payload carries no effective access',
+    (role) => {
+      authState.user = { role };
+      renderSettings();
+
+      expect(screen.getByRole('button', { name: 'common.settings.team' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'flow.settings.workspaces.section' })
+      ).toBeInTheDocument();
+    }
+  );
+
+  it('still hides them from a member on the same legacy payload', () => {
+    authState.user = { role: 'member' };
+    renderSettings();
+
+    expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'flow.settings.workspaces.section' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides them when there is neither effective access nor a role', () => {
+    renderSettings();
+
+    expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
+  });
+
+  it('lets effective access override a privileged legacy role rather than widening it', () => {
+    authState.user = { role: 'owner' };
+    authState.effectiveAccess = makeFlowAccess(['flow:projects:view']);
+    renderSettings();
+
+    expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
   });
 });

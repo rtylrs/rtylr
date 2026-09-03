@@ -12,8 +12,13 @@ import { canEffectiveAccess } from '@voxire/permissions';
 const AdminLayout: React.FC = (): React.JSX.Element => {
   const user = useUserStore((s) => s.user);
   const effectiveAccess = user?.effectiveAccess;
+  // While getMe is not guaranteed to send effectiveAccess, reading its absence
+  // as "no access" locked owners and admins out of Recruit administration
+  // entirely (#1025). Fall back to the legacy business role, which is the same
+  // rule AppGuard still applies and the same rule the denial copy below states.
+  const hasLegacyAdminRole = user?.role === 'owner' || user?.role === 'admin';
   const canRecruit = (permission: string): boolean =>
-    effectiveAccess ? canEffectiveAccess(effectiveAccess, permission) : false;
+    effectiveAccess ? canEffectiveAccess(effectiveAccess, permission) : hasLegacyAdminRole;
   const canAdministerRecruit =
     canRecruit('recruit:jobs:view') ||
     canRecruit('recruit:jobs:manage') ||

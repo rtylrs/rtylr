@@ -59,7 +59,7 @@ import { useSystemDark } from './components/useSystemDark';
 import TimeSection from './sections/TimeSection';
 import BinSection from './sections/BinSection';
 import SidebarSettingsSection from './sections/SidebarSettingsSection';
-import { hasFlowPermission } from '../../shared/lib/roleUtils';
+import { canFlowPermission } from '../../shared/lib/roleUtils';
 
 interface SettingsSection {
   id: string;
@@ -1134,8 +1134,13 @@ const settingsRouteApi = getRouteApi('/settings');
 const FlowSettings: React.FC = () => {
   const { t } = useTranslation();
   const effectiveAccess = useAuthUserStore((s) => s.effectiveAccess);
-  const canManageWorkspaces = hasFlowPermission(effectiveAccess, 'flow:settings:manage');
-  const canManageTeam = hasFlowPermission(effectiveAccess, 'flow:team:manage');
+  const legacyRole = useAuthUserStore((s) => s.user?.role);
+  const canManageWorkspaces = canFlowPermission(
+    legacyRole,
+    'flow:settings:manage',
+    effectiveAccess
+  );
+  const canManageTeam = canFlowPermission(legacyRole, 'flow:team:manage', effectiveAccess);
   const canManageBin = canManageWorkspaces;
   const sections = useMemo(
     () => buildSections(t, canManageWorkspaces, canManageTeam, canManageBin),
