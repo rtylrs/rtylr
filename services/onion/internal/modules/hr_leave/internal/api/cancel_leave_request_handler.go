@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CancelLeaveRequestRoutes() []string { return []string{"/hr/leave/requests/{id}/cancel"} }
@@ -37,7 +38,12 @@ func (h *CancelLeaveRequestHandler) Serve(ctx context.Context, req *CancelLeaveR
 		return CancelLeaveRequestResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.Service.CancelLeaveRequest(ctx, device.User.UserID, device.User.UserID, req.RequestID)
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return CancelLeaveRequestResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err := h.Service.CancelLeaveRequest(ctx, businessID, device.User.UserID, req.RequestID)
 	if err != nil {
 		if errors.Is(err, domain.ErrLeaveRequestNotFound) {
 			return CancelLeaveRequestResponse{}, onekiterrors.New(http.StatusNotFound, "Leave request not found")

@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
@@ -58,7 +59,12 @@ func (h *ListLeaveRequestsHandler) Serve(ctx context.Context, req *ListLeaveRequ
 		limit = maxLeaveRequestsLimit
 	}
 
-	requests, total, err := h.Service.ListLeaveRequests(ctx, device.User.UserID, device.User.UserID, domain.ListLeaveRequestsParams{
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return ListLeaveRequestsResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	requests, total, err := h.Service.ListLeaveRequests(ctx, businessID, device.User.UserID, domain.ListLeaveRequestsParams{
 		EmployeeID: req.EmployeeID,
 		Status:     req.Status,
 		FromDate:   req.FromDate,

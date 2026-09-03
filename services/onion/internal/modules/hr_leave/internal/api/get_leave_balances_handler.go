@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
@@ -32,7 +33,12 @@ func (h *GetLeaveBalancesHandler) Serve(ctx context.Context, req *GetLeaveBalanc
 		return GetLeaveBalancesResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	balances, err := h.Service.GetLeaveBalances(ctx, device.User.UserID, device.User.UserID, req.EmployeeID, req.Year)
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return GetLeaveBalancesResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	balances, err := h.Service.GetLeaveBalances(ctx, businessID, device.User.UserID, req.EmployeeID, req.Year)
 	if err != nil {
 		if errors.Is(err, domain.ErrLeaveAccessDenied) {
 			return GetLeaveBalancesResponse{}, onekiterrors.PermissionDenied()
