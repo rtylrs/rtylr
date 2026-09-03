@@ -43,15 +43,12 @@ const Login: React.FC = (): React.JSX.Element => {
   }, []);
 
   const redirectTo = useCallback(async (): Promise<void> => {
-    // Explicit redirect param, honor it directly
-    if (redirectParam && redirectParam in APP_URLS) {
-      window.location.href = APP_URLS[redirectParam as KnownAppId] as string;
-      return;
-    }
-    // No explicit redirect, decide based on the user's subscription apps
     try {
       const res = await userClient.getMe({});
       const provisioningStatus = res.provisioningStatus;
+      // MFA is resolved before any destination is chosen, including an explicit
+      // `redirect` param. Honouring that param first let a user who owes MFA
+      // enrolment name another app and skip the Dash enrolment gate entirely.
       if (
         provisioningStatus?.mfaRequired &&
         (!provisioningStatus.mfaEnrolled || !provisioningStatus.mfaVerified)
@@ -59,6 +56,12 @@ const Login: React.FC = (): React.JSX.Element => {
         window.location.href = APP_URLS.dash as string;
         return;
       }
+      // Explicit redirect param, honoured once MFA is satisfied.
+      if (redirectParam && redirectParam in APP_URLS) {
+        window.location.href = APP_URLS[redirectParam as KnownAppId] as string;
+        return;
+      }
+      // No explicit redirect, decide based on the user's subscription apps
       const role = res.role;
       const apps = res.effectiveAccess
         ? res.effectiveAccess.apps
@@ -81,6 +84,8 @@ const Login: React.FC = (): React.JSX.Element => {
       // Multi-app, use Dash as the launcher
       window.location.href = APP_URLS.dash as string;
     } catch {
+      // Fail closed: if MFA state cannot be read, send the user to Dash rather
+      // than to a redirect target that may be behind the gate.
       window.location.href = APP_URLS.dash as string;
     }
   }, [redirectParam]);
