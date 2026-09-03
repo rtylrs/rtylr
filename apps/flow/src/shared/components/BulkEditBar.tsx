@@ -14,7 +14,8 @@ import {
 import { useMostRestrictiveProjectRole } from '../lib/currentUser';
 import { canEditTask, canDelete } from '../lib/roleUtils';
 
-const t = (key: string): string => i18next.t(key) as string;
+const t = (key: string, options?: Record<string, unknown>): string =>
+  i18next.t(key, options) as string;
 
 export const BulkEditBar: React.FC = () => {
   const { selectedTaskIds, clearSelection } = useFlowStore();
@@ -80,7 +81,7 @@ export const BulkEditBar: React.FC = () => {
         }}
       >
         <span className="text-[11px] font-semibold px-2" style={{ color: 'var(--flow-text)' }}>
-          {selectedTaskIds.length} selected
+          {t('flow.bulkEdit.selectedCount', { count: selectedTaskIds.length })}
         </span>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
         <button
@@ -96,7 +97,7 @@ export const BulkEditBar: React.FC = () => {
           className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
-          <Check size={11} /> Mark done
+          <Check size={11} /> {t('flow.bulkEdit.markDone')}
         </button>
         <button
           type="button"
@@ -111,7 +112,7 @@ export const BulkEditBar: React.FC = () => {
           className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
-          <Flag size={11} /> Set urgent
+          <Flag size={11} /> {t('flow.bulkEdit.setUrgent')}
         </button>
         <button
           type="button"
@@ -126,7 +127,7 @@ export const BulkEditBar: React.FC = () => {
           className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
-          <Archive size={11} /> Archive
+          <Archive size={11} /> {t('flow.bulkEdit.archive')}
         </button>
         <button
           type="button"
@@ -141,7 +142,7 @@ export const BulkEditBar: React.FC = () => {
           className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: '#ef4444' }}
         >
-          <Trash2 size={11} /> Delete
+          <Trash2 size={11} /> {t('common.delete')}
         </button>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
         <button
