@@ -26,7 +26,12 @@ import {
   Sparkles,
   Menu,
   X,
+  Globe,
+  Check,
+  ChevronDown,
 } from 'lucide-react';
+import { SUPPORTED_LANGUAGES } from '@voxire/i18n';
+import { selectLanguage } from '../shared/services/i18next';
 import { CaretPanel, CaretButton, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { LicenseBanner } from '@voxire/components';
 import { useUserStore } from '../shared/stores/userStore';
@@ -299,6 +304,97 @@ interface DefaultLayoutProps {
   children?: React.ReactNode;
 }
 
+// Language codes dash ships locale resources for. To support a new language,
+// add its code here and add the matching locales/{code}/*.json files.
+const DASH_LANGUAGE_CODES = ['en', 'fr', 'ar'] as const;
+
+const DASH_LANGUAGES = SUPPORTED_LANGUAGES.filter((l) =>
+  (DASH_LANGUAGE_CODES as readonly string[]).includes(l.code)
+);
+
+const FALLBACK_LANGUAGE = { code: 'en', name: 'English', nativeName: 'English', rtl: false };
+
+const LanguageSelector = (): React.JSX.Element => {
+  const { t, i18n } = useTranslation('common');
+  const [open, setOpen] = React.useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const current =
+    DASH_LANGUAGES.find((l) => l.code === i18n.language) ?? DASH_LANGUAGES[0] ?? FALLBACK_LANGUAGE;
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent): void => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  const handleSelect = (code: string): void => {
+    selectLanguage(code);
+    setOpen(false);
+  };
+
+  return (
+    <div className="px-2 py-1.5">
+      <p
+        className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
+        style={{ color: 'var(--dash-text-dim)' }}
+      >
+        {t('nav.language', 'Language')}
+      </p>
+      <div ref={containerRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-xs font-medium transition-colors hover:bg-[var(--dash-hover)]"
+          style={{ background: 'var(--dash-hover)', color: 'var(--dash-text)' }}
+        >
+          <Globe size={13} className="shrink-0" style={{ color: 'var(--dash-text-muted)' }} />
+          <span className="flex-1 text-start">{current.nativeName}</span>
+          <ChevronDown
+            size={12}
+            className={cn('shrink-0 transition-transform', open && 'rotate-180')}
+            style={{ color: 'var(--dash-text-dim)' }}
+          />
+        </button>
+        {open && (
+          <div
+            role="menu"
+            aria-label={t('nav.language', 'Language')}
+            className="absolute start-0 end-0 top-full z-10 mt-1 max-h-48 overflow-y-auto rounded-xl py-1"
+            style={{
+              background: 'var(--dash-card)',
+              border: '1px solid var(--dash-border)',
+              boxShadow: 'var(--dash-shadow)',
+            }}
+          >
+            {DASH_LANGUAGES.map((lang) => {
+              const active = lang.code === current.code;
+              return (
+                <DropdownMenuItem
+                  key={lang.code}
+                  onClick={() => handleSelect(lang.code)}
+                  className="min-h-[44px]"
+                  style={active ? { color: 'var(--accent)' } : undefined}
+                >
+                  <span className="flex-1">{lang.nativeName}</span>
+                  {active && <Check size={13} className="shrink-0" />}
+                </DropdownMenuItem>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.searchStr });
@@ -549,6 +645,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     ))}
                   </div>
                 </div>
+                <LanguageSelector />
                 <DropdownMenuSeparator />
                 {isConsoleAdmin && (
                   <>

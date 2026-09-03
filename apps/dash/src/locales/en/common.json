@@ -156,6 +156,7 @@
     "goToDashboard": "Go to Dashboard",
     "teamMembers": "Team Members",
     "allApps": "All Apps",
-    "activityLog": "Activity Log"
+    "activityLog": "Activity Log",
+    "language": "Language"
   }
 }
