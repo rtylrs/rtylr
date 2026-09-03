@@ -210,14 +210,27 @@ WHERE u.id = ?
 -- name: RevokeBusinessUserPermissions :execrows
 -- Employment-driven revocation (#834): one business, one user. The join to
 -- hr_employees keeps the decision inside this module's SQL while the
--- employment fact stays authoritative in hr_core's table. The join column is
--- pinned with sqlc.arg so both business-id placeholders type as int64.
+-- employment fact stays authoritative in hr_core's table.
+--
+-- Both business-id comparisons live in the WHERE clause. sqlc rewrites
+-- sqlc.arg in a WHERE expression into a placeholder but left it untouched
+-- inside the JOIN ON, so the statement reached MySQL with the literal text
+-- sqlc.arg('business_id') in it and every call failed with
+-- "Error 1305: FUNCTION sqlc.arg does not exist". The join is an inner join,
+-- so moving the condition out of ON and into WHERE selects exactly the same
+-- rows.
+--
+-- The two comparisons are separately named because the columns have different
+-- nullability: user_app_permissions.business_id is nullable and types as
+-- sql.NullInt64, hr_employees.business_id is NOT NULL and types as int64.
+-- Sharing one name makes sqlc refuse the query outright. Both are filled from
+-- the same caller argument.
 UPDATE user_app_permissions p
 JOIN hr_employees e
   ON e.user_id = p.user_id
- AND e.business_id = sqlc.arg('business_id')
 SET p.is_active = FALSE, p.updated_at = NOW()
 WHERE p.business_id = sqlc.arg('business_id')
+  AND e.business_id = sqlc.arg('employee_business_id')
   AND p.user_id = sqlc.arg('user_id')
   AND p.is_active = TRUE
   AND e.status = 'terminated';

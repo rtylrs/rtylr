@@ -580,16 +580,20 @@ func (r *Repository) RevokeBusinessUserPermissions(ctx context.Context, business
 		_ = tx.Rollback()
 		if authorizationSchemaUnavailable(cause) {
 			rows, legacyErr := r.queries.RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
-				BusinessID: nullBusinessID(businessID),
-				UserID:     userID,
+				BusinessID:         nullBusinessID(businessID),
+				EmployeeBusinessID: businessID,
+				UserID:             userID,
 			})
 			return rows, legacyErr
 		}
 		return 0, cause
 	}
+	// The two business-id parameters are the same business. They are separate
+	// because the two columns differ in nullability; see the note on the query.
 	rows, err := sqlc.New(tx).RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
-		BusinessID: nullBusinessID(businessID),
-		UserID:     userID,
+		BusinessID:         nullBusinessID(businessID),
+		EmployeeBusinessID: businessID,
+		UserID:             userID,
 	})
 	if err != nil {
 		return rollback(err)
