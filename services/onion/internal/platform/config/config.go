@@ -398,7 +398,7 @@ func LoadAndValidate() (*AppConfig, error) {
 		LicenseIssuer:            envOrDefault("LICENSE_ISSUER", "voxire"),
 		LicenseGracePeriod:       envDurationOrDefault("LICENSE_GRACE_PERIOD", 7*24*time.Hour),
 		LicenseClockStateFile:    envOrDefault("LICENSE_CLOCK_STATE_FILE", "/var/lib/rtylr/license-clock.json"),
-		LicenseAuthorityURL:      DefaultLicenseAuthorityURL,
+		LicenseAuthorityURL:      envTrimmedOrDefault("LICENSE_AUTHORITY_URL", DefaultLicenseAuthorityURL),
 
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),
@@ -439,6 +439,17 @@ func LoadAndValidate() (*AppConfig, error) {
 // envOrDefault returns the env var value, or fallback when it's unset/empty.
 func envOrDefault(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+// envTrimmedOrDefault is envOrDefault for values where surrounding whitespace is
+// never meaningful, such as a URL. A variable set to spaces by a shell export or
+// a compose file means the same as unset, and passing those spaces through
+// produces an address nothing can reach.
+func envTrimmedOrDefault(key, fallback string) string {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
 		return v
 	}
 	return fallback
