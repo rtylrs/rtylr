@@ -5,6 +5,7 @@ import { getCookie } from '../cookies';
 import { signOut } from '../signOut';
 import { useUserStore } from '../store';
 import { parseUserRole } from '../types';
+import { hasEffectiveAppAccess, parseEffectiveAccess } from '../effectiveAccess';
 import type { AppId, User } from '../types';
 
 type FetchUserFn = () => Promise<Record<string, unknown>>;
@@ -174,10 +175,18 @@ export function AppGuard({
           name: (data.fullName as string) ?? '',
           role: parseUserRole(data.role) ?? undefined,
           apps: (data.apps as AppId[]) ?? [],
+          effectiveAccess:
+            parseEffectiveAccess(data.effectiveAccess ?? data.effective_access) ?? undefined,
           planType: (data.planSlug as string) ?? undefined,
           isConsoleAdmin: data.isConsoleAdmin === true || undefined,
         };
         login(user);
+
+        const effectiveAccess = parseEffectiveAccess(data.effectiveAccess ?? data.effective_access);
+        if (data.effectiveAccess !== undefined || data.effective_access !== undefined) {
+          setStatus(hasEffectiveAppAccess(effectiveAccess, appId) ? 'allowed' : 'denied');
+          return;
+        }
 
         const apps: string[] = (data.apps as string[]) ?? [];
         const role = parseUserRole(data.role);

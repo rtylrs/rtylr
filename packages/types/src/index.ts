@@ -7,3 +7,4 @@ export * from './hr';
 export * from './crm';
 export * from './finance';
 export * from './flow';
+export * from './role-access';

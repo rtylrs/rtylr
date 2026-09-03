@@ -23,6 +23,7 @@ export type Resource =
   | 'app:flow'
   | 'app:insights'
   | 'app:menu'
+  | 'app:recruit'
   // POS operations
   | 'pos:orders'
   | 'pos:orders:create'

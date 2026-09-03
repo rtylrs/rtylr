@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 import { resolveApiBase, resolveAuthUrl, resolveCookieDomain } from '@voxire/config';
+import { safeFetch } from './result';
 
 const getBaseUrl = (): string => {
   // Runtime config (self-host) overrides the build-time/hosted default; hosted
@@ -212,6 +213,16 @@ export function createApiClient(appId: string): AxiosInstance {
   );
 
   return client;
+}
+
+/**
+ * Creates the explicitly scoped fallback transport for an endpoint that has
+ * no generated OneKit contract yet. Callers must keep these endpoints in a
+ * small adapter module and parse every response at that boundary. Generated
+ * clients remain mandatory whenever a contract exists.
+ */
+export function createRestRouteClient(appId: string) {
+  return safeFetch(createApiClient(appId));
 }
 
 export type OneKitClientOptions = {

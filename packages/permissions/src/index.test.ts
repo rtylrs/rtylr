@@ -13,8 +13,11 @@ import {
   can,
   canAll,
   canAny,
+  canEffectiveAccess,
+  canEffectiveAccessInScope,
 } from './index';
-import type { PlatformRole, POSRole, Resource, PermissionContext } from './index';
+import type { PlatformRole, PermissionContext } from './index';
+import type { EffectiveAccess } from '@voxire/types';
 
 // ── Role hierarchy ──────────────────────────────────────────────────
 
@@ -217,7 +220,7 @@ describe('getAccessibleApps', () => {
     expect(apps).toContain('pos');
     expect(apps).toContain('erp');
     expect(apps).toContain('finance');
-    expect(apps.length).toBe(9); // All app IDs
+    expect(apps.length).toBe(10); // All app IDs
   });
 
   it('viewer gets minimal apps', () => {
@@ -307,5 +310,73 @@ describe('canAny', () => {
     const ctx: PermissionContext = { platformRole: 'staff' };
     expect(canAny(ctx, ['app:pos', 'hub:settings'])).toBe(true);
     expect(canAny(ctx, ['hub:settings', 'finance:reconcile'])).toBe(false);
+  });
+});
+
+describe('canEffectiveAccess', () => {
+  const access: EffectiveAccess = {
+    businessId: 'business-1',
+    dashRole: 'manager',
+    dashRoleId: 'dash-manager',
+    dashPermissions: ['hub:team:view'],
+    subscribedApps: ['flow', 'finance'],
+    licenses: [],
+    apps: [
+      {
+        appId: 'flow',
+        licensed: true,
+        hasAccess: true,
+        roleIds: ['flow-manager'],
+        primaryRoleId: 'flow-manager',
+        displayRole: 'Manager',
+        permissions: ['flow:tasks:view', 'flow:tasks:edit'],
+        scopes: [{ scopeType: 'project', scopeId: 'project-1' }],
+        sources: ['explicit'],
+        permissionSources: {
+          'flow:tasks:view': ['flow-manager'],
+          'flow:tasks:edit': ['flow-manager'],
+        },
+      },
+      {
+        appId: 'finance',
+        licensed: false,
+        hasAccess: false,
+        roleIds: ['finance-viewer'],
+        primaryRoleId: 'finance-viewer',
+        displayRole: 'Viewer',
+        permissions: ['finance:reports:view'],
+        scopes: [],
+        sources: ['explicit'],
+        permissionSources: { 'finance:reports:view': ['finance-viewer'] },
+      },
+    ],
+    isOwner: false,
+    isAdmin: false,
+    authorizationVersion: 2,
+  };
+
+  it('requires both a license and a resolved permission', () => {
+    expect(canEffectiveAccess(access, 'flow:tasks:edit')).toBe(true);
+    expect(canEffectiveAccess(access, 'finance:reports:view')).toBe(false);
+  });
+
+  it('does not turn an app assignment into child permissions', () => {
+    expect(canEffectiveAccess(access, 'app:flow')).toBe(true);
+    expect(canEffectiveAccess(access, 'flow:projects:delete')).toBe(false);
+  });
+
+  it('requires the matching scope for row-level checks', () => {
+    expect(
+      canEffectiveAccessInScope(access, 'flow:tasks:edit', {
+        scopeType: 'project',
+        scopeId: 'project-1',
+      })
+    ).toBe(true);
+    expect(
+      canEffectiveAccessInScope(access, 'flow:tasks:edit', {
+        scopeType: 'project',
+        scopeId: 'project-2',
+      })
+    ).toBe(false);
   });
 });

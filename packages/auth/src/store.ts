@@ -15,6 +15,7 @@ export const useUserStore = create<UserStore>()(
       role: null,
       userId: null,
       addons: {},
+      effectiveAccess: null,
       visits: [],
 
       // Actions
@@ -25,6 +26,7 @@ export const useUserStore = create<UserStore>()(
           role: user.role ?? null,
           userId: user.id ?? null,
           addons: user.addons ?? {},
+          effectiveAccess: user.effectiveAccess ?? null,
         }),
 
       logout: () => {
@@ -37,6 +39,7 @@ export const useUserStore = create<UserStore>()(
           role: null,
           userId: null,
           addons: {},
+          effectiveAccess: null,
           visits: [],
         });
       },
@@ -49,6 +52,7 @@ export const useUserStore = create<UserStore>()(
           role: user.role ?? null,
           userId: user.id ?? null,
           addons: user.addons ?? {},
+          effectiveAccess: user.effectiveAccess ?? null,
         }),
 
       setRole: (role: UserRole) => set({ role }),
@@ -56,6 +60,8 @@ export const useUserStore = create<UserStore>()(
       setUserId: (userId: string) => set({ userId }),
 
       setAddons: (addons: Record<string, boolean>) => set({ addons }),
+
+      setEffectiveAccess: (effectiveAccess) => set({ effectiveAccess }),
 
       setVisits: (visits: unknown[]) => set({ visits }),
     }),
@@ -67,6 +73,7 @@ export const useUserStore = create<UserStore>()(
         role: state.role,
         userId: state.userId,
         addons: state.addons,
+        effectiveAccess: state.effectiveAccess,
         visits: state.visits,
         // token is intentionally excluded - stored in cookie only
       }),

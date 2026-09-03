@@ -4,6 +4,7 @@ export {
   createOneKitClient,
   createOneKitClientOptions,
   createOneKitFetch,
+  createRestRouteClient,
   getOneKitApiBaseUrl,
   getOneKitErrorMessage,
   fromOneKitJson,

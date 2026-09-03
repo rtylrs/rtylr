@@ -62,6 +62,7 @@ export type AppId =
 
 export interface User {
   id?: string;
+  userId?: string;
   name?: string;
   firstName?: string;
   lastName?: string;
@@ -74,11 +75,11 @@ export interface User {
   apps?: AppId[]; // which apps this user has access to
   addons?: Record<string, boolean>;
   theme?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 export interface AuthResponse {
   token: string;
   userId: string;
   user: User;
-  visits?: any[];
+  visits?: unknown[];
 }

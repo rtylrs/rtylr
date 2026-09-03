@@ -54,7 +54,11 @@ describe('AppGuard', () => {
           calls += 1;
           return calls === 1 ? Promise.reject(new Error('boom')) : fetchUserAllowed();
         }}
-        error={(retry) => <button type="button" onClick={retry}>translated-error</button>}
+        error={(retry) => (
+          <button type="button" onClick={retry}>
+            translated-error
+          </button>
+        )}
       >
         <span>app</span>
       </AppGuard>

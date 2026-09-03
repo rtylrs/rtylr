@@ -9,6 +9,7 @@
   "dependencies": {
     "@voxire/config": "workspace:*",
     "@voxire/observability": "workspace:*",
+    "@voxire/permissions": "workspace:*",
     "@voxire/types": "workspace:*"
   },
   "peerDependencies": {

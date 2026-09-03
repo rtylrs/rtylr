@@ -9,5 +9,15 @@ export type { Resource, Action } from './capabilities';
 export { getPermissions, hasPermission, hasAllPermissions, hasAnyPermission } from './matrix';
 
 // Guards
-export { canAccessApp, getAccessibleApps, canPOSAction, can, canAll, canAny } from './guards';
+export {
+  canAccessApp,
+  getAccessibleApps,
+  canPOSAction,
+  can,
+  canAll,
+  canAny,
+  canEffectiveAccess,
+  canEffectiveAccessInScope,
+  canonicalizePermission,
+} from './guards';
 export type { AppId, PermissionContext } from './guards';
