@@ -809,7 +809,8 @@
     "archiveConfirm": "Archive project"
   },
   "bulkEdit": {
-    "clearSelectionLabel": "Clear selection"
+    "clearSelectionLabel": "Clear selection",
+    "unresolved": "Some selected tasks could not be loaded, so this action is unavailable."
   },
   "allProjects": {
     "title": "All Projects",
