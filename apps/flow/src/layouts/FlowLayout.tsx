@@ -57,7 +57,7 @@ import { RecycleBinSection } from '../features/projects-v2/RecycleBinSection';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
-import { hasFlowPermission, toFlowMemberRole } from '../shared/lib/roleUtils';
+import { canFlowPermission, toFlowMemberRole } from '../shared/lib/roleUtils';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useSidebarSections } from '../shared/hooks/useSidebarSections';
 import {
@@ -293,7 +293,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // threading the removal through those signatures here.
   const currentWorkspaceId = '';
 
-  const canCreateProject = hasFlowPermission(effectiveAccess, 'flow:projects:create');
+  const canCreateProject = canFlowPermission(
+    authUser?.role,
+    'flow:projects:create',
+    effectiveAccess
+  );
   const createProjectGateReason = canCreateProject ? '' : t('flow.shell.createNeedsRole');
 
   // Workspace-scoped routes are authoritative even when the workspace list
