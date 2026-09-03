@@ -20,6 +20,11 @@ const DefaultBinRetentionDays = 30
 // ErrNotFound is returned by v2 lookups when the business has no such project.
 var ErrNotFound = errors.New("flow project not found")
 
+// ErrProjectNotArchived is a client error, not a fault: purging is only
+// defined for an archived project, and a caller who has not archived one yet
+// needs to be told that rather than shown a 500.
+var ErrProjectNotArchived = errors.New("only archived projects can be purged")
+
 // canSeeProject reports whether callerID may READ projectID under the curation
 // rule: creator, member, or manager visibility through the reporting line.
 // Public visibility never widens read access here.
@@ -202,7 +207,7 @@ func (s *Service) PurgeProjectV2(ctx context.Context, projectID, callerID, busin
 		return nil, err
 	}
 	if p.ArchivedAt == nil {
-		return nil, errors.New("only archived projects can be purged")
+		return nil, ErrProjectNotArchived
 	}
 	bypass := s.hubProfileBypasses(ctx, callerID, businessID)
 	if !bypass && p.CreatedBy != callerID && p.OwnerID != callerID {

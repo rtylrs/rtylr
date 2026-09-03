@@ -101,11 +101,26 @@ func toProjectV2(p domain.Project) *flowprojectv2.Project {
 	return out
 }
 
+// mapProjectV2Error turns a service rule into the status a caller should see,
+// and returns nil for anything it does not recognise so the caller falls
+// through to its own message.
+//
+// It used to return the unrecognised error unchanged. Because it is called as
+// `if err := mapProjectV2Error(err); err != nil`, that made every caller's own
+// fallback dead code and handed an unclassified error straight to the generated
+// server, which renders it as a 500 with the reason discarded. That is how
+// purging an unarchived project reported a server fault for a client mistake.
 func mapProjectV2Error(err error) error {
-	if errors.Is(err, domain.ErrUnauthorized) {
+	switch {
+	case errors.Is(err, domain.ErrUnauthorized):
 		return onekiterrors.PermissionDenied()
+	case errors.Is(err, application.ErrProjectNotArchived):
+		// 409: the project exists and the caller may act on it, but not in the
+		// state it is in. Archiving it first makes the same request valid.
+		return onekiterrors.New(http.StatusConflict, application.ErrProjectNotArchived.Error())
+	default:
+		return nil
 	}
-	return err
 }
 
 func (a *ProjectAPIV2) resolveBusinessID(ctx context.Context) (int64, *authPkg.AuthUser, error) {
