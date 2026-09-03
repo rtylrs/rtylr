@@ -685,7 +685,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <button
                   type="button"
                   onClick={() => setMobileSidebarOpen((v) => !v)}
-                  className="md:hidden h-11 w-11 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
+                  className="md:hidden h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
                   aria-label="Toggle navigation menu"
                 >
@@ -719,7 +719,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <button
                   type="button"
                   onClick={() => setCommandPaletteOpen(true)}
-                  className="flex items-center gap-2 px-2.5 h-11 min-w-11 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                  className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{
                     color: 'var(--dash-text-muted)',
                     border: '1px solid var(--dash-border)',
@@ -745,7 +745,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <button
                   type="button"
                   onClick={() => navigate({ to: '/notifications' })}
-                  className="relative h-11 w-11 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                  className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
                   aria-label={
                     unreadCount > 0
