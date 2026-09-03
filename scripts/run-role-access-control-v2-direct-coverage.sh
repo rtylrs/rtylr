@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This harness connects to a database as a privileged user. It used to carry a
+# default password, which put a credential in repository source and let the run
+# connect with it silently. Require the secret from the environment and fail
+# before any other work happens, so a missing value can never fall back.
+if [[ -z "${DB_PASSWORD:-}" ]]; then
+    echo "DB_PASSWORD is not set. Export it for this run; this script carries no default." >&2
+    exit 1
+fi
+
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 onion_dir="${ONION_DIR:-$(cd "$script_dir/../../onion" && pwd)}"
 
@@ -24,7 +33,7 @@ fi
 export DB_HOST="${DB_HOST:-127.0.0.1}"
 export DB_PORT="${DB_PORT:-3306}"
 export DB_USER="${DB_USER:-root}"
-export DB_PASSWORD="${DB_PASSWORD:-onion_root_password}"
+export DB_PASSWORD
 export DB_NAME="${DB_NAME:-onion_test}"
 export DIRECT_AUTHORIZATION_EVIDENCE=1
 
