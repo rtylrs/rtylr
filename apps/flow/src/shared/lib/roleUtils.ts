@@ -83,6 +83,48 @@ export function hasFlowPermission(
   return flowAccess?.permissions.some((value) => value === permission) ?? false;
 }
 
+/**
+ * The Flow permissions that have a legacy business-role equivalent, and the
+ * equivalent itself.
+ *
+ * Kept as an explicit map rather than a blanket "owner or admin" so the
+ * fallback grants exactly what the pre-effective-access build granted:
+ * `flow:projects:create` was open to members too, while managing settings and
+ * the team was not.
+ */
+export type FlowPermission = 'flow:settings:manage' | 'flow:team:manage' | 'flow:projects:create';
+
+const LEGACY_FLOW_PERMISSION: Record<FlowPermission, (role: Member['role']) => boolean> = {
+  'flow:settings:manage': canManageWorkspace,
+  'flow:team:manage': canManageWorkspace,
+  'flow:projects:create': canCreateProject,
+};
+
+/**
+ * Whether the signed-in user holds a Flow permission, preferring the central
+ * effective-access payload and falling back to the legacy business role while
+ * that payload is not guaranteed to be sent.
+ *
+ * The fallback is load bearing, not defensive. `getMe` can still answer with a
+ * `role` and no `effectiveAccess`, and reading that as "no access" denied
+ * owners and admins project creation and the management settings sections
+ * outright (#1025). This mirrors `canHrPermission` and `canCrmPermission`,
+ * which kept their `can({ platformRole: role }, ...)` fallback for the same
+ * reason.
+ *
+ * An absent role still denies: absent access data plus no role is no evidence
+ * of anything.
+ */
+export function canFlowPermission(
+  role: string | null | undefined,
+  permission: FlowPermission,
+  effectiveAccess: EffectiveAccess | null | undefined
+): boolean {
+  if (effectiveAccess) return hasFlowPermission(effectiveAccess, permission);
+  if (!role) return false;
+  return LEGACY_FLOW_PERMISSION[permission](toFlowMemberRole(role));
+}
+
 /** Returns true if the role can invite members. */
 export function canInviteMembers(role: Member['role']): boolean {
   return role === 'owner' || role === 'admin';
