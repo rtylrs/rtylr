@@ -250,6 +250,19 @@ export interface ApiRoadmap {
   taskCount?: number;
 }
 
+/**
+ * The UI models "no priority" as `no_priority`, but `flow_tasks.priority` is
+ * `enum('none','low','medium','high','urgent')` and the contract types the
+ * field as a plain string, so `no_priority` reaches SQL unvalidated and the
+ * write fails with a 500 rather than a 400. Map it at the boundary on the way
+ * out; `apiTaskToTask` already normalises `none` back to `no_priority` on the
+ * way in.
+ */
+export type WirePriority = 'none' | 'low' | 'medium' | 'high' | 'urgent';
+
+export const toWirePriority = (priority: ApiTask['priority']): WirePriority =>
+  priority === 'no_priority' ? 'none' : priority;
+
 const toTaskCreatePayload = (data: {
   projectId?: string;
   title: string;
@@ -266,7 +279,7 @@ const toTaskCreatePayload = (data: {
   project_id: String(data.projectId ? Number(data.projectId) : 0),
   title: data.title,
   description: data.description ?? '-',
-  priority: data.priority ?? 'medium',
+  priority: toWirePriority(data.priority ?? 'medium'),
   assignee_id: data.assigneeId ? String(Number(data.assigneeId)) : undefined,
   due_date: data.dueDate ?? '-',
   start_date: '-',
@@ -673,7 +686,7 @@ export const flowApi = {
           title: data.title,
           description: data.description,
           status: data.status,
-          priority: data.priority,
+          priority: data.priority !== undefined ? toWirePriority(data.priority) : undefined,
           assigneeId:
             data.assigneeId !== undefined
               ? data.assigneeId
