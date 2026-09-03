@@ -9,6 +9,7 @@ import {
   useBulkUpdatePriority,
   useBulkUpdateArchive,
   useBulkDelete,
+  useTasks,
 } from '../../features/tasks/useTasks';
 import { useMostRestrictiveProjectRole } from '../lib/currentUser';
 import { canEditTask, canDelete } from '../lib/roleUtils';
@@ -16,7 +17,12 @@ import { canEditTask, canDelete } from '../lib/roleUtils';
 const t = (key: string): string => i18next.t(key) as string;
 
 export const BulkEditBar: React.FC = () => {
-  const { selectedTaskIds, clearSelection, tasks } = useFlowStore();
+  const { selectedTaskIds, clearSelection } = useFlowStore();
+  // Resolve the selection from the task query rather than the Zustand store.
+  // `setTasks` has no call site anywhere in the app, so `tasks` was
+  // permanently [], no selected task could ever be resolved, and the guard
+  // below fell through to "no role" for every user.
+  const { data: taskList = [] } = useTasks({});
   const bulkStatus = useBulkUpdateStatus();
   const bulkPriority = useBulkUpdatePriority();
   const bulkArchive = useBulkUpdateArchive();
@@ -31,20 +37,27 @@ export const BulkEditBar: React.FC = () => {
     const ids = new Set<string>();
     let resolved = true;
     for (const taskId of selectedTaskIds) {
-      const task = tasks.find((candidate) => candidate.id === taskId);
+      // Ids are compared as strings: the wire sends int64 task and project ids
+      // as numbers even where the hand-rolled ApiTask types them as strings.
+      const task = taskList.find((candidate) => String(candidate.id) === String(taskId));
       if (!task) {
         resolved = false;
         continue;
       }
-      ids.add(task.projectId);
+      ids.add(String(task.projectId));
     }
     return { projectIds: [...ids].sort(), allResolved: resolved };
-  }, [selectedTaskIds, tasks]);
+  }, [selectedTaskIds, taskList]);
 
   const restrictingRole = useMostRestrictiveProjectRole(projectIds);
   const effectiveRole = allResolved ? restrictingRole : undefined;
   const canEdit = effectiveRole !== undefined && canEditTask(effectiveRole);
   const canRemove = effectiveRole !== undefined && canDelete(effectiveRole);
+  // Distinguish "you may not" from "we could not work out which projects this
+  // selection touches". Blaming view-only access for the latter sent anyone
+  // debugging it after the user's role rather than after the data.
+  const editBlockedReason = allResolved ? 'common.readOnlyAccess' : 'flow.bulkEdit.unresolved';
+  const deleteBlockedReason = allResolved ? 'common.deleteRestricted' : 'flow.bulkEdit.unresolved';
 
   if (selectedTaskIds.length === 0) return null;
 
@@ -73,7 +86,7 @@ export const BulkEditBar: React.FC = () => {
         <button
           type="button"
           disabled={isPending || !canEdit}
-          title={!canEdit ? t('common.readOnlyAccess') : undefined}
+          title={!canEdit ? t(editBlockedReason) : undefined}
           onClick={() =>
             bulkStatus
               .mutateAsync({ ids: selectedTaskIds, status: 'done' })
@@ -88,7 +101,7 @@ export const BulkEditBar: React.FC = () => {
         <button
           type="button"
           disabled={isPending || !canEdit}
-          title={!canEdit ? t('common.readOnlyAccess') : undefined}
+          title={!canEdit ? t(editBlockedReason) : undefined}
           onClick={() =>
             bulkPriority
               .mutateAsync({ ids: selectedTaskIds, priority: 'urgent' })
@@ -103,7 +116,7 @@ export const BulkEditBar: React.FC = () => {
         <button
           type="button"
           disabled={isPending || !canEdit}
-          title={!canEdit ? t('common.readOnlyAccess') : undefined}
+          title={!canEdit ? t(editBlockedReason) : undefined}
           onClick={() =>
             bulkArchive
               .mutateAsync({ ids: selectedTaskIds })
@@ -118,7 +131,7 @@ export const BulkEditBar: React.FC = () => {
         <button
           type="button"
           disabled={isPending || !canRemove}
-          title={!canRemove ? t('common.deleteRestricted') : undefined}
+          title={!canRemove ? t(deleteBlockedReason) : undefined}
           onClick={() =>
             bulkDelete
               .mutateAsync(selectedTaskIds)
