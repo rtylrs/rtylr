@@ -272,3 +272,69 @@ describe('flowApi OneKit adapters', () => {
     });
   });
 });
+
+describe('flowApi.updateTask sends a genuine partial update', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // What onion receives is what survives JSON.stringify, and that drops
+  // undefined. Asserting the serialised key set rather than the object is the
+  // point of these tests: toHaveBeenCalledWith treats `{title: undefined}` and
+  // `{}` as equal, which is why the previous `?? '-'` defaults were never
+  // caught despite this file already calling updateTask.
+  const sentKeys = (call = 0): string[] =>
+    Object.keys(JSON.parse(JSON.stringify(vi.mocked(taskV2.updateTask).mock.calls[call][0].body)));
+
+  const sentBody = (call = 0) => vi.mocked(taskV2.updateTask).mock.calls[call][0].body;
+
+  it('omits every field the caller did not supply', async () => {
+    await flowApi.updateTask('9', { status: 'done' });
+
+    expect(sentKeys()).toEqual(['status']);
+    expect(sentBody().status).toBe('done');
+    expect(sentBody().title).toBeUndefined();
+    expect(sentBody().description).toBeUndefined();
+    expect(sentBody().dueDate).toBeUndefined();
+    expect(sentBody().startDate).toBeUndefined();
+  });
+
+  it('sends an explicitly cleared title rather than dropping it', async () => {
+    await flowApi.updateTask('9', { title: '' });
+
+    expect(sentKeys()).toEqual(['title']);
+    expect(sentBody().title).toBe('');
+  });
+
+  it('maps the no_priority UI value to the none the column accepts', async () => {
+    await flowApi.updateTask('9', { priority: 'no_priority' });
+
+    expect(sentKeys()).toEqual(['priority']);
+    expect(sentBody().priority).toBe('none');
+  });
+
+  it('passes a real priority through untouched', async () => {
+    await flowApi.updateTask('9', { priority: 'high' });
+
+    expect(sentBody().priority).toBe('high');
+  });
+
+  it('keeps archived load bearing in both directions', async () => {
+    await flowApi.updateTask('9', { archived: false });
+    expect(sentKeys()).toEqual(['archived']);
+    expect(sentBody().archived).toBe(false);
+
+    vi.clearAllMocks();
+    await flowApi.updateTask('9', { title: 'Renamed' });
+    expect(sentKeys()).toEqual(['title']);
+    expect(sentBody().archived).toBeUndefined();
+  });
+
+  it('maps no_priority on the create path too', async () => {
+    await flowApi.createTask({ projectId: '7', title: 'Task', priority: 'no_priority' });
+
+    expect(taskV2.createTask).toHaveBeenCalledWith(
+      expect.objectContaining({ priority: 'none', title: 'Task' })
+    );
+  });
+});
