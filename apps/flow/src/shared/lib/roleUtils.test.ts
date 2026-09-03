@@ -7,6 +7,7 @@ import {
   canEditTask,
   canDelete,
   hasFlowPermission,
+  canFlowPermission,
   mostRestrictiveProjectRole,
   canInviteMembers,
   toFlowMemberRole,
@@ -218,5 +219,79 @@ describe('hasFlowPermission', () => {
         'flow:projects:view'
       )
     ).toBe(false);
+  });
+});
+
+describe('canFlowPermission legacy role fallback', () => {
+  const flowApp = {
+    appId: 'flow',
+    licensed: true,
+    hasAccess: true,
+    roleIds: [],
+    primaryRoleId: null,
+    displayRole: null,
+    permissions: ['flow:projects:view'],
+    scopes: [],
+    sources: [],
+    permissionSources: {},
+  };
+  const access: EffectiveAccess = {
+    businessId: 'b1',
+    dashRole: 'member',
+    dashRoleId: null,
+    dashPermissions: [],
+    subscribedApps: ['flow'],
+    licenses: [],
+    isOwner: false,
+    isAdmin: false,
+    authorizationVersion: 1,
+    apps: [flowApp],
+  };
+
+  // The regression: a getMe payload that carries a role and no effectiveAccess.
+  describe('with no effective access in the payload', () => {
+    it.each(['owner', 'admin'])('lets %s manage settings and the team', (role) => {
+      expect(canFlowPermission(role, 'flow:settings:manage', undefined)).toBe(true);
+      expect(canFlowPermission(role, 'flow:team:manage', undefined)).toBe(true);
+      expect(canFlowPermission(role, 'flow:projects:create', undefined)).toBe(true);
+    });
+
+    it('lets a member create a project but not manage settings or the team', () => {
+      expect(canFlowPermission('member', 'flow:projects:create', undefined)).toBe(true);
+      expect(canFlowPermission('member', 'flow:settings:manage', undefined)).toBe(false);
+      expect(canFlowPermission('member', 'flow:team:manage', undefined)).toBe(false);
+    });
+
+    it('grants a viewer nothing', () => {
+      expect(canFlowPermission('viewer', 'flow:projects:create', undefined)).toBe(false);
+      expect(canFlowPermission('viewer', 'flow:settings:manage', undefined)).toBe(false);
+    });
+
+    it('treats a role Flow does not recognise as a viewer', () => {
+      expect(canFlowPermission('store_manager', 'flow:projects:create', undefined)).toBe(false);
+      expect(canFlowPermission('billing', 'flow:settings:manage', undefined)).toBe(false);
+    });
+
+    it.each([null, undefined, ''])('denies when the role is %s too', (role) => {
+      expect(canFlowPermission(role, 'flow:projects:create', undefined)).toBe(false);
+    });
+  });
+
+  // When the payload is present it is authoritative, and the legacy role must
+  // not widen it: that would make the fallback a permanent privilege escalation
+  // rather than a migration bridge.
+  describe('with effective access in the payload', () => {
+    it('answers from the payload and ignores the legacy role', () => {
+      expect(canFlowPermission('owner', 'flow:projects:create', access)).toBe(false);
+      expect(canFlowPermission('viewer', 'flow:projects:create', access)).toBe(false);
+    });
+
+    it('grants what the payload grants', () => {
+      const granted: EffectiveAccess = {
+        ...access,
+        apps: [{ ...flowApp, permissions: ['flow:projects:create'] }],
+      };
+      expect(canFlowPermission('viewer', 'flow:projects:create', granted)).toBe(true);
+    });
   });
 });
