@@ -98,10 +98,60 @@ func (s *Service) CreateWorkDayLine(ctx context.Context, input domain.WorkDayLin
 		return domain.WorkDayLine{}, ErrDayLocked
 	}
 
+	if err := s.assertCallerOwnsWorkDay(ctx, input, day.EmployeeID); err != nil {
+		return domain.WorkDayLine{}, err
+	}
+
 	input.EmployeeID = day.EmployeeID
 	input.Date = day.Date.Format("2006-01-02")
 	input.Timezone = day.Timezone
 	return s.repo.CreateWorkDayLine(ctx, input)
+}
+
+// callerOwnsWorkDay reports whether a caller may file a line onto a work day.
+//
+// A day is keyed on hr_employees.id while the caller is an auth user id, so the
+// two are compared through the caller's resolved employee row. The direct
+// callerUserID == dayEmployeeID case stays allowed because the v2 time API
+// still names a caller's own day by their user id where HR onboarding never
+// ran, and those days must remain writable by the person they belong to.
+func callerOwnsWorkDay(callerUserID, dayEmployeeID, callerEmployeeID int64) bool {
+	if callerUserID <= 0 || dayEmployeeID <= 0 {
+		return false
+	}
+	if dayEmployeeID == callerUserID {
+		return true
+	}
+	return callerEmployeeID > 0 && dayEmployeeID == callerEmployeeID
+}
+
+// assertCallerOwnsWorkDay refuses a line filed onto somebody else's day.
+//
+// GetWorkDayByID is scoped to the business, which every member of that business
+// shares, so on its own it lets any authenticated member append time to a
+// colleague's day. The line is then stamped with the target day's employee, so
+// the hours read as that colleague's own and feed their approvals.
+//
+// A foreign day is reported as not found rather than forbidden, so the response
+// does not confirm that another employee's day id exists. DeleteWorkDayLine
+// already answers that way for the same reason.
+func (s *Service) assertCallerOwnsWorkDay(ctx context.Context, input domain.WorkDayLineInput, dayEmployeeID int64) error {
+	callerUserID := input.LoggedBy
+	if callerUserID <= 0 {
+		return ErrWorkDayNotFound
+	}
+	if callerOwnsWorkDay(callerUserID, dayEmployeeID, 0) {
+		return nil
+	}
+
+	byUserID, err := s.repo.EmployeeIDsByUserIDs(ctx, input.OwnerID, input.BusinessID, []int64{callerUserID})
+	if err != nil {
+		return err
+	}
+	if callerOwnsWorkDay(callerUserID, dayEmployeeID, byUserID[callerUserID]) {
+		return nil
+	}
+	return ErrWorkDayNotFound
 }
 
 // UpdateWorkDayLine changes a line in place.
