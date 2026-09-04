@@ -214,8 +214,12 @@ const TaskDetail: React.FC = () => {
     }
   }, [setActiveWorkspace, taskWorkspaceId]);
 
-  const updateTask = (taskId: string, patch: Partial<Task>) => {
-    updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> });
+  const updateTask = (
+    taskId: string,
+    patch: Partial<Task>,
+    options?: { onSuccess?: () => void }
+  ) => {
+    updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> }, options);
   };
   const addComment = (
     taskId: string,
@@ -590,13 +594,23 @@ const TaskDetail: React.FC = () => {
             value={task.status}
             onChange={(e) => {
               const next = e.target.value as Task['status'];
-              if (next === 'done' && task.status !== 'done') {
-                toast.success(t('toasts.task.niceWork'), {
-                  description: t('flow.taskDetail.taskMarkedComplete'),
-                  icon: '🎉',
-                });
-              }
-              updateTask(task.id, { status: next });
+              // The celebration belongs on the mutation's success path. Firing
+              // it here showed "Nice work!" next to "Failed to update task"
+              // while the status reverted and nothing was saved.
+              const justCompleted = next === 'done' && task.status !== 'done';
+              updateTask(
+                task.id,
+                { status: next },
+                justCompleted
+                  ? {
+                      onSuccess: () =>
+                        toast.success(t('toasts.task.niceWork'), {
+                          description: t('flow.taskDetail.taskMarkedComplete'),
+                          icon: '🎉',
+                        }),
+                    }
+                  : undefined
+              );
             }}
             disabled={!canEdit}
             className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
