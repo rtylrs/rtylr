@@ -12,6 +12,8 @@ import { useProjects } from '../projects/useProjects';
 import { useTasks } from '../tasks/useTasks';
 import AddHours from './AddHours';
 import { todayLocalDate, useDeleteWorkDayLine, useWorkDay, useWorkDaysRange } from './useWorkDay';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const routeApi = getRouteApi('/time');
 
@@ -23,7 +25,9 @@ const MyDay = (): React.JSX.Element => {
   const { date: datePrefill } = routeApi.useSearch();
   const [date, setDate] = useState(datePrefill ?? todayLocalDate());
 
-  const { data, isLoading } = useWorkDay(date);
+  const workDayQuery = useWorkDay(date);
+  const { data, isLoading } = workDayQuery;
+  const loadFailed = hasQueryFailed(workDayQuery);
   const deleteLine = useDeleteWorkDayLine();
   const addHoursRef = useRef<HTMLDivElement | null>(null);
 
@@ -112,6 +116,11 @@ const MyDay = (): React.JSX.Element => {
           <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
           </p>
+        ) : loadFailed ? (
+          // Without this the screen sat on "Loading the day..." forever,
+          // because a failed query is not a loading one and nothing rendered
+          // the difference.
+          <ListLoadFailed onRetry={() => void workDayQuery.refetch()} />
         ) : (
           <>
             <section>

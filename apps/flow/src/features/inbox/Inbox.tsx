@@ -19,6 +19,8 @@ import {
   useMarkAllNotificationsRead,
 } from './useNotifications';
 import type { ApiNotification } from '../../shared/services/flowApi';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 type FilterType = 'all' | 'unread' | 'assigned';
 
@@ -126,7 +128,9 @@ const NotificationRow: React.FC<{
 
 const Inbox: React.FC = () => {
   const { t } = useTranslation();
-  const { data: notifications = [], isLoading, refetch } = useNotifications();
+  const notificationsQuery = useNotifications();
+  const { data: notifications = [], isLoading, refetch } = notificationsQuery;
+  const loadFailed = hasQueryFailed(notificationsQuery);
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -211,6 +215,10 @@ const Inbox: React.FC = () => {
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 size={20} className="animate-spin" style={{ color: 'var(--flow-text-dim)' }} />
+          </div>
+        ) : loadFailed ? (
+          <div className="py-10">
+            <ListLoadFailed onRetry={() => void refetch()} />
           </div>
         ) : (
           <AnimatePresence>
