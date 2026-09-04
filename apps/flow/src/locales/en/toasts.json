@@ -36,7 +36,8 @@
   "time": {
     "logged": "Time logged",
     "logFailed": "Failed to log time",
-    "deleteFailed": "Failed to delete time log"
+    "deleteFailed": "Failed to delete time log",
+    "deleted": "Time log deleted"
   },
   "cycle": {
     "created": "Cycle created",
@@ -94,7 +95,10 @@
     "renameFailed": "Failed to rename view",
     "deleted": "View deleted",
     "deleteFailed": "Failed to delete view",
-    "created": "View created"
+    "created": "View created",
+    "madePrivate": "View is now private",
+    "madeShared": "View is now shared",
+    "visibilityFailed": "Failed to change view visibility"
   },
   "weeklyReview": {
     "logged": "Weekly review logged",
@@ -149,5 +153,9 @@
     "deletedWithReassignment": "Status deleted. {{count}} task(s) fell back to their built-in status.",
     "deleteFailed": "Failed to delete status",
     "setFailed": "Failed to set task status"
+  },
+  "attachment": {
+    "addFailed": "Failed to add attachment",
+    "removeFailed": "Failed to remove attachment"
   }
 }

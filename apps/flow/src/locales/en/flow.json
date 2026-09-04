@@ -87,7 +87,8 @@
     "externalUrlPlaceholder": "https://example.com",
     "settingsSection": "Sidebar",
     "recent": "Recent",
-    "topItems": "Top navigation"
+    "topItems": "Top navigation",
+    "yourReports": "Your reports"
   },
   "taskDetail": {
     "loading": "Loading task…",
@@ -562,7 +563,8 @@
     "back": "Back",
     "notFound": "Profile not found.",
     "publicProjects": "Public projects",
-    "noPublicProjects": "No public projects."
+    "noPublicProjects": "No public projects.",
+    "heading": "Profile"
   },
   "board": {
     "pageTitle": "Board · rtylr",
