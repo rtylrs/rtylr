@@ -683,7 +683,8 @@
       "completed": "Terminé"
     },
     "project": "Projet",
-    "noProjects": "Aucun projet pour le moment"
+    "noProjects": "Aucun projet pour le moment",
+    "noTasksYet": "Aucune tâche"
   },
   "roadmap": {
     "loading": "Chargement de la feuille de route...",
