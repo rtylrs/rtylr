@@ -396,6 +396,28 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		return 0, "", errors.New("direct credentials require a new user")
 	}
 
+	// Attach the member to the business before any authorization row is written.
+	// Nothing else ever set users.business_id for an invitee, so their JWT was
+	// issued with no business: /users/me reported business_id "0", onion logged
+	// "failed to resolve business for personal workspace", every Flow endpoint
+	// 403d, and the auth app dropped the session back to the sign-in screen with
+	// nothing to explain why.
+	//
+	// A failure here is logged rather than fatal: it leaves the member in the
+	// state they were already in before this existed, and failing the invite
+	// outright would be a worse outcome than an invite that needs the business
+	// attaching by hand.
+	if attached, attachErr := s.repo.AttachUserToBusiness(ctx, userID, businessID); attachErr != nil {
+		logger.Ctx(ctx).Error("failed to attach invited member to business",
+			logger.Int("user_id", int(userID)), logger.Int("business_id", int(businessID)), logger.Error(attachErr))
+	} else if !attached {
+		// Already had one. Expected when inviting somebody who belongs to
+		// another business; recorded because it also means this invite did not
+		// change which business their session resolves to.
+		logger.Ctx(ctx).Info("invited member already belongs to a business",
+			logger.Int("user_id", int(userID)), logger.Int("business_id", int(businessID)))
+	}
+
 	apps := input.Apps
 	if apps == nil {
 		apps = []string{}

@@ -708,6 +708,24 @@ func (r *Repository) CreateUser(ctx context.Context, email, username, passwordHa
 	return res.LastInsertId()
 }
 
+// AttachUserToBusiness fills users.business_id for a member who does not have
+// one yet, and reports whether it applied. It deliberately leaves an existing
+// value alone: a person can belong to more than one business, and business_id is
+// the one their session resolves to, so inviting somebody who already has one
+// must not move them out of it.
+func (r *Repository) AttachUserToBusiness(ctx context.Context, userID, businessID int64) (bool, error) {
+	rows, err := r.queries.SetUserBusinessIDIfUnset(ctx, sqlc.SetUserBusinessIDIfUnsetParams{
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: businessID != 0},
+		ID:         userID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to attach user to business",
+			logger.Int("user_id", int(userID)), logger.Int("business_id", int(businessID)), logger.Error(err))
+		return false, err
+	}
+	return rows > 0, nil
+}
+
 // EnsureEmployeeForUser creates the HR employee record for a user. The business
 // is passed in rather than read from the user's own row: at invite time
 // users.business_id is still NULL, so reading it there scoped the record to no

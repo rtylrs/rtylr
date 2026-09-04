@@ -196,6 +196,17 @@ INSERT INTO hub_notifications (owner_id, user_id, title, body, type, link)
 VALUES (?, ?, ?, ?, ?, ?);
 
 -- cross-schema write to hr_core — every invited user is also an hr_employees row
+-- cross-schema read from users — attach an invited member to their business.
+-- Only fills an unset business. users.business_id is the user's current business
+-- and a person can belong to more than one, so inviting somebody who already has
+-- one must not move them out of it. An invited member's row is NULL until this
+-- runs, which is why their token carried no business_id and every Flow call 403d.
+-- name: SetUserBusinessIDIfUnset :execrows
+UPDATE users
+SET business_id = ?
+WHERE id = ?
+  AND (business_id IS NULL OR business_id = 0);
+
 -- name: EnsureEmployeeForUser :exec
 -- business_id is passed in rather than read from the invited user's own row.
 -- users.business_id is still NULL at invite time, so COALESCE(u.business_id, 0)
