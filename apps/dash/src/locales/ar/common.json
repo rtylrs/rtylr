@@ -161,6 +161,9 @@
     "teamMembers": "أعضاء الفريق",
     "allApps": "جميع التطبيقات",
     "activityLog": "سجل النشاط",
-    "language": "اللغة"
-  }
+    "language": "اللغة",
+    "navigate": "تنقل",
+    "storefront": "واجهة المتجر"
+  },
+  "launch": "تشغيل"
 }
