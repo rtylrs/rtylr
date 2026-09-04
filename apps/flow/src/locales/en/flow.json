@@ -688,11 +688,12 @@
     "target": "Target:"
   },
   "triage": {
-    "subtitle_one": "{{count}} task needs attention · Capture → set priority & date → move out of backlog",
-    "subtitle_other": "{{count}} tasks need attention · Capture → set priority & date → move out of backlog",
+    "subtitle_one": "{{count}} task needs attention",
+    "subtitle_other": "{{count}} tasks need attention",
     "emptyTitle": "Inbox zero",
     "emptyDescription": "Nothing stuck without a priority or due date. New work lands in capture first-keep triage lean so planned work stays trustworthy.",
-    "emptyCta": "Go to My Tasks"
+    "emptyCta": "Go to My Tasks",
+    "explanation": "Anything without a priority or a due date, or still in the backlog, shows up here."
   },
   "team": {
     "loading": "Loading team...",
