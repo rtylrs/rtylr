@@ -53,6 +53,11 @@
   --flow-input-bg: rgba(255, 255, 255, 0.04);
   --flow-scrollbar: rgba(255, 255, 255, 0.12);
   --flow-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  /* The card lift, distinct from --flow-shadow, which is the modal and popover
+   * shadow at 8px/32px. TaskCard hardcoded 0 1px 3px rgba(0,0,0,.15), the one
+   * shadow in the app outside the token set, and heavier than a card wants on
+   * a dark ground where the surface is already darker than the page. */
+  --flow-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
 
   /* keep hub vars aliased so shared components work */
   --hub-bg: var(--flow-bg);
@@ -98,6 +103,10 @@
   --flow-input-bg: #ffffff;
   --flow-scrollbar: rgba(0, 0, 0, 0.15);
   --flow-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
+  /* See the dark-mode note. Lighter here, matching the second layer of
+   * --flow-shadow above, because a card on white needs a hint of lift rather
+   * than the .15 the hardcoded value used. */
+  --flow-shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08);
 
   --hub-bg: var(--flow-bg);
   --hub-surface: var(--flow-surface);
