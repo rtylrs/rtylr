@@ -41,6 +41,9 @@ jobs:
       - name: Check SQL case
         run: make sql-check
 
+      - name: Check Flow and HR route contracts
+        run: make route-contract-check
+
       - name: Start MySQL
         run: docker compose -p onion-env -f local-env/docker-compose.yml up -d --wait db
 

@@ -11,6 +11,8 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+	// These hand-registered paths implement the HR compatibility contract. The
+	// route-contract-check target compares this table with the .onk declarations.
 	// Time Entries
 	serverHttp.RegisterGET[handlers.ListTimeEntriesRequest, handlers.ListTimeEntriesResponse](
 		ctx, router, handlers.ListTimeEntriesRoutes(), &handlers.ListTimeEntriesHandler{Service: service},

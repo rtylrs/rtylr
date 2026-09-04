@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all build-media-engine generate generate-module lint test test-db direct-authorization-evidence role-access-control-v2-rollback-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
+.PHONY: onion setup build build-all build-media-engine generate generate-module lint test test-db direct-authorization-evidence role-access-control-v2-rollback-check route-contract-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -66,6 +66,9 @@ direct-authorization-evidence:
 
 role-access-control-v2-rollback-check:
 	./scripts/test-role-access-control-v2-rollback.sh
+
+route-contract-check:
+	python3 ./scripts/check-route-contract-drift.py
 
 # Default run (backwards compatibility)
 run:
