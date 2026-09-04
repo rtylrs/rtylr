@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@voxire/ui';
-import { useFlowStore, Task, PRIORITY_LABELS } from '../stores/flowStore';
+import { useFlowStore, Task } from '../stores/flowStore';
+import { priorityLabelKey } from '../lib/priorityLabels';
 import { useUserStore } from '../stores/userStore';
 import ProjectSelect from './ProjectSelect';
 import PriorityIcon from './PriorityIcon';
@@ -333,7 +334,7 @@ export const QuickCreate: React.FC = () => {
                               : '1px solid transparent',
                         }}
                         title={t(p === 'no_priority' ? 'priority.noPriority' : `priority.${p}`)}
-                        aria-label={PRIORITY_LABELS[p] ?? p}
+                        aria-label={t(priorityLabelKey(p))}
                       >
                         <PriorityIcon priority={p} />
                       </button>
