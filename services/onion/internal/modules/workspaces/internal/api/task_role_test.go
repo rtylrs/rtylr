@@ -125,21 +125,34 @@ func (f *roleFixture) newTask(t *testing.T) int64 {
 // ctxAs returns a context carrying an authenticated caller, the same shape the
 // auth middleware installs in production.
 func ctxAs(userID int64) context.Context {
+	return ctxAsWithTaskAssignment(userID, true)
+}
+
+func ctxAsWithoutTaskAssignment(userID int64) context.Context {
+	return ctxAsWithTaskAssignment(userID, false)
+}
+
+func ctxAsWithTaskAssignment(userID int64, canAssignTasks bool) context.Context {
+	permissions := []string{
+		"flow:projects:view", "flow:projects:create", "flow:projects:edit",
+		"flow:projects:assign", "flow:tasks:view", "flow:tasks:create",
+		"flow:tasks:edit", "flow:team:manage", "flow:managers:manage",
+		"flow:settings:manage",
+	}
+	if canAssignTasks {
+		permissions = append(permissions, "flow:tasks:assign")
+	}
+
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     userID,
 		BusinessID: testutil.BusinessID,
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID: testutil.BusinessID,
 			Apps: []authorization.EffectiveAppAccess{{
-				AppID:     authorization.AppFlow,
-				Licensed:  true,
-				HasAccess: true,
-				Permissions: []string{
-					"flow:projects:view", "flow:projects:create", "flow:projects:edit",
-					"flow:projects:assign", "flow:tasks:view", "flow:tasks:create",
-					"flow:tasks:edit", "flow:tasks:assign", "flow:team:manage",
-					"flow:managers:manage", "flow:settings:manage",
-				},
+				AppID:       authorization.AppFlow,
+				Licensed:    true,
+				HasAccess:   true,
+				Permissions: permissions,
 			}},
 			IsOwner: userID == roleOwnerID,
 			IsAdmin: userID == roleManagerID,
@@ -189,6 +202,62 @@ func TestTaskRole_MemberCanUpdateTask(t *testing.T) {
 	if err := f.updateTaskAs(roleMemberID, f.newTask(t)); err != nil {
 		t.Fatalf("member UpdateTask: expected success, got %v", err)
 	}
+}
+
+func TestTaskRole_MemberCanCreateSelfAssignedTaskWithoutAssignmentPermission(t *testing.T) {
+	f := newRoleFixture(t)
+	self := roleMemberID
+	response, err := f.taskAPI.CreateTask(ctxAsWithoutTaskAssignment(roleMemberID), &flowtaskv1.CreateTaskRequest{
+		ProjectId:   testutil.Int64Ptr(f.projID),
+		WorkspaceId: testutil.Int64Ptr(f.wsID),
+		Title:       "Self assigned task",
+		AssigneeId:  &self,
+	})
+	if err != nil {
+		t.Fatalf("member CreateTask self assignment: expected success, got %v", err)
+	}
+	if response.Task == nil || response.Task.AssigneeId == nil || *response.Task.AssigneeId != roleMemberID {
+		t.Fatalf("created task assignee = %v, want %d", response.Task, roleMemberID)
+	}
+	t.Cleanup(func() {
+		if deleteErr := f.repo.DeleteTask(context.Background(), response.Task.Id, testutil.BusinessID); deleteErr != nil {
+			t.Errorf("delete self assigned task: %v", deleteErr)
+		}
+	})
+}
+
+func TestTaskRole_MemberCanUpdateToSelfWithoutAssignmentPermission(t *testing.T) {
+	f := newRoleFixture(t)
+	taskID := f.newTask(t)
+	self := roleMemberID
+	if _, err := f.taskAPI.UpdateTask(ctxAsWithoutTaskAssignment(roleMemberID), &flowtaskv1.UpdateTaskRequest{
+		Id: taskID,
+		Body: &flowtaskv1.UpdateTaskBody{
+			AssigneeId: &self,
+		},
+	}); err != nil {
+		t.Fatalf("member UpdateTask self assignment: expected success, got %v", err)
+	}
+
+	task, err := f.repo.GetTaskByID(context.Background(), taskID)
+	if err != nil {
+		t.Fatalf("GetTaskByID: %v", err)
+	}
+	if task.AssigneeID == nil || *task.AssigneeID != roleMemberID {
+		t.Errorf("updated task assignee = %v, want %d", task.AssigneeID, roleMemberID)
+	}
+}
+
+func TestTaskRole_MemberStillNeedsAssignmentPermissionForAnotherUser(t *testing.T) {
+	f := newRoleFixture(t)
+	other := roleOwnerID
+	_, err := f.taskAPI.UpdateTask(ctxAsWithoutTaskAssignment(roleMemberID), &flowtaskv1.UpdateTaskRequest{
+		Id: f.newTask(t),
+		Body: &flowtaskv1.UpdateTaskBody{
+			AssigneeId: &other,
+		},
+	})
+	assertPermissionDenied(t, err, "member assignment to another user")
 }
 
 func TestTaskRole_MemberCannotDeleteTask(t *testing.T) {

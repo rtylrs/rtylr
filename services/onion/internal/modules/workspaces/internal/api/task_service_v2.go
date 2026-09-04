@@ -257,13 +257,11 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 	if err := requireFlowPermission(ctx, "flow:tasks:create"); err != nil {
 		return nil, err
 	}
-	if req.AssigneeId != nil {
-		if err := requireFlowPermission(ctx, "flow:tasks:assign"); err != nil {
-			return nil, err
-		}
-	}
 	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if err := requireTaskAssignmentPermission(ctx, req.AssigneeId, caller.UserID); err != nil {
 		return nil, err
 	}
 
@@ -362,10 +360,8 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 	if body == nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Missing update body")
 	}
-	if body.AssigneeId != nil {
-		if err := requireFlowPermission(ctx, "flow:tasks:assign"); err != nil {
-			return nil, err
-		}
+	if err := requireTaskAssignmentPermission(ctx, body.AssigneeId, caller.UserID); err != nil {
+		return nil, err
 	}
 
 	dueDate, err := parseTaskDate(body.GetDueDate())
