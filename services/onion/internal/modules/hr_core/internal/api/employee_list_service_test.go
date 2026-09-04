@@ -62,7 +62,7 @@ func TestEmployeeToPayload(t *testing.T) {
 		CreatedAt:       created,
 		UpdatedAt:       created,
 	}
-	payload := employeeToPayload(employee)
+	payload := employeeToPayload(employee, "EUR")
 	if payload.GetId() != 42 || payload.GetUserId() != 21 || payload.GetWorkScheduleId() != 5 {
 		t.Fatalf("identity fields not mapped: %+v", payload)
 	}
@@ -71,6 +71,13 @@ func TestEmployeeToPayload(t *testing.T) {
 	}
 	if payload.HourlyRate == nil || *payload.HourlyRate != 25 || payload.MonthlySalary == nil || *payload.MonthlySalary != 1250 {
 		t.Fatalf("compensation fields not mapped: %+v", payload)
+	}
+	if payload.GetCurrency() != "EUR" {
+		t.Fatalf("currency = %q, want EUR", payload.GetCurrency())
+	}
+	withoutCurrency := employeeToPayload(employee, "")
+	if withoutCurrency.GetCurrency() != "" {
+		t.Fatalf("unavailable currency = %q, want empty", withoutCurrency.GetCurrency())
 	}
 	if payload.TerminationDate == nil || *payload.TerminationDate != "2026-09-30" {
 		t.Fatalf("termination date not mapped: %+v", payload)

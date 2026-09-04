@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
@@ -125,6 +127,16 @@ func (a *EmployeeListAPI) ListEmployees(
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	currency := ""
+	config, configErr := a.Service.GetHRConfig(ctx, businessID)
+	if configErr != nil {
+		if !errors.Is(configErr, domain.ErrSetupNotComplete) {
+			logger.Ctx(ctx).Warn("failed to resolve employee currency", logger.Any("business_id", businessID), logger.Error(configErr))
+		}
+	} else if config != nil {
+		currency = strings.TrimSpace(config.DefaultCurrency)
+	}
+
 	limit := req.GetLimit()
 	if limit <= 0 {
 		limit = defaultEmployeeListLimit
@@ -154,7 +166,7 @@ func (a *EmployeeListAPI) ListEmployees(
 
 	payloads := make([]*hremployeev1.EmployeePayload, 0, len(employees))
 	for _, employee := range employees {
-		payloads = append(payloads, employeeToPayload(employee))
+		payloads = append(payloads, employeeToPayload(employee, currency))
 	}
 
 	return &hremployeev1.ListEmployeesResponse{
@@ -165,7 +177,7 @@ func (a *EmployeeListAPI) ListEmployees(
 	}, nil
 }
 
-func employeeToPayload(employee domain.EmployeeRecord) *hremployeev1.EmployeePayload {
+func employeeToPayload(employee domain.EmployeeRecord, currency string) *hremployeev1.EmployeePayload {
 	payload := &hremployeev1.EmployeePayload{
 		Id:                  employee.ID,
 		OwnerId:             employee.OwnerID,
@@ -175,7 +187,7 @@ func employeeToPayload(employee domain.EmployeeRecord) *hremployeev1.EmployeePay
 		ContractType:        employee.EmploymentType,
 		Status:              employee.Status,
 		HireDate:            formatEmployeeDate(employee.StartDate),
-		Currency:            "",
+		Currency:            currency,
 		AccountCreationMode: employeeAccountCreationMode(employee.Status),
 		CreatedAt:           employee.CreatedAt.Unix(),
 		UpdatedAt:           employee.UpdatedAt.Unix(),
