@@ -25,8 +25,11 @@ const cyclesState = vi.hoisted(() => ({
 }));
 
 // The screen asks which project's cycles to show, so it reads the project list.
+const projectsState = vi.hoisted(() => ({
+  data: [{ id: 'p-1', name: 'Website Redesign' }] as Array<{ id: string; name: string }>,
+}));
 vi.mock('../projects/useProjects', () => ({
-  useProjects: () => ({ data: [{ id: 'p-1', name: 'Website Redesign' }], isLoading: false }),
+  useProjects: () => ({ data: projectsState.data, isLoading: false }),
 }));
 
 vi.mock('./useCycles', () => ({
@@ -131,5 +134,46 @@ describe('Cycles create form', () => {
       startDate: '2026-08-20',
       endDate: '2026-08-21',
     });
+  });
+});
+
+describe('Cycles: the disabled primary explains itself (#1090)', () => {
+  beforeEach(() => {
+    projectsState.data = [{ id: 'p-1', name: 'Website Redesign' }];
+  });
+
+  it('says why New cycle is disabled when there is no project', () => {
+    // A cycle belongs to a project, so with none there is nothing to create
+    // one against. The button was simply dim.
+    projectsState.data = [];
+    render(<Cycles />);
+
+    expect(screen.getByText('flow.cycles.newCycleGate')).toBeInTheDocument();
+    expect(screen.getByText('flow.cycles.newCycle').closest('button')).toBeDisabled();
+  });
+
+  it('points the button at the reason for a screen reader', () => {
+    projectsState.data = [];
+    render(<Cycles />);
+
+    expect(screen.getByText('flow.cycles.newCycle').closest('button')).toHaveAttribute(
+      'aria-describedby',
+      'cycles-project-gate'
+    );
+  });
+
+  it('explains nothing when there is a project to create against', () => {
+    render(<Cycles />);
+
+    expect(screen.queryByText('flow.cycles.newCycleGate')).not.toBeInTheDocument();
+    expect(screen.getByText('flow.cycles.newCycle').closest('button')).not.toBeDisabled();
+  });
+
+  it('shows the project label rather than hiding it from sighted users', () => {
+    // It was sr-only, on a selector that truncates a 60-character project
+    // name, which is exactly where the reader needs to know what it is.
+    render(<Cycles />);
+    const label = screen.getByText('flow.cycles.project');
+    expect(label.className).not.toContain('sr-only');
   });
 });
