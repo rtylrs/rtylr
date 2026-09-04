@@ -8,7 +8,6 @@ import {
   Tag,
   Trash2,
   Users,
-  LayoutDashboard,
   Clock,
   PanelLeft,
 } from 'lucide-react';
@@ -79,7 +78,9 @@ function buildSections(
     ...(canManageTeam ? [{ id: 'team', label: t('common.settings.team'), icon: Users }] : []),
     { id: 'notifications', label: t('common.settings.notifications'), icon: Bell },
     // Admin/owner only: rates and the approval lock change what the whole
-    // workspace can edit. Gated on the same role check as Workspaces.
+    // business can edit. The flag is still called canManageWorkspaces because
+    // it is the same role check the removed Workspaces tab used; it is the
+    // only thing gating this one now.
     ...(canManageWorkspaces
       ? [{ id: 'time', label: t('flow.settings.time.section'), icon: Clock }]
       : []),
@@ -92,13 +93,13 @@ function buildSections(
     // permission, which is also enforced by the server.
     ...(canManageBin ? [{ id: 'bin', label: t('flow.settings.bin.section'), icon: Trash2 }] : []),
   ];
-  if (canManageWorkspaces) {
-    sections.unshift({
-      id: 'workspaces',
-      label: t('flow.settings.workspaces.section'),
-      icon: LayoutDashboard,
-    });
-  }
+  // No Workspaces tab. Workspaces were removed from the product, and
+  // SECTION_CONTENT never had an entry for one, so the tab fell through to
+  // PlaceholderSection and read "This section is not yet available."
+  //
+  // It was also unshifted to position 0, which made it the default section,
+  // so the first thing an admin saw in Settings was a dead tab carrying the
+  // selected-tab dot. See vault/rtylr/apps/flow/workspace-removal.md.
   return sections;
 }
 
@@ -1162,8 +1163,11 @@ const FlowSettings: React.FC = () => {
   // but the search param is user-controlled, so it must be checked against
   // the same gate that hides the tab, not rendered on faith (#793).
   const { section } = settingsRouteApi.useSearch();
+  // Notifications rather than sections[0]: the first tab depends on the
+  // caller's role, so an admin and a member landed on different screens, and
+  // this is one of the two sections people actually open Settings for.
   const [activeSection, setActiveSection] = useState<SettingsSectionId | string>(() =>
-    section && isAccessibleSection(section) ? section : (sections[0]?.id ?? 'notifications')
+    section && isAccessibleSection(section) ? section : 'notifications'
   );
   useEffect(() => {
     if (section && isAccessibleSection(section)) {

@@ -339,7 +339,6 @@
       "deleteFailed": "Could not delete that work type."
     },
     "workspaces": {
-      "section": "Workspaces",
       "subtitle": "Manage your Flow workspaces.",
       "newWorkspace": "New workspace",
       "namePlaceholder": "Workspace name",

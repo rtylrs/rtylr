@@ -203,16 +203,19 @@ describe('FlowSettings section gating (#793)', () => {
     authState.user = undefined;
   });
 
-  it('shows Team, Workspaces and Time in the sidebar for an admin', () => {
+  it('shows Team and Time in the sidebar for an admin, and no Workspaces', () => {
     tokenState.token = makeToken('admin');
     authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
     renderSettings();
 
     expect(screen.getByRole('button', { name: 'common.settings.team' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'flow.settings.workspaces.section' })
-    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'flow.settings.time.section' })).toBeInTheDocument();
+    // Workspaces were removed from the product. The tab had no content
+    // component, so it rendered "This section is not yet available", and it
+    // was unshifted to position 0, which made that dead tab the default.
+    expect(
+      screen.queryByRole('button', { name: 'flow.settings.workspaces.section' })
+    ).not.toBeInTheDocument();
   });
 
   it('hides Team, Workspaces and Time from the sidebar for a plain member', () => {
@@ -373,15 +376,16 @@ describe('FlowSettings gating on a legacy payload (#1025)', () => {
   });
 
   it.each(['owner', 'admin'])(
-    'shows Team and Workspaces to %s when the payload carries no effective access',
+    'shows Team to %s when the payload carries no effective access',
     (role) => {
       authState.user = { role };
       renderSettings();
 
       expect(screen.getByRole('button', { name: 'common.settings.team' })).toBeInTheDocument();
+      // Workspaces no longer appears for any role, legacy payload included.
       expect(
-        screen.getByRole('button', { name: 'flow.settings.workspaces.section' })
-      ).toBeInTheDocument();
+        screen.queryByRole('button', { name: 'flow.settings.workspaces.section' })
+      ).not.toBeInTheDocument();
     }
   );
 
@@ -407,5 +411,54 @@ describe('FlowSettings gating on a legacy payload (#1025)', () => {
     renderSettings();
 
     expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
+  });
+});
+
+describe('FlowSettings default section (#1092)', () => {
+  beforeEach(() => {
+    flowTeamData.data = [];
+    searchState.section = undefined;
+    authState.effectiveAccess = undefined;
+    authState.user = undefined;
+  });
+
+  it('opens on Notifications for an admin, not on the first role-gated tab', () => {
+    // Workspaces was unshifted to position 0 and the default was
+    // sections[0], so an admin opened Settings on a dead tab while a member
+    // opened it somewhere else entirely.
+    tokenState.token = makeToken('admin');
+    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
+    renderSettings();
+
+    expect(
+      screen.getByText('flow.settings.notifications.items.taskAssigned.label')
+    ).toBeInTheDocument();
+  });
+
+  it('opens on Notifications for a plain member too, so the landing screen is the same', () => {
+    tokenState.token = makeToken('member');
+    renderSettings();
+
+    expect(
+      screen.getByText('flow.settings.notifications.items.taskAssigned.label')
+    ).toBeInTheDocument();
+  });
+
+  it('never shows the not-available placeholder for the removed section', () => {
+    tokenState.token = makeToken('admin');
+    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
+    searchState.section = 'workspaces';
+    renderSettings();
+
+    expect(screen.queryByText('flow.settings.sectionNotAvailable')).not.toBeInTheDocument();
+  });
+
+  it('still honours a valid ?section for a role that can reach it', () => {
+    tokenState.token = makeToken('admin');
+    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
+    searchState.section = 'time';
+    renderSettings();
+
+    expect(screen.getByRole('button', { name: 'flow.settings.time.section' })).toBeInTheDocument();
   });
 });

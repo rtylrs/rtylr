@@ -343,7 +343,6 @@
       "deleteFailed": "Impossible de supprimer ce type de travail."
     },
     "workspaces": {
-      "section": "Espaces de travail",
       "subtitle": "Gérez vos espaces de travail Flow.",
       "newWorkspace": "Nouvel espace de travail",
       "namePlaceholder": "Nom de l'espace de travail",

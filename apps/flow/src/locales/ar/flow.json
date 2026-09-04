@@ -355,7 +355,6 @@
       "deleteFailed": "تعذّر حذف نوع العمل."
     },
     "workspaces": {
-      "section": "مساحات العمل",
       "subtitle": "إدارة مساحات عمل Flow.",
       "newWorkspace": "مساحة عمل جديدة",
       "namePlaceholder": "اسم مساحة العمل",
