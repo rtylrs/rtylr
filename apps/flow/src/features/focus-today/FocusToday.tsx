@@ -19,14 +19,17 @@ const ACCENT_VAR = 'var(--accent)';
 const FocusToday: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { projects, activeWorkspaceId } = useFlowStore();
+  const { projects } = useFlowStore();
   const { data: myTasks } = useMyIssues();
   const tasks: Task[] = (myTasks ?? []).map(apiTaskToTask);
 
   const focusTasks = useMemo(() => {
+    // No workspace filter. `t.workspaceId` is undefined because the API no
+    // longer sends a workspace field, and `activeWorkspaceId` is '' because
+    // that layer was removed, so `undefined === ''` was false for every task
+    // and this list could never contain anything.
     const list = tasks.filter(
       (t) =>
-        t.workspaceId === activeWorkspaceId &&
         !t.archived &&
         t.status !== 'done' &&
         t.status !== 'cancelled' &&
@@ -41,17 +44,12 @@ const FocusToday: React.FC = () => {
       const bd = b.dueDate || '';
       return ad.localeCompare(bd);
     });
-  }, [tasks, activeWorkspaceId]);
+  }, [tasks]);
 
   const backlogHint = useMemo(() => {
-    return tasks.filter(
-      (t) =>
-        t.workspaceId === activeWorkspaceId &&
-        !t.archived &&
-        t.status === 'backlog' &&
-        isTaskMine(t.assigneeId)
-    ).length;
-  }, [tasks, activeWorkspaceId]);
+    return tasks.filter((t) => !t.archived && t.status === 'backlog' && isTaskMine(t.assigneeId))
+      .length;
+  }, [tasks]);
 
   return (
     <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
