@@ -949,5 +949,11 @@
     "title": "Couldn't load this",
     "description": "The request failed, so this is not an empty list. Your work is still there.",
     "retry": "Try again"
-  }
+  },
+  "notFound": {
+    "title": "That page isn't here",
+    "description": "The link may be old, or the item may have been deleted. Nothing has been lost.",
+    "cta": "Go to my tasks"
+  },
+  "projectNotFound": "Project not found. The link may be old, or it may have been deleted."
 }
