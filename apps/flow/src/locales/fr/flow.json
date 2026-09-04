@@ -948,5 +948,10 @@
     "addPayment": "Ajoutez un moyen de paiement pour conserver vos données.",
     "activate": "Activer l'offre",
     "dismiss": "Fermer"
+  },
+  "loadFailed": {
+    "title": "Impossible de charger",
+    "description": "La requête a échoué, il ne s'agit donc pas d'une liste vide. Votre travail est toujours là.",
+    "retry": "Réessayer"
   }
 }
