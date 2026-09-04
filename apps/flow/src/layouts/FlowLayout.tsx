@@ -1395,7 +1395,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         );
                       }}
                       className="px-4 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+                      style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
                     >
                       {createProject.isPending ? t('flow.shell.creating') : t('common.create')}
                     </button>
