@@ -2,5 +2,8 @@
   "emptyNoMenusTitle": "لم يتم العثور على قوائم",
   "emptyTryAnotherSearch": "جرّب بحثًا آخر.",
   "emptyNoMenuItemsYet": "لا توجد عناصر قائمة بعد.",
-  "createItem": "عنصر"
+  "createItem": "عنصر",
+  "savingUnavailable": "الحفظ غير متوفر بعد. التغييرات هنا تبقى في هذا المتصفّح ولا تصل إلى نقطة البيع أو قائمتك العامة.",
+  "savingUnavailableToast": "الحفظ غير متوفر بعد.",
+  "saveItem": "حفظ العنصر"
 }
