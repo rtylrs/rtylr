@@ -18,10 +18,18 @@ export function getCurrentUserId(): string | null {
   return DEMO_USER_ID;
 }
 
-/** Whether the task counts as "mine" for My tasks. */
+/**
+ * Whether the task counts as "mine" for My tasks.
+ *
+ * Compared as strings, for the reason findProjectRole below already records:
+ * the API layer can hand back a numeric id even where the contract types it
+ * as a string. A strict === between a number and a string is false for every
+ * task, and this predicate gates the My tasks count, the Today count and the
+ * whole Today list, so it fails silently and completely.
+ */
 export function isTaskMine(taskAssigneeId: string): boolean {
   const id = getCurrentUserId();
-  return id !== null && taskAssigneeId === id;
+  return id !== null && String(taskAssigneeId) === String(id);
 }
 
 /** The signed-in user's id, reactive to store updates. */
