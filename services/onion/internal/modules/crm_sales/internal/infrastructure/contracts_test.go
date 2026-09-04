@@ -1,12 +1,12 @@
 package infrastructure_test
 
 import (
-	"github.com/voxire/onion/internal/platform/money"
 	"context"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/testutil"
 )
 

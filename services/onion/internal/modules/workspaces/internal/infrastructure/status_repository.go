@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -21,7 +22,8 @@ import (
 
 func statusFromRow(id, businessID, projectID int64, name string, bucket sqlc.FlowStatusesBucket,
 	legacy sqlc.FlowStatusesLegacyStatus, color string, sortOrder int32, isDefault bool,
-	createdBy int64, createdAt sql.NullTime) domain.Status {
+	createdBy int64, createdAt sql.NullTime,
+) domain.Status {
 	s := domain.Status{
 		ID:           id,
 		BusinessID:   businessID,

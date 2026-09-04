@@ -113,7 +113,7 @@ func TestFetchDashboardRunsIndependentQueriesConcurrently(t *testing.T) {
 		upcomingCount:  10,
 		totalMonth:     20,
 		cancelledMonth: 4,
-		revenue: money.Amount(150000),
+		revenue:        money.Amount(150000),
 		delay:          20 * time.Millisecond,
 	}
 	svc := newDashboardService(repo)

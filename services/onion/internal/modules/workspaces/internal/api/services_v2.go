@@ -74,17 +74,17 @@ type InsightsAPIV2 struct{ Service *application.Service }
 
 func NewInsightsAPIV2(s *application.Service) *InsightsAPIV2 { return &InsightsAPIV2{Service: s} }
 
-func (a *InsightsAPIV2) GetInsights(ctx context.Context, _ *flowinsightsv2.GetInsightsRequest) (*flowinsightsv2.GetInsightsResponse, error) {
+func (a *InsightsAPIV2) GetInsights(_ context.Context, _ *flowinsightsv2.GetInsightsRequest) (*flowinsightsv2.GetInsightsResponse, error) {
 	// Served by the flow_insights module; stub for contract completeness.
 	return &flowinsightsv2.GetInsightsResponse{}, nil
 }
 
-func (a *InsightsAPIV2) GetTeamWorkload(ctx context.Context, req *flowinsightsv2.GetTeamWorkloadRequest) (*flowinsightsv2.GetTeamWorkloadResponse, error) {
+func (a *InsightsAPIV2) GetTeamWorkload(_ context.Context, req *flowinsightsv2.GetTeamWorkloadRequest) (*flowinsightsv2.GetTeamWorkloadResponse, error) {
 	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
 	return &flowinsightsv2.GetTeamWorkloadResponse{Pagination: buildPagination(page, limit, 0, 0)}, nil
 }
 
-func (a *InsightsAPIV2) GetRoadmap(ctx context.Context, req *flowinsightsv2.GetRoadmapRequest) (*flowinsightsv2.GetRoadmapResponse, error) {
+func (a *InsightsAPIV2) GetRoadmap(_ context.Context, req *flowinsightsv2.GetRoadmapRequest) (*flowinsightsv2.GetRoadmapResponse, error) {
 	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
 	return &flowinsightsv2.GetRoadmapResponse{Pagination: buildPagination(page, limit, 0, 0)}, nil
 }
@@ -346,7 +346,10 @@ func (a *ViewAPIV2) ListViews(ctx context.Context, req *flowviewv2.ListViewsRequ
 	}
 	out := make([]*flowviewv2.View, 0, len(views))
 	for _, v := range views {
-		filtersJSON, _ := json.Marshal(v.Filters)
+		filtersJSON, err := json.Marshal(v.Filters)
+		if err != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to encode view filters")
+		}
 		out = append(out, &flowviewv2.View{
 			Id: v.ID, Name: v.Name, Icon: v.Icon, Filters: string(filtersJSON),
 			GroupBy: v.GroupBy, SortBy: v.SortBy, SortDir: v.SortDir,
@@ -365,7 +368,10 @@ func (a *ViewAPIV2) CreateView(ctx context.Context, req *flowviewv2.CreateViewRe
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create view")
 	}
-	filtersOut, _ := json.Marshal(v.Filters)
+	filtersOut, err := json.Marshal(v.Filters)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to encode view filters")
+	}
 	return &flowviewv2.CreateViewResponse{View: &flowviewv2.View{
 		Id: v.ID, Name: v.Name, Icon: v.Icon, Filters: string(filtersOut),
 		GroupBy: v.GroupBy, SortBy: v.SortBy, SortDir: v.SortDir,

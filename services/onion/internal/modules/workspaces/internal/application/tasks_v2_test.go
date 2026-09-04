@@ -37,7 +37,7 @@ func TestCreateTaskV2WithoutProjectLandsInBucket(t *testing.T) {
 func TestAssigneeAutoMembership(t *testing.T) {
 	svc, ctx, db := v2Svc(t)
 
-	p := createV2Project(t, svc, ctx, "assign-grant", "", v2UserA)
+	p := createV2Project(ctx, t, svc, "assign-grant", "", v2UserA)
 	assignee := v2UserB
 
 	if _, err := svc.CreateTask(ctx, domain.TaskInput{
@@ -83,7 +83,7 @@ func TestAssigneeAutoMembership(t *testing.T) {
 func TestListTasksV2VisibilityGating(t *testing.T) {
 	svc, ctx, _ := v2Svc(t)
 
-	private := createV2Project(t, svc, ctx, "private-tasks", "", v2UserA)
+	private := createV2Project(ctx, t, svc, "private-tasks", "", v2UserA)
 	if _, err := svc.CreateTask(ctx, domain.TaskInput{
 		ProjectID: private.ID, BusinessID: v2Business, OwnerID: v2UserA,
 		Title: "secret work", ReporterID: v2UserA,

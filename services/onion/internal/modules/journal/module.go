@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/journal/internal/api"
 	"github.com/voxire/onion/internal/modules/journal/internal/application"
-	journalDomain "github.com/voxire/onion/internal/modules/journal/internal/domain"
 	"github.com/voxire/onion/internal/platform/financeaccounts"
 	"github.com/voxire/onion/internal/platform/financejournal"
 	financejournalv1 "github.com/voxire/voxie/gen/go/finance/journal/v1"
@@ -38,7 +37,7 @@ type payrollPoster struct {
 }
 
 func (p payrollPoster) PostPayrollJournal(ctx context.Context, entry financejournal.PayrollJournalEntry) error {
-	return p.service.PostPayrollJournal(ctx, journalDomain.PayrollJournalInput(entry))
+	return p.service.PostPayrollJournal(ctx, entry)
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

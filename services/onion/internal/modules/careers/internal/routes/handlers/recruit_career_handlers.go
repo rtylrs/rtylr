@@ -325,12 +325,12 @@ func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecru
 	return DeleteRecruitCareerResponse{Message: "Career archived"}, nil
 }
 
-func recruitSalaryAmounts(min, max float64) (money.Amount, money.Amount, error) {
-	salaryMin, err := money.FromFloat64(min)
+func recruitSalaryAmounts(minSalary, maxSalary float64) (money.Amount, money.Amount, error) {
+	salaryMin, err := money.FromFloat64(minSalary)
 	if err != nil {
 		return 0, 0, onekiterrors.New(http.StatusBadRequest, "salary_min must be a valid monetary amount")
 	}
-	salaryMax, err := money.FromFloat64(max)
+	salaryMax, err := money.FromFloat64(maxSalary)
 	if err != nil {
 		return 0, 0, onekiterrors.New(http.StatusBadRequest, "salary_max must be a valid monetary amount")
 	}

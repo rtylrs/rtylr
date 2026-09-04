@@ -50,7 +50,7 @@ func resolveBusinessIDV2(ctx context.Context) (int64, *authPkg.AuthUser, error) 
 // publishBusinessEvent fans lifecycle events to the business-wide realtime
 // topic introduced by the workspace removal, alongside the per-project topic
 // subscribers already listen to.
-func publishBusinessEvent(eventType string, businessID int64, entityID, actorID int64) {
+func publishBusinessEvent(eventType string, businessID, entityID, actorID int64) {
 	if businessID == 0 {
 		return
 	}

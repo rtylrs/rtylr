@@ -36,4 +36,3 @@ func TestAddonDTOPricesUseExactMoneyAndDecimalJSON(t *testing.T) {
 		t.Fatalf("addon payload = %s, want decimal JSON prices", payload)
 	}
 }
-

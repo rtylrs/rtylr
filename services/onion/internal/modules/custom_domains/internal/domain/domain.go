@@ -2,10 +2,12 @@ package domain
 
 import "time"
 
-var ErrNotFound = errorString("custom domain not found")
-var ErrInvalidToken = errorString("invalid verification token")
-var ErrDNSVerificationFailed = errorString("custom domain DNS verification failed")
-var ErrConflict = errorString("custom domain already belongs to another business")
+var (
+	ErrNotFound              = errorString("custom domain not found")
+	ErrInvalidToken          = errorString("invalid verification token")
+	ErrDNSVerificationFailed = errorString("custom domain DNS verification failed")
+	ErrConflict              = errorString("custom domain already belongs to another business")
+)
 
 type errorString string
 

@@ -5,14 +5,16 @@ import (
 	"time"
 )
 
-var ErrRoleNotFound = errors.New("role not found")
-var ErrSystemRoleMutation = errors.New("system roles cannot be mutated")
-var ErrRoleArchived = errors.New("role is archived")
-var ErrInvalidPermission = errors.New("invalid permission")
-var ErrInvalidAssignmentTarget = errors.New("exactly one assignment target is required")
-var ErrInvalidScope = errors.New("scope is not owned by the business")
-var ErrDelegationCeiling = errors.New("authorization exceeds delegation ceiling")
-var ErrAuthorizationSchemaUnavailable = errors.New("normalized authorization schema unavailable")
+var (
+	ErrRoleNotFound                   = errors.New("role not found")
+	ErrSystemRoleMutation             = errors.New("system roles cannot be mutated")
+	ErrRoleArchived                   = errors.New("role is archived")
+	ErrInvalidPermission              = errors.New("invalid permission")
+	ErrInvalidAssignmentTarget        = errors.New("exactly one assignment target is required")
+	ErrInvalidScope                   = errors.New("scope is not owned by the business")
+	ErrDelegationCeiling              = errors.New("authorization exceeds delegation ceiling")
+	ErrAuthorizationSchemaUnavailable = errors.New("normalized authorization schema unavailable")
+)
 
 type Role struct {
 	ID           int64     `json:"id"`

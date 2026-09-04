@@ -962,32 +962,32 @@ func (s *Service) DeleteGrant(ctx context.Context, id int64) error {
 // ── Addon Grants ──────────────────────────────────────────────────────────────
 
 type AddonDTO struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Icon        string  `json:"icon"`
+	ID          string       `json:"id"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Icon        string       `json:"icon"`
 	Price       money.Amount `json:"price"`
-	IsFree      bool    `json:"is_free"`
-	SortOrder   int64   `json:"sort_order"`
+	IsFree      bool         `json:"is_free"`
+	SortOrder   int64        `json:"sort_order"`
 }
 
 type AddonGrantDTO struct {
-	ID             int64   `json:"id"`
-	UserID         int64   `json:"user_id"`
-	UserName       string  `json:"user_name"`
-	UserEmail      string  `json:"user_email"`
-	BusinessID     int64   `json:"business_id"`
-	BusinessName   string  `json:"business_name"`
-	AddonID        string  `json:"addon_id"`
-	AddonName      string  `json:"addon_name"`
+	ID             int64        `json:"id"`
+	UserID         int64        `json:"user_id"`
+	UserName       string       `json:"user_name"`
+	UserEmail      string       `json:"user_email"`
+	BusinessID     int64        `json:"business_id"`
+	BusinessName   string       `json:"business_name"`
+	AddonID        string       `json:"addon_id"`
+	AddonName      string       `json:"addon_name"`
 	AddonPrice     money.Amount `json:"addon_price"`
-	GrantedBy      int64   `json:"granted_by"`
-	GranterName    string  `json:"granter_name"`
-	Note           string  `json:"note"`
-	ExpiresAt      *string `json:"expires_at,omitempty"`
-	RevokedAt      *string `json:"revoked_at,omitempty"`
-	EnabledByGrant bool    `json:"enabled_by_grant"`
-	CreatedAt      string  `json:"created_at"`
+	GrantedBy      int64        `json:"granted_by"`
+	GranterName    string       `json:"granter_name"`
+	Note           string       `json:"note"`
+	ExpiresAt      *string      `json:"expires_at,omitempty"`
+	RevokedAt      *string      `json:"revoked_at,omitempty"`
+	EnabledByGrant bool         `json:"enabled_by_grant"`
+	CreatedAt      string       `json:"created_at"`
 }
 
 type ListAddonsResult struct {

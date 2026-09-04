@@ -47,7 +47,7 @@ func TestCreate_BankAccount_ReturnsPositiveID(t *testing.T) {
 		Name:        "Test Checking",
 		Institution: "Test Bank",
 		AccountType: "checking",
-		Balance: money.Amount(150000),
+		Balance:     money.Amount(150000),
 		Currency:    "USD",
 		IsConnected: false,
 	}
@@ -69,7 +69,7 @@ func TestCreate_BankAccount_AppearsInList(t *testing.T) {
 	input := domain.BankAccountInput{
 		Name:        "List Check Account",
 		AccountType: "savings",
-		Balance: money.Amount(50000),
+		Balance:     money.Amount(50000),
 		Currency:    "USD",
 	}
 
@@ -188,7 +188,7 @@ func TestCreate_BankAccount_BalanceRoundTrip(t *testing.T) {
 
 	input := domain.BankAccountInput{
 		Name:     "Balance Test",
-		Balance: money.Amount(123456),
+		Balance:  money.Amount(123456),
 		Currency: "EUR",
 	}
 
@@ -220,7 +220,7 @@ func TestCreate_BankAccount_ConnectedFlag(t *testing.T) {
 
 	input := domain.BankAccountInput{
 		Name:        "Connected Account",
-		Balance: money.Amount(0),
+		Balance:     money.Amount(0),
 		Currency:    "USD",
 		IsConnected: true,
 	}
@@ -281,7 +281,7 @@ func TestCreate_BankAccount_NameStored(t *testing.T) {
 	name := "Name Stored Account"
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     name,
-		Balance: money.Amount(0),
+		Balance:  money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -313,7 +313,7 @@ func TestCreate_BankAccount_IBANStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:        "IBAN Account",
 		Institution: institution,
-		Balance: money.Amount(0),
+		Balance:     money.Amount(0),
 		Currency:    "USD",
 	})
 	if err != nil {
@@ -349,7 +349,7 @@ func TestCreate_ThenList_FindsNewAccount(t *testing.T) {
 
 	_, err = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "New Account For List Check",
-		Balance: money.Amount(0),
+		Balance:  money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -373,7 +373,7 @@ func TestList_ScopedByOwner(t *testing.T) {
 	// Create one account for the fixture owner.
 	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "Scoped Account",
-		Balance: money.Amount(0),
+		Balance:  money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -398,7 +398,7 @@ func TestCreate_BankAccount_AccountTypeStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:        "Type Stored Account",
 		AccountType: "savings",
-		Balance: money.Amount(0),
+		Balance:     money.Amount(0),
 		Currency:    "USD",
 	})
 	if err != nil {
@@ -428,7 +428,7 @@ func TestCreate_BankAccount_CurrencyEUR(t *testing.T) {
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "EUR Account",
-		Balance: money.Amount(50000),
+		Balance:  money.Amount(50000),
 		Currency: "EUR",
 	})
 	if err != nil {
@@ -483,7 +483,7 @@ func TestCreate_BankAccount_ZeroBalance(t *testing.T) {
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "Zero Balance Account",
-		Balance: money.Amount(0),
+		Balance:  money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -541,7 +541,7 @@ func TestTotalBalance_ReflectsCreatedAccount(t *testing.T) {
 
 	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "Balance Test Account",
-		Balance: money.Amount(500000),
+		Balance:  money.Amount(500000),
 		Currency: "USD",
 	})
 	if err != nil {

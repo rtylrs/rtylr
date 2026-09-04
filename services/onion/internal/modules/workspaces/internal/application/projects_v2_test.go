@@ -50,7 +50,7 @@ func v2Svc(t *testing.T) (*Service, context.Context, *sql.DB) {
 	return NewService(ctx, db), ctx, db
 }
 
-func createV2Project(t *testing.T, svc *Service, ctx context.Context, name, visibility string, creator int64) domain.Project {
+func createV2Project(ctx context.Context, t *testing.T, svc *Service, name, visibility string, creator int64) domain.Project {
 	t.Helper()
 	p, err := svc.CreateProject(ctx, domain.ProjectInput{
 		BusinessID:  v2Business,
@@ -71,11 +71,11 @@ func createV2Project(t *testing.T, svc *Service, ctx context.Context, name, visi
 func TestCreateProjectV2VisibilityDefaults(t *testing.T) {
 	svc, ctx, _ := v2Svc(t)
 
-	private := createV2Project(t, svc, ctx, "default-private", "", v2UserA)
+	private := createV2Project(ctx, t, svc, "default-private", "", v2UserA)
 	if private.Visibility != domain.VisibilityPrivate {
 		t.Errorf("empty visibility = %q, want private", private.Visibility)
 	}
-	public := createV2Project(t, svc, ctx, "explicit-public", domain.VisibilityPublic, v2UserA)
+	public := createV2Project(ctx, t, svc, "explicit-public", domain.VisibilityPublic, v2UserA)
 	if public.Visibility != domain.VisibilityPublic || public.IsPersonal {
 		t.Errorf("public project visibility=%q personal=%v", public.Visibility, public.IsPersonal)
 	}
@@ -84,7 +84,7 @@ func TestCreateProjectV2VisibilityDefaults(t *testing.T) {
 func TestListProjectsV2CurationAndBucketExclusion(t *testing.T) {
 	svc, ctx, _ := v2Svc(t)
 
-	mine := createV2Project(t, svc, ctx, "curated-mine", "", v2UserA)
+	mine := createV2Project(ctx, t, svc, "curated-mine", "", v2UserA)
 
 	bucketID, _, err := svc.EnsureMyTasksProject(ctx, v2UserA, v2Business, 0)
 	if err != nil {
@@ -147,7 +147,7 @@ func TestListProjectsV2CurationAndBucketExclusion(t *testing.T) {
 func TestArchiveRestorePurgeLifecycle(t *testing.T) {
 	svc, ctx, db := v2Svc(t)
 
-	p := createV2Project(t, svc, ctx, "bin-lifecycle", "", v2UserA)
+	p := createV2Project(ctx, t, svc, "bin-lifecycle", "", v2UserA)
 	if err := svc.AddProjectMember(ctx, domain.AddProjectMemberInput{
 		ProjectID: p.ID, UserID: v2UserB, Role: domain.FlowRoleViewer,
 	}); err != nil {

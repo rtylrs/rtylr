@@ -18,8 +18,8 @@ type ProjectCost struct {
 	UncostedEmployeeCount int64
 }
 
-// LabourCostProvider returns tenant-scoped, live project labour aggregates.
+// Provider returns tenant-scoped, live project labour aggregates.
 // Implementations must not expose employee rates or other compensation data.
-type LabourCostProvider interface {
+type Provider interface {
 	GetProjectLabourCost(ctx context.Context, businessID, projectID int64) (ProjectCost, error)
 }

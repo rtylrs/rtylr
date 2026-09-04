@@ -18,7 +18,7 @@ func TestCreateMilestoneV2RejectsInvalidTargetDate(t *testing.T) {
 
 func TestCreateMilestoneV2PersistsAndListsTargetDate(t *testing.T) {
 	service, ctx, db := v2Svc(t)
-	project := createV2Project(t, service, ctx, "milestone target date", "", v2UserA)
+	project := createV2Project(ctx, t, service, "milestone target date", "", v2UserA)
 
 	const targetDate = "2026-10-15"
 	milestone, err := service.CreateMilestoneV2(ctx, v2Business, project.ID, "Ship it", "Release the next version", targetDate)

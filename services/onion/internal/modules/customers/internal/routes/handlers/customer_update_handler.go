@@ -85,7 +85,11 @@ func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRe
 		IsActive:    req.IsActive,
 	}
 	if req.Consent != nil {
-		input.Consent, _ = json.Marshal(req.Consent)
+		consent, err := json.Marshal(req.Consent)
+		if err != nil {
+			return UpdateCustomerResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid consent data")
+		}
+		input.Consent = consent
 	}
 
 	if req.DateOfBirth != "" {

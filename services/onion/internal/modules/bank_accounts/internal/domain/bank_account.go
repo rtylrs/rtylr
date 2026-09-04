@@ -11,17 +11,17 @@ import (
 var ErrBankAccountNotFound = errors.New("bank account not found")
 
 type BankAccount struct {
-	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"owner_id"`
-	BusinessID   int64     `json:"business_id"`
-	Name         string    `json:"name"`
-	Institution  string    `json:"institution"`
-	AccountType  string    `json:"account_type"`
+	ID           int64        `json:"id"`
+	OwnerID      int64        `json:"owner_id"`
+	BusinessID   int64        `json:"business_id"`
+	Name         string       `json:"name"`
+	Institution  string       `json:"institution"`
+	AccountType  string       `json:"account_type"`
 	Balance      money.Amount `json:"balance"`
-	Currency     string    `json:"currency"`
-	IsConnected  bool      `json:"is_connected"`
-	LastSyncedAt time.Time `json:"last_synced_at"`
-	CreatedAt    time.Time `json:"created_at"`
+	Currency     string       `json:"currency"`
+	IsConnected  bool         `json:"is_connected"`
+	LastSyncedAt time.Time    `json:"last_synced_at"`
+	CreatedAt    time.Time    `json:"created_at"`
 }
 
 func (b *BankAccount) FromRow(row *sql.Rows) error {
@@ -57,10 +57,10 @@ func (b *BankAccount) FromRow(row *sql.Rows) error {
 }
 
 type BankAccountInput struct {
-	Name        string  `json:"name"`
-	Institution string  `json:"institution"`
-	AccountType string  `json:"account_type"`
+	Name        string       `json:"name"`
+	Institution string       `json:"institution"`
+	AccountType string       `json:"account_type"`
 	Balance     money.Amount `json:"balance"`
-	Currency    string  `json:"currency"`
-	IsConnected bool    `json:"is_connected"`
+	Currency    string       `json:"currency"`
+	IsConnected bool         `json:"is_connected"`
 }

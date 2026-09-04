@@ -10,8 +10,8 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
-	"github.com/voxire/onion/internal/platform/money"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 const bookingDashboardTTL = 1 * time.Minute

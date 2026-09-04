@@ -196,10 +196,7 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 				return err
 			}
 		}
-		if err := tx.Commit(); err != nil {
-			return err
-		}
-		return nil
+		return tx.Commit()
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		_ = tx.Rollback()
@@ -288,10 +285,7 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) lockConfiguredPayrollAccount(ctx context.Context, tx *sql.Tx, businessID, accountID int64, accountType string) (int64, error) {

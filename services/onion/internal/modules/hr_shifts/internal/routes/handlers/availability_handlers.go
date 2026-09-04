@@ -201,7 +201,7 @@ type DeleteAvailabilityResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *DeleteAvailabilityHandler) Validate(_ context.Context, req *DeleteAvailabilityRequest) error {
+func (h *DeleteAvailabilityHandler) Validate(_ context.Context, _ *DeleteAvailabilityRequest) error {
 	return nil
 }
 

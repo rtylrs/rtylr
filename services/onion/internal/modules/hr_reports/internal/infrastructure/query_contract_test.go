@@ -22,14 +22,14 @@ func TestReportsQueriesBoundInteractiveResults(t *testing.T) {
 // Asserted per query rather than by counting matches, so adding a report with
 // the wrong cap fails, and adding one with the right cap does not.
 func TestReportsQueriesUseTheInteractiveCap(t *testing.T) {
-	const cap = "LIMIT 5001"
+	const interactiveLimit = "LIMIT 5001"
 
 	for _, q := range testutil.ParseSQLQueries(t, reportQueries) {
 		if !q.IsMany() || q.IsPaginated() || q.Exempt() || q.IsAggregate() {
 			continue
 		}
-		if q.HasLimit() && !strings.Contains(q.Text, cap) {
-			t.Errorf("%s bounds its result but not with %q, so the UI cannot detect overflow", q.Name, cap)
+		if q.HasLimit() && !strings.Contains(q.Text, interactiveLimit) {
+			t.Errorf("%s bounds its result but not with %q, so the UI cannot detect overflow", q.Name, interactiveLimit)
 		}
 	}
 }

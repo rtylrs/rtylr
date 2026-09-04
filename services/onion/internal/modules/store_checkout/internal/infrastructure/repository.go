@@ -178,22 +178,24 @@ func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) erro
 		// Completion is idempotent for missing or cross-business checkouts.
 		// The scoped lookup deliberately reveals neither existence nor data.
 		return nil
-	} else if err != nil {
+	}
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to load checkout customer", logger.Error(err))
 		return err
+	}
+	if checkout.Status.Valid && checkout.Status.StoreCheckoutsStatus == sqlc.StoreCheckoutsStatus("completed") {
+		return nil
+	}
+	customerEmail = checkout.CustomerEmail
+	totalString = checkout.Total
+	total, parseErr := strconv.ParseFloat(totalString, 64)
+	if parseErr != nil {
+		logger.Ctx(ctx).Warn("failed to parse checkout total for CRM sync",
+			logger.String("total", totalString),
+			logger.Error(parseErr),
+		)
 	} else {
-		if checkout.Status.Valid && checkout.Status.StoreCheckoutsStatus == sqlc.StoreCheckoutsStatus("completed") {
-			return nil
-		}
-		customerEmail = checkout.CustomerEmail
-		totalString = checkout.Total
-		total, parseErr := strconv.ParseFloat(totalString, 64)
-		if parseErr != nil {
-			logger.Ctx(ctx).Warn("failed to parse checkout total for CRM sync",
-				logger.String("total", totalString),
-				logger.Error(parseErr),
-			)
-		} else if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
+		if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 			Email:      customerEmail.String,
 			TotalSpent: total,
 			CountVisit: true,

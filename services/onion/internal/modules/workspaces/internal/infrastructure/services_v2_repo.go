@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -182,10 +183,14 @@ func (r *Repository) ListViewsV2(ctx context.Context, businessID, callerID, limi
 }
 
 func (r *Repository) CreateViewV2(ctx context.Context, input domain.ViewInput) (int64, error) {
+	filters, err := filtersJSON(input.Filters)
+	if err != nil {
+		return 0, fmt.Errorf("encode view filters: %w", err)
+	}
 	res, err := r.queries.CreateViewV2(ctx, sqlc.CreateViewV2Params{
 		BusinessID: input.BusinessID, Name: input.Name,
 		Icon:    sql.NullString{String: input.Icon, Valid: input.Icon != ""},
-		Filters: filtersJSON(input.Filters),
+		Filters: filters,
 		GroupBy: sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
 		SortBy:  sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
 		SortDir: sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
@@ -201,9 +206,8 @@ func (r *Repository) CreateViewV2(ctx context.Context, input domain.ViewInput) (
 	return res.LastInsertId()
 }
 
-func filtersJSON(m map[string]interface{}) json.RawMessage {
-	b, _ := json.Marshal(m)
-	return b
+func filtersJSON(m map[string]interface{}) (json.RawMessage, error) {
+	return json.Marshal(m)
 }
 
 // BusinessEmployeeIDs returns every HR employee id for a business.
@@ -271,7 +275,7 @@ func (r *Repository) EmployeeUserIDs(ctx context.Context, businessID int64, empl
 
 // GetProjectsByCreatorOrMembership lists projects where the caller is the
 // creator or a member (the curation rule from the v2 project listing).
-func (r *Repository) GetProjectsByCreatorOrMembership(ctx context.Context, businessID, callerID int64, limit, offset int64) ([]domain.Project, int64, error) {
+func (r *Repository) GetProjectsByCreatorOrMembership(ctx context.Context, businessID, callerID, limit, offset int64) ([]domain.Project, int64, error) {
 	// nil managed set on purpose: this helper means creator-or-member exactly,
 	// as its name says, so the dept-manager proxy must not widen it.
 	return r.ListProjectsV2(ctx, businessID, callerID, false, nil, "", "", "", limit, offset)

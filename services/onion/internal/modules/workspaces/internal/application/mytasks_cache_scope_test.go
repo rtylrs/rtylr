@@ -45,6 +45,9 @@ func TestEnsureMyTasksProjectEvictsBusinessScope(t *testing.T) {
 			}
 			wsIDs = append(wsIDs, id)
 		}
+		if err := rows.Err(); err != nil {
+			t.Fatalf("iterate workspaces: %v", err)
+		}
 		rows.Close()
 		for _, id := range wsIDs {
 			for _, stmt := range []string{

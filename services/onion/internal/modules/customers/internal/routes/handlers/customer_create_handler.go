@@ -75,7 +75,11 @@ func (h *CreateCustomerHandler) Serve(ctx context.Context, req *CreateCustomerRe
 		Notes:      req.Notes,
 	}
 	if req.Consent != nil {
-		input.Consent, _ = json.Marshal(req.Consent)
+		consent, err := json.Marshal(req.Consent)
+		if err != nil {
+			return CreateCustomerResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid consent data")
+		}
+		input.Consent = consent
 	}
 
 	if req.DateOfBirth != "" {

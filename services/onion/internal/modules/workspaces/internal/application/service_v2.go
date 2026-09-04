@@ -154,7 +154,7 @@ func (s *Service) markVisibleViaReport(ctx context.Context, projects []domain.Pr
 
 // ListArchivedProjectsV2 lists the caller's visible recycle-bin entries,
 // soonest purge first.
-func (s *Service) ListArchivedProjectsV2(ctx context.Context, callerID, businessID int64, limit, offset int64) ([]domain.Project, int64, error) {
+func (s *Service) ListArchivedProjectsV2(ctx context.Context, callerID, businessID, limit, offset int64) ([]domain.Project, int64, error) {
 	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
 	return s.repo.ListArchivedProjectsV2(ctx, businessID, callerID, includeAll, limit, offset)
 }

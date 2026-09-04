@@ -49,8 +49,8 @@ func mapProjectV2(r projectV2Row) domain.Project {
 		Description:    r.Description,
 		Icon:           r.Icon,
 		Color:          r.Color,
-		Status:         string(r.Status),
-		Visibility:     string(r.Visibility),
+		Status:         r.Status,
+		Visibility:     r.Visibility,
 		IsPersonal:     r.IsPersonal,
 		CreatedBy:      r.CreatedBy,
 		TaskCount:      int32(countIfaceToInt64(r.TaskCount)),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.

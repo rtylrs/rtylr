@@ -31,8 +31,10 @@ var ErrImageBlocked = errors.New("image rejected by content moderation")
 // moderationMaxBytes bounds how large an image we send to a moderation
 // provider. Larger images skip the check (fail-open) rather than shipping
 // tens of megabytes to an external API per upload.
-const moderationMaxBytes = 8 << 20 // 8 MiB
-const moderationMaxPixels int64 = 24_000_000
+const (
+	moderationMaxBytes        = 8 << 20 // 8 MiB
+	moderationMaxPixels int64 = 24_000_000
+)
 
 // ImageModerator decides whether an uploaded image is allowed. Implementations
 // must be safe for concurrent use.

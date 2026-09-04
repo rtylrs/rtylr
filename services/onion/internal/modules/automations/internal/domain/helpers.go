@@ -80,7 +80,11 @@ func NormalizeAutomationActions(raw []byte) ([]byte, error) {
 				return nil, fmt.Errorf("actions[%d] must contain a canonical type: %w", i, err)
 			}
 			action = map[string]json.RawMessage{}
-			action["type"], _ = json.Marshal(actionType)
+			typeValue, err := json.Marshal(actionType)
+			if err != nil {
+				return nil, fmt.Errorf("actions[%d] type could not be encoded: %w", i, err)
+			}
+			action["type"] = typeValue
 		} else if err := json.Unmarshal(entry, &action); err != nil || action == nil {
 			return nil, fmt.Errorf("actions[%d] must be an object with a canonical type", i)
 		}

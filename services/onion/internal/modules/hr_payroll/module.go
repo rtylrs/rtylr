@@ -74,7 +74,7 @@ func (m *Module) SetFinancePoster(p domain.FinanceJournalPoster) {
 
 // LabourCostProvider exposes the HR-owned aggregate port to consumers without
 // exposing the payroll service or compensation details.
-func (m *Module) LabourCostProvider() labourcost.LabourCostProvider {
+func (m *Module) LabourCostProvider() labourcost.Provider {
 	return m.service
 }
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -65,7 +66,7 @@ func (a *WorkTimeAPIV2) ListTeamWorkDays(ctx context.Context, req *flowtimev2.Li
 		req.GetFromDate(), req.GetToDate(), int64(limit), offset,
 	)
 	if err != nil {
-		if err == domain.ErrUnauthorized {
+		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
 		}
 		logger.Ctx(ctx).Error("ListTeamWorkDays failed", logger.Error(err))

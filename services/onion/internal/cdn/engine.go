@@ -3,6 +3,7 @@ package cdn
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"os/exec"
@@ -189,7 +190,7 @@ func (c *engineConn) run(ctx context.Context, tokens []string) (string, error) {
 	}
 	c.jobs++
 	if code != 0 {
-		return string(msg), fmt.Errorf("media-engine exited %d: %s", code, msg)
+		return msg, fmt.Errorf("media-engine exited %d: %s", code, msg)
 	}
 	return msg, nil
 }
@@ -272,9 +273,9 @@ func (p *enginePool) acquire(ctx context.Context) (*engineConn, func(), error) {
 		if ctx.Err() != nil {
 			// The request went away mid-probe; nothing was learned about the
 			// binary, so leave the pool enabled for the next request.
-			return nil, nil, fmt.Errorf("%w: %v", errEngineDisabled, context.Canceled)
+			return nil, nil, fmt.Errorf("%w: %w", errEngineDisabled, context.Canceled)
 		}
-		return nil, nil, fmt.Errorf("%w: %v", errEngineDisabled, err)
+		return nil, nil, fmt.Errorf("%w: %w", errEngineDisabled, err)
 	}
 	return c, func() { p.release(c) }, nil
 }
@@ -304,7 +305,7 @@ func (c *CDN) runTransformed(ctx context.Context, args []string) error {
 		if runErr == nil {
 			return nil
 		}
-	case err == errEngineBusy || ctx.Err() == nil && err != context.Canceled:
+	case errors.Is(err, errEngineBusy) || ctx.Err() == nil && !errors.Is(err, context.Canceled):
 		// Busy or transient spawn issue: fall through to single-shot rather
 		// than fail the request. Genuine cancellation still aborts.
 		select {

@@ -824,7 +824,7 @@ func CentsToFloat(cents int64) float64 {
 
 // ListInvoicesByCustomer returns one page of a customer's invoices
 // (CRM->FIN-02's read surface), backed by the business+customer index.
-func (s *Service) ListInvoicesByCustomer(ctx context.Context, businessID, customerID int64, page, pageSize int64) ([]domain.Invoice, bool, error) {
+func (s *Service) ListInvoicesByCustomer(ctx context.Context, businessID, customerID, page, pageSize int64) ([]domain.Invoice, bool, error) {
 	limit, offset := paginateInvoices(page, pageSize)
 	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("by-customer=%d|p=%d|ps=%d", customerID, page, pageSize))
 	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
@@ -836,7 +836,7 @@ func (s *Service) ListInvoicesByCustomer(ctx context.Context, businessID, custom
 	if err != nil {
 		return nil, false, err
 	}
-	hasMore := len(rows) > int(limit)
+	hasMore := len(rows) > limit
 	if hasMore {
 		rows = rows[:limit]
 	}

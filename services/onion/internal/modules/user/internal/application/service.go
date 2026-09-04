@@ -517,16 +517,6 @@ func (s *Service) getUserBusinessID(ctx context.Context, userID int64) (int64, e
 	)
 }
 
-func (s *Service) getUserBusinessRole(ctx context.Context, businessID, userID int64) (string, error) {
-	return cacher.Of[string]().GetOrComputeSingle(ctx,
-		cacheKeys.UserBusinessRole(userID, businessID),
-		func(ctx context.Context) (string, error) {
-			return s.repo.GetUserRole(ctx, businessID, userID)
-		},
-		cacher.WithExpiry(ctx, userProfileTTL),
-	)
-}
-
 type AccessTokenClaims struct {
 	UserID         int64  `json:"user_id"`
 	BusinessID     int64  `json:"business_id,omitempty"`

@@ -49,7 +49,7 @@ func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) *crmloyaltyv1.Lo
 	}
 }
 
-func (h *ListLoyaltyTransactionsHandler) Validate(_ context.Context, req *ListLoyaltyTransactionsRequest) error {
+func (h *ListLoyaltyTransactionsHandler) Validate(_ context.Context, _ *ListLoyaltyTransactionsRequest) error {
 	return nil
 }
 

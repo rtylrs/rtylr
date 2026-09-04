@@ -100,11 +100,11 @@ func workOSHTTPStatus(err error) (int, bool) {
 	}
 	var ssoRequired *workos_errors.SSORequiredError
 	if errors.As(err, &ssoRequired) {
-		return ssoRequired.HTTPError.Code, true
+		return ssoRequired.Code, true
 	}
 	var organizationMethods *workos_errors.OrganizationAuthenticationMethodsRequiredError
 	if errors.As(err, &organizationMethods) {
-		return organizationMethods.HTTPError.Code, true
+		return organizationMethods.Code, true
 	}
 
 	return 0, false

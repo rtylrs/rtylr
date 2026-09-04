@@ -258,7 +258,7 @@ func (p *Pool) processOne(ctx context.Context) bool {
 	return true
 }
 
-func (p *Pool) releaseClaim(ctx context.Context, claimID sql.NullString) {
+func (p *Pool) releaseClaim(_ context.Context, claimID sql.NullString) {
 	releaseCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if _, err := p.q.ReleaseClaim(releaseCtx, claimID); err != nil {

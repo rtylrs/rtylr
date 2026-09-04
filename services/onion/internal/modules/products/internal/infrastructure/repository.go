@@ -395,17 +395,6 @@ func (r *Repository) replacePrimaryProductImage(ctx context.Context, qtx *sqlc.Q
 	})
 }
 
-func (r *Repository) lockProductStock(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64) (float64, error) {
-	stock, err := qtx.LockProductStockForUpdate(ctx, sqlc.LockProductStockForUpdateParams{
-		BusinessID: ownerID,
-		ID:         productID,
-	})
-	if err != nil {
-		return 0, err
-	}
-	return sqlutil.ParseDecimal(stock), nil
-}
-
 func (r *Repository) applyProductStockTotal(
 	ctx context.Context,
 	tx *sql.Tx,

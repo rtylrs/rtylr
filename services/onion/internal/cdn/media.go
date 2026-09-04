@@ -221,8 +221,8 @@ const (
 	// maxTransformBorder caps border/pad growth per step so bo_ tokens can
 	// never inflate the canvas past the pixel-area budget.
 	maxTransformBorder = 2000
-	maxBlurStrength       = 2000.0
-	maxMedianWindow       = 31
+	maxBlurStrength    = 2000.0
+	maxMedianWindow    = 31
 )
 
 // allowedOutputFormat reports whether fmt is an encoder the CDN serves.

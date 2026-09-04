@@ -13,10 +13,10 @@ func TestGetFlowProfileReturnsOnlyPublicProjects(t *testing.T) {
 		ID: v2UserA, FullName: "Abed Amouneh", Email: "abed@example.com", Role: "owner",
 	}})
 
-	createV2Project(t, svc, ctx, "public-one", "public", v2UserA)
-	createV2Project(t, svc, ctx, "private-one", "private", v2UserA)
+	createV2Project(ctx, t, svc, "public-one", "public", v2UserA)
+	createV2Project(ctx, t, svc, "private-one", "private", v2UserA)
 	// Another member's public project must not appear on this profile.
-	createV2Project(t, svc, ctx, "someone-elses", "public", v2UserB)
+	createV2Project(ctx, t, svc, "someone-elses", "public", v2UserB)
 
 	profile, err := svc.GetFlowProfile(ctx, v2UserA, v2Business)
 	if err != nil {
@@ -48,7 +48,7 @@ func TestGetFlowProfileExcludesArchivedProjects(t *testing.T) {
 		ID: v2UserA, FullName: "Abed Amouneh", Role: "owner",
 	}})
 
-	p := createV2Project(t, svc, ctx, "public-then-binned", "public", v2UserA)
+	p := createV2Project(ctx, t, svc, "public-then-binned", "public", v2UserA)
 	if err := svc.DeleteProject(ctx, p.ID, v2Business); err != nil {
 		t.Fatalf("DeleteProject: %v", err)
 	}

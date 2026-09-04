@@ -5,12 +5,10 @@ import (
 	"errors"
 	"net/http"
 
-	flowstatusv2 "github.com/voxire/voxie/gen/go/flow/status/v2"
-
-	"github.com/voxire/onion/internal/platform/onekiterrors"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	flowstatusv2 "github.com/voxire/voxie/gen/go/flow/status/v2"
 )
 
 // StatusAPIV2 serves F-A's per-project custom statuses.

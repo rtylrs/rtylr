@@ -184,8 +184,8 @@ func TestRedeem_ReducesBalance(t *testing.T) {
 
 	updated, err := repo.RedeemForOrder(ctx, testutil.BusinessID, testutil.OwnerID, domain.RedeemInput{
 		OrderID: 3301,
-		Code:   "INTTEST-003",
-		Amount: 25.00,
+		Code:    "INTTEST-003",
+		Amount:  25.00,
 	})
 	if err != nil {
 		t.Fatalf("Redeem error: %v", err)
@@ -217,8 +217,8 @@ func TestRedeem_InsufficientBalanceErrors(t *testing.T) {
 
 	_, err = repo.RedeemForOrder(ctx, testutil.BusinessID, testutil.OwnerID, domain.RedeemInput{
 		OrderID: 3301,
-		Code:   "INTTEST-004",
-		Amount: 100.00,
+		Code:    "INTTEST-004",
+		Amount:  100.00,
 	})
 	if !errors.Is(err, domain.ErrInsufficientBalance) {
 		t.Errorf("expected ErrInsufficientBalance, got %v", err)

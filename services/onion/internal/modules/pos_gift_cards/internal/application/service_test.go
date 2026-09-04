@@ -21,7 +21,7 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.GiftCard, error) {
 	return m.list, nil
 }
 
-func (m *mockRepo) CreateForOwner(_ context.Context, _ int64, _ int64, _ domain.GiftCardInput) (int64, error) {
+func (m *mockRepo) CreateForOwner(_ context.Context, _, _ int64, _ domain.GiftCardInput) (int64, error) {
 	return m.createID, m.createErr
 }
 
@@ -29,7 +29,7 @@ func (m *mockRepo) GetByCode(_ context.Context, _ int64, _ string) (*domain.Gift
 	return m.card, m.getErr
 }
 
-func (m *mockRepo) RedeemForOrder(_ context.Context, _ int64, _ int64, _ domain.RedeemInput) (*domain.GiftCard, error) {
+func (m *mockRepo) RedeemForOrder(_ context.Context, _, _ int64, _ domain.RedeemInput) (*domain.GiftCard, error) {
 	return m.card, m.redErr
 }
 

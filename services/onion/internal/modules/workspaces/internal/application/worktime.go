@@ -332,7 +332,7 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 		userIDByEmployeeID[employeeID] = userID
 	}
 
-	days, total, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, from, to, int32(limit), offset)
+	days, total, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, from, to, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

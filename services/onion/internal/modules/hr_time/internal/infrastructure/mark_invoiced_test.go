@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-func seedApprovedBillableEntry(t *testing.T, repo *infrastructure.Repository, ctx context.Context, description string) int64 {
+func seedApprovedBillableEntry(ctx context.Context, t *testing.T, repo *infrastructure.Repository, description string) int64 {
 	t.Helper()
 	created, err := repo.CreateTimeEntry(ctx, testutil.OwnerID, domain.TimeEntryRecord{
 		EmployeeID:      4101,
@@ -33,8 +33,8 @@ func TestMarkEntriesInvoiced_BatchSemantics(t *testing.T) {
 	ctx := context.Background()
 	repo := infrastructure.NewRepository(db)
 
-	first := seedApprovedBillableEntry(t, repo, ctx, "invoiced batch a")
-	second := seedApprovedBillableEntry(t, repo, ctx, "invoiced batch b")
+	first := seedApprovedBillableEntry(ctx, t, repo, "invoiced batch a")
+	second := seedApprovedBillableEntry(ctx, t, repo, "invoiced batch b")
 	foreign := int64(9_999_999)
 
 	marked, err := repo.MarkEntriesInvoiced(ctx, testutil.OwnerID, 4242, []int64{first, second, foreign})

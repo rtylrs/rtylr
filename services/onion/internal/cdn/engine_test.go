@@ -63,7 +63,10 @@ done
 	default:
 		t.Fatalf("unknown mode %q", mode)
 	}
-	if err := os.WriteFile(path, []byte(script), 0o755); err != nil {
+	if err := os.WriteFile(path, []byte(script), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(path, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	return path
@@ -164,12 +167,14 @@ func TestEnginePoolAgainstRealBinary(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	args := []string{"transform", "--input", img, "--output", out,
-		"--chain", "w_64,h_64,c_fill/e_grayscale"}
+	args := []string{
+		"transform", "--input", img, "--output", out,
+		"--chain", "w_64,h_64,c_fill/e_grayscale",
+	}
 
 	// First call pays spawn+probe; subsequent calls reuse the resident.
 	start := time.Now()
-	if err := runVia(t, p, ctx, args); err != nil {
+	if err := runVia(ctx, t, p, args); err != nil {
 		t.Fatalf("first job: %v", err)
 	}
 	first := time.Since(start)
@@ -177,7 +182,7 @@ func TestEnginePoolAgainstRealBinary(t *testing.T) {
 	start = time.Now()
 	n := 10
 	for i := 0; i < n; i++ {
-		if err := runVia(t, p, ctx, args); err != nil {
+		if err := runVia(ctx, t, p, args); err != nil {
 			t.Fatalf("job %d: %v", i, err)
 		}
 	}
@@ -191,7 +196,7 @@ func TestEnginePoolAgainstRealBinary(t *testing.T) {
 	}
 }
 
-func runVia(t *testing.T, p *enginePool, ctx context.Context, args []string) error {
+func runVia(ctx context.Context, t *testing.T, p *enginePool, args []string) error {
 	t.Helper()
 	conn, release, err := p.acquire(ctx)
 	if err != nil {

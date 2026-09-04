@@ -94,7 +94,7 @@ type Service struct {
 	// labourCosts is optional because workers and tests can construct the
 	// module without payroll. The no-op implementation keeps those consumers
 	// safe while the API bootstrap wires the HR-owned provider.
-	labourCosts labourcost.LabourCostProvider
+	labourCosts labourcost.Provider
 
 	// hubProfiles resolves the central effective-access payload used by Flow's
 	// business-wide reporting visibility. Project and workspace authorization
@@ -120,7 +120,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 // SetLabourCostProvider wires the HR-owned aggregate port. Consumers receive
 // cents and rate-coverage counts only; hourly rates never enter workspaces.
-func (s *Service) SetLabourCostProvider(provider labourcost.LabourCostProvider) {
+func (s *Service) SetLabourCostProvider(provider labourcost.Provider) {
 	if provider != nil {
 		s.labourCosts = provider
 	}
@@ -407,7 +407,7 @@ func (s *Service) hubProfileBypasses(ctx context.Context, userID, businessID int
 // RequireProjectRole reports whether userID holds at least minRole on a
 // project, returning domain.ErrUnauthorized when they do not. Flow project
 // membership and project scope are the only source of this authorization.
-func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, businessID int64, minRole string) error {
+func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, _ int64, minRole string) error {
 	if domain.RoleAllows(s.projectRoleFor(ctx, projectID, userID), minRole) {
 		return nil
 	}
@@ -416,7 +416,7 @@ func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, bus
 
 // RequireWorkspaceRole reports whether userID holds at least minRole on a
 // workspace, including the workspace owner who has no membership row.
-func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID, businessID int64, minRole string) error {
+func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID, _ int64, minRole string) error {
 	if domain.RoleAllows(s.workspaceRoleFor(ctx, workspaceID, userID), minRole) {
 		return nil
 	}
