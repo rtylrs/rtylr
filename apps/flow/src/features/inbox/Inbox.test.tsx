@@ -14,6 +14,9 @@ vi.mock('@voxire/components', () => ({
 const notificationsState = vi.hoisted(() => ({
   data: [] as ApiNotification[],
   isLoading: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
   refetch: vi.fn(),
 }));
 const markReadMutate = vi.hoisted(() => vi.fn());
@@ -67,5 +70,35 @@ describe('Inbox empty state', () => {
 
     const allButtons = screen.getAllByRole('button', { name: 'inbox.filters.all' });
     expect(allButtons.length).toBeGreaterThan(0);
+  });
+});
+
+describe('Inbox: a failed load is not an empty inbox', () => {
+  beforeEach(() => {
+    notificationsState.data = [];
+    notificationsState.isLoading = false;
+    notificationsState.isError = false;
+    notificationsState.isPaused = false;
+    notificationsState.failureCount = 0;
+  });
+
+  it('shows the failure state instead of "all caught up" when the request fails', () => {
+    notificationsState.isError = true;
+    render(<Inbox />);
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('inbox.emptyTitle')).not.toBeInTheDocument();
+  });
+
+  it('retries the query from the failure state', () => {
+    notificationsState.isError = true;
+    render(<Inbox />);
+    fireEvent.click(screen.getByText('flow.loadFailed.retry'));
+    expect(notificationsState.refetch).toHaveBeenCalled();
+  });
+
+  it('still shows the empty state when the request succeeded and there is nothing', () => {
+    render(<Inbox />);
+    expect(screen.getByText('inbox.emptyTitle')).toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // t returns the key, so a label that goes through i18n is distinguishable from
@@ -12,8 +12,16 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
 }));
 
+const refetchAllProjects = vi.hoisted(() => vi.fn());
 const listState = vi.hoisted(() => ({
-  value: { data: { projects: [] as Array<Record<string, unknown>>, total: 0 }, isLoading: false },
+  value: {
+    data: { projects: [] as Array<Record<string, unknown>>, total: 0 },
+    isLoading: false,
+    isError: false,
+    isPaused: false,
+    failureCount: 0,
+    refetch: refetchAllProjects,
+  },
 }));
 
 vi.mock('./useAllProjects', () => ({
@@ -76,5 +84,38 @@ describe('AllProjects manager-proxy grouping', () => {
     expect(screen.queryByText('flow.allProjects.yourReports')).not.toBeInTheDocument();
     expect(screen.queryByText('flow.allProjects.yourProjects')).not.toBeInTheDocument();
     expect(screen.getByText('My Project')).toBeInTheDocument();
+  });
+});
+
+describe('AllProjects: a failed load is not an empty project list', () => {
+  beforeEach(() => {
+    listState.value = {
+      data: { projects: [], total: 0 },
+      isLoading: false,
+      isError: false,
+      isPaused: false,
+      failureCount: 0,
+      refetch: refetchAllProjects,
+    };
+    refetchAllProjects.mockClear();
+  });
+
+  it('shows the failure state instead of "create your first project"', () => {
+    listState.value = { ...listState.value, isError: true };
+    render(<AllProjects />);
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.allProjects.emptyTitle')).not.toBeInTheDocument();
+  });
+
+  it('retries the query from the failure state', () => {
+    listState.value = { ...listState.value, isError: true };
+    render(<AllProjects />);
+    fireEvent.click(screen.getByText('flow.loadFailed.retry'));
+    expect(refetchAllProjects).toHaveBeenCalled();
+  });
+
+  it('still shows the empty state when the request succeeded and there is nothing', () => {
+    render(<AllProjects />);
+    expect(screen.getByText('flow.allProjects.emptyTitle')).toBeInTheDocument();
   });
 });

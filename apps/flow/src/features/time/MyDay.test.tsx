@@ -36,6 +36,10 @@ const workDayState = vi.hoisted(() => ({
         }
       | undefined,
     isLoading: false,
+    isError: false,
+    isPaused: false,
+    failureCount: 0,
+    refetch: vi.fn(),
   },
 }));
 
@@ -145,6 +149,10 @@ beforeEach(() => {
       lines: [],
     },
     isLoading: false,
+    isError: false,
+    isPaused: false,
+    failureCount: 0,
+    refetch: vi.fn(),
   };
   projectsState.value = { data: [project(), project({ id: '2', name: 'Warehouse racking' })] };
   workDaysRangeState.value = { data: { workDays: [] } };
@@ -293,5 +301,32 @@ describe('MyDay: entry list labels', () => {
     };
     render(<MyDay />);
     expect(within(screen.getByRole('list')).getByText('Warehouse racking')).toBeInTheDocument();
+  });
+});
+
+describe('MyDay: a failed load is not an endless load', () => {
+  it('shows the failure state instead of loading forever', () => {
+    // The reported case: /time sat on "Loading the day..." indefinitely,
+    // because a failed query is not a loading one and nothing rendered the
+    // difference.
+    workDayState.value = { ...workDayState.value, isError: true };
+    render(<MyDay />);
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.time.loadingDay')).not.toBeInTheDocument();
+  });
+
+  it('retries the query from the failure state', () => {
+    const refetch = vi.fn();
+    workDayState.value = { ...workDayState.value, isError: true, refetch };
+    render(<MyDay />);
+    fireEvent.click(screen.getByText('flow.loadFailed.retry'));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('still shows the loading copy while genuinely loading', () => {
+    workDayState.value = { ...workDayState.value, isLoading: true };
+    render(<MyDay />);
+    expect(screen.getByText('flow.time.loadingDay')).toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
   });
 });

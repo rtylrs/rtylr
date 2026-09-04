@@ -11,10 +11,14 @@ import {
   MY_TASK_BUCKET_LABEL_KEY,
   MY_TASK_BUCKET_ORDER,
 } from '../../shared/lib/myTasksBuckets';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const MyIssues: React.FC = () => {
   const { t } = useTranslation();
-  const { data: rawTasks = [], isLoading } = useMyIssues();
+  const myIssuesQuery = useMyIssues();
+  const { data: rawTasks = [], isLoading } = myIssuesQuery;
+  const loadFailed = hasQueryFailed(myIssuesQuery);
   // GetMyTasks doesn't filter archived server-side, so exclude client-side
   // to match Triage/FocusToday/FlowLayout.
   const tasks = useMemo(() => rawTasks.map(apiTaskToTask).filter((t) => !t.archived), [rawTasks]);
@@ -45,7 +49,7 @@ const MyIssues: React.FC = () => {
             {t('flow.shell.myTasks')}
           </h1>
           <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
-            {isLoading
+            {isLoading || loadFailed
               ? t('flow.myIssues.loading')
               : t('flow.myIssues.taskCount', { count: tasks.length })}
           </p>
@@ -97,7 +101,15 @@ const MyIssues: React.FC = () => {
           })}
         </div>
 
-        {tasks.length === 0 && !isLoading && (
+        {loadFailed && !isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+              <ListLoadFailed onRetry={() => void myIssuesQuery.refetch()} />
+            </div>
+          </div>
+        )}
+
+        {tasks.length === 0 && !isLoading && !loadFailed && (
           <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4">
             <div
               className="pointer-events-auto w-full max-w-md rounded-xl px-6 py-7 text-center shadow-xl"

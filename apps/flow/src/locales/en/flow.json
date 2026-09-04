@@ -938,5 +938,10 @@
     "addPayment": "Add a payment method to keep your data.",
     "activate": "Activate plan",
     "dismiss": "Dismiss"
+  },
+  "loadFailed": {
+    "title": "Couldn't load this",
+    "description": "The request failed, so this is not an empty list. Your work is still there.",
+    "retry": "Try again"
   }
 }

@@ -4,6 +4,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { Search, Plus, Lock, Globe, Archive } from 'lucide-react';
 import { useAllProjects } from './useAllProjects';
 import type { Project } from '@voxire/voxie/flow/project/v2/types';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const STATUS_FILTERS = ['', 'active', 'completed'] as const;
 const VISIBILITY_FILTERS = ['', 'private', 'public'] as const;
@@ -84,12 +86,14 @@ export const AllProjects: React.FC = () => {
   const [status, setStatus] = useState<string>('');
   const [visibility, setVisibility] = useState<string>('');
 
-  const { data, isLoading } = useAllProjects({
+  const allProjectsQuery = useAllProjects({
     q: q || undefined,
     status: status || undefined,
     visibility: visibility || undefined,
     limit: 100,
   });
+  const { data, isLoading } = allProjectsQuery;
+  const loadFailed = hasQueryFailed(allProjectsQuery);
 
   const projects = data?.projects ?? [];
   const total = data?.total ?? 0;
@@ -183,6 +187,8 @@ export const AllProjects: React.FC = () => {
               />
             ))}
           </div>
+        ) : loadFailed ? (
+          <ListLoadFailed onRetry={() => void allProjectsQuery.refetch()} />
         ) : projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="font-semibold text-sm mb-1" style={{ color: 'var(--flow-text)' }}>

@@ -10,7 +10,14 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-const myIssuesData = vi.hoisted(() => ({ data: [] as unknown[], isLoading: false }));
+const myIssuesData = vi.hoisted(() => ({
+  data: [] as unknown[],
+  isLoading: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
+}));
 vi.mock('./useMyIssues', () => ({
   useMyIssues: () => myIssuesData,
 }));
@@ -145,5 +152,55 @@ describe('MyIssues time buckets (#1035)', () => {
     // MY_TASK_BUCKET_LABEL held literal English while nothing imported it.
     expect(screen.queryByText('Today')).not.toBeInTheDocument();
     expect(screen.getByText('flow.myIssues.buckets.today')).toBeInTheDocument();
+  });
+});
+
+describe('MyIssues: a failed load is not an empty list', () => {
+  beforeEach(() => {
+    myIssuesData.data = [];
+    myIssuesData.isLoading = false;
+    myIssuesData.isError = false;
+    myIssuesData.isPaused = false;
+    myIssuesData.failureCount = 0;
+  });
+
+  it('shows the failure state instead of "nice work" when the request fails', () => {
+    // The reported case: with every request forced to 500 this screen said
+    // "Nothing is on your plate right now. Nice work!", reporting success
+    // while the server was down.
+    myIssuesData.isError = true;
+    render(<MyIssues />);
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.myIssues.emptyTitle')).not.toBeInTheDocument();
+  });
+
+  it('retries the query from the failure state', () => {
+    myIssuesData.isError = true;
+    render(<MyIssues />);
+
+    fireEvent.click(screen.getByText('flow.loadFailed.retry'));
+    expect(myIssuesData.refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not assert a task count while the load has failed', () => {
+    myIssuesData.isError = true;
+    render(<MyIssues />);
+    expect(screen.queryByText('flow.myIssues.taskCount')).not.toBeInTheDocument();
+  });
+
+  it('still shows the empty state when the request succeeded and there is nothing', () => {
+    render(<MyIssues />);
+    expect(screen.getByText('flow.myIssues.emptyTitle')).toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
+  });
+
+  it('treats a paused query with a failure behind it as a failure', () => {
+    // Offline: react-query pauses rather than erroring, so isError alone
+    // leaves an offline user looking at "Nice work!".
+    myIssuesData.isPaused = true;
+    myIssuesData.failureCount = 1;
+    render(<MyIssues />);
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
   });
 });
