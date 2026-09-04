@@ -701,7 +701,8 @@
       "completed": "مكتمل"
     },
     "project": "المشروع",
-    "noProjects": "لا توجد مشاريع بعد"
+    "noProjects": "لا توجد مشاريع بعد",
+    "noTasksYet": "لا مهام بعد"
   },
   "roadmap": {
     "loading": "جارٍ تحميل خارطة الطريق...",

@@ -24,6 +24,7 @@ const STATUS_LABEL_KEYS: Record<string, string> = {
 };
 
 import { useProjects } from '../projects/useProjects';
+import { milestoneProgress } from '../../shared/lib/milestoneUtils';
 
 const Milestones: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -271,16 +272,22 @@ const Milestones: React.FC = () => {
                   {t('flow.milestones.progress')}
                 </span>
                 <span className="text-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
-                  {m.computedProgress}%
+                  {m.taskCount === 0 ? t('flow.milestones.noTasksYet') : `${milestoneProgress(m)}%`}
                 </span>
               </div>
               <div
                 className="h-1.5 rounded-full overflow-hidden mb-3"
                 style={{ background: 'var(--flow-hover)' }}
               >
+                {/* milestoneProgress, not m.computedProgress. The raw field is
+                    optional, and `width: undefined%` is an invalid
+                    declaration, which the browser drops: the fill then took
+                    its parent's width and a milestone with unknown progress
+                    rendered as a completed one. The percentage beside it read
+                    as a bare "%" for the same reason. */}
                 <div
                   className="h-full transition-all"
-                  style={{ width: `${m.computedProgress}%`, background: style.color }}
+                  style={{ width: `${milestoneProgress(m)}%`, background: style.color }}
                 />
               </div>
               <div
