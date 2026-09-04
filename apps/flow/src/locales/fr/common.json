@@ -28,14 +28,16 @@
   "comingSoon": "Bientôt disponible",
   "emojiPickerComingSoon": "Sélecteur d'émojis (bientôt disponible)",
   "focusToday": {
-    "emptyTitle": "Rien n'est épinglé pour aujourd'hui",
+    "emptyTitle": "Rien d’épinglé ni d’échu aujourd’hui",
     "emptyHint": "Épinglez des tâches depuis le détail de la tâche, ou fixez une échéance à aujourd'hui. Profitez d'un planning dégagé.",
-    "subtitle": "Une liste courte : les éléments épinglés et tout ce qui est dû aujourd'hui. Tout le reste reste hors de cette vue pour que vous puissiez vous engager sans parcourir tout le backlog.",
+    "subtitle": "Les éléments épinglés et tout ce qui est dû aujourd'hui. Le reste reste à l'écart.",
     "backlogHint_one": "{{count}} tâche encore dans le backlog, utilisez",
     "backlogHint_many": "{{count}} tâches encore dans le backlog, utilisez",
     "backlogHint_other": "{{count}} tâches encore dans le backlog, utilisez",
     "backlogHintSuffix": "quand vous serez prêt.",
-    "dueToday": "Dû aujourd'hui"
+    "dueToday": "Dû aujourd'hui",
+    "pinnedHeading": "Épinglé",
+    "dueTodayHeading": "Échéance aujourd’hui"
   },
   "activity": {
     "empty": "Pas encore d'activité.",
