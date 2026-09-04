@@ -75,10 +75,30 @@ describe('Orders table empty state', () => {
     expect(screen.queryByText('orders.emptyTitleAll')).not.toBeInTheDocument();
   });
 
-  it('renders minor-unit subtotal and total through the canonical display formatter', () => {
+  it('renders subtotal and total as the major units the POS sends', () => {
+    // pos_orders.subtotal and .total are DECIMAL(10,2) in onion, read through
+    // sqlutil.DecimalToFloat and declared float64 on the wire, so 10 is ten
+    // dollars. This test previously fed 1000 and expected $10.00, which pinned
+    // the cents assumption and made a real $1,000 order read as $10.00.
     ordersData.data = [
       {
         id: '7',
+        status: 'pending',
+        subtotal: 10,
+        total: 12.5,
+        createdAt: new Date().toISOString(),
+      } as unknown as { id: string; status: string },
+    ];
+    render(<Orders />);
+
+    expect(screen.getByText('$10.00')).toBeInTheDocument();
+    expect(screen.getByText('$12.50')).toBeInTheDocument();
+  });
+
+  it('does not divide the total by a hundred', () => {
+    ordersData.data = [
+      {
+        id: '11',
         status: 'pending',
         subtotal: 1000,
         total: 1250,
@@ -87,8 +107,10 @@ describe('Orders table empty state', () => {
     ];
     render(<Orders />);
 
-    expect(screen.getByText('$10.00')).toBeInTheDocument();
-    expect(screen.getByText('$12.50')).toBeInTheDocument();
+    expect(screen.getByText('$1,000.00')).toBeInTheDocument();
+    expect(screen.getByText('$1,250.00')).toBeInTheDocument();
+    expect(screen.queryByText('$10.00')).not.toBeInTheDocument();
+    expect(screen.queryByText('$12.50')).not.toBeInTheDocument();
   });
 
   it('falls back to the raw status label in the detail dialog for unknown statuses', () => {
@@ -115,10 +137,10 @@ describe('Orders table empty state', () => {
       {
         id: '8',
         status: 'completed',
-        subtotal: 1000,
-        total: 2500,
+        subtotal: 10,
+        total: 25,
         createdAt: new Date().toISOString(),
-        items: [{ id: 'i1', name: 'Kebab', quantity: 2, price: 1000 }],
+        items: [{ id: 'i1', name: 'Kebab', quantity: 2, price: 10 }],
       } as unknown as { id: string; status: string },
     ];
     render(<Orders />);
@@ -127,6 +149,25 @@ describe('Orders table empty state', () => {
 
     expect(screen.getAllByText('$10.00')).toHaveLength(2);
     expect(screen.getAllByText('$25.00')).toHaveLength(2);
-    expect(screen.getByText('Kebab').closest('div.flex')).toHaveTextContent('20.00');
+    // The line total is unit_price times quantity, both major units.
+    expect(screen.getByText('Kebab').closest('div.flex')).toHaveTextContent('$20.00');
+  });
+
+  it('renders the detail line total without dividing by a hundred', () => {
+    ordersData.data = [
+      {
+        id: '12',
+        status: 'completed',
+        subtotal: 1500,
+        total: 1500,
+        createdAt: new Date().toISOString(),
+        items: [{ id: 'i1', name: 'Catering tray', quantity: 3, price: 500 }],
+      } as unknown as { id: string; status: string },
+    ];
+    render(<Orders />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'View' }));
+
+    expect(screen.getByText('Catering tray').closest('div.flex')).toHaveTextContent('$1,500.00');
   });
 });
