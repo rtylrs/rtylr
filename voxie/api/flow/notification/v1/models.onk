@@ -7,6 +7,10 @@ message Notification {
   description: string
   task_id: string
   task_title: string
+  /// The user whose action caused this notification, when the source recorded one.
+  actor_id: int64?
+  /// Display name resolved from the acting user's current profile.
+  actor_name: string
   actor_initials: string
   project: string
   project_color: string

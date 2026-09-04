@@ -99,6 +99,10 @@ message TaskComment {
   task_id: int64
   /// user_id identifies the user associated with this request.
   user_id: int64
+  /// Display name resolved from the comment author's current profile.
+  actor_name: string
+  /// Two-letter initials resolved from the comment author's current profile.
+  actor_initials: string
   /// content is the content value for this contract.
   content: string
   /// is_edited is the is edited value for this contract.
@@ -116,6 +120,10 @@ message TaskActivity {
   task_id: int64
   /// user_id identifies the user associated with this request.
   user_id: int64
+  /// Display name resolved from the activity author's current profile.
+  actor_name: string
+  /// Two-letter initials resolved from the activity author's current profile.
+  actor_initials: string
   /// action is the action value for this contract.
   action: string
   /// old_value is the old value value for this contract.

@@ -172,6 +172,8 @@ export interface TaskComment {
 id?: string;
 taskId?: string;
 userId?: string;
+actorName?: string;
+actorInitials?: string;
 content?: string;
 isEdited?: boolean;
 createdAt?: string;
@@ -184,6 +186,8 @@ return {
 id: v.id,
 taskId: v.task_id,
 userId: v.user_id,
+actorName: v.actor_name,
+actorInitials: v.actor_initials,
 content: v.content,
 isEdited: v.is_edited,
 createdAt: v.created_at,
@@ -196,6 +200,8 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.actorName !== undefined) { out.actor_name = v.actorName; }
+if (v.actorInitials !== undefined) { out.actor_initials = v.actorInitials; }
 if (v.content !== undefined) { out.content = v.content; }
 if (v.isEdited !== undefined) { out.is_edited = v.isEdited; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
@@ -208,6 +214,8 @@ const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.actorName !== undefined && v.actorName !== null && !(typeof v.actorName === "string")) violations.push("actor_name has invalid type");
+if (v.actorInitials !== undefined && v.actorInitials !== null && !(typeof v.actorInitials === "string")) violations.push("actor_initials has invalid type");
 if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
 if (v.isEdited !== undefined && v.isEdited !== null && !(typeof v.isEdited === "boolean")) violations.push("is_edited has invalid type");
 if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
@@ -219,6 +227,8 @@ export interface TaskActivity {
 id?: string;
 taskId?: string;
 userId?: string;
+actorName?: string;
+actorInitials?: string;
 action?: string;
 oldValue?: string;
 newValue?: string;
@@ -231,6 +241,8 @@ return {
 id: v.id,
 taskId: v.task_id,
 userId: v.user_id,
+actorName: v.actor_name,
+actorInitials: v.actor_initials,
 action: v.action,
 oldValue: v.old_value,
 newValue: v.new_value,
@@ -243,6 +255,8 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.actorName !== undefined) { out.actor_name = v.actorName; }
+if (v.actorInitials !== undefined) { out.actor_initials = v.actorInitials; }
 if (v.action !== undefined) { out.action = v.action; }
 if (v.oldValue !== undefined) { out.old_value = v.oldValue; }
 if (v.newValue !== undefined) { out.new_value = v.newValue; }
@@ -255,6 +269,8 @@ const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.actorName !== undefined && v.actorName !== null && !(typeof v.actorName === "string")) violations.push("actor_name has invalid type");
+if (v.actorInitials !== undefined && v.actorInitials !== null && !(typeof v.actorInitials === "string")) violations.push("actor_initials has invalid type");
 if (v.action !== undefined && v.action !== null && !(typeof v.action === "string")) violations.push("action has invalid type");
 if (v.oldValue !== undefined && v.oldValue !== null && !(typeof v.oldValue === "string")) violations.push("old_value has invalid type");
 if (v.newValue !== undefined && v.newValue !== null && !(typeof v.newValue === "string")) violations.push("new_value has invalid type");

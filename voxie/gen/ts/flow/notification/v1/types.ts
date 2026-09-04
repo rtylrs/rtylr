@@ -8,6 +8,8 @@ title?: string;
 description?: string;
 taskId?: string;
 taskTitle?: string;
+actorId?: string;
+actorName?: string;
 actorInitials?: string;
 project?: string;
 projectColor?: string;
@@ -24,6 +26,8 @@ title: v.title,
 description: v.description,
 taskId: v.task_id,
 taskTitle: v.task_title,
+actorId: v.actor_id,
+actorName: v.actor_name,
 actorInitials: v.actor_initials,
 project: v.project,
 projectColor: v.project_color,
@@ -40,6 +44,8 @@ if (v.title !== undefined) { out.title = v.title; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 if (v.taskTitle !== undefined) { out.task_title = v.taskTitle; }
+if (v.actorId !== undefined) { out.actor_id = v.actorId; }
+if (v.actorName !== undefined) { out.actor_name = v.actorName; }
 if (v.actorInitials !== undefined) { out.actor_initials = v.actorInitials; }
 if (v.project !== undefined) { out.project = v.project; }
 if (v.projectColor !== undefined) { out.project_color = v.projectColor; }
@@ -56,6 +62,8 @@ if (v.title !== undefined && v.title !== null && !(typeof v.title === "string"))
 if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string")) violations.push("task_id has invalid type");
 if (v.taskTitle !== undefined && v.taskTitle !== null && !(typeof v.taskTitle === "string")) violations.push("task_title has invalid type");
+if (v.actorId !== undefined && v.actorId !== null && !(typeof v.actorId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.actorId))) violations.push("actor_id has invalid type");
+if (v.actorName !== undefined && v.actorName !== null && !(typeof v.actorName === "string")) violations.push("actor_name has invalid type");
 if (v.actorInitials !== undefined && v.actorInitials !== null && !(typeof v.actorInitials === "string")) violations.push("actor_initials has invalid type");
 if (v.project !== undefined && v.project !== null && !(typeof v.project === "string")) violations.push("project has invalid type");
 if (v.projectColor !== undefined && v.projectColor !== null && !(typeof v.projectColor === "string")) violations.push("project_color has invalid type");

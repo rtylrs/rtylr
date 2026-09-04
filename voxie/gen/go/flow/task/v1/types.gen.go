@@ -546,13 +546,15 @@ func (x *Task) GetDependencies() []int64 {
 }
 
 type TaskComment struct {
-	Id        int64  `json:"id,omitempty"`
-	TaskId    int64  `json:"task_id,omitempty"`
-	UserId    int64  `json:"user_id,omitempty"`
-	Content   string `json:"content,omitempty"`
-	IsEdited  bool   `json:"is_edited,omitempty"`
-	CreatedAt string `json:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty"`
+	Id            int64  `json:"id,omitempty"`
+	TaskId        int64  `json:"task_id,omitempty"`
+	UserId        int64  `json:"user_id,omitempty"`
+	ActorName     string `json:"actor_name,omitempty"`
+	ActorInitials string `json:"actor_initials,omitempty"`
+	Content       string `json:"content,omitempty"`
+	IsEdited      bool   `json:"is_edited,omitempty"`
+	CreatedAt     string `json:"created_at,omitempty"`
+	UpdatedAt     string `json:"updated_at,omitempty"`
 }
 
 func (m *TaskComment) MarshalJSON() ([]byte, error) {
@@ -628,6 +630,22 @@ func (x *TaskComment) GetUserId() int64 {
 	return x.UserId
 }
 
+func (x *TaskComment) GetActorName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActorName
+}
+
+func (x *TaskComment) GetActorInitials() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActorInitials
+}
+
 func (x *TaskComment) GetContent() string {
 	if x == nil {
 		var zero string
@@ -661,13 +679,15 @@ func (x *TaskComment) GetUpdatedAt() string {
 }
 
 type TaskActivity struct {
-	Id        int64  `json:"id,omitempty"`
-	TaskId    int64  `json:"task_id,omitempty"`
-	UserId    int64  `json:"user_id,omitempty"`
-	Action    string `json:"action,omitempty"`
-	OldValue  string `json:"old_value,omitempty"`
-	NewValue  string `json:"new_value,omitempty"`
-	CreatedAt string `json:"created_at,omitempty"`
+	Id            int64  `json:"id,omitempty"`
+	TaskId        int64  `json:"task_id,omitempty"`
+	UserId        int64  `json:"user_id,omitempty"`
+	ActorName     string `json:"actor_name,omitempty"`
+	ActorInitials string `json:"actor_initials,omitempty"`
+	Action        string `json:"action,omitempty"`
+	OldValue      string `json:"old_value,omitempty"`
+	NewValue      string `json:"new_value,omitempty"`
+	CreatedAt     string `json:"created_at,omitempty"`
 }
 
 func (m *TaskActivity) MarshalJSON() ([]byte, error) {
@@ -741,6 +761,22 @@ func (x *TaskActivity) GetUserId() int64 {
 		return zero
 	}
 	return x.UserId
+}
+
+func (x *TaskActivity) GetActorName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActorName
+}
+
+func (x *TaskActivity) GetActorInitials() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActorInitials
 }
 
 func (x *TaskActivity) GetAction() string {

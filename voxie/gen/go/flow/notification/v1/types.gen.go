@@ -14,6 +14,8 @@ type Notification struct {
 	Description   string `json:"description,omitempty"`
 	TaskId        string `json:"task_id,omitempty"`
 	TaskTitle     string `json:"task_title,omitempty"`
+	ActorId       *int64 `json:"actor_id,omitempty"`
+	ActorName     string `json:"actor_name,omitempty"`
 	ActorInitials string `json:"actor_initials,omitempty"`
 	Project       string `json:"project,omitempty"`
 	ProjectColor  string `json:"project_color,omitempty"`
@@ -25,9 +27,14 @@ func (m *Notification) MarshalJSON() ([]byte, error) {
 	type alias Notification
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id      string  `json:"id,omitempty"`
+		ActorId *string `json:"actor_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.ActorId != nil {
+		encodedActorId := strconv.FormatInt(*m.ActorId, 10)
+		aux.ActorId = &encodedActorId
+	}
 	return json.Marshal(aux)
 }
 
@@ -35,7 +42,8 @@ func (m *Notification) UnmarshalJSON(data []byte) error {
 	type alias Notification
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id      string  `json:"id,omitempty"`
+		ActorId *string `json:"actor_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -46,6 +54,13 @@ func (m *Notification) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Id = v
+	}
+	if aux.ActorId != nil {
+		v, err := strconv.ParseInt(*aux.ActorId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ActorId = &v
 	}
 	return nil
 }
@@ -96,6 +111,26 @@ func (x *Notification) GetTaskTitle() string {
 		return zero
 	}
 	return x.TaskTitle
+}
+
+func (x *Notification) GetActorId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ActorId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ActorId
+}
+
+func (x *Notification) GetActorName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActorName
 }
 
 func (x *Notification) GetActorInitials() string {
