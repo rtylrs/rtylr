@@ -44,31 +44,6 @@ SELECT name, sale_price, tax_rate, track_inventory
 FROM erp_products
 WHERE owner_id = ? AND id = ? AND is_active = TRUE;
 
--- cross-schema read/write crm_customers — order checkout customer upsert
--- name: FindCRMCustomerByContact :one
-SELECT id FROM crm_customers
-WHERE business_id = ?
-  AND ((? <> '' AND email = ?) OR (? <> '' AND phone = ?))
-ORDER BY CASE WHEN ? <> '' AND email = ? THEN 0 ELSE 1 END
-LIMIT 1;
-
--- name: InsertCRMCustomerFromOrder :exec
-INSERT INTO crm_customers
-  (owner_id, business_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
-VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), 'bronze', JSON_ARRAY(), TRUE);
-
--- name: UpdateCRMCustomerFromOrder :exec
-UPDATE crm_customers
-SET first_name = CASE WHEN ? <> '' THEN ? ELSE first_name END,
-    last_name = CASE WHEN ? <> '' THEN ? ELSE last_name END,
-    email = CASE WHEN ? <> '' THEN ? ELSE email END,
-    phone = CASE WHEN ? <> '' THEN ? ELSE phone END,
-    total_spent = total_spent + ?,
-    visit_count = visit_count + 1,
-    last_visit_at = NOW(),
-    is_active = TRUE
-WHERE business_id = ? AND id = ?;
-
 -- name: ListStoreOrdersPaginated :many
 SELECT id, owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at
 FROM store_orders WHERE business_id = ? ORDER BY created_at DESC, id DESC

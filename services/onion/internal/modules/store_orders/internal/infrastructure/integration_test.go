@@ -2,7 +2,9 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_orders/internal/infrastructure"
@@ -49,6 +51,72 @@ func TestStoreOrders_Create_ReturnsPositiveID(t *testing.T) {
 	}
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
+	}
+}
+
+func TestStoreOrders_Create_UsesCustomerSync(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	email := fmt.Sprintf("store-orders-sync-%d@example.com", time.Now().UnixNano())
+	t.Cleanup(func() {
+		if _, err := db.ExecContext(context.Background(), "DELETE FROM crm_customers WHERE business_id = ? AND email = ?", testutil.BusinessID, email); err != nil {
+			t.Errorf("cleanup synced customer: %v", err)
+		}
+	})
+
+	firstID, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
+		CustomerName:  "  Checkout Customer  ",
+		CustomerEmail: "  " + email + "  ",
+		CustomerPhone: " +1 555 0100 ",
+		Status:        "pending",
+		Total:         10.50,
+	})
+	if err != nil {
+		t.Fatalf("Create first order: %v", err)
+	}
+	if firstID <= 0 {
+		t.Fatalf("expected positive first order ID, got %d", firstID)
+	}
+
+	secondID, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
+		CustomerName:  "Updated Customer",
+		CustomerEmail: email,
+		CustomerPhone: "+1 555 0100",
+		Status:        "pending",
+		Total:         4.25,
+	})
+	if err != nil {
+		t.Fatalf("Create second order: %v", err)
+	}
+	if secondID <= 0 {
+		t.Fatalf("expected positive second order ID, got %d", secondID)
+	}
+
+	var firstName, lastName, normalizedEmail, normalizedPhone, totalSpent string
+	var visitCount int32
+	var businessID int64
+	err = db.QueryRowContext(context.Background(), `
+		SELECT first_name, COALESCE(last_name, ''), email, COALESCE(phone, ''), total_spent, visit_count, business_id
+		FROM crm_customers
+		WHERE business_id = ? AND email = ?
+		ORDER BY id DESC
+		LIMIT 1`, testutil.BusinessID, email).Scan(
+		&firstName, &lastName, &normalizedEmail, &normalizedPhone, &totalSpent, &visitCount, &businessID,
+	)
+	if err != nil {
+		t.Fatalf("read synced customer: %v", err)
+	}
+	if firstName != "Updated" || lastName != "Customer" {
+		t.Fatalf("expected canonical updated name, got %q %q", firstName, lastName)
+	}
+	if normalizedEmail != email || normalizedPhone != "+1 555 0100" {
+		t.Fatalf("expected normalized contact, got email=%q phone=%q", normalizedEmail, normalizedPhone)
+	}
+	if totalSpent != "14.75" || visitCount != 2 {
+		t.Fatalf("expected accumulated spend and visits, got total=%q visits=%d", totalSpent, visitCount)
+	}
+	if businessID != testutil.BusinessID {
+		t.Fatalf("expected customer business_id %d, got %d", testutil.BusinessID, businessID)
 	}
 }
 

@@ -11,8 +11,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_orders/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -122,7 +122,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		logger.Ctx(ctx).Error("Failed to read store order insert id", logger.Error(err))
 		return 0, err
 	}
-	if err := r.upsertOrderCustomerTx(ctx, qtx, ownerID, businessID, input); err != nil {
+	if err := r.upsertOrderCustomerTx(ctx, tx, businessID, input); err != nil {
 		return 0, err
 	}
 
@@ -255,72 +255,15 @@ func (r *Repository) productTracksInventory(ctx context.Context, qtx *sqlc.Queri
 	return !pricing.TrackInventory.Valid || pricing.TrackInventory.Bool, nil
 }
 
-func (r *Repository) upsertOrderCustomerTx(ctx context.Context, qtx *sqlc.Queries, ownerID, businessID int64, input domain.StoreOrderInput) error {
-	email := strings.TrimSpace(input.CustomerEmail)
-	phone := strings.TrimSpace(input.CustomerPhone)
-	name := strings.TrimSpace(input.CustomerName)
-	if email == "" && phone == "" && name == "" {
-		return nil
-	}
-
-	firstName, lastName := splitCustomerName(name, email, phone)
-	customerID, err := qtx.FindCRMCustomerByContact(ctx, sqlc.FindCRMCustomerByContactParams{
-		BusinessID: businessID,
-		Column2:    email,
-		Email:      sqlutil.NullString(email),
-		Column4:    phone,
-		Phone:      sqlutil.NullString(phone),
-		Column6:    email,
-		Email_2:    sqlutil.NullString(email),
+func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, businessID int64, input domain.StoreOrderInput) error {
+	_, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
+		Name:       input.CustomerName,
+		Email:      input.CustomerEmail,
+		Phone:      input.CustomerPhone,
+		TotalSpent: input.Total,
+		CountVisit: true,
 	})
-	if errors.Is(err, sql.ErrNoRows) {
-		return qtx.InsertCRMCustomerFromOrder(ctx, sqlc.InsertCRMCustomerFromOrderParams{
-			OwnerID:    ownerID,
-			BusinessID: businessID,
-			FirstName:  firstName,
-			LastName:   sqlutil.NullString(lastName),
-			Email:      sqlutil.NullString(email),
-			Phone:      sqlutil.NullString(phone),
-			TotalSpent: sql.NullString{String: strconv.FormatFloat(input.Total, 'f', 2, 64), Valid: true},
-		})
-	}
-	if err != nil {
-		return err
-	}
-
-	return qtx.UpdateCRMCustomerFromOrder(ctx, sqlc.UpdateCRMCustomerFromOrderParams{
-		Column1:    firstName,
-		FirstName:  firstName,
-		Column3:    lastName,
-		LastName:   sqlutil.NullString(lastName),
-		Column5:    email,
-		Email:      sqlutil.NullString(email),
-		Column7:    phone,
-		Phone:      sqlutil.NullString(phone),
-		TotalSpent: sql.NullString{String: strconv.FormatFloat(input.Total, 'f', 2, 64), Valid: true},
-		BusinessID: businessID,
-		ID:         customerID,
-	})
-}
-
-func splitCustomerName(name, email, phone string) (string, string) {
-	if name == "" {
-		if email != "" {
-			name = strings.Split(email, "@")[0]
-		} else if phone != "" {
-			name = phone
-		} else {
-			name = "Store customer"
-		}
-	}
-	parts := strings.Fields(name)
-	if len(parts) == 0 {
-		return "Store customer", ""
-	}
-	if len(parts) == 1 {
-		return parts[0], ""
-	}
-	return parts[0], strings.Join(parts[1:], " ")
+	return err
 }
 
 func int64Ptr(v int64) *int64 {
