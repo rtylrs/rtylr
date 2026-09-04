@@ -209,3 +209,120 @@ describe('BusinessRoute', () => {
     });
   });
 });
+
+describe('BusinessRoute with an omitted ownership marker (#1121)', () => {
+  // parseEffectiveAccess fails closed and needs businessId and dashRole to be
+  // present, so an access document short of those parses to null and lands in
+  // the store as `undefined`. Building them through a helper keeps a fixture
+  // from quietly testing the legacy arm while claiming to test the grant arm.
+  const accessDocument = (dashPermissions: string[]): Record<string, unknown> => ({
+    businessId: '10',
+    dashRole: 'member',
+    dashPermissions,
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useUserStore.setState({ user: null, token: null });
+    document.cookie = 'token=test-token; path=/';
+    routerState.pathname = '/';
+    mockGetConfig.mockResolvedValue({ business: { name: 'Acme Corp' } });
+  });
+
+  it('restricts a staff user whose isOwner is omitted entirely', async () => {
+    // StoredUser.isOwner is optional, so this shape is what a hydrated user
+    // looks like when the marker never arrives. The guard tested `=== false`,
+    // which this does not match, so the user fell through to the full app.
+    mockGetMe.mockResolvedValue({
+      id: 3,
+      email: 'staff@example.com',
+      fullName: 'Staff User',
+      businessId: 10,
+      role: 'staff',
+      apps: [],
+    });
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => expect(screen.getByText(/Welcome/i)).toBeTruthy());
+    expect(screen.queryByTestId('outlet')).toBeNull();
+  });
+
+  it('still admits a legacy owner whose marker was never set', async () => {
+    // The reason the fix is not `!== true` alone: hasManagementRole fell back
+    // to `role === 'admin'` only, so an owner with no marker and no access
+    // document would have been restricted by that change by itself.
+    mockGetMe.mockResolvedValue({
+      id: 4,
+      email: 'owner@example.com',
+      businessId: 10,
+      role: 'owner',
+    });
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
+  });
+
+  it('still admits a legacy admin whose marker was never set', async () => {
+    mockGetMe.mockResolvedValue({
+      id: 5,
+      email: 'admin@example.com',
+      businessId: 10,
+      role: 'admin',
+    });
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
+  });
+
+  it('admits a management grant from the access document with no marker', async () => {
+    mockGetMe.mockResolvedValue({
+      id: 6,
+      email: 'manager@example.com',
+      businessId: 10,
+      role: 'staff',
+      effectiveAccess: accessDocument(['hub:team:edit']),
+    });
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
+    // Proves the grant arm ran rather than the document silently parsing to
+    // null and this passing through some other branch.
+    expect(useUserStore.getState().user?.effectiveAccess?.dashPermissions).toEqual([
+      'hub:team:edit',
+    ]);
+  });
+
+  it('restricts a staff user with an access document carrying no management grant', async () => {
+    mockGetMe.mockResolvedValue({
+      id: 7,
+      email: 'nobody@example.com',
+      businessId: 10,
+      role: 'staff',
+      effectiveAccess: accessDocument([]),
+    });
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => expect(screen.getByText(/Welcome/i)).toBeTruthy());
+    expect(useUserStore.getState().user?.effectiveAccess?.dashPermissions).toEqual([]);
+  });
+
+  it('lets an omitted-marker staff user reach their own account settings', async () => {
+    // Deny by default is not deny always: the staff-allowed paths still apply.
+    mockGetMe.mockResolvedValue({
+      id: 8,
+      email: 'staff@example.com',
+      businessId: 10,
+      role: 'staff',
+    });
+    routerState.pathname = '/settings/account';
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
+  });
+});
