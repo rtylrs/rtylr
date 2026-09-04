@@ -966,7 +966,7 @@ const TaskDetail: React.FC = () => {
                     setDepId('');
                   }}
                   className="text-meta px-1.5 py-0.5 rounded-sm font-semibold disabled:opacity-40"
-                  style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+                  style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
                 >
                   {t('flow.taskDetail.add')}
                 </button>

@@ -186,7 +186,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
           type="button"
           onClick={onNewTask}
           className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-meta font-semibold transition-opacity hover:opacity-90"
-          style={{ background: 'var(--accent)', color: '#ffffff' }}
+          style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           <Plus size={12} strokeWidth={2.5} /> New task
         </button>

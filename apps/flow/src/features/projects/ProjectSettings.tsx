@@ -232,7 +232,7 @@ const ProjectSettings: React.FC = () => {
               }}
               disabled={updateProject.isPending || !canManageProject}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
-              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               <Save size={11} />{' '}
               {updateProject.isPending ? t('common.saving') : t('common.saveChanges')}

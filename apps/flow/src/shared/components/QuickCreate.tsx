@@ -410,7 +410,7 @@ export const QuickCreate: React.FC = () => {
                 onClick={submit}
                 disabled={!title.trim() || !projectId || createTaskMutation.isPending}
                 className="px-4 py-2 rounded-lg text-meta font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
-                style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+                style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
               >
                 {createTaskMutation.isPending
                   ? t('flow.quickCreate.creating')

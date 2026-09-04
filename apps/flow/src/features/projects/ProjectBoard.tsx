@@ -479,7 +479,7 @@ const ProjectBoard: React.FC = () => {
                     onClick={handleAddColumn}
                     disabled={!newColumnName.trim() || createColumn.isPending}
                     className="h-6 px-2.5 rounded-sm text-meta font-semibold disabled:opacity-40"
-                    style={{ background: 'var(--accent)', color: '#ffffff' }}
+                    style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
                   >
                     {t('flow.taskDetail.add')}
                   </button>

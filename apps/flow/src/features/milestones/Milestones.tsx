@@ -71,7 +71,7 @@ const Milestones: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold"
-            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+            style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             <Plus size={11} /> {t('flow.milestones.newMilestone')}
           </button>
@@ -110,7 +110,7 @@ const Milestones: React.FC = () => {
           type="button"
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold"
-          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           <Plus size={11} /> {t('flow.milestones.newMilestone')}
         </button>
@@ -198,7 +198,7 @@ const Milestones: React.FC = () => {
                 createMilestone.isPending || !newName.trim() || !newDate || !selectedProjectId
               }
               className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-50"
-              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {createMilestone.isPending
                 ? t('flow.milestones.creating')
