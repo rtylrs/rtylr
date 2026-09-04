@@ -9,11 +9,20 @@ import { useTasks, useUpdateTask } from '../tasks/useTasks';
 import type { ApiTask } from '../../shared/services/flowApi';
 import { archivedTasks } from '../../shared/lib/taskArchiveUtils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import { TaskRowSkeleton } from '../../shared/components/Skeleton';
 
 const Archive: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: apiTasks = [] } = useTasks({ activeOnly: false });
+  const tasksQuery = useTasks({ activeOnly: false });
+  const { data: apiTasks = [], isLoading } = tasksQuery;
+  const loadFailed = hasQueryFailed(tasksQuery);
+  // The count and the empty state both assert a fact. apiTasks is [] until the
+  // query resolves, so before this the screen said "0 archived tasks" and
+  // "Nothing archived" while archived tasks existed.
+  const resolved = !isLoading && !loadFailed;
   const restoreTask = useUpdateTask();
 
   const archived = useMemo(() => archivedTasks(apiTasks as ApiTask[]), [apiTasks]);
@@ -25,12 +34,26 @@ const Archive: React.FC = () => {
         <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('archive.title')}
         </h1>
-        <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
-          {t('archive.count', { count: archived.length })}
+        {resolved && (
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
+            {t('archive.count', { count: archived.length })}
+          </p>
+        )}
+        {/* Archiving is not deleting, and nothing on this screen said so. */}
+        <p className="mt-1 max-w-[60ch] text-body" style={{ color: 'var(--flow-text-muted)' }}>
+          {t('archive.explanation')}
         </p>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {archived.length === 0 ? (
+        {isLoading ? (
+          <div className="px-6 py-4">
+            <TaskRowSkeleton />
+            <TaskRowSkeleton />
+            <TaskRowSkeleton />
+          </div>
+        ) : loadFailed ? (
+          <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
+        ) : archived.length === 0 ? (
           <EmptyState
             icon={ArchiveIcon}
             title={t('archive.emptyTitle')}
@@ -47,15 +70,20 @@ const Archive: React.FC = () => {
               className="flex items-center gap-3 px-6 py-3 hover:bg-[var(--flow-hover)] group"
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
-              <PriorityIcon priority={task.priority} size={12} />
-              <button
-                type="button"
-                onClick={() => navigate({ to: `/task/${task.id}` as string })}
-                className="flex-1 text-left text-meta truncate"
-                style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
-              >
-                {task.title}
-              </button>
+              {/* The glyph and title dim together, S-14's 62%. Restore stays
+                  outside this wrapper: dimming the row as a whole would take
+                  the one control on it down with the content. */}
+              <span className="flex min-w-0 flex-1 items-center gap-3 opacity-[0.62]">
+                <PriorityIcon priority={task.priority} size={12} />
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: `/task/${task.id}` as string })}
+                  className="min-w-0 flex-1 truncate text-left text-meta"
+                  style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
+                >
+                  {task.title}
+                </button>
+              </span>
               <span
                 className="text-meta shrink-0 hidden group-hover:inline"
                 style={{ color: 'var(--flow-text-dim)' }}

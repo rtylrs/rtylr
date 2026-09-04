@@ -7,5 +7,6 @@
   "emptyDescription": "Les tâches archivées apparaîtront ici.",
   "emptyCta": "Aller à Mes tâches",
   "restore": "Restaurer",
-  "restoreTitle": "Restaurer la tâche"
+  "restoreTitle": "Restaurer la tâche",
+  "explanation": "Les tâches archivées sont masquées des listes et des tableaux. Elles ne sont pas supprimées et peuvent être restaurées à tout moment."
 }
