@@ -15,10 +15,8 @@ import (
 //
 // The ids below deliberately match nothing. What is under test is whether the
 // statement is valid SQL at all, and a parse error fires regardless of whether
-// any row qualifies. That also keeps the test independent of fixtures, which
-// matters here: the neighbouring TestTerminatedAccessReconciliation currently
-// skips because its fixture permission row for user 1002 is absent from
-// onion_test, so this whole area was passing vacuously.
+// any row qualifies. Keeping this test independent of fixtures ensures the SQL
+// validity check remains isolated from the reconciliation fixture test.
 func TestRevokeBusinessUserPermissionsIsValidSQL(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

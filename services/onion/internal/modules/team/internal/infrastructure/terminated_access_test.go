@@ -25,7 +25,7 @@ func TestTerminatedAccessReconciliation_DeactivatesTerminatedOnly(t *testing.T) 
 		"SELECT is_active FROM user_app_permissions WHERE owner_id = ? AND user_id = ?",
 		testutil.OwnerID, teamStaffUserID,
 	).Scan(&isActive); err != nil {
-		t.Skipf("fixture permission row missing: %v", err)
+		t.Fatalf("fixture permission row missing: %v", err)
 	}
 	if isActive != 1 {
 		t.Fatalf("fixture precondition failed: staff %d permission inactive", teamStaffUserID)
@@ -45,10 +45,12 @@ func TestTerminatedAccessReconciliation_DeactivatesTerminatedOnly(t *testing.T) 
 	setStatus("terminated")
 	t.Cleanup(func() {
 		setStatus("active")
-		_, _ = db.ExecContext(ctx,
+		if _, err := db.ExecContext(ctx,
 			"UPDATE user_app_permissions SET is_active = TRUE WHERE owner_id = ? AND user_id = ?",
 			testutil.OwnerID, teamStaffUserID,
-		)
+		); err != nil {
+			t.Errorf("restore permission: %v", err)
+		}
 	})
 
 	sweep := application.NewService(ctx, db)

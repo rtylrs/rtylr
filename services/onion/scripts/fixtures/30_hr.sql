@@ -14,17 +14,23 @@ VALUES
     (4001, 1001, 1001, 0, 'Operations', 'Floor + kitchen staff')
 ON DUPLICATE KEY UPDATE name = VALUES(name), location_id = VALUES(location_id), business_id = VALUES(business_id);
 
-INSERT INTO hr_employees (id, owner_id, business_id, department_id, first_name, last_name, email, employment_type, status, salary, hourly_rate, overtime_rate, start_date)
+INSERT INTO hr_employees (id, owner_id, business_id, user_id, department_id, first_name, last_name, email, employment_type, status, salary, hourly_rate, overtime_rate, start_date)
 VALUES
-    (4101, 1001, 1001, 4001, 'Alice', 'Worker', 'alice@test.local', 'full_time', 'active', 1200.00, NULL, NULL, '2025-01-01'),
-    (4102, 1001, 1001, 4001, 'Bob',   'Hourly', 'bob@test.local',   'part_time', 'active', NULL,    8.00, 12.00, '2025-03-01')
-ON DUPLICATE KEY UPDATE email = VALUES(email), business_id = VALUES(business_id);
+    (4101, 1001, 1001, 1001, 4001, 'Alice', 'Worker', 'alice@test.local', 'full_time', 'active', 1200.00, NULL, NULL, '2025-01-01'),
+    (4102, 1001, 1001, 1002, 4001, 'Bob',   'Hourly', 'bob@test.local',   'part_time', 'active', NULL,    8.00, 12.00, '2025-03-01')
+ON DUPLICATE KEY UPDATE email = VALUES(email), business_id = VALUES(business_id), user_id = VALUES(user_id);
 
 INSERT INTO hr_staff (id, owner_id, business_id, department_id, first_name, last_name, email, role, employment_type, status, salary, hourly_rate, overtime_rate, start_date, apps)
 VALUES
     (4101, 1001, 1001, 4001, 'Alice', 'Worker', 'alice@test.local', 'cashier', 'full_time', 'active', 1200.00, NULL, NULL,  '2025-01-01', '[]'),
     (4102, 1001, 1001, 4001, 'Bob',   'Hourly', 'bob@test.local',   'server',  'part_time', 'active', NULL,    8.00, 12.00, '2025-03-01', '[]')
 ON DUPLICATE KEY UPDATE email = VALUES(email), apps = VALUES(apps), business_id = VALUES(business_id);
+
+INSERT INTO user_app_permissions
+    (business_id, owner_id, user_id, apps, role, is_active)
+VALUES
+    (1001, 1001, 1002, JSON_ARRAY(), 'staff', TRUE)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), apps = VALUES(apps), role = VALUES(role), is_active = TRUE;
 
 INSERT INTO hr_payroll_config (id, owner_id, business_id, period_type, pay_day_of_month, overtime_enabled)
 VALUES
