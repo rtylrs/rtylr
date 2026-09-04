@@ -855,7 +855,7 @@
     "selectedCount": "{{count}} selected"
   },
   "allProjects": {
-    "title": "All Projects",
+    "title": "All projects",
     "search": "Search projects…",
     "filterStatus": "Filter by status",
     "filterVisibility": "Filter by visibility",
