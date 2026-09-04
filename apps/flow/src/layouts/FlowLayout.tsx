@@ -1273,6 +1273,15 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             {
                               name: newProjectName.trim(),
                               color: newProjectColor,
+                              // The modal collects both of these and used to send
+                              // neither, so a typed description was discarded and a
+                              // project chosen as Public was created private.
+                              // A blank description must be undefined rather than '',
+                              // because the contract marks it @required and the
+                              // generated validator rejects an empty string; the API
+                              // layer substitutes its sentinel for undefined.
+                              description: newProjectDescription.trim() || undefined,
+                              visibility: newProjectVisibility,
                             },
                             {
                               onSuccess: () => setNewProjectOpen(false),
@@ -1366,6 +1375,15 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           {
                             name: newProjectName.trim(),
                             color: newProjectColor,
+                            // The modal collects both of these and used to send
+                            // neither, so a typed description was discarded and a
+                            // project chosen as Public was created private.
+                            // A blank description must be undefined rather than '',
+                            // because the contract marks it @required and the
+                            // generated validator rejects an empty string; the API
+                            // layer substitutes its sentinel for undefined.
+                            description: newProjectDescription.trim() || undefined,
+                            visibility: newProjectVisibility,
                           },
                           {
                             onSuccess: () => setNewProjectOpen(false),
