@@ -225,6 +225,18 @@ func (s *Service) CreateBusinessForUser(ctx context.Context, userID int64, busin
 		return err
 	}
 
+	// The owner's authorization row. Without it GetAuthorizationSnapshot finds
+	// nothing for the person who just created the business, EffectiveAccess.IsOwner
+	// stays false, and every requireHubPermission check answers 403 to them.
+	//
+	// Logged rather than fatal, matching the employee record above: the business
+	// and its owner exist and are usable through the legacy path, and failing
+	// creation at this point would leave a half-made business behind.
+	if err := s.repo.EnsureOwnerAuthorizationMembership(ctx, businessID, userID); err != nil {
+		logger.Ctx(ctx).Error("failed to write the owner authorization membership",
+			logger.Int("business_id", int(businessID)), logger.Int("user_id", int(userID)), logger.Error(err))
+	}
+
 	if err := s.repo.EnsureEmployeeForUser(ctx, userID, businessID, userID); err != nil {
 		logger.Ctx(ctx).Error("failed to create employee record for business owner",
 			logger.Int("owner_id", int(userID)), logger.Error(err))
