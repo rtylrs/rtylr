@@ -145,10 +145,11 @@ export const useCreateGroup = (): ReturnType<
       return fromApiGroup(res.group);
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.groupCreated', 'Group created'));
+      toast.success(i18next.t('common.toasts.groupCreated', 'Group created'));
       qc.invalidateQueries({ queryKey: ['groups'] });
     },
-    onError: () => toast.error(i18next.t('toasts.failedCreateGroup', 'Failed to create group')),
+    onError: () =>
+      toast.error(i18next.t('common.toasts.failedCreateGroup', 'Failed to create group')),
   });
 };
 
@@ -180,11 +181,11 @@ export const useUpdateGroup = (
       return fromApiGroup(res.group);
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.groupSaved', 'Group saved'));
+      toast.success(i18next.t('common.toasts.groupSaved', 'Group saved'));
       qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['groups', id] });
     },
-    onError: () => toast.error(i18next.t('toasts.failedSaveGroup', 'Failed to save group')),
+    onError: () => toast.error(i18next.t('common.toasts.failedSaveGroup', 'Failed to save group')),
   });
 };
 
@@ -195,10 +196,11 @@ export const useDeleteGroup = (): ReturnType<typeof useMutation<void, Error, num
       await groupsClient.deleteGroup({ id: String(groupId) });
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.groupDeleted', 'Group deleted'));
+      toast.success(i18next.t('common.toasts.groupDeleted', 'Group deleted'));
       qc.invalidateQueries({ queryKey: ['groups'] });
     },
-    onError: () => toast.error(i18next.t('toasts.failedDeleteGroup', 'Failed to delete group')),
+    onError: () =>
+      toast.error(i18next.t('common.toasts.failedDeleteGroup', 'Failed to delete group')),
   });
 };
 
@@ -216,13 +218,14 @@ export const useAddGroupMembers = (
       });
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.membersAdded', 'Members added'));
+      toast.success(i18next.t('common.toasts.membersAdded', 'Members added'));
       qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['groups', groupId] });
       // Team rows embed each member's group memberships; refresh them too.
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: () => toast.error(i18next.t('toasts.failedAddMembers', 'Failed to add members')),
+    onError: () =>
+      toast.error(i18next.t('common.toasts.failedAddMembers', 'Failed to add members')),
   });
 };
 
@@ -236,11 +239,12 @@ export const useRemoveGroupMember = (
       await groupsClient.removeGroupMember({ id: groupId, userId: String(userId) });
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.memberRemoved', 'Member removed'));
+      toast.success(i18next.t('common.toasts.memberRemoved', 'Member removed'));
       qc.invalidateQueries({ queryKey: ['groups', groupId] });
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: () => toast.error(i18next.t('toasts.failedRemoveMember', 'Failed to remove member')),
+    onError: () =>
+      toast.error(i18next.t('common.toasts.failedRemoveMember', 'Failed to remove member')),
   });
 };
 
@@ -295,7 +299,10 @@ export const useBulkInvite = (): ReturnType<
     },
     onError: (error) =>
       toast.error(
-        getOneKitErrorMessage(error, i18next.t('toasts.bulkInviteFailed', 'Bulk invite failed'))
+        getOneKitErrorMessage(
+          error,
+          i18next.t('common.toasts.bulkInviteFailed', 'Bulk invite failed')
+        )
       ),
   });
 };

@@ -26,14 +26,14 @@ export const useToggleTwoFactor = () => {
     onSuccess: (enabled) => {
       toast.success(
         enabled
-          ? i18next.t('toasts.twoFactorEnabled', 'Two-factor enabled')
-          : i18next.t('toasts.twoFactorDisabled', 'Two-factor disabled')
+          ? i18next.t('common.toasts.twoFactorEnabled', 'Two-factor enabled')
+          : i18next.t('common.toasts.twoFactorDisabled', 'Two-factor disabled')
       );
       qc.invalidateQueries({ queryKey: ['security'] });
     },
     onError: () =>
       toast.error(
-        i18next.t('toasts.failedTwoFactorUpdate', 'Failed to update two-factor settings')
+        i18next.t('common.toasts.failedTwoFactorUpdate', 'Failed to update two-factor settings')
       ),
   });
 };
@@ -86,10 +86,10 @@ export const useRevokeSession = () => {
       await securityClient.invalidateSessions({});
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.signedOutSessions', 'Signed out of all sessions'));
+      toast.success(i18next.t('common.toasts.signedOutSessions', 'Signed out of all sessions'));
       qc.invalidateQueries({ queryKey: ['security'] });
     },
     onError: () =>
-      toast.error(i18next.t('toasts.failedSignOutSessions', 'Failed to sign out sessions')),
+      toast.error(i18next.t('common.toasts.failedSignOutSessions', 'Failed to sign out sessions')),
   });
 };

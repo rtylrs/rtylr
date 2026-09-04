@@ -49,14 +49,14 @@ export const useUpdatePermissions = () => {
       });
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.permissionUpdated', 'Permission updated'));
+      toast.success(i18next.t('common.toasts.permissionUpdated', 'Permission updated'));
       qc.invalidateQueries({ queryKey: ['permissions'] });
     },
     onError: (error) =>
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedUpdatePermission', 'Failed to update permission')
+          i18next.t('common.toasts.failedUpdatePermission', 'Failed to update permission')
         )
       ),
   });
@@ -74,12 +74,15 @@ export const useCreateCustomRole = () => {
       return permissionClient.createRole(payload);
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.roleCreated', 'Role created'));
+      toast.success(i18next.t('common.toasts.roleCreated', 'Role created'));
       qc.invalidateQueries({ queryKey: ['custom-roles'] });
     },
     onError: (error) =>
       toast.error(
-        getOneKitErrorMessage(error, i18next.t('toasts.failedCreateRole', 'Failed to create role'))
+        getOneKitErrorMessage(
+          error,
+          i18next.t('common.toasts.failedCreateRole', 'Failed to create role')
+        )
       ),
   });
 };
@@ -102,12 +105,15 @@ export const useUpdateCustomRole = () => {
         },
       }),
     onSuccess: () => {
-      toast.success(i18next.t('toasts.roleUpdated', 'Role updated'));
+      toast.success(i18next.t('common.toasts.roleUpdated', 'Role updated'));
       qc.invalidateQueries({ queryKey: ['custom-roles'] });
     },
     onError: (error) =>
       toast.error(
-        getOneKitErrorMessage(error, i18next.t('toasts.failedUpdateRole', 'Failed to update role'))
+        getOneKitErrorMessage(
+          error,
+          i18next.t('common.toasts.failedUpdateRole', 'Failed to update role')
+        )
       ),
   });
 };
@@ -117,14 +123,14 @@ export const useArchiveCustomRole = () => {
   return useMutation({
     mutationFn: async (id: string) => permissionClient.deleteRole({ id }),
     onSuccess: () => {
-      toast.success(i18next.t('toasts.roleArchived', 'Role archived'));
+      toast.success(i18next.t('common.toasts.roleArchived', 'Role archived'));
       qc.invalidateQueries({ queryKey: ['custom-roles'] });
     },
     onError: (error) =>
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedArchiveRole', 'Failed to archive role')
+          i18next.t('common.toasts.failedArchiveRole', 'Failed to archive role')
         )
       ),
   });

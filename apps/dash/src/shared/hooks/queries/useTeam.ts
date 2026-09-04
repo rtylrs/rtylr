@@ -175,14 +175,14 @@ export const useInviteMember = () => {
       });
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.invitationSent', 'Invitation sent'));
+      toast.success(i18next.t('common.toasts.invitationSent', 'Invitation sent'));
       qc.invalidateQueries({ queryKey: ['team'] });
     },
     onError: (error) =>
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedSendInvitation', 'Failed to send invitation')
+          i18next.t('common.toasts.failedSendInvitation', 'Failed to send invitation')
         )
       ),
   });
@@ -203,7 +203,7 @@ export const useUpdateMember = () => {
       });
     },
     onSuccess: (_data, { id, patch }) => {
-      toast.success(i18next.t('toasts.memberUpdated', 'Member updated'));
+      toast.success(i18next.t('common.toasts.memberUpdated', 'Member updated'));
       qc.getQueriesData({ queryKey: ['team'] }).forEach(([queryKey, cached]) => {
         if (!isTeamListResult(cached)) return;
         qc.setQueryData<TeamListResult>(queryKey, {
@@ -221,7 +221,7 @@ export const useUpdateMember = () => {
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedUpdateMember', 'Failed to update member')
+          i18next.t('common.toasts.failedUpdateMember', 'Failed to update member')
         )
       ),
   });
@@ -235,14 +235,14 @@ export const useDeactivateMember = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.memberDeactivated', 'Member deactivated'));
+      toast.success(i18next.t('common.toasts.memberDeactivated', 'Member deactivated'));
       qc.invalidateQueries({ queryKey: ['team'] });
     },
     onError: (error) =>
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedDeactivateMember', 'Failed to deactivate member')
+          i18next.t('common.toasts.failedDeactivateMember', 'Failed to deactivate member')
         )
       ),
   });
@@ -289,7 +289,7 @@ export const useApproveAccessRequest = () => {
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedGrantAccess', 'Failed to grant access')
+          i18next.t('common.toasts.failedGrantAccess', 'Failed to grant access')
         )
       ),
   });

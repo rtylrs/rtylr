@@ -17,11 +17,13 @@ export const useSetBusinessSlug = () => {
       setWebsiteData({ ...currentWebsiteData, slug });
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      toast.success(i18next.t('toasts.slugUpdated', 'Slug updated'));
+      toast.success(i18next.t('common.toasts.slugUpdated', 'Slug updated'));
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
-      toast.error(err.message || i18next.t('toasts.failedUpdateSlug', 'Failed to update slug'));
+      toast.error(
+        err.message || i18next.t('common.toasts.failedUpdateSlug', 'Failed to update slug')
+      );
     },
   });
 };
@@ -83,14 +85,17 @@ export const useUpdateBusiness = () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success(
-        i18next.t('toasts.businessInfoUpdated', 'Business information updated successfully')
+        i18next.t('common.toasts.businessInfoUpdated', 'Business information updated successfully')
       );
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
       toast.error(
         err.message ||
-          i18next.t('toasts.failedUpdateBusinessInfo', 'Failed to update business information')
+          i18next.t(
+            'common.toasts.failedUpdateBusinessInfo',
+            'Failed to update business information'
+          )
       );
     },
   });
@@ -105,12 +110,12 @@ export const useUpdateBusinessConfig = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['config'] });
-      toast.success(i18next.t('toasts.designConfigSaved', 'Design configuration saved'));
+      toast.success(i18next.t('common.toasts.designConfigSaved', 'Design configuration saved'));
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
       toast.error(
-        err.message || i18next.t('toasts.failedSaveConfig', 'Failed to save configuration')
+        err.message || i18next.t('common.toasts.failedSaveConfig', 'Failed to save configuration')
       );
     },
   });

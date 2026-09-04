@@ -57,7 +57,7 @@ export const useAssignPOSLocation = () => {
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedAssignLocation', 'Failed to assign location')
+          i18next.t('common.toasts.failedAssignLocation', 'Failed to assign location')
         )
       ),
     onSuccess: () => {
@@ -74,7 +74,7 @@ export const useRemovePOSLocation = () => {
       toast.error(
         getOneKitErrorMessage(
           error,
-          i18next.t('toasts.failedRemoveLocation', 'Failed to remove location')
+          i18next.t('common.toasts.failedRemoveLocation', 'Failed to remove location')
         )
       ),
     onSuccess: () => {
