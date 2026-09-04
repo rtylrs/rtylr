@@ -694,12 +694,13 @@
     "target": "Cible :"
   },
   "triage": {
-    "subtitle_one": "{{count}} tâche nécessite de l'attention · Capture → définir priorité & date → sortir du backlog",
-    "subtitle_many": "{{count}} tâches nécessitent de l'attention · Capture → définir priorité & date → sortir du backlog",
-    "subtitle_other": "{{count}} tâches nécessitent de l'attention · Capture → définir priorité & date → sortir du backlog",
+    "subtitle_one": "{{count}} tâche nécessite de l'attention",
+    "subtitle_many": "{{count}} tâches nécessitent de l'attention",
+    "subtitle_other": "{{count}} tâches nécessitent de l'attention",
     "emptyTitle": "Boîte de réception vide",
     "emptyDescription": "Rien ne traîne sans priorité ni date d'échéance. Le nouveau travail arrive d'abord en capture - gardez le tri léger pour que le travail planifié reste fiable.",
-    "emptyCta": "Aller à Mes tâches"
+    "emptyCta": "Aller à Mes tâches",
+    "explanation": "Tout ce qui n'a ni priorité ni date d'échéance, ou reste dans le backlog, apparaît ici."
   },
   "team": {
     "loading": "Chargement de l'équipe...",
