@@ -6,6 +6,7 @@ import { useMenuStore } from '../../shared/stores/menuStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useGetMenu } from '../../shared/hooks/queries/useMenu';
 import { toFiniteNumber } from '@voxire/api';
+import { formatMoney } from '../../shared/lib/money';
 
 interface StoreItemDetails {
   name?: string;
@@ -81,7 +82,7 @@ const Menu: React.FC<{}> = () => {
           <div className="flex items-center gap-2">
             {item?.details?.price !== undefined && (
               <span className="text-sm font-semibold text-primary">
-                ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
+                {formatMoney(toFiniteNumber(item.details.price))}
               </span>
             )}
             <button
@@ -121,7 +122,7 @@ const Menu: React.FC<{}> = () => {
       </div>
       <div className="flex items-center gap-3">
         <span className="text-sm font-semibold text-primary">
-          ${(toFiniteNumber(item.details?.price) / 100).toFixed(2)}
+          {formatMoney(toFiniteNumber(item.details?.price))}
         </span>
         <span
           className="px-2 py-1 rounded-full text-[11px] font-semibold"
