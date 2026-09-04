@@ -96,6 +96,28 @@ func (m *Module) UpsertConfig(ctx context.Context, ownerID int64, input ConfigIn
 	return configFromDomain(cfg), nil
 }
 
+// ProvisionBusiness creates the HR records needed by a newly onboarded
+// business. The owner employee row is created by the onboarding module before
+// this method is called, so the system HR Admin role can be assigned here.
+func (m *Module) ProvisionBusiness(ctx context.Context, businessID, ownerUserID int64, companyName string) error {
+	if err := m.service.SeedDefaultRoles(ctx, businessID); err != nil {
+		return fmt.Errorf("seed default HR roles: %w", err)
+	}
+	if _, err := m.service.UpsertHRConfig(ctx, businessID, domain.HRCompanyConfigRecord{
+		CompanyName:          companyName,
+		FiscalYearStartMonth: 1,
+		DefaultCurrency:      "USD",
+		DefaultTimezone:      "UTC",
+		OvertimeMultiplier:   1.5,
+	}); err != nil {
+		return fmt.Errorf("create default HR config: %w", err)
+	}
+	if err := m.service.AssignDefaultOwnerRole(ctx, businessID, ownerUserID); err != nil {
+		return fmt.Errorf("assign default HR owner role: %w", err)
+	}
+	return nil
+}
+
 func IsConfigNotFound(err error) bool {
 	return errors.Is(err, domain.ErrSetupNotComplete)
 }

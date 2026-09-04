@@ -349,6 +349,11 @@ func (s *Service) AssignRole(ctx context.Context, ownerID, employeeID, roleID in
 	return s.repo.AssignRole(ctx, ownerID, employeeID, roleID)
 }
 
+func (s *Service) AssignDefaultOwnerRole(ctx context.Context, ownerID, userID int64) error {
+	defer invalidateHRCoreScope(ctx, ownerID)
+	return s.repo.AssignDefaultOwnerRole(ctx, ownerID, userID)
+}
+
 func (s *Service) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
 	return s.repo.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }

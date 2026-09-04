@@ -620,6 +620,18 @@ func (r *Repository) AssignRole(ctx context.Context, businessID, employeeID, rol
 	})
 }
 
+func (r *Repository) AssignDefaultOwnerRole(ctx context.Context, businessID, userID int64) error {
+	if err := r.queries.AssignDefaultOwnerRole(ctx, sqlc.AssignDefaultOwnerRoleParams{
+		BusinessID: businessID,
+		UserID:     sqlutil.NullInt64(userID),
+	}); err != nil {
+		logger.Ctx(ctx).Error("failed to assign default HR owner role",
+			logger.Any("business_id", businessID), logger.Any("user_id", userID), logger.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (r *Repository) HasPermission(ctx context.Context, businessID, employeeID int64, permissionKey string) (bool, error) {
 	roles, err := r.queries.GetEmployeeRoles(ctx, sqlc.GetEmployeeRolesParams{
 		BusinessID: businessID,

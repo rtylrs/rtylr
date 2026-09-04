@@ -90,6 +90,11 @@ func (m *Module) WithWorkOS(apiKey, clientID, redirectURI string) *Module {
 	return m
 }
 
+func (m *Module) WithBusinessProvisioner(provisioner application.BusinessProvisioner) *Module {
+	m.UserService.WithBusinessProvisioner(provisioner)
+	return m
+}
+
 func (m *Module) GetService() *application.Service {
 	return m.UserService
 }

@@ -664,6 +664,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Training:              training.NewModule(ctx, dbclient.Pool()),
 		User: func() *user.Module {
 			m := user.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.GoogleOAuthClientID)
+			m.WithBusinessProvisioner(hrCoreModule)
 			cfg := platformConfig.GlobalConfig
 			if cfg.WorkOSClientID != "" {
 				m.WithWorkOS(cfg.WorkOSAPIKey, cfg.WorkOSClientID, cfg.WorkOSRedirectURI)

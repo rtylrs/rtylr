@@ -44,12 +44,17 @@ var (
 )
 
 type Service struct {
-	repo           *infrastructure.Repository
-	db             *sql.DB
-	validator      *Validator
-	JWT            *jwtutils.JWTHelper
-	googleClientID string
-	workOSProvider *WorkOSProvider
+	repo                *infrastructure.Repository
+	db                  *sql.DB
+	validator           *Validator
+	JWT                 *jwtutils.JWTHelper
+	googleClientID      string
+	workOSProvider      *WorkOSProvider
+	businessProvisioner BusinessProvisioner
+}
+
+type BusinessProvisioner interface {
+	ProvisionBusiness(ctx context.Context, businessID, ownerUserID int64, companyName string) error
 }
 
 func NewService(_ context.Context, db *sql.DB, googleClientID string) *Service {
@@ -67,6 +72,11 @@ func NewService(_ context.Context, db *sql.DB, googleClientID string) *Service {
 // Call this after NewService when WorkOS credentials are available.
 func (s *Service) WithWorkOSProvider(p *WorkOSProvider) *Service {
 	s.workOSProvider = p
+	return s
+}
+
+func (s *Service) WithBusinessProvisioner(provisioner BusinessProvisioner) *Service {
+	s.businessProvisioner = provisioner
 	return s
 }
 
@@ -240,6 +250,13 @@ func (s *Service) CreateBusinessForUser(ctx context.Context, userID int64, busin
 	if err := s.repo.EnsureEmployeeForUser(ctx, userID, businessID, userID); err != nil {
 		logger.Ctx(ctx).Error("failed to create employee record for business owner",
 			logger.Int("owner_id", int(userID)), logger.Error(err))
+	}
+
+	if s.businessProvisioner != nil {
+		if err := s.businessProvisioner.ProvisionBusiness(ctx, businessID, userID, businessName); err != nil {
+			logger.Ctx(ctx).Error("failed to provision HR records for new business",
+				logger.Int("business_id", int(businessID)), logger.Int("owner_id", int(userID)), logger.Error(err))
+		}
 	}
 
 	return nil

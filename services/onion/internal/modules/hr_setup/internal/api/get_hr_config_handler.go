@@ -21,6 +21,7 @@ type GetHRConfigRequest struct{}
 type HRConfigPayload struct {
 	ID                    int64   `json:"id"`
 	OwnerID               int64   `json:"owner_id"`
+	TimeTrackingModel     string  `json:"time_tracking_model"`
 	SetupCompletedAt      *int64  `json:"setup_completed_at"`
 	CompanyName           string  `json:"company_name,omitempty"`
 	FiscalYearStartMonth  int32   `json:"fiscal_year_start_month,omitempty"`
@@ -79,7 +80,7 @@ func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (
 }
 
 func toConfigPayload(cfg *domain.HRConfig, coreCfg *hrcore.Config) *HRConfigPayload {
-	p := &HRConfigPayload{}
+	p := &HRConfigPayload{TimeTrackingModel: "both"}
 	if cfg != nil {
 		p.ID = cfg.ID
 		p.OwnerID = cfg.OwnerID
