@@ -4606,22 +4606,22 @@ func (c *CompatibilityServiceClient) UpdateTimeEntry(ctx context.Context, req *P
 	return result, nil
 }
 
-func (c *CompatibilityServiceClient) ImportTimeEntries(ctx context.Context, req *BodyRequest) (*JsonResponse, error) {
+func (c *CompatibilityServiceClient) DeleteTimeEntry(ctx context.Context, req *PathRequest) (*JsonResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
 		}
 	}
-	path := "/hr/time-entries/import-flow"
-	body, err := json.Marshal(req.Body)
-	if err != nil {
-		return nil, fmt.Errorf("marshal request: %w", err)
+	path := "/hr/time-entries/{id}"
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	query := url.Values{}
+	if len(query) > 0 {
+		path += "?" + query.Encode()
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.BaseURL+path, bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", c.BaseURL+path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("build request: %w", err)
 	}
-	httpReq.Header.Set("Content-Type", "application/json")
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
@@ -4645,22 +4645,22 @@ func (c *CompatibilityServiceClient) ImportTimeEntries(ctx context.Context, req 
 	return result, nil
 }
 
-func (c *CompatibilityServiceClient) DeleteTimeEntry(ctx context.Context, req *PathRequest) (*JsonResponse, error) {
+func (c *CompatibilityServiceClient) MarkTimeEntriesInvoiced(ctx context.Context, req *BodyRequest) (*JsonResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
 		}
 	}
-	path := "/hr/time-entries/{id}"
-	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
-	query := url.Values{}
-	if len(query) > 0 {
-		path += "?" + query.Encode()
+	path := "/hr/time-entries/mark-invoiced"
+	body, err := json.Marshal(req.Body)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", c.BaseURL+path, nil)
+	httpReq, err := http.NewRequestWithContext(ctx, "PATCH", c.BaseURL+path, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("build request: %w", err)
 	}
+	httpReq.Header.Set("Content-Type", "application/json")
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}

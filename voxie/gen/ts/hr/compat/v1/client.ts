@@ -3109,25 +3109,6 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async importTimeEntries(req: BodyRequest): Promise<JsonResponse> {
-const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
-let path = "/hr/time-entries/import-flow";
-const res = await this.request(this.baseUrl + path, {
-method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
-body: JSON.stringify(encodeBodyRequest(req)["body"]),
-});
-
-if (!res.ok) {
-const body = await readResponseText(res, this.options.maxResponseBodyBytes);
-throw new ApiError(res.status, body);
-}
-
-const text = await readResponseText(res, this.options.maxResponseBodyBytes);
-return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
-}
-
 async deleteTimeEntry(req: PathRequest): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
@@ -3139,6 +3120,25 @@ if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
 headers: { ...this.options.defaultHeaders },
+});
+
+if (!res.ok) {
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
+throw new ApiError(res.status, body);
+}
+
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
+}
+
+async markTimeEntriesInvoiced(req: BodyRequest): Promise<JsonResponse> {
+const violations = validateBodyRequest(req);
+if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+let path = "/hr/time-entries/mark-invoiced";
+const res = await this.request(this.baseUrl + path, {
+method: "PATCH",
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+body: JSON.stringify(encodeBodyRequest(req)["body"]),
 });
 
 if (!res.ok) {

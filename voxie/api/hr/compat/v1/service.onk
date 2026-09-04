@@ -106,8 +106,8 @@ service CompatibilityService {
   getTimeEntries(QueryRequest) -> JsonResponse @get("/time-entries")
   createTimeEntry(BodyRequest) -> JsonResponse @post("/time-entries") @body("body")
   updateTimeEntry(PathBodyRequest) -> JsonResponse @put("/time-entries/{id}") @body("body")
-  importTimeEntries(BodyRequest) -> JsonResponse @post("/time-entries/import-flow") @body("body")
   deleteTimeEntry(PathRequest) -> JsonResponse @delete("/time-entries/{id}")
+  markTimeEntriesInvoiced(BodyRequest) -> JsonResponse @patch("/time-entries/mark-invoiced") @body("body")
 
   getReviews(EmptyRequest) -> JsonResponse @get("/reviews")
   createReview(BodyRequest) -> JsonResponse @post("/reviews") @body("body")

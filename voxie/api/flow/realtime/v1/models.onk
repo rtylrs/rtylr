@@ -1,0 +1,8 @@
+package flow.realtime.v1
+
+message IssueWebSocketTicketRequest {}
+
+message IssueWebSocketTicketResponse {
+  /// Short-lived, single-use ticket accepted by the Flow WebSocket handshake.
+  ticket: string
+}

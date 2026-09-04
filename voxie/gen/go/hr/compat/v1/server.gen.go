@@ -315,8 +315,8 @@ type CompatibilityServiceServer interface {
 	GetTimeEntries(ctx context.Context, req *QueryRequest) (*JsonResponse, error)
 	CreateTimeEntry(ctx context.Context, req *BodyRequest) (*JsonResponse, error)
 	UpdateTimeEntry(ctx context.Context, req *PathBodyRequest) (*JsonResponse, error)
-	ImportTimeEntries(ctx context.Context, req *BodyRequest) (*JsonResponse, error)
 	DeleteTimeEntry(ctx context.Context, req *PathRequest) (*JsonResponse, error)
+	MarkTimeEntriesInvoiced(ctx context.Context, req *BodyRequest) (*JsonResponse, error)
 	GetReviews(ctx context.Context, req *EmptyRequest) (*JsonResponse, error)
 	CreateReview(ctx context.Context, req *BodyRequest) (*JsonResponse, error)
 	GetOneOnOnes(ctx context.Context, req *EmptyRequest) (*JsonResponse, error)
@@ -4691,29 +4691,6 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateTimeEntry", HTTPMethod: "PUT", Route: "/hr/time-entries/{id}", AuthSchemes: nil}))
-	mux.Handle("POST /hr/time-entries/import-flow", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		req := new(BodyRequest)
-		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
-			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
-				return
-			}
-		}
-		if v, ok := any(req).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				writeJSONError(w, http.StatusBadRequest, err.Error())
-				return
-			}
-		}
-		resp, err := srv.ImportTimeEntries(r.Context(), req)
-		if err != nil {
-			writeHandlerError(w, err)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
-	}), RequestMetadata{Service: "CompatibilityService", Method: "importTimeEntries", HTTPMethod: "POST", Route: "/hr/time-entries/import-flow", AuthSchemes: nil}))
 	mux.Handle("DELETE /hr/time-entries/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PathRequest)
 		req.Id = r.PathValue("id")
@@ -4731,6 +4708,29 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "deleteTimeEntry", HTTPMethod: "DELETE", Route: "/hr/time-entries/{id}", AuthSchemes: nil}))
+	mux.Handle("PATCH /hr/time-entries/mark-invoiced", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(BodyRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.MarkTimeEntriesInvoiced(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "CompatibilityService", Method: "markTimeEntriesInvoiced", HTTPMethod: "PATCH", Route: "/hr/time-entries/mark-invoiced", AuthSchemes: nil}))
 	mux.Handle("GET /hr/reviews", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {

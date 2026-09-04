@@ -1,0 +1,9 @@
+package flow.realtime.v1
+
+/// RealtimeService defines the authenticated preflight for Flow WebSocket connections.
+service RealtimeService {
+  base_path: "/flow"
+
+  /// Exchanges the authenticated API session for a short-lived WebSocket ticket.
+  issueWebSocketTicket(IssueWebSocketTicketRequest) -> IssueWebSocketTicketResponse @post("/ws-ticket")
+}
