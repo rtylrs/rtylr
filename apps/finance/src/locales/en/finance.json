@@ -57,9 +57,9 @@
     "region": "Unbilled billable time",
     "title": "Unbilled billable time",
     "hint": "Approved billable HR time with no invoice yet. Pick entries, then create one invoice; the hours are stamped invoiced automatically.",
-    "billSelected": "Bill selected ({count})",
+    "billSelected": "Bill selected ({{count}})",
     "working": "Working…",
-    "markedDone": "Invoice loop closed: {marked} hours stamped invoiced, {skipped} skipped.",
+    "markedDone": "Invoice loop closed: {{marked}} hours stamped invoiced, {{skipped}} skipped.",
     "fallbackClient": "",
     "billToPlaceholder": "Bill to (client name)"
   }
