@@ -102,7 +102,7 @@ function buildSections(
   return sections;
 }
 
-const NotificationsSection: React.FC = () => {
+export const NotificationsSection: React.FC = () => {
   const { t } = useTranslation();
   const { data: remote } = useQuery({
     queryKey: ['flow-settings'],
