@@ -402,6 +402,25 @@ func (r *Repository) UpdateWorkDayLine(ctx context.Context, input domain.WorkDay
 	return toDomainLine(lineFromGet(row)), nil
 }
 
+// GetWorkDayLineOwner reads the employee that owns a line, scoped to the
+// current tenant. The application uses this before line mutations so a caller
+// cannot mutate a colleague's work day by presenting only a line id.
+func (r *Repository) GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (int64, int64, bool, error) {
+	row, err := r.queries.GetWorkDayLineOwner(ctx, sqlc.GetWorkDayLineOwnerParams{
+		ID:         id,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, 0, false, nil
+		}
+		logger.Ctx(ctx).Error("GetWorkDayLineOwner failed", logger.Error(err))
+		return 0, 0, false, err
+	}
+	return int64Value(row.WorkDayID), row.EmployeeID, true, nil
+}
+
 // DeleteWorkDayLine removes a line. Reports whether a row was actually removed,
 // so the caller can answer 404 rather than pretending a foreign id succeeded.
 func (r *Repository) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error) {

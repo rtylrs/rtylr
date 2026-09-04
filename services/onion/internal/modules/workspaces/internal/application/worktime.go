@@ -165,11 +165,38 @@ func (s *Service) UpdateWorkDayLine(ctx context.Context, input domain.WorkDayLin
 	if input.ProjectID <= 0 {
 		return domain.WorkDayLine{}, ErrProjectRequired
 	}
+	workDayID, employeeID, found, err := s.repo.GetWorkDayLineOwner(ctx, input.ID, input.OwnerID, input.BusinessID)
+	if err != nil {
+		return domain.WorkDayLine{}, err
+	}
+	if !found {
+		return domain.WorkDayLine{}, ErrWorkDayNotFound
+	}
+	input.WorkDayID = workDayID
+	if err := s.assertCallerOwnsWorkDay(ctx, input, employeeID); err != nil {
+		return domain.WorkDayLine{}, err
+	}
 	return s.repo.UpdateWorkDayLine(ctx, input)
 }
 
 // DeleteWorkDayLine removes a line.
-func (s *Service) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
+func (s *Service) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID, callerUserID int64) (bool, error) {
+	workDayID, employeeID, found, err := s.repo.GetWorkDayLineOwner(ctx, id, ownerID, businessID)
+	if err != nil {
+		return false, err
+	}
+	if !found {
+		return false, nil
+	}
+	if err := s.assertCallerOwnsWorkDay(ctx, domain.WorkDayLineInput{
+		ID:         id,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		WorkDayID:  workDayID,
+		LoggedBy:   callerUserID,
+	}, employeeID); err != nil {
+		return false, err
+	}
 	return s.repo.DeleteWorkDayLine(ctx, id, ownerID, businessID)
 }
 

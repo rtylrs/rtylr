@@ -2,8 +2,10 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
@@ -81,6 +83,103 @@ func TestWorkspaces_ListWorkDayLines_ScopesByBusiness(t *testing.T) {
 	}
 	if total != 45 {
 		t.Fatalf("total = %d, want 45", total)
+	}
+}
+
+func TestWorkspaces_WorkDayLineMutationsScopeToCaller(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	service := application.NewService(ctx, db)
+
+	const (
+		workDayID int64 = 980101
+		lineID    int64 = 980102
+	)
+
+	if _, err := db.ExecContext(ctx, "DELETE FROM hr_time_entries WHERE id = ?", lineID); err != nil {
+		t.Fatalf("delete stale line fixture: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, "DELETE FROM flow_work_days WHERE id = ?", workDayID); err != nil {
+		t.Fatalf("delete stale work day fixture: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO flow_work_days (id, owner_id, business_id, employee_id, date, timezone, work_mode, status)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		workDayID, testutil.BusinessID, testutil.BusinessID, 4101, "2035-01-01", "UTC", "onsite", "draft",
+	); err != nil {
+		t.Fatalf("insert work day fixture: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO hr_time_entries (
+			id, owner_id, business_id, employee_id, work_day_id, date,
+			project_id, duration_minutes, description, source
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'flow')`,
+		lineID, testutil.BusinessID, testutil.BusinessID, 4101, workDayID, "2035-01-01", 998833, 45, "original",
+	); err != nil {
+		t.Fatalf("insert work day line fixture: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, err := db.ExecContext(ctx, "DELETE FROM hr_time_entries WHERE id = ?", lineID); err != nil {
+			t.Errorf("delete line fixture: %v", err)
+		}
+		if _, err := db.ExecContext(ctx, "DELETE FROM flow_work_days WHERE id = ?", workDayID); err != nil {
+			t.Errorf("delete work day fixture: %v", err)
+		}
+	})
+
+	foreignLine, err := service.UpdateWorkDayLine(ctx, domain.WorkDayLineInput{
+		ID:              lineID,
+		OwnerID:         testutil.BusinessID,
+		BusinessID:      testutil.BusinessID,
+		ProjectID:       998833,
+		DurationMinutes: 90,
+		Description:     "foreign update",
+		LoggedBy:        1002,
+	})
+	if !errors.Is(err, application.ErrWorkDayNotFound) {
+		t.Fatalf("foreign update error = %v, want ErrWorkDayNotFound", err)
+	}
+	if foreignLine.ID != 0 {
+		t.Fatalf("foreign update returned line %+v", foreignLine)
+	}
+
+	var duration int
+	var description string
+	if err := db.QueryRowContext(ctx,
+		"SELECT duration_minutes, description FROM hr_time_entries WHERE id = ?", lineID,
+	).Scan(&duration, &description); err != nil {
+		t.Fatalf("read line after foreign update: %v", err)
+	}
+	if duration != 45 || description != "original" {
+		t.Fatalf("foreign update changed line to duration=%d description=%q", duration, description)
+	}
+
+	if _, err := service.UpdateWorkDayLine(ctx, domain.WorkDayLineInput{
+		ID:              lineID,
+		OwnerID:         testutil.BusinessID,
+		BusinessID:      testutil.BusinessID,
+		ProjectID:       998833,
+		DurationMinutes: 60,
+		Description:     "owner update",
+		LoggedBy:        1001,
+	}); err != nil {
+		t.Fatalf("owner update: %v", err)
+	}
+
+	removed, err := service.DeleteWorkDayLine(ctx, lineID, testutil.BusinessID, testutil.BusinessID, 1002)
+	if !errors.Is(err, application.ErrWorkDayNotFound) {
+		t.Fatalf("foreign delete error = %v, want ErrWorkDayNotFound", err)
+	}
+	if removed {
+		t.Fatal("foreign delete reported a removal")
+	}
+
+	removed, err = service.DeleteWorkDayLine(ctx, lineID, testutil.BusinessID, testutil.BusinessID, 1001)
+	if err != nil {
+		t.Fatalf("owner delete: %v", err)
+	}
+	if !removed {
+		t.Fatal("owner delete reported no removal")
 	}
 }
 

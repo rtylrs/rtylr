@@ -91,6 +91,12 @@ FROM hr_time_entries
 WHERE id = ? AND owner_id = ? AND business_id = ?
 LIMIT 1;
 
+-- name: GetWorkDayLineOwner :one
+SELECT work_day_id, employee_id
+FROM hr_time_entries
+WHERE id = ? AND owner_id = ? AND business_id = ?
+LIMIT 1;
+
 -- name: CreateWorkDayLine :execresult
 INSERT INTO hr_time_entries (
     owner_id, business_id, employee_id, work_day_id, date,

@@ -338,6 +338,7 @@ func (a *WorkTimeAPI) UpdateWorkDayLine(ctx context.Context, req *flowtimev1.Upd
 		Description:     req.GetDescription(),
 		DurationMinutes: req.GetDurationMinutes(),
 		IsBillable:      req.GetIsBillable(),
+		LoggedBy:        actor(ctx),
 	})
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
@@ -351,7 +352,7 @@ func (a *WorkTimeAPI) DeleteWorkDayLine(ctx context.Context, req *flowtimev1.Del
 		return nil, err
 	}
 
-	removed, err := a.Service.DeleteWorkDayLine(ctx, req.GetId(), businessID, businessID)
+	removed, err := a.Service.DeleteWorkDayLine(ctx, req.GetId(), businessID, businessID, actor(ctx))
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}
