@@ -91,6 +91,25 @@ describe('Orders table empty state', () => {
     expect(screen.getByText('$12.50')).toBeInTheDocument();
   });
 
+  it('falls back to the raw status label in the detail dialog for unknown statuses', () => {
+    ordersData.data = [
+      {
+        id: '9',
+        status: 'refunded',
+        subtotal: 500,
+        total: 500,
+        createdAt: new Date().toISOString(),
+      } as unknown as { id: string; status: string },
+    ];
+    render(<Orders />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'View' }));
+
+    // Table badge and dialog badge both fall back to the raw status label
+    // instead of rendering an empty badge.
+    expect(screen.getAllByText('refunded')).toHaveLength(2);
+  });
+
   it('shows formatted totals and line items in the detail dialog', () => {
     ordersData.data = [
       {
