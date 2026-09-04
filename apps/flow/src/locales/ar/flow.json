@@ -617,7 +617,16 @@
     },
     "moveTask": "نقل {{title}} إلى عمود آخر",
     "moveTaskMenu": "النقل إلى عمود",
-    "moveNoTargets": "لا توجد أعمدة أخرى في هذا اللوح بعد."
+    "moveNoTargets": "لا توجد أعمدة أخرى في هذا اللوح بعد.",
+    "dueLane": {
+      "overdue": "متأخرة",
+      "today": "اليوم",
+      "thisWeek": "هذا الأسبوع",
+      "thisMonth": "هذا الشهر",
+      "later": "لاحقًا",
+      "noDueDate": "بدون تاريخ استحقاق"
+    },
+    "groupByLabel": "تجميع:"
   },
   "views": {
     "heading": "العروض المحفوظة",
@@ -789,14 +798,22 @@
   },
   "projectList": {
     "pageTitle": "القائمة · rtylr",
-    "toggleDoneLabel": "وضع علامة مكتمل"
+    "toggleDoneLabel": "وضع علامة مكتمل",
+    "columnTitle": "العنوان",
+    "moreOptions": "خيارات أخرى"
   },
   "projectOverview": {
     "pageTitle": "نظرة عامة · rtylr",
     "noMilestones": "لا توجد مراحل محددة.",
     "goToMilestonesCta": "الانتقال إلى المراحل",
     "noComments": "لا توجد تعليقات حديثة.",
-    "goToBoardCta": "الانتقال إلى اللوحة"
+    "goToBoardCta": "الانتقال إلى اللوحة",
+    "health": {
+      "onTrack": "على المسار الصحيح",
+      "offTrack": "خارج المسار"
+    },
+    "recentComments": "أحدث التعليقات",
+    "total": "الإجمالي"
   },
   "projectTimeline": {
     "pageTitle": "الخط الزمني · rtylr",
@@ -839,7 +856,17 @@
     "visibilityPersonalGate": "مشروع «مهامي» خاص دائمًا.",
     "archiveNotice": "الأرشفة تنقل المشروع إلى سلة المحذوفات. يبقى قابلاً للاستعادة حتى انتهاء مدة الاحتفاظ.",
     "archiveAction": "أرشفة",
-    "archiveConfirm": "أرشفة المشروع"
+    "archiveConfirm": "أرشفة المشروع",
+    "deleteDialogTitle": "حذف المشروع",
+    "deleteDialogPrefix": "سيؤدي هذا إلى أرشفة",
+    "deleteDialogSuffix": " وكل مهامه نهائيًا. للتأكيد، اكتب اسم المشروع مرة أخرى أدناه.",
+    "deleteHeading": "حذف هذا المشروع",
+    "selectNewOwner": "اختر مالكًا جديدًا…",
+    "transferHeading": "نقل الملكية",
+    "transferDescription": "انقل الملكية إلى أي عضو في المؤسسة. ستبقى عضوًا.",
+    "transferCta": "نقل",
+    "transferConfirmHint": "سيتم نقل الملكية فورًا. اضغط تأكيد للمتابعة.",
+    "transferring": "جارٍ النقل…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد",
@@ -929,5 +956,26 @@
   "confirm": {
     "typeToConfirm": "للتأكيد، اكتب {{word}} أدناه",
     "working": "جارٍ التنفيذ…"
+  },
+  "project": {
+    "loading": "جارٍ تحميل المشروع…",
+    "notFound": "لم يتم العثور على المشروع."
+  },
+  "projectViewTabs": {
+    "overview": "نظرة عامة",
+    "board": "اللوحة",
+    "list": "القائمة"
+  },
+  "trialBanner": {
+    "endsToday": "تنتهي فترتك التجريبية اليوم.",
+    "endsIn_zero": "تنتهي فترتك التجريبية اليوم.",
+    "endsIn_one": "تنتهي فترتك التجريبية بعد يوم واحد.",
+    "endsIn_two": "تنتهي فترتك التجريبية بعد يومين.",
+    "endsIn_few": "تنتهي فترتك التجريبية بعد {{count}} أيام.",
+    "endsIn_many": "تنتهي فترتك التجريبية بعد {{count}} يومًا.",
+    "endsIn_other": "تنتهي فترتك التجريبية بعد {{count}} يوم.",
+    "addPayment": "أضف طريقة دفع للحفاظ على بياناتك.",
+    "activate": "تنشيط الخطة",
+    "dismiss": "إخفاء"
   }
 }
