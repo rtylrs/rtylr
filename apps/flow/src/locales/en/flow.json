@@ -847,7 +847,13 @@
     "transferDescription": "Transfer ownership to any org member. You'll remain a member.",
     "transferCta": "Transfer",
     "transferConfirmHint": "Ownership will transfer immediately. Click Confirm to proceed.",
-    "transferring": "Transferring…"
+    "transferring": "Transferring…",
+    "tabs": {
+      "general": "General",
+      "members": "Members",
+      "integrations": "Integrations",
+      "danger": "Danger zone"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",
