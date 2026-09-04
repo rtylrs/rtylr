@@ -12,6 +12,7 @@ import { AppGuard } from '@voxire/auth';
 import FlowLayout from './layouts/FlowLayout';
 import { userClient } from './shared/lib/clients';
 import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable';
+import RouteNotFound from './shared/components/RouteNotFound';
 import { settingsSearchSchema } from './shared/schemas/settings';
 import { myDaySearchSchema } from './shared/schemas/time';
 import { useTranslation } from 'react-i18next';
@@ -398,7 +399,13 @@ const routeTree = rootRoute.addChildren([
   catchAllRoute,
 ]);
 
-export const router = createRouter({ routeTree });
+// Inside the app frame, so a mistyped or stale link keeps the sidebar and
+// navigation rather than dropping to a bare white page. Without this TanStack
+// renders its own "Not Found" text at the top left, untranslated.
+export const router = createRouter({
+  routeTree,
+  defaultNotFoundComponent: () => withLayout(<RouteNotFound />),
+});
 
 declare module '@tanstack/react-router' {
   interface Register {
