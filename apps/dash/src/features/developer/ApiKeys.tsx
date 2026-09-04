@@ -225,9 +225,11 @@ const ApiKeys: React.FC = () => {
                   if (showKey) {
                     try {
                       await navigator.clipboard.writeText(showKey);
-                      toast.success('Key copied');
+                      toast.success(t('developer.apiKeys.copied', 'Key copied'));
                     } catch {
-                      toast.error('Failed to copy key to clipboard');
+                      toast.error(
+                        t('developer.apiKeys.copyFailed', 'Failed to copy key to clipboard')
+                      );
                     }
                   }
                 }}

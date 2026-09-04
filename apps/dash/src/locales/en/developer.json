@@ -7,6 +7,9 @@
   "apiKeys": {
     "emptyTitle": "No API keys yet",
     "emptyDescription": "Create your first API key to start building.",
-    "newKey": "New key"
+    "newKey": "New key",
+    "previewCopied": "Key preview copied",
+    "copied": "Key copied",
+    "copyFailed": "Failed to copy key to clipboard"
   }
 }

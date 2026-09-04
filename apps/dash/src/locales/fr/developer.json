@@ -7,6 +7,9 @@
   "apiKeys": {
     "emptyTitle": "Aucune clé API pour l'instant",
     "emptyDescription": "Créez votre première clé API pour commencer à développer.",
-    "newKey": "Nouvelle clé"
+    "newKey": "Nouvelle clé",
+    "previewCopied": "Aperçu de la clé copié",
+    "copied": "Clé copiée",
+    "copyFailed": "Échec de la copie de la clé dans le presse-papiers"
   }
 }
