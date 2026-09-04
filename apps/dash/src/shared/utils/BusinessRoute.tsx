@@ -548,6 +548,7 @@ function BusinessRoute(): React.JSX.Element | null {
   // routing remains only for the migration window when the server did not send
   // that document.
   const role = (user?.role ?? '').toLowerCase();
+  const dashRole = (user?.dashRole ?? '').toLowerCase();
   const hasManagementRole = user?.effectiveAccess
     ? user.effectiveAccess.dashPermissions.some(
         (permission) =>
@@ -555,14 +556,23 @@ function BusinessRoute(): React.JSX.Element | null {
           permission === 'hub:roles:view' ||
           permission === 'hub:licenses:manage'
       )
-    : role === 'admin';
+    : // `owner` and `dashRole` belong here, matching isAdminOrOwner's legacy
+      // arm. Without them, treating an omitted isOwner as "not an owner"
+      // below would restrict a legacy owner whose marker was never set.
+      role === 'admin' || role === 'owner' || dashRole === 'admin' || dashRole === 'owner';
   const staffAllowedPaths = user?.effectiveAccess
     ? ['/settings/account']
     : ['/settings/account', ...(ROLE_SCOPED_PATHS[role] ?? [])];
 
+  // `!== true`, not `=== false`. StoredUser.isOwner is optional, so a hydrated
+  // user like { role: 'staff', isOwner: undefined, effectiveAccess: undefined }
+  // matched neither branch of `=== false` and fell through to the full app.
+  // Deny by default: ownership has to be asserted, not merely un-denied. This
+  // is the render-layer half of the same rule isAdminOrOwner applies in the
+  // route loader, whose own comment noted this guard was the lenient one.
   if (
     user &&
-    user.isOwner === false &&
+    user.isOwner !== true &&
     !hasManagementRole &&
     !staffAllowedPaths.some((p) => pathname.startsWith(p))
   ) {
