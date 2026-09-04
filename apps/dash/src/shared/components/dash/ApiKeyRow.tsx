@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Copy, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ApiKey } from '../../hooks/queries/useApiKeys';
@@ -17,6 +18,7 @@ function formatDate(iso: string): string {
 }
 
 export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
+  const { t } = useTranslation('common');
   const preview = `${apiKey.keyPrefix}••••••••`;
 
   const copy = async () => {
@@ -24,7 +26,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
       await navigator.clipboard.writeText(preview);
       toast.success('Key preview copied');
     } catch {
-      toast.error('Failed to copy key to clipboard');
+      toast.error(t('copyFailed', 'Failed to copy to clipboard'));
     }
   };
 

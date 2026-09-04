@@ -125,7 +125,7 @@ const Security: React.FC = () => {
       if (copyResetTimer.current) clearTimeout(copyResetTimer.current);
       copyResetTimer.current = setTimeout(() => setCopiedSecret(false), 2000);
     } catch {
-      toast.error('Failed to copy secret to clipboard');
+      toast.error(t('copyFailed', 'Failed to copy to clipboard'));
     }
   };
   const mfaEnabled = data?.mfaEnrolled || data?.twoFactorEnabled;
