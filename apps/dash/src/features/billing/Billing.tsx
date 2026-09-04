@@ -40,6 +40,32 @@ import {
 type BillingCycle = 'monthly' | 'yearly';
 type SubStatus = SubscriptionPayload['status'];
 
+// Checkout URLs come from the subscription backend but trigger a full-page
+// navigation, so validate them against the Paddle hosted-checkout hosts
+// before assigning to window.location.
+const CHECKOUT_HOSTS = ['buy.paddle.com', 'checkout.paddle.com', 'paddle.com'];
+
+function isAllowedCheckoutUrl(raw: unknown): raw is string {
+  if (typeof raw !== 'string' || raw.length === 0 || raw.length > 2048) return false;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:') return false;
+  const host = url.hostname.toLowerCase();
+  return CHECKOUT_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+}
+
+function navigateToCheckoutUrl(checkoutUrl: unknown): void {
+  if (!isAllowedCheckoutUrl(checkoutUrl)) {
+    toast.error('Failed to start checkout. Please try again.');
+    return;
+  }
+  window.location.href = checkoutUrl;
+}
+
 interface StatusConfig {
   label: string;
   color: string;
@@ -359,7 +385,7 @@ const PlanAction: React.FC<{
       },
       {
         onSuccess: (data) => {
-          window.location.href = data.checkoutUrl;
+          navigateToCheckoutUrl(data.checkoutUrl);
         },
         onError: () => {
           toast.error('Failed to start checkout. Please try again.');
@@ -721,7 +747,7 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
       { planSlug: sub.planSlug, email: ownerEmail || undefined },
       {
         onSuccess: (data) => {
-          window.location.href = data.checkoutUrl;
+          navigateToCheckoutUrl(data.checkoutUrl);
         },
         onError: () => toast.error('Failed to start checkout. Please try again.'),
       }
