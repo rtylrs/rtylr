@@ -1,6 +1,7 @@
 {
   "title": "Boîte de réception",
   "unreadCount_one": "{{count}} notification non lue",
+  "unreadCount_many": "{{count}} notifications non lues",
   "unreadCount_other": "{{count}} notifications non lues",
   "markAllRead": "Tout marquer comme lu",
   "filters": {

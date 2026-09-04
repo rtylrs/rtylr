@@ -3,6 +3,7 @@
   "title": "Membres de l'espace de travail",
   "addMember": "Ajouter un membre",
   "memberCount_one": "{{count}} membre dans cet espace de travail",
+  "memberCount_many": "{{count}} membres dans cet espace de travail",
   "memberCount_other": "{{count}} membres dans cet espace de travail",
   "addMemberHeading": "Ajouter un membre de l'équipe à cet espace de travail",
   "addMemberDescription": "Recherchez dans votre organisation la personne à ajouter, puis choisissez le rôle qu'elle aura dans cet espace de travail.",

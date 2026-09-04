@@ -13,9 +13,11 @@
     "copied": "{{id}} copié",
     "niceWork": "Bien joué !",
     "bulkUpdated_one": "{{count}} tâche mise à jour",
+    "bulkUpdated_many": "{{count}} tâches mises à jour",
     "bulkUpdated_other": "{{count}} tâches mises à jour",
     "bulkUpdateFailed": "Impossible d'effectuer la mise à jour groupée",
     "bulkDeleted_one": "{{count}} tâche supprimée",
+    "bulkDeleted_many": "{{count}} tâches supprimées",
     "bulkDeleted_other": "{{count}} tâches supprimées",
     "bulkDeleteFailed": "Impossible d'effectuer la suppression groupée",
     "selectProjectFirst": "Sélectionnez d'abord un projet",
@@ -106,9 +108,11 @@
   "weeklyReview": {
     "logged": "Bilan hebdomadaire enregistré",
     "streak_one": "{{count}} semaine de suite",
+    "streak_many": "{{count}} semaines de suite",
     "streak_other": "{{count}} semaines de suite",
     "alreadyLogged": "Déjà enregistré cette semaine",
     "alreadyLoggedStreak_one": "Série : {{count}} semaine",
+    "alreadyLoggedStreak_many": "Série : {{count}} semaines",
     "alreadyLoggedStreak_other": "Série : {{count}} semaines"
   },
   "profile": {
