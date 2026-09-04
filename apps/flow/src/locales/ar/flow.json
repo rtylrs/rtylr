@@ -657,7 +657,15 @@
     "makePrivateTooltip": "اجعل هذا العرض خاصًا",
     "makeSharedTooltip": "شارك هذا العرض مع الشركة",
     "makePrivateLabel": "اجعل العرض خاصًا",
-    "makeSharedLabel": "شارك العرض"
+    "makeSharedLabel": "شارك العرض",
+    "filters": {
+      "heading": "عوامل التصفية",
+      "remove": "إزالة عامل التصفية",
+      "clearAll": "مسح عوامل التصفية",
+      "assignee": "المسؤول",
+      "project": "المشروع",
+      "labels": "التسميات"
+    }
   },
   "calendar": {
     "heading": "التقويم",
