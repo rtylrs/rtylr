@@ -922,5 +922,13 @@
     "confirmRemoveStatus": "إزالة الحالة",
     "cancel": "إلغاء",
     "none": "بلا حالة مخصّصة"
+  },
+  "taskMenu": {
+    "label": "إجراءات المهمة",
+    "openTask": "فتح المهمة",
+    "copyLink": "نسخ الرابط",
+    "deleteTitle": "حذف المهمة",
+    "deleteConfirmPrefix": "هل تريد حذف",
+    "deleteConfirmSuffix": "؟ لا يمكن التراجع عن هذا الإجراء."
   }
 }
