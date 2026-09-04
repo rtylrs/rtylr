@@ -203,16 +203,16 @@ const Security: React.FC = () => {
 
   const handleMFAChallenge = async () => {
     if (challengeCode.length !== 6) {
-      toast.error(t('mfaChallenge.invalidCode'));
+      toast.error(t('common.mfaChallenge.invalidCode'));
       return;
     }
     try {
       await verifyMFA.mutateAsync(challengeCode);
       setChallengeCode('');
       markMFAVerified();
-      toast.success(t('mfaChallenge.verified'));
+      toast.success(t('common.mfaChallenge.verified'));
     } catch {
-      toast.error(t('mfaChallenge.invalidCode'));
+      toast.error(t('common.mfaChallenge.invalidCode'));
     }
   };
 
@@ -405,11 +405,13 @@ const Security: React.FC = () => {
 
         {needsMFAChallenge && (
           <SettingSection
-            title={t('mfaChallenge.title')}
-            description={t('mfaChallenge.description')}
+            title={t('common.mfaChallenge.title')}
+            description={t('common.mfaChallenge.description')}
             footer={
               <Button size="sm" onClick={handleMFAChallenge} disabled={verifyMFA.isPending}>
-                {verifyMFA.isPending ? t('mfaChallenge.verifying') : t('mfaChallenge.verify')}
+                {verifyMFA.isPending
+                  ? t('common.mfaChallenge.verifying')
+                  : t('common.mfaChallenge.verify')}
               </Button>
             }
           >
@@ -418,14 +420,14 @@ const Security: React.FC = () => {
               className="text-xs font-semibold"
               style={{ color: 'var(--dash-text-muted)' }}
             >
-              {t('mfaChallenge.codeLabel')}
+              {t('common.mfaChallenge.codeLabel')}
             </label>
             <Input
               id="mfa-challenge-code"
               type="text"
               inputMode="numeric"
               maxLength={6}
-              placeholder={t('mfaChallenge.codePlaceholder')}
+              placeholder={t('common.mfaChallenge.codePlaceholder')}
               value={challengeCode}
               onChange={(event) => setChallengeCode(event.target.value.replace(/\D/g, ''))}
               className="mt-2 font-mono text-center tracking-widest text-lg"
