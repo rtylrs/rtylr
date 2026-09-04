@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import FlowLayout from './FlowLayout';
 import { useFlowStore } from '../shared/stores/flowStore';
 
@@ -97,15 +97,19 @@ vi.mock('@voxire/ui', () => ({
   },
 }));
 
+// caretState.isOpen is mutable so a test can assert the panel is mounted only
+// while open, and CaretPanel renders a textarea because the defect was Caret's
+// composer holding keyboard focus while the panel was closed.
+const caretState = vi.hoisted(() => ({ isOpen: false }));
 vi.mock('@voxire/caret', () => ({
   buildCaretRouteContext: () => ({}),
-  CaretPanel: () => null,
+  CaretPanel: () => <textarea aria-label="Ask a question about this page" />,
   CaretButton: ({ className }: { className?: string }) => (
     <button type="button" className={className}>
       Caret
     </button>
   ),
-  useCaretStore: () => ({ isOpen: false }),
+  useCaretStore: () => caretState,
 }));
 
 // useForesightLinks is stubbed because it prefetches routes; useClickOutside is
@@ -309,5 +313,52 @@ describe('FlowLayout appearance wiring', () => {
   it('still supplies the provider an accent at all', () => {
     renderLayout();
     expect(providerProps.workspaceAccent).toBeTruthy();
+  });
+});
+
+describe('FlowLayout Caret panel mounting (#1043)', () => {
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  afterEach(() => {
+    caretState.isOpen = false;
+  });
+
+  it('does not mount the composer while the panel is closed', () => {
+    caretState.isOpen = false;
+
+    renderLayout();
+
+    // The panel used to render at width 0 with overflow hidden, so this
+    // textarea existed, autofocused, and swallowed every single-key shortcut.
+    expect(screen.queryByRole('textbox', { name: /Ask a question/i })).not.toBeInTheDocument();
+  });
+
+  it('leaves nothing focusable from the closed panel', () => {
+    caretState.isOpen = false;
+
+    const { container } = renderLayout();
+
+    expect(container.querySelector('textarea')).toBeNull();
+  });
+
+  it('mounts the composer once the panel is open', () => {
+    caretState.isOpen = true;
+
+    renderLayout();
+
+    expect(screen.getByRole('textbox', { name: /Ask a question/i })).toBeInTheDocument();
+  });
+
+  it('keeps the Caret trigger available whether the panel is open or closed', () => {
+    caretState.isOpen = false;
+
+    renderLayout();
+
+    expect(screen.getAllByRole('button', { name: 'Caret' }).length).toBeGreaterThan(0);
   });
 });

@@ -351,7 +351,11 @@ const legacyProjectSubRoute = createRoute({
 
 const catchAllRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '*',
+  // `$` is TanStack Router v1's splat token, not `*`. With `*` the route was
+  // registered but could never match, so an unknown URL fell through to the
+  // router's built-in not-found instead of redirecting. The legacy project
+  // route above already uses the working form.
+  path: '$',
   component: () => <Navigate to="/my-issues" replace />,
 });
 

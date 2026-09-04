@@ -21,6 +21,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
+import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
 import { useFlowStore } from '../stores/flowStore';
 import { useTasks } from '../../features/tasks/useTasks';
 import { useProjects } from '../../features/projects/useProjects';
@@ -40,6 +41,7 @@ interface CommandItem {
 export const CommandBar: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen } = useFlowStore();
   const { data: apiTasks = [] } = useTasks({});
   const { data: apiProjects = [] } = useProjects();
@@ -73,6 +75,12 @@ export const CommandBar: React.FC = () => {
   }, [commandBarOpen]);
 
   const items = useMemo<CommandItem[]>(() => {
+    // These four are the destinations router.tsx wraps in
+    // AppFlagGuard(APP_FLOW_PREVIEW_ROUTES). Offering them with the flag off
+    // walked the user into "Preview route unavailable"; the sidebar, the
+    // project view tabs, Settings and the shortcuts panel all hide them, so
+    // the command bar was the only way in.
+    const previewOnly = new Set(['nav-timeline', 'nav-roadmap', 'nav-insights', 'nav-team']);
     const navItems: CommandItem[] = [
       {
         id: 'nav-inbox',
@@ -203,8 +211,11 @@ export const CommandBar: React.FC = () => {
       action: () => navigate({ to: '/p/$projectId', params: { projectId: p.id } }),
       group: 'project',
     }));
-    return [...actionItems, ...navItems, ...projectItems, ...taskItems];
-  }, [tasks, projects, navigate, setQuickCreateOpen, query, searchResults, t]);
+    const reachableNavItems = showPreviewRoutes
+      ? navItems
+      : navItems.filter((item) => !previewOnly.has(item.id));
+    return [...actionItems, ...reachableNavItems, ...projectItems, ...taskItems];
+  }, [tasks, projects, navigate, setQuickCreateOpen, query, searchResults, t, showPreviewRoutes]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;
