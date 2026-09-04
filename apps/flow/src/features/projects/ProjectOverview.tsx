@@ -21,10 +21,11 @@ import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 
-const HEALTH: Record<string, { color: string; label: string }> = {
-  on_track: { color: '#22c55e', label: 'On track' },
-  at_risk: { color: '#f59e0b', label: 'At risk' },
-  off_track: { color: '#ef4444', label: 'Off track' },
+// labelKey, not label: module scope again, so it cannot call `t` itself.
+const HEALTH: Record<string, { color: string; labelKey: string }> = {
+  on_track: { color: '#22c55e', labelKey: 'flow.projectOverview.health.onTrack' },
+  at_risk: { color: '#f59e0b', labelKey: 'flow.milestones.status.atRisk' },
+  off_track: { color: '#ef4444', labelKey: 'flow.projectOverview.health.offTrack' },
 };
 
 const ProjectOverview: React.FC = () => {
@@ -40,14 +41,14 @@ const ProjectOverview: React.FC = () => {
   if (isLoading)
     return (
       <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
-        Loading project...
+        {t('flow.project.loading')}
       </div>
     );
 
   if (!data || !project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Project not found.
+        {t('flow.project.notFound')}
       </div>
     );
   }
@@ -79,7 +80,7 @@ const ProjectOverview: React.FC = () => {
               border: `1px solid ${health.color}33`,
             }}
           >
-            {health.label}
+            {t(health.labelKey)}
           </span>
         }
       />
@@ -108,7 +109,7 @@ const ProjectOverview: React.FC = () => {
               className="text-[12px] font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              Progress
+              {t('flow.milestones.progress')}
             </h3>
             <span className="text-[24px] font-bold" style={{ color: 'var(--flow-text)' }}>
               {stats.progress}%
@@ -124,15 +125,30 @@ const ProjectOverview: React.FC = () => {
             />
           </div>
           <div className="grid grid-cols-4 gap-3">
-            <StatCard icon={CheckCircle2} label="Done" value={stats.done} color="#22c55e" />
+            <StatCard
+              icon={CheckCircle2}
+              label={t('flow.taskDetail.done')}
+              value={stats.done}
+              color="#22c55e"
+            />
             <StatCard
               icon={Activity}
-              label="In progress"
+              label={t('flow.taskDetail.inProgress')}
               value={stats.inProgress}
               color="#3b82f6"
             />
-            <StatCard icon={Clock} label="Total" value={stats.total} color="var(--accent)" />
-            <StatCard icon={AlertCircle} label="Overdue" value={stats.overdue} color="#ef4444" />
+            <StatCard
+              icon={Clock}
+              label={t('flow.projectOverview.total')}
+              value={stats.total}
+              color="var(--accent)"
+            />
+            <StatCard
+              icon={AlertCircle}
+              label={t('common.dashboard.stats.overdue')}
+              value={stats.overdue}
+              color="#ef4444"
+            />
           </div>
         </motion.section>
 
@@ -146,7 +162,7 @@ const ProjectOverview: React.FC = () => {
               className="text-[12px] font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              Milestones
+              {t('flow.shell.milestones')}
             </h3>
             <MilestoneIcon size={12} style={{ color: 'var(--flow-text-dim)' }} />
           </div>
@@ -197,7 +213,7 @@ const ProjectOverview: React.FC = () => {
               className="text-[12px] font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              Team
+              {t('flow.shell.team')}
             </h3>
             <Users size={12} style={{ color: 'var(--flow-text-dim)' }} />
           </div>
@@ -222,7 +238,7 @@ const ProjectOverview: React.FC = () => {
             className="text-[12px] font-semibold uppercase tracking-wider mb-3"
             style={{ color: 'var(--flow-text-muted)' }}
           >
-            Recent comments
+            {t('flow.projectOverview.recentComments')}
           </h3>
           {recentComments.length === 0 ? (
             <EmptyState
