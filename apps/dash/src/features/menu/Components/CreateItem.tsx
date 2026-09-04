@@ -44,10 +44,10 @@ const CreateItem: React.FC = () => {
       setName(details.name || found.name || '');
       setDescription(details.description || '');
       if (details.price !== undefined) {
-        setPrice((Number(details.price) / 100).toString());
+        setPrice(String(Number(details.price)));
       }
       if (details.salePrice) {
-        setSalePrice((Number(details.salePrice) / 100).toString());
+        setSalePrice(String(Number(details.salePrice)));
       }
       if (details.isAvailable !== undefined) setIsAvailable(Boolean(details.isAvailable));
       if (details.ingredients) setIngredients(details.ingredients);
@@ -83,8 +83,12 @@ const CreateItem: React.FC = () => {
     const item = {
       name: trimmedName,
       description,
-      price: numericPrice * 100,
-      salePrice: salePrice ? Number(salePrice) * 100 : 0,
+      // Major units, matching pos_menu_items.sale_price DECIMAL(10,2) and
+      // what useMenu's toStoreItems reads back. Scaling by 100 here meant the
+      // form seeded itself by dividing by 100 to compensate, so the field
+      // showed 0.125 for a $12.50 item.
+      price: numericPrice,
+      salePrice: salePrice ? Number(salePrice) : 0,
       coverImage,
       images,
       ingredients,
