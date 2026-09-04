@@ -420,7 +420,10 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		return 0, "", err
 	}
 
-	if err := s.repo.EnsureEmployeeForUser(ctx, ownerID, userID); err != nil {
+	// businessID, not the invitee's own users.business_id, which is still NULL
+	// at this point and made every invited member's employee record land with
+	// business_id = 0.
+	if err := s.repo.EnsureEmployeeForUser(ctx, ownerID, businessID, userID); err != nil {
 		logger.Ctx(ctx).Error("failed to create employee record for invited user",
 			logger.Int("owner_id", int(ownerID)), logger.Int("user_id", int(userID)), logger.Error(err))
 	}

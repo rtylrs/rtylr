@@ -225,7 +225,7 @@ func (s *Service) CreateBusinessForUser(ctx context.Context, userID int64, busin
 		return err
 	}
 
-	if err := s.repo.EnsureEmployeeForUser(ctx, userID, userID); err != nil {
+	if err := s.repo.EnsureEmployeeForUser(ctx, userID, businessID, userID); err != nil {
 		logger.Ctx(ctx).Error("failed to create employee record for business owner",
 			logger.Int("owner_id", int(userID)), logger.Error(err))
 	}

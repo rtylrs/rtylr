@@ -182,7 +182,7 @@ func (s *Service) linkGoogleUser(
 				logger.Error(setErr),
 				logger.Any("user_id", userID),
 			)
-		} else if empErr := s.repo.EnsureEmployeeForUser(ctx, userID, userID); empErr != nil {
+		} else if empErr := s.repo.EnsureEmployeeForUser(ctx, userID, bizID, userID); empErr != nil {
 			logger.Ctx(ctx).Warn("failed to create employee record for google-signup owner",
 				logger.Error(empErr),
 				logger.Any("user_id", userID),

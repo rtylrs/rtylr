@@ -197,8 +197,13 @@ VALUES (?, ?, ?, ?, ?, ?);
 
 -- cross-schema write to hr_core — every invited user is also an hr_employees row
 -- name: EnsureEmployeeForUser :exec
+-- business_id is passed in rather than read from the invited user's own row.
+-- users.business_id is still NULL at invite time, so COALESCE(u.business_id, 0)
+-- collapsed to 0 and every invited member's employee record was scoped to no
+-- business at all. The owner's row looked correct only because
+-- CreateBusinessForUser calls SetUserBusinessID before this runs.
 INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
-SELECT ?, COALESCE(u.business_id, 0), u.id,
+SELECT ?, ?, u.id,
        COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
        CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
        u.email, 'active'

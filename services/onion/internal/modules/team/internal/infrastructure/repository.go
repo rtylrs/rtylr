@@ -708,10 +708,15 @@ func (r *Repository) CreateUser(ctx context.Context, email, username, passwordHa
 	return res.LastInsertId()
 }
 
-func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID int64) error {
+// EnsureEmployeeForUser creates the HR employee record for a user. The business
+// is passed in rather than read from the user's own row: at invite time
+// users.business_id is still NULL, so reading it there scoped the record to no
+// business at all.
+func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error {
 	return r.queries.EnsureEmployeeForUser(ctx, sqlc.EnsureEmployeeForUserParams{
-		OwnerID: ownerID,
-		ID:      userID,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		ID:         userID,
 	})
 }
 
