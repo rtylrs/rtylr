@@ -44,26 +44,30 @@ import type { Task } from '../../shared/stores/flowStore';
 /** Re-exported name kept local for readability; the type lives in boardUtils. */
 type GroupKey = BoardGroupKey;
 
-const GROUP_OPTIONS: { key: GroupKey; label: string }[] = [
-  { key: 'none', label: 'None' },
-  { key: 'assignee', label: 'Assignee' },
-  { key: 'priority', label: 'Priority' },
-  { key: 'due', label: 'Due window' },
+// labelKey, not label: module scope, so it cannot call `t` itself.
+const GROUP_OPTIONS: { key: GroupKey; labelKey: string }[] = [
+  { key: 'none', labelKey: 'flow.board.groupBy.none' },
+  { key: 'assignee', labelKey: 'flow.board.groupBy.assignee' },
+  { key: 'priority', labelKey: 'flow.board.groupBy.priority' },
+  { key: 'due', labelKey: 'flow.board.groupBy.due' },
 ];
 
 const PRIORITY_ORDER: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
 
-const PRIORITY_LABEL: Record<Task['priority'], string> = {
-  urgent: 'Urgent',
-  high: 'High',
-  medium: 'Medium',
-  low: 'Low',
-  no_priority: 'No priority',
+const PRIORITY_LABEL_KEY: Record<Task['priority'], string> = {
+  urgent: 'priority.urgent',
+  high: 'priority.high',
+  medium: 'priority.medium',
+  low: 'priority.low',
+  no_priority: 'priority.noPriority',
 };
 
 interface Lane {
   key: string;
-  label: string;
+  /** A person's name, for assignee lanes. Never translated. */
+  label?: string;
+  /** A translation key, for priority and due-window lanes. */
+  labelKey?: string;
   tasks: Task[];
 }
 
@@ -73,7 +77,7 @@ interface Lane {
  * columns - this is the "swimlane" effect.
  */
 function buildLanes(
-  allLaneKeys: { key: string; label: string }[],
+  allLaneKeys: { key: string; label?: string; labelKey?: string }[],
   columnTasks: Task[],
   groupBy: GroupKey
 ): Lane[] {
@@ -87,9 +91,10 @@ function buildLanes(
     bucket.push(t);
     byKey.set(k, bucket);
   }
-  return allLaneKeys.map(({ key, label }) => ({
+  return allLaneKeys.map(({ key, label, labelKey }) => ({
     key,
     label,
+    labelKey,
     tasks: byKey.get(key) ?? [],
   }));
 }
@@ -116,25 +121,31 @@ function laneKeyFor(t: Task, groupBy: GroupKey): string {
  * column shows the same swimlanes in the same order. Without this, empty
  * columns would skip lanes and rows would misalign.
  */
-function buildLaneIndex(tasks: Task[], groupBy: GroupKey): { key: string; label: string }[] {
+function buildLaneIndex(
+  tasks: Task[],
+  groupBy: GroupKey
+): { key: string; label?: string; labelKey?: string }[] {
   if (groupBy === 'none') return [{ key: '_all', label: '' }];
 
   if (groupBy === 'priority') {
-    return PRIORITY_ORDER.map((p) => ({ key: p, label: PRIORITY_LABEL[p] }));
+    return PRIORITY_ORDER.map((p) => ({ key: p, labelKey: PRIORITY_LABEL_KEY[p] }));
   }
 
   if (groupBy === 'due') {
+    // The keys stay as they are: they are lane identities used for bucketing,
+    // not text, and translating them would break the grouping.
     return [
-      { key: 'Overdue', label: 'Overdue' },
-      { key: 'Today', label: 'Today' },
-      { key: 'This week', label: 'This week' },
-      { key: 'This month', label: 'This month' },
-      { key: 'Later', label: 'Later' },
-      { key: 'No due date', label: 'No due date' },
+      { key: 'Overdue', labelKey: 'flow.board.dueLane.overdue' },
+      { key: 'Today', labelKey: 'flow.board.dueLane.today' },
+      { key: 'This week', labelKey: 'flow.board.dueLane.thisWeek' },
+      { key: 'This month', labelKey: 'flow.board.dueLane.thisMonth' },
+      { key: 'Later', labelKey: 'flow.board.dueLane.later' },
+      { key: 'No due date', labelKey: 'flow.board.dueLane.noDueDate' },
     ];
   }
 
-  // assignee - build from data, keep stable order by first-seen.
+  // assignee - build from data, keep stable order by first-seen. These labels
+  // are people's names, so they carry `label` and are never translated.
   const seen = new Map<string, string>();
   for (const t of tasks) {
     const k = laneKeyFor(t, groupBy);
@@ -237,7 +248,7 @@ const ProjectBoard: React.FC = () => {
   if (projectLoading && !project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Loading project…
+        {t('flow.project.loading')}
       </div>
     );
   }
@@ -245,7 +256,7 @@ const ProjectBoard: React.FC = () => {
   if (!project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Project not found.
+        {t('flow.project.notFound')}
       </div>
     );
   }
@@ -470,7 +481,7 @@ const ProjectBoard: React.FC = () => {
                     className="h-6 px-2.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                     style={{ background: 'var(--accent)', color: '#ffffff' }}
                   >
-                    Add
+                    {t('flow.taskDetail.add')}
                   </button>
                   <button
                     type="button"
@@ -478,7 +489,7 @@ const ProjectBoard: React.FC = () => {
                     className="h-6 px-2 rounded-sm text-[11px] hover:bg-[var(--flow-hover)]"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 </div>
               </div>
@@ -493,7 +504,7 @@ const ProjectBoard: React.FC = () => {
                 }}
               >
                 <Plus size={12} />
-                Add column
+                {t('flow.board.addColumn')}
               </button>
             )}
           </div>
@@ -723,7 +734,7 @@ const KanbanColumn: React.FC<{
                 className="flex items-center gap-1.5 px-1 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
-                <span className="truncate">{lane.label}</span>
+                <span className="truncate">{lane.labelKey ? t(lane.labelKey) : lane.label}</span>
                 <span style={{ color: 'var(--flow-border)' }}>·</span>
                 <span className="tabular-nums">{lane.tasks.length}</span>
               </div>
@@ -764,6 +775,7 @@ const GroupByPicker: React.FC<{
   groupBy: GroupKey;
   onChange: (k: GroupKey) => void;
 }> = ({ groupBy, onChange }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -784,8 +796,8 @@ const GroupByPicker: React.FC<{
           color: 'var(--flow-text-muted)',
         }}
       >
-        <span style={{ color: 'var(--flow-text-dim)' }}>Group:</span>
-        <span style={{ color: 'var(--flow-text)' }}>{current.label}</span>
+        <span style={{ color: 'var(--flow-text-dim)' }}>{t('flow.board.groupByLabel')}</span>
+        <span style={{ color: 'var(--flow-text)' }}>{t(current.labelKey)}</span>
         <ChevronDown size={11} />
       </button>
       {open && (
@@ -810,7 +822,7 @@ const GroupByPicker: React.FC<{
                 fontWeight: o.key === groupBy ? 600 : 400,
               }}
             >
-              {o.label}
+              {t(o.labelKey)}
             </button>
           ))}
         </div>
