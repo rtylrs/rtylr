@@ -9,11 +9,21 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTasks } from '../tasks/useTasks';
 import TaskRow from '../../shared/components/TaskRow';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import { TaskRowSkeleton } from '../../shared/components/Skeleton';
 
 const Triage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: apiTasks } = useTasks({});
+  const tasksQuery = useTasks({});
+  const { data: apiTasks, isLoading } = tasksQuery;
+  const loadFailed = hasQueryFailed(tasksQuery);
+  // `apiTasks` is undefined until the query resolves, which made `needsTriage`
+  // empty and the screen say "Inbox zero" and "0 tasks need attention" before
+  // anything had been fetched. A confident sentence should only come from a
+  // query that ran, so the count and the empty state both wait for it.
+  const resolved = !isLoading && !loadFailed;
   const tasks: Task[] = (apiTasks ?? []).map(apiTaskToTask);
   const { selectedTaskIds } = useFlowStore();
 
@@ -34,12 +44,27 @@ const Triage: React.FC = () => {
         <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('flow.shell.triage')}
         </h1>
-        <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
-          {t('flow.triage.subtitle', { count: needsTriage.length })}
+        {resolved && (
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
+            {t('flow.triage.subtitle', { count: needsTriage.length })}
+          </p>
+        )}
+        {/* 13px and plain words. This was 12px, the smallest text on the
+            screen, and used an arrow notation used nowhere else in Flow. */}
+        <p className="text-body mt-1" style={{ color: 'var(--flow-text-muted)' }}>
+          {t('flow.triage.explanation')}
         </p>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {needsTriage.length === 0 ? (
+        {isLoading ? (
+          <div className="px-6 py-4">
+            <TaskRowSkeleton />
+            <TaskRowSkeleton />
+            <TaskRowSkeleton />
+          </div>
+        ) : loadFailed ? (
+          <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
+        ) : needsTriage.length === 0 ? (
           <EmptyState
             icon={Eye}
             title={t('flow.triage.emptyTitle')}
