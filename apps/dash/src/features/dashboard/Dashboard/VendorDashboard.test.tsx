@@ -107,3 +107,73 @@ describe('VendorDashboard', () => {
     expect(screen.queryByTestId('grid-layout')).toBeNull();
   });
 });
+
+describe('StaffDashboard app links (#1069)', () => {
+  const hrefs: string[] = [];
+
+  beforeEach(() => {
+    hrefs.length = 0;
+    useUserStore.setState({ user: null });
+    // window.location.href is assigned directly; replacing the object makes the
+    // assignment observable and stops happy-dom attempting a navigation.
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        hostname: 'localhost',
+        get href(): string {
+          return 'http://localhost:5175/';
+        },
+        set href(value: string) {
+          hrefs.push(value);
+        },
+      },
+    });
+  });
+
+  const asStaffWith = (apps: string[]): void => {
+    useUserStore.setState({ user: { id: 2, role: 'staff', apps } });
+  };
+
+  it('redirects a single-app staff member to a resolved URL, not to rtylr.com', () => {
+    asStaffWith(['flow']);
+
+    render(<VendorDashboard />);
+
+    expect(hrefs).toHaveLength(1);
+    expect(hrefs[0]).not.toContain('rtylr.com');
+    // APP_URLS is localhost-aware and window.location.hostname is localhost here.
+    expect(hrefs[0]).toContain('localhost');
+  });
+
+  it('links each app through the resolver rather than a built hostname', () => {
+    asStaffWith(['crm', 'hr']);
+
+    render(<VendorDashboard />);
+
+    const links = screen.getAllByRole('link');
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      expect(link.getAttribute('href')).not.toContain('rtylr.com');
+      expect(link.getAttribute('href')).not.toBe('undefined');
+    }
+  });
+
+  it('offers nothing, and redirects nowhere, for an app id it cannot resolve', () => {
+    // APP_URLS has no entry for this, so resolving it would have produced
+    // href="undefined". Previously it produced https://not-an-app.rtylr.com.
+    asStaffWith(['not-an-app']);
+
+    render(<VendorDashboard />);
+
+    expect(hrefs).toHaveLength(0);
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+  });
+
+  it('redirects nowhere when the staff member has no apps', () => {
+    asStaffWith([]);
+
+    render(<VendorDashboard />);
+
+    expect(hrefs).toHaveLength(0);
+  });
+});
