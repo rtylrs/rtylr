@@ -351,19 +351,8 @@
     "team": {
       "section": "Team",
       "subtitle": "People who have access to this Flow workspace.",
-      "grantAccess": "Grant Flow access",
-      "grantAccessHint": "Only people who are already part of your business can be added here. Add new people from the Team page first.",
-      "teamMember": "Team member",
-      "everyoneHasAccess": "Everyone in your business already has Flow access.",
-      "selectMember": "Select a team member…",
-      "seatCostNote": "Adding this member costs {{amount}} this month ({{daysRemaining}}/{{daysInMonth}} days), then {{monthlyAmount}} from {{nextMonth}} 1st.",
-      "granting": "Granting…",
-      "grantAccessAction": "Grant access",
-      "addMember": "Add member",
       "noMembersYet": "No team members yet.",
-      "refreshCta": "Refresh",
-      "removeMemberLabel": "Remove {{name}}",
-      "gateReason": "Only workspace owners and admins can grant or remove Flow access."
+      "refreshCta": "Refresh"
     },
     "sectionNotAvailable": "This section is not yet available.",
     "notifications": {
