@@ -159,7 +159,8 @@
     "subtaskAddPlaceholder": "Add subtask…",
     "subtaskCount": "{{done}} of {{total}}",
     "removeAttachmentLabel": "Remove attachment",
-    "leaveOverlap": "{count} approved leave window(s) overlap this task's due date"
+    "leaveOverlap_one": "{{count}} approved leave window overlaps this task's due date",
+    "leaveOverlap_other": "{{count}} approved leave windows overlap this task's due date"
   },
   "time": {
     "heading": "Time",
