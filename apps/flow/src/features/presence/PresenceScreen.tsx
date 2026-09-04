@@ -74,10 +74,10 @@ const PresenceScreen = (): React.JSX.Element => {
         {!isLoading && !isError && data && data.presence.length > 0 && (
           <ul className="space-y-1.5">
             {data.presence.map((entry: PresenceEntry) => {
-              const fullName = `${entry.first_name ?? ''} ${entry.last_name ?? ''}`.trim();
+              const fullName = `${entry.firstName ?? ''} ${entry.lastName ?? ''}`.trim();
               return (
                 <li
-                  key={entry.employee_id}
+                  key={entry.employeeId}
                   className="flex items-center gap-3 rounded-md p-2"
                   style={{ background: 'var(--flow-hover)' }}
                 >
