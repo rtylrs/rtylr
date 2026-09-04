@@ -760,7 +760,13 @@
     "noTasks": "لا توجد مهام",
     "quickAddPlaceholder": "أضف مهمة شخصية واضغط Enter",
     "quickAddButton": "إضافة",
-    "quickAddNoLabelsReason": "أضف تصنيفاً في الإعدادات قبل إنشاء المهام."
+    "quickAddNoLabelsReason": "أضف تصنيفاً في الإعدادات قبل إنشاء المهام.",
+    "buckets": {
+      "recentlyAssigned": "المُسندة حديثًا",
+      "today": "اليوم",
+      "upcoming": "قادمة",
+      "later": "لاحقًا"
+    }
   },
   "commandBar": {
     "goToInbox": "الذهاب إلى صندوق الوارد",
