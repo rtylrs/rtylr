@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { QRCode } from 'react-qrcode-logo';
@@ -110,6 +110,24 @@ const Security: React.FC = () => {
   } | null>(null);
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [copiedSecret, setCopiedSecret] = useState(false);
+  const copyResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (copyResetTimer.current) clearTimeout(copyResetTimer.current);
+    };
+  }, []);
+
+  const handleCopySecret = async () => {
+    if (!enrollment?.secret) return;
+    try {
+      await navigator.clipboard.writeText(enrollment.secret);
+      setCopiedSecret(true);
+      if (copyResetTimer.current) clearTimeout(copyResetTimer.current);
+      copyResetTimer.current = setTimeout(() => setCopiedSecret(false), 2000);
+    } catch {
+      toast.error('Failed to copy secret to clipboard');
+    }
+  };
   const mfaEnabled = data?.mfaEnrolled || data?.twoFactorEnabled;
   const needsMFAChallenge =
     data?.mfaRequired && data.mfaEnrolled && currentUser?.provisioningStatus?.mfaVerified !== true;
@@ -320,11 +338,7 @@ const Security: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        if (enrollment?.secret) navigator.clipboard.writeText(enrollment.secret);
-                        setCopiedSecret(true);
-                        setTimeout(() => setCopiedSecret(false), 2000);
-                      }}
+                      onClick={() => void handleCopySecret()}
                     >
                       {copiedSecret ? <Check size={14} /> : <Copy size={14} />}
                     </Button>

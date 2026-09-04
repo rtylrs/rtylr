@@ -19,9 +19,13 @@ function formatDate(iso: string): string {
 export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
   const preview = `${apiKey.keyPrefix}••••••••`;
 
-  const copy = () => {
-    navigator.clipboard.writeText(preview);
-    toast.success('Key preview copied');
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(preview);
+      toast.success('Key preview copied');
+    } catch {
+      toast.error('Failed to copy key to clipboard');
+    }
   };
 
   return (
@@ -51,7 +55,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
             type="button"
             className="flex items-center gap-1 text-[11px] transition-opacity hover:opacity-70"
             style={{ color: 'var(--dash-text-dim)' }}
-            onClick={copy}
+            onClick={() => void copy()}
           >
             <Copy size={10} /> Copy
           </button>
