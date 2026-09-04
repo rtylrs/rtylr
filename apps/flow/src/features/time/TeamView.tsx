@@ -9,7 +9,7 @@ import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { todayLocalDate, useTeamWorkDays, type WorkDay } from './useWorkDay';
 
-const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
+const labelClass = 'mb-1 block text-meta font-semibold uppercase tracking-wider';
 
 /**
  * The team view: one row per workspace member, for the day selected.
@@ -50,7 +50,7 @@ const TeamView = (): React.JSX.Element => {
       <HelmetContainer title={`${t('flow.time.team')} · Flow`} />
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <header className="mb-6">
-          <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-screen font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.team')}
           </h1>
           <label htmlFor="team-view-date" className="sr-only">
@@ -71,9 +71,9 @@ const TeamView = (): React.JSX.Element => {
         </header>
 
         {isError ? (
-          <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-[13px]" />
+          <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-body" />
         ) : membersLoading || isLoading ? (
-          <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
           </p>
         ) : (members ?? []).length === 0 ? (
@@ -98,7 +98,7 @@ const TeamView = (): React.JSX.Element => {
                   className="flex items-center justify-between gap-3 rounded-md p-3"
                   style={{ background: 'var(--flow-hover)' }}
                 >
-                  <span className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                  <span className="text-body font-medium" style={{ color: 'var(--flow-text)' }}>
                     {member.name}
                   </span>
                   {day ? (
@@ -116,7 +116,7 @@ const TeamView = (): React.JSX.Element => {
                       />
                     </div>
                   ) : (
-                    <span className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+                    <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                       {t('flow.time.teamNotStarted')}
                     </span>
                   )}
@@ -144,7 +144,7 @@ const Figure = ({
       {label}
     </span>
     <span
-      className="text-[13px] font-semibold tabular-nums"
+      className="text-body font-semibold tabular-nums"
       style={{ color: tone ?? 'var(--flow-text)' }}
     >
       {value}

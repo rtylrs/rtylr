@@ -21,17 +21,17 @@ export const WorkloadBar: React.FC<WorkloadBarProps> = ({
   return (
     <div className="flex items-center gap-3 py-2">
       <span
-        className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+        className="h-7 w-7 rounded-full flex items-center justify-center text-meta font-bold shrink-0"
         style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
       >
         {initials}
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
+          <span className="text-meta font-medium" style={{ color: 'var(--flow-text)' }}>
             {name}
           </span>
-          <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {capacity === undefined ? `${assigned}h` : `${assigned}h / ${capacity}h`}
           </span>
         </div>

@@ -25,10 +25,10 @@ const Roadmap: React.FC = () => {
       <HelmetContainer title={`${t('flow.shell.roadmap')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: t('flow.shell.roadmap') }]} />
-        <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
+        <h1 className="text-title font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
           {t('flow.shell.roadmap')}
         </h1>
-        <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
           {t('flow.roadmap.subtitle')}
         </p>
       </div>
@@ -52,17 +52,17 @@ const Roadmap: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <span
-                    className="h-8 w-8 rounded-md flex items-center justify-center font-bold text-[11px]"
+                    className="h-8 w-8 rounded-md flex items-center justify-center font-bold text-meta"
                     style={{ background: `${p.color}22`, color: p.color }}
                   >
                     {p.name.charAt(0)}
                   </span>
                   <div>
-                    <p className="text-[14px] font-bold" style={{ color: 'var(--flow-text)' }}>
+                    <p className="text-section font-bold" style={{ color: 'var(--flow-text)' }}>
                       {p.name}
                     </p>
                     {displayDescription(p.description) && (
-                      <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                      <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                         {displayDescription(p.description)}
                       </p>
                     )}
@@ -75,13 +75,13 @@ const Roadmap: React.FC = () => {
                 />
               </div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.roadmap.taskCount', {
                     done: p.doneCount,
                     total: p.tasks.length || p.taskCount,
                   })}
                 </span>
-                <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                <span className="text-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {p.progress}%
                 </span>
               </div>
@@ -95,7 +95,7 @@ const Roadmap: React.FC = () => {
                 />
               </div>
               <div
-                className="flex items-center justify-between text-[10px]"
+                className="flex items-center justify-between text-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <span>

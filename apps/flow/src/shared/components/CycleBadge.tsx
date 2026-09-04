@@ -24,7 +24,7 @@ export const CycleBadge: React.FC<CycleBadgeProps> = ({ cycle, compact }) => {
         border: `1px solid ${color}33`,
         color,
         padding: compact ? '1px 6px' : '2px 10px',
-        fontSize: compact ? 10 : 11,
+        fontSize: 'var(--text-meta)',
       }}
     >
       <Timer size={compact ? 10 : 12} />

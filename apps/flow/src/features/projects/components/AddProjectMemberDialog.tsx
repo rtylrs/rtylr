@@ -81,7 +81,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
                 handleInvite();
               }
             }}
-            className="flex-1 rounded-sm px-2 py-1.5 text-[16px] md:text-[11px] outline-none"
+            className="flex-1 rounded-sm px-2 py-1.5 text-title md:text-meta outline-none"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border)',
@@ -92,7 +92,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
             value={role}
             onChange={(e) => setRole(e.target.value as 'admin' | 'member' | 'viewer')}
             aria-label={t('flow.projectSettings.roleLabel')}
-            className="rounded-sm px-2 py-1.5 text-[16px] md:text-[11px] outline-none"
+            className="rounded-sm px-2 py-1.5 text-title md:text-meta outline-none"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border)',
@@ -109,7 +109,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
             type="button"
             onClick={handleInvite}
             disabled={inviteMember.isPending}
-            className="min-h-[44px] px-3 rounded-sm text-[11px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
+            className="min-h-[44px] px-3 rounded-sm text-meta font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             {t('flow.projectSettings.invite')}

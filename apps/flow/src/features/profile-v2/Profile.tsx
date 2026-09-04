@@ -82,7 +82,7 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
             {data.initials || '?'}
           </div>
           <div>
-            <h1 className="text-[18px] font-bold" style={{ color: 'var(--flow-text)' }}>
+            <h1 className="text-title font-bold" style={{ color: 'var(--flow-text)' }}>
               {data.name}
             </h1>
             {data.roleTitle ? (

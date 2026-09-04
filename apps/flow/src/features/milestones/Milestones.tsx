@@ -60,17 +60,17 @@ const Milestones: React.FC = () => {
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <div>
-            <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+            <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
               {t('flow.milestones.heading')}
             </h1>
-            <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+            <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
               {t('flow.milestones.trackedCount', { count: 0 })}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
             <Plus size={11} /> {t('flow.milestones.newMilestone')}
@@ -99,17 +99,17 @@ const Milestones: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.milestones.heading')}
           </h1>
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {t('flow.milestones.trackedCount', { count: milestones.length })}
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Plus size={11} /> {t('flow.milestones.newMilestone')}
@@ -124,7 +124,7 @@ const Milestones: React.FC = () => {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('flow.milestones.namePlaceholder')}
-            className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
+            className="w-full rounded-md px-3 py-2 text-meta outline-none"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border)',
@@ -133,13 +133,13 @@ const Milestones: React.FC = () => {
             autoFocus
           />
           <label className="block">
-            <span className="mb-1 block text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <span className="mb-1 block text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.milestones.project')}
             </span>
             <select
               value={selectedProjectId}
               onChange={(e) => setNewProjectId(e.target.value)}
-              className="w-full rounded-md px-3 py-2 text-[16px] outline-none sm:text-[12px]"
+              className="w-full rounded-md px-3 py-2 text-title outline-none sm:text-meta"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border)',
@@ -167,7 +167,7 @@ const Milestones: React.FC = () => {
               previousMonth: t('common.datePicker.previousMonth'),
               nextMonth: t('common.datePicker.nextMonth'),
             }}
-            className="text-[12px]"
+            className="text-meta"
           />
           <div className="flex gap-2">
             <button
@@ -197,7 +197,7 @@ const Milestones: React.FC = () => {
               disabled={
                 createMilestone.isPending || !newName.trim() || !newDate || !selectedProjectId
               }
-              className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-50"
+              className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               {createMilestone.isPending
@@ -211,7 +211,7 @@ const Milestones: React.FC = () => {
                 setNewName('');
                 setNewDate('');
               }}
-              className="px-3 py-1.5 rounded-sm text-[11px]"
+              className="px-3 py-1.5 rounded-sm text-meta"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.milestones.cancel')}
@@ -246,31 +246,31 @@ const Milestones: React.FC = () => {
                     />
                   </span>
                   <div>
-                    <p className="text-[13px] font-bold" style={{ color: 'var(--flow-text)' }}>
+                    <p className="text-body font-bold" style={{ color: 'var(--flow-text)' }}>
                       {m.name}
                     </p>
-                    <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+                    <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                       {m.project?.name}
                     </p>
                   </div>
                 </div>
                 <span
-                  className="text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize"
+                  className="text-meta px-2 py-0.5 rounded-full font-semibold capitalize"
                   style={{ background: style.bg, color: style.color }}
                 >
                   {t(`flow.milestones.status.${STATUS_LABEL_KEYS[m.status]}`)}
                 </span>
               </div>
               {m.description && (
-                <p className="text-[12px] mb-3" style={{ color: 'var(--flow-text-muted)' }}>
+                <p className="text-meta mb-3" style={{ color: 'var(--flow-text-muted)' }}>
                   {m.description}
                 </p>
               )}
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+                <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                   {t('flow.milestones.progress')}
                 </span>
-                <span className="text-[11px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                <span className="text-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {m.computedProgress}%
                 </span>
               </div>
@@ -284,7 +284,7 @@ const Milestones: React.FC = () => {
                 />
               </div>
               <div
-                className="flex items-center justify-between text-[10px]"
+                className="flex items-center justify-between text-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <span>

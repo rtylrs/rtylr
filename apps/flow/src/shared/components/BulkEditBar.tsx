@@ -80,7 +80,7 @@ export const BulkEditBar: React.FC = () => {
           opacity: isPending ? 0.7 : 1,
         }}
       >
-        <span className="text-[11px] font-semibold px-2" style={{ color: 'var(--flow-text)' }}>
+        <span className="text-meta font-semibold px-2" style={{ color: 'var(--flow-text)' }}>
           {t('flow.bulkEdit.selectedCount', { count: selectedTaskIds.length })}
         </span>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
@@ -94,7 +94,7 @@ export const BulkEditBar: React.FC = () => {
               .then(() => clearSelection())
               .catch(() => toast.error(t('errors.generic')))
           }
-          className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
+          className="h-7 px-2 rounded-sm text-meta flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <Check size={11} /> {t('flow.bulkEdit.markDone')}
@@ -109,7 +109,7 @@ export const BulkEditBar: React.FC = () => {
               .then(() => clearSelection())
               .catch(() => toast.error(t('errors.generic')))
           }
-          className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
+          className="h-7 px-2 rounded-sm text-meta flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <Flag size={11} /> {t('flow.bulkEdit.setUrgent')}
@@ -124,7 +124,7 @@ export const BulkEditBar: React.FC = () => {
               .then(() => clearSelection())
               .catch(() => toast.error(t('errors.generic')))
           }
-          className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
+          className="h-7 px-2 rounded-sm text-meta flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <Archive size={11} /> {t('flow.bulkEdit.archive')}
@@ -139,7 +139,7 @@ export const BulkEditBar: React.FC = () => {
               .then(() => clearSelection())
               .catch(() => toast.error(t('errors.generic')))
           }
-          className="h-7 px-2 rounded-sm text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
+          className="h-7 px-2 rounded-sm text-meta flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: '#ef4444' }}
         >
           <Trash2 size={11} /> {t('common.delete')}

@@ -56,11 +56,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-[14px] font-semibold flex items-center gap-2">
+          <DialogTitle className="text-section font-semibold flex items-center gap-2">
             <AlertTriangle size={14} style={{ color: '#ef4444' }} />
             {title}
           </DialogTitle>
-          <DialogDescription className="text-[12px]">{description}</DialogDescription>
+          <DialogDescription className="text-meta">{description}</DialogDescription>
         </DialogHeader>
 
         {requireText ? (
@@ -76,7 +76,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             */}
             <label
               htmlFor={typedInputId}
-              className="block text-[11px] mb-1"
+              className="block text-meta mb-1"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.confirm.typeToConfirm', { word: requireText })}
@@ -88,7 +88,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
               placeholder={requireText}
-              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+              className="w-full rounded-lg px-3 py-2 text-body outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border)',
@@ -102,7 +102,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
+            className="px-3 py-1.5 rounded-lg text-meta font-medium"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {cancelLabel}
@@ -111,7 +111,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             disabled={disabled}
             onClick={onConfirm}
-            className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+            className="px-3 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40"
             style={{ background: '#ef4444', color: '#fff' }}
           >
             {pending ? t('flow.confirm.working') : confirmLabel}

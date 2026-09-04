@@ -169,7 +169,7 @@ const MoveToColumnMenu = ({
             }}
           >
             {targets.length === 0 ? (
-              <p className="px-3 py-2 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+              <p className="px-3 py-2 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                 {t('flow.board.moveNoTargets')}
               </p>
             ) : (
@@ -189,7 +189,7 @@ const MoveToColumnMenu = ({
                       onMove(target.id);
                     }}
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="flex w-full min-h-[44px] items-center gap-2 px-3 text-start text-[12px] hover:bg-[var(--flow-hover)] disabled:opacity-50"
+                    className="flex w-full min-h-[44px] items-center gap-2 px-3 text-start text-meta hover:bg-[var(--flow-hover)] disabled:opacity-50"
                     style={{ color: 'var(--flow-text)' }}
                   >
                     {isCurrent ? (

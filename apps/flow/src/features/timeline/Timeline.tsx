@@ -47,7 +47,7 @@ const Timeline: React.FC = () => {
       <HelmetContainer title={`${t('flow.shell.timeline')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: t('flow.shell.timeline') }]} />
-        <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
+        <h1 className="text-title font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
           {t('flow.shell.timeline')}
         </h1>
       </div>
@@ -62,12 +62,12 @@ const Timeline: React.FC = () => {
             }}
           >
             <div
-              className="w-[192px] shrink-0 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider"
+              className="w-[192px] shrink-0 px-4 py-2 text-meta font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-dim)', borderRight: '1px solid var(--flow-border)' }}
             >
               {t('flow.timeline.projectColumn')}
             </div>
-            <div className="flex-1 flex text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+            <div className="flex-1 flex text-meta" style={{ color: 'var(--flow-text-dim)' }}>
               {days
                 .filter((d, i) => i % 3 === 0)
                 .map((d) => (
@@ -103,7 +103,7 @@ const Timeline: React.FC = () => {
                   style={{ borderRight: '1px solid var(--flow-border)' }}
                 >
                   <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-                  <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                  <span className="text-meta font-medium" style={{ color: 'var(--flow-text)' }}>
                     {p.name}
                   </span>
                 </div>
@@ -118,7 +118,7 @@ const Timeline: React.FC = () => {
                       border: `1px solid ${p.color}66`,
                     }}
                   >
-                    <span className="text-[10px] font-semibold truncate" style={{ color: p.color }}>
+                    <span className="text-meta font-semibold truncate" style={{ color: p.color }}>
                       {p.progress}%
                     </span>
                   </div>

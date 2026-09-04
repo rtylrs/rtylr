@@ -121,7 +121,7 @@ const BoardSettingsPanel = ({
         }}
       >
         <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h2 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.board.settingsTitle')}
           </h2>
           <button
@@ -144,7 +144,7 @@ const BoardSettingsPanel = ({
 
         <section className="mb-6">
           <h3
-            className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+            className="mb-2 text-meta font-semibold uppercase tracking-wider"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.board.columns')}
@@ -175,7 +175,7 @@ const BoardSettingsPanel = ({
           </ul>
 
           {isLastColumn && (
-            <p className="mt-2 text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <p className="mt-2 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.board.lastColumnProtected')}
             </p>
           )}
@@ -193,7 +193,7 @@ const BoardSettingsPanel = ({
                   }
                 }}
                 placeholder={t('flow.board.newColumnPlaceholder')}
-                className="flow-focus min-h-[44px] rounded-sm px-2 text-[16px] sm:flex-1 md:min-h-0 md:py-1.5 md:text-[13px]"
+                className="flow-focus min-h-[44px] rounded-sm px-2 text-title sm:flex-1 md:min-h-0 md:py-1.5 md:text-body"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -203,7 +203,7 @@ const BoardSettingsPanel = ({
               <button
                 type="button"
                 onClick={addColumn}
-                className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
+                className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-body font-semibold md:min-h-0 md:py-2"
                 style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
               >
                 <Plus size={14} aria-hidden="true" />
@@ -215,7 +215,7 @@ const BoardSettingsPanel = ({
 
         <section className="mb-6">
           <h3
-            className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+            className="mb-2 text-meta font-semibold uppercase tracking-wider"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.board.promptsForHours')}
@@ -224,7 +224,7 @@ const BoardSettingsPanel = ({
           <ul className="space-y-1.5">
             {ordered.map((col) => (
               <li key={col.id} className="flex items-center justify-between gap-3">
-                <span className="truncate text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <span className="truncate text-body" style={{ color: 'var(--flow-text-muted)' }}>
                   {col.name}
                 </span>
                 <Switch
@@ -240,7 +240,7 @@ const BoardSettingsPanel = ({
 
         <section className="mb-6">
           <h3
-            className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+            className="mb-2 text-meta font-semibold uppercase tracking-wider"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.board.onTheCard')}
@@ -249,7 +249,7 @@ const BoardSettingsPanel = ({
           <ul className="space-y-1.5">
             {CARD_FIELDS.map((field) => (
               <li key={field} className="flex items-center justify-between gap-3">
-                <span className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <span className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
                   {t(`flow.board.cardField.${field}`)}
                 </span>
                 <Switch
@@ -265,7 +265,7 @@ const BoardSettingsPanel = ({
 
         <section>
           <h3
-            className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+            className="mb-2 text-meta font-semibold uppercase tracking-wider"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.board.groupByHeading')}
@@ -273,7 +273,7 @@ const BoardSettingsPanel = ({
           {/* Group-by is the one setting here that is a personal preference. The
            * copy says which is which, because one changes only your view and the
            * other changes what your team sees. */}
-          <p className="mb-2 text-[11px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="mb-2 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.board.scopeExplained')}
           </p>
           <div role="radiogroup" aria-label={t('flow.board.groupByHeading')} className="space-y-1">
@@ -284,7 +284,7 @@ const BoardSettingsPanel = ({
                 role="radio"
                 aria-checked={groupBy === key}
                 onClick={() => onGroupByChange(key)}
-                className="flow-focus flex min-h-[44px] w-full items-center gap-2 rounded-sm px-2 text-start text-[13px] md:min-h-0 md:py-1.5"
+                className="flow-focus flex min-h-[44px] w-full items-center gap-2 rounded-sm px-2 text-start text-body md:min-h-0 md:py-1.5"
                 style={{
                   background: groupBy === key ? 'var(--flow-active)' : 'transparent',
                   color: groupBy === key ? 'var(--flow-text)' : 'var(--flow-text-muted)',
@@ -353,7 +353,7 @@ const ColumnRow = ({
             }
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
           }}
-          className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm bg-transparent px-2 text-[16px] disabled:opacity-70 md:min-h-0 md:py-1 md:text-[13px]"
+          className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm bg-transparent px-2 text-title disabled:opacity-70 md:min-h-0 md:py-1 md:text-body"
           style={{ color: 'var(--flow-text)' }}
         />
 
@@ -395,7 +395,7 @@ const ColumnRow = ({
       <div className="mt-2 flex items-center gap-2">
         <label
           htmlFor={`wip-${column.id}`}
-          className="text-[10px] font-semibold uppercase tracking-wider"
+          className="text-meta font-semibold uppercase tracking-wider"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.board.wipLimit')}
@@ -407,7 +407,7 @@ const ColumnRow = ({
           value=""
           placeholder={t('flow.board.wipLimitNone')}
           aria-label={t('flow.board.wipLimitFor', { name: column.name })}
-          className="w-[80px] rounded-sm px-2 py-1 text-[13px] opacity-50"
+          className="w-[80px] rounded-sm px-2 py-1 text-body opacity-50"
           style={{
             background: 'var(--flow-input-bg)',
             border: '1px solid var(--flow-border)',
@@ -418,14 +418,14 @@ const ColumnRow = ({
 
       {pendingDelete && (
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <p className="text-[11px] leading-snug" style={{ color: 'var(--flow-text)' }}>
+          <p className="text-meta leading-snug" style={{ color: 'var(--flow-text)' }}>
             {t('flow.board.removeColumnConfirm', { name: column.name })}
           </p>
           <div className="flex gap-1.5">
             <button
               type="button"
               onClick={onConfirmDelete}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] font-semibold md:min-h-0 md:py-1"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-meta font-semibold md:min-h-0 md:py-1"
               style={{
                 background: 'var(--flow-status-rejected-bg)',
                 border: '1px solid var(--flow-status-rejected-border)',
@@ -437,7 +437,7 @@ const ColumnRow = ({
             <button
               type="button"
               onClick={onCancelDelete}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] md:min-h-0 md:py-1"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-meta md:min-h-0 md:py-1"
               style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
             >
               {t('flow.board.cancel')}

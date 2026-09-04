@@ -65,7 +65,7 @@ const ModeToggle = ({ className }: ModeToggleProps): React.JSX.Element => {
             className={cn(
               // The 44px floor is a literal so the density control cannot take
               // an interactive target below it at the compact multiplier.
-              'flow-focus flex min-h-[44px] flex-col items-center gap-1 rounded-md py-2 text-[10px] font-medium transition-colors'
+              'flow-focus flex min-h-[44px] flex-col items-center gap-1 rounded-md py-2 text-meta font-medium transition-colors'
             )}
             style={{
               background: selected ? 'var(--accent-muted)' : 'var(--flow-hover)',

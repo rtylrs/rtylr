@@ -303,11 +303,11 @@ export const CommandBar: React.FC = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('flow.commandBar.searchPlaceholder')}
-                className="flex-1 bg-transparent outline-none text-[13px]"
+                className="flex-1 bg-transparent outline-none text-body"
                 style={{ color: 'var(--flow-text)' }}
               />
               <span
-                className="text-[10px] px-1.5 py-0.5 rounded-sm font-mono"
+                className="text-meta px-1.5 py-0.5 rounded-sm font-mono"
                 style={{
                   background: 'var(--flow-hover)',
                   color: 'var(--flow-text-dim)',
@@ -321,7 +321,7 @@ export const CommandBar: React.FC = () => {
             <div className="max-h-[min(50vh,360px)] overflow-y-auto py-1 sm:max-h-[60vh]">
               {filtered.length === 0 && (
                 <div
-                  className="text-[12px] text-center py-8"
+                  className="text-meta text-center py-8"
                   style={{ color: 'var(--flow-text-dim)' }}
                 >
                   {t('flow.commandBar.noResults')}
@@ -333,7 +333,7 @@ export const CommandBar: React.FC = () => {
                 return (
                   <div key={g} className="mb-1">
                     <div
-                      className="px-3 py-1 text-[9px] font-semibold uppercase tracking-widest"
+                      className="px-3 py-1 text-meta font-semibold uppercase tracking-widest"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
                       {groupLabels[g]}
@@ -348,7 +348,7 @@ export const CommandBar: React.FC = () => {
                           key={item.id}
                           onMouseEnter={() => setSelected(idx)}
                           onClick={() => run(item)}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[12px]"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-meta"
                           style={{
                             background: active ? 'var(--flow-hover)' : 'transparent',
                             color: 'var(--flow-text)',
@@ -358,7 +358,7 @@ export const CommandBar: React.FC = () => {
                           <span className="flex-1 truncate">{item.label}</span>
                           {item.hint && (
                             <span
-                              className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm"
+                              className="text-meta font-mono px-1.5 py-0.5 rounded-sm"
                               style={{
                                 background: 'var(--flow-active)',
                                 color: 'var(--flow-text-dim)',

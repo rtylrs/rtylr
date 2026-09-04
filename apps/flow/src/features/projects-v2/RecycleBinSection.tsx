@@ -32,7 +32,7 @@ export const RecycleBinSection: React.FC = () => {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide rounded transition-colors hover:bg-[var(--flow-hover)]"
+        className="w-full flex items-center gap-2 px-3 py-1.5 text-meta font-semibold uppercase tracking-wide rounded transition-colors hover:bg-[var(--flow-hover)]"
         style={{ color: 'var(--flow-text-muted)' }}
         aria-expanded={open}
       >
@@ -40,7 +40,7 @@ export const RecycleBinSection: React.FC = () => {
         <Archive size={13} aria-hidden />
         {t('flow.bin.title')}
         <span
-          className="ml-auto rounded-full px-1.5 py-0.5 text-[10px]"
+          className="ml-auto rounded-full px-1.5 py-0.5 text-meta"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
           aria-label={`${projects.length} ${t('flow.bin.archived')}`}
         >

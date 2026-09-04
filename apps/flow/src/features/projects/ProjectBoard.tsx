@@ -361,7 +361,7 @@ const ProjectBoard: React.FC = () => {
           onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
         />
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             Loading board…
           </p>
         </div>
@@ -470,7 +470,7 @@ const ProjectBoard: React.FC = () => {
                     if (e.key === 'Escape') setAddingColumn(false);
                   }}
                   placeholder={t('flow.board.columnName')}
-                  className="w-full bg-transparent outline-none text-[12px] font-medium mb-1.5"
+                  className="w-full bg-transparent outline-none text-meta font-medium mb-1.5"
                   style={{ color: 'var(--flow-text)' }}
                 />
                 <div className="flex items-center gap-1.5">
@@ -478,7 +478,7 @@ const ProjectBoard: React.FC = () => {
                     type="button"
                     onClick={handleAddColumn}
                     disabled={!newColumnName.trim() || createColumn.isPending}
-                    className="h-6 px-2.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
+                    className="h-6 px-2.5 rounded-sm text-meta font-semibold disabled:opacity-40"
                     style={{ background: 'var(--accent)', color: '#ffffff' }}
                   >
                     {t('flow.taskDetail.add')}
@@ -486,7 +486,7 @@ const ProjectBoard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setAddingColumn(false)}
-                    className="h-6 px-2 rounded-sm text-[11px] hover:bg-[var(--flow-hover)]"
+                    className="h-6 px-2 rounded-sm text-meta hover:bg-[var(--flow-hover)]"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     {t('common.cancel')}
@@ -497,7 +497,7 @@ const ProjectBoard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setAddingColumn(true)}
-                className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
+                className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-meta transition-colors hover:bg-[var(--flow-hover)]"
                 style={{
                   color: 'var(--flow-text-dim)',
                   border: '1px dashed var(--flow-border)',
@@ -650,14 +650,14 @@ const KanbanColumn: React.FC<{
                 setEditing(false);
               }
             }}
-            className="flex-1 bg-transparent outline-none text-[12px] font-semibold min-w-0"
+            className="flex-1 bg-transparent outline-none text-meta font-semibold min-w-0"
             style={{ color: 'var(--flow-text)' }}
           />
         ) : (
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="flex-1 text-start text-[12px] font-semibold truncate hover:opacity-70 transition-opacity"
+            className="flex-1 text-start text-meta font-semibold truncate hover:opacity-70 transition-opacity"
             style={{ color: 'var(--flow-text)' }}
           >
             {col.name}
@@ -665,7 +665,7 @@ const KanbanColumn: React.FC<{
         )}
 
         <span
-          className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
+          className="text-meta px-1.5 py-0.5 rounded-full font-medium shrink-0"
           style={{ background: `${col.color}22`, color: col.color }}
         >
           {colTaskCount}
@@ -714,7 +714,7 @@ const KanbanColumn: React.FC<{
               <button
                 type="button"
                 onClick={onAddTask}
-                className="flex-1 flex items-center justify-center rounded-sm text-[11px] min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
+                className="flex-1 flex items-center justify-center rounded-sm text-meta min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
                 style={{
                   color: 'var(--flow-text-dim)',
                   border: '1px dashed var(--flow-border)',
@@ -731,7 +731,7 @@ const KanbanColumn: React.FC<{
           lanes.map((lane) => (
             <div key={lane.key} className="flex flex-col gap-1">
               <div
-                className="flex items-center gap-1.5 px-1 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                className="flex items-center gap-1.5 px-1 pt-1.5 pb-0.5 text-meta font-semibold uppercase tracking-wider"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <span className="truncate">{lane.labelKey ? t(lane.labelKey) : lane.label}</span>
@@ -751,7 +751,7 @@ const KanbanColumn: React.FC<{
                 ))}
                 {lane.tasks.length === 0 && (
                   <div
-                    className="rounded-sm text-[10px] min-h-[28px] flex items-center justify-center"
+                    className="rounded-sm text-meta min-h-[28px] flex items-center justify-center"
                     style={{
                       color: 'var(--flow-text-dim)',
                       border: '1px dashed var(--flow-border)',
@@ -789,7 +789,7 @@ const GroupByPicker: React.FC<{
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 h-7 px-2 rounded-md text-[11px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
+        className="flex items-center gap-1.5 h-7 px-2 rounded-md text-meta font-medium transition-colors hover:bg-[var(--flow-hover)]"
         style={{
           background: 'var(--flow-surface)',
           border: '1px solid var(--flow-border)',
@@ -816,7 +816,7 @@ const GroupByPicker: React.FC<{
                 onChange(o.key);
                 setOpen(false);
               }}
-              className="w-full text-start px-2.5 py-1.5 text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
+              className="w-full text-start px-2.5 py-1.5 text-meta transition-colors hover:bg-[var(--flow-hover)]"
               style={{
                 color: o.key === groupBy ? 'var(--flow-text)' : 'var(--flow-text-muted)',
                 fontWeight: o.key === groupBy ? 600 : 400,

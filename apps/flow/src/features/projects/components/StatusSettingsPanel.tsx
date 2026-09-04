@@ -193,13 +193,10 @@ const StatusSettingsPanel = ({
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+            <h2 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
               {t('flow.status.settingsTitle')}
             </h2>
-            <p
-              className="mt-1 text-[12px] leading-snug"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
+            <p className="mt-1 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.status.settingsSubtitle')}
             </p>
           </div>
@@ -221,7 +218,7 @@ const StatusSettingsPanel = ({
         </p>
 
         {ordered.length === 0 && (
-          <p className="mb-4 text-[12px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="mb-4 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.status.emptyExplainer')}
           </p>
         )}
@@ -267,7 +264,7 @@ const StatusSettingsPanel = ({
                   }
                 }}
                 placeholder={t('flow.status.newStatusPlaceholder')}
-                className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+                className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm px-2 text-title md:min-h-0 md:py-1.5 md:text-body"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -278,7 +275,7 @@ const StatusSettingsPanel = ({
                 aria-label={t('flow.status.bucketLabel')}
                 value={newBucket}
                 onChange={(e) => setNewBucket(e.target.value as Bucket)}
-                className="flow-focus min-h-[44px] rounded-sm px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+                className="flow-focus min-h-[44px] rounded-sm px-2 text-title md:min-h-0 md:py-1.5 md:text-body"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -314,7 +311,7 @@ const StatusSettingsPanel = ({
                 type="button"
                 disabled={!newName.trim() || createStatus.isPending}
                 onClick={addStatus}
-                className="flow-focus ms-auto inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
+                className="flow-focus ms-auto inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-body font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
                 style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
               >
                 <Plus size={14} aria-hidden="true" />
@@ -384,7 +381,7 @@ const StatusRow = ({
             }
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
           }}
-          className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm bg-transparent px-2 text-[16px] disabled:opacity-70 md:min-h-0 md:py-1 md:text-[13px]"
+          className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm bg-transparent px-2 text-title disabled:opacity-70 md:min-h-0 md:py-1 md:text-body"
           style={{ color: 'var(--flow-text)' }}
         />
         <select
@@ -392,7 +389,7 @@ const StatusRow = ({
           value={status.bucket}
           disabled={!canManage}
           onChange={(e) => onRebucket(status, e.target.value as Bucket)}
-          className="flow-focus min-h-[44px] rounded-sm px-1.5 text-[13px] disabled:opacity-70 md:min-h-0 md:py-1"
+          className="flow-focus min-h-[44px] rounded-sm px-1.5 text-body disabled:opacity-70 md:min-h-0 md:py-1"
           style={{
             background: 'var(--flow-input-bg)',
             border: '1px solid var(--flow-border)',
@@ -468,7 +465,7 @@ const StatusRow = ({
           ))}
         </div>
         <label
-          className="flex items-center gap-1.5 text-[11px]"
+          className="flex items-center gap-1.5 text-meta"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <input
@@ -485,14 +482,14 @@ const StatusRow = ({
 
       {pendingDelete && (
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <p className="text-[11px] leading-snug" style={{ color: 'var(--flow-text)' }}>
+          <p className="text-meta leading-snug" style={{ color: 'var(--flow-text)' }}>
             {t('flow.status.removeStatusConfirm', { name: status.name })}
           </p>
           <div className="flex gap-1.5">
             <button
               type="button"
               onClick={onConfirmDelete}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] font-semibold md:min-h-0 md:py-1"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-meta font-semibold md:min-h-0 md:py-1"
               style={{
                 background: 'var(--flow-status-rejected-bg)',
                 border: '1px solid var(--flow-status-rejected-border)',
@@ -504,7 +501,7 @@ const StatusRow = ({
             <button
               type="button"
               onClick={onCancelDelete}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] md:min-h-0 md:py-1"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-meta md:min-h-0 md:py-1"
               style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
             >
               {t('flow.status.cancel')}

@@ -58,7 +58,7 @@ const MyDay = (): React.JSX.Element => {
       <HelmetContainer title={`${t('flow.time.myDay')} · Flow`} />
       <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
         <header className="mb-6">
-          <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-screen font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.myDay')}
           </h1>
           <label htmlFor="work-day-date" className="sr-only">
@@ -88,7 +88,7 @@ const MyDay = (): React.JSX.Element => {
                 type="button"
                 onClick={() => setDate(d)}
                 aria-current={active ? 'date' : undefined}
-                className="flow-focus relative flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-md py-1.5 text-[11px] font-medium md:min-h-0"
+                className="flow-focus relative flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-md py-1.5 text-meta font-medium md:min-h-0"
                 style={{
                   background: active ? 'var(--accent)' : 'var(--flow-hover)',
                   color: active ? 'var(--flow-on-accent)' : 'var(--flow-text)',
@@ -109,14 +109,14 @@ const MyDay = (): React.JSX.Element => {
         </div>
 
         {isLoading ? (
-          <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
           </p>
         ) : (
           <>
             <section>
               <h2
-                className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+                className="mb-3 text-meta font-semibold uppercase tracking-wider"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {t('flow.time.whatYouWorkedOn')}
@@ -149,13 +149,13 @@ const MyDay = (): React.JSX.Element => {
                       style={{ background: 'var(--flow-hover)' }}
                     >
                       <span
-                        className="text-[13px] font-semibold tabular-nums"
+                        className="text-body font-semibold tabular-nums"
                         style={{ color: 'var(--accent-fg)' }}
                       >
                         {formatDurationClock(line.durationMinutes ?? 0)}
                       </span>
                       <span
-                        className="min-w-0 flex-1 text-[13px]"
+                        className="min-w-0 flex-1 text-body"
                         style={{ color: 'var(--flow-text)' }}
                       >
                         {target && <span className="block font-semibold">{target}</span>}

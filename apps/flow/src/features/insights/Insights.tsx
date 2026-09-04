@@ -46,10 +46,10 @@ const Insights: React.FC = () => {
     <div className="flex flex-col h-full overflow-auto">
       <HelmetContainer title={`${t('common.insights.heading')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-        <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+        <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('common.insights.heading')}
         </h1>
-        <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
           {t('common.insights.subtitle')}
         </p>
       </div>
@@ -150,7 +150,7 @@ const Insights: React.FC = () => {
                     className="w-full rounded-t-sm"
                     style={{ background: '#4583C4' }}
                   />
-                  <span className="text-[9px]" style={{ color: 'var(--flow-text-dim)' }}>
+                  <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                     {t.week}
                   </span>
                 </div>
@@ -162,7 +162,7 @@ const Insights: React.FC = () => {
             <div className="space-y-2">
               {data.velocity.map((v) => (
                 <div key={v.cycle}>
-                  <div className="flex items-center justify-between text-[11px] mb-1">
+                  <div className="flex items-center justify-between text-meta mb-1">
                     <span style={{ color: 'var(--flow-text-muted)' }}>{v.cycle}</span>
                     <span style={{ color: 'var(--flow-text)' }}>
                       {v.completed} / {v.total}
@@ -190,10 +190,7 @@ const Insights: React.FC = () => {
           <div className="space-y-2">
             {data.timeByMember.map((m) => (
               <div key={m.id} className="flex items-center gap-3">
-                <span
-                  className="text-[12px] w-[96px] shrink-0"
-                  style={{ color: 'var(--flow-text)' }}
-                >
+                <span className="text-meta w-[96px] shrink-0" style={{ color: 'var(--flow-text)' }}>
                   {m.name}
                 </span>
                 <div
@@ -209,7 +206,7 @@ const Insights: React.FC = () => {
                   />
                 </div>
                 <span
-                  className="text-[11px] w-12 text-right shrink-0"
+                  className="text-meta w-12 text-right shrink-0"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {m.hours}h
@@ -240,16 +237,16 @@ const Kpi: React.FC<{
     <div className="flex items-center gap-1.5 mb-2">
       <Icon size={11} />
       <span
-        className="text-[10px] uppercase tracking-wider font-semibold"
+        className="text-meta uppercase tracking-wider font-semibold"
         style={{ color: 'var(--flow-text-dim)' }}
       >
         {label}
       </span>
     </div>
-    <p className="text-[22px] font-bold" style={{ color }}>
+    <p className="text-screen font-bold" style={{ color }}>
       {value}
     </p>
-    <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+    <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
       {hint}
     </p>
   </div>
@@ -264,7 +261,7 @@ const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
     }}
   >
     <h3
-      className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+      className="text-meta font-semibold uppercase tracking-wider mb-3"
       style={{ color: 'var(--flow-text-muted)' }}
     >
       {title}

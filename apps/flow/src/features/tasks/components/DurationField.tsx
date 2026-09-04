@@ -50,7 +50,7 @@ const DurationField = ({
     <div>
       <label
         htmlFor={id}
-        className="mb-1 block text-[10px] font-semibold uppercase tracking-wider"
+        className="mb-1 block text-meta font-semibold uppercase tracking-wider"
         style={{ color: 'var(--flow-text-muted)' }}
       >
         {label}
@@ -77,7 +77,7 @@ const DurationField = ({
             onCancel();
           }
         }}
-        className="flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
+        className="flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1 md:text-meta"
         style={{
           background: 'var(--flow-input-bg)',
           border: `1px solid ${invalid ? 'var(--flow-status-rejected-border)' : 'var(--flow-border)'}`,
@@ -85,16 +85,12 @@ const DurationField = ({
         }}
       />
       {invalid && invalidMessage ? (
-        <p
-          id={errorId}
-          className="mt-1 text-[10px]"
-          style={{ color: 'var(--flow-status-rejected)' }}
-        >
+        <p id={errorId} className="mt-1 text-meta" style={{ color: 'var(--flow-status-rejected)' }}>
           {invalidMessage}
         </p>
       ) : (
         hint && (
-          <p id={hintId} className="mt-1 text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p id={hintId} className="mt-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {hint}
           </p>
         )

@@ -22,7 +22,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded-sm text-[12px] transition-colors hover:bg-[var(--flow-hover)] w-full"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-sm text-meta transition-colors hover:bg-[var(--flow-hover)] w-full"
         style={{
           color: current ? 'var(--flow-text)' : 'var(--flow-text-muted)',
           background: 'var(--flow-input-bg)',
@@ -56,7 +56,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
                 onChange(p.id);
                 setOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] text-start"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-meta hover:bg-[var(--flow-hover)] text-start"
               style={{ color: 'var(--flow-text)' }}
             >
               <Circle size={8} className="fill-current" style={{ color: p.color }} />

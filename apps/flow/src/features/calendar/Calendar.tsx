@@ -121,10 +121,10 @@ const Calendar: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.calendar.heading')}
           </h1>
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {t('flow.calendar.subtitle')}
           </p>
         </div>
@@ -139,7 +139,7 @@ const Calendar: React.FC = () => {
             <ChevronLeft size={13} />
           </button>
           <span
-            className="text-[12px] font-semibold w-[128px] text-center"
+            className="text-meta font-semibold w-[128px] text-center"
             style={{ color: 'var(--flow-text)' }}
           >
             {monthLabel}
@@ -156,7 +156,7 @@ const Calendar: React.FC = () => {
           <button
             type="button"
             onClick={() => setCursor(new Date())}
-            className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)] font-medium"
+            className="text-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)] font-medium"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.calendar.today')}
@@ -169,7 +169,7 @@ const Calendar: React.FC = () => {
           {days.slice(0, 7).map((c) => (
             <div
               key={c.date.toISOString()}
-              className="py-1.5 text-center text-[10px] font-semibold uppercase"
+              className="py-1.5 text-center text-meta font-semibold uppercase"
               style={{ background: 'var(--flow-bg)', color: 'var(--flow-text-dim)' }}
             >
               {new Intl.DateTimeFormat(i18n.language, { weekday: 'short' }).format(c.date)}
@@ -194,7 +194,7 @@ const Calendar: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-1">
                   <span
-                    className="text-[10px] font-semibold h-5 w-5 flex items-center justify-center rounded-full"
+                    className="text-meta font-semibold h-5 w-5 flex items-center justify-center rounded-full"
                     style={{
                       background: isToday ? ACCENT_VAR : 'transparent',
                       color: isToday ? '#0a0a0a' : 'var(--flow-text-muted)',
@@ -216,7 +216,7 @@ const Calendar: React.FC = () => {
                           year: 'numeric',
                         }),
                       })}
-                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-[9px] opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
+                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-meta opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
                       {t('flow.calendar.addHint')}
@@ -232,7 +232,7 @@ const Calendar: React.FC = () => {
                         e.stopPropagation();
                         navigate({ to: `/task/${t.id}` as string });
                       }}
-                      className="w-full text-left px-1.5 py-0.5 rounded-sm text-[10px] truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+                      className="w-full text-left px-1.5 py-0.5 rounded-sm text-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
                       style={{
                         background: 'var(--flow-card)',
                         color: 'var(--flow-text)',
@@ -246,7 +246,7 @@ const Calendar: React.FC = () => {
                     <button
                       type="button"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-[9px] px-1 hover:underline"
+                      className="text-meta px-1 hover:underline"
                       style={{ color: ACCENT_VAR }}
                     >
                       {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
@@ -280,7 +280,7 @@ const Calendar: React.FC = () => {
               style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                <h2 className="text-body font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {t('flow.calendar.newTaskFor')}{' '}
                   <span style={{ color: ACCENT_VAR }}>
                     {new Date(createModal.date + 'T00:00:00').toLocaleDateString(i18n.language, {
@@ -306,7 +306,7 @@ const Calendar: React.FC = () => {
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submitCreate()}
                 placeholder={t('flow.calendar.titlePlaceholder')}
-                className="w-full rounded-lg px-3 py-2 text-[13px] outline-none mb-3"
+                className="w-full rounded-lg px-3 py-2 text-body outline-none mb-3"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -318,7 +318,7 @@ const Calendar: React.FC = () => {
                 <select
                   value={newProjectId}
                   onChange={(e) => setNewProjectId(e.target.value)}
-                  className="w-full rounded-lg px-3 py-2 text-[12px] outline-none mb-4"
+                  className="w-full rounded-lg px-3 py-2 text-meta outline-none mb-4"
                   style={{
                     background: 'var(--flow-input-bg)',
                     border: '1px solid var(--flow-border)',
@@ -338,7 +338,7 @@ const Calendar: React.FC = () => {
                 value={newLabelId}
                 onChange={(e) => setNewLabelId(e.target.value)}
                 disabled={labels.length === 0}
-                className="w-full rounded-lg px-3 py-2 text-[12px] outline-none mb-4 disabled:opacity-50"
+                className="w-full rounded-lg px-3 py-2 text-meta outline-none mb-4 disabled:opacity-50"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -360,7 +360,7 @@ const Calendar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCreateModal(null)}
-                  className="px-3 py-1.5 rounded-sm text-[12px]"
+                  className="px-3 py-1.5 rounded-sm text-meta"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('flow.calendar.cancel')}
@@ -369,7 +369,7 @@ const Calendar: React.FC = () => {
                   type="button"
                   onClick={submitCreate}
                   disabled={!newTitle.trim() || createTask.isPending}
-                  className="px-3 py-1.5 rounded-sm text-[12px] font-semibold disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
                   style={{ background: ACCENT_VAR, color: '#0a0a0a' }}
                 >
                   {createTask.isPending ? t('flow.calendar.creating') : t('flow.calendar.create')}

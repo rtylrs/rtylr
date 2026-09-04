@@ -108,25 +108,25 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </button>
         <PriorityIcon priority={task.priority} />
         <span
-          className="text-[10px] font-mono w-[64px] shrink-0"
+          className="text-meta font-mono w-[64px] shrink-0"
           style={{ color: 'var(--flow-text-dim)' }}
         >
           {task.identifier}
         </span>
         <StatusIcon status={task.status} />
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-medium truncate" style={{ color: 'var(--flow-text)' }}>
+          <p className="text-body font-medium truncate" style={{ color: 'var(--flow-text)' }}>
             {task.title}
           </p>
           {task.waitingOn && (
-            <p className="text-[10px] mt-0.5 truncate" style={{ color: 'var(--flow-text-dim)' }}>
+            <p className="text-meta mt-0.5 truncate" style={{ color: 'var(--flow-text-dim)' }}>
               Waiting on {task.waitingOn}
             </p>
           )}
         </div>
         {showProject && project && (
           <span
-            className="text-[11px] px-2 py-0.5 rounded-sm shrink-0 font-medium"
+            className="text-meta px-2 py-0.5 rounded-sm shrink-0 font-medium"
             style={{
               background: `${project.color}22`,
               color: project.color,
@@ -145,7 +145,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
                 color: l.color,
                 border: `1px solid ${l.color}33`,
                 padding: '1px 5px',
-                fontSize: 10,
+                fontSize: 'var(--text-meta)',
               }}
             >
               <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: l.color }} />
@@ -154,7 +154,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
           ))}
           {taskLabels.length > 3 && (
             <span
-              className="text-[10px] px-1 rounded-full shrink-0"
+              className="text-meta px-1 rounded-full shrink-0"
               style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
             >
               +{taskLabels.length - 3}
@@ -163,7 +163,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </div>
         {task.dueDate && (
           <span
-            className="text-[11px] shrink-0 w-[64px] text-right"
+            className="text-meta shrink-0 w-[64px] text-right"
             style={{ color: overdue ? '#ef4444' : 'var(--flow-text-dim)' }}
           >
             {formatDate(task.dueDate)}

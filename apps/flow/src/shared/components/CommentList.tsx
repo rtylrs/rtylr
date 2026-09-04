@@ -44,7 +44,7 @@ function renderBody(body: string): React.ReactNode {
       return (
         <code
           key={i}
-          className="rounded-sm px-1 py-0.5 font-mono text-[11px]"
+          className="rounded-sm px-1 py-0.5 font-mono text-meta"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
         >
           {p.slice(1, -1)}
@@ -59,7 +59,7 @@ export const CommentList: React.FC<CommentListProps> = ({ comments }) => {
   const { t } = useTranslation();
   if (comments.length === 0) {
     return (
-      <div className="text-[12px] text-center py-6" style={{ color: 'var(--flow-text-dim)' }}>
+      <div className="text-meta text-center py-6" style={{ color: 'var(--flow-text-dim)' }}>
         {t('flow.taskDetail.noComments')}
       </div>
     );
@@ -71,17 +71,14 @@ export const CommentList: React.FC<CommentListProps> = ({ comments }) => {
           <AssigneeAvatar name={c.author} initials={c.authorInitials} size={28} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+              <span className="text-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
                 {c.author}
               </span>
-              <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+              <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                 {timeAgo(c.createdAt, t)}
               </span>
             </div>
-            <div
-              className="text-[12px] leading-relaxed"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
+            <div className="text-meta leading-relaxed" style={{ color: 'var(--flow-text-muted)' }}>
               {renderBody(c.body)}
             </div>
           </div>

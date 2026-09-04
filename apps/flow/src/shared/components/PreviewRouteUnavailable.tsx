@@ -21,7 +21,9 @@ export function PreviewRouteUnavailable(): React.JSX.Element {
         color: 'var(--flow-text)',
       }}
     >
-      <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Preview route unavailable</h1>
+      <h1 style={{ margin: 0, fontSize: 'var(--text-screen)', fontWeight: 600 }}>
+        Preview route unavailable
+      </h1>
       <p style={{ maxWidth: '420px', margin: '12px 0 20px', color: 'var(--flow-text-muted)' }}>
         This Flow page is not enabled in the current environment. The route is still available when
         preview routes are enabled.

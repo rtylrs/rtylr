@@ -13,7 +13,7 @@ interface BreadcrumbsProps {
 
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
   return (
-    <nav className="flex min-w-0 items-center gap-1 text-[11px] sm:text-[12px]">
+    <nav className="flex min-w-0 items-center gap-1 text-meta sm:text-meta">
       {items.map((c, i) => (
         <React.Fragment key={i}>
           {i > 0 && (

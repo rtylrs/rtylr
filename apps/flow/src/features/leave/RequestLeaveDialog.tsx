@@ -12,7 +12,7 @@ import GateNotice from '../../shared/components/GateNotice';
 import type { LeaveTypePayload } from './useLeave';
 import { useCreateLeaveRequest } from './useLeave';
 
-const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
+const labelClass = 'mb-1 block text-meta font-semibold uppercase tracking-wider';
 const inputStyle: React.CSSProperties = {
   background: 'var(--flow-input-bg)',
   border: '1px solid var(--flow-border)',
@@ -133,7 +133,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               required
               disabled={!hasLeaveTypes}
               aria-describedby={noLeaveTypesReason ? 'leave-type-gate' : undefined}
-              className="flow-focus min-h-[44px] w-full rounded-sm px-2 text-[16px] disabled:cursor-not-allowed md:min-h-0 md:py-1.5 md:text-[13px]"
+              className="flow-focus min-h-[44px] w-full rounded-sm px-2 text-title disabled:cursor-not-allowed md:min-h-0 md:py-1.5 md:text-body"
               style={{
                 ...inputStyle,
                 background: hasLeaveTypes ? inputStyle.background : 'var(--flow-hover)',
@@ -206,7 +206,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="flow-focus w-full rounded-sm px-2 py-1.5 text-[16px] md:text-[13px]"
+              className="flow-focus w-full rounded-sm px-2 py-1.5 text-title md:text-body"
               style={inputStyle}
             />
           </div>
@@ -215,7 +215,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-[13px] font-medium md:min-h-0 md:py-2"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-body font-medium md:min-h-0 md:py-2"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('common.cancel')}
@@ -226,7 +226,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               disabled={!canSubmit || createRequest.isPending}
               title={noLeaveTypesReason || undefined}
               aria-describedby={noLeaveTypesReason ? 'leave-type-gate' : undefined}
-              className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-4 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40 md:min-h-0 md:py-2.5"
+              className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-4 text-body font-semibold disabled:cursor-not-allowed disabled:opacity-40 md:min-h-0 md:py-2.5"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {t('flow.leave.submit')}

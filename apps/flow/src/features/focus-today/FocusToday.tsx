@@ -61,11 +61,11 @@ const FocusToday: React.FC = () => {
             {t('nav.focusToday', 'Today')}
           </h1>
         </div>
-        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-body leading-relaxed" style={{ color: 'var(--flow-text-muted)' }}>
           {t('common.focusToday.subtitle')}
         </p>
         {backlogHint > 0 && (
-          <p className="text-[12px] mt-3" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta mt-3" style={{ color: 'var(--flow-text-dim)' }}>
             {t('common.focusToday.backlogHint', { count: backlogHint })}{' '}
             <Link
               to="/triage"
@@ -132,15 +132,12 @@ const FocusRow: React.FC<{
             {task.focusPin && (
               <Pin size={12} className="shrink-0" style={{ color: ACCENT_VAR }} aria-hidden />
             )}
-            <span
-              className="text-[13px] font-medium truncate"
-              style={{ color: 'var(--flow-text)' }}
-            >
+            <span className="text-body font-medium truncate" style={{ color: 'var(--flow-text)' }}>
               {task.title}
             </span>
           </div>
           <div
-            className="flex items-center gap-2 mt-1 text-[11px]"
+            className="flex items-center gap-2 mt-1 text-meta"
             style={{ color: 'var(--flow-text-dim)' }}
           >
             <span className="truncate">{project?.name ?? task.projectName}</span>

@@ -54,7 +54,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
         onKeyDown={handleKey}
         placeholder={placeholder ?? t('flow.taskDetail.commentPlaceholder')}
         disabled={disabled}
-        className="w-full bg-transparent outline-none resize-none p-3 text-[12px] disabled:opacity-60"
+        className="w-full bg-transparent outline-none resize-none p-3 text-meta disabled:opacity-60"
         rows={3}
         style={{ color: 'var(--flow-text)' }}
       />
@@ -89,7 +89,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           type="button"
           onClick={handleSubmit}
           disabled={disabled || !value.trim()}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-sm text-[11px] font-semibold transition-opacity disabled:opacity-40"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-sm text-meta font-semibold transition-opacity disabled:opacity-40"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Send size={11} />
@@ -110,11 +110,11 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
               type="button"
               key={m.id}
               onClick={() => insertMention('@' + m.name)}
-              className="w-full text-start px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] flex items-center gap-2"
+              className="w-full text-start px-3 py-1.5 text-meta hover:bg-[var(--flow-hover)] flex items-center gap-2"
               style={{ color: 'var(--flow-text)' }}
             >
               <span
-                className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold"
+                className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold"
                 style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
               >
                 {m.initials}

@@ -62,7 +62,7 @@ const RealtimeConnectionIndicator = ({
       aria-live="polite"
       title={label}
       className={cn(
-        'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium',
+        'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-meta font-medium',
         className
       )}
       style={{

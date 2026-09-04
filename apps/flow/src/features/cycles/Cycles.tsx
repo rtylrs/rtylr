@@ -45,10 +45,10 @@ const Cycles: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.shell.cycles')}
           </h1>
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {t('flow.cycles.subtitle')}
           </p>
         </div>
@@ -59,7 +59,7 @@ const Cycles: React.FC = () => {
               value={selectedProjectId}
               onChange={(e) => setProjectId(e.target.value)}
               aria-label={t('flow.cycles.project')}
-              className="min-h-[44px] rounded-md px-2 text-[16px] outline-none sm:min-h-0 sm:py-1.5 sm:text-[12px]"
+              className="min-h-[44px] rounded-md px-2 text-title outline-none sm:min-h-0 sm:py-1.5 sm:text-meta"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border)',
@@ -81,7 +81,7 @@ const Cycles: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             disabled={!selectedProjectId}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
             <Plus size={11} /> {t('flow.cycles.newCycle')}
@@ -98,7 +98,7 @@ const Cycles: React.FC = () => {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('flow.cycles.namePlaceholder')}
-            className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
+            className="w-full rounded-md px-3 py-2 text-meta outline-none"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border)',
@@ -117,7 +117,7 @@ const Cycles: React.FC = () => {
                 previousMonth: t('common.datePicker.previousMonth'),
                 nextMonth: t('common.datePicker.nextMonth'),
               }}
-              className="text-[12px]"
+              className="text-meta"
             />
             <DatePicker
               value={newEnd}
@@ -130,7 +130,7 @@ const Cycles: React.FC = () => {
                 previousMonth: t('common.datePicker.previousMonth'),
                 nextMonth: t('common.datePicker.nextMonth'),
               }}
-              className="text-[12px]"
+              className="text-meta"
             />
           </div>
           <div className="flex gap-2">
@@ -160,7 +160,7 @@ const Cycles: React.FC = () => {
                 );
               }}
               disabled={createCycle.isPending || !newName.trim() || !newStart || !newEnd}
-              className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-50"
+              className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               {createCycle.isPending ? t('flow.cycles.creating') : t('flow.cycles.create')}
@@ -173,7 +173,7 @@ const Cycles: React.FC = () => {
                 setNewStart('');
                 setNewEnd('');
               }}
-              className="px-3 py-1.5 rounded-sm text-[11px]"
+              className="px-3 py-1.5 rounded-sm text-meta"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.cycles.cancel')}
@@ -209,17 +209,17 @@ const Cycles: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <span className="h-2 w-2 rounded-full" style={{ background: '#22c55e' }} />
                 <span
-                  className="text-[10px] uppercase tracking-wider font-semibold"
+                  className="text-meta uppercase tracking-wider font-semibold"
                   style={{ color: '#22c55e' }}
                 >
                   {t('flow.cycles.activeCycle')}
                 </span>
               </div>
-              <h2 className="text-[22px] font-bold mb-2" style={{ color: 'var(--flow-text)' }}>
+              <h2 className="text-screen font-bold mb-2" style={{ color: 'var(--flow-text)' }}>
                 {active.name}
               </h2>
               <div
-                className="flex items-center gap-2 text-[11px]"
+                className="flex items-center gap-2 text-meta"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 <span>{formatDate(active.startDate)}</span>
@@ -228,10 +228,10 @@ const Cycles: React.FC = () => {
               </div>
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                     {t('flow.cycles.taskCount', { done: active.completed, total: active.scope })}
                   </span>
-                  <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                  <span className="text-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
                     {active.scope > 0 ? Math.round((active.completed / active.scope) * 100) : 0}%
                   </span>
                 </div>
@@ -268,7 +268,7 @@ const CycleSection: React.FC<{ title: string; cycles: ApiCycle[] }> = ({ title, 
   return (
     <section>
       <h3
-        className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+        className="text-meta font-semibold uppercase tracking-wider mb-3"
         style={{ color: 'var(--flow-text-muted)' }}
       >
         {title}
@@ -286,11 +286,11 @@ const CycleSection: React.FC<{ title: string; cycles: ApiCycle[] }> = ({ title, 
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <Timer size={12} style={{ color: 'var(--flow-text-muted)' }} />
-                <span className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                <span className="text-body font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {c.name}
                 </span>
               </div>
-              <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+              <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                 {t('flow.cycles.dateRange', {
                   start: formatDate(c.startDate),
                   end: formatDate(c.endDate),

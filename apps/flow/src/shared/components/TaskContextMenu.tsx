@@ -98,7 +98,7 @@ export const TaskContextMenu: React.FC<{
     gap: 8,
     width: '100%',
     padding: '6px 12px',
-    fontSize: 12,
+    fontSize: 'var(--text-meta)',
     cursor: 'pointer',
     background: 'transparent',
     border: 'none',

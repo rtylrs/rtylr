@@ -123,11 +123,11 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
     >
       <div className="flex min-w-0 items-center gap-2.5">
         <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: project.color }} />
-        <h1 className="text-[14px] font-semibold truncate" style={{ color: 'var(--flow-text)' }}>
+        <h1 className="text-section font-semibold truncate" style={{ color: 'var(--flow-text)' }}>
           {project.name}
         </h1>
         <span
-          className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+          className="text-meta px-1.5 py-0.5 rounded-full font-semibold shrink-0"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
         >
           {taskCount}
@@ -154,7 +154,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
                 to={v.to}
                 params={{ projectId }}
                 className={[
-                  'flex items-center gap-1.5 px-2 py-1 rounded-sm text-[11px] font-medium transition-colors',
+                  'flex items-center gap-1.5 px-2 py-1 rounded-sm text-meta font-medium transition-colors',
                   active ? '' : 'hover:bg-[var(--flow-hover)]',
                 ].join(' ')}
                 style={
@@ -185,7 +185,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
         <button
           type="button"
           onClick={onNewTask}
-          className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-[11px] font-semibold transition-opacity hover:opacity-90"
+          className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-meta font-semibold transition-opacity hover:opacity-90"
           style={{ background: 'var(--accent)', color: '#ffffff' }}
         >
           <Plus size={12} strokeWidth={2.5} /> New task

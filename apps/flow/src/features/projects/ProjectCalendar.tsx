@@ -129,7 +129,7 @@ const ProjectCalendar: React.FC = () => {
           >
             <ChevronRight size={14} />
           </button>
-          <h2 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h2 className="text-body font-semibold" style={{ color: 'var(--flow-text)' }}>
             {monthLabel}
           </h2>
         </div>
@@ -140,7 +140,7 @@ const ProjectCalendar: React.FC = () => {
             d.setDate(1);
             setCursor(d);
           }}
-          className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
+          className="text-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.calendar.today')}
@@ -152,7 +152,7 @@ const ProjectCalendar: React.FC = () => {
           {weekdays.map((d) => (
             <div
               key={d}
-              className="text-[10px] font-semibold uppercase tracking-wider py-1.5 text-center"
+              className="text-meta font-semibold uppercase tracking-wider py-1.5 text-center"
               style={{ color: 'var(--flow-text-dim)' }}
             >
               {d}
@@ -183,7 +183,7 @@ const ProjectCalendar: React.FC = () => {
                   <>
                     <div
                       className={[
-                        'text-[11px] mb-1 self-end',
+                        'text-meta mb-1 self-end',
                         isToday ? 'font-bold' : 'font-medium',
                       ].join(' ')}
                       style={{
@@ -196,7 +196,7 @@ const ProjectCalendar: React.FC = () => {
                       {dayTasks.slice(0, 3).map((t) => (
                         <div
                           key={t.id}
-                          className="text-[10px] px-1.5 py-0.5 rounded-sm truncate"
+                          className="text-meta px-1.5 py-0.5 rounded-sm truncate"
                           style={{
                             background: `${project.color}22`,
                             color: project.color,
@@ -209,7 +209,7 @@ const ProjectCalendar: React.FC = () => {
                         </div>
                       ))}
                       {dayTasks.length > 3 && (
-                        <span className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+                        <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                           +{dayTasks.length - 3} more
                         </span>
                       )}

@@ -283,7 +283,7 @@ const TaskDetail: React.FC = () => {
   if (!task) {
     return (
       <div className="p-10 text-center">
-        <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.taskDetail.notFound')}
         </p>
       </div>
@@ -393,7 +393,7 @@ const TaskDetail: React.FC = () => {
                 navigator.clipboard?.writeText(task.identifier ?? task.id);
                 toast.success(t('toasts.task.copied', { id: task.identifier ?? task.id }));
               }}
-              className="flex h-8 items-center gap-1 rounded-sm px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
+              className="flex h-8 items-center gap-1 rounded-sm px-2 text-meta hover:bg-[var(--flow-hover)] sm:h-7"
               style={{ color: 'var(--flow-text-muted)' }}
               title={t('flow.taskDetail.copyId')}
             >
@@ -438,7 +438,7 @@ const TaskDetail: React.FC = () => {
 
         {!canEdit && (
           <div
-            className="px-4 py-2 text-[11px] sm:px-6"
+            className="px-4 py-2 text-meta sm:px-6"
             style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
           >
             {t('common.readOnlyAccess')}
@@ -469,7 +469,7 @@ const TaskDetail: React.FC = () => {
               placeholder={t('flow.taskDetail.descriptionPlaceholder')}
               rows={5}
               disabled={!canEdit}
-              className="w-full bg-transparent outline-none text-[13px] leading-relaxed mb-6 resize-none disabled:opacity-70"
+              className="w-full bg-transparent outline-none text-body leading-relaxed mb-6 resize-none disabled:opacity-70"
               style={{ color: 'var(--flow-text-muted)' }}
             />
 
@@ -478,7 +478,7 @@ const TaskDetail: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <GitBranch size={12} style={{ color: 'var(--flow-text-muted)' }} />
                 <h3
-                  className="text-[11px] font-semibold uppercase tracking-wider"
+                  className="text-meta font-semibold uppercase tracking-wider"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('flow.taskDetail.subtasks')}
@@ -494,7 +494,7 @@ const TaskDetail: React.FC = () => {
 
             <section className="mb-8">
               <h3
-                className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+                className="text-meta font-semibold uppercase tracking-wider mb-3"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {t('flow.taskDetail.attachments')}
@@ -521,7 +521,7 @@ const TaskDetail: React.FC = () => {
                   type="button"
                   key={tabName}
                   onClick={() => setTab(tabName)}
-                  className="px-3 py-2 text-[12px] font-medium capitalize"
+                  className="px-3 py-2 text-meta font-medium capitalize"
                   style={{
                     color: tab === tabName ? 'var(--flow-text)' : 'var(--flow-text-muted)',
                     borderBottom: tab === tabName ? '2px solid #64C5B9' : '2px solid transparent',
@@ -532,7 +532,7 @@ const TaskDetail: React.FC = () => {
                     : t('flow.taskDetail.activity')}
                   {tabName === 'comments' && (
                     <span
-                      className="ms-1.5 text-[10px] px-1 rounded-sm"
+                      className="ms-1.5 text-meta px-1 rounded-sm"
                       style={{
                         background: 'var(--flow-hover)',
                         color: 'var(--flow-text-dim)',
@@ -611,7 +611,7 @@ const TaskDetail: React.FC = () => {
               );
             }}
             disabled={!canEdit}
-            className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+            className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           >
             {statuses.map((s) => (
@@ -630,7 +630,7 @@ const TaskDetail: React.FC = () => {
                 setTaskStatus.mutate({ taskId: task.id, statusId: e.target.value || '0' });
               }}
               disabled={!canEdit}
-              className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+              className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               <option value="" style={{ background: 'var(--flow-card)' }}>
@@ -650,7 +650,7 @@ const TaskDetail: React.FC = () => {
             value={task.priority}
             onChange={(e) => updateTask(task.id, { priority: e.target.value as Task['priority'] })}
             disabled={!canEdit}
-            className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+            className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           >
             {priorities.map((p) => (
@@ -676,7 +676,7 @@ const TaskDetail: React.FC = () => {
                   });
               }}
               disabled={!canEdit}
-              className="bg-transparent text-[12px] outline-none flex-1 disabled:opacity-70"
+              className="bg-transparent text-meta outline-none flex-1 disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               {members.map((m) => (
@@ -697,7 +697,7 @@ const TaskDetail: React.FC = () => {
               borderRadius: 8,
               background: 'var(--flow-warning-bg, rgba(234, 179, 8, 0.12))',
               color: 'var(--flow-text)',
-              fontSize: 11,
+              fontSize: 'var(--text-meta)',
             }}
           >
             {t('flow.taskDetail.leaveOverlap', { count: overlappingLeave.length })}{' '}
@@ -725,7 +725,7 @@ const TaskDetail: React.FC = () => {
             onChange={(e) => updateTask(task.id, { estimate: Number(e.target.value) })}
             placeholder={t('flow.taskDetail.hours')}
             disabled={!canEdit}
-            className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+            className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -744,7 +744,7 @@ const TaskDetail: React.FC = () => {
               type="button"
               onClick={() => updateTask(task.id, { effortMinutes: undefined })}
               disabled={!canEdit}
-              className="text-[10px] px-2 py-1 rounded-md disabled:opacity-40"
+              className="text-meta px-2 py-1 rounded-md disabled:opacity-40"
               style={{
                 background: !task.effortMinutes ? 'var(--flow-hover)' : 'transparent',
                 color: 'var(--flow-text-muted)',
@@ -759,7 +759,7 @@ const TaskDetail: React.FC = () => {
                 type="button"
                 onClick={() => updateTask(task.id, { effortMinutes: m })}
                 disabled={!canEdit}
-                className="text-[10px] px-2 py-1 rounded-md transition-colors disabled:opacity-40"
+                className="text-meta px-2 py-1 rounded-md transition-colors disabled:opacity-40"
                 style={{
                   background: task.effortMinutes === m ? 'var(--accent-muted)' : 'transparent',
                   color: 'var(--flow-text)',
@@ -784,7 +784,7 @@ const TaskDetail: React.FC = () => {
             onChange={(e) => updateTask(task.id, { waitingOn: e.target.value || undefined })}
             placeholder={t('flow.taskDetail.waitingPlaceholder')}
             disabled={!canEdit}
-            className="bg-transparent text-[12px] outline-none w-full placeholder:opacity-50 disabled:opacity-70"
+            className="bg-transparent text-meta outline-none w-full placeholder:opacity-50 disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -796,7 +796,7 @@ const TaskDetail: React.FC = () => {
             placeholder={t('flow.taskDetail.decisionPlaceholder')}
             rows={2}
             disabled={!canEdit}
-            className="w-full bg-transparent text-[12px] outline-none resize-none placeholder:opacity-50 rounded-md px-2 py-1.5 disabled:opacity-70"
+            className="w-full bg-transparent text-meta outline-none resize-none placeholder:opacity-50 rounded-md px-2 py-1.5 disabled:opacity-70"
             style={{ border: '1px solid var(--flow-border)', color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -807,7 +807,7 @@ const TaskDetail: React.FC = () => {
             onClick={() => updateTask(task.id, { focusPin: !task.focusPin })}
             disabled={!canEdit}
             title={!canEdit ? t('common.readOnlyAccess') : undefined}
-            className="text-[11px] px-2.5 py-1.5 rounded-md w-full text-start transition-colors disabled:opacity-60"
+            className="text-meta px-2.5 py-1.5 rounded-md w-full text-start transition-colors disabled:opacity-60"
             style={{
               background: task.focusPin ? 'var(--accent-muted)' : 'var(--flow-hover)',
               color: 'var(--flow-text)',
@@ -820,7 +820,7 @@ const TaskDetail: React.FC = () => {
 
         {cycle && (
           <DetailField icon={Timer} label={t('flow.taskDetail.cycle')}>
-            <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text)' }}>
               {cycle.name}
             </span>
           </DetailField>
@@ -828,7 +828,7 @@ const TaskDetail: React.FC = () => {
 
         {milestone && (
           <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
-            <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text)' }}>
               {milestone.name}
             </span>
           </DetailField>
@@ -840,7 +840,7 @@ const TaskDetail: React.FC = () => {
               value={task.sectionId ?? ''}
               onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
               disabled={!canEdit}
-              className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+              className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               <option value="">{t('flow.taskDetail.noSection')}</option>
@@ -867,7 +867,7 @@ const TaskDetail: React.FC = () => {
                   })
                 }
                 disabled={!canEdit}
-                className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+                className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               >
                 <option value="">-</option>
@@ -890,7 +890,7 @@ const TaskDetail: React.FC = () => {
                   })
                 }
                 disabled={!canEdit}
-                className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+                className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               />
             ) : (
@@ -905,7 +905,7 @@ const TaskDetail: React.FC = () => {
                   })
                 }
                 disabled={!canEdit}
-                className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+                className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               />
             )}
@@ -919,7 +919,7 @@ const TaskDetail: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate({ to: `/task/${dt.id}` as string })}
-                  className="text-[11px] text-start truncate flex-1 hover:underline"
+                  className="text-meta text-start truncate flex-1 hover:underline"
                   style={{ color: 'var(--accent)' }}
                 >
                   {dt.identifier} · {dt.title}
@@ -927,7 +927,7 @@ const TaskDetail: React.FC = () => {
                 {canEdit && (
                   <button
                     type="button"
-                    className="text-[10px] shrink-0"
+                    className="text-meta shrink-0"
                     style={{ color: 'var(--flow-text-dim)' }}
                     onClick={() =>
                       updateTask(task.id, {
@@ -945,7 +945,7 @@ const TaskDetail: React.FC = () => {
                 <select
                   value={depId}
                   onChange={(e) => setDepId(e.target.value)}
-                  className="bg-transparent text-[11px] outline-none flex-1 min-w-0 rounded-sm px-1"
+                  className="bg-transparent text-meta outline-none flex-1 min-w-0 rounded-sm px-1"
                   style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
                 >
                   <option value="">{t('flow.taskDetail.addDependency')}</option>
@@ -965,7 +965,7 @@ const TaskDetail: React.FC = () => {
                     });
                     setDepId('');
                   }}
-                  className="text-[10px] px-1.5 py-0.5 rounded-sm font-semibold disabled:opacity-40"
+                  className="text-meta px-1.5 py-0.5 rounded-sm font-semibold disabled:opacity-40"
                   style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                 >
                   {t('flow.taskDetail.add')}
@@ -981,7 +981,7 @@ const TaskDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
-                className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
+                className="text-meta px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 {t('flow.taskDetail.addLabel')}
@@ -999,7 +999,7 @@ const TaskDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
-                className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
+                className="text-meta px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 {t('flow.taskDetail.addShort')}
@@ -1011,7 +1011,7 @@ const TaskDetail: React.FC = () => {
                 style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
               >
                 {allLabels.length === 0 && (
-                  <p className="text-[11px] px-2 py-1" style={{ color: 'var(--flow-text-dim)' }}>
+                  <p className="text-meta px-2 py-1" style={{ color: 'var(--flow-text-dim)' }}>
                     {t('flow.taskDetail.noLabels')}
                   </p>
                 )}
@@ -1029,7 +1029,7 @@ const TaskDetail: React.FC = () => {
                         style={{ background: l.color }}
                       />
                       <span
-                        className="text-[11px] flex-1"
+                        className="text-meta flex-1"
                         style={{
                           color: active ? l.color : 'var(--flow-text)',
                           fontWeight: active ? 600 : 400,
@@ -1038,7 +1038,7 @@ const TaskDetail: React.FC = () => {
                         {l.name}
                       </span>
                       {active && (
-                        <span className="text-[10px]" style={{ color: l.color }}>
+                        <span className="text-meta" style={{ color: l.color }}>
                           ✓
                         </span>
                       )}
@@ -1113,7 +1113,7 @@ const ActivitySection: React.FC<{
             >
               <Icon size={10} />
             </span>
-            <div className="flex-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <div className="flex-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {describeActivity(a, t)}
               <span className="ms-2" style={{ color: 'var(--flow-text-dim)' }}>
                 {formatRelative(a.createdAt, t)}
@@ -1140,7 +1140,7 @@ const DetailField: React.FC<{
        * text. TimePanel's own heading uses the same treatment, so leaving this
        * dim would put two versions of one label style side by side. */}
       <span
-        className="text-[10px] uppercase tracking-wider font-semibold"
+        className="text-meta uppercase tracking-wider font-semibold"
         style={{ color: 'var(--flow-text-muted)' }}
       >
         {label}

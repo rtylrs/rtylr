@@ -48,7 +48,7 @@ const ProjectVisibilityField = ({
 
   return (
     <fieldset className="mt-3" disabled={disabled} aria-describedby={reason ? GATE_ID : undefined}>
-      <legend className="text-[11px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
+      <legend className="text-meta font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
         {t('flow.projectSettings.visibility')}
       </legend>
 
@@ -56,7 +56,7 @@ const ProjectVisibilityField = ({
         {OPTIONS.map((option) => (
           <label
             key={option}
-            className="flex items-center gap-2 min-h-[44px] px-2 rounded-md cursor-pointer text-[12px]"
+            className="flex items-center gap-2 min-h-[44px] px-2 rounded-md cursor-pointer text-meta"
             style={{ color: 'var(--flow-text)' }}
           >
             <input
@@ -77,7 +77,7 @@ const ProjectVisibilityField = ({
         ))}
       </div>
 
-      <p className="mt-1 text-[10px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
+      <p className="mt-1 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
         {t('flow.visibility.publicHint')}
       </p>
       <GateNotice id={GATE_ID} reason={reason} className="mt-1" />

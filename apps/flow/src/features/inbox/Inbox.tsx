@@ -67,7 +67,7 @@ const NotificationRow: React.FC<{
       )}
 
       <span
-        className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5"
+        className="h-8 w-8 rounded-full flex items-center justify-center text-meta font-bold shrink-0 mt-0.5"
         style={{
           background: `${notification.projectColor || '#64C5B9'}22`,
           color: notification.projectColor || 'var(--accent)',
@@ -80,19 +80,19 @@ const NotificationRow: React.FC<{
         <div className="flex items-center gap-2 mb-0.5">
           {TYPE_ICONS[notification.type]}
           <span
-            className="text-[12px] font-semibold"
+            className="text-meta font-semibold"
             style={{
               color: notification.read ? 'var(--flow-text-muted)' : 'var(--flow-text)',
             }}
           >
             {notification.title}
           </span>
-          <span className="text-[11px] ml-auto shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
+          <span className="text-meta ml-auto shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
             {formatTimestamp(notification.timestamp, t, i18n.language)}
           </span>
         </div>
 
-        <p className="text-[12px] mb-1" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta mb-1" style={{ color: 'var(--flow-text-muted)' }}>
           {notification.description}
         </p>
 
@@ -103,15 +103,15 @@ const NotificationRow: React.FC<{
               style={{ background: notification.projectColor }}
             />
           )}
-          <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {notification.project}
           </span>
           {notification.taskTitle && (
             <>
-              <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+              <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                 ·
               </span>
-              <span className="text-[11px] truncate" style={{ color: 'var(--flow-text-dim)' }}>
+              <span className="text-meta truncate" style={{ color: 'var(--flow-text-dim)' }}>
                 {notification.taskTitle}
               </span>
             </>
@@ -151,11 +151,11 @@ const Inbox: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
-          <h1 className="text-[18px] font-bold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('inbox.title')}
           </h1>
           {unreadCount > 0 && (
-            <p className="text-[12px] mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
+            <p className="text-meta mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
               {t('inbox.unreadCount', { count: unreadCount })}
             </p>
           )}
@@ -165,7 +165,7 @@ const Inbox: React.FC = () => {
           type="button"
           onClick={() => markAll.mutate()}
           disabled={markAll.isPending || unreadCount === 0}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-40"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-meta font-medium transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {markAll.isPending ? (
@@ -186,7 +186,7 @@ const Inbox: React.FC = () => {
             type="button"
             key={id}
             onClick={() => setActiveFilter(id)}
-            className="px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
+            className="px-3 py-1.5 rounded-md text-meta font-medium transition-colors"
             style={{
               background: activeFilter === id ? 'var(--accent-muted)' : 'transparent',
               color: activeFilter === id ? 'var(--accent)' : 'var(--flow-text-muted)',
@@ -195,7 +195,7 @@ const Inbox: React.FC = () => {
             {label}
             {id === 'unread' && unreadCount > 0 && (
               <span
-                className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                className="ml-1.5 px-1.5 py-0.5 rounded-full text-meta font-bold"
                 style={{ background: 'var(--accent)', color: '#0a0a0a' }}
               >
                 {unreadCount}

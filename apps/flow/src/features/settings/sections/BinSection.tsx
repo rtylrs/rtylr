@@ -65,10 +65,10 @@ const BinSection = (): React.JSX.Element => {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="text-title font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
           {t('flow.settings.bin.section')}
         </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.bin.description')}
         </p>
       </div>
@@ -98,7 +98,7 @@ const BinSection = (): React.JSX.Element => {
         <>
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <label
-              className="flex items-center gap-2 min-h-[44px] text-[12px] cursor-pointer"
+              className="flex items-center gap-2 min-h-[44px] text-meta cursor-pointer"
               style={{ color: 'var(--flow-text)' }}
             >
               <input
@@ -114,7 +114,7 @@ const BinSection = (): React.JSX.Element => {
               type="button"
               onClick={() => setConfirming(true)}
               disabled={selected.size === 0 || purge.isPending}
-              className="min-h-[44px] px-3 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+              className="min-h-[44px] px-3 rounded-lg text-meta font-semibold disabled:opacity-40"
               style={{ background: 'var(--flow-danger-fg)', color: 'var(--flow-surface)' }}
             >
               {t('flow.settings.bin.purgeSelected', { count: selected.size })}
@@ -136,13 +136,13 @@ const BinSection = (): React.JSX.Element => {
                   aria-label={t('flow.settings.bin.selectProject', { name: p.name })}
                 />
                 <span
-                  className="flex-1 min-w-0 truncate text-[13px]"
+                  className="flex-1 min-w-0 truncate text-body"
                   style={{ color: 'var(--flow-text)' }}
                 >
                   {p.name}
                 </span>
                 {p.purgeAt ? (
-                  <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                     {t('flow.settings.bin.purgesOn', { date: p.purgeAt.slice(0, 10) })}
                   </span>
                 ) : null}
@@ -161,7 +161,7 @@ const BinSection = (): React.JSX.Element => {
           </ul>
 
           {total > projects.length ? (
-            <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.settings.bin.truncated', { shown: projects.length, total })}
             </p>
           ) : null}
@@ -181,7 +181,7 @@ const BinSection = (): React.JSX.Element => {
       />
 
       <p
-        className="flex items-center gap-1.5 text-[11px]"
+        className="flex items-center gap-1.5 text-meta"
         style={{ color: 'var(--flow-text-muted)' }}
       >
         <Trash2 size={11} aria-hidden />
