@@ -642,7 +642,15 @@
     "makePrivateTooltip": "Rendre cette vue privée",
     "makeSharedTooltip": "Partager cette vue avec l'entreprise",
     "makePrivateLabel": "Rendre la vue privée",
-    "makeSharedLabel": "Partager la vue"
+    "makeSharedLabel": "Partager la vue",
+    "filters": {
+      "heading": "Filtres",
+      "remove": "Retirer le filtre",
+      "clearAll": "Effacer les filtres",
+      "assignee": "Assigné",
+      "project": "Projet",
+      "labels": "Étiquettes"
+    }
   },
   "calendar": {
     "heading": "Calendrier",
