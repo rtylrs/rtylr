@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Task, useFlowStore } from '../stores/flowStore';
+import { useLabels } from '../../features/tasks/useLabels';
+import { labelsForTask } from '../lib/taskLabelUtils';
 import { formatDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
 import StatusIcon from './StatusIcon';
@@ -19,8 +21,11 @@ interface TaskRowProps {
 export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { labels, projects, toggleSelectTask } = useFlowStore();
-  const taskLabels = labels.filter((l) => task.labelIds?.includes(l.id));
+  const { projects, toggleSelectTask } = useFlowStore();
+  // See TaskCard: the store's `labels` is never populated, so this read from
+  // the query is what makes the chips appear.
+  const { data: allLabels = [] } = useLabels();
+  const taskLabels = labelsForTask(allLabels, task);
   const project = projects.find((p) => p.id === task.projectId);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 

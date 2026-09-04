@@ -3,6 +3,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Calendar, MessageSquare, Paperclip, GitBranch } from 'lucide-react';
 import { Task, useFlowStore } from '../stores/flowStore';
+import { useLabels } from '../../features/tasks/useLabels';
+import { labelsForTask } from '../lib/taskLabelUtils';
 import { formatDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
@@ -38,8 +40,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   dimmed,
 }) => {
   const navigate = useNavigate();
-  const { labels, comments, attachments, subtasks, projects } = useFlowStore();
-  const taskLabels = labels.filter((l) => task.labelIds?.includes(l.id));
+  const { comments, attachments, subtasks, projects } = useFlowStore();
+  // Labels come from the query, not the store. `setLabels` has no call site
+  // anywhere in the app, so the store's `labels` was permanently [] and no
+  // chip ever rendered here even when the task had labels.
+  const { data: allLabels = [] } = useLabels();
+  const taskLabels = labelsForTask(allLabels, task);
   const project = projects.find((p) => p.id === task.projectId);
   const commentCount = comments.filter((c) => c.taskId === task.id).length;
   const attachmentCount = attachments.filter((a) => a.taskId === task.id).length;
@@ -136,7 +142,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         {taskLabels.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-2">
             {taskLabels.slice(0, 3).map((l) => (
-              <LabelChip key={l.id} label={l} small />
+              <LabelChip
+                key={l.id}
+                label={{ id: String(l.id), name: l.name, color: l.color }}
+                small
+              />
             ))}
           </div>
         )}

@@ -1,9 +1,17 @@
 import type { Label, Task } from '../stores/flowStore';
 
-/** Returns labels assigned to a task. */
-export function labelsForTask(labels: Label[], task: Task): Label[] {
-  const ids = task.labelIds ?? [];
-  return labels.filter((l) => ids.includes(l.id));
+/**
+ * Returns labels assigned to a task.
+ *
+ * Ids are compared as strings. `Label.id` from the store is a string, but the
+ * same shape arrives from `useLabels` as `ApiLabel`, which declares `id: number`
+ * while the wire actually sends the int64 as a string, and `Array.includes`
+ * does not coerce. The label parameter is widened for the same reason, so a
+ * caller holding API labels does not need a cast.
+ */
+export function labelsForTask<T extends { id: string | number }>(labels: T[], task: Task): T[] {
+  const ids = (task.labelIds ?? []).map(String);
+  return labels.filter((l) => ids.includes(String(l.id)));
 }
 
 /** Returns tasks that have a specific label. */
