@@ -37,11 +37,16 @@ export function bucketForMyTask(task: Task): MyTaskBucket {
   return 'later';
 }
 
-export const MY_TASK_BUCKET_LABEL: Record<MyTaskBucket, string> = {
-  recently_assigned: 'Recently assigned',
-  today: 'Today',
-  upcoming: 'Upcoming',
-  later: 'Later',
+/**
+ * Translation keys, not English. These were literal strings while nothing
+ * imported the module; rendering them as-is would have put English section
+ * headings into a screen that ships in three languages.
+ */
+export const MY_TASK_BUCKET_LABEL_KEY: Record<MyTaskBucket, string> = {
+  recently_assigned: 'flow.myIssues.buckets.recentlyAssigned',
+  today: 'flow.myIssues.buckets.today',
+  upcoming: 'flow.myIssues.buckets.upcoming',
+  later: 'flow.myIssues.buckets.later',
 };
 
 export const MY_TASK_BUCKET_ORDER: MyTaskBucket[] = [
