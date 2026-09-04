@@ -63,6 +63,39 @@ describe('menuStore', () => {
     expect(getState().items).toHaveLength(2);
   });
 
+  it('editCategory updates a category matched by _id', () => {
+    getState().addCategory({ _id: 'c1', name: 'A', type: 'category' as const, menuItems: [] });
+    getState().editCategory('c1', { name: 'B' });
+    expect(getState().items[0]).toMatchObject({ _id: 'c1', name: 'B' });
+  });
+
+  it('editCategory matches legacy id and itemId aliases', () => {
+    getState().addCategory({
+      _id: 'c1',
+      id: 'legacy-1',
+      name: 'A',
+      type: 'category' as const,
+      menuItems: [],
+    });
+    getState().addCategory({
+      _id: 'c2',
+      itemId: 'legacy-2',
+      name: 'C',
+      type: 'category' as const,
+      menuItems: [],
+    });
+    getState().editCategory('legacy-1', { name: 'B' });
+    getState().editCategory('legacy-2', { name: 'D' });
+    expect(getState().items[0]).toMatchObject({ _id: 'c1', name: 'B' });
+    expect(getState().items[1]).toMatchObject({ _id: 'c2', name: 'D' });
+  });
+
+  it('editCategory leaves non-matching categories untouched', () => {
+    getState().addCategory({ _id: 'c1', name: 'A', type: 'category' as const, menuItems: [] });
+    getState().editCategory('nope', { name: 'B' });
+    expect(getState().items[0]).toMatchObject({ _id: 'c1', name: 'A' });
+  });
+
   it('deleteCategory removes a category', () => {
     getState().addCategory({
       _id: 'c1',
@@ -70,7 +103,7 @@ describe('menuStore', () => {
       type: 'category' as const,
       menuItems: [],
       id: 'c1',
-    } as any);
+    });
     getState().deleteCategory('c1');
     expect(getState().items).toHaveLength(0);
   });
