@@ -282,6 +282,7 @@
       "overCapacity": "{{duration}} في {{day}}. أكثر من يومك المحدد بـ {{target}}. سيُسجَّل رغم ذلك - هذا تنبيه لا حظر.",
       "errors": {
         "minutesRange": "الدقائق لا تتجاوز 59. أتقصد {{hint}}؟",
+        "minutesHint_zero": "{{count}} ساعة و{{mins}} دقيقة",
         "minutesHint_one": "ساعة و{{mins}} دقيقة",
         "minutesHint_two": "ساعتان و{{mins}} دقيقة",
         "minutesHint_few": "{{count}} ساعات و{{mins}} دقيقة",

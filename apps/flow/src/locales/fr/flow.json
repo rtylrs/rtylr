@@ -189,6 +189,7 @@
     "logAction": "Saisir du temps",
     "logAmount": "Saisir {{amount}}",
     "roundedNotice_one": "Arrondi à {{amount}}, à la minute la plus proche.",
+    "roundedNotice_many": "Arrondi à {{amount}}, aux {{count}} minutes les plus proches.",
     "roundedNotice_other": "Arrondi à {{amount}}, aux {{count}} minutes les plus proches.",
     "cancel": "Annuler",
     "logForOthersGate": "Vous pouvez saisir votre propre temps. Saisir pour quelqu'un d'autre nécessite la gestion du temps de l'équipe.",
@@ -276,6 +277,7 @@
       "errors": {
         "minutesRange": "Les minutes ne dépassent pas 59. Vouliez-vous dire {{hint}} ?",
         "minutesHint_one": "{{count}} heure {{mins}}",
+        "minutesHint_many": "{{count}} heures {{mins}}",
         "minutesHint_other": "{{count}} heures {{mins}}",
         "dayLocked": "Cette journée a été approuvée le {{date}}. Demandez à votre manager de la rouvrir.",
         "dayLockedGeneric": "Cette journée est verrouillée pour modification. Demandez à votre manager de la rouvrir."
@@ -309,6 +311,7 @@
       "undo": "Annuler",
       "autoLockDays": "Verrouillage automatique après, en jours",
       "autoLockExplained_one": "Les entrées se verrouillent {{count}} jour après la clôture de la semaine, quel que soit le réglage. C'est ce qui rend la récupération par la finance sûre.",
+      "autoLockExplained_many": "Les entrées se verrouillent {{count}} jours après la clôture de la semaine, quel que soit le réglage. C'est ce qui rend la récupération par la finance sûre.",
       "autoLockExplained_other": "Les entrées se verrouillent {{count}} jours après la clôture de la semaine, quel que soit le réglage. C'est ce qui rend la récupération par la finance sûre.",
       "attendance": "Présence",
       "trackAttendance": "Suivre la présence (heures pointées)",
@@ -623,6 +626,7 @@
     "emptyList": "Aucune vue enregistrée pour le moment. Cliquez sur + pour en créer une.",
     "noViewSelected": "Aucune vue sélectionnée",
     "taskCount_one": "{{count}} tâche",
+    "taskCount_many": "{{count}} tâches",
     "taskCount_other": "{{count}} tâches",
     "emptyTasksForView": "Aucune tâche ne correspond aux filtres de cette vue.",
     "deleteDialog": {
@@ -659,6 +663,7 @@
   "milestones": {
     "heading": "Jalons",
     "trackedCount_one": "{{count}} suivi",
+    "trackedCount_many": "{{count}} suivis",
     "trackedCount_other": "{{count}} suivis",
     "newMilestone": "Nouveau jalon",
     "emptyTitle": "Aucun jalon pour le moment",
@@ -690,6 +695,7 @@
   },
   "triage": {
     "subtitle_one": "{{count}} tâche nécessite de l'attention · Capture → définir priorité & date → sortir du backlog",
+    "subtitle_many": "{{count}} tâches nécessitent de l'attention · Capture → définir priorité & date → sortir du backlog",
     "subtitle_other": "{{count}} tâches nécessitent de l'attention · Capture → définir priorité & date → sortir du backlog",
     "emptyTitle": "Boîte de réception vide",
     "emptyDescription": "Rien ne traîne sans priorité ni date d'échéance. Le nouveau travail arrive d'abord en capture - gardez le tri léger pour que le travail planifié reste fiable.",
@@ -698,6 +704,7 @@
   "team": {
     "loading": "Chargement de l'équipe...",
     "memberCount_one": "{{count}} membre · capacité et charge de travail",
+    "memberCount_many": "{{count}} membres · capacité et charge de travail",
     "memberCount_other": "{{count}} membres · capacité et charge de travail",
     "moreCount": "+{{count}} de plus"
   },
@@ -728,6 +735,7 @@
   "myIssues": {
     "loading": "Chargement…",
     "taskCount_one": "{{count}} tâche qui vous est assignée",
+    "taskCount_many": "{{count}} tâches qui vous sont assignées",
     "taskCount_other": "{{count}} tâches qui vous sont assignées",
     "emptyTitle": "Aucune tâche assignée",
     "emptyDescription": "Rien sur votre assiette pour le moment. Bon travail !",
