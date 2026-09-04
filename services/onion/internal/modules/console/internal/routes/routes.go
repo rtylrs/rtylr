@@ -24,13 +24,19 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	router.Get("/console/resources", rawListResources(ctx, service))
 	router.Get("/console/resources/{table}", rawDescribeResource(ctx, service))
 	router.Get("/console/resources/{table}/rows", rawListResourceRows(ctx, service))
-	router.Post("/console/resources/{table}/rows", rawCreateResourceRow(ctx, service))
+	serverHttp.RegisterPOSTWithValidation[createResourceRowRequest, createResourceRowResponse](
+		ctx, router, []string{"/console/resources/{table}/rows"},
+		&createResourceRowHandler{Service: service},
+	)
 	router.Get("/console/resources/{table}/rows/{id}", rawGetResourceRow(ctx, service))
 	serverHttp.RegisterPUTWithValidation[updateResourceRowRequest, updateResourceRowResponse](
 		ctx, router, []string{"/console/resources/{table}/rows/{id}"},
 		&updateResourceRowHandler{Service: service},
 	)
-	router.Delete("/console/resources/{table}/rows/{id}", rawDeleteResourceRow(ctx, service))
+	serverHttp.RegisterDELETEWithValidation[deleteResourceRowRequest, resourceMutationResponse](
+		ctx, router, []string{"/console/resources/{table}/rows/{id}"},
+		&deleteResourceRowHandler{Service: service},
+	)
 
 	// AI cache analytics has not moved to the generated console contract yet.
 	serverHttp.RegisterGET[handlers.AICacheAnalyticsRequest, handlers.AICacheAnalyticsResponse](
@@ -47,8 +53,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, []string{"/console/grants"},
 		&handlers.CreateGrantHandler{Service: service},
 	)
-	router.Post("/console/grants/{id}/revoke", rawRevokeGrant(ctx, service))
-	router.Delete("/console/grants/{id}", rawDeleteGrant(ctx, service))
+	serverHttp.RegisterPOSTWithValidation[grantIDRequest, resourceMutationResponse](
+		ctx, router, []string{"/console/grants/{id}/revoke"},
+		&revokeGrantHandler{Service: service},
+	)
+	serverHttp.RegisterDELETEWithValidation[grantIDRequest, resourceMutationResponse](
+		ctx, router, []string{"/console/grants/{id}"},
+		&deleteGrantHandler{Service: service},
+	)
 
 	// Addon Grants
 	serverHttp.RegisterGET[handlers.ListAddonsRequest, handlers.ListAddonsResponse](
@@ -63,14 +75,29 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, []string{"/console/addon-grants"},
 		&handlers.CreateAddonGrantHandler{Service: service},
 	)
-	router.Post("/console/addon-grants/{id}/revoke", rawRevokeAddonGrant(ctx, service))
-	router.Delete("/console/addon-grants/{id}", rawDeleteAddonGrant(ctx, service))
+	serverHttp.RegisterPOSTWithValidation[grantIDRequest, resourceMutationResponse](
+		ctx, router, []string{"/console/addon-grants/{id}/revoke"},
+		&revokeAddonGrantHandler{Service: service},
+	)
+	serverHttp.RegisterDELETEWithValidation[grantIDRequest, resourceMutationResponse](
+		ctx, router, []string{"/console/addon-grants/{id}"},
+		&deleteAddonGrantHandler{Service: service},
+	)
 
 	// Self-host licenses
 	router.Get("/console/self-host-licenses", rawListSelfHostLicenses(ctx, service))
-	router.Post("/console/self-host-licenses", rawCreateSelfHostLicense(ctx, service))
-	router.Post("/console/self-host-licenses/{id}/regenerate", rawRegenerateSelfHostLicenseKey(ctx, service))
-	router.Post("/console/self-host-licenses/{id}/revoke", rawRevokeSelfHostLicense(ctx, service))
+	serverHttp.RegisterPOSTWithValidation[createSelfHostLicenseRequest, application.SelfHostLicenseKeyResult](
+		ctx, router, []string{"/console/self-host-licenses"},
+		&createSelfHostLicenseHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[licenseIDRequest, application.SelfHostLicenseKeyResult](
+		ctx, router, []string{"/console/self-host-licenses/{id}/regenerate"},
+		&regenerateSelfHostLicenseHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[licenseIDRequest, application.SelfHostLicenseDTO](
+		ctx, router, []string{"/console/self-host-licenses/{id}/revoke"},
+		&revokeSelfHostLicenseHandler{Service: service},
+	)
 }
 
 // ── helper ────────────────────────────────────────────────────────────────────
@@ -109,12 +136,6 @@ func decodeOptionalJSONBody(w http.ResponseWriter, r *http.Request, dst any) boo
 		return true
 	}
 	return decodeJSONBody(w, r, dst)
-}
-
-func getIDParam(r *http.Request, param string) (int64, bool) {
-	raw := chi.URLParam(r, param)
-	id, err := strconv.ParseInt(raw, 10, 64)
-	return id, err == nil && id > 0
 }
 
 type updateResourceRowRequest struct {
@@ -225,120 +246,5 @@ func rawGetResourceRow(_ context.Context, svc *application.Service) http.Handler
 			return
 		}
 		writeJSON(w, http.StatusOK, result)
-	}
-}
-
-func rawCreateResourceRow(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		var req struct {
-			Values map[string]any `json:"values"`
-		}
-		if !decodeJSONBody(w, r, &req) {
-			return
-		}
-		if req.Values == nil {
-			writeError(w, http.StatusBadRequest, "values are required")
-			return
-		}
-		id, err := svc.CreateResourceRow(r.Context(), chi.URLParam(r, "table"), req.Values)
-		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusCreated, map[string]any{"id": id, "message": "Resource row created"})
-	}
-}
-
-func rawDeleteResourceRow(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		if err := svc.DeleteResourceRow(r.Context(), chi.URLParam(r, "table"), chi.URLParam(r, "id")); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"message": "Resource row deleted"})
-	}
-}
-
-func rawRevokeGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		id, ok := getIDParam(r, "id")
-		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id")
-			return
-		}
-		if err := svc.RevokeGrant(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to revoke grant")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"message": "Grant revoked"})
-	}
-}
-
-func rawDeleteGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		id, ok := getIDParam(r, "id")
-		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id")
-			return
-		}
-		if err := svc.DeleteGrant(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to delete grant")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"message": "Grant deleted"})
-	}
-}
-
-func rawRevokeAddonGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		id, ok := getIDParam(r, "id")
-		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id")
-			return
-		}
-		if err := svc.RevokeAddonGrant(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to revoke addon grant")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"message": "Addon grant revoked"})
-	}
-}
-
-func rawDeleteAddonGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		id, ok := getIDParam(r, "id")
-		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id")
-			return
-		}
-		if err := svc.DeleteAddonGrant(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to delete addon grant")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"message": "Addon grant deleted"})
 	}
 }

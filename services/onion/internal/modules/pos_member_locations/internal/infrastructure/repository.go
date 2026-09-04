@@ -17,7 +17,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 type MyLocation struct {
-	LocationID int64  `json:"locationId"`
+	LocationID int64  `json:"location_id"`
 	Name       string `json:"name"`
 	Address    string `json:"address"`
 	Phone      string `json:"phone"`

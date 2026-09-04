@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/application"
@@ -18,17 +19,72 @@ type ContactHandler struct{ Service *application.Service }
 // ContactRequest mirrors the typed ContactPayload in voxhire-web/src/lib/api.ts.
 // Field names use the JSON wire shape that the frontend already sends.
 type ContactRequest struct {
-	CompanyName string `json:"companyName"`
-	YourName    string `json:"yourName"`
-	YourTitle   string `json:"yourTitle"`
-	WorkEmail   string `json:"workEmail"`
+	CompanyName string `json:"company_name"`
+	YourName    string `json:"your_name"`
+	YourTitle   string `json:"your_title"`
+	WorkEmail   string `json:"work_email"`
 	Phone       string `json:"phone"`
 	Role        string `json:"role"`
 	Headcount   string `json:"headcount"`
 	Timeline    string `json:"timeline"`
 	Service     string `json:"service"`
 	Message     string `json:"message"`
-	AgencyOptIn bool   `json:"agencyOptIn"`
+	AgencyOptIn bool   `json:"agency_opt_in"`
+}
+
+// UnmarshalJSON accepts the older camelCase form while exposing only the
+// canonical snake_case tags on the request type.
+func (r *ContactRequest) UnmarshalJSON(data []byte) error {
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	decode := func(dst any, names ...string) error {
+		for _, name := range names {
+			raw, ok := fields[name]
+			if !ok {
+				continue
+			}
+			return json.Unmarshal(raw, dst)
+		}
+		return nil
+	}
+	var parsed ContactRequest
+	if err := decode(&parsed.CompanyName, "company_name", "companyName"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.YourName, "your_name", "yourName"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.YourTitle, "your_title", "yourTitle"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.WorkEmail, "work_email", "workEmail"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Phone, "phone"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Role, "role"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Headcount, "headcount"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Timeline, "timeline"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Service, "service"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Message, "message"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.AgencyOptIn, "agency_opt_in", "agencyOptIn"); err != nil {
+		return err
+	}
+	*r = parsed
+	return nil
 }
 
 type ContactResponse struct {

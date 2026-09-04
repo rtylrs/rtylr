@@ -36,8 +36,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		Post(handlers.CareerApplyRoute(), handlers.CareerApplyHandler(service))
 
 	// Admin login — anonymous, tighter limit (login spam target).
-	router.With(serverHttp.PerRouteRateLimit(10, time.Minute)).
-		Post(handlers.AdminLoginRoute(), handlers.AdminLoginHandler(service))
+	serverHttp.RegisterPOSTWithValidationAndMiddleware[handlers.AdminLoginRequest, handlers.AdminLoginResponse](
+		ctx, router, []string{handlers.AdminLoginRoute()},
+		&handlers.AdminLoginValidatedHandler{Service: service},
+		serverHttp.PerRouteRateLimit(10, time.Minute),
+	)
 
 	// Admin panel — self-guarded by the admin JWT middleware.
 	router.Group(func(gr chi.Router) {
@@ -45,25 +48,58 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 
 		gr.Get(handlers.AdminMeRoute(), handlers.AdminMeHandler(service))
 		gr.Get(handlers.AdminAdminsRoute(), handlers.ListAdminsHandler(service))
-		gr.Post(handlers.AdminAdminsRoute(), handlers.CreateAdminHandler(service))
+		serverHttp.RegisterPOSTWithValidation[handlers.CreateAdminRequest, handlers.CreateAdminResponse](
+			ctx, gr, []string{handlers.AdminAdminsRoute()},
+			&handlers.CreateAdminValidatedHandler{Service: service},
+		)
 		gr.Get(handlers.AdminAnalyticsRoute(), handlers.AnalyticsHandler(service))
 		gr.Get(handlers.AdminOpeningsRoute(), handlers.ListOpeningsHandler(service))
-		gr.Post(handlers.AdminCareersRoute(), handlers.CreateCareerHandler(service))
-		gr.Put(handlers.AdminCareerRoute(), handlers.UpdateCareerHandler(service))
-		gr.Put(handlers.AdminCareerActiveRoute(), handlers.SetCareerActiveHandler(service))
+		serverHttp.RegisterPOSTWithValidation[handlers.AdminCareerRequest, handlers.CareerMutationResponse](
+			ctx, gr, []string{handlers.AdminCareersRoute()},
+			&handlers.CreateCareerValidatedHandler{Service: service},
+		)
+		serverHttp.RegisterPUTWithValidation[handlers.AdminCareerRequest, handlers.CareerMutationResponse](
+			ctx, gr, []string{handlers.AdminCareerRoute()},
+			&handlers.UpdateCareerValidatedHandler{Service: service},
+		)
+		serverHttp.RegisterPUTWithValidation[handlers.SetCareerActiveRequest, handlers.CareerMutationResponse](
+			ctx, gr, []string{handlers.AdminCareerActiveRoute()},
+			&handlers.SetCareerActiveValidatedHandler{Service: service},
+		)
 		gr.Get(handlers.AdminLeadsRoute(), handlers.ListLeadsHandler(service))
 		gr.Get(handlers.AdminCandidatesRoute(), handlers.ListCandidatesHandler(service))
 		gr.Get(handlers.AdminCVJobsRoute(), handlers.ListCVJobsHandler(service))
-		gr.Put(handlers.AdminCVJobRetryRoute(), handlers.RetryCVJobHandler(service))
+		serverHttp.RegisterPUTWithValidation[handlers.RetryCVJobRequest, handlers.StatusResponse](
+			ctx, gr, []string{handlers.AdminCVJobRetryRoute()},
+			&handlers.RetryCVJobValidatedHandler{Service: service},
+		)
 		gr.Get(handlers.AdminTasksRoute(), handlers.ListTasksHandler(service))
-		gr.Post(handlers.AdminTasksRoute(), handlers.CreateTaskHandler(service))
-		gr.Put(handlers.AdminTaskRoute(), handlers.UpdateTaskHandler(service))
+		serverHttp.RegisterPOSTWithValidation[handlers.AdminTaskRequest, handlers.TaskMutationResponse](
+			ctx, gr, []string{handlers.AdminTasksRoute()},
+			&handlers.CreateTaskValidatedHandler{Service: service},
+		)
+		serverHttp.RegisterPUTWithValidation[handlers.AdminTaskRequest, handlers.TaskMutationResponse](
+			ctx, gr, []string{handlers.AdminTaskRoute()},
+			&handlers.UpdateTaskValidatedHandler{Service: service},
+		)
 		gr.Get(handlers.AdminShortlistsRoute(), handlers.ListShortlistsHandler(service))
-		gr.Post(handlers.AdminShortlistsRoute(), handlers.CreateShortlistHandler(service))
-		gr.Post(handlers.AdminShortlistItemsRoute(), handlers.AddShortlistItemHandler(service))
+		serverHttp.RegisterPOSTWithValidation[handlers.AdminShortlistRequest, handlers.ShortlistMutationResponse](
+			ctx, gr, []string{handlers.AdminShortlistsRoute()},
+			&handlers.CreateShortlistValidatedHandler{Service: service},
+		)
+		serverHttp.RegisterPOSTWithValidation[handlers.AddShortlistItemRequest, handlers.AddShortlistItemResponse](
+			ctx, gr, []string{handlers.AdminShortlistItemsRoute()},
+			&handlers.AddShortlistItemValidatedHandler{Service: service},
+		)
 		gr.Get(handlers.AdminApplicationsRoute(), handlers.ListApplicationsHandler(service))
-		gr.Put(handlers.AdminAppStatusRoute(), handlers.UpdateApplicationStatusHandler(service))
-		gr.Put(handlers.AdminAppReviewRoute(), handlers.UpdateApplicationReviewHandler(service))
+		serverHttp.RegisterPUTWithValidation[handlers.UpdateApplicationStatusRequest, handlers.StatusResponse](
+			ctx, gr, []string{handlers.AdminAppStatusRoute()},
+			&handlers.UpdateApplicationStatusValidatedHandler{Service: service},
+		)
+		serverHttp.RegisterPUTWithValidation[handlers.UpdateApplicationReviewRequest, handlers.StatusResponse](
+			ctx, gr, []string{handlers.AdminAppReviewRoute()},
+			&handlers.UpdateApplicationReviewValidatedHandler{Service: service},
+		)
 		gr.Get(handlers.AdminAppCVRoute(), handlers.ApplicationCVHandler(service))
 		gr.Get(handlers.AdminAppTimelineRoute(), handlers.ApplicationTimelineHandler(service))
 	})

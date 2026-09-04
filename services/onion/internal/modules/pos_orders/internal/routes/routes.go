@@ -29,8 +29,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.PayOrderHandler{Service: service},
 	)
 
+	// Paddle signs the raw request body, so this webhook must own body reads.
 	router.Post("/pos/payments/webhook", handlers.PaddlePOSWebhookHTTPHandler(service))
 
 	router.Get("/pos/ws", handlers.ServePOSWebSocket)
+	// The ticket endpoint is a websocket transport preflight, not a JSON API
+	// operation, and is authenticated by the websocket ticket handler.
 	router.Post("/pos/ws-ticket", handlers.IssuePOSWebSocketTicket)
 }

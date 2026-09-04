@@ -94,23 +94,14 @@ func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRe
 func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 	type requestPayload struct {
 		SetupCompletedAtSnake *json.RawMessage `json:"setup_completed_at"`
-		SetupCompletedAtCamel *json.RawMessage `json:"setupCompletedAt"`
 		CompanyNameSnake      string           `json:"company_name"`
-		CompanyNameCamel      string           `json:"companyName"`
 		FiscalMonthSnake      int32            `json:"fiscal_year_start_month"`
-		FiscalMonthCamel      int32            `json:"fiscalYearStartMonth"`
 		CurrencySnake         string           `json:"default_currency"`
-		CurrencyCamel         string           `json:"defaultCurrency"`
 		TimezoneSnake         string           `json:"default_timezone"`
-		TimezoneCamel         string           `json:"defaultTimezone"`
 		ScheduleSnake         int64            `json:"default_work_schedule_id"`
-		ScheduleCamel         int64            `json:"defaultWorkScheduleId"`
 		OvertimeEnabledSnake  bool             `json:"overtime_enabled"`
-		OvertimeEnabledCamel  bool             `json:"overtimeEnabled"`
 		MultiplierSnake       float64          `json:"overtime_multiplier"`
-		MultiplierCamel       float64          `json:"overtimeMultiplier"`
 		DirectorySnake        bool             `json:"directory_enabled"`
-		DirectoryCamel        bool             `json:"directoryEnabled"`
 	}
 	var payload requestPayload
 	if err := json.Unmarshal(data, &payload); err != nil {
@@ -121,9 +112,53 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	decode := func(key string, dst any) error {
+		raw, ok := fields[key]
+		if !ok {
+			return nil
+		}
+		return json.Unmarshal(raw, dst)
+	}
+	var setupCompletedAtCamel *json.RawMessage
+	var companyNameCamel string
+	var fiscalMonthCamel int32
+	var currencyCamel string
+	var timezoneCamel string
+	var scheduleCamel int64
+	var overtimeEnabledCamel bool
+	var multiplierCamel float64
+	var directoryCamel bool
+	if raw, ok := fields["setupCompletedAt"]; ok {
+		setupCompletedAtCamel = &raw
+	}
+	if err := decode("companyName", &companyNameCamel); err != nil {
+		return err
+	}
+	if err := decode("fiscalYearStartMonth", &fiscalMonthCamel); err != nil {
+		return err
+	}
+	if err := decode("defaultCurrency", &currencyCamel); err != nil {
+		return err
+	}
+	if err := decode("defaultTimezone", &timezoneCamel); err != nil {
+		return err
+	}
+	if err := decode("defaultWorkScheduleId", &scheduleCamel); err != nil {
+		return err
+	}
+	if err := decode("overtimeEnabled", &overtimeEnabledCamel); err != nil {
+		return err
+	}
+	if err := decode("overtimeMultiplier", &multiplierCamel); err != nil {
+		return err
+	}
+	if err := decode("directoryEnabled", &directoryCamel); err != nil {
+		return err
+	}
+
 	setupRaw := payload.SetupCompletedAtSnake
 	if setupRaw == nil {
-		setupRaw = payload.SetupCompletedAtCamel
+		setupRaw = setupCompletedAtCamel
 	}
 	setupCompletedAt, err := parseOptionalInt64(setupRaw)
 	if err != nil {
@@ -132,14 +167,14 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 
 	*r = UpsertHRConfigRequest{
 		SetupCompletedAt:      setupCompletedAt,
-		CompanyName:           firstString(payload.CompanyNameSnake, payload.CompanyNameCamel),
-		FiscalYearStartMonth:  firstInt32(payload.FiscalMonthSnake, payload.FiscalMonthCamel),
-		DefaultCurrency:       firstString(payload.CurrencySnake, payload.CurrencyCamel),
-		DefaultTimezone:       firstString(payload.TimezoneSnake, payload.TimezoneCamel),
-		DefaultWorkScheduleID: firstInt64(payload.ScheduleSnake, payload.ScheduleCamel),
-		OvertimeEnabled:       payload.OvertimeEnabledSnake || payload.OvertimeEnabledCamel,
-		OvertimeMultiplier:    firstFloat64(payload.MultiplierSnake, payload.MultiplierCamel),
-		DirectoryEnabled:      payload.DirectorySnake || payload.DirectoryCamel,
+		CompanyName:           firstString(payload.CompanyNameSnake, companyNameCamel),
+		FiscalYearStartMonth:  firstInt32(payload.FiscalMonthSnake, fiscalMonthCamel),
+		DefaultCurrency:       firstString(payload.CurrencySnake, currencyCamel),
+		DefaultTimezone:       firstString(payload.TimezoneSnake, timezoneCamel),
+		DefaultWorkScheduleID: firstInt64(payload.ScheduleSnake, scheduleCamel),
+		OvertimeEnabled:       payload.OvertimeEnabledSnake || overtimeEnabledCamel,
+		OvertimeMultiplier:    firstFloat64(payload.MultiplierSnake, multiplierCamel),
+		DirectoryEnabled:      payload.DirectorySnake || directoryCamel,
 	}
 	for _, key := range []string{
 		"company_name", "companyName", "fiscal_year_start_month", "fiscalYearStartMonth",

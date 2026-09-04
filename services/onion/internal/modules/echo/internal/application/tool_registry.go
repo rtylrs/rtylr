@@ -13,12 +13,12 @@ type ToolDef struct {
 	Description      string `json:"description"`
 	Module           string `json:"module"`
 	Scope            string `json:"scope"` // "read" or "write"
-	RequiresApproval bool   `json:"requiresApproval"`
-	InputHint        string `json:"inputHint,omitempty"`
-	OutputHint       string `json:"outputHint,omitempty"`
+	RequiresApproval bool   `json:"requires_approval"`
+	InputHint        string `json:"input_hint,omitempty"`
+	OutputHint       string `json:"output_hint,omitempty"`
 	Freshness        string `json:"freshness,omitempty"`
-	SideEffect       string `json:"sideEffect,omitempty"`
-	ApprovalReason   string `json:"approvalReason,omitempty"`
+	SideEffect       string `json:"side_effect,omitempty"`
+	ApprovalReason   string `json:"approval_reason,omitempty"`
 }
 
 // CoreTools is the seed registry — the long-term plan is to source this

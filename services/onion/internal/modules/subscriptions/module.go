@@ -34,6 +34,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	_ = ctx
+	// Paddle signs the raw request body, so this webhook must own body reads.
 	router.Post("/subscriptions/paddle-webhook", api.PaddleWebhookHTTPHandler(m.service))
 }
 

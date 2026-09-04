@@ -12,6 +12,8 @@ import (
 func RegisterRoutes(_ context.Context, router *chi.Mux, service *application.Service, permissions handlers.PermissionChecker) {
 	handler := &handlers.GenerateReportHandler{Service: service, Permissions: permissions}
 	for _, path := range handlers.GenerateReportRoutes() {
+		// The handler supports both JSON and CSV responses and therefore owns
+		// response content negotiation in addition to request validation.
 		router.Post(path, handler.ServeHTTP)
 	}
 }

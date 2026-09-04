@@ -88,25 +88,60 @@ type GenerateTextStreamHandler struct {
 }
 
 type GenerateTextStreamRequest struct {
-	Prompt string `json:"prompt"`
-	// snake_case to match the frontend payload and onion's JSON convention.
-	// camelCase aliases are accepted too so older clients keep working.
+	Prompt        string         `json:"prompt"`
 	SessionID     string         `json:"session_id"`
 	UserID        int64          `json:"user_id"`
 	SystemContext string         `json:"system_context"` // optional — app context injected as system message
 	Mode          string         `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
 	PageContext   map[string]any `json:"page_context,omitempty"`
+}
 
-	// Accepted aliases (older camelCase clients).
-	SessionIDAlt   string         `json:"sessionId"`
-	UserIDAlt      int64          `json:"userId"`
-	PageContextAlt map[string]any `json:"pageContext,omitempty"`
+// UnmarshalJSON keeps older Caret clients working while maintaining a single
+// snake_case representation in the request type and in generated responses.
+func (r *GenerateTextStreamRequest) UnmarshalJSON(data []byte) error {
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+
+	decode := func(dst any, names ...string) error {
+		for _, name := range names {
+			raw, ok := fields[name]
+			if !ok {
+				continue
+			}
+			return json.Unmarshal(raw, dst)
+		}
+		return nil
+	}
+
+	var parsed GenerateTextStreamRequest
+	if err := decode(&parsed.Prompt, "prompt"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.SessionID, "session_id", "sessionId"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.UserID, "user_id", "userId"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.SystemContext, "system_context"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Mode, "mode"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.PageContext, "page_context", "pageContext"); err != nil {
+		return err
+	}
+	*r = parsed
+	return nil
 }
 
 type GenerateTextStreamResponse struct {
 	Response   string `json:"response"`
-	IsComplete bool   `json:"isComplete"`
-	SessionID  string `json:"sessionId"`
+	IsComplete bool   `json:"is_complete"`
+	SessionID  string `json:"session_id"`
 }
 
 func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *GenerateTextStreamRequest) error {
@@ -389,17 +424,6 @@ func (h *GenerateTextStreamHandler) parseAndValidateRequest(w http.ResponseWrite
 	var req GenerateTextStreamRequest
 	if err := serverHttp.DecodeJSONRequestBody(w, r, &req); err != nil {
 		return nil, ErrInvalidRequestBody
-	}
-
-	// Accept camelCase aliases from older clients.
-	if req.SessionID == "" {
-		req.SessionID = req.SessionIDAlt
-	}
-	if req.UserID == 0 {
-		req.UserID = req.UserIDAlt
-	}
-	if req.PageContext == nil {
-		req.PageContext = req.PageContextAlt
 	}
 
 	return &req, nil

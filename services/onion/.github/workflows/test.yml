@@ -44,6 +44,12 @@ jobs:
       - name: Check Flow and HR route contracts
         run: make route-contract-check
 
+      - name: Check module JSON tags
+        run: make json-tags-check
+
+      - name: Check mutation validation registrations
+        run: make mutation-validation-check
+
       - name: Start MySQL
         run: docker compose -p onion-env -f local-env/docker-compose.yml up -d --wait db
 

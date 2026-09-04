@@ -115,32 +115,6 @@ func adminIDFromCtx(ctx context.Context) int64 {
 
 // ── Login ────────────────────────────────────────────────────────────
 
-func AdminLoginHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var body struct {
-			Email    string `json:"email"`
-			Password string `json:"password"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-
-		token, admin, err := svc.AdminLogin(r.Context(), body.Email, body.Password)
-		if err != nil {
-			if errors.Is(err, domain.ErrInvalidCredentials) {
-				writeApplyError(w, http.StatusUnauthorized, "Invalid email or password")
-				return
-			}
-			logger.Ctx(r.Context()).Error("voxhire admin login failed", logger.Error(err))
-			writeApplyError(w, http.StatusInternalServerError, "Login failed")
-			return
-		}
-
-		writeJSON(w, http.StatusOK, map[string]any{"token": token, "admin": admin})
-	}
-}
-
 // ── Admin accounts ───────────────────────────────────────────────────
 
 func AdminMeHandler(svc *application.Service) http.HandlerFunc {
@@ -163,35 +137,6 @@ func ListAdminsHandler(svc *application.Service) http.HandlerFunc {
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"admins": admins})
-	}
-}
-
-func CreateAdminHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var body struct {
-			Email    string `json:"email"`
-			Password string `json:"password"`
-			Name     string `json:"name"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-
-		admin, err := svc.CreateAdmin(r.Context(), body.Email, body.Password, body.Name)
-		if err != nil {
-			switch {
-			case errors.Is(err, domain.ErrAdminExists):
-				writeApplyError(w, http.StatusConflict, "An admin with that email already exists")
-			case errors.Is(err, domain.ErrInvalidInput):
-				writeApplyError(w, http.StatusBadRequest, "Email and a password of at least 6 characters are required")
-			default:
-				logger.Ctx(r.Context()).Error("voxhire create admin failed", logger.Error(err))
-				writeApplyError(w, http.StatusInternalServerError, "Failed to create admin")
-			}
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"admin": admin})
 	}
 }
 
@@ -251,86 +196,6 @@ func (b adminCareerRequest) careerInput(id int64) domain.CareerInput {
 	}
 }
 
-func CreateCareerHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var body adminCareerRequest
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-
-		career, err := svc.CreateCareer(r.Context(), body.careerInput(0))
-		if err != nil {
-			writeCareerMutationError(w, r, err, "create")
-			return
-		}
-		writeJSON(w, http.StatusCreated, map[string]any{"career": career})
-	}
-}
-
-func UpdateCareerHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-		if err != nil || id <= 0 {
-			writeApplyError(w, http.StatusBadRequest, "Invalid career id")
-			return
-		}
-
-		var body adminCareerRequest
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-
-		career, err := svc.UpdateCareer(r.Context(), body.careerInput(id))
-		if err != nil {
-			writeCareerMutationError(w, r, err, "update")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"career": career})
-	}
-}
-
-func SetCareerActiveHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-		if err != nil || id <= 0 {
-			writeApplyError(w, http.StatusBadRequest, "Invalid career id")
-			return
-		}
-
-		var body struct {
-			Active bool `json:"active"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-
-		career, err := svc.SetCareerActive(r.Context(), id, body.Active)
-		if err != nil {
-			writeCareerMutationError(w, r, err, "update active state for")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"career": career})
-	}
-}
-
-func writeCareerMutationError(w http.ResponseWriter, r *http.Request, err error, action string) {
-	switch {
-	case errors.Is(err, domain.ErrInvalidInput):
-		writeApplyError(w, http.StatusBadRequest, "Title is required")
-	case errors.Is(err, domain.ErrCareerNotFound):
-		writeApplyError(w, http.StatusNotFound, "Career not found")
-	default:
-		logger.Ctx(r.Context()).Error("voxhire career mutation failed",
-			logger.String("action", action),
-			logger.Error(err),
-		)
-		writeApplyError(w, http.StatusInternalServerError, "Failed to "+action+" career")
-	}
-}
-
 func ListLeadsHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		leads, err := svc.ListCompanyLeads(r.Context())
@@ -374,79 +239,6 @@ func ListApplicationsHandler(svc *application.Service) http.HandlerFunc {
 			"limit":        filter.Limit,
 			"offset":       filter.Offset,
 		})
-	}
-}
-
-func UpdateApplicationStatusHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-		if err != nil || id <= 0 {
-			writeApplyError(w, http.StatusBadRequest, "Invalid application id")
-			return
-		}
-
-		var body struct {
-			Status string `json:"status"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-
-		if err := svc.UpdateApplicationStatus(r.Context(), id, body.Status); err != nil {
-			switch {
-			case errors.Is(err, domain.ErrApplicationNotFound):
-				writeApplyError(w, http.StatusNotFound, "Application not found")
-			case errors.Is(err, domain.ErrInvalidInput):
-				writeApplyError(w, http.StatusBadRequest, "Status is required")
-			default:
-				logger.Ctx(r.Context()).Error("voxhire update application status failed", logger.Error(err))
-				writeApplyError(w, http.StatusInternalServerError, "Failed to update status")
-			}
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"status": "success"})
-	}
-}
-
-func UpdateApplicationReviewHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-		if err != nil || id <= 0 {
-			writeApplyError(w, http.StatusBadRequest, "Invalid application id")
-			return
-		}
-
-		var body struct {
-			Status       string `json:"status"`
-			ReviewRating int    `json:"review_rating"`
-			ReviewNotes  string `json:"review_notes"`
-			NextStep     string `json:"next_step"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-
-		err = svc.UpdateApplicationReview(r.Context(), id, domain.ApplicationReviewInput{
-			Status:       body.Status,
-			ReviewRating: body.ReviewRating,
-			ReviewNotes:  body.ReviewNotes,
-			NextStep:     body.NextStep,
-		})
-		if err != nil {
-			switch {
-			case errors.Is(err, domain.ErrApplicationNotFound):
-				writeApplyError(w, http.StatusNotFound, "Application not found")
-			case errors.Is(err, domain.ErrInvalidInput):
-				writeApplyError(w, http.StatusBadRequest, "Invalid review")
-			default:
-				logger.Ctx(r.Context()).Error("voxhire update application review failed", logger.Error(err))
-				writeApplyError(w, http.StatusInternalServerError, "Failed to update review")
-			}
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"status": "success"})
 	}
 }
 
@@ -537,30 +329,6 @@ func ListCVJobsHandler(svc *application.Service) http.HandlerFunc {
 	}
 }
 
-func RetryCVJobHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-		if err != nil || id <= 0 {
-			writeApplyError(w, http.StatusBadRequest, "Invalid CV job id")
-			return
-		}
-		source := strings.TrimSpace(chi.URLParam(r, "source"))
-		if err := svc.RetryCVProcessing(r.Context(), source, id); err != nil {
-			switch {
-			case errors.Is(err, domain.ErrInvalidInput):
-				writeApplyError(w, http.StatusBadRequest, "Invalid CV job")
-			case errors.Is(err, domain.ErrApplicationNotFound):
-				writeApplyError(w, http.StatusNotFound, "CV job not found")
-			default:
-				logger.Ctx(r.Context()).Error("voxhire retry cv job failed", logger.Error(err))
-				writeApplyError(w, http.StatusInternalServerError, "Failed to retry CV job")
-			}
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"status": "success"})
-	}
-}
-
 type adminTaskRequest struct {
 	ApplicationID int64  `json:"application_id"`
 	Title         string `json:"title"`
@@ -594,68 +362,6 @@ func ListTasksHandler(svc *application.Service) http.HandlerFunc {
 	}
 }
 
-func CreateTaskHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var body adminTaskRequest
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-		in, err := body.taskInput(0)
-		if err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid due date")
-			return
-		}
-		task, err := svc.UpsertTask(r.Context(), in)
-		if err != nil {
-			writeTaskMutationError(w, r, err, "create")
-			return
-		}
-		writeJSON(w, http.StatusCreated, map[string]any{"task": task})
-	}
-}
-
-func UpdateTaskHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-		if err != nil || id <= 0 {
-			writeApplyError(w, http.StatusBadRequest, "Invalid task id")
-			return
-		}
-		var body adminTaskRequest
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-		in, err := body.taskInput(id)
-		if err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid due date")
-			return
-		}
-		task, err := svc.UpdateTask(r.Context(), in)
-		if err != nil {
-			writeTaskMutationError(w, r, err, "update")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{"task": task})
-	}
-}
-
-func writeTaskMutationError(w http.ResponseWriter, r *http.Request, err error, action string) {
-	switch {
-	case errors.Is(err, domain.ErrInvalidInput):
-		writeApplyError(w, http.StatusBadRequest, "Application and task title are required")
-	case errors.Is(err, domain.ErrApplicationNotFound):
-		writeApplyError(w, http.StatusNotFound, "Task or application not found")
-	default:
-		logger.Ctx(r.Context()).Error("voxhire task mutation failed",
-			logger.String("action", action),
-			logger.Error(err),
-		)
-		writeApplyError(w, http.StatusInternalServerError, "Failed to "+action+" task")
-	}
-}
-
 type adminShortlistRequest struct {
 	JobID  int64  `json:"job_id"`
 	Name   string `json:"name"`
@@ -681,71 +387,6 @@ func ListShortlistsHandler(svc *application.Service) http.HandlerFunc {
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"shortlists": shortlists})
-	}
-}
-
-func CreateShortlistHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var body adminShortlistRequest
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-		shortlist, err := svc.CreateShortlist(r.Context(), domain.ShortlistInput{
-			JobID:  body.JobID,
-			Name:   body.Name,
-			Status: body.Status,
-			Notes:  body.Notes,
-		})
-		if err != nil {
-			if errors.Is(err, domain.ErrInvalidInput) {
-				writeApplyError(w, http.StatusBadRequest, "Job and shortlist name are required")
-				return
-			}
-			logger.Ctx(r.Context()).Error("voxhire create shortlist failed", logger.Error(err))
-			writeApplyError(w, http.StatusInternalServerError, "Failed to create shortlist")
-			return
-		}
-		writeJSON(w, http.StatusCreated, map[string]any{"shortlist": shortlist})
-	}
-}
-
-func AddShortlistItemHandler(svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		shortlistID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-		if err != nil || shortlistID <= 0 {
-			writeApplyError(w, http.StatusBadRequest, "Invalid shortlist id")
-			return
-		}
-		var body struct {
-			ApplicationID int64  `json:"application_id"`
-			Rank          int    `json:"rank"`
-			Notes         string `json:"notes"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeApplyError(w, http.StatusBadRequest, "Invalid request")
-			return
-		}
-		item, err := svc.AddShortlistItem(r.Context(), domain.ShortlistItemInput{
-			ShortlistID:   shortlistID,
-			ApplicationID: body.ApplicationID,
-			Rank:          body.Rank,
-			Notes:         body.Notes,
-		})
-		if err != nil {
-			if errors.Is(err, domain.ErrInvalidInput) {
-				writeApplyError(w, http.StatusBadRequest, "Shortlist and application are required")
-				return
-			}
-			if errors.Is(err, domain.ErrApplicationNotFound) {
-				writeApplyError(w, http.StatusNotFound, "Shortlist item not found")
-				return
-			}
-			logger.Ctx(r.Context()).Error("voxhire add shortlist item failed", logger.Error(err))
-			writeApplyError(w, http.StatusInternalServerError, "Failed to add shortlist item")
-			return
-		}
-		writeJSON(w, http.StatusCreated, map[string]any{"item": item})
 	}
 }
 

@@ -2,25 +2,25 @@ package domain
 
 // InsightsStats represents task velocity and completion statistics.
 type InsightsStats struct {
-	TotalTasks        int64            `json:"totalTasks"`
-	CompletedTasks    int64            `json:"completedTasks"`
-	CompletionRate    float64          `json:"completionRate"`
-	AvgCompletionDays float64          `json:"avgCompletionDays"`
-	VelocityThisWeek  int64            `json:"velocityThisWeek"`
-	VelocityLastWeek  int64            `json:"velocityLastWeek"`
-	OverdueCount      int64            `json:"overdueCount"`
-	TasksByStatus     map[string]int64 `json:"tasksByStatus"`
-	TasksByPriority   map[string]int64 `json:"tasksByPriority"`
+	TotalTasks        int64            `json:"total_tasks"`
+	CompletedTasks    int64            `json:"completed_tasks"`
+	CompletionRate    float64          `json:"completion_rate"`
+	AvgCompletionDays float64          `json:"avg_completion_days"`
+	VelocityThisWeek  int64            `json:"velocity_this_week"`
+	VelocityLastWeek  int64            `json:"velocity_last_week"`
+	OverdueCount      int64            `json:"overdue_count"`
+	TasksByStatus     map[string]int64 `json:"tasks_by_status"`
+	TasksByPriority   map[string]int64 `json:"tasks_by_priority"`
 }
 
 // TeamMemberWorkload represents per-member task distribution.
 type TeamMemberWorkload struct {
-	UserID          int64  `json:"userId"`
+	UserID          int64  `json:"user_id"`
 	Name            string `json:"name"`
-	TotalTasks      int64  `json:"totalTasks"`
-	CompletedTasks  int64  `json:"completedTasks"`
-	InProgressTasks int64  `json:"inProgressTasks"`
-	OverdueTasks    int64  `json:"overdueTasks"`
+	TotalTasks      int64  `json:"total_tasks"`
+	CompletedTasks  int64  `json:"completed_tasks"`
+	InProgressTasks int64  `json:"in_progress_tasks"`
+	OverdueTasks    int64  `json:"overdue_tasks"`
 }
 
 // TeamWorkloadResult is the full team workload response.
@@ -32,9 +32,9 @@ type TeamWorkloadResult struct {
 type RoadmapMilestone struct {
 	ID        int64  `json:"id"`
 	Name      string `json:"name"`
-	DueDate   string `json:"dueDate"`
-	TaskCount int64  `json:"taskCount"`
-	DoneCount int64  `json:"doneCount"`
+	DueDate   string `json:"due_date"`
+	TaskCount int64  `json:"task_count"`
+	DoneCount int64  `json:"done_count"`
 }
 
 // RoadmapProject represents a project with milestone progress.
@@ -47,11 +47,11 @@ type RoadmapProject struct {
 	ID             int64              `json:"id"`
 	Name           string             `json:"name"`
 	Status         string             `json:"status"`
-	StartDate      string             `json:"startDate"`
-	DueDate        string             `json:"dueDate"`
+	StartDate      string             `json:"start_date"`
+	DueDate        string             `json:"due_date"`
 	Progress       float64            `json:"progress"`
-	TotalTasks     int64              `json:"totalTasks"`
-	CompletedTasks int64              `json:"completedTasks"`
+	TotalTasks     int64              `json:"total_tasks"`
+	CompletedTasks int64              `json:"completed_tasks"`
 	Milestones     []RoadmapMilestone `json:"milestones"`
 }
 

@@ -22,14 +22,14 @@ var ErrSettingsNotFound = errors.New("pos settings not found")
 
 type FeatureSettings struct {
 	Tables         bool `json:"tables"`
-	KitchenDisplay bool `json:"kitchenDisplay"`
+	KitchenDisplay bool `json:"kitchen_display"`
 	Modifiers      bool `json:"modifiers"`
 	Combos         bool `json:"combos"`
 	Tips           bool `json:"tips"`
-	GiftCards      bool `json:"giftCards"`
+	GiftCards      bool `json:"gift_cards"`
 	Customers      bool `json:"customers"`
 	Inventory      bool `json:"inventory"`
-	CashDrawer     bool `json:"cashDrawer"`
+	CashDrawer     bool `json:"cash_drawer"`
 }
 
 type Settings struct {

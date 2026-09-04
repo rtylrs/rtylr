@@ -20,7 +20,7 @@ type GetProviderStatusRequest struct{}
 
 type GetProviderStatusResponse struct {
 	Available       bool            `json:"available"`
-	PrimaryProvider string          `json:"primaryProvider"`
+	PrimaryProvider string          `json:"primary_provider"`
 	Providers       map[string]bool `json:"providers"`
 }
 

@@ -26,10 +26,10 @@ const (
 // StreamEvent is the JSON envelope written to the wire after `data: `.
 type StreamEvent struct {
 	Type             StreamEventType `json:"type"`
-	SessionID        string          `json:"sessionId,omitempty"`
-	MessageID        string          `json:"messageId,omitempty"`
+	SessionID        string          `json:"session_id,omitempty"`
+	MessageID        string          `json:"message_id,omitempty"`
 	Role             string          `json:"role,omitempty"`
-	BlockID          string          `json:"blockId,omitempty"`
+	BlockID          string          `json:"block_id,omitempty"`
 	Delta            string          `json:"delta,omitempty"`
 	Name             string          `json:"name,omitempty"`
 	Mode             string          `json:"mode,omitempty"`
@@ -40,8 +40,8 @@ type StreamEvent struct {
 	Summary          string          `json:"summary,omitempty"`
 	Error            string          `json:"error,omitempty"`
 	Recoverable      bool            `json:"recoverable,omitempty"`
-	DurationMs       int64           `json:"durationMs,omitempty"`
-	RequiresApproval bool            `json:"requiresApproval,omitempty"`
+	DurationMs       int64           `json:"duration_ms,omitempty"`
+	RequiresApproval bool            `json:"requires_approval,omitempty"`
 }
 
 // WriteEvent serializes the event to the SSE stream and flushes immediately.

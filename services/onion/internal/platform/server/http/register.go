@@ -48,13 +48,13 @@ type ValidatorFunc[Req any] interface {
 	Validate(ctx context.Context, req *Req) error
 }
 
-func RegisterGET[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterGET[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Get(path, wrapHandler(ctx, handler, false))
 	}
 }
 
-func RegisterGETWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterGETWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Get(path, wrapHandler(ctx, handler, true))
 	}
@@ -67,7 +67,7 @@ func RegisterGETWithValidation[Req, Res any](ctx context.Context, router *chi.Mu
 // outermost.
 func RegisterGETWithValidationAndMiddleware[Req, Res any](
 	ctx context.Context,
-	router *chi.Mux,
+	router chi.Router,
 	paths []string,
 	handler HandlerFunc[Req, Res],
 	middlewares ...MiddlewareFunc,
@@ -81,13 +81,13 @@ func RegisterGETWithValidationAndMiddleware[Req, Res any](
 	}
 }
 
-func RegisterPOST[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterPOST[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Post(path, wrapHandler(ctx, handler, false))
 	}
 }
 
-func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Post(path, wrapHandler(ctx, handler, true))
 	}
@@ -100,7 +100,7 @@ func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router *chi.M
 // run in order around the handler — index 0 is outermost.
 func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 	ctx context.Context,
-	router *chi.Mux,
+	router chi.Router,
 	paths []string,
 	handler HandlerFunc[Req, Res],
 	middlewares ...MiddlewareFunc,
@@ -114,37 +114,37 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 	}
 }
 
-func RegisterPATCH[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterPATCH[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Patch(path, wrapHandler(ctx, handler, false))
 	}
 }
 
-func RegisterPATCHWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterPATCHWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Patch(path, wrapHandler(ctx, handler, true))
 	}
 }
 
-func RegisterPUT[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterPUT[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Put(path, wrapHandler(ctx, handler, false))
 	}
 }
 
-func RegisterPUTWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterPUTWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Put(path, wrapHandler(ctx, handler, true))
 	}
 }
 
-func RegisterDELETE[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterDELETE[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Delete(path, wrapHandler(ctx, handler, false))
 	}
 }
 
-func RegisterDELETEWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+func RegisterDELETEWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Delete(path, wrapHandler(ctx, handler, true))
 	}
