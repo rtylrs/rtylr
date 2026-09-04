@@ -101,6 +101,10 @@ describe('flow locale parity', () => {
       // sibling bucket.active/done/cancelled all differ, which is the check
       // that this is a cognate rather than a missed translation.
       'status.bucket.backlog',
+      // "Total" is the same word in French. Its siblings in the same block,
+      // projectOverview.health.onTrack and .recentComments, both differ, which
+      // is the check that this is a cognate rather than a missed translation.
+      'projectOverview.total',
     ]);
 
     const copied = keyPaths(en).filter((path) => {
