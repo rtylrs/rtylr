@@ -121,7 +121,14 @@ const navSections: NavSection[] = [
         i18nKey: 'nav.timeLogging',
         path: '/time',
         icon: PlayCircle,
-        configGuard: (m) => m === 'time_logging' || m === 'both',
+        // Reads the raw config rather than the defaulted `m`, so this matches
+        // the route's own guard exactly. `timeTrackingModel` is never
+        // populated by the backend, and the sidebar's `?? 'both'` fallback
+        // therefore advertised a route that redirects away for every user and
+        // every role. The fallback stays for Attendance below, whose route has
+        // no config guard at all and is always reachable.
+        configGuard: (_m, cfg) =>
+          cfg?.timeTrackingModel === 'time_logging' || cfg?.timeTrackingModel === 'both',
       },
       { i18nKey: 'nav.timesheets', path: '/timesheets', icon: Timer, permission: 'hr:shifts' },
       {
