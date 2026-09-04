@@ -84,7 +84,10 @@
     "deleted": "Project deleted",
     "restoreFailed": "Failed to restore project",
     "purgeFailed": "Failed to permanently delete project",
-    "visibilityFailed": "Failed to update visibility"
+    "visibilityFailed": "Failed to update visibility",
+    "archived": "Project archived.",
+    "archivedUntil": "Project archived. It will be permanently deleted on {{date}}.",
+    "archiveFailed": "Failed to archive project"
   },
   "milestone": {
     "createFailed": "Failed to create milestone",
