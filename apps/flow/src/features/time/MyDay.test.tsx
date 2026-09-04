@@ -182,9 +182,12 @@ describe('MyDay: week strip', () => {
   });
 
   it('marks a day with recorded time so it is distinguishable from an empty one', () => {
+    // This asserted a dot carrying only a `title`, which is aria-hidden and
+    // announced as nothing. The cell now shows the total itself, which is a
+    // stronger affordance and readable by anything.
     workDaysRangeState.value = { data: { workDays: [{ date: '2026-08-11', loggedMinutes: 90 }] } };
     render(<MyDay />);
-    expect(screen.getByTitle('flow.time.weekDayLogged')).toBeInTheDocument();
+    expect(screen.getByText('1:30')).toBeInTheDocument();
   });
 
   it('selecting a strip day changes which day is loaded', () => {
@@ -328,5 +331,71 @@ describe('MyDay: a failed load is not an endless load', () => {
     render(<MyDay />);
     expect(screen.getByText('flow.time.loadingDay')).toBeInTheDocument();
     expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
+  });
+});
+
+describe('MyDay day total and week strip (#1093)', () => {
+  it('shows the day total prominently, not only in the card pill', () => {
+    // S-19 asks for 20px where the eye lands. It was 12px inside a pill at
+    // the top right of the Add-hours card.
+    workDayState.value = {
+      ...workDayState.value,
+      data: {
+        workDay: {
+          id: '9',
+          workMode: 'onsite',
+          clockedMinutes: 0,
+          loggedMinutes: 185,
+          gapMinutes: 0,
+        },
+        lines: [],
+      },
+    };
+    const { container } = render(<MyDay />);
+
+    const header = container.querySelector('header');
+    expect(header?.textContent).toContain('3:05');
+    // The prominent number is on the type scale's largest step.
+    const prominent = [...(header?.querySelectorAll('.text-screen') ?? [])].map(
+      (n) => n.textContent
+    );
+    expect(prominent.some((text) => text?.includes('3:05'))).toBe(true);
+  });
+
+  it('shows each day of the week its own logged total', () => {
+    // The strip already fetched loggedMinutes per date and used it only to
+    // decide whether to draw a dot, so every cell carried just the date.
+    workDaysRangeState.value = {
+      data: { workDays: [{ date: '2026-08-16', loggedMinutes: 125 }] },
+    };
+    render(<MyDay />);
+
+    expect(screen.getByText('2:05')).toBeInTheDocument();
+  });
+
+  it('marks a day with nothing logged rather than leaving it blank', () => {
+    workDaysRangeState.value = { data: { workDays: [] } };
+    const { container } = render(<MyDay />);
+
+    const strip = container.querySelector('[role="group"]');
+    expect(strip?.textContent).toContain('–');
+  });
+
+  it('omits the target when none is configured', () => {
+    workDayState.value = {
+      ...workDayState.value,
+      data: {
+        workDay: {
+          id: '9',
+          workMode: 'onsite',
+          clockedMinutes: 0,
+          loggedMinutes: 60,
+          gapMinutes: 0,
+        },
+        lines: [],
+      },
+    };
+    const { container } = render(<MyDay />);
+    expect(container.querySelector('header')?.textContent).not.toContain('flow.time.of');
   });
 });
