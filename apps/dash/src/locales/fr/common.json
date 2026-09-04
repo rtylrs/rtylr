@@ -161,6 +161,9 @@
     "teamMembers": "Membres de l'équipe",
     "allApps": "Toutes les applications",
     "activityLog": "Journal d'activité",
-    "language": "Langue"
-  }
+    "language": "Langue",
+    "navigate": "Naviguer",
+    "storefront": "Boutique"
+  },
+  "launch": "Ouvrir"
 }
