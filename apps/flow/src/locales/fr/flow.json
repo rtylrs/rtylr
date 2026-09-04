@@ -159,7 +159,9 @@
     "subtaskAddPlaceholder": "Ajouter une sous-tâche…",
     "subtaskCount": "{{done}} sur {{total}}",
     "removeAttachmentLabel": "Supprimer la pièce jointe",
-    "leaveOverlap": "{count} période(s) de congé approuvé chevauchent l'échéance"
+    "leaveOverlap_one": "{{count}} période de congé approuvé chevauche l'échéance",
+    "leaveOverlap_many": "{{count}} périodes de congé approuvé chevauchent l'échéance",
+    "leaveOverlap_other": "{{count}} périodes de congé approuvé chevauchent l'échéance"
   },
   "time": {
     "heading": "Temps",

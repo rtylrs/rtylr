@@ -280,7 +280,5 @@
     },
     "refresh": "تحديث"
   },
-  "supplierBills": {
-    "supplierBills": "{count} فاتورة"
-  }
+  "supplierBills": "{{count}} فاتورة"
 }

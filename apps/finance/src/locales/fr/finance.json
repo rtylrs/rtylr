@@ -58,9 +58,9 @@
     "region": "Temps facturable non facturé",
     "title": "Temps facturable non facturé",
     "hint": "Temps approuvé facturable des RH sans facture. Sélectionnez des entrées puis créez une facture ; les heures seront marquées facturées automatiquement.",
-    "billSelected": "Facturer la sélection ({count})",
+    "billSelected": "Facturer la sélection ({{count}})",
     "working": "En cours…",
-    "markedDone": "Boucle terminée : {marked} heures marquées facturées, {skipped} ignorées.",
+    "markedDone": "Boucle terminée : {{marked}} heures marquées facturées, {{skipped}} ignorées.",
     "billToPlaceholder": "Facturer à (nom du client)",
     "fallbackClient": "Heures facturables"
   }

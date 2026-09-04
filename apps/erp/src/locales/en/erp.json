@@ -280,7 +280,5 @@
     },
     "refresh": "Refresh"
   },
-  "supplierBills": {
-    "supplierBills": "{count} bill(s)"
-  }
+  "supplierBills": "{{count}} bill(s)"
 }
