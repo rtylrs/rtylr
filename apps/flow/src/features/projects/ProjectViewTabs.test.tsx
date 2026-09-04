@@ -46,24 +46,24 @@ describe('ProjectViewTabs preview-route gating', () => {
     mockUseFeatureFlag.mockReturnValue(false);
     renderTabs();
 
-    expect(screen.queryByText('Overview')).not.toBeInTheDocument();
-    expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
-    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.projectViewTabs.overview')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.shell.timeline')).not.toBeInTheDocument();
+    expect(screen.queryByText('nav.dashboard')).not.toBeInTheDocument();
 
-    expect(screen.getByText('Board')).toBeInTheDocument();
-    expect(screen.getByText('List')).toBeInTheDocument();
-    expect(screen.getByText('Calendar')).toBeInTheDocument();
+    expect(screen.getByText('flow.projectViewTabs.board')).toBeInTheDocument();
+    expect(screen.getByText('flow.projectViewTabs.list')).toBeInTheDocument();
+    expect(screen.getByText('flow.shell.calendar')).toBeInTheDocument();
   });
 
   it('shows all tabs when the preview-routes flag is on', () => {
     mockUseFeatureFlag.mockReturnValue(true);
     renderTabs();
 
-    expect(screen.getByText('Overview')).toBeInTheDocument();
-    expect(screen.getByText('Timeline')).toBeInTheDocument();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Board')).toBeInTheDocument();
-    expect(screen.getByText('List')).toBeInTheDocument();
-    expect(screen.getByText('Calendar')).toBeInTheDocument();
+    expect(screen.getByText('flow.projectViewTabs.overview')).toBeInTheDocument();
+    expect(screen.getByText('flow.shell.timeline')).toBeInTheDocument();
+    expect(screen.getByText('nav.dashboard')).toBeInTheDocument();
+    expect(screen.getByText('flow.projectViewTabs.board')).toBeInTheDocument();
+    expect(screen.getByText('flow.projectViewTabs.list')).toBeInTheDocument();
+    expect(screen.getByText('flow.shell.calendar')).toBeInTheDocument();
   });
 });

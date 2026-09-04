@@ -602,7 +602,16 @@
     },
     "moveTask": "Move {{title}} to another column",
     "moveTaskMenu": "Move to column",
-    "moveNoTargets": "This board has no other columns yet."
+    "moveNoTargets": "This board has no other columns yet.",
+    "dueLane": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "later": "Later",
+      "noDueDate": "No due date"
+    },
+    "groupByLabel": "Group:"
   },
   "views": {
     "heading": "Saved Views",
@@ -754,14 +763,22 @@
   },
   "projectList": {
     "pageTitle": "List · rtylr",
-    "toggleDoneLabel": "Mark done"
+    "toggleDoneLabel": "Mark done",
+    "columnTitle": "Title",
+    "moreOptions": "More options"
   },
   "projectOverview": {
     "pageTitle": "Overview · rtylr",
     "noMilestones": "No milestones defined.",
     "goToMilestonesCta": "Go to Milestones",
     "noComments": "No recent comments.",
-    "goToBoardCta": "Go to Board"
+    "goToBoardCta": "Go to Board",
+    "health": {
+      "onTrack": "On track",
+      "offTrack": "Off track"
+    },
+    "recentComments": "Recent comments",
+    "total": "Total"
   },
   "projectTimeline": {
     "pageTitle": "Timeline · rtylr",
@@ -804,7 +821,17 @@
     "visibilityPersonalGate": "Your My Tasks project is always private.",
     "archiveNotice": "Archiving moves the project to the recycle bin. It stays restorable until retention expires.",
     "archiveAction": "Archive",
-    "archiveConfirm": "Archive project"
+    "archiveConfirm": "Archive project",
+    "deleteDialogTitle": "Delete project",
+    "deleteDialogPrefix": "This permanently archives",
+    "deleteDialogSuffix": " and all its tasks. To confirm, retype the project name below.",
+    "deleteHeading": "Delete this project",
+    "selectNewOwner": "Select new owner…",
+    "transferHeading": "Transfer ownership",
+    "transferDescription": "Transfer ownership to any org member. You'll remain a member.",
+    "transferCta": "Transfer",
+    "transferConfirmHint": "Ownership will transfer immediately. Click Confirm to proceed.",
+    "transferring": "Transferring…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",
@@ -894,5 +921,22 @@
   "confirm": {
     "typeToConfirm": "To confirm, type {{word}} below",
     "working": "Working…"
+  },
+  "project": {
+    "loading": "Loading project…",
+    "notFound": "Project not found."
+  },
+  "projectViewTabs": {
+    "overview": "Overview",
+    "board": "Board",
+    "list": "List"
+  },
+  "trialBanner": {
+    "endsToday": "Your trial ends today.",
+    "endsIn_one": "Your trial ends in {{count}} day.",
+    "endsIn_other": "Your trial ends in {{count}} days.",
+    "addPayment": "Add a payment method to keep your data.",
+    "activate": "Activate plan",
+    "dismiss": "Dismiss"
   }
 }

@@ -23,12 +23,14 @@ import { useCurrentProject } from './useCurrentProject';
 import { useStatusLabels } from '../../shared/hooks/useStatusLabels';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 
-const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
-  urgent: { color: '#ef4444', label: 'Urgent' },
-  high: { color: '#f97316', label: 'High' },
-  medium: { color: '#3b82f6', label: 'Medium' },
-  low: { color: '#6b7280', label: 'Low' },
-  no_priority: { color: '#4b5563', label: 'No priority' },
+// labelKey, not label: this is module scope, so it is built before any hook
+// can run. The priority names already exist as translated copy.
+const PRIORITY_ICONS: Record<string, { color: string; labelKey: string }> = {
+  urgent: { color: '#ef4444', labelKey: 'priority.urgent' },
+  high: { color: '#f97316', labelKey: 'priority.high' },
+  medium: { color: '#3b82f6', labelKey: 'priority.medium' },
+  low: { color: '#6b7280', labelKey: 'priority.low' },
+  no_priority: { color: '#4b5563', labelKey: 'priority.noPriority' },
 };
 
 interface StatusGroupDef {
@@ -116,7 +118,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       <span
         className="h-2 w-2 rounded-full shrink-0"
         style={{ background: PRIORITY_ICONS[task.priority].color }}
-        title={PRIORITY_ICONS[task.priority].label}
+        title={t(PRIORITY_ICONS[task.priority].labelKey)}
       />
 
       {/* Title */}
@@ -159,7 +161,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       <button
         type="button"
         onClick={handleMoreClick}
-        aria-label="More options"
+        aria-label={t('flow.projectList.moreOptions')}
         className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
         style={{ color: 'var(--flow-text-dim)' }}
       >
@@ -175,6 +177,7 @@ export const StatusGroup: React.FC<{
   group: StatusGroupDef;
   tasks: Task[];
 }> = ({ group, tasks }) => {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -225,7 +228,7 @@ export const StatusGroup: React.FC<{
                 <Plus size={10} style={{ color: 'var(--flow-text-dim)' }} />
               </div>
               <span className="text-[13px]" style={{ color: 'var(--flow-text-dim)' }}>
-                New Task
+                {t('flow.shell.newTask')}
               </span>
             </div>
           </motion.div>
@@ -278,7 +281,7 @@ const ProjectList: React.FC = () => {
   if (projectLoading && !project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Loading project…
+        {t('flow.project.loading')}
       </div>
     );
   }
@@ -286,7 +289,7 @@ const ProjectList: React.FC = () => {
   if (!project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Project not found.
+        {t('flow.project.notFound')}
       </div>
     );
   }
@@ -321,7 +324,7 @@ const ProjectList: React.FC = () => {
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <LayoutGrid size={13} />
-            Board
+            {t('flow.projectViewTabs.board')}
           </Link>
           <button
             type="button"
@@ -332,7 +335,7 @@ const ProjectList: React.FC = () => {
             }}
           >
             <List size={13} />
-            List
+            {t('flow.projectViewTabs.list')}
           </button>
         </div>
       </div>
@@ -348,9 +351,9 @@ const ProjectList: React.FC = () => {
       >
         <div className="w-4" />
         <div className="w-2" />
-        <div className="flex-1">Title</div>
+        <div className="flex-1">{t('flow.projectList.columnTitle')}</div>
         <div className="w-5" />
-        <div className="w-[96px] text-right">Due Date</div>
+        <div className="w-[96px] text-right">{t('common.dueDate')}</div>
         <div className="w-5" />
       </div>
 

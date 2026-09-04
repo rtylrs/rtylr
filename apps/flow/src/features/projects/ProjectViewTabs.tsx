@@ -10,6 +10,7 @@ import {
   Settings as SettingsIcon,
   Plus,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 
 interface ProjectViewTabsProps {
@@ -30,7 +31,12 @@ type ProjectViewPath =
 
 interface ViewDef {
   key: string;
-  label: string;
+  /**
+   * A translation key, not a label. This array is module scope, so it is built
+   * before any hook can run and cannot call `t` itself; the tab resolves the
+   * key at render.
+   */
+  labelKey: string;
   icon: React.ComponentType<{ size?: number }>;
   // A literal from the route tree, not a builder: `<Link to>` is typed against
   // the tree, so an interpolated path needs a cast, and the cast is what let
@@ -45,7 +51,7 @@ interface ViewDef {
 const VIEWS: ViewDef[] = [
   {
     key: 'overview',
-    label: 'Overview',
+    labelKey: 'flow.projectViewTabs.overview',
     icon: Activity,
     to: '/p/$projectId/overview',
     match: (p) => p.endsWith('/overview'),
@@ -53,7 +59,7 @@ const VIEWS: ViewDef[] = [
   },
   {
     key: 'board',
-    label: 'Board',
+    labelKey: 'flow.projectViewTabs.board',
     icon: LayoutGrid,
     to: '/p/$projectId',
     // The default project route is board - matches anything that isn't
@@ -62,14 +68,14 @@ const VIEWS: ViewDef[] = [
   },
   {
     key: 'list',
-    label: 'List',
+    labelKey: 'flow.projectViewTabs.list',
     icon: List,
     to: '/p/$projectId/list',
     match: (p) => p.endsWith('/list'),
   },
   {
     key: 'timeline',
-    label: 'Timeline',
+    labelKey: 'flow.shell.timeline',
     icon: GanttChart,
     to: '/p/$projectId/timeline',
     match: (p) => p.endsWith('/timeline'),
@@ -77,14 +83,14 @@ const VIEWS: ViewDef[] = [
   },
   {
     key: 'calendar',
-    label: 'Calendar',
+    labelKey: 'flow.shell.calendar',
     icon: Calendar,
     to: '/p/$projectId/calendar',
     match: (p) => p.endsWith('/calendar'),
   },
   {
     key: 'dashboard',
-    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
     icon: BarChart3,
     to: '/p/$projectId/dashboard',
     match: (p) => p.endsWith('/dashboard'),
@@ -105,6 +111,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
   onNewTask,
   rightSlot,
 }) => {
+  const { t } = useTranslation();
   const { pathname } = useLocation();
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const visibleViews = VIEWS.filter((v) => !v.previewOnly || showPreviewRoutes);
@@ -157,7 +164,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
                 }
               >
                 <Icon size={11} />
-                <span className="hidden md:inline">{v.label}</span>
+                <span className="hidden md:inline">{t(v.labelKey)}</span>
               </Link>
             );
           })}
@@ -168,7 +175,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
           params={{ projectId }}
           className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] transition-colors"
           style={{ color: 'var(--flow-text-dim)' }}
-          aria-label="Project settings"
+          aria-label={t('nav.settings')}
         >
           <SettingsIcon size={13} />
         </Link>

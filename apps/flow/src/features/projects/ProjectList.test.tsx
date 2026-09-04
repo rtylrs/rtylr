@@ -62,7 +62,7 @@ describe('ProjectList TaskRow more menu', () => {
   it('opens a menu with open/copy link/delete actions when the more button is clicked', () => {
     renderRow();
 
-    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectList.moreOptions' }));
 
     expect(screen.getByRole('menuitem', { name: 'flow.taskMenu.openTask' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'flow.taskMenu.copyLink' })).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('ProjectList TaskRow more menu', () => {
   it('navigates to the task detail page when Open task is chosen', () => {
     renderRow();
 
-    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectList.moreOptions' }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'flow.taskMenu.openTask' }));
 
     expect(mockNavigate).toHaveBeenCalledWith({ to: '/task/t1' });

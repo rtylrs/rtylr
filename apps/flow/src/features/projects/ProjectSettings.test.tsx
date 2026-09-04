@@ -323,7 +323,7 @@ describe('ProjectSettings role gating (#793)', () => {
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Members' }));
 
-    expect(screen.getByRole('button', { name: /Transfer/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'flow.projectSettings.transferCta' })).toBeDisabled();
   });
 });
 
@@ -416,15 +416,17 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
     fireEvent.change(document.getElementById('transfer-select')!, {
       target: { value: '20' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Transfer' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.transferCta' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.confirm' }));
 
     const [, options] = transferOwnershipMutate.mock.calls[0];
     act(() => options.onError?.(new Error('boom')));
 
     expect(toast.error).not.toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Transfer' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'flow.projectSettings.transferCta' })
+    ).toBeInTheDocument();
   });
 
   it('does not show a call-site toast when deleting a project fails - the hook already shows one', () => {

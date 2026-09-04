@@ -84,7 +84,7 @@ const ProjectCalendar: React.FC = () => {
   if (projectLoading && !project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Loading project…
+        {t('flow.project.loading')}
       </div>
     );
   }
@@ -92,7 +92,7 @@ const ProjectCalendar: React.FC = () => {
   if (!project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Project not found.
+        {t('flow.project.notFound')}
       </div>
     );
   }
@@ -116,7 +116,7 @@ const ProjectCalendar: React.FC = () => {
             onClick={() => setCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
             className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
-            aria-label="Previous month"
+            aria-label={t('flow.calendar.prevMonthLabel')}
           >
             <ChevronLeft size={14} />
           </button>
@@ -125,7 +125,7 @@ const ProjectCalendar: React.FC = () => {
             onClick={() => setCursor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
             className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
-            aria-label="Next month"
+            aria-label={t('flow.calendar.nextMonthLabel')}
           >
             <ChevronRight size={14} />
           </button>
@@ -143,7 +143,7 @@ const ProjectCalendar: React.FC = () => {
           className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text-muted)' }}
         >
-          Today
+          {t('flow.calendar.today')}
         </button>
       </div>
 
