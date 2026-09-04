@@ -349,7 +349,10 @@ const PlanAction: React.FC<{
 }) => {
   const checkout = useCheckout();
   const { t } = useTranslation();
-  const checkoutFailedMessage = t('billing.checkoutFailed', 'Failed to start checkout. Please try again.');
+  const checkoutFailedMessage = t(
+    'billing.checkoutFailed',
+    'Failed to start checkout. Please try again.'
+  );
 
   const navigateToCheckoutUrl = (checkoutUrl: unknown): void => {
     if (!isAllowedCheckoutUrl(checkoutUrl)) {
@@ -722,7 +725,10 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
   const ownerEmail = useUserStore((s) => s.user?.email ?? '');
   const checkout = useCheckout();
   const { t } = useTranslation();
-  const checkoutFailedMessage = t('billing.checkoutFailed', 'Failed to start checkout. Please try again.');
+  const checkoutFailedMessage = t(
+    'billing.checkoutFailed',
+    'Failed to start checkout. Please try again.'
+  );
   const hasPayment = !!sub?.paddleSubscriptionId;
 
   const navigateToCheckoutUrl = (checkoutUrl: unknown): void => {

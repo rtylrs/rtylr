@@ -335,11 +335,7 @@ const Security: React.FC = () => {
                       readOnly
                       className="font-mono text-xs"
                     />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => void handleCopySecret()}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => void handleCopySecret()}>
                       {copiedSecret ? <Check size={14} /> : <Copy size={14} />}
                     </Button>
                   </div>

@@ -1,10 +1,6 @@
 import type { StoredUser } from '../stores/userStore';
 
-const MANAGEMENT_PERMISSIONS = [
-  'hub:team:edit',
-  'hub:roles:view',
-  'hub:licenses:manage',
-] as const;
+const MANAGEMENT_PERMISSIONS = ['hub:team:edit', 'hub:roles:view', 'hub:licenses:manage'] as const;
 
 /**
  * Admin-route predicate. Denies by default: passes only when the user is
