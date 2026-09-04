@@ -8,6 +8,7 @@ import {
   useUpdateOrderStatus,
   type HubOrder,
 } from '../../shared/hooks/queries/useOrders';
+import { centsToDisplay } from '../../shared/hooks/queries/useSubscription';
 import {
   Card,
   CardContent,
@@ -105,8 +106,8 @@ const OrdersTable: React.FC<{
           <TableRow key={order.id}>
             <TableCell className="font-mono text-xs">#{order.id}</TableCell>
             <TableCell>{order.customerName || order.customerEmail || '-'}</TableCell>
-            <TableCell>${order.subtotal.toFixed(2)}</TableCell>
-            <TableCell>${order.total.toFixed(2)}</TableCell>
+            <TableCell>{centsToDisplay(order.subtotal)}</TableCell>
+            <TableCell>{centsToDisplay(order.total)}</TableCell>
             <TableCell>
               <Badge variant={statusBadgeVariant[order.status] || 'outline'}>
                 {statusLabel[order.status] || order.status.replace('_', ' ')}
@@ -333,7 +334,7 @@ const Orders: React.FC = () => {
                 >
                   <span>Subtotal</span>
                   <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
-                    ${selectedOrder.subtotal.toFixed(2)}
+                    {centsToDisplay(selectedOrder.subtotal)}
                   </span>
                 </div>
                 <div
@@ -342,7 +343,7 @@ const Orders: React.FC = () => {
                 >
                   <span>Total</span>
                   <span className="font-bold text-base" style={{ color: 'var(--dash-text)' }}>
-                    ${selectedOrder.total.toFixed(2)}
+                    {centsToDisplay(selectedOrder.total)}
                   </span>
                 </div>
                 <div className="flex justify-between pt-1 text-xs">
