@@ -11,6 +11,7 @@ import {
 import { ErrorBoundary } from '@voxire/ui';
 import { Spinner } from '@voxire/components';
 import { BusinessRoute } from './shared/utils/BusinessRoute';
+import { isAdminOrOwner } from './shared/utils/requireAdminOrOwner';
 import { useUserStore } from './shared/stores/userStore';
 import AppLayout from './layouts/AppLayout';
 import SettingsLayout from './features/settings/Settings/components/SettingsLayout';
@@ -70,26 +71,9 @@ const wrap = (children: React.ReactNode) => (
 
 const requireAdminOrOwner = () => {
   const user = useUserStore.getState().user;
-  // No hydrated user yet: deny at this layer and let BusinessRoute drive
-  // the auth/onboarding redirect. (Previously a null user passed the guard.)
-  if (!user) {
-    throw redirect({ to: '/' });
-  }
-  // Mirror BusinessRoute: owners pass; otherwise the normalized access
-  // document is authoritative when present, with legacy role as fallback.
-  if (user.isOwner === true) return;
-  const hasManagementGrant = user.effectiveAccess
-    ? user.effectiveAccess.dashPermissions.some(
-        (permission) =>
-          permission === 'hub:team:edit' ||
-          permission === 'hub:roles:view' ||
-          permission === 'hub:licenses:manage'
-      )
-    : (user.role ?? '').toLowerCase() === 'admin' ||
-      (user.role ?? '').toLowerCase() === 'owner' ||
-      (user.dashRole ?? '').toLowerCase() === 'admin' ||
-      (user.dashRole ?? '').toLowerCase() === 'owner';
-  if (user.isOwner === false && !hasManagementGrant) {
+  // Deny by default (including unhydrated users) and let BusinessRoute drive
+  // the auth/onboarding redirect. Previously a null user passed the guard.
+  if (!isAdminOrOwner(user)) {
     throw redirect({ to: '/' });
   }
 };
