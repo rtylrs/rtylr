@@ -44,6 +44,40 @@ describe('labelsForTask', () => {
     const task = makeTask({ labelIds: ['l1'] });
     expect(labelsForTask(labels, task).map((l) => l.id)).toEqual(['l1']);
   });
+
+  // ApiLabel declares id as a number while the wire sends the int64 as a
+  // string, so both shapes reach this function and Array.includes does not
+  // coerce between them.
+  it("matches a numeric label id against the task's string ids", () => {
+    const labels = [
+      { id: 994343, name: 'qa-temp', color: '#f00' },
+      { id: 994344, name: 'blocked', color: '#0f0' },
+    ];
+    const task = makeTask({ labelIds: ['994343'] });
+
+    expect(labelsForTask(labels, task).map((l) => l.name)).toEqual(['qa-temp']);
+  });
+
+  it('matches a string label id against numeric task ids', () => {
+    const labels = [makeLabel({ id: '994343', name: 'qa-temp' })];
+    const task = makeTask({ labelIds: [994343] as unknown as string[] });
+
+    expect(labelsForTask(labels, task).map((l) => l.name)).toEqual(['qa-temp']);
+  });
+
+  it('returns nothing for a task with no labels', () => {
+    const labels = [makeLabel({ id: 'l1' })];
+
+    expect(labelsForTask(labels, makeTask({ labelIds: [] }))).toEqual([]);
+    expect(labelsForTask(labels, makeTask({ labelIds: undefined }))).toEqual([]);
+  });
+
+  it('does not match a partial id', () => {
+    const labels = [{ id: 99, name: 'short', color: '#f00' }];
+    const task = makeTask({ labelIds: ['994343'] });
+
+    expect(labelsForTask(labels, task)).toEqual([]);
+  });
 });
 
 describe('tasksWithLabel', () => {
