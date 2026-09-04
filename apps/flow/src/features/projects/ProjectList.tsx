@@ -37,17 +37,32 @@ interface StatusGroupDef {
   id: Task['status'];
   label: string;
   color: string;
+  alwaysShown: boolean;
 }
 
 // Labels are filled in from useStatusLabels() at render time (the single
 // i18n-backed source of truth - see constantsFlow.ts's STATUS_LABEL_KEYS) so
 // this view can never hardcode a different string than the rest of the app.
-const STATUS_GROUP_COLORS: { id: Task['status']; color: string }[] = [
-  { id: 'todo', color: '#6b7280' },
-  { id: 'in_progress', color: '#3b82f6' },
-  { id: 'in_review', color: '#f59e0b' },
-  { id: 'done', color: '#22c55e' },
+// Every value of the status enum has a group. backlog and cancelled were
+// absent, so a task in either state rendered in no group at all and was simply
+// invisible on this screen while showing up on the board (#1049).
+//
+// `alwaysShown` keeps the appearance of a project that has neither: those two
+// groups appear only when they hold something, so a list that looked like four
+// groups yesterday still does.
+export const STATUS_GROUP_COLORS: { id: Task['status']; color: string; alwaysShown: boolean }[] = [
+  { id: 'backlog', color: '#6b7280', alwaysShown: false },
+  { id: 'todo', color: '#9ca3af', alwaysShown: true },
+  { id: 'in_progress', color: '#3b82f6', alwaysShown: true },
+  { id: 'in_review', color: '#f59e0b', alwaysShown: true },
+  { id: 'done', color: '#22c55e', alwaysShown: true },
+  { id: 'cancelled', color: '#4b5563', alwaysShown: false },
 ];
+
+/** Whether a group earns a header: one of the four the list always shows, or non-empty. */
+export function groupIsVisible(group: { alwaysShown: boolean }, taskCount: number): boolean {
+  return group.alwaysShown || taskCount > 0;
+}
 
 interface TaskRowProps {
   task: Task;
@@ -375,22 +390,20 @@ const ProjectList: React.FC = () => {
                     {block.tasks.length}
                   </span>
                 </div>
-                {STATUS_GROUPS.map((group) => (
-                  <StatusGroup
-                    key={`${block.id}-${group.id}`}
-                    group={group}
-                    tasks={block.tasks.filter((t) => t.status === group.id)}
-                  />
-                ))}
+                {STATUS_GROUPS.map((group) => {
+                  const groupTasks = block.tasks.filter((t) => t.status === group.id);
+                  if (!groupIsVisible(group, groupTasks.length)) return null;
+                  return (
+                    <StatusGroup key={`${block.id}-${group.id}`} group={group} tasks={groupTasks} />
+                  );
+                })}
               </div>
             ))
-          : STATUS_GROUPS.map((group) => (
-              <StatusGroup
-                key={group.id}
-                group={group}
-                tasks={projectTasks.filter((t) => t.status === group.id)}
-              />
-            ))}
+          : STATUS_GROUPS.map((group) => {
+              const groupTasks = projectTasks.filter((t) => t.status === group.id);
+              if (!groupIsVisible(group, groupTasks.length)) return null;
+              return <StatusGroup key={group.id} group={group} tasks={groupTasks} />;
+            })}
       </div>
     </div>
   );
