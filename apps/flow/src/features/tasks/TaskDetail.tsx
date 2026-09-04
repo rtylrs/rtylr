@@ -28,6 +28,7 @@ import {
   Lightbulb,
   Activity,
   Type,
+  PartyPopper,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
@@ -606,7 +607,7 @@ const TaskDetail: React.FC = () => {
                       onSuccess: () =>
                         toast.success(t('toasts.task.niceWork'), {
                           description: t('flow.taskDetail.taskMarkedComplete'),
-                          icon: '🎉',
+                          icon: <PartyPopper size={16} />,
                         }),
                     }
                   : undefined
