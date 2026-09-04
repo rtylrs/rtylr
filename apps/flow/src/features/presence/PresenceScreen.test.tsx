@@ -6,24 +6,29 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
 }));
 
+// camelCase fixtures on purpose. The endpoint answers snake_case, but
+// @voxire/api's response interceptor converts every key before a caller sees
+// it, so this is the shape usePresence actually receives. The previous
+// snake_case fixtures matched the schema rather than reality, which is why the
+// suite stayed green while /presence showed its error state (#1067).
 const presenceState = vi.hoisted(() => ({
   value: {
     data: {
       date: '2027-05-10',
       presence: [
-        { employee_id: '1', user_id: '10', first_name: 'Jane', last_name: 'Doe', status: 'onsite' },
+        { employeeId: '1', userId: '10', firstName: 'Jane', lastName: 'Doe', status: 'onsite' },
         {
-          employee_id: '2',
-          user_id: '20',
-          first_name: 'Sam',
-          last_name: 'Lee',
+          employeeId: '2',
+          userId: '20',
+          firstName: 'Sam',
+          lastName: 'Lee',
           status: 'on_leave',
         },
         {
-          employee_id: '3',
-          user_id: '30',
-          first_name: 'Alex',
-          last_name: 'Kim',
+          employeeId: '3',
+          userId: '30',
+          firstName: 'Alex',
+          lastName: 'Kim',
           status: 'not_started',
         },
       ],
@@ -46,19 +51,19 @@ beforeEach(() => {
     data: {
       date: '2027-05-10',
       presence: [
-        { employee_id: '1', user_id: '10', first_name: 'Jane', last_name: 'Doe', status: 'onsite' },
+        { employeeId: '1', userId: '10', firstName: 'Jane', lastName: 'Doe', status: 'onsite' },
         {
-          employee_id: '2',
-          user_id: '20',
-          first_name: 'Sam',
-          last_name: 'Lee',
+          employeeId: '2',
+          userId: '20',
+          firstName: 'Sam',
+          lastName: 'Lee',
           status: 'on_leave',
         },
         {
-          employee_id: '3',
-          user_id: '30',
-          first_name: 'Alex',
-          last_name: 'Kim',
+          employeeId: '3',
+          userId: '30',
+          firstName: 'Alex',
+          lastName: 'Kim',
           status: 'not_started',
         },
       ],
