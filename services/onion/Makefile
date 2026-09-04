@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all build-media-engine generate generate-module lint test run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
+.PHONY: onion setup build build-all build-media-engine generate generate-module lint test test-db direct-authorization-evidence run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -60,6 +60,9 @@ test:
 # Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos_users/...`
 test-db:
 	./scripts/test-db.sh $(PKG)
+
+direct-authorization-evidence:
+	./scripts/run-role-access-control-v2-direct-coverage.sh
 
 # Default run (backwards compatibility)
 run:

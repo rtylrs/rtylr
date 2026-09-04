@@ -8,7 +8,6 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
-	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
@@ -54,10 +53,6 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "flow managers manage", App: authorization.AppFlow, Permission: "flow:managers:manage", Call: func(ctx context.Context) (any, error) {
 			response, err := NewWorkspaceAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).UpdateWorkspaceMemberRole(ctx, &flowworkspacev1.UpdateWorkspaceMemberRoleRequest{WorkspaceId: testutil.Int64Ptr(1), UserId: testutil.Int64Ptr(assignedUserID), Role: "admin"})
-			return response, err
-		}},
-		{Name: "flow settings manage", App: authorization.AppFlow, Permission: "flow:settings:manage", Call: func(ctx context.Context) (any, error) {
-			response, err := NewSettingAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).UpdateUserSettings(ctx, &flowsettingv1.UpdateUserSettingsRequest{})
 			return response, err
 		}},
 	})

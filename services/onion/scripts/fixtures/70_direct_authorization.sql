@@ -58,14 +58,15 @@ ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), requires_approval = V
 INSERT INTO hr_leave_balances
     (id, owner_id, business_id, employee_id, leave_type_id, year, entitled_days, used_days, pending_days)
 VALUES
-    (7204, 1001, 1001, 4101, 7203, 2026, 30.00, 0.00, 0.00)
-ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), entitled_days = VALUES(entitled_days), used_days = VALUES(used_days), pending_days = VALUES(pending_days);
+    (7220, 1001, 1001, 4101, 7203, 2026, 30.00, 0.00, 0.00),
+    (7204, 1001, 1001, 4102, 7203, 2026, 30.00, 0.00, 0.00)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), employee_id = VALUES(employee_id), entitled_days = VALUES(entitled_days), used_days = VALUES(used_days), pending_days = VALUES(pending_days);
 
 INSERT INTO hr_leave_requests
     (id, owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days, notes, status, current_approval_level)
 VALUES
-    (7205, 1001, 1001, 4101, 7203, '2026-12-10', '2026-12-11', 2.00, 'Direct authorization fixture.', 'pending', 0)
-ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), status = VALUES(status), current_approval_level = VALUES(current_approval_level);
+    (7205, 1001, 1001, 4102, 7203, '2026-12-10', '2026-12-11', 2.00, 'Direct authorization fixture.', 'pending', 0)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), employee_id = VALUES(employee_id), status = VALUES(status), current_approval_level = VALUES(current_approval_level);
 
 INSERT INTO insights_scheduled_reports
     (id, owner_id, business_id, template_id, cadence, channel, recipient, is_active)
@@ -82,7 +83,8 @@ VALUES
     (7214, 1001, 1001, 3201, 3101, 3001, 'AUTH-REFUND-APPROVE', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 23.00, 23.00, 23.00),
     (7215, 1001, 1001, 3201, 3101, 3001, 'AUTH-VOID-OVERRIDE', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 24.00, 24.00, 24.00),
     (7216, 1001, 1001, 3201, 3101, 3001, 'AUTH-REFUND-OVERRIDE', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 25.00, 25.00, 25.00),
-    (7217, 1001, 1001, 3201, 3101, 3001, 'AUTH-DISCOUNT', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 26.00, 26.00, 26.00)
+    (7217, 1001, 1001, 3201, 3101, 3001, 'AUTH-DISCOUNT', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 26.00, 26.00, 26.00),
+    (7218, 1001, 1001, 3201, 3101, 3001, 'AUTH-DISCOUNT-STAFF', 'dine_in', 'pending', 'unpaid', 'Direct Authorization', 1001, 26.00, 26.00, 0.00)
 ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), status = VALUES(status), payment_status = VALUES(payment_status), total = VALUES(total), amount_paid = VALUES(amount_paid);
 
 INSERT INTO pos_sessions
@@ -120,6 +122,12 @@ INSERT INTO pos_terminals
 VALUES
     (1, 1001, 3001, 'Direct Authorization Terminal', 'direct-authorization-terminal', TRUE)
 ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), branch_id = VALUES(branch_id), is_active = VALUES(is_active);
+
+INSERT INTO pos_users
+    (id, owner_id, business_id, user_id, location_id, name, role, is_active, max_discount_pct, can_apply_discount)
+VALUES
+    (7219, 1001, 1001, 1001, 3001, 'Direct Authorization Operator', 'manager', TRUE, 100.00, TRUE)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), user_id = VALUES(user_id), location_id = VALUES(location_id), is_active = VALUES(is_active), max_discount_pct = VALUES(max_discount_pct), can_apply_discount = VALUES(can_apply_discount);
 
 INSERT INTO authorization_roles
     (id, business_id, app_id, role_key, display_name, description, level, assignment_mode, is_system, is_archived, lifecycle, version, created_by)

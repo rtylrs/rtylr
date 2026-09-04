@@ -20,7 +20,11 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "pos orders create", App: authorization.AppPOS, Permission: "pos:orders:create", Call: func(ctx context.Context) (any, error) {
 			response, err := NewOrderAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CreateOrder(ctx, &posordersv1.CreateOrderRequest{
-				Items: []*posordersv1.CreateOrderItemInput{{Name: "authorization probe", Quantity: 1}},
+				SessionId:  3201,
+				TableId:    3101,
+				LocationId: 3001,
+				Type:       "dine_in",
+				Items:      []*posordersv1.CreateOrderItemInput{{MenuItemId: 5201, Name: "Burger", Quantity: 1}},
 			})
 			return response, err
 		}},
@@ -49,7 +53,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "pos orders discount", App: authorization.AppPOS, Permission: "pos:orders:discount", Call: func(ctx context.Context) (any, error) {
-			response, err := NewDiscountAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).DiscountOrder(ctx, &posordersdiscountsv1.DiscountOrderRequest{OrderId: 7217, DiscountType: "percentage", DiscountValue: testutil.Float64Ptr(5), Reason: "authorization probe"})
+			response, err := NewDiscountAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).DiscountOrder(ctx, &posordersdiscountsv1.DiscountOrderRequest{OrderId: 7218, DiscountType: "percentage", DiscountValue: testutil.Float64Ptr(5), Reason: "authorization probe"})
 			return response, err
 		}},
 	}
