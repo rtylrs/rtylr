@@ -2,5 +2,8 @@
   "emptyNoMenusTitle": "No menus found",
   "emptyTryAnotherSearch": "Try another search.",
   "emptyNoMenuItemsYet": "No menu items yet.",
-  "createItem": "Item"
+  "createItem": "Item",
+  "savingUnavailable": "Saving is not available yet. Changes here stay in this browser and do not reach your point of sale or your public menu.",
+  "savingUnavailableToast": "Saving is not available yet.",
+  "saveItem": "Save item"
 }

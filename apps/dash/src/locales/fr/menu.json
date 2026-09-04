@@ -2,5 +2,8 @@
   "emptyNoMenusTitle": "Aucun menu trouvé",
   "emptyTryAnotherSearch": "Essayez une autre recherche.",
   "emptyNoMenuItemsYet": "Aucun article de menu pour l'instant.",
-  "createItem": "Article"
+  "createItem": "Article",
+  "savingUnavailable": "L'enregistrement n'est pas encore disponible. Les modifications restent dans ce navigateur et n'atteignent ni votre point de vente ni votre menu public.",
+  "savingUnavailableToast": "L'enregistrement n'est pas encore disponible.",
+  "saveItem": "Enregistrer"
 }

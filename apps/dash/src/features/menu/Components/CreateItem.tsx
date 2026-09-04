@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useRouterState } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button, Input } from '../../../shared/components/ui';
 import { useMenuStore } from '../../../shared/stores/menuStore';
+import UnavailableNotice from '../../../shared/components/dash/UnavailableNotice';
+
+const UNAVAILABLE_ID = 'menu-item-saving-unavailable';
 
 const CreateItem: React.FC = () => {
+  const { t } = useTranslation();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const { items, addMenuItem, updateMenuItem } = useMenuStore();
+  // Only `items` is read now: the two write actions were the false-success
+  // path. They stay in the store for whoever wires the real mutations.
+  const { items } = useMenuStore();
   const searchParams = new URLSearchParams(searchStr);
   const categoryId = searchParams.get('categoryId') || 'uncategorized';
   const itemId = searchParams.get('itemId');
@@ -100,22 +107,22 @@ const CreateItem: React.FC = () => {
       isHalal,
     };
 
-    if (itemId) {
-      updateMenuItem(itemId, item);
-      toast.success('Item updated');
-      window.history.back();
-    } else {
-      addMenuItem(categoryId, item).then(() => {
-        toast.success('Item created');
-        window.history.back();
-      });
-    }
+    // Saving is off. These two calls change only the local store, and
+    // useGetMenu refetches over the top, so the success toast was telling
+    // someone their menu item had been created when nothing had left the
+    // browser. Reporting the state is the honest behaviour until the
+    // mutations reach pos/menu_item/v1. rtylr#1150.
+    void item;
+    toast.error(t('menu.savingUnavailableToast'));
   };
 
   return (
     <>
       <HelmetContainer title={itemId ? 'Edit item · rtylr' : 'Create item · rtylr'} />
       <div className="max-w-2xl mx-auto space-y-6">
+        <UnavailableNotice>
+          <span id={UNAVAILABLE_ID}>{t('menu.savingUnavailable')}</span>
+        </UnavailableNotice>
         <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           {itemId ? 'Edit Menu Item' : 'Create Menu Item'}
         </h2>
@@ -287,10 +294,12 @@ const CreateItem: React.FC = () => {
             style={{ borderColor: 'var(--dash-border)' }}
           >
             <Button variant="ghost" type="button" onClick={() => window.history.back()}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button variant="default" type="submit">
-              Save Item
+            {/* Disabled as well as guarded in the handler: a disabled submit
+                button does not stop Enter submitting the form from a field. */}
+            <Button variant="default" type="submit" disabled aria-describedby={UNAVAILABLE_ID}>
+              {t('menu.saveItem')}
             </Button>
           </div>
         </form>

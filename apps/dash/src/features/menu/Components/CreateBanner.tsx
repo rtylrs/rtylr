@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { uploadAsset } from '@voxire/api';
-import { useMenuStore } from '../../../shared/stores/menuStore';
+import UnavailableNotice from '../../../shared/components/dash/UnavailableNotice';
 import { useUserStore } from '../../../shared/stores/userStore';
 import Dropzone from '../../../shared/components/Dropzone';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+const UNAVAILABLE_ID = 'menu-banner-saving-unavailable';
+
 const CreateBanner = (): React.JSX.Element => {
-  const { addBanner } = useMenuStore();
+  const { t } = useTranslation();
   const { userId: restaurantId } = useUserStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,9 +58,11 @@ const CreateBanner = (): React.JSX.Element => {
         },
       };
 
-      addBanner(bannerObj as any);
-      toast.success('Banner created');
-      window.history.back();
+      // Same as CreateItem: addBanner touches only the local store, so the
+      // success toast was untrue. Also drops an `as any` the store's own
+      // Banner type never needed. rtylr#1150.
+      void bannerObj;
+      toast.error(t('menu.savingUnavailableToast'));
     } catch {
       toast.error('Failed to upload image. Please try again.');
     } finally {
@@ -72,6 +77,9 @@ const CreateBanner = (): React.JSX.Element => {
         <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Create Banner
         </h1>
+        <UnavailableNotice>
+          <span id={UNAVAILABLE_ID}>{t('menu.savingUnavailable')}</span>
+        </UnavailableNotice>
         <form
           onSubmit={handleSubmit}
           className="rounded-xl p-6 border space-y-4"
@@ -127,9 +135,10 @@ const CreateBanner = (): React.JSX.Element => {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity text-white disabled:opacity-50"
-              style={{ background: '#4583C4' }}
+              disabled
+              aria-describedby={UNAVAILABLE_ID}
+              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50"
+              style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {isSubmitting ? 'Uploading...' : 'Create Banner'}
             </button>
