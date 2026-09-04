@@ -40,7 +40,7 @@ vi.mock('../lib/clients', () => ({
   labelV2: mockClients.labelV2,
 }));
 
-import { flowApi } from './flowApi';
+import { DEFAULT_PROJECT_ICON, flowApi } from './flowApi';
 import {
   businessClient,
   milestoneV2,
@@ -91,7 +91,7 @@ describe('flowApi OneKit adapters', () => {
     expect(projectV2.createProject).toHaveBeenCalledWith({
       name: 'Project A',
       description: '-',
-      icon: 'folder',
+      icon: DEFAULT_PROJECT_ICON,
       color: '#6366f1',
       visibility: 'private',
       startDate: '',
@@ -105,7 +105,7 @@ describe('flowApi OneKit adapters', () => {
       body: {
         name: 'Renamed',
         description: '-',
-        icon: 'folder',
+        icon: DEFAULT_PROJECT_ICON,
         color: '#6366f1',
         status: 'active',
         startDate: '',
@@ -336,5 +336,51 @@ describe('flowApi.updateTask sends a genuine partial update', () => {
     expect(taskV2.createTask).toHaveBeenCalledWith(
       expect.objectContaining({ priority: 'none', title: 'Task' })
     );
+  });
+});
+
+describe('flowApi project icon writes (#1045)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // `flow_projects.icon` is read as a glyph by every reader in Flow and by the
+  // backend's own seeds. Writing a lucide component name into it made the
+  // project render as that word. In the dev database this had corrupted ten
+  // rows: folder, rocket, globe, flask, building-2.
+  const LUCIDE_NAMES = ['folder', 'rocket', 'globe', 'flask', 'building-2'];
+
+  it('creates a project with a glyph, not a lucide component name', async () => {
+    await flowApi.createProject({ name: 'Project A' });
+
+    const sent = vi.mocked(projectV2.createProject).mock.calls[0][0] as { icon: string };
+    expect(sent.icon).toBe(DEFAULT_PROJECT_ICON);
+    expect(LUCIDE_NAMES).not.toContain(sent.icon);
+  });
+
+  it('updates a project with a glyph when the caller supplies no icon', async () => {
+    await flowApi.updateProject('7', { name: 'Renamed' });
+
+    const sent = vi.mocked(projectV2.updateProject).mock.calls[0][0] as {
+      body: { icon: string };
+    };
+    expect(sent.body.icon).toBe(DEFAULT_PROJECT_ICON);
+    expect(LUCIDE_NAMES).not.toContain(sent.body.icon);
+  });
+
+  it('passes an existing icon through untouched, whatever it is', async () => {
+    // No data migration here: a row already holding a lucide name keeps it
+    // until #1085 settles the convention.
+    await flowApi.updateProject('7', { name: 'Renamed', icon: 'building-2' });
+
+    const sent = vi.mocked(projectV2.updateProject).mock.calls[0][0] as {
+      body: { icon: string };
+    };
+    expect(sent.body.icon).toBe('building-2');
+  });
+
+  it('uses the same glyph every reader falls back to', () => {
+    // AllProjects.tsx and Profile.tsx both render `project.icon || '<glyph>'`.
+    expect(DEFAULT_PROJECT_ICON).toBe('\u{1F4CB}');
   });
 });
