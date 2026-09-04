@@ -158,6 +158,9 @@
     "teamMembers": "Team Members",
     "allApps": "All Apps",
     "activityLog": "Activity Log",
-    "language": "Language"
-  }
+    "language": "Language",
+    "navigate": "Navigate",
+    "storefront": "Storefront"
+  },
+  "launch": "Launch"
 }
