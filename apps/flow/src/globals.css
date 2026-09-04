@@ -218,6 +218,37 @@
   --color-flow-active: var(--flow-active);
 }
 
+/* ── Type scale ──────────────────────────────────────────────────────
+ * One scale, named for the roles design-review-checklist.md G-T2 uses:
+ * "screen title 16-20px/600, section 14px/600, body 13-14px/400, meta 12px;
+ * nothing at 11px or below except tabular ids."
+ *
+ * Five steps, 20 / 16 / 14 / 13 / 12, declared in @theme so Tailwind emits
+ * `text-screen`, `text-title`, `text-section`, `text-body` and `text-meta`
+ * utilities. Naming the role rather than the pixel count is the point: a
+ * component asks for meta text and the scale decides how big that is, so the
+ * scale can move in one place.
+ *
+ * Line heights are set alongside each size because v4 reads
+ * `--text-*--line-height` from the same token family, so a bare `text-body`
+ * carries its own leading instead of inheriting whatever the parent had.
+ *
+ * Sizes below 12px are deliberately absent. There is no token for 10px, so
+ * putting one back means writing an arbitrary value, which
+ * flow-type-scale.test.ts fails on. */
+@theme {
+  --text-screen: 20px;
+  --text-screen--line-height: 28px;
+  --text-title: 16px;
+  --text-title--line-height: 24px;
+  --text-section: 14px;
+  --text-section--line-height: 20px;
+  --text-body: 13px;
+  --text-body--line-height: 19px;
+  --text-meta: 12px;
+  --text-meta--line-height: 16px;
+}
+
 /* ── Corner radius re-pointed at the appearance control ──────────────
  * Same mechanism as the --color-* block above, applied to shape. Tailwind v4
  * compiles .rounded-lg to `border-radius: var(--radius-lg)`, and the shared
