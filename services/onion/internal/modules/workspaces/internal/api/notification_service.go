@@ -27,6 +27,8 @@ func toNotification(n domain.Notification) *flownotificationv1.Notification {
 		Title:         n.Title,
 		Description:   n.Description,
 		TaskTitle:     n.TaskTitle,
+		ActorId:       n.ActorID,
+		ActorName:     n.ActorName,
 		ActorInitials: n.ActorInitials,
 		Project:       n.Project,
 		ProjectColor:  n.ProjectColor,

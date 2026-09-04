@@ -114,14 +114,21 @@ DELETE FROM flow_tasks WHERE id = ? AND business_id = ?;
 INSERT INTO flow_task_comments (task_id, user_id, content) VALUES (?, ?, ?);
 
 -- name: GetCommentByID :one
-SELECT id, task_id, user_id, content, is_edited, created_at, updated_at
-FROM flow_task_comments
-WHERE id = ?
+-- cross-schema read from users: resolve the comment author's display identity
+SELECT c.id, c.task_id, c.user_id, COALESCE(u.full_name, u.email, '') AS actor_name,
+       c.content, c.is_edited, c.created_at, c.updated_at
+FROM flow_task_comments c
+LEFT JOIN users u ON u.id = c.user_id
+WHERE c.id = ?
 LIMIT 1;
 
+-- cross-schema read from users: resolve the comment author's display identity
 -- name: GetCommentsByTask :many
-SELECT id, task_id, user_id, content, is_edited, created_at, updated_at
-FROM flow_task_comments WHERE task_id = ? ORDER BY created_at ASC, id ASC LIMIT 500;
+SELECT c.id, c.task_id, c.user_id, COALESCE(u.full_name, u.email, '') AS actor_name,
+       c.content, c.is_edited, c.created_at, c.updated_at
+FROM flow_task_comments c
+LEFT JOIN users u ON u.id = c.user_id
+WHERE c.task_id = ? ORDER BY c.created_at ASC, c.id ASC LIMIT 500;
 
 -- name: DeleteComment :exec
 DELETE FROM flow_task_comments WHERE id = ? AND user_id = ?;
@@ -130,8 +137,12 @@ DELETE FROM flow_task_comments WHERE id = ? AND user_id = ?;
 INSERT INTO flow_task_activity (task_id, user_id, action, old_value, new_value) VALUES (?, ?, ?, ?, ?);
 
 -- name: GetActivityByTask :many
-SELECT id, task_id, user_id, action, old_value, new_value, created_at
-FROM flow_task_activity WHERE task_id = ? ORDER BY created_at DESC LIMIT ?;
+-- cross-schema read from users: resolve the activity author's display identity
+SELECT a.id, a.task_id, a.user_id, COALESCE(u.full_name, u.email, '') AS actor_name,
+       a.action, a.old_value, a.new_value, a.created_at
+FROM flow_task_activity a
+LEFT JOIN users u ON u.id = a.user_id
+WHERE a.task_id = ? ORDER BY a.created_at DESC LIMIT ?;
 
 -- name: CreateAttachment :execresult
 INSERT INTO flow_task_attachments (task_id, owner_id, business_id, name, url, size, uploaded_by)

@@ -228,14 +228,17 @@ LIMIT ? OFFSET ?;
 SELECT COUNT(*) FROM flow_notifications WHERE user_id = ?;
 
 -- name: ListNotifications :many
+-- cross-schema read from users: resolve the notification actor's display identity
 SELECT
-    id, user_id, workspace_id, type, title, COALESCE(description, '') AS description,
-    task_id, COALESCE(task_title, '') AS task_title, actor_id, COALESCE(actor_initials, '') AS actor_initials,
-    COALESCE(project, '') AS project, COALESCE(project_color, '') AS project_color,
-    is_read, created_at
-FROM flow_notifications
-WHERE user_id = ?
-ORDER BY created_at DESC
+    n.id, n.user_id, n.workspace_id, n.type, n.title, COALESCE(n.description, '') AS description,
+    n.task_id, COALESCE(n.task_title, '') AS task_title, n.actor_id,
+    COALESCE(u.full_name, u.email, '') AS actor_name, COALESCE(n.actor_initials, '') AS actor_initials,
+    COALESCE(n.project, '') AS project, COALESCE(n.project_color, '') AS project_color,
+    n.is_read, n.created_at
+FROM flow_notifications n
+LEFT JOIN users u ON u.id = n.actor_id
+WHERE n.user_id = ?
+ORDER BY n.created_at DESC
 LIMIT ? OFFSET ?;
 
 -- name: CreateNotification :exec

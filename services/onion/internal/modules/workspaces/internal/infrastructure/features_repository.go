@@ -716,6 +716,10 @@ func (r *Repository) ListNotifications(ctx context.Context, userID, limit, offse
 
 	notifs := make([]domain.Notification, 0, len(rows))
 	for _, row := range rows {
+		actorInitials := row.ActorInitials
+		if actorInitials == "" {
+			actorInitials = initialsOf(row.ActorName)
+		}
 		n := domain.Notification{
 			ID:            row.ID,
 			UserID:        row.UserID,
@@ -723,7 +727,8 @@ func (r *Repository) ListNotifications(ctx context.Context, userID, limit, offse
 			Title:         row.Title,
 			Description:   row.Description,
 			TaskTitle:     row.TaskTitle,
-			ActorInitials: row.ActorInitials,
+			ActorName:     row.ActorName,
+			ActorInitials: actorInitials,
 			Project:       row.Project,
 			ProjectColor:  row.ProjectColor,
 			IsRead:        row.IsRead.Bool,

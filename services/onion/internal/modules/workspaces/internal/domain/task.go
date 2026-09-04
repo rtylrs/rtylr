@@ -96,23 +96,27 @@ type UpdateProjectColumnInput struct {
 }
 
 type TaskComment struct {
-	ID        int64
-	TaskID    int64
-	UserID    int64
-	Content   string
-	IsEdited  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID            int64
+	TaskID        int64
+	UserID        int64
+	ActorName     string
+	ActorInitials string
+	Content       string
+	IsEdited      bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type TaskActivity struct {
-	ID        int64
-	TaskID    int64
-	UserID    int64
-	Action    string
-	OldValue  string
-	NewValue  string
-	CreatedAt time.Time
+	ID            int64
+	TaskID        int64
+	UserID        int64
+	ActorName     string
+	ActorInitials string
+	Action        string
+	OldValue      string
+	NewValue      string
+	CreatedAt     time.Time
 }
 
 type TaskDetail struct {

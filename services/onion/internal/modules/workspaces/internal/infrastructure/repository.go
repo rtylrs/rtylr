@@ -766,13 +766,15 @@ func (r *Repository) GetCommentByID(ctx context.Context, commentID int64) (domai
 		return domain.TaskComment{}, err
 	}
 	return domain.TaskComment{
-		ID:        row.ID,
-		TaskID:    row.TaskID,
-		UserID:    row.UserID,
-		Content:   row.Content,
-		IsEdited:  row.IsEdited.Bool,
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
+		ID:            row.ID,
+		TaskID:        row.TaskID,
+		UserID:        row.UserID,
+		ActorName:     row.ActorName,
+		ActorInitials: initialsOf(row.ActorName),
+		Content:       row.Content,
+		IsEdited:      row.IsEdited.Bool,
+		CreatedAt:     row.CreatedAt.Time,
+		UpdatedAt:     row.UpdatedAt.Time,
 	}, nil
 }
 
@@ -786,13 +788,15 @@ func (r *Repository) GetCommentsByTask(ctx context.Context, taskID int64) ([]dom
 	comments := make([]domain.TaskComment, 0, len(rows))
 	for _, row := range rows {
 		comments = append(comments, domain.TaskComment{
-			ID:        row.ID,
-			TaskID:    row.TaskID,
-			UserID:    row.UserID,
-			Content:   row.Content,
-			IsEdited:  row.IsEdited.Bool,
-			CreatedAt: row.CreatedAt.Time,
-			UpdatedAt: row.UpdatedAt.Time,
+			ID:            row.ID,
+			TaskID:        row.TaskID,
+			UserID:        row.UserID,
+			ActorName:     row.ActorName,
+			ActorInitials: initialsOf(row.ActorName),
+			Content:       row.Content,
+			IsEdited:      row.IsEdited.Bool,
+			CreatedAt:     row.CreatedAt.Time,
+			UpdatedAt:     row.UpdatedAt.Time,
 		})
 	}
 	return comments, nil
@@ -855,13 +859,15 @@ func (r *Repository) GetActivityByTask(ctx context.Context, taskID int64, limit 
 	activities := make([]domain.TaskActivity, 0, len(rows))
 	for _, row := range rows {
 		activities = append(activities, domain.TaskActivity{
-			ID:        row.ID,
-			TaskID:    row.TaskID,
-			UserID:    row.UserID,
-			Action:    row.Action,
-			OldValue:  row.OldValue.String,
-			NewValue:  row.NewValue.String,
-			CreatedAt: row.CreatedAt.Time,
+			ID:            row.ID,
+			TaskID:        row.TaskID,
+			UserID:        row.UserID,
+			ActorName:     row.ActorName,
+			ActorInitials: initialsOf(row.ActorName),
+			Action:        row.Action,
+			OldValue:      row.OldValue.String,
+			NewValue:      row.NewValue.String,
+			CreatedAt:     row.CreatedAt.Time,
 		})
 	}
 	return activities, nil

@@ -74,25 +74,29 @@ func toTask(t domain.Task) *flowtaskv1.Task {
 
 func toComment(c domain.TaskComment) *flowtaskv1.TaskComment {
 	return &flowtaskv1.TaskComment{
-		Id:        c.ID,
-		TaskId:    c.TaskID,
-		UserId:    c.UserID,
-		Content:   c.Content,
-		IsEdited:  c.IsEdited,
-		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		Id:            c.ID,
+		TaskId:        c.TaskID,
+		UserId:        c.UserID,
+		ActorName:     c.ActorName,
+		ActorInitials: c.ActorInitials,
+		Content:       c.Content,
+		IsEdited:      c.IsEdited,
+		CreatedAt:     c.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:     c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
 func toActivity(a domain.TaskActivity) *flowtaskv1.TaskActivity {
 	return &flowtaskv1.TaskActivity{
-		Id:        a.ID,
-		TaskId:    a.TaskID,
-		UserId:    a.UserID,
-		Action:    a.Action,
-		OldValue:  a.OldValue,
-		NewValue:  a.NewValue,
-		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		Id:            a.ID,
+		TaskId:        a.TaskID,
+		UserId:        a.UserID,
+		ActorName:     a.ActorName,
+		ActorInitials: a.ActorInitials,
+		Action:        a.Action,
+		OldValue:      a.OldValue,
+		NewValue:      a.NewValue,
+		CreatedAt:     a.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 

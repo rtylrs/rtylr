@@ -145,6 +145,7 @@ type Notification struct {
 	TaskID        *int64
 	TaskTitle     string
 	ActorID       *int64
+	ActorName     string
 	ActorInitials string
 	Project       string
 	ProjectColor  string
@@ -161,6 +162,7 @@ type CreateNotificationInput struct {
 	TaskID        *int64
 	TaskTitle     string
 	ActorID       *int64
+	ActorName     string
 	ActorInitials string
 	Project       string
 	ProjectColor  string

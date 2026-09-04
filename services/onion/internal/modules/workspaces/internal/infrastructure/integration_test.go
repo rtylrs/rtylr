@@ -770,10 +770,27 @@ func TestWorkspaces_GetCommentsByTask_ReturnsComment(t *testing.T) {
 	for _, c := range comments {
 		if c.ID == commentID {
 			found = true
+			if c.ActorName == "" || c.ActorInitials == "" {
+				t.Errorf("comment actor identity is empty: name=%q initials=%q", c.ActorName, c.ActorInitials)
+			}
 		}
 	}
 	if !found {
 		t.Errorf("comment id=%d not found in GetCommentsByTask", commentID)
+	}
+
+	if err := repo.LogActivity(ctx, taskID, testutil.OwnerID, "task_updated", "old", "new"); err != nil {
+		t.Fatalf("LogActivity: %v", err)
+	}
+	activities, err := repo.GetActivityByTask(ctx, taskID, 10)
+	if err != nil {
+		t.Fatalf("GetActivityByTask: %v", err)
+	}
+	if len(activities) == 0 {
+		t.Fatal("expected activity row")
+	}
+	if activities[0].ActorName == "" || activities[0].ActorInitials == "" {
+		t.Fatalf("activity actor identity is empty: name=%q initials=%q", activities[0].ActorName, activities[0].ActorInitials)
 	}
 }
 
