@@ -69,6 +69,18 @@ const ProjectCalendar: React.FC = () => {
     return map;
   }, [apiTasks]);
 
+  // Built from Intl rather than hardcoded English. The grid's first column is
+  // Sunday, so the names are generated from a known Sunday; which day the week
+  // starts on is unchanged, only the language of the labels. Declared here,
+  // above the early returns below, because a hook has to run on every render.
+  const weekdays = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' });
+    const knownSunday = new Date(2026, 0, 4);
+    return Array.from({ length: 7 }, (_, offset) =>
+      formatter.format(new Date(2026, 0, knownSunday.getDate() + offset))
+    );
+  }, [i18n.language]);
+
   if (projectLoading && !project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
@@ -86,16 +98,6 @@ const ProjectCalendar: React.FC = () => {
   }
 
   const today = new Date().toDateString();
-  // Built from Intl rather than hardcoded English. The grid's first column is
-  // Sunday, so the names are generated from a known Sunday; which day the week
-  // starts on is unchanged, only the language of the labels.
-  const weekdays = useMemo(() => {
-    const formatter = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' });
-    const knownSunday = new Date(2026, 0, 4);
-    return Array.from({ length: 7 }, (_, offset) =>
-      formatter.format(new Date(2026, 0, knownSunday.getDate() + offset))
-    );
-  }, [i18n.language]);
 
   return (
     <div className="flex flex-col h-full">
