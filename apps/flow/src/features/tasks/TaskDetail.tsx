@@ -311,8 +311,13 @@ const TaskDetail: React.FC = () => {
   // or labels (post-mapping). Accept either shape.
   const taskWithLabelIds = task as Task & { label_ids?: number[] };
   const rawLabels = taskWithLabelIds.label_ids ?? task.labels ?? [];
-  const taskLabelIds: number[] = rawLabels.map((l) => Number(l)).filter((n) => !Number.isNaN(n));
-  const taskLabels = allLabels.filter((l) => taskLabelIds.includes(l.id));
+  // Compare as strings. `ApiLabel` declares `id: number`, but `useLabels` casts
+  // the response rather than converting it, so at runtime the id is the int64
+  // wire string. Coercing the task's ids to numbers and testing them against
+  // that string with Array.includes never matched, so an attached label saved
+  // correctly and then never displayed.
+  const taskLabelIds: string[] = rawLabels.map((l) => String(l));
+  const taskLabels = allLabels.filter((l) => taskLabelIds.includes(String(l.id)));
 
   const cycle = cycles.find((c) => c.id === task.cycleId);
   const milestone = milestones.find((m) => m.id === task.milestoneId);
@@ -999,7 +1004,7 @@ const TaskDetail: React.FC = () => {
                   </p>
                 )}
                 {allLabels.map((l) => {
-                  const active = taskLabelIds.includes(l.id);
+                  const active = taskLabelIds.includes(String(l.id));
                   return (
                     <button
                       type="button"
