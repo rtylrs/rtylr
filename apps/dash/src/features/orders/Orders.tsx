@@ -8,6 +8,7 @@ import {
   useUpdateOrderStatus,
   type HubOrder,
 } from '../../shared/hooks/queries/useOrders';
+import { centsToDisplay } from '../../shared/hooks/queries/useSubscription';
 import {
   Card,
   CardContent,
@@ -79,11 +80,6 @@ function formatTime(iso: string): string {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// POS API amounts are in minor units (cents); render as dollars.
-function formatMinor(value: number): string {
-  return `$${(Number(value) / 100).toFixed(2)}`;
-}
-
 const OrdersTable: React.FC<{
   orders: HubOrder[];
   emptyLabel: string;
@@ -110,8 +106,8 @@ const OrdersTable: React.FC<{
           <TableRow key={order.id}>
             <TableCell className="font-mono text-xs">#{order.id}</TableCell>
             <TableCell>{order.customerName || order.customerEmail || '-'}</TableCell>
-            <TableCell>{formatMinor(order.subtotal)}</TableCell>
-            <TableCell>{formatMinor(order.total)}</TableCell>
+            <TableCell>{centsToDisplay(order.subtotal)}</TableCell>
+            <TableCell>{centsToDisplay(order.total)}</TableCell>
             <TableCell>
               <Badge variant={statusBadgeVariant[order.status] || 'outline'}>
                 {statusLabel[order.status] || order.status.replace('_', ' ')}
@@ -338,7 +334,7 @@ const Orders: React.FC = () => {
                 >
                   <span>Subtotal</span>
                   <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
-                    {formatMinor(selectedOrder.subtotal)}
+                    {centsToDisplay(selectedOrder.subtotal)}
                   </span>
                 </div>
                 <div
@@ -347,7 +343,7 @@ const Orders: React.FC = () => {
                 >
                   <span>Total</span>
                   <span className="font-bold text-base" style={{ color: 'var(--dash-text)' }}>
-                    {formatMinor(selectedOrder.total)}
+                    {centsToDisplay(selectedOrder.total)}
                   </span>
                 </div>
                 <div className="flex justify-between pt-1 text-xs">

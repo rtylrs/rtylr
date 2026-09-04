@@ -74,4 +74,40 @@ describe('Orders table empty state', () => {
 
     expect(screen.queryByText('orders.emptyTitleAll')).not.toBeInTheDocument();
   });
+
+  it('renders minor-unit subtotal and total through the canonical display formatter', () => {
+    ordersData.data = [
+      {
+        id: '7',
+        status: 'pending',
+        subtotal: 1000,
+        total: 1250,
+        createdAt: new Date().toISOString(),
+      } as unknown as { id: string; status: string },
+    ];
+    render(<Orders />);
+
+    expect(screen.getByText('$10.00')).toBeInTheDocument();
+    expect(screen.getByText('$12.50')).toBeInTheDocument();
+  });
+
+  it('shows formatted totals and line items in the detail dialog', () => {
+    ordersData.data = [
+      {
+        id: '8',
+        status: 'completed',
+        subtotal: 1000,
+        total: 2500,
+        createdAt: new Date().toISOString(),
+        items: [{ id: 'i1', name: 'Kebab', quantity: 2, price: 1000 }],
+      } as unknown as { id: string; status: string },
+    ];
+    render(<Orders />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'View' }));
+
+    expect(screen.getAllByText('$10.00')).toHaveLength(2);
+    expect(screen.getAllByText('$25.00')).toHaveLength(2);
+    expect(screen.getByText('Kebab').closest('div.flex')).toHaveTextContent('20.00');
+  });
 });
