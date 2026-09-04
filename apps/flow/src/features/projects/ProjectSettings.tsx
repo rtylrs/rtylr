@@ -115,11 +115,14 @@ const ProjectSettings: React.FC = () => {
     );
   }
 
+  // Translated, and sentence case. All four labels were hardcoded English on
+  // a screen that ships in three languages, and "Danger Zone" was Title Case
+  // among single-word siblings.
   const tabs = [
-    { id: 'general', label: 'General' },
-    { id: 'members', label: 'Members' },
-    { id: 'integrations', label: 'Integrations' },
-    { id: 'danger', label: 'Danger Zone' },
+    { id: 'general', label: t('flow.projectSettings.tabs.general') },
+    { id: 'members', label: t('flow.projectSettings.tabs.members') },
+    { id: 'integrations', label: t('flow.projectSettings.tabs.integrations') },
+    { id: 'danger', label: t('flow.projectSettings.tabs.danger') },
   ] as const;
 
   return (
