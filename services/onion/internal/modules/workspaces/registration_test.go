@@ -2,6 +2,7 @@ package workspaces
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -25,4 +26,11 @@ func TestRegisterAPIDoesNotPanic(t *testing.T) {
 	}()
 
 	m.RegisterAPI(mux)
+
+	req := httptest.NewRequest(http.MethodGet, "/flow/presence/today", http.NoBody)
+	res := httptest.NewRecorder()
+	mux.ServeHTTP(res, req)
+	if res.Code != http.StatusForbidden {
+		t.Fatalf("expected generated presence route to reject anonymous access with 403, got %d", res.Code)
+	}
 }

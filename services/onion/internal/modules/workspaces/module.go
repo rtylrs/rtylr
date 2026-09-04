@@ -14,7 +14,6 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/realtime"
 	"github.com/voxire/onion/internal/platform/logger"
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/tenant"
 	flowcyclev1 "github.com/voxire/voxie/gen/go/flow/cycle/v1"
 	flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
@@ -27,6 +26,7 @@ import (
 	flowmilestonev1 "github.com/voxire/voxie/gen/go/flow/milestone/v1"
 	flowmilestonev2 "github.com/voxire/voxie/gen/go/flow/milestone/v2"
 	flownotificationv1 "github.com/voxire/voxie/gen/go/flow/notification/v1"
+	flowpresencev1 "github.com/voxire/voxie/gen/go/flow/presence/v1"
 	flowprofilev1 "github.com/voxire/voxie/gen/go/flow/profile/v1"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
@@ -178,6 +178,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	); err != nil {
 		panic(fmt.Errorf("register flow notification service: %w", err))
 	}
+	if err := flowpresencev1.RegisterPresenceServiceServer(
+		&PresenceAPI{Module: m},
+		flowpresencev1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow presence service: %w", err))
+	}
 	if err := flowsettingv1.RegisterSettingServiceServer(
 		api.NewSettingAPI(m.service),
 		flowsettingv1.WithMux(mux),
@@ -204,16 +210,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	// Realtime WebSocket endpoint. Registered as a raw chi handler — the
-	// standard RegisterGET wrapper would try to decode the request body
-	// and serialize a JSON response, both of which break the WS upgrade.
+func (m *Module) RegisterRoutes(_ context.Context, router *chi.Mux, _ ...interface{}) {
+	// These realtime endpoints are deliberate transport-level escape hatches
+	// from the JSON API contract. The WebSocket upgrade cannot use the standard
+	// JSON handler, while the ticket is its bearer-authenticated preflight.
 	router.Get("/flow/ws", realtime.ServeRealtime)
 	router.Post("/flow/ws-ticket", realtime.IssueRealtimeTicket)
-
-	serverHttp.RegisterGET[PresenceRequest, PresenceResponse](
-		ctx, router, PresenceRoutes(), &PresenceHandler{Module: m},
-	)
 }
 
 // GetAnonymousRoutes tells the global auth middleware to skip bearer-token

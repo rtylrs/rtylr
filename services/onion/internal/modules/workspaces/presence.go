@@ -3,12 +3,6 @@ package workspaces
 import (
 	"context"
 	"errors"
-	"net/http"
-	"time"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/onekiterrors"
-	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // Presence status values. A day carries one of these, resolved server-side -
@@ -93,41 +87,4 @@ func (m *Module) ListPresenceForBusiness(
 		})
 	}
 	return entries, nil
-}
-
-func PresenceRoutes() []string { return []string{"/flow/presence/today"} }
-
-type PresenceHandler struct{ Module *Module }
-
-type PresenceRequest struct{}
-
-type PresenceResponse struct {
-	Presence []PresenceEntry `json:"presence"`
-	Date     string          `json:"date"`
-}
-
-func (h *PresenceHandler) Serve(ctx context.Context, _ *PresenceRequest) (PresenceResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.IsAnonymous || device.User == nil {
-		return PresenceResponse{}, onekiterrors.PermissionDenied()
-	}
-
-	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
-	if err != nil {
-		return PresenceResponse{}, onekiterrors.PermissionDenied()
-	}
-	resolvedOwnerID, err := tenant.ResolveOwnerID(ctx, businessID, device.User.UserID)
-	if err != nil {
-		return PresenceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to resolve business owner")
-	}
-
-	date := time.Now().UTC().Format("2006-01-02")
-	entries, err := h.Module.ListPresenceForBusiness(ctx, resolvedOwnerID, businessID, device.User.UserID, date)
-	if err != nil {
-		if errors.Is(err, errPresenceAccessDenied) {
-			return PresenceResponse{}, onekiterrors.PermissionDenied()
-		}
-		return PresenceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load presence")
-	}
-	return PresenceResponse{Presence: entries, Date: date}, nil
 }
