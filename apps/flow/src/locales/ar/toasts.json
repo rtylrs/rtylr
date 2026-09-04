@@ -44,7 +44,8 @@
   "time": {
     "logged": "تم تسجيل الوقت",
     "logFailed": "تعذّر تسجيل الوقت",
-    "deleteFailed": "تعذّر حذف سجل الوقت"
+    "deleteFailed": "تعذّر حذف سجل الوقت",
+    "deleted": "تم حذف سجل الوقت"
   },
   "cycle": {
     "created": "تم إنشاء الدورة",
@@ -91,7 +92,10 @@
     "deleted": "تم حذف المشروع",
     "restoreFailed": "فشل استعادة المشروع",
     "purgeFailed": "فشل الحذف النهائي للمشروع",
-    "visibilityFailed": "فشل تحديث الظهور"
+    "visibilityFailed": "فشل تحديث الظهور",
+    "archived": "تمت أرشفة المشروع.",
+    "archivedUntil": "تمت أرشفة المشروع. سيتم حذفه نهائيًا في {{date}}.",
+    "archiveFailed": "فشل أرشفة المشروع"
   },
   "milestone": {
     "createFailed": "فشل إنشاء المرحلة",
@@ -102,7 +106,10 @@
     "renameFailed": "فشل إعادة تسمية العرض",
     "deleted": "تم حذف العرض",
     "deleteFailed": "فشل حذف العرض",
-    "created": "تم إنشاء العرض"
+    "created": "تم إنشاء العرض",
+    "madePrivate": "العرض الآن خاص",
+    "madeShared": "العرض الآن مشترك",
+    "visibilityFailed": "فشل تغيير ظهور العرض"
   },
   "weeklyReview": {
     "logged": "تم تسجيل المراجعة الأسبوعية",
@@ -165,5 +172,9 @@
     "deletedWithReassignment": "تم حذف الحالة. عادت {{count}} مهمة إلى حالتها المدمجة.",
     "deleteFailed": "تعذّر حذف الحالة",
     "setFailed": "فشل تعيين حالة المهمة"
+  },
+  "attachment": {
+    "addFailed": "تعذّر إضافة المرفق",
+    "removeFailed": "تعذّر حذف المرفق"
   }
 }

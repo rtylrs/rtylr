@@ -638,7 +638,11 @@ const ProjectSettings: React.FC = () => {
                   if (!canManageProject) return;
                   archiveProject.mutate(projectId, {
                     onSuccess: () => {
-                      toast.success(t('toasts.project.deleted'));
+                      // No toast here. useArchiveProject already reports the
+                      // archive, with the scheduled permanent-deletion date.
+                      // This fired a second one reading "Project deleted",
+                      // which contradicted the Danger Zone copy above telling
+                      // the user archiving is reversible.
                       setConfirmDelete(false);
                       navigate({ to: '/projects' });
                     },

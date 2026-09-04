@@ -87,7 +87,8 @@
     "externalUrlPlaceholder": "https://example.com",
     "settingsSection": "الشريط الجانبي",
     "recent": "الأخيرة",
-    "topItems": "التنقل العلوي"
+    "topItems": "التنقل العلوي",
+    "yourReports": "تقاريرك"
   },
   "taskDetail": {
     "loading": "جارٍ تحميل المهمة…",
@@ -573,7 +574,8 @@
     "back": "رجوع",
     "notFound": "لم يتم العثور على الملف الشخصي.",
     "publicProjects": "المشاريع العامة",
-    "noPublicProjects": "لا توجد مشاريع عامة."
+    "noPublicProjects": "لا توجد مشاريع عامة.",
+    "heading": "الملف الشخصي"
   },
   "board": {
     "pageTitle": "اللوحة · rtylr",
@@ -884,12 +886,6 @@
   "projectStatus": {
     "active": "نشط",
     "completed": "مكتمل"
-  },
-  "toasts": {
-    "project": {
-      "archived": "تمت أرشفة المشروع.",
-      "archivedUntil": "تمت أرشفة المشروع. سيُحذف نهائيًا في {{date}}."
-    }
   },
   "status": {
     "openSettings": "الحالات",

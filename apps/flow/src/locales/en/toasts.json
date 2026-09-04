@@ -36,7 +36,8 @@
   "time": {
     "logged": "Time logged",
     "logFailed": "Failed to log time",
-    "deleteFailed": "Failed to delete time log"
+    "deleteFailed": "Failed to delete time log",
+    "deleted": "Time log deleted"
   },
   "cycle": {
     "created": "Cycle created",
@@ -83,7 +84,10 @@
     "deleted": "Project deleted",
     "restoreFailed": "Failed to restore project",
     "purgeFailed": "Failed to permanently delete project",
-    "visibilityFailed": "Failed to update visibility"
+    "visibilityFailed": "Failed to update visibility",
+    "archived": "Project archived.",
+    "archivedUntil": "Project archived. It will be permanently deleted on {{date}}.",
+    "archiveFailed": "Failed to archive project"
   },
   "milestone": {
     "createFailed": "Failed to create milestone",
@@ -94,7 +98,10 @@
     "renameFailed": "Failed to rename view",
     "deleted": "View deleted",
     "deleteFailed": "Failed to delete view",
-    "created": "View created"
+    "created": "View created",
+    "madePrivate": "View is now private",
+    "madeShared": "View is now shared",
+    "visibilityFailed": "Failed to change view visibility"
   },
   "weeklyReview": {
     "logged": "Weekly review logged",
@@ -149,5 +156,9 @@
     "deletedWithReassignment": "Status deleted. {{count}} task(s) fell back to their built-in status.",
     "deleteFailed": "Failed to delete status",
     "setFailed": "Failed to set task status"
+  },
+  "attachment": {
+    "addFailed": "Failed to add attachment",
+    "removeFailed": "Failed to remove attachment"
   }
 }
