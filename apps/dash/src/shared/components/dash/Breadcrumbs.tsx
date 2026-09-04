@@ -49,7 +49,7 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
         <li>
           <Link to="/" className="flex items-center gap-1 hover:opacity-70 transition-opacity">
             <Home size={11} />
-            {t('nav.hub', 'Hub')}
+            {t('common.nav.hub', 'Hub')}
           </Link>
         </li>
         {segments.map((seg, i) => {

@@ -171,7 +171,7 @@ const Groups = (): React.JSX.Element => {
                             className="text-[11px] ml-1"
                             style={{ color: 'var(--dash-text-dim)' }}
                           >
-                            {t('groups.sectionsCount', { count: sectionCount })}
+                            {t('team.groups.sectionsCount', { count: sectionCount })}
                           </span>
                         </>
                       )}

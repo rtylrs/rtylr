@@ -26,10 +26,11 @@ export const useCreateApiKey = () => {
       return developerClient.createApiKey(payload);
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.apiKeyCreated', 'API key created'));
+      toast.success(i18next.t('common.toasts.apiKeyCreated', 'API key created'));
       qc.invalidateQueries({ queryKey: ['api-keys'] });
     },
-    onError: () => toast.error(i18next.t('toasts.failedCreateApiKey', 'Failed to create API key')),
+    onError: () =>
+      toast.error(i18next.t('common.toasts.failedCreateApiKey', 'Failed to create API key')),
   });
 };
 
@@ -41,9 +42,10 @@ export const useRevokeApiKey = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.apiKeyRevoked', 'API key revoked'));
+      toast.success(i18next.t('common.toasts.apiKeyRevoked', 'API key revoked'));
       qc.invalidateQueries({ queryKey: ['api-keys'] });
     },
-    onError: () => toast.error(i18next.t('toasts.failedRevokeApiKey', 'Failed to revoke API key')),
+    onError: () =>
+      toast.error(i18next.t('common.toasts.failedRevokeApiKey', 'Failed to revoke API key')),
   });
 };

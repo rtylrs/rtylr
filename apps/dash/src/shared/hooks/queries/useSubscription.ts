@@ -448,10 +448,12 @@ export const useSetSubscription = () => {
       subscriptionClient.upsertSubscription({ planSlug: data.planSlug }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      toast.success(i18next.t('toasts.subscriptionUpdated', 'Subscription updated'));
+      toast.success(i18next.t('common.toasts.subscriptionUpdated', 'Subscription updated'));
     },
     onError: () =>
-      toast.error(i18next.t('toasts.failedUpdateSubscription', 'Failed to update subscription')),
+      toast.error(
+        i18next.t('common.toasts.failedUpdateSubscription', 'Failed to update subscription')
+      ),
   });
 };
 

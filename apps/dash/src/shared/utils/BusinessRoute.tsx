@@ -405,19 +405,23 @@ function MFAAccessGate({ enrollmentRequired }: { enrollmentRequired: boolean }):
         style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
       >
         <h1 className="text-xl font-semibold" style={{ color: 'var(--dash-text)' }}>
-          {enrollmentRequired ? t('mfaGate.enrollmentTitle') : t('mfaGate.verificationTitle')}
+          {enrollmentRequired
+            ? t('common.mfaGate.enrollmentTitle')
+            : t('common.mfaGate.verificationTitle')}
         </h1>
         <p className="mt-2 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
           {enrollmentRequired
-            ? t('mfaGate.enrollmentDescription')
-            : t('mfaGate.verificationDescription')}
+            ? t('common.mfaGate.enrollmentDescription')
+            : t('common.mfaGate.verificationDescription')}
         </p>
         <a
           href="/security"
           className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold"
           style={{ background: 'var(--accent)', color: 'var(--accent-contrast, #fff)' }}
         >
-          {enrollmentRequired ? t('mfaGate.openSetup') : t('mfaGate.openVerification')}
+          {enrollmentRequired
+            ? t('common.mfaGate.openSetup')
+            : t('common.mfaGate.openVerification')}
         </a>
       </main>
     </div>

@@ -26,11 +26,11 @@ export const useCreateWebhook = () => {
       return developerClient.createWebhook(payload);
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.webhookCreated', 'Webhook created'));
+      toast.success(i18next.t('common.toasts.webhookCreated', 'Webhook created'));
       qc.invalidateQueries({ queryKey: ['webhooks'] });
     },
     onError: () => {
-      toast.error(i18next.t('toasts.failedCreateWebhook', 'Failed to create webhook'));
+      toast.error(i18next.t('common.toasts.failedCreateWebhook', 'Failed to create webhook'));
     },
   });
 };
@@ -43,11 +43,11 @@ export const useDeleteWebhook = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.webhookRemoved', 'Webhook removed'));
+      toast.success(i18next.t('common.toasts.webhookRemoved', 'Webhook removed'));
       qc.invalidateQueries({ queryKey: ['webhooks'] });
     },
     onError: () => {
-      toast.error(i18next.t('toasts.failedRemoveWebhook', 'Failed to remove webhook'));
+      toast.error(i18next.t('common.toasts.failedRemoveWebhook', 'Failed to remove webhook'));
     },
   });
 };

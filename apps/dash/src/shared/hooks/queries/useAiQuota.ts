@@ -90,9 +90,11 @@ export const useUpdateAiQuotaMode = () => {
         returnedMode === 'pool' || returnedMode === 'per_person' ? returnedMode : requestedMode;
       qc.setQueryData<AiQuotaMode>(['ai-quota-settings'], nextMode);
       qc.invalidateQueries({ queryKey: ['ai-usage'] });
-      toast.success(i18next.t('toasts.aiAllocationUpdated', 'AI allocation updated'));
+      toast.success(i18next.t('common.toasts.aiAllocationUpdated', 'AI allocation updated'));
     },
     onError: () =>
-      toast.error(i18next.t('toasts.failedUpdateAiAllocation', 'Failed to update AI allocation')),
+      toast.error(
+        i18next.t('common.toasts.failedUpdateAiAllocation', 'Failed to update AI allocation')
+      ),
   });
 };

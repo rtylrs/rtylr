@@ -26,11 +26,13 @@ export const useConnectIntegration = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.integrationConnected', 'Integration connected'));
+      toast.success(i18next.t('common.toasts.integrationConnected', 'Integration connected'));
       qc.invalidateQueries({ queryKey: ['integrations'] });
     },
     onError: () =>
-      toast.error(i18next.t('toasts.failedConnectIntegration', 'Failed to connect integration')),
+      toast.error(
+        i18next.t('common.toasts.failedConnectIntegration', 'Failed to connect integration')
+      ),
   });
 };
 
@@ -42,12 +44,12 @@ export const useDisconnectIntegration = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success(i18next.t('toasts.integrationDisconnected', 'Integration disconnected'));
+      toast.success(i18next.t('common.toasts.integrationDisconnected', 'Integration disconnected'));
       qc.invalidateQueries({ queryKey: ['integrations'] });
     },
     onError: () =>
       toast.error(
-        i18next.t('toasts.failedDisconnectIntegration', 'Failed to disconnect integration')
+        i18next.t('common.toasts.failedDisconnectIntegration', 'Failed to disconnect integration')
       ),
   });
 };
