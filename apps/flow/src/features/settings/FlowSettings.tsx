@@ -210,7 +210,7 @@ export const NotificationsSection: React.FC = () => {
               onClick={() => toggle(item.key)}
               className={cn(
                 'flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full p-0.5',
-                'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64C5B9]/45',
+                'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-focus)]',
                 'focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--flow-bg)]'
               )}
               style={{

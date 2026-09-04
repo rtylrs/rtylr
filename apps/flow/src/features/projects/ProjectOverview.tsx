@@ -25,7 +25,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 const HEALTH: Record<string, { color: string; labelKey: string }> = {
   on_track: { color: '#22c55e', labelKey: 'flow.projectOverview.health.onTrack' },
   at_risk: { color: '#f59e0b', labelKey: 'flow.milestones.status.atRisk' },
-  off_track: { color: '#ef4444', labelKey: 'flow.projectOverview.health.offTrack' },
+  off_track: { color: 'var(--flow-danger-fg)', labelKey: 'flow.projectOverview.health.offTrack' },
 };
 
 const ProjectOverview: React.FC = () => {
@@ -147,7 +147,7 @@ const ProjectOverview: React.FC = () => {
               icon={AlertCircle}
               label={t('common.dashboard.stats.overdue')}
               value={stats.overdue}
-              color="#ef4444"
+              color="var(--flow-danger-fg)"
             />
           </div>
         </motion.section>

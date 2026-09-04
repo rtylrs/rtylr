@@ -140,7 +140,7 @@ export const BulkEditBar: React.FC = () => {
               .catch(() => toast.error(t('errors.generic')))
           }
           className="h-7 px-2 rounded-sm text-meta flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
-          style={{ color: '#ef4444' }}
+          style={{ color: 'var(--flow-danger-fg)' }}
         >
           <Trash2 size={11} /> {t('common.delete')}
         </button>

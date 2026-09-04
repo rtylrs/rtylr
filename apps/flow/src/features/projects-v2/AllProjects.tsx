@@ -25,8 +25,8 @@ function ProjectCard({ project }: { project: Project }) {
           <span
             className="h-8 w-8 rounded-lg flex items-center justify-center text-sm shrink-0"
             style={{
-              background: `${project.color ?? '#64C5B9'}20`,
-              color: project.color ?? '#64C5B9',
+              background: project.color ? `${project.color}20` : 'var(--accent-muted)',
+              color: project.color ?? 'var(--accent)',
             }}
             aria-hidden
           >

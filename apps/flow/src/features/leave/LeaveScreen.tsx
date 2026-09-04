@@ -23,7 +23,7 @@ const sectionHeadingClass = 'mb-3 text-body font-semibold uppercase tracking-wid
 const statusTone: Record<string, string> = {
   pending: 'var(--flow-status-pending, var(--flow-text-muted))',
   approved: 'var(--flow-status-approved, var(--accent-fg))',
-  rejected: 'var(--flow-status-rejected, var(--flow-error))',
+  rejected: 'var(--flow-status-rejected, var(--flow-danger-fg))',
   cancelled: 'var(--flow-text-muted)',
 };
 

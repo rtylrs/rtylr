@@ -26,7 +26,7 @@ import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskC
 // labelKey, not label: this is module scope, so it is built before any hook
 // can run. The priority names already exist as translated copy.
 const PRIORITY_ICONS: Record<string, { color: string; labelKey: string }> = {
-  urgent: { color: '#ef4444', labelKey: 'priority.urgent' },
+  urgent: { color: 'var(--flow-danger-fg)', labelKey: 'priority.urgent' },
   high: { color: '#f97316', labelKey: 'priority.high' },
   medium: { color: '#3b82f6', labelKey: 'priority.medium' },
   low: { color: '#6b7280', labelKey: 'priority.low' },

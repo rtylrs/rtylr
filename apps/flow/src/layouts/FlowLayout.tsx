@@ -385,7 +385,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
-  const [newProjectColor, setNewProjectColor] = useState('#64C5B9');
+  const [newProjectColor, setNewProjectColor] = useState(ACCENT_DEFAULT);
   const [newProjectVisibility, setNewProjectVisibility] = useState<'private' | 'public'>('private');
 
   // Account menu (avatar/name trigger in the sidebar footer): closes on an
@@ -724,7 +724,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             onNewProject={() => {
               setNewProjectName('');
               setNewProjectDescription('');
-              setNewProjectColor('#64C5B9');
+              setNewProjectColor(ACCENT_DEFAULT);
               setNewProjectOpen(true);
             }}
             sidebarRef={sidebarRef}
@@ -1006,7 +1006,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               onClick={() => {
                                 setNewProjectName('');
                                 setNewProjectDescription('');
-                                setNewProjectColor('#64C5B9');
+                                setNewProjectColor(ACCENT_DEFAULT);
                                 setNewProjectOpen(true);
                               }}
                             >
@@ -1197,7 +1197,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       type="button"
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-meta text-start transition-colors hover:bg-[var(--flow-hover)]"
-                      style={{ color: '#ef4444' }}
+                      style={{ color: 'var(--flow-danger-fg)' }}
                     >
                       <LogOut size={13} />
                       {t('flow.shell.signOut')}

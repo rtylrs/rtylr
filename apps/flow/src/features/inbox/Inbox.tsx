@@ -27,7 +27,7 @@ const TYPE_ICONS: Record<ApiNotification['type'], React.ReactNode> = {
   mention: <AtSign size={14} style={{ color: '#f59e0b' }} />,
   comment: <MessageSquare size={14} style={{ color: '#3b82f6' }} />,
   status_change: <Circle size={14} style={{ color: '#22c55e' }} />,
-  due_soon: <Bell size={14} style={{ color: '#ef4444' }} />,
+  due_soon: <Bell size={14} style={{ color: 'var(--flow-danger-fg)' }} />,
 };
 
 function formatTimestamp(ts: string, t: TFunction, lang: string): string {
@@ -69,7 +69,9 @@ const NotificationRow: React.FC<{
       <span
         className="h-8 w-8 rounded-full flex items-center justify-center text-meta font-bold shrink-0 mt-0.5"
         style={{
-          background: `${notification.projectColor || '#64C5B9'}22`,
+          background: notification.projectColor
+            ? `${notification.projectColor}22`
+            : 'var(--accent-muted)',
           color: notification.projectColor || 'var(--accent)',
         }}
       >

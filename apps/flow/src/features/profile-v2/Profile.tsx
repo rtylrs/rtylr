@@ -116,8 +116,8 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
                       <span
                         className="h-7 w-7 rounded-md flex items-center justify-center text-xs shrink-0"
                         style={{
-                          background: `${pp.color ?? '#64C5B9'}20`,
-                          color: pp.color ?? '#64C5B9',
+                          background: pp.color ? `${pp.color}20` : 'var(--accent-muted)',
+                          color: pp.color ?? 'var(--accent)',
                         }}
                         aria-hidden
                       >

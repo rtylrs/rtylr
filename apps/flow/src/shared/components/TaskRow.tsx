@@ -164,7 +164,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         {task.dueDate && (
           <span
             className="text-meta shrink-0 w-[64px] text-right"
-            style={{ color: overdue ? '#ef4444' : 'var(--flow-text-dim)' }}
+            style={{ color: overdue ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)' }}
           >
             {formatDate(task.dueDate)}
           </span>

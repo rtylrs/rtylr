@@ -30,7 +30,7 @@ export function PreviewRouteUnavailable(): React.JSX.Element {
       </p>
       <Link
         to="/my-issues"
-        style={{ color: 'var(--flow-accent)', fontWeight: 600, textDecoration: 'none' }}
+        style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}
       >
         Return to My Issues
       </Link>

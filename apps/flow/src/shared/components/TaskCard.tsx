@@ -87,7 +87,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         style={{
           opacity: dimmed ? 0.5 : undefined,
           background: 'var(--flow-card)',
-          border: selected ? '1px solid #64C5B9' : '1px solid var(--flow-border)',
+          border: selected ? '1px solid var(--accent)' : '1px solid var(--flow-border)',
           boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : '0 1px 3px rgba(0,0,0,0.15)',
         }}
         whileHover={{ y: -1 }}
@@ -106,7 +106,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               <span
                 className="min-w-0 max-w-[7rem] shrink-0 truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
                 style={{
-                  background: `${task.statusColor ?? '#64C5B9'}22`,
+                  background: task.statusColor ? `${task.statusColor}22` : 'var(--accent-muted)',
                   color: task.statusColor ?? 'var(--accent)',
                 }}
                 title={task.statusName}
@@ -120,7 +120,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             <span
               className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
               style={{
-                background: `${project?.color ?? '#64C5B9'}22`,
+                background: project?.color ? `${project.color}22` : 'var(--accent-muted)',
                 color: project?.color ?? 'var(--accent)',
               }}
               title={project?.name ?? task.projectName}
@@ -187,7 +187,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           {task.dueDate && (
             <span
               className="flex items-center gap-1 text-meta"
-              style={{ color: overdue ? '#ef4444' : 'var(--flow-text-dim)' }}
+              style={{ color: overdue ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)' }}
             >
               <Calendar size={10} />
               {formatDate(task.dueDate)}

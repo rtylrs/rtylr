@@ -27,7 +27,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
     <div className="relative">
       <div
         className="flex items-center gap-1.5 text-meta"
-        style={{ color: overdue ? '#ef4444' : 'var(--flow-text-muted)' }}
+        style={{ color: overdue ? 'var(--flow-danger-fg)' : 'var(--flow-text-muted)' }}
       >
         <button
           type="button"
