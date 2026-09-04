@@ -8,7 +8,7 @@ import { Button } from '@voxire/components';
 import { useEmailVerification, useResendVerificationEmail } from './useEmailVerification';
 import notify from '../../shared/lib/notify/notify';
 
-type Status = 'loading' | 'success' | 'error';
+type Status = 'loading' | 'success' | 'error' | 'awaitingCode';
 
 const VerifyEmail: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +24,11 @@ const VerifyEmail: React.FC = () => {
   useEffect(() => {
     const token = params.get('token');
     if (!token) {
-      setStatus('error');
+      // Not an error: onion emails a six-digit code, never a link, so arriving
+      // here without a token is the normal path. Showing a red alert reading
+      // "the verification code is invalid" before the user has typed anything
+      // told them their code had failed when they had not used it yet.
+      setStatus('awaitingCode');
       return;
     }
     verifyMutation.mutate(
@@ -53,14 +57,14 @@ const VerifyEmail: React.FC = () => {
   const handleResend = (targetEmail?: string): void => {
     const emailToUse = targetEmail || resendEmail || params.get('email') || '';
     if (!emailToUse) {
-      notify.error('Please enter your email address to resend verification');
+      notify.error(t('auth.verify.emailRequired'));
       return;
     }
     resendMutation.mutate(
       { email: emailToUse },
       {
-        onSuccess: () => notify.success('Verification email sent'),
-        onError: () => notify.error('Failed to send verification email'),
+        onSuccess: () => notify.success(t('auth.verify.resent')),
+        onError: () => notify.error(t('auth.verify.resendFailed')),
       }
     );
   };
@@ -94,7 +98,7 @@ const VerifyEmail: React.FC = () => {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 mx-auto">
               <Loader2 className="h-8 w-8 text-[#4583C4] animate-spin" />
             </div>
-            <p className="mt-4 text-sm text-[#666]">{t('verify.verifying')}</p>
+            <p className="mt-4 text-sm text-[#666]">{t('auth.verify.verifying')}</p>
           </>
         )}
         {status === 'success' && (
@@ -102,7 +106,7 @@ const VerifyEmail: React.FC = () => {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 border border-green-200 mx-auto">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <p className="mt-4 text-base font-semibold text-[#111]">{t('verify.success')}</p>
+            <p className="mt-4 text-base font-semibold text-[#111]">{t('auth.verify.success')}</p>
             <div className="mt-6">
               <Button
                 type="button"
@@ -116,14 +120,25 @@ const VerifyEmail: React.FC = () => {
             </div>
           </>
         )}
-        {status === 'error' && (
+        {(status === 'error' || status === 'awaitingCode') && (
           <>
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 border border-red-200 mx-auto">
-              <AlertCircle className="h-8 w-8 text-red-500" />
-            </div>
-            <p className="mt-4 text-sm text-red-600">
-              {hasLinkToken ? t('verify.failed') : t('verify.codeInvalid')}
-            </p>
+            {status === 'awaitingCode' ? (
+              <>
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 mx-auto">
+                  <Mail className="h-8 w-8 text-[#4583C4]" />
+                </div>
+                <p className="mt-4 text-sm text-[#666]">{t('auth.verify.enterCodePrompt')}</p>
+              </>
+            ) : (
+              <>
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 border border-red-200 mx-auto">
+                  <AlertCircle className="h-8 w-8 text-red-500" />
+                </div>
+                <p className="mt-4 text-sm text-red-600">
+                  {hasLinkToken ? t('auth.verify.failed') : t('auth.verify.codeInvalid')}
+                </p>
+              </>
+            )}
             {!hasLinkToken && (
               <form
                 onSubmit={(event) => {
@@ -133,7 +148,7 @@ const VerifyEmail: React.FC = () => {
                 className="mt-6 space-y-3"
               >
                 <label htmlFor="verification-code" className="sr-only">
-                  {t('verify.codeLabel')}
+                  {t('auth.verify.codeLabel')}
                 </label>
                 <input
                   id="verification-code"
@@ -141,13 +156,13 @@ const VerifyEmail: React.FC = () => {
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   maxLength={6}
-                  placeholder={t('verify.codePlaceholder')}
+                  placeholder={t('auth.verify.codePlaceholder')}
                   value={verificationCode}
                   onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, ''))}
                   className="w-full h-11 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base text-[#111] text-center tracking-[0.35em] outline-none focus:border-[#4583C4]"
                 />
                 <Button type="submit" variant="primary" fullWidth height={44}>
-                  {t('verify.verifyCode')}
+                  {t('auth.verify.verifyCode')}
                 </Button>
               </form>
             )}
@@ -160,7 +175,7 @@ const VerifyEmail: React.FC = () => {
             >
               <input
                 type="email"
-                placeholder={t('common.email')}
+                placeholder={t('auth.common.email')}
                 value={resendEmail}
                 onChange={(e) => setResendEmail(e.target.value)}
                 required
@@ -175,7 +190,7 @@ const VerifyEmail: React.FC = () => {
               >
                 <span className="inline-flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  {t('verify.resend')}
+                  {t('auth.verify.resend')}
                 </span>
               </Button>
             </form>
@@ -188,7 +203,7 @@ const VerifyEmail: React.FC = () => {
             onClick={() => navigate({ to: '/' })}
             className="text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
           >
-            Back to sign in
+            {t('auth.reset.backToSignIn')}
           </button>
         </div>
       </div>
