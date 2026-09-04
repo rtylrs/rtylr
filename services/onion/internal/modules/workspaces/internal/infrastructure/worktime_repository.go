@@ -292,6 +292,35 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, businessID, workDayID
 	return lines, int32(sumToInt64(total)), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
+// SumWorkDayLineMinutesByDayIDs returns logged totals for a page of work days
+// with one grouped query.
+func (r *Repository) SumWorkDayLineMinutesByDayIDs(ctx context.Context, ownerID, businessID int64, workDayIDs []int64) (map[int64]int32, error) {
+	totals := make(map[int64]int32, len(workDayIDs))
+	if len(workDayIDs) == 0 {
+		return totals, nil
+	}
+	workDayIDParams := make([]sql.NullInt64, 0, len(workDayIDs))
+	for _, workDayID := range workDayIDs {
+		workDayIDParams = append(workDayIDParams, nullInt64(workDayID))
+	}
+
+	rows, err := r.queries.SumWorkDayLineMinutesByDayIDs(ctx, sqlc.SumWorkDayLineMinutesByDayIDsParams{
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		WorkDayIds: workDayIDParams,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("SumWorkDayLineMinutesByDayIDs failed", logger.Error(err))
+		return nil, err
+	}
+	for _, row := range rows {
+		if row.WorkDayID.Valid {
+			totals[row.WorkDayID.Int64] = int32(sumToInt64(row.LoggedMinutes)) // #nosec G115 -- Reviewed width conversion matches the domain's minute field and established database bounds.
+		}
+	}
+	return totals, nil
+}
+
 // CreateWorkDayLine adds a line. A repeated client key returns the line that
 // already exists rather than an error: an offline client retrying a send it
 // never saw acknowledged has not made a mistake, and the second call must be a

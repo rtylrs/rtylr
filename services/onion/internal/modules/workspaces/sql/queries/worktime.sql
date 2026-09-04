@@ -114,6 +114,16 @@ WHERE id = ? AND owner_id = ? AND business_id = ?;
 SELECT COALESCE(SUM(duration_minutes), 0) FROM hr_time_entries
 WHERE owner_id = ? AND business_id = ? AND work_day_id = ?;
 
+-- The team work-day page needs one logged total per returned day. Grouping by
+-- work_day_id keeps the page at one aggregate query instead of one sum query
+-- per day.
+-- name: SumWorkDayLineMinutesByDayIDs :many
+SELECT work_day_id, COALESCE(SUM(duration_minutes), 0) AS logged_minutes
+FROM hr_time_entries
+WHERE owner_id = ? AND business_id = ?
+  AND work_day_id IN (sqlc.slice('work_day_ids'))
+GROUP BY work_day_id;
+
 -- ── Work types ─────────────────────────────────────────────────────────────
 
 -- name: ListWorkTypes :many

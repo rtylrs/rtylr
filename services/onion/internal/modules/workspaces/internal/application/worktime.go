@@ -327,10 +327,35 @@ func (s *Service) ListTeamWorkDays(ctx context.Context, callerID, businessID int
 	if err != nil {
 		return nil, 0, err
 	}
+	if err := s.stampWorkDayLoggedMinutes(ctx, businessID, days); err != nil {
+		return nil, 0, err
+	}
 	if err := s.stampWorkDayUserIDs(ctx, businessID, days); err != nil {
 		return nil, 0, err
 	}
 	return days, total, nil
+}
+
+// stampWorkDayLoggedMinutes attaches each returned day's aggregate from one
+// grouped query, preserving zero for days without time-entry rows.
+func (s *Service) stampWorkDayLoggedMinutes(ctx context.Context, businessID int64, days []domain.WorkDay) error {
+	if len(days) == 0 {
+		return nil
+	}
+
+	workDayIDs := make([]int64, 0, len(days))
+	for _, day := range days {
+		workDayIDs = append(workDayIDs, day.ID)
+	}
+	totals, err := s.repo.SumWorkDayLineMinutesByDayIDs(ctx, businessID, businessID, workDayIDs)
+	if err != nil {
+		return err
+	}
+	for i := range days {
+		days[i].LoggedMinutes = totals[days[i].ID]
+		days[i].GapMinutes = days[i].ClockedMinutes - days[i].LoggedMinutes
+	}
+	return nil
 }
 
 func (s *Service) listTeamWorkDaysForCaller(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
