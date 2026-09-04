@@ -108,6 +108,59 @@ describe('menuStore', () => {
     expect(getState().items).toHaveLength(0);
   });
 
+  it('addMenuItem inserts into the matching category instead of top level', async () => {
+    getState().addCategory({ _id: 'c1', name: 'A', type: 'category' as const, menuItems: [] });
+    await getState().addMenuItem('c1', { name: 'Falafel' });
+    expect(getState().items).toHaveLength(1);
+    const category = getState().items[0];
+    expect(category).toMatchObject({ _id: 'c1' });
+    if (category.type !== 'category') throw new Error('expected category');
+    expect(category.details?.menuItems).toHaveLength(1);
+    expect(category.details?.menuItems?.[0]).toMatchObject({ name: 'Falafel' });
+    expect(category.menuItems).toHaveLength(1);
+  });
+
+  it('addMenuItem falls back to top level for unknown categories', async () => {
+    await getState().addMenuItem('uncategorized', { name: 'Soup' });
+    expect(getState().items).toHaveLength(1);
+    expect(getState().items[0]).toMatchObject({ name: 'Soup', type: 'item' });
+  });
+
+  it('deleteMenuItem removes nested items from both storage shapes', () => {
+    getState().setItems([
+      {
+        _id: 'c1',
+        name: 'A',
+        type: 'category' as const,
+        menuItems: [{ _id: 'm1', name: 'Kebab', type: 'item' as const }],
+        details: { menuItems: [{ _id: 'm1', name: 'Kebab', type: 'item' as const }] },
+      },
+    ]);
+    getState().deleteMenuItem('m1');
+    const category = getState().items[0];
+    if (category.type !== 'category') throw new Error('expected category');
+    expect(category.menuItems).toHaveLength(0);
+    expect(category.details?.menuItems).toHaveLength(0);
+  });
+
+  it('deleteMenuItem leaves other nested items untouched', () => {
+    getState().setItems([
+      {
+        _id: 'c1',
+        name: 'A',
+        type: 'category' as const,
+        menuItems: [
+          { _id: 'm1', name: 'Kebab', type: 'item' as const },
+          { _id: 'm2', name: 'Salad', type: 'item' as const },
+        ],
+      },
+    ]);
+    getState().deleteMenuItem('m1');
+    const category = getState().items[0];
+    if (category.type !== 'category') throw new Error('expected category');
+    expect(category.menuItems.map((i) => i._id)).toEqual(['m2']);
+  });
+
   it('addBanner appends a banner', () => {
     const banner = { _id: 'b1', bannerImage: 'img.jpg', menuId: 'm1' };
     getState().addBanner(banner);
