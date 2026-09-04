@@ -459,6 +459,10 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	if err := s.repo.EnsureEmployeeForUser(ctx, ownerID, businessID, userID); err != nil {
 		logger.Ctx(ctx).Error("failed to create employee record for invited user",
 			logger.Int("owner_id", int(ownerID)), logger.Int("user_id", int(userID)), logger.Error(err))
+	} else if err := s.repo.EnsureStaffForUser(ctx, ownerID, businessID, userID, string(role)); err != nil {
+		logger.Ctx(ctx).Error("failed to create staff directory record for invited user",
+			logger.Int("owner_id", int(ownerID)), logger.Int("business_id", int(businessID)),
+			logger.Int("user_id", int(userID)), logger.Error(err))
 	}
 
 	// New team member changes the business's team list cache + the new user's

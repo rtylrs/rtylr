@@ -6,6 +6,7 @@ sql:
       - "../../../../internal/platform/database/schemas/shared"
       - "../../../../internal/platform/database/schemas/hub"
       - "../../../../internal/platform/database/schemas/hr_core"
+      - "../../../../internal/platform/database/schemas/hr"
       - "../../../../internal/platform/database/schemas/shared/subscriptions.sql"
     gen:
       go:

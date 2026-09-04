@@ -48,6 +48,7 @@ func TestEnsureEmployeeForUserScopesToThePassedBusiness(t *testing.T) {
 		t.Skipf("cannot seed probe user: %v", err)
 	}
 	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_staff WHERE user_id = ?", userID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employees WHERE user_id = ?", userID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", userID)
 	})
@@ -76,5 +77,45 @@ func TestEnsureEmployeeForUserScopesToThePassedBusiness(t *testing.T) {
 	}
 	if storedOwnerID != ownerID {
 		t.Errorf("hr_employees.owner_id = %d, want %d", storedOwnerID, ownerID)
+	}
+
+	if err := repo.EnsureStaffForUser(ctx, ownerID, businessID, userID, "staff"); err != nil {
+		t.Fatalf("EnsureStaffForUser: %v", err)
+	}
+	if err := repo.EnsureStaffForUser(ctx, ownerID, businessID, userID, "staff"); err != nil {
+		t.Fatalf("EnsureStaffForUser second call: %v", err)
+	}
+
+	var staffOwnerID, staffBusinessID, staffUserID, employeeID int64
+	var staffRole, staffFirstName, staffLastName string
+	if err := db.QueryRowContext(ctx, `
+		SELECT owner_id, business_id, user_id, employee_id, role, first_name, last_name
+		FROM hr_staff
+		WHERE owner_id = ? AND business_id = ? AND user_id = ?`, ownerID, businessID, userID).
+		Scan(&staffOwnerID, &staffBusinessID, &staffUserID, &employeeID, &staffRole, &staffFirstName, &staffLastName); err != nil {
+		t.Fatalf("read staff row: %v", err)
+	}
+	if staffOwnerID != ownerID || staffBusinessID != businessID || staffUserID != userID {
+		t.Fatalf("staff scope = owner %d, business %d, user %d, want owner %d, business %d, user %d",
+			staffOwnerID, staffBusinessID, staffUserID, ownerID, businessID, userID)
+	}
+	if employeeID == 0 {
+		t.Fatal("staff employee_id is zero, want the linked hr_employees row")
+	}
+	if staffRole != "staff" {
+		t.Errorf("staff role = %q, want staff", staffRole)
+	}
+	if staffFirstName != "Probe" || staffLastName != "Person" {
+		t.Errorf("staff name = %q %q, want Probe Person", staffFirstName, staffLastName)
+	}
+
+	var staffCount int
+	if err := db.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM hr_staff WHERE owner_id = ? AND business_id = ? AND user_id = ?",
+		ownerID, businessID, userID).Scan(&staffCount); err != nil {
+		t.Fatalf("count staff rows: %v", err)
+	}
+	if staffCount != 1 {
+		t.Fatalf("staff row count = %d, want 1 after idempotent ensure", staffCount)
 	}
 }

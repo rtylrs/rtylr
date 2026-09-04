@@ -222,6 +222,50 @@ FROM users u
 WHERE u.id = ?
   AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id);
 
+-- cross-schema write to hr_core: link an existing Directory row to its employee.
+-- name: LinkStaffEmployeeForUser :exec
+UPDATE hr_staff s
+JOIN hr_employees e
+  ON e.owner_id = s.owner_id
+ AND e.business_id = s.business_id
+ AND e.user_id = s.user_id
+SET s.employee_id = e.id
+WHERE s.owner_id = ?
+  AND s.business_id = ?
+  AND s.user_id = ?
+  AND (s.employee_id IS NULL OR s.employee_id = 0);
+
+-- cross-schema write to hr: mirror an invited employee in the Directory source.
+-- The staff table uses enums for fields that hr_employees stores as strings, so
+-- map unknown employment types to the schema default.
+-- name: EnsureStaffForUser :exec
+INSERT INTO hr_staff
+    (owner_id, business_id, user_id, employee_id, department_id, first_name, last_name, email,
+     phone, role, employment_type, status, salary, hourly_rate, overtime_rate, start_date,
+     end_date, address, emergency_contact_name, emergency_contact_phone, apps, notes, photo_url, bio)
+SELECT e.owner_id, e.business_id, e.user_id, e.id, e.department_id, e.first_name, e.last_name, e.email,
+       e.phone, ?,
+       CASE e.employment_type
+           WHEN 'part_time' THEN 'part_time'
+           WHEN 'contractor' THEN 'contractor'
+           WHEN 'intern' THEN 'intern'
+           ELSE 'full_time'
+       END,
+       'active', e.salary, e.hourly_rate, e.overtime_rate, COALESCE(e.start_date, CURDATE()),
+       e.end_date, e.address, e.emergency_contact_name, e.emergency_contact_phone,
+       JSON_ARRAY(), e.notes, NULL, NULL
+FROM hr_employees e
+WHERE e.owner_id = ?
+  AND e.business_id = ?
+  AND e.user_id = ?
+  AND NOT EXISTS (
+      SELECT 1
+      FROM hr_staff s
+      WHERE s.owner_id = e.owner_id
+        AND s.business_id = e.business_id
+        AND s.user_id = e.user_id
+  );
+
 -- cross-schema read from hr_core — revoke access when the employee is terminated.
 -- name: RevokeBusinessUserPermissions :execrows
 -- Employment-driven revocation (#834): one business, one user. The join to

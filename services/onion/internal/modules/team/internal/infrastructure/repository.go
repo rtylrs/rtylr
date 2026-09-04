@@ -804,6 +804,12 @@ func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, ownerID,
 			args: []any{ownerID, businessID, userID},
 		},
 		{
+			name: "staff directory record",
+			query: `DELETE FROM hr_staff
+				WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
+			args: []any{ownerID, businessID, userID},
+		},
+		{
 			name: "legacy permission",
 			query: `DELETE FROM user_app_permissions
 				WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
@@ -855,6 +861,26 @@ func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, busines
 		OwnerID:    ownerID,
 		BusinessID: businessID,
 		ID:         userID,
+	})
+}
+
+// EnsureStaffForUser mirrors an invited employee in hr_staff, which is the
+// source used by the Directory. Existing staff rows are retained and linked
+// to their employee so this also repairs rows created before the mirror ran.
+func (r *Repository) EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error {
+	if err := r.queries.LinkStaffEmployeeForUser(ctx, sqlc.LinkStaffEmployeeForUserParams{
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		UserID:     sql.NullInt64{Int64: userID, Valid: true},
+	}); err != nil {
+		return err
+	}
+
+	return r.queries.EnsureStaffForUser(ctx, sqlc.EnsureStaffForUserParams{
+		Role:       role,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		UserID:     sql.NullInt64{Int64: userID, Valid: true},
 	})
 }
 
