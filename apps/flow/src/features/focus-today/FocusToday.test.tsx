@@ -38,6 +38,7 @@ vi.mock('../../shared/stores/flowStore', async (importOriginal) => ({
 // bucketing cases added at the end of the file.
 vi.mock('../../shared/lib/currentUser', () => ({ isTaskMine: () => true }));
 
+import { todayIso } from '../../shared/lib/lifeRhythm';
 import FocusToday from './FocusToday';
 
 beforeEach(() => {
@@ -122,7 +123,12 @@ describe('FocusToday lists what is due today (#1035)', () => {
 });
 
 describe('FocusToday separates pinned from due today (#1083)', () => {
-  const today = new Date().toISOString().slice(0, 10);
+  // The same helper the screen's filter uses. Building this from
+  // toISOString() gives the UTC date, and lifeRhythm's todayIso() is local,
+  // so the two disagree for the hours between local midnight and UTC
+  // midnight: these cases passed when written in the evening and failed
+  // after midnight local.
+  const today = todayIso();
 
   function apiTask(over: Record<string, unknown> = {}): ApiTask {
     return {
