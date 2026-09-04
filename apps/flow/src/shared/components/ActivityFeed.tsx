@@ -68,7 +68,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ entries }) => {
 
   if (entries.length === 0) {
     return (
-      <div className="text-[12px] text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
+      <div className="text-meta text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
         {t('common.activity.empty', 'No activity yet.')}
       </div>
     );
@@ -85,7 +85,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ entries }) => {
             >
               <Icon size={10} />
             </span>
-            <div className="flex-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <div className="flex-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               <span className="font-semibold" style={{ color: 'var(--flow-text)' }}>
                 {a.actor}
               </span>{' '}

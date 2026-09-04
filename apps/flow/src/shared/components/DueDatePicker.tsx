@@ -26,7 +26,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
   return (
     <div className="relative">
       <div
-        className="flex items-center gap-1.5 text-[11px]"
+        className="flex items-center gap-1.5 text-meta"
         style={{ color: overdue ? '#ef4444' : 'var(--flow-text-muted)' }}
       >
         <button
@@ -73,7 +73,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
                   onChange(iso);
                   setOpen(false);
                 }}
-                className="w-full text-start px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)]"
+                className="w-full text-start px-3 py-1.5 text-meta hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {o.label}

@@ -66,13 +66,13 @@ const AppearanceOptionCard = ({
     {children}
     <span className="flex min-w-0 flex-col gap-0.5">
       <span
-        className="text-[12px] font-medium"
+        className="text-meta font-medium"
         style={{ color: selected ? 'var(--accent-fg)' : 'var(--flow-text)' }}
       >
         {label}
       </span>
       {description ? (
-        <span className="text-[10px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
+        <span className="text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
           {description}
         </span>
       ) : null}

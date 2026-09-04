@@ -10,7 +10,7 @@ import {
 } from '../../time/useWorkDay';
 
 const inputClass =
-  'flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]';
+  'flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1.5 md:text-body';
 
 function inputStyle(): React.CSSProperties {
   return {
@@ -71,17 +71,17 @@ const WorkTypesSection = (): React.JSX.Element => {
   return (
     <section>
       <h2
-        className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+        className="mb-3 text-meta font-semibold uppercase tracking-wider"
         style={{ color: 'var(--flow-text-muted)' }}
       >
         {t('flow.settings.workTypes.section')}
       </h2>
-      <p className="mb-3 text-[11px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
+      <p className="mb-3 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
         {t('flow.settings.workTypes.explained')}
       </p>
 
       {isLoading ? (
-        <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.workTypes.loading')}
         </p>
       ) : workTypes.length === 0 ? (
@@ -122,7 +122,7 @@ const WorkTypesSection = (): React.JSX.Element => {
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="flow-focus min-h-[44px] rounded-sm px-3 text-[13px] font-medium md:min-h-0 md:py-1.5"
+                        className="flow-focus min-h-[44px] rounded-sm px-3 text-body font-medium md:min-h-0 md:py-1.5"
                         style={{ color: 'var(--flow-text-muted)' }}
                       >
                         {t('flow.settings.workTypes.cancel')}
@@ -131,7 +131,7 @@ const WorkTypesSection = (): React.JSX.Element => {
                         type="button"
                         onClick={() => saveEdit(id)}
                         disabled={updateWorkType.isPending}
-                        className="flow-focus min-h-[44px] rounded-sm px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
+                        className="flow-focus min-h-[44px] rounded-sm px-3 text-body font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
                         style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
                       >
                         {t('flow.settings.workTypes.save')}
@@ -146,14 +146,14 @@ const WorkTypesSection = (): React.JSX.Element => {
                       className="flow-focus min-w-0 flex-1 rounded-sm px-1 py-0.5 text-left"
                     >
                       <p
-                        className="truncate text-[13px] font-medium"
+                        className="truncate text-body font-medium"
                         style={{ color: 'var(--flow-text)' }}
                       >
                         {wt.name}
                       </p>
                       {wt.description && (
                         <p
-                          className="mt-0.5 truncate text-[11px]"
+                          className="mt-0.5 truncate text-meta"
                           style={{ color: 'var(--flow-text-muted)' }}
                         >
                           {wt.description}
@@ -205,7 +205,7 @@ const WorkTypesSection = (): React.JSX.Element => {
           type="button"
           onClick={addWorkType}
           disabled={!newName.trim() || createWorkType.isPending}
-          className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded-sm px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
+          className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded-sm px-3 text-body font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
           style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           <Plus size={14} aria-hidden="true" />

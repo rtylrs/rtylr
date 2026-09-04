@@ -27,7 +27,7 @@ export const PriorityIcon: React.FC<PriorityIconProps> = ({
   return (
     <span className="inline-flex items-center gap-1.5" style={{ color }} title={label}>
       <Icon size={size} />
-      {showLabel && <span className="text-[12px] font-medium">{label}</span>}
+      {showLabel && <span className="text-meta font-medium">{label}</span>}
     </span>
   );
 };

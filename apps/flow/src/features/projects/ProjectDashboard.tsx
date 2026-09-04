@@ -163,7 +163,7 @@ const ProjectDashboard: React.FC = () => {
                   );
                 })}
               </div>
-              <div className="flex flex-wrap gap-3 mt-3 text-[11px]">
+              <div className="flex flex-wrap gap-3 mt-3 text-meta">
                 {(
                   [
                     ['done', 'var(--flow-success, #10b981)', 'Done'],
@@ -208,7 +208,7 @@ const ProjectDashboard: React.FC = () => {
               {stats.byAssignee.slice(0, 8).map((a) => (
                 <div key={a.name} className="flex items-center gap-3">
                   <span
-                    className="text-[11px] w-[128px] truncate"
+                    className="text-meta w-[128px] truncate"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     {a.name}
@@ -226,7 +226,7 @@ const ProjectDashboard: React.FC = () => {
                     />
                   </div>
                   <span
-                    className="text-[11px] font-mono tabular-nums w-8 text-right"
+                    className="text-meta font-mono tabular-nums w-8 text-right"
                     style={{ color: 'var(--flow-text-dim)' }}
                   >
                     {a.count}
@@ -255,17 +255,17 @@ const StatTile: React.FC<{
     }}
   >
     <div
-      className="text-[10px] font-semibold uppercase tracking-wider mb-1"
+      className="text-meta font-semibold uppercase tracking-wider mb-1"
       style={{ color: 'var(--flow-text-dim)' }}
     >
       {label}
     </div>
     <div className="flex items-baseline gap-2">
-      <span className="text-[22px] font-bold tabular-nums" style={{ color: 'var(--flow-text)' }}>
+      <span className="text-screen font-bold tabular-nums" style={{ color: 'var(--flow-text)' }}>
         {value}
       </span>
       {hint && (
-        <span className="text-[11px]" style={{ color: tint }}>
+        <span className="text-meta" style={{ color: tint }}>
           {hint}
         </span>
       )}
@@ -282,7 +282,7 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
     }}
   >
     <h3
-      className="text-[12px] font-semibold uppercase tracking-wider mb-3"
+      className="text-meta font-semibold uppercase tracking-wider mb-3"
       style={{ color: 'var(--flow-text-dim)' }}
     >
       {title}

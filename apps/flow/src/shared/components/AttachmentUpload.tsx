@@ -60,13 +60,10 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
             >
               <Icon size={14} style={{ color: 'var(--flow-text-muted)' }} />
               <div className="flex-1 min-w-0">
-                <p
-                  className="text-[12px] font-medium truncate"
-                  style={{ color: 'var(--flow-text)' }}
-                >
+                <p className="text-meta font-medium truncate" style={{ color: 'var(--flow-text)' }}>
                   {a.name}
                 </p>
-                <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+                <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                   {formatSize(a.size)} · {a.uploadedBy}
                 </p>
               </div>
@@ -91,7 +88,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
           if (!uploading && !disabled) ref.current?.click();
         }}
         disabled={uploading || disabled}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] w-full transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-meta w-full transition-colors disabled:opacity-50"
         style={{
           background: 'var(--flow-input-bg)',
           border: '1px dashed var(--flow-border)',
@@ -103,7 +100,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
         {uploading ? 'Uploading...' : 'Add attachment'}
       </button>
       {error && (
-        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-error, #ef4444)' }}>
+        <p className="mt-1 text-meta" style={{ color: 'var(--flow-error, #ef4444)' }}>
           {error}
         </p>
       )}

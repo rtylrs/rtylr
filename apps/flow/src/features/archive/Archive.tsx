@@ -22,10 +22,10 @@ const Archive: React.FC = () => {
     <div className="flex flex-col h-full">
       <HelmetContainer title={`${t('archive.title')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-        <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+        <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('archive.title')}
         </h1>
-        <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
           {t('archive.count', { count: archived.length })}
         </p>
       </div>
@@ -51,13 +51,13 @@ const Archive: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate({ to: `/task/${task.id}` as string })}
-                className="flex-1 text-left text-[12px] truncate"
+                className="flex-1 text-left text-meta truncate"
                 style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
               >
                 {task.title}
               </button>
               <span
-                className="text-[10px] shrink-0 hidden group-hover:inline"
+                className="text-meta shrink-0 hidden group-hover:inline"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 {task.projectName}
@@ -74,7 +74,7 @@ const Archive: React.FC = () => {
                   )
                 }
                 disabled={restoreTask.isPending}
-                className="flex items-center gap-1 px-2 py-1 rounded-sm text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                className="flex items-center gap-1 px-2 py-1 rounded-sm text-meta font-medium opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
                 title={t('archive.restoreTitle')}
               >

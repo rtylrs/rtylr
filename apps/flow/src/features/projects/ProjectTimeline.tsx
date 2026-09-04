@@ -91,7 +91,7 @@ const ProjectTimeline: React.FC = () => {
             }}
           >
             <div
-              className="shrink-0 px-3 py-2 text-[11px] font-semibold"
+              className="shrink-0 px-3 py-2 text-meta font-semibold"
               style={{
                 width: 240,
                 color: 'var(--flow-text-dim)',
@@ -113,10 +113,10 @@ const ProjectTimeline: React.FC = () => {
                   borderRight: '1px solid var(--flow-border)',
                 }}
               >
-                <span className="text-[10px]">
+                <span className="text-meta">
                   {d.toLocaleDateString(undefined, { weekday: 'short' })[0]}
                 </span>
-                <span className="text-[11px] font-semibold">{d.getDate()}</span>
+                <span className="text-meta font-semibold">{d.getDate()}</span>
               </div>
             ))}
           </div>
@@ -128,7 +128,7 @@ const ProjectTimeline: React.FC = () => {
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
               <div
-                className="shrink-0 px-3 py-1.5 text-[11px]"
+                className="shrink-0 px-3 py-1.5 text-meta"
                 style={{
                   width: 240,
                   color: 'var(--flow-text-dim)',
@@ -141,7 +141,7 @@ const ProjectTimeline: React.FC = () => {
                 {unscheduled.slice(0, 10).map((t) => (
                   <span
                     key={t.id}
-                    className="text-[10px] px-1.5 py-0.5 rounded-sm"
+                    className="text-meta px-1.5 py-0.5 rounded-sm"
                     style={{
                       background: 'var(--flow-hover)',
                       color: 'var(--flow-text-muted)',
@@ -152,7 +152,7 @@ const ProjectTimeline: React.FC = () => {
                 ))}
                 {unscheduled.length > 10 && (
                   <span
-                    className="text-[10px] px-1.5 py-0.5 rounded-sm"
+                    className="text-meta px-1.5 py-0.5 rounded-sm"
                     style={{ color: 'var(--flow-text-dim)' }}
                   >
                     +{unscheduled.length - 10} more
@@ -203,7 +203,7 @@ const ProjectTimeline: React.FC = () => {
                   style={{ borderBottom: '1px solid var(--flow-border)' }}
                 >
                   <div
-                    className="shrink-0 px-3 py-1.5 text-[12px] truncate"
+                    className="shrink-0 px-3 py-1.5 text-meta truncate"
                     style={{
                       width: 240,
                       color: 'var(--flow-text)',
@@ -214,7 +214,7 @@ const ProjectTimeline: React.FC = () => {
                   </div>
                   <div className="relative" style={{ width: colWidth * days.length, height: 28 }}>
                     <div
-                      className="absolute top-1.5 h-5 rounded-sm text-[10px] flex items-center px-2 text-white overflow-hidden"
+                      className="absolute top-1.5 h-5 rounded-sm text-meta flex items-center px-2 text-white overflow-hidden"
                       style={{
                         left: offsetDays * colWidth + 4,
                         width: Math.max(spanDays * colWidth - 8, 24),

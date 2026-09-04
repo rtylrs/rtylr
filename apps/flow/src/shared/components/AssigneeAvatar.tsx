@@ -24,7 +24,14 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
         height: size,
         background: `${color}22`,
         color,
-        fontSize: Math.max(9, Math.round(size * 0.4)),
+        // Initials scale with the circle, so the scale cannot supply this
+        // one: at the sizes in use (18 to 28) a 12px floor overflows a two
+        // character monogram, and reaching 12px proportionally needs a 30px
+        // avatar. Growing avatars changes row height, so that is a density
+        // call and not this file's to make. The floor is 11 rather than 9 in
+        // the meantime, and typeScale.test.ts names this as its one
+        // exception so it cannot be copied silently.
+        fontSize: Math.max(11, Math.round(size * 0.4)),
         border: stacked ? '2px solid var(--flow-card)' : undefined,
         boxSizing: 'border-box',
       }}
@@ -63,7 +70,7 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({ members, max = 4, size
             height: size,
             background: 'var(--flow-hover)',
             color: 'var(--flow-text-muted)',
-            fontSize: 10,
+            fontSize: 'var(--text-meta)',
             border: '2px solid var(--flow-card)',
           }}
         >

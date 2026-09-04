@@ -26,7 +26,7 @@ const GateNotice = ({ reason, id, className }: GateNoticeProps): React.JSX.Eleme
   return (
     <p
       id={id}
-      className={cn('flex items-start gap-1.5 text-[10px] leading-snug', className)}
+      className={cn('flex items-start gap-1.5 text-meta leading-snug', className)}
       style={{ color: 'var(--flow-text-muted)' }}
     >
       <Lock size={11} aria-hidden="true" className="mt-px shrink-0" />

@@ -73,7 +73,7 @@ const ProjectOverview: React.FC = () => {
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
         rightSlot={
           <span
-            className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
+            className="text-meta px-2 py-0.5 rounded-full font-semibold"
             style={{
               background: `${health.color}1a`,
               color: health.color,
@@ -90,7 +90,7 @@ const ProjectOverview: React.FC = () => {
           className="px-5 py-3 shrink-0"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
-          <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {displayDescription(project.description)}
           </p>
         </div>
@@ -106,12 +106,12 @@ const ProjectOverview: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-3">
             <h3
-              className="text-[12px] font-semibold uppercase tracking-wider"
+              className="text-meta font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.milestones.progress')}
             </h3>
-            <span className="text-[24px] font-bold" style={{ color: 'var(--flow-text)' }}>
+            <span className="text-screen font-bold" style={{ color: 'var(--flow-text)' }}>
               {stats.progress}%
             </span>
           </div>
@@ -159,7 +159,7 @@ const ProjectOverview: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-3">
             <h3
-              className="text-[12px] font-semibold uppercase tracking-wider"
+              className="text-meta font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.shell.milestones')}
@@ -181,10 +181,10 @@ const ProjectOverview: React.FC = () => {
               {milestones.map((m) => (
                 <div key={m.id}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                    <span className="text-meta font-medium" style={{ color: 'var(--flow-text)' }}>
                       {m.name}
                     </span>
-                    <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+                    <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                       {formatDate(m.targetDate)}
                     </span>
                   </div>
@@ -210,7 +210,7 @@ const ProjectOverview: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-3">
             <h3
-              className="text-[12px] font-semibold uppercase tracking-wider"
+              className="text-meta font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.shell.team')}
@@ -223,7 +223,7 @@ const ProjectOverview: React.FC = () => {
               size={30}
               max={6}
             />
-            <div className="flex-1 text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <div className="flex-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {team.length} {team.length === 1 ? 'member' : 'members'}
             </div>
           </div>
@@ -235,7 +235,7 @@ const ProjectOverview: React.FC = () => {
           style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
         >
           <h3
-            className="text-[12px] font-semibold uppercase tracking-wider mb-3"
+            className="text-meta font-semibold uppercase tracking-wider mb-3"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.projectOverview.recentComments')}
@@ -257,9 +257,9 @@ const ProjectOverview: React.FC = () => {
           ) : (
             <div className="space-y-2">
               {recentComments.map((c) => (
-                <div key={c.id} className="flex items-start gap-2 text-[12px]">
+                <div key={c.id} className="flex items-start gap-2 text-meta">
                   <span
-                    className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5"
+                    className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold shrink-0 mt-0.5"
                     style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                   >
                     {c.authorInitials}
@@ -293,13 +293,13 @@ const StatCard: React.FC<{
     <div className="flex items-center gap-1.5 mb-1">
       <Icon size={11} />
       <span
-        className="text-[10px] uppercase tracking-wider font-semibold"
+        className="text-meta uppercase tracking-wider font-semibold"
         style={{ color: 'var(--flow-text-dim)' }}
       >
         {label}
       </span>
     </div>
-    <p className="text-[18px] font-bold" style={{ color }}>
+    <p className="text-title font-bold" style={{ color }}>
       {value}
     </p>
   </div>

@@ -97,14 +97,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           <div className="flex min-w-0 items-center gap-2">
             <PriorityIcon priority={task.priority} />
             <span
-              className="text-[10px] font-mono shrink-0"
+              className="text-meta font-mono shrink-0"
               style={{ color: 'var(--flow-text-dim)' }}
             >
               {task.identifier}
             </span>
             {task.statusName && (
               <span
-                className="min-w-0 max-w-[7rem] shrink-0 truncate rounded-sm px-1.5 py-0.5 text-[10px] font-semibold"
+                className="min-w-0 max-w-[7rem] shrink-0 truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
                 style={{
                   background: `${task.statusColor ?? '#64C5B9'}22`,
                   color: task.statusColor ?? 'var(--accent)',
@@ -118,7 +118,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           <div className="flex shrink-0 items-center gap-0.5">{controls}</div>
           {showProject && (project || task.projectName) && (
             <span
-              className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-[10px] font-semibold"
+              className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
               style={{
                 background: `${project?.color ?? '#64C5B9'}22`,
                 color: project?.color ?? 'var(--accent)',
@@ -132,7 +132,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
         {/* Title */}
         <p
-          className={cn('font-medium leading-snug mb-2', compact ? 'text-[12px]' : 'text-[13px]')}
+          className={cn('font-medium leading-snug mb-2', compact ? 'text-meta' : 'text-body')}
           style={{ color: 'var(--flow-text)' }}
         >
           {task.title}
@@ -157,7 +157,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
             {taskSubtasks.length > 0 && (
               <span
-                className="flex items-center gap-0.5 text-[10px]"
+                className="flex items-center gap-0.5 text-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <GitBranch size={10} />
@@ -166,7 +166,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             )}
             {commentCount > 0 && (
               <span
-                className="flex items-center gap-0.5 text-[10px]"
+                className="flex items-center gap-0.5 text-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <MessageSquare size={10} />
@@ -175,7 +175,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             )}
             {attachmentCount > 0 && (
               <span
-                className="flex items-center gap-0.5 text-[10px]"
+                className="flex items-center gap-0.5 text-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <Paperclip size={10} />
@@ -186,7 +186,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
           {task.dueDate && (
             <span
-              className="flex items-center gap-1 text-[10px]"
+              className="flex items-center gap-1 text-meta"
               style={{ color: overdue ? '#ef4444' : 'var(--flow-text-dim)' }}
             >
               <Calendar size={10} />

@@ -148,7 +148,7 @@ const SidebarItemActions: React.FC<{
       {!item.lockedVisibility && (
         <button
           type="button"
-          className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-[12px] hover:bg-[var(--flow-hover)]"
+          className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-meta hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text)' }}
           onClick={(event) => {
             event.preventDefault();
@@ -160,7 +160,7 @@ const SidebarItemActions: React.FC<{
         </button>
       )}
       <div
-        className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider"
+        className="px-3 pb-1 pt-2 text-meta font-semibold uppercase tracking-wider"
         style={{ color: 'var(--flow-text-dim)' }}
       >
         {t('flow.sidebar.moveTo')}
@@ -171,7 +171,7 @@ const SidebarItemActions: React.FC<{
           <button
             type="button"
             key={group.id}
-            className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-[12px] hover:bg-[var(--flow-hover)]"
+            className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-meta hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text)' }}
             onClick={(event) => {
               event.preventDefault();
@@ -185,7 +185,7 @@ const SidebarItemActions: React.FC<{
       {!item.lockedGroup && item.groupId && (
         <button
           type="button"
-          className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-[12px] hover:bg-[var(--flow-hover)]"
+          className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-meta hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text)' }}
           onClick={(event) => {
             event.preventDefault();
@@ -231,7 +231,7 @@ const SidebarItemRow: React.FC<{
   const active = item.route ? location.pathname === item.route.split('?')[0] : false;
   const Icon = ICONS[item.icon] ?? Circle;
   const commonClass = cn(
-    'group relative flex min-h-10 items-center gap-2 rounded-md px-2 text-[12px] font-medium transition-[background,box-shadow,opacity,transform] duration-150 lg:min-h-0 lg:py-1.5',
+    'group relative flex min-h-10 items-center gap-2 rounded-md px-2 text-meta font-medium transition-[background,box-shadow,opacity,transform] duration-150 lg:min-h-0 lg:py-1.5',
     active ? '' : 'hover:bg-[var(--flow-hover)]',
     isDragging && 'scale-[0.98] opacity-45',
     isDropTarget && 'z-10'
@@ -261,7 +261,7 @@ const SidebarItemRow: React.FC<{
       <span className="relative min-w-0 flex-1 truncate">{label}</span>
       {badge !== undefined && badge > 0 && (
         <span
-          className="relative rounded-full px-1.5 text-[10px] font-semibold"
+          className="relative rounded-full px-1.5 text-meta font-semibold"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
         >
           {badge}
@@ -450,7 +450,7 @@ const SidebarGroup: React.FC<{
           className="flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-start hover:bg-[var(--flow-hover)]"
         >
           <span
-            className="min-w-0 flex-1 truncate text-[13px] font-bold leading-tight"
+            className="min-w-0 flex-1 truncate text-body font-bold leading-tight"
             style={{ color: 'var(--flow-text)' }}
           >
             {groupLabel}
@@ -492,7 +492,7 @@ const SidebarGroup: React.FC<{
             {!group.lockedVisibility && (
               <button
                 type="button"
-                className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-[12px] hover:bg-[var(--flow-hover)]"
+                className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-meta hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text)' }}
                 onClick={() => {
                   update((draft) => {
@@ -532,7 +532,7 @@ const SidebarGroup: React.FC<{
                 to="/p/$projectId"
                 params={{ projectId: project.id }}
                 className={cn(
-                  'relative flex min-h-10 items-center gap-2 px-3 py-1.5 rounded-md text-[12px]',
+                  'relative flex min-h-10 items-center gap-2 px-3 py-1.5 rounded-md text-meta',
                   active ? '' : 'hover:bg-[var(--flow-hover)]'
                 )}
                 style={{ color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
@@ -543,7 +543,7 @@ const SidebarGroup: React.FC<{
                   style={{ color: project.color }}
                 />
                 <span className="relative min-w-0 flex-1 truncate font-medium">{project.name}</span>
-                <span className="relative text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+                <span className="relative text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                   {(project.taskCount ?? 0) - (project.completedCount ?? 0)}
                 </span>
               </Link>
@@ -568,7 +568,7 @@ const SidebarGroup: React.FC<{
           ))}
           {isGroupDropTarget && (
             <div
-              className="mx-2 my-1 flex min-h-8 items-center justify-center rounded-md border border-dashed text-[10px] font-semibold"
+              className="mx-2 my-1 flex min-h-8 items-center justify-center rounded-md border border-dashed text-meta font-semibold"
               style={{ borderColor: 'var(--accent-border)', color: 'var(--accent-fg)' }}
             >
               {t('flow.sidebar.dropHere')}
@@ -609,7 +609,7 @@ const SidebarGroup: React.FC<{
           ))}
           {isGroupDropTarget && (
             <div
-              className="mx-2 my-1 flex min-h-8 items-center justify-center rounded-md border border-dashed text-[10px] font-semibold"
+              className="mx-2 my-1 flex min-h-8 items-center justify-center rounded-md border border-dashed text-meta font-semibold"
               style={{ borderColor: 'var(--accent-border)', color: 'var(--accent-fg)' }}
             >
               {t('flow.sidebar.dropHere')}

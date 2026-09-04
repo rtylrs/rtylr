@@ -16,7 +16,7 @@ export const LabelChip: React.FC<LabelChipProps> = ({ label, small, onRemove }) 
         color: label.color,
         border: `1px solid ${label.color}33`,
         padding: small ? '1px 6px' : '2px 8px',
-        fontSize: small ? 10 : 11,
+        fontSize: 'var(--text-meta)',
       }}
     >
       <span className="h-1.5 w-1.5 rounded-full" style={{ background: label.color }} />

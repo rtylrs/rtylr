@@ -97,7 +97,7 @@ const AppearancePreview = ({
         {railItems.map((item) => (
           <span
             key={item.key}
-            className="flex items-center truncate text-[10px] font-medium"
+            className="flex items-center truncate text-meta font-medium"
             style={{
               background: item.active ? 'var(--accent-muted)' : 'transparent',
               borderRadius: 'var(--flow-r)',
@@ -133,14 +133,11 @@ const AppearancePreview = ({
             className="block h-2 w-2 shrink-0 rounded-full"
             style={{ background: 'var(--accent)' }}
           />
-          <span
-            className="min-w-0 flex-1 truncate text-[11px]"
-            style={{ color: 'var(--flow-text)' }}
-          >
+          <span className="min-w-0 flex-1 truncate text-meta" style={{ color: 'var(--flow-text)' }}>
             {t('flow.settings.appearance.preview.taskTitle')}
           </span>
           <span
-            className="shrink-0 text-[9px] font-semibold"
+            className="shrink-0 text-meta font-semibold"
             style={{
               background: 'var(--accent-muted)',
               border: '1px solid var(--accent-border)',
@@ -165,7 +162,7 @@ const AppearancePreview = ({
         </div>
 
         <span
-          className="inline-flex w-fit items-center text-[10px] font-semibold"
+          className="inline-flex w-fit items-center text-meta font-semibold"
           style={{
             background: 'var(--accent)',
             borderRadius: 'var(--flow-r)',

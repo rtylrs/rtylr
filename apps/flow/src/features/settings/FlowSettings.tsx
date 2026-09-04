@@ -176,10 +176,10 @@ export const NotificationsSection: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="text-title font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
           {t('common.settings.notifications')}
         </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.notifications.subtitle')}
         </p>
       </div>
@@ -191,10 +191,10 @@ export const NotificationsSection: React.FC = () => {
             className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-[var(--flow-hover)] transition-colors"
           >
             <div>
-              <p className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+              <p className="text-body font-medium" style={{ color: 'var(--flow-text)' }}>
                 {item.label}
               </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
+              <p className="text-meta mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
                 {item.desc}
               </p>
             </div>
@@ -239,10 +239,10 @@ const LifeRhythmSection: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="text-title font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
           {t('common.settings.life')}
         </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('common.settings.quietHoursNote')}
         </p>
       </div>
@@ -250,7 +250,7 @@ const LifeRhythmSection: React.FC = () => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label
-            className="block text-[12px] font-medium mb-1.5"
+            className="block text-meta font-medium mb-1.5"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.settings.life.quietStart')}
@@ -259,7 +259,7 @@ const LifeRhythmSection: React.FC = () => {
             type="time"
             value={prefs.quietStart}
             onChange={(e) => setPrefs({ quietStart: e.target.value })}
-            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            className="w-full rounded-lg px-3 py-2 text-body outline-none"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border)',
@@ -269,7 +269,7 @@ const LifeRhythmSection: React.FC = () => {
         </div>
         <div>
           <label
-            className="block text-[12px] font-medium mb-1.5"
+            className="block text-meta font-medium mb-1.5"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.settings.life.quietEnd')}
@@ -278,7 +278,7 @@ const LifeRhythmSection: React.FC = () => {
             type="time"
             value={prefs.quietEnd}
             onChange={(e) => setPrefs({ quietEnd: e.target.value })}
-            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            className="w-full rounded-lg px-3 py-2 text-body outline-none"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border)',
@@ -290,7 +290,7 @@ const LifeRhythmSection: React.FC = () => {
 
       <div>
         <label
-          className="block text-[12px] font-medium mb-1.5"
+          className="block text-meta font-medium mb-1.5"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.settings.life.digestHour')}
@@ -298,7 +298,7 @@ const LifeRhythmSection: React.FC = () => {
         <select
           value={prefs.digestHour}
           onChange={(e) => setPrefs({ digestHour: Number(e.target.value) })}
-          className="w-full max-w-[200px] rounded-lg px-3 py-2 text-[13px] outline-none"
+          className="w-full max-w-[200px] rounded-lg px-3 py-2 text-body outline-none"
           style={{
             background: 'var(--flow-input-bg)',
             border: '1px solid var(--flow-border)',
@@ -416,7 +416,7 @@ export const AppearanceSection = (): React.JSX.Element => {
     setAccent(hex);
   };
 
-  const labelClass = 'mb-3 block text-[12px] font-medium';
+  const labelClass = 'mb-3 block text-meta font-medium';
   const labelStyle = { color: 'var(--flow-text-muted)' };
   const inputStyle = {
     background: 'var(--flow-input-bg)',
@@ -428,10 +428,10 @@ export const AppearanceSection = (): React.JSX.Element => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="mb-1 text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="mb-1 text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('common.settings.appearance')}
         </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.appearance.subtitle')}
         </p>
         {/* --flow-text-muted, not --flow-text-dim. axe measured dim at 2.23:1
@@ -440,7 +440,7 @@ export const AppearanceSection = (): React.JSX.Element => {
             token. This line is the disclosure that makes the settings-seam rule
             satisfiable, so it is the one string on the screen that must not be
             hard to read. Muted measures 6.15 dark and 5.69 light. */}
-        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="mt-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.appearance.perDevice')}
         </p>
       </div>
@@ -450,7 +450,7 @@ export const AppearanceSection = (): React.JSX.Element => {
         className="sticky top-0 z-10 space-y-2 pb-3"
         style={{ background: 'var(--flow-bg)', borderBlockEnd: '1px solid var(--flow-border)' }}
       >
-        <p className="text-[11px] font-medium" style={labelStyle}>
+        <p className="text-meta font-medium" style={labelStyle}>
           {t('flow.settings.appearance.preview.label')}
         </p>
         <AppearancePreview
@@ -574,7 +574,7 @@ export const AppearanceSection = (): React.JSX.Element => {
           <div className="min-w-0 flex-1">
             <label
               htmlFor="appearance-accent-hex"
-              className="mb-1.5 block text-[11px]"
+              className="mb-1.5 block text-meta"
               style={labelStyle}
             >
               {t('flow.settings.appearance.accentHex')}
@@ -600,7 +600,7 @@ export const AppearanceSection = (): React.JSX.Element => {
               aria-describedby={hexInvalid ? 'appearance-accent-hex-error' : undefined}
               onChange={(e) => onHexChange(e.target.value)}
               /* 16px minimum, or iOS auto-zooms the whole panel on focus. */
-              className="flow-focus min-h-[44px] w-full px-3 text-[16px] outline-none"
+              className="flow-focus min-h-[44px] w-full px-3 text-title outline-none"
               style={inputStyle}
             />
           </div>
@@ -620,7 +620,7 @@ export const AppearanceSection = (): React.JSX.Element => {
         {hexInvalid && (
           <p
             id="appearance-accent-hex-error"
-            className="mt-1.5 text-[11px]"
+            className="mt-1.5 text-meta"
             style={{ color: 'var(--flow-danger-fg)' }}
           >
             {t('flow.settings.appearance.accentInvalid')}
@@ -635,7 +635,7 @@ export const AppearanceSection = (): React.JSX.Element => {
           onPointerLeave={clearAudition}
           onFocus={() => setAudition({ accent: null })}
           onBlur={clearAudition}
-          className="flow-focus mt-3 inline-flex min-h-[44px] items-center gap-2 px-3 text-[13px] font-medium"
+          className="flow-focus mt-3 inline-flex min-h-[44px] items-center gap-2 px-3 text-body font-medium"
           style={{
             background: accent === null ? 'var(--accent-muted)' : 'var(--flow-card)',
             border: `1px solid ${accent === null ? 'var(--accent-border)' : 'var(--flow-border)'}`,
@@ -708,10 +708,10 @@ export const AppearanceSection = (): React.JSX.Element => {
 
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+          <p className="text-body font-medium" style={{ color: 'var(--flow-text)' }}>
             {t('flow.settings.appearance.groups.motion')}
           </p>
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.settings.appearance.motionHint')}
           </p>
         </div>
@@ -756,10 +756,10 @@ const ShortcutsSection: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="text-title font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
           {t('common.settings.shortcuts')}
         </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.shortcuts.subtitle')}
         </p>
       </div>
@@ -769,14 +769,14 @@ const ShortcutsSection: React.FC = () => {
             key={i}
             className="flex items-center justify-between py-2 px-3 rounded-sm hover:bg-[var(--flow-hover)]"
           >
-            <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text)' }}>
               {s.desc}
             </span>
             <div className="flex items-center gap-1">
               {s.keys.map((k, j) => (
                 <kbd
                   key={j}
-                  className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-semibold"
+                  className="px-1.5 py-0.5 rounded-sm text-meta font-mono font-semibold"
                   style={{
                     background: 'var(--flow-hover)',
                     color: 'var(--flow-text)',
@@ -850,10 +850,10 @@ export const LabelsSection: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="text-title font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
           {t('common.settings.labels')}
         </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.labels.subtitle')}
         </p>
       </div>
@@ -863,7 +863,7 @@ export const LabelsSection: React.FC = () => {
         className="rounded-xl p-4 space-y-3"
         style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
       >
-        <h3 className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+        <h3 className="text-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('flow.settings.labels.newLabel')}
         </h3>
         <div className="flex gap-2">
@@ -874,12 +874,12 @@ export const LabelsSection: React.FC = () => {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none"
+            className="flex-1 rounded-lg px-3 py-2 text-body outline-none"
             style={inputStyle}
           />
         </div>
         <div>
-          <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="text-meta mb-2" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.settings.labels.color')}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -930,7 +930,7 @@ export const LabelsSection: React.FC = () => {
           type="button"
           disabled={!newName.trim() || createLabel.isPending}
           onClick={handleCreate}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           {createLabel.isPending
@@ -941,11 +941,11 @@ export const LabelsSection: React.FC = () => {
 
       {/* Existing labels */}
       <div>
-        <h3 className="text-[12px] font-semibold mb-3" style={{ color: 'var(--flow-text-muted)' }}>
+        <h3 className="text-meta font-semibold mb-3" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.labels.workspaceLabels')}
         </h3>
         {isLoading ? (
-          <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {t('common.loading')}
           </p>
         ) : labels.length === 0 ? (
@@ -973,7 +973,7 @@ export const LabelsSection: React.FC = () => {
                     className="h-3 w-3 rounded-full shrink-0"
                     style={{ background: label.color }}
                   />
-                  <span className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                  <span className="text-body font-medium" style={{ color: 'var(--flow-text)' }}>
                     {label.name}
                   </span>
                 </div>
@@ -1040,10 +1040,10 @@ export const TeamSection: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="text-title font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
           {t('flow.settings.team.section')}
         </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.team.subtitle')}
         </p>
       </div>
@@ -1077,24 +1077,21 @@ export const TeamSection: React.FC = () => {
           {flowMembers.map((m) => (
             <div key={m.id} className="flex items-center gap-3 px-4 py-3">
               <div
-                className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
+                className="h-8 w-8 rounded-full flex items-center justify-center text-meta font-semibold shrink-0"
                 style={{ background: 'var(--accent-border)', color: 'var(--accent)' }}
               >
                 {m.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p
-                  className="text-[13px] font-medium truncate"
-                  style={{ color: 'var(--flow-text)' }}
-                >
+                <p className="text-body font-medium truncate" style={{ color: 'var(--flow-text)' }}>
                   {m.name}
                 </p>
-                <p className="text-[11px] truncate" style={{ color: 'var(--flow-text-muted)' }}>
+                <p className="text-meta truncate" style={{ color: 'var(--flow-text-muted)' }}>
                   {m.email}
                 </p>
               </div>
               <span
-                className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                className="text-meta font-semibold px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: 'var(--flow-hover)',
                   color: 'var(--flow-text-muted)',
@@ -1129,10 +1126,10 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
   const sections = buildSections(t, false, false, false);
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
+      <p className="text-section font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
         {sections.find((s) => s.id === id)?.label}
       </p>
-      <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+      <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
         {t('flow.settings.sectionNotAvailable')}
       </p>
     </div>
@@ -1186,7 +1183,7 @@ const FlowSettings: React.FC = () => {
       <div className="w-full shrink-0 overflow-x-auto overflow-y-hidden border-b border-[var(--flow-border)] md:w-[236px] md:border-b-0 md:border-r md:border-[var(--flow-border)] md:overflow-y-auto">
         <div className="flex flex-row gap-1 p-3 md:flex-col md:gap-0 md:p-4">
           <h1
-            className="mb-3 hidden text-[13px] font-semibold md:mb-4 md:block"
+            className="mb-3 hidden text-body font-semibold md:mb-4 md:block"
             style={{ color: 'var(--flow-text)' }}
           >
             {t('nav.settings')}
@@ -1200,7 +1197,7 @@ const FlowSettings: React.FC = () => {
                   key={section.id}
                   type="button"
                   onClick={() => setActiveSection(section.id)}
-                  className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-left text-[13px] transition-colors md:w-full md:min-w-0 md:whitespace-normal"
+                  className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-left text-body transition-colors md:w-full md:min-w-0 md:whitespace-normal"
                   style={{
                     background: isActive ? 'var(--flow-active)' : 'transparent',
                     color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)',

@@ -129,7 +129,7 @@ const Views: React.FC = () => {
       >
         <div className="flex items-center justify-between px-2 mb-3">
           <h2
-            className="text-[11px] font-semibold uppercase tracking-wider"
+            className="text-meta font-semibold uppercase tracking-wider"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.views.heading')}
@@ -169,7 +169,7 @@ const Views: React.FC = () => {
                         if (e.key === 'Enter') commitEdit(v);
                         if (e.key === 'Escape') setEditingId(null);
                       }}
-                      className="flex-1 bg-transparent text-[12px] outline-none"
+                      className="flex-1 bg-transparent text-meta outline-none"
                       style={{ color: 'var(--flow-text)' }}
                     />
                     <button
@@ -196,7 +196,7 @@ const Views: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setSelected(v)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-sm text-[12px] text-left flex-1 min-w-0"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-sm text-meta text-left flex-1 min-w-0"
                       style={{ color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
                     >
                       <Icon size={12} />
@@ -268,10 +268,10 @@ const Views: React.FC = () => {
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {displayView?.name || t('flow.views.noViewSelected')}
           </h1>
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {t('flow.views.taskCount', { count: tasks.length })}
           </p>
         </div>

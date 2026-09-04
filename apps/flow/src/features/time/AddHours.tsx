@@ -25,14 +25,14 @@ import { WORK_MODES as LOCATIONS, type WorkMode as Location } from './workModes'
 
 const routeApi = getRouteApi('/time');
 
-const labelClass = 'mb-[7px] block text-[10px] font-bold uppercase tracking-[0.07em]' as const;
+const labelClass = 'mb-[7px] block text-meta font-bold uppercase tracking-[0.07em]' as const;
 const fieldStyle: React.CSSProperties = {
   background: 'var(--flow-input-bg)',
   border: '1px solid var(--flow-border)',
   color: 'var(--flow-text)',
 };
 const fieldSizing =
-  'min-h-[44px] w-full rounded-lg px-3 text-[16px] md:h-[38px] md:min-h-0 md:text-[12.5px]';
+  'min-h-[44px] w-full rounded-lg px-3 text-title md:h-[38px] md:min-h-0 md:text-meta';
 
 type Phase = 'idle' | 'submitting' | 'error' | 'success';
 
@@ -349,15 +349,15 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
         style={{ background: 'var(--flow-card)', borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
-          <h3 className="text-[14px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h3 className="text-section font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.add.title')}
           </h3>
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.add.subtitle', { day: dayLabel })}
           </p>
         </div>
         <div
-          className="flex h-8 items-center gap-1 self-start rounded-full px-3 text-[11px] md:self-auto"
+          className="flex h-8 items-center gap-1 self-start rounded-full px-3 text-meta md:self-auto"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
         >
           <span>{t('flow.time.add.today')}</span>
@@ -401,7 +401,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
             {dateError && (
               <p
                 id="add-hours-date-error"
-                className="mt-1 text-[11px]"
+                className="mt-1 text-meta"
                 style={{ color: 'var(--flow-danger-fg)' }}
               >
                 {dateError}
@@ -467,7 +467,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
               {minutesError && (
                 <p
                   id="add-hours-minutes-error"
-                  className="mt-1 text-[11px]"
+                  className="mt-1 text-meta"
                   style={{ color: 'var(--flow-danger-fg)' }}
                 >
                   {minutesError}
@@ -503,7 +503,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                       tabIndex={active ? 0 : -1}
                       aria-disabled={locked}
                       onClick={() => !locked && setLocation(loc)}
-                      className="flow-focus min-h-[44px] h-auto rounded-xl px-4 py-2 text-[13px] font-semibold whitespace-normal md:min-h-0 md:h-[38px] md:py-0"
+                      className="flow-focus min-h-[44px] h-auto rounded-xl px-4 py-2 text-body font-semibold whitespace-normal md:min-h-0 md:h-[38px] md:py-0"
                       style={{
                         background: active ? 'var(--accent)' : 'var(--flow-hover)',
                         color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
@@ -612,11 +612,11 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                 style={{ background: 'var(--flow-hover)', border: '1px dashed var(--flow-border)' }}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                     {taskDescription}
                   </p>
                   <span
-                    className="shrink-0 whitespace-nowrap text-[9.5px] font-semibold uppercase tracking-[0.07em]"
+                    className="shrink-0 whitespace-nowrap text-meta font-semibold uppercase tracking-[0.07em]"
                     style={{ color: 'var(--flow-text-dim)' }}
                   >
                     {t('flow.time.add.fromTheTask')}
@@ -629,12 +629,12 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
               <div className="mb-[7px] flex items-baseline justify-between">
                 <label
                   htmlFor="add-hours-note"
-                  className="text-[10px] font-bold uppercase tracking-[0.07em]"
+                  className="text-meta font-bold uppercase tracking-[0.07em]"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('flow.time.description')}
                 </label>
-                <span className="text-[10.5px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.time.add.noteHint')}
                 </span>
               </div>
@@ -643,11 +643,11 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                 value={note}
                 readOnly={locked}
                 onChange={(e) => setNote(e.target.value.slice(0, noteMax))}
-                className="flow-focus h-[120px] w-full resize-none rounded-lg px-3 py-2 text-[16px] leading-[1.6] md:h-[190px] md:text-[12.5px]"
+                className="flow-focus h-[120px] w-full resize-none rounded-lg px-3 py-2 text-title leading-[1.6] md:h-[190px] md:text-meta"
                 style={fieldStyle}
               />
               <p
-                className="mt-1 text-right text-[10px] tabular-nums"
+                className="mt-1 text-right text-meta tabular-nums"
                 style={{
                   color:
                     note.length >= noteDangerAt
@@ -663,7 +663,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
 
         {showsOverCapacityWarning && phase !== 'success' && (
           <div
-            className="rounded-lg px-3 py-2 text-[11px]"
+            className="rounded-lg px-3 py-2 text-meta"
             style={{
               background: 'var(--flow-status-pending-bg)',
               border: '1px solid var(--flow-status-pending-border)',
@@ -697,17 +697,17 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                 className="mt-0.5 shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-semibold" style={{ color: 'var(--flow-danger-fg)' }}>
+                <p className="text-meta font-semibold" style={{ color: 'var(--flow-danger-fg)' }}>
                   {t('flow.time.add.failedTitle')}
                 </p>
-                <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <p className="mt-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.time.add.failedBody', { target: targetLabel || '-', ref: errorRef })}
                 </p>
                 <div className="mt-2 flex gap-2">
                   <button
                     type="button"
                     onClick={() => void handleSubmit()}
-                    className="flow-focus h-[30px] rounded-lg px-3 text-[12px] font-semibold"
+                    className="flow-focus h-[30px] rounded-lg px-3 text-meta font-semibold"
                     style={{
                       background: 'transparent',
                       border: '1px solid var(--flow-status-rejected-border)',
@@ -719,7 +719,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                   <button
                     type="button"
                     onClick={handleCopyNote}
-                    className="flow-focus h-[30px] rounded-lg px-3 text-[12px] font-medium"
+                    className="flow-focus h-[30px] rounded-lg px-3 text-meta font-medium"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     {copied ? t('flow.time.add.copyNoteDone') : t('flow.time.add.copyNote')}
@@ -745,16 +745,13 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                 style={{ background: 'var(--accent-on-muted)' }}
               />
               <div className="min-w-0 flex-1">
-                <p
-                  className="text-[12px] font-semibold"
-                  style={{ color: 'var(--accent-on-muted)' }}
-                >
+                <p className="text-meta font-semibold" style={{ color: 'var(--accent-on-muted)' }}>
                   {t('flow.time.add.successTitle', {
                     duration: formatDurationClock(successInfo.durationMinutes),
                     target: successInfo.target || '-',
                   })}
                 </p>
-                <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <p className="mt-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.time.add.successBody', {
                     day: successInfo.dayLabel,
                     total: formatDurationClock(successInfo.newTotalMinutes),
@@ -764,14 +761,14 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                   <button
                     type="button"
                     onClick={resetForLogAnother}
-                    className="flow-focus h-[30px] rounded-lg px-3 text-[12px] font-semibold"
+                    className="flow-focus h-[30px] rounded-lg px-3 text-meta font-semibold"
                     style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
                   >
                     {t('flow.time.add.logAnother')}
                   </button>
                   <Link
                     to="/time/reports"
-                    className="flow-focus flex h-[30px] items-center rounded-lg px-3 text-[12px] font-medium"
+                    className="flow-focus flex h-[30px] items-center rounded-lg px-3 text-meta font-medium"
                     style={{
                       background: 'var(--flow-hover)',
                       border: '1px solid var(--flow-border)',
@@ -783,7 +780,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                   <button
                     type="button"
                     onClick={handleUndo}
-                    className="flow-focus h-[30px] rounded-lg px-3 text-[12px] font-medium"
+                    className="flow-focus h-[30px] rounded-lg px-3 text-meta font-medium"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     {t('flow.time.add.undo')}
@@ -795,7 +792,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
         )}
 
         {locked && (
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }} aria-live="polite">
+          <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }} aria-live="polite">
             {t('flow.time.add.submittingLine', {
               duration: formatDurationClock(durationMinutes),
               target: targetLabel || '-',
@@ -811,7 +808,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
           // together overstate the real total. The success banner already
           // states the real, frozen total - this line only makes sense while
           // something is still pending submission.
-          <p aria-live="polite" className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p aria-live="polite" className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             <span>{t('flow.time.add.footerLoggingPrefix')}</span>{' '}
             <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
               {formatDurationClock(durationMinutes)}
@@ -835,7 +832,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
             type="button"
             onClick={handleDiscard}
             disabled={locked}
-            className="flow-focus min-h-[44px] flex-1 rounded-lg px-3 text-[12px] font-semibold disabled:cursor-not-allowed md:flex-none md:h-[38px] md:min-h-0"
+            className="flow-focus min-h-[44px] flex-1 rounded-lg px-3 text-meta font-semibold disabled:cursor-not-allowed md:flex-none md:h-[38px] md:min-h-0"
             style={{
               background: 'var(--flow-hover)',
               border: '1px solid var(--flow-border)',
@@ -850,7 +847,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
             disabled={!canSubmit || submitBlocked}
             title={disabledReason || undefined}
             aria-describedby={disabledReason ? 'add-hours-log-reason' : undefined}
-            className="flow-focus flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg px-4 text-[12px] font-bold disabled:opacity-40 disabled:cursor-not-allowed md:flex-none md:h-[38px] md:min-h-0"
+            className="flow-focus flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg px-4 text-meta font-bold disabled:opacity-40 disabled:cursor-not-allowed md:flex-none md:h-[38px] md:min-h-0"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             {locked ? (

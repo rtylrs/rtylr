@@ -133,7 +133,7 @@ const GroupEditor: React.FC<{
                 if (event.key === 'Enter') event.currentTarget.blur();
                 if (event.key === 'Escape') setEditing(false);
               }}
-              className="min-w-0 flex-1 rounded-md border px-2 py-1 text-[16px] outline-none"
+              className="min-w-0 flex-1 rounded-md border px-2 py-1 text-title outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
                 borderColor: 'var(--flow-border)',
@@ -142,7 +142,7 @@ const GroupEditor: React.FC<{
             />
           ) : (
             <span
-              className="min-w-0 flex-1 truncate text-[13px] font-semibold"
+              className="min-w-0 flex-1 truncate text-body font-semibold"
               style={{ color: 'var(--flow-text)' }}
             >
               {group.kind === 'custom' ? group.label : t(group.label)}
@@ -217,7 +217,7 @@ const GroupEditor: React.FC<{
           className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border p-2"
           style={{ borderColor: 'var(--flow-border)' }}
         >
-          <span className="me-auto text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <span className="me-auto text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.sidebar.deleteGroup')}
           </span>
           <button
@@ -237,7 +237,7 @@ const GroupEditor: React.FC<{
               });
               setDeleteConfirm(false);
             }}
-            className="min-h-10 rounded-md px-2 text-[11px] hover:bg-[var(--flow-hover)]"
+            className="min-h-10 rounded-md px-2 text-meta hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text)' }}
           >
             {t('flow.sidebar.moveItemsToTop')}
@@ -256,7 +256,7 @@ const GroupEditor: React.FC<{
               });
               setDeleteConfirm(false);
             }}
-            className="min-h-10 rounded-md px-2 text-[11px] hover:bg-[var(--flow-hover)]"
+            className="min-h-10 rounded-md px-2 text-meta hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.sidebar.deleteGroupAndItems')}
@@ -269,7 +269,7 @@ const GroupEditor: React.FC<{
           style={{ borderColor: 'var(--flow-border)' }}
         >
           <label
-            className="flex min-h-10 items-center gap-2 text-[11px]"
+            className="flex min-h-10 items-center gap-2 text-meta"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <input
@@ -288,7 +288,7 @@ const GroupEditor: React.FC<{
             {t('flow.sidebar.groupColor')}
           </label>
           <label
-            className="flex min-h-10 items-center gap-2 text-[11px]"
+            className="flex min-h-10 items-center gap-2 text-meta"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.sidebar.groupIcon')}
@@ -302,7 +302,7 @@ const GroupEditor: React.FC<{
                   return next;
                 })
               }
-              className="min-h-10 rounded-md border px-2 text-[16px]"
+              className="min-h-10 rounded-md border px-2 text-title"
               style={{
                 background: 'var(--flow-input-bg)',
                 borderColor: 'var(--flow-border)',
@@ -327,7 +327,7 @@ const GroupEditor: React.FC<{
             >
               <GripVertical size={14} style={{ color: 'var(--flow-text-dim)' }} />
               <span
-                className="min-w-0 flex-1 truncate text-[12px]"
+                className="min-w-0 flex-1 truncate text-meta"
                 style={{ color: item.visible ? 'var(--flow-text)' : 'var(--flow-text-dim)' }}
               >
                 {itemName(item, t)}
@@ -354,7 +354,7 @@ const GroupEditor: React.FC<{
             </div>
           ))}
           {items.length === 0 && (
-            <p className="px-2 py-2 text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+            <p className="px-2 py-2 text-meta" style={{ color: 'var(--flow-text-dim)' }}>
               {t('flow.sidebar.emptyGroup')}
             </p>
           )}
@@ -463,7 +463,7 @@ const SidebarSettingsSection: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+      <div className="p-6 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
         {t('flow.shell.loading')}
       </div>
     );
@@ -471,17 +471,17 @@ const SidebarSettingsSection: React.FC = () => {
     <div className="flex flex-col gap-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-[18px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h2 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.sidebar.title')}
           </h2>
-          <p className="mt-1 max-w-2xl text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="mt-1 max-w-2xl text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.sidebar.subtitle')}
           </p>
         </div>
         <button
           type="button"
           onClick={() => update(() => createDefaultSidebarPreferences())}
-          className="flex min-h-11 items-center gap-2 rounded-lg border px-3 text-[12px] font-medium hover:bg-[var(--flow-hover)]"
+          className="flex min-h-11 items-center gap-2 rounded-lg border px-3 text-meta font-medium hover:bg-[var(--flow-hover)]"
           style={{ borderColor: 'var(--flow-border)', color: 'var(--flow-text)' }}
         >
           <RotateCcw size={14} />
@@ -496,7 +496,7 @@ const SidebarSettingsSection: React.FC = () => {
             setGroupError(null);
             setDialog('group');
           }}
-          className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-[12px] font-semibold"
+          className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-meta font-semibold"
           style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           <Plus size={15} />
@@ -508,7 +508,7 @@ const SidebarSettingsSection: React.FC = () => {
             setLinkError(null);
             setDialog('link');
           }}
-          className="flex min-h-11 items-center gap-2 rounded-lg border px-3 text-[12px] font-semibold"
+          className="flex min-h-11 items-center gap-2 rounded-lg border px-3 text-meta font-semibold"
           style={{ borderColor: 'var(--flow-border)', color: 'var(--flow-text)' }}
         >
           <LinkIcon size={15} />
@@ -522,7 +522,7 @@ const SidebarSettingsSection: React.FC = () => {
       >
         <div className="mb-2 flex items-center gap-2">
           <GripVertical size={16} style={{ color: 'var(--flow-text-dim)' }} />
-          <h3 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h3 className="text-body font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.sidebar.topItems')}
           </h3>
         </div>
@@ -537,7 +537,7 @@ const SidebarSettingsSection: React.FC = () => {
               >
                 <GripVertical size={14} style={{ color: 'var(--flow-text-dim)' }} />
                 <span
-                  className="min-w-0 flex-1 truncate text-[12px]"
+                  className="min-w-0 flex-1 truncate text-meta"
                   style={{ color: item.visible ? 'var(--flow-text)' : 'var(--flow-text-dim)' }}
                 >
                   {itemName(item, t)}
@@ -584,10 +584,10 @@ const SidebarSettingsSection: React.FC = () => {
           className="order-5 rounded-xl border p-4"
           style={{ borderColor: 'var(--flow-border)' }}
         >
-          <h3 className="mb-1 text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h3 className="mb-1 text-body font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.sidebar.pinItems')}
           </h3>
-          <p className="mb-3 text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="mb-3 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.sidebar.pinItemsHint')}
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -597,7 +597,7 @@ const SidebarSettingsSection: React.FC = () => {
                 type="button"
                 onClick={() => pinProject(project.id)}
                 disabled={preferences.items.some((item) => item.id === `project:${project.id}`)}
-                className="flex min-h-11 items-center gap-2 rounded-lg border px-3 text-start text-[12px] hover:bg-[var(--flow-hover)] disabled:cursor-not-allowed disabled:opacity-45"
+                className="flex min-h-11 items-center gap-2 rounded-lg border px-3 text-start text-meta hover:bg-[var(--flow-hover)] disabled:cursor-not-allowed disabled:opacity-45"
                 style={{ borderColor: 'var(--flow-border)', color: 'var(--flow-text)' }}
               >
                 <Plus size={14} />
@@ -616,7 +616,7 @@ const SidebarSettingsSection: React.FC = () => {
           <div className="mb-2 flex items-start justify-between gap-3">
             <label
               htmlFor="sidebar-group-name"
-              className="block text-[12px] font-medium"
+              className="block text-meta font-medium"
               style={{ color: 'var(--flow-text)' }}
             >
               {t('flow.sidebar.groupName')}
@@ -654,7 +654,7 @@ const SidebarSettingsSection: React.FC = () => {
               }}
               aria-required="true"
               aria-invalid={groupError !== null}
-              className="min-h-11 min-w-0 flex-1 rounded-lg border px-3 text-[16px] outline-none"
+              className="min-h-11 min-w-0 flex-1 rounded-lg border px-3 text-title outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
                 borderColor: groupError ? 'var(--flow-danger-fg)' : 'var(--flow-border)',
@@ -664,7 +664,7 @@ const SidebarSettingsSection: React.FC = () => {
             <button
               type="button"
               onClick={createGroup}
-              className="min-h-11 rounded-lg px-4 text-[12px] font-semibold"
+              className="min-h-11 rounded-lg px-4 text-meta font-semibold"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {t('common.create')}
@@ -672,7 +672,7 @@ const SidebarSettingsSection: React.FC = () => {
           </div>
           {groupError && (
             <p
-              className="mt-2 flex items-center gap-1.5 text-[11px]"
+              className="mt-2 flex items-center gap-1.5 text-meta"
               style={{ color: 'var(--flow-danger-fg)' }}
               role="alert"
             >
@@ -694,10 +694,10 @@ const SidebarSettingsSection: React.FC = () => {
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+              <h3 className="text-body font-semibold" style={{ color: 'var(--flow-text)' }}>
                 {t('flow.sidebar.addShortcut')}
               </h3>
-              <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+              <p className="mt-1 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                 {t('flow.sidebar.addShortcutHint')}
               </p>
             </div>
@@ -722,7 +722,7 @@ const SidebarSettingsSection: React.FC = () => {
                 setLinkMode('route');
               }}
               className={cn(
-                'min-h-10 rounded-lg px-3 text-[12px]',
+                'min-h-10 rounded-lg px-3 text-meta',
                 linkMode === 'route' && 'font-semibold'
               )}
               style={{
@@ -739,7 +739,7 @@ const SidebarSettingsSection: React.FC = () => {
                 setLinkMode('external');
               }}
               className={cn(
-                'min-h-10 rounded-lg px-3 text-[12px]',
+                'min-h-10 rounded-lg px-3 text-meta',
                 linkMode === 'external' && 'font-semibold'
               )}
               style={{
@@ -752,7 +752,7 @@ const SidebarSettingsSection: React.FC = () => {
           </div>
           <label
             htmlFor="sidebar-shortcut-name"
-            className="block text-[11px] font-medium"
+            className="block text-meta font-medium"
             style={{ color: 'var(--flow-text)' }}
           >
             {t('flow.sidebar.shortcutName')}
@@ -766,7 +766,7 @@ const SidebarSettingsSection: React.FC = () => {
               placeholder={t('flow.sidebar.shortcutName')}
               aria-required="true"
               aria-invalid={linkError !== null && linkLabel.trim().length === 0}
-              className="mt-1 min-h-11 w-full rounded-lg border px-3 text-[16px] font-normal outline-none"
+              className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
                 borderColor:
@@ -779,7 +779,7 @@ const SidebarSettingsSection: React.FC = () => {
           </label>
           <label
             htmlFor="sidebar-shortcut-destination"
-            className="block text-[11px] font-medium"
+            className="block text-meta font-medium"
             style={{ color: 'var(--flow-text)' }}
           >
             {linkMode === 'route'
@@ -793,7 +793,7 @@ const SidebarSettingsSection: React.FC = () => {
                   setLinkError(null);
                   setSelectedRoute(event.target.value);
                 }}
-                className="mt-1 min-h-11 w-full rounded-lg border px-3 text-[16px] font-normal"
+                className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal"
                 style={{
                   background: 'var(--flow-input-bg)',
                   borderColor: 'var(--flow-border)',
@@ -817,7 +817,7 @@ const SidebarSettingsSection: React.FC = () => {
                 placeholder={t('flow.sidebar.externalUrlPlaceholder')}
                 aria-required="true"
                 aria-invalid={linkError !== null && linkMode === 'external'}
-                className="mt-1 min-h-11 w-full rounded-lg border px-3 text-[16px] font-normal outline-none"
+                className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal outline-none"
                 style={{
                   background: 'var(--flow-input-bg)',
                   borderColor:
@@ -831,7 +831,7 @@ const SidebarSettingsSection: React.FC = () => {
           </label>
           {linkError && (
             <p
-              className="flex items-center gap-1.5 text-[11px]"
+              className="flex items-center gap-1.5 text-meta"
               style={{ color: 'var(--flow-danger-fg)' }}
               role="alert"
             >
@@ -842,7 +842,7 @@ const SidebarSettingsSection: React.FC = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="min-h-11 rounded-lg px-4 text-[12px] font-semibold"
+              className="min-h-11 rounded-lg px-4 text-meta font-semibold"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {t('flow.sidebar.addShortcut')}

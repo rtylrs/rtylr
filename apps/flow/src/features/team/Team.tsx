@@ -27,11 +27,11 @@ const Team: React.FC = () => {
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center gap-2">
           <Users size={14} style={{ color: 'var(--flow-text-muted)' }} />
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.shell.team')}
           </h1>
         </div>
-        <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
           {t('flow.team.memberCount', { count: members.length })}
         </p>
       </div>
@@ -70,21 +70,18 @@ const Team: React.FC = () => {
                     <PriorityIcon priority={t.priority} size={11} />
                     <StatusIcon status={t.status} size={11} />
                     <span
-                      className="text-[11px] flex-1 truncate"
+                      className="text-meta flex-1 truncate"
                       style={{ color: 'var(--flow-text)' }}
                     >
                       {t.title}
                     </span>
-                    <span
-                      className="text-[10px] shrink-0"
-                      style={{ color: 'var(--flow-text-dim)' }}
-                    >
+                    <span className="text-meta shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
                       {t.estimate || 4}h
                     </span>
                   </button>
                 ))}
                 {m.tasks.length > 5 && (
-                  <p className="text-[10px] px-1.5" style={{ color: 'var(--flow-text-dim)' }}>
+                  <p className="text-meta px-1.5" style={{ color: 'var(--flow-text-dim)' }}>
                     {t('flow.team.moreCount', { count: m.tasks.length - 5 })}
                   </p>
                 )}

@@ -28,9 +28,9 @@ const DAY_LABEL_KEYS: Record<DayKey, string> = {
   sat: 'saturday',
 };
 
-const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
+const labelClass = 'mb-1 block text-meta font-semibold uppercase tracking-wider';
 const inputClass =
-  'flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]';
+  'flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1.5 md:text-body';
 
 function inputStyle(): React.CSSProperties {
   return {
@@ -92,12 +92,12 @@ const TimeSection = (): React.JSX.Element => {
       {/* The honest header. Without it this pane reads as a workspace setting
        * that quietly is not one. */}
       <Alert variant="warning" data-c="alert">
-        <p className="text-[13px] leading-snug">{t('flow.settings.time.localOnlyWarning')}</p>
+        <p className="text-body leading-snug">{t('flow.settings.time.localOnlyWarning')}</p>
       </Alert>
 
       <section>
         <h2
-          className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+          className="mb-3 text-meta font-semibold uppercase tracking-wider"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.settings.time.weekAndTargets')}
@@ -168,7 +168,7 @@ const TimeSection = (): React.JSX.Element => {
               <div key={day}>
                 <label
                   htmlFor={`time-daily-target-${day}`}
-                  className="mb-1 block text-[10px] font-medium"
+                  className="mb-1 block text-meta font-medium"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t(`flow.settings.time.${DAY_LABEL_KEYS[day]}`)}
@@ -191,7 +191,7 @@ const TimeSection = (): React.JSX.Element => {
               </div>
             ))}
           </div>
-          <p className="mt-2 text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="mt-2 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.settings.time.weeklyTargetSummary', {
               total: formatDurationClock(getWeeklyTargetMinutes(settings.dailyTargetMinutes)),
             })}
@@ -231,7 +231,7 @@ const TimeSection = (): React.JSX.Element => {
               style={inputStyle()}
             />
             {overtimeError && (
-              <p className="mt-1 text-[10px]" style={{ color: 'var(--flow-status-rejected)' }}>
+              <p className="mt-1 text-meta" style={{ color: 'var(--flow-status-rejected)' }}>
                 {t('flow.settings.time.overtimeBelowTarget')}
               </p>
             )}
@@ -241,7 +241,7 @@ const TimeSection = (): React.JSX.Element => {
 
       <section>
         <h2
-          className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+          className="mb-3 text-meta font-semibold uppercase tracking-wider"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.settings.time.approval')}
@@ -249,22 +249,19 @@ const TimeSection = (): React.JSX.Element => {
 
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] leading-snug" style={{ color: 'var(--flow-text)' }}>
+            <p className="text-body leading-snug" style={{ color: 'var(--flow-text)' }}>
               {t('flow.settings.time.approvalLocksExplained')}
             </p>
             {/* Stated before the switch is touched: both directions are
              * irreversible for entries that already exist. */}
-            <p
-              className="mt-1 text-[11px] leading-snug"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
+            <p className="mt-1 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.settings.time.lockConsequence')}
             </p>
             {lockUndo !== null && (
               <button
                 type="button"
                 onClick={undoLock}
-                className="flow-focus mt-2 min-h-[44px] rounded-sm px-2 text-[11px] font-semibold md:min-h-0 md:py-1"
+                className="flow-focus mt-2 min-h-[44px] rounded-sm px-2 text-meta font-semibold md:min-h-0 md:py-1"
                 style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
               >
                 {t('flow.settings.time.undo')}
@@ -301,7 +298,7 @@ const TimeSection = (): React.JSX.Element => {
             className={`${inputClass} sm:max-w-[160px]`}
             style={inputStyle()}
           />
-          <p className="mt-1 text-[11px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="mt-1 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.settings.time.autoLockExplained', { count: settings.autoLockDays })}
           </p>
         </div>
@@ -309,7 +306,7 @@ const TimeSection = (): React.JSX.Element => {
 
       <section>
         <h2
-          className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+          className="mb-3 text-meta font-semibold uppercase tracking-wider"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.settings.time.attendance')}
@@ -317,7 +314,7 @@ const TimeSection = (): React.JSX.Element => {
 
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] leading-snug" style={{ color: 'var(--flow-text)' }}>
+            <p className="text-body leading-snug" style={{ color: 'var(--flow-text)' }}>
               {t('flow.settings.time.trackAttendanceExplained')}
             </p>
           </div>
@@ -334,7 +331,7 @@ const TimeSection = (): React.JSX.Element => {
 
       <section>
         <h2
-          className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+          className="mb-3 text-meta font-semibold uppercase tracking-wider"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.settings.time.categories')}
@@ -353,7 +350,7 @@ const TimeSection = (): React.JSX.Element => {
                 aria-label={t('flow.settings.time.categoryName')}
                 value={category.name}
                 onChange={(e) => settings.renameCategory(category.id, e.target.value)}
-                className="flow-focus min-h-[44px] flex-1 rounded-sm bg-transparent px-2 text-[16px] md:min-h-0 md:py-1 md:text-[13px]"
+                className="flow-focus min-h-[44px] flex-1 rounded-sm bg-transparent px-2 text-title md:min-h-0 md:py-1 md:text-body"
                 style={{ color: 'var(--flow-text)' }}
               />
               <Switch
@@ -394,7 +391,7 @@ const TimeSection = (): React.JSX.Element => {
           <button
             type="button"
             onClick={addCategory}
-            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
+            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-body font-semibold md:min-h-0 md:py-2"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             <Plus size={14} aria-hidden="true" />

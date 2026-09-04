@@ -55,7 +55,7 @@ const RouteLoading = (): React.JSX.Element => {
         padding: '32px',
         color: 'var(--flow-text-muted)',
         fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-        fontSize: '13px',
+        fontSize: 'var(--text-body)',
       }}
     >
       {t('flow.shell.loading')}

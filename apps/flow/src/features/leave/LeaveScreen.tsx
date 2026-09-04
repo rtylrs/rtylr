@@ -18,7 +18,7 @@ const cardStyle: React.CSSProperties = {
   background: 'var(--flow-card)',
   border: '1px solid var(--flow-border)',
 };
-const sectionHeadingClass = 'mb-3 text-[13px] font-semibold uppercase tracking-wider';
+const sectionHeadingClass = 'mb-3 text-body font-semibold uppercase tracking-wider';
 
 const statusTone: Record<string, string> = {
   pending: 'var(--flow-status-pending, var(--flow-text-muted))',
@@ -62,7 +62,7 @@ const LeaveScreen = (): React.JSX.Element => {
           <button
             type="button"
             onClick={() => setDialogOpen(true)}
-            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
+            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-body font-semibold md:min-h-0 md:py-2"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             <Plus size={14} aria-hidden="true" />
@@ -102,7 +102,7 @@ const LeaveScreen = (): React.JSX.Element => {
                   style={{ background: 'var(--flow-hover)' }}
                 >
                   <div
-                    className="mb-1 text-[13px] font-semibold"
+                    className="mb-1 text-body font-semibold"
                     style={{ color: 'var(--flow-text)' }}
                   >
                     {typeName(balance.leaveTypeId)}
@@ -114,12 +114,12 @@ const LeaveScreen = (): React.JSX.Element => {
                     >
                       {balance.remainingDays}
                     </span>
-                    <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                    <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                       {t('flow.leave.remaining')}
                     </span>
                   </div>
                   <div
-                    className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]"
+                    className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-meta"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     <span>
@@ -170,20 +170,20 @@ const LeaveScreen = (): React.JSX.Element => {
                   style={{ background: 'var(--flow-hover)' }}
                 >
                   <span
-                    className="min-w-0 flex-1 text-[13px] font-medium"
+                    className="min-w-0 flex-1 text-body font-medium"
                     style={{ color: 'var(--flow-text)' }}
                   >
                     {typeName(request.leaveTypeId)}
                   </span>
-                  <span className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <span className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
                     {request.startDate}
                   </span>
                   <span style={{ color: 'var(--flow-text-muted)' }}>→</span>
-                  <span className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <span className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
                     {request.endDate}
                   </span>
                   <span
-                    className="rounded-sm px-1.5 py-0.5 text-[11px] font-semibold"
+                    className="rounded-sm px-1.5 py-0.5 text-meta font-semibold"
                     style={{ color: statusTone[request.status ?? ''] ?? 'var(--flow-text-muted)' }}
                   >
                     {t(`flow.leave.status.${request.status}`)}

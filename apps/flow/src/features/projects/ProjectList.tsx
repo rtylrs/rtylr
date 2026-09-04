@@ -138,7 +138,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
       {/* Title */}
       <span
-        className={cn('flex-1 text-[13px] font-medium truncate', checked ? 'line-through' : '')}
+        className={cn('flex-1 text-body font-medium truncate', checked ? 'line-through' : '')}
         style={{ color: checked ? 'var(--flow-text-dim)' : 'var(--flow-text)' }}
       >
         {task.title}
@@ -147,7 +147,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       {/* Subtask indicator */}
       {task.subtaskCount > 0 && (
         <span
-          className="text-[11px] flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="text-meta flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
           style={{ color: 'var(--flow-text-dim)' }}
         >
           <ChevronRight size={11} />
@@ -157,7 +157,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
       {/* Assignee */}
       <span
-        className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
+        className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold shrink-0"
         style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
       >
         {task.assigneeInitials}
@@ -165,7 +165,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
       {/* Due date */}
       <span
-        className="text-[11px] flex items-center gap-1 w-[96px] justify-end"
+        className="text-meta flex items-center gap-1 w-[96px] justify-end"
         style={{ color: 'var(--flow-text-dim)' }}
       >
         <Calendar size={11} />
@@ -209,10 +209,10 @@ export const StatusGroup: React.FC<{
           style={{ color: 'var(--flow-text-dim)' }}
         />
         <span className="h-2 w-2 rounded-full" style={{ background: group.color }} />
-        <span className="text-[12px] font-semibold" style={{ color: group.color }}>
+        <span className="text-meta font-semibold" style={{ color: group.color }}>
           {group.label}
         </span>
-        <span className="text-[11px] ml-1" style={{ color: 'var(--flow-text-dim)' }}>
+        <span className="text-meta ml-1" style={{ color: 'var(--flow-text-dim)' }}>
           {tasks.length}
         </span>
       </button>
@@ -242,7 +242,7 @@ export const StatusGroup: React.FC<{
               >
                 <Plus size={10} style={{ color: 'var(--flow-text-dim)' }} />
               </div>
-              <span className="text-[13px]" style={{ color: 'var(--flow-text-dim)' }}>
+              <span className="text-body" style={{ color: 'var(--flow-text-dim)' }}>
                 {t('flow.shell.newTask')}
               </span>
             </div>
@@ -319,7 +319,7 @@ const ProjectList: React.FC = () => {
       >
         <div className="flex items-center gap-3">
           <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {project.name}
           </h1>
         </div>
@@ -335,7 +335,7 @@ const ProjectList: React.FC = () => {
           <Link
             to="/p/$projectId"
             params={{ projectId }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)] no-underline"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-meta font-medium transition-colors hover:bg-[var(--flow-hover)] no-underline"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <LayoutGrid size={13} />
@@ -343,7 +343,7 @@ const ProjectList: React.FC = () => {
           </Link>
           <button
             type="button"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-meta font-medium transition-colors"
             style={{
               background: 'var(--accent-muted)',
               color: 'var(--accent)',
@@ -357,7 +357,7 @@ const ProjectList: React.FC = () => {
 
       {/* Column headers */}
       <div
-        className="flex items-center gap-3 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider"
+        className="flex items-center gap-3 px-4 py-2 text-meta font-semibold uppercase tracking-wider"
         style={{
           color: 'var(--flow-text-dim)',
           borderBottom: '1px solid var(--flow-border)',
@@ -378,7 +378,7 @@ const ProjectList: React.FC = () => {
           ? sectionBlocks.map((block) => (
               <div key={block.id} className="mb-4">
                 <div
-                  className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider sticky top-0 z-[1]"
+                  className="px-4 py-2 text-meta font-semibold uppercase tracking-wider sticky top-0 z-[1]"
                   style={{
                     background: 'var(--flow-bg)',
                     borderBottom: '1px solid var(--flow-border)',

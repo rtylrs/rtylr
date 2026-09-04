@@ -44,9 +44,9 @@ function FieldRow({
         style={{ color: 'var(--flow-text-muted)' }}
       >
         {Icon && <Icon size={14} className="shrink-0 opacity-70" />}
-        <span className="text-[11px] font-medium">{label}</span>
+        <span className="text-meta font-medium">{label}</span>
       </div>
-      <div className="flex-1 min-w-0 text-[13px]">{children}</div>
+      <div className="flex-1 min-w-0 text-body">{children}</div>
     </div>
   );
 }
@@ -175,12 +175,12 @@ export const QuickCreate: React.FC = () => {
               <div className="min-w-0">
                 <p
                   id="quick-create-title"
-                  className="text-[13px] font-semibold"
+                  className="text-body font-semibold"
                   style={{ color: 'var(--flow-text)' }}
                 >
                   {t('flow.quickCreate.title')}
                 </p>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--flow-text-dim)' }}>
+                <p className="text-meta mt-0.5" style={{ color: 'var(--flow-text-dim)' }}>
                   {t('flow.quickCreate.subtitle')}
                 </p>
               </div>
@@ -209,7 +209,7 @@ export const QuickCreate: React.FC = () => {
                 }}
                 placeholder={t('flow.quickCreate.titlePlaceholder')}
                 rows={2}
-                className="w-full bg-transparent outline-none resize-none text-[20px] font-semibold leading-snug placeholder:opacity-40 mb-1"
+                className="w-full bg-transparent outline-none resize-none text-screen font-semibold leading-snug placeholder:opacity-40 mb-1"
                 style={{ color: 'var(--flow-text)' }}
               />
 
@@ -220,7 +220,7 @@ export const QuickCreate: React.FC = () => {
                       type="button"
                       onClick={() => setAssignToMe(true)}
                       className={cn(
-                        'inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-colors',
+                        'inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-meta font-medium transition-colors',
                         assignToMe ? '' : 'hover:bg-[var(--flow-hover)]'
                       )}
                       style={{
@@ -232,7 +232,7 @@ export const QuickCreate: React.FC = () => {
                       }}
                     >
                       <span
-                        className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+                        className="h-6 w-6 rounded-full flex items-center justify-center text-meta font-bold"
                         style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                       >
                         {getInitials(assigneeName)}
@@ -243,7 +243,7 @@ export const QuickCreate: React.FC = () => {
                       type="button"
                       onClick={() => setAssignToMe(false)}
                       className={cn(
-                        'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] transition-colors',
+                        'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-meta transition-colors',
                         !assignToMe ? '' : 'hover:bg-[var(--flow-hover)]'
                       )}
                       style={{
@@ -265,7 +265,7 @@ export const QuickCreate: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setEffortMinutes(undefined)}
-                      className="text-[11px] px-2 py-1 rounded-md"
+                      className="text-meta px-2 py-1 rounded-md"
                       style={{
                         background: effortMinutes == null ? 'var(--flow-hover)' : 'transparent',
                         color: 'var(--flow-text-muted)',
@@ -279,7 +279,7 @@ export const QuickCreate: React.FC = () => {
                         key={m}
                         type="button"
                         onClick={() => setEffortMinutes(m)}
-                        className="text-[11px] px-2 py-1 rounded-md"
+                        className="text-meta px-2 py-1 rounded-md"
                         style={{
                           background: effortMinutes === m ? 'var(--accent-muted)' : 'transparent',
                           color: 'var(--flow-text)',
@@ -302,7 +302,7 @@ export const QuickCreate: React.FC = () => {
                     locale={i18n.language}
                     aria-label={t('common.dueDate')}
                     wrapperClassName="max-w-[200px]"
-                    className="h-9 min-h-0 py-1.5 text-[13px]"
+                    className="h-9 min-h-0 py-1.5 text-body"
                     labels={{
                       placeholder: t('common.dueDate'),
                       previousMonth: t('common.datePicker.previousMonth'),
@@ -347,7 +347,7 @@ export const QuickCreate: React.FC = () => {
                     value={labelId}
                     onChange={(e) => setLabelId(e.target.value)}
                     disabled={labels.length === 0}
-                    className="w-full max-w-[240px] rounded-md px-2 py-1.5 text-[13px] outline-none disabled:opacity-50"
+                    className="w-full max-w-[240px] rounded-md px-2 py-1.5 text-body outline-none disabled:opacity-50"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border)',
@@ -372,7 +372,7 @@ export const QuickCreate: React.FC = () => {
 
               <div className="mt-4">
                 <p
-                  className="text-[11px] font-semibold uppercase tracking-wide mb-2"
+                  className="text-meta font-semibold uppercase tracking-wide mb-2"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('common.description')}
@@ -382,7 +382,7 @@ export const QuickCreate: React.FC = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder={t('flow.quickCreate.descriptionPlaceholder')}
                   rows={6}
-                  className="w-full rounded-lg px-3 py-2.5 text-[13px] leading-relaxed outline-none resize-y min-h-[120px] placeholder:opacity-45"
+                  className="w-full rounded-lg px-3 py-2.5 text-body leading-relaxed outline-none resize-y min-h-[120px] placeholder:opacity-45"
                   style={{
                     background: 'var(--flow-input-bg)',
                     border: '1px solid var(--flow-border)',
@@ -400,7 +400,7 @@ export const QuickCreate: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setQuickCreateOpen(false)}
-                className="px-3 py-2 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
+                className="px-3 py-2 rounded-lg text-meta font-medium transition-colors hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {t('common.cancel')}
@@ -409,7 +409,7 @@ export const QuickCreate: React.FC = () => {
                 type="button"
                 onClick={submit}
                 disabled={!title.trim() || !projectId || createTaskMutation.isPending}
-                className="px-4 py-2 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                className="px-4 py-2 rounded-lg text-meta font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 style={{ background: 'var(--accent)', color: '#0a0a0a' }}
               >
                 {createTaskMutation.isPending

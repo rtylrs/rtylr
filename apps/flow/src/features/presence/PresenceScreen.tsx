@@ -83,13 +83,13 @@ const PresenceScreen = (): React.JSX.Element => {
                 >
                   <Avatar initials={initials(fullName)} size="sm" />
                   <span
-                    className="min-w-0 flex-1 text-[13px] font-medium"
+                    className="min-w-0 flex-1 text-body font-medium"
                     style={{ color: 'var(--flow-text)' }}
                   >
                     {fullName}
                   </span>
                   <span
-                    className="rounded-sm px-1.5 py-0.5 text-[11px] font-semibold"
+                    className="rounded-sm px-1.5 py-0.5 text-meta font-semibold"
                     style={{ color: statusTone[entry.status] ?? 'var(--accent-fg)' }}
                   >
                     {statusLabel(entry.status)}

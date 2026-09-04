@@ -41,10 +41,10 @@ const MyIssues: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.shell.myTasks')}
           </h1>
-          <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {isLoading
               ? t('flow.myIssues.loading')
               : t('flow.myIssues.taskCount', { count: tasks.length })}
@@ -65,12 +65,12 @@ const MyIssues: React.FC = () => {
                 transition={{ duration: 0.15, delay: bucketIdx * 0.04 }}
               >
                 <h2
-                  className="flex items-center gap-2 px-1 pb-1.5 text-[12px] font-semibold"
+                  className="flex items-center gap-2 px-1 pb-1.5 text-meta font-semibold"
                   style={{ color: 'var(--flow-text)' }}
                 >
                   {t(MY_TASK_BUCKET_LABEL_KEY[bucket])}
                   <span
-                    className="rounded-sm px-1.5 py-0.5 text-[10px] font-medium"
+                    className="rounded-sm px-1.5 py-0.5 text-meta font-medium"
                     style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
                   >
                     {bucketTasks.length}
@@ -106,16 +106,16 @@ const MyIssues: React.FC = () => {
                 border: '1px solid var(--accent-muted)',
               }}
             >
-              <h2 className="text-[16px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+              <h2 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
                 {t('flow.myIssues.emptyTitle')}
               </h2>
-              <p className="mt-2 text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+              <p className="mt-2 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                 {t('flow.myIssues.emptyDescription')}
               </p>
               <button
                 type="button"
                 onClick={() => setQuickCreateOpen(true)}
-                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-5 text-[12px] font-semibold transition-opacity hover:opacity-90"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-5 text-meta font-semibold transition-opacity hover:opacity-90"
                 style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
               >
                 {t('flow.board.addTaskLabel')}

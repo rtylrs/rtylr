@@ -71,7 +71,7 @@ const TimeReports = (): React.JSX.Element => {
       <HelmetContainer title={`${t('flow.time.reports')} · Flow`} />
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <header className="mb-6">
-          <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-screen font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.reports')}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -88,9 +88,9 @@ const TimeReports = (): React.JSX.Element => {
                 previousMonth: t('common.datePicker.previousMonth'),
                 nextMonth: t('common.datePicker.nextMonth'),
               }}
-              className="w-auto text-[13px]"
+              className="w-auto text-body"
             />
-            <span className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.time.reportsRangeTo')}
             </span>
             <label htmlFor="reports-to" className="sr-only">
@@ -106,18 +106,18 @@ const TimeReports = (): React.JSX.Element => {
                 previousMonth: t('common.datePicker.previousMonth'),
                 nextMonth: t('common.datePicker.nextMonth'),
               }}
-              className="w-auto text-[13px]"
+              className="w-auto text-body"
             />
           </div>
-          <p className="mt-2 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="mt-2 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.reportsScopeNote')}
           </p>
         </header>
 
         {isError ? (
-          <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-[13px]" />
+          <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-body" />
         ) : membersLoading || isLoading ? (
-          <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+          <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
           </p>
         ) : (members ?? []).length === 0 ? (
@@ -134,22 +134,22 @@ const TimeReports = (): React.JSX.Element => {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
+            <table className="w-full text-body">
               <thead>
                 <tr style={{ color: 'var(--flow-text-muted)' }}>
-                  <th className="pb-2 text-start text-[10px] font-semibold uppercase tracking-wider">
+                  <th className="pb-2 text-start text-meta font-semibold uppercase tracking-wider">
                     {t('flow.time.reportsPerson')}
                   </th>
                   {trackAttendance && (
-                    <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
+                    <th className="pb-2 text-end text-meta font-semibold uppercase tracking-wider">
                       {t('flow.time.clocked')}
                     </th>
                   )}
-                  <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
+                  <th className="pb-2 text-end text-meta font-semibold uppercase tracking-wider">
                     {t('flow.time.logged')}
                   </th>
                   {trackAttendance && (
-                    <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
+                    <th className="pb-2 text-end text-meta font-semibold uppercase tracking-wider">
                       {t('flow.time.unaccounted')}
                     </th>
                   )}

@@ -79,7 +79,7 @@ function SegmentedControl<T extends string>({
             onFocus={disabled ? undefined : () => onAudition?.(option.value)}
             onBlur={disabled ? undefined : () => onAudition?.(null)}
             className={cn(
-              'flow-focus inline-flex min-h-[44px] items-center justify-center px-3 text-center text-[13px] font-medium transition-colors',
+              'flow-focus inline-flex min-h-[44px] items-center justify-center px-3 text-center text-body font-medium transition-colors',
               // opacity-75, not 60. At 60 the label measured 2.96:1 against the
               // card, because the opacity multiplies an already-muted token:
               // 0.58 * 0.6 leaves an effective alpha of 0.35. WCAG exempts

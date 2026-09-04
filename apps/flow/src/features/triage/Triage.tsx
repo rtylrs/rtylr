@@ -31,10 +31,10 @@ const Triage: React.FC = () => {
     <div className="flex flex-col h-full">
       <HelmetContainer title={`${t('flow.shell.triage')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-        <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+        <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('flow.shell.triage')}
         </h1>
-        <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
           {t('flow.triage.subtitle', { count: needsTriage.length })}
         </p>
       </div>

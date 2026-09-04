@@ -132,7 +132,7 @@ const ProjectSettings: React.FC = () => {
             { label: t('nav.settings') },
           ]}
         />
-        <h1 className="text-[17px] font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
+        <h1 className="text-title font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
           {t('nav.settings')}
         </h1>
         <div className="flex gap-4 mt-3">
@@ -141,7 +141,7 @@ const ProjectSettings: React.FC = () => {
               type="button"
               key={t.id}
               onClick={() => setTab(t.id)}
-              className="text-[12px] pb-1 border-b-2 transition-colors"
+              className="text-meta pb-1 border-b-2 transition-colors"
               style={{
                 color: tab === t.id ? 'var(--flow-text)' : 'var(--flow-text-muted)',
                 borderColor: tab === t.id ? 'var(--accent)' : 'transparent',
@@ -169,7 +169,7 @@ const ProjectSettings: React.FC = () => {
                 onChange={(e) => setName(e.target.value)}
                 disabled={!canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-general-gate'}
-                className="w-full rounded-md px-3 py-2 text-[12px] outline-none disabled:opacity-60"
+                className="w-full rounded-md px-3 py-2 text-meta outline-none disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -185,7 +185,7 @@ const ProjectSettings: React.FC = () => {
                 rows={3}
                 disabled={!canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-general-gate'}
-                className="w-full rounded-md px-3 py-2 text-[12px] outline-none resize-none disabled:opacity-60"
+                className="w-full rounded-md px-3 py-2 text-meta outline-none resize-none disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -231,7 +231,7 @@ const ProjectSettings: React.FC = () => {
                 );
               }}
               disabled={updateProject.isPending || !canManageProject}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <Save size={11} />{' '}
@@ -248,7 +248,7 @@ const ProjectSettings: React.FC = () => {
             )}
             <div className="flex items-center justify-between">
               <p
-                className="text-[11px] font-semibold uppercase tracking-wider"
+                className="text-meta font-semibold uppercase tracking-wider"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {members.length} member{members.length !== 1 ? 's' : ''}
@@ -257,7 +257,7 @@ const ProjectSettings: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddMember(true)}
-                  className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-sm"
+                  className="flex items-center gap-1 text-meta px-2 py-1 rounded-sm"
                   style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                 >
                   <Plus size={10} /> Add
@@ -322,21 +322,21 @@ const ProjectSettings: React.FC = () => {
                       }}
                     >
                       <span
-                        className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                        className="h-7 w-7 rounded-full flex items-center justify-center text-meta font-bold shrink-0"
                         style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                       >
                         {initials}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p
-                          className="text-[12px] font-medium truncate"
+                          className="text-meta font-medium truncate"
                           style={{ color: 'var(--flow-text)' }}
                         >
                           {m.name || m.email}
                         </p>
                         {m.name && (
                           <p
-                            className="text-[10px] truncate"
+                            className="text-meta truncate"
                             style={{ color: 'var(--flow-text-dim)' }}
                           >
                             {m.email}
@@ -365,7 +365,7 @@ const ProjectSettings: React.FC = () => {
                               }
                             );
                           }}
-                          className="text-[11px] outline-none bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                          className="text-meta outline-none bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                           style={{ color: roleMeta.color }}
                         >
                           <option value="admin">{t('common.roles.admin')}</option>
@@ -406,12 +406,12 @@ const ProjectSettings: React.FC = () => {
               {/* Transfer ownership */}
               <div>
                 <p
-                  className="text-[11px] font-semibold mb-1"
+                  className="text-meta font-semibold mb-1"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('flow.projectSettings.transferHeading')}
                 </p>
-                <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
+                <p className="text-meta mb-2" style={{ color: 'var(--flow-text-dim)' }}>
                   {t('flow.projectSettings.transferDescription')}
                 </p>
                 {!canManageProject && (
@@ -428,7 +428,7 @@ const ProjectSettings: React.FC = () => {
                     disabled={!canManageProject}
                     aria-describedby={canManageProject ? undefined : 'flow-project-transfer-gate'}
                     onChange={() => setConfirmTransfer(false)}
-                    className="flex-1 rounded-sm px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
+                    className="flex-1 rounded-sm px-2 py-1.5 text-meta outline-none disabled:opacity-60"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border)',
@@ -464,7 +464,7 @@ const ProjectSettings: React.FC = () => {
                           );
                         }}
                         disabled={transferOwnership.isPending || !canManageProject}
-                        className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
+                        className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
                         style={{ background: '#ef4444', color: '#fff' }}
                       >
                         {transferOwnership.isPending
@@ -474,7 +474,7 @@ const ProjectSettings: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setConfirmTransfer(false)}
-                        className="px-3 py-1.5 rounded-sm text-[11px]"
+                        className="px-3 py-1.5 rounded-sm text-meta"
                         style={{ color: 'var(--flow-text-muted)' }}
                       >
                         {t('common.cancel')}
@@ -491,7 +491,7 @@ const ProjectSettings: React.FC = () => {
                         setConfirmTransfer(true);
                       }}
                       disabled={!canManageProject}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
                       style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                     >
                       <ArrowRightLeft size={10} /> {t('flow.projectSettings.transferCta')}
@@ -499,7 +499,7 @@ const ProjectSettings: React.FC = () => {
                   )}
                 </div>
                 {confirmTransfer && (
-                  <p className="text-[11px] mt-1.5" style={{ color: '#f97316' }}>
+                  <p className="text-meta mt-1.5" style={{ color: '#f97316' }}>
                     {t('flow.projectSettings.transferConfirmHint')}
                   </p>
                 )}
@@ -530,16 +530,16 @@ const ProjectSettings: React.FC = () => {
               >
                 <Icon size={14} style={{ color: 'var(--flow-text-muted)' }} />
                 <div className="flex-1">
-                  <p className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                  <p className="text-meta font-medium" style={{ color: 'var(--flow-text)' }}>
                     {name}
                   </p>
-                  <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+                  <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                     {description}
                   </p>
                 </div>
                 <button
                   type="button"
-                  className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
+                  className="text-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
                   disabled
                   title={t('common.comingSoon')}
@@ -569,16 +569,16 @@ const ProjectSettings: React.FC = () => {
             >
               <Trash2 size={14} style={{ color: '#ef4444' }} className="mt-0.5" />
               <div className="flex-1">
-                <p className="text-[12px] font-semibold" style={{ color: '#ef4444' }}>
+                <p className="text-meta font-semibold" style={{ color: '#ef4444' }}>
                   {t('flow.projectSettings.deleteHeading')}
                 </p>
-                <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.projectSettings.archiveNotice')}
                 </p>
               </div>
               <button
                 type="button"
-                className="px-3 py-1 rounded-sm text-[11px] font-semibold disabled:opacity-40"
+                className="px-3 py-1 rounded-sm text-meta font-semibold disabled:opacity-40"
                 style={{ background: '#ef4444', color: '#fff' }}
                 disabled={archiveProject.isPending || !canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-delete-gate'}
@@ -606,11 +606,11 @@ const ProjectSettings: React.FC = () => {
         >
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-[14px] font-semibold flex items-center gap-2">
+              <DialogTitle className="text-section font-semibold flex items-center gap-2">
                 <Trash2 size={14} style={{ color: '#ef4444' }} />
                 {t('flow.projectSettings.deleteDialogTitle')}
               </DialogTitle>
-              <DialogDescription className="text-[12px]">
+              <DialogDescription className="text-meta">
                 {t('flow.projectSettings.deleteDialogPrefix')} <strong>{project?.name}</strong>
                 {t('flow.projectSettings.deleteDialogSuffix')}
               </DialogDescription>
@@ -621,7 +621,7 @@ const ProjectSettings: React.FC = () => {
               value={deleteTypedName}
               onChange={(e) => setDeleteTypedName(e.target.value)}
               placeholder={project?.name ?? ''}
-              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none mt-2"
+              className="w-full rounded-lg px-3 py-2 text-body outline-none mt-2"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border)',
@@ -632,7 +632,7 @@ const ProjectSettings: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
+                className="px-3 py-1.5 rounded-lg text-meta font-medium"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {t('common.cancel')}
@@ -658,7 +658,7 @@ const ProjectSettings: React.FC = () => {
                     },
                   });
                 }}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+                className="px-3 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40"
                 style={{ background: '#ef4444', color: '#fff' }}
               >
                 {archiveProject.isPending
@@ -675,7 +675,7 @@ const ProjectSettings: React.FC = () => {
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div>
-    <label className="text-[11px] mb-1 block" style={{ color: 'var(--flow-text-muted)' }}>
+    <label className="text-meta mb-1 block" style={{ color: 'var(--flow-text-muted)' }}>
       {label}
     </label>
     {children}

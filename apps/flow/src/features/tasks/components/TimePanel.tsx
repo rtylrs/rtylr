@@ -130,7 +130,7 @@ const TimePanel = ({
         <Timer size={11} aria-hidden="true" />
         <h3
           id={`time-panel-${taskId}`}
-          className="text-[10px] font-semibold uppercase tracking-wider"
+          className="text-meta font-semibold uppercase tracking-wider"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           {t('flow.time.heading')}
@@ -140,18 +140,15 @@ const TimePanel = ({
       {/* Running total. aria-live so a screen reader hears the new figure after
        * a log, without the whole panel being re-announced. */}
       <div aria-live="polite" aria-atomic="true" className="flex items-baseline gap-1.5">
-        <span
-          className="text-[18px] font-semibold md:text-[16px]"
-          style={{ color: 'var(--flow-text)' }}
-        >
+        <span className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {formatDurationClock(totalMinutes)}
         </span>
         {estimateMinutes !== null && (
           <>
-            <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.time.of')}
             </span>
-            <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {formatDurationClock(estimateMinutes)}
             </span>
           </>
@@ -174,7 +171,7 @@ const TimePanel = ({
       {(realtimeStatus === 'reconnecting' || realtimeStatus === 'disconnected') && (
         <p
           role="status"
-          className="mt-2 rounded-sm px-2 py-1 text-[10px] leading-snug"
+          className="mt-2 rounded-sm px-2 py-1 text-meta leading-snug"
           style={{
             background: 'var(--flow-status-pending-bg)',
             border: '1px solid var(--flow-status-pending-border)',
@@ -204,13 +201,13 @@ const TimePanel = ({
             border: '1px solid var(--flow-status-rejected-border)',
           }}
         >
-          <p className="text-[10px] leading-snug" style={{ color: 'var(--flow-text)' }}>
+          <p className="text-meta leading-snug" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.loadFailed')}
           </p>
           <button
             type="button"
             onClick={() => void refetch()}
-            className="flow-focus mt-1.5 inline-flex min-h-[44px] items-center gap-1 rounded-sm px-2 text-[11px] font-semibold md:min-h-0 md:py-1"
+            className="flow-focus mt-1.5 inline-flex min-h-[44px] items-center gap-1 rounded-sm px-2 text-meta font-semibold md:min-h-0 md:py-1"
             style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
           >
             <RotateCcw size={11} aria-hidden="true" />
@@ -254,18 +251,18 @@ const TimePanel = ({
               >
                 <Avatar size="sm" initials={initialsFromName(authorName)} aria-hidden="true" />
                 <div className="min-w-0 flex-1">
-                  <span className="text-[11px] font-semibold" style={{ color: 'var(--accent-fg)' }}>
+                  <span className="text-meta font-semibold" style={{ color: 'var(--accent-fg)' }}>
                     {formatDurationClock(log.durationMinutes)}
                   </span>
                   {body && (
                     <p
-                      className="mt-0.5 text-[11px] leading-snug"
+                      className="mt-0.5 text-meta leading-snug"
                       style={{ color: 'var(--flow-text)' }}
                     >
                       {body}
                     </p>
                   )}
-                  <p className="mt-0.5 text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <p className="mt-0.5 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                     <span>{authorName}</span>
                     {' · '}
                     {formatEntryTimestamp(log.loggedAt || log.createdAt, i18n.language)}
@@ -294,18 +291,18 @@ const TimePanel = ({
               style={{ background: 'var(--flow-hover)' }}
             >
               <div className="min-w-0 flex-1">
-                <span className="text-[11px] font-semibold" style={{ color: 'var(--accent-fg)' }}>
+                <span className="text-meta font-semibold" style={{ color: 'var(--accent-fg)' }}>
                   {formatDurationClock(pendingMinutes)}
                 </span>
                 {pendingDescription && pendingDescription !== '-' && (
                   <p
-                    className="mt-0.5 text-[11px] leading-snug"
+                    className="mt-0.5 text-meta leading-snug"
                     style={{ color: 'var(--flow-text)' }}
                   >
                     {pendingDescription}
                   </p>
                 )}
-                <p className="mt-0.5 text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
+                <p className="mt-0.5 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.time.saving')}
                 </p>
               </div>
@@ -319,7 +316,7 @@ const TimePanel = ({
           <button
             type="button"
             onClick={() => setFormOpen(true)}
-            className="flow-focus mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded-sm px-3 text-[11px] font-semibold md:min-h-0 md:w-auto md:py-1.5"
+            className="flow-focus mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded-sm px-3 text-meta font-semibold md:min-h-0 md:w-auto md:py-1.5"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             {t('flow.time.logTime')}
@@ -348,7 +345,7 @@ const TimePanel = ({
           <div>
             <label
               htmlFor={`time-date-${taskId}`}
-              className="mb-1 block text-[10px] font-semibold uppercase tracking-wider"
+              className="mb-1 block text-meta font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.time.date')}
@@ -360,7 +357,7 @@ const TimePanel = ({
               readOnly
               disabled
               aria-describedby={`time-date-gate-${taskId}`}
-              className="min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
+              className="min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1 md:text-meta"
               style={{
                 background: 'var(--flow-hover)',
                 border: '1px solid var(--flow-border)',
@@ -377,7 +374,7 @@ const TimePanel = ({
           <div>
             <label
               htmlFor={`time-description-${taskId}`}
-              className="mb-1 block text-[10px] font-semibold uppercase tracking-wider"
+              className="mb-1 block text-meta font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.time.description')}
@@ -397,7 +394,7 @@ const TimePanel = ({
                   closeForm();
                 }
               }}
-              className="flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
+              className="flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1 md:text-meta"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border)',
@@ -407,7 +404,7 @@ const TimePanel = ({
           </div>
 
           {wasRounded && (
-            <p className="text-[10px]" style={{ color: 'var(--flow-status-pending)' }}>
+            <p className="text-meta" style={{ color: 'var(--flow-status-pending)' }}>
               {/* `count` rather than a plain number: i18next selects the plural
                * form from it, and Arabic needs six of them. */}
               {t('flow.time.roundedNotice', {
@@ -424,7 +421,7 @@ const TimePanel = ({
               type="button"
               onClick={submit}
               disabled={parsedPreview === null || logTime.isPending}
-              className="flow-focus min-h-[44px] flex-1 rounded-sm px-3 text-[11px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
+              className="flow-focus min-h-[44px] flex-1 rounded-sm px-3 text-meta font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {roundedPreview !== null
@@ -434,7 +431,7 @@ const TimePanel = ({
             <button
               type="button"
               onClick={closeForm}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] md:min-h-0 md:py-1.5"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-meta md:min-h-0 md:py-1.5"
               style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
             >
               {t('flow.time.cancel')}
@@ -499,12 +496,12 @@ const EstimateBar = ({
         />
       </div>
       <div className="mt-1 flex items-center gap-1.5">
-        <span className="text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
+        <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
           {percentLabel(percent)}
         </span>
         {over && (
           <span
-            className="rounded-full px-2 text-[10px] font-semibold"
+            className="rounded-full px-2 text-meta font-semibold"
             style={{
               background: 'var(--flow-status-pending-bg)',
               border: '1px solid var(--flow-status-pending-border)',

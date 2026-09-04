@@ -195,7 +195,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
       to={to}
       search={search}
       className={cn(
-        'relative flex min-h-[40px] items-center gap-2.5 px-3 py-2 rounded-md text-[12px] font-medium transition-colors duration-150 lg:min-h-0 lg:py-1.5',
+        'relative flex min-h-[40px] items-center gap-2.5 px-3 py-2 rounded-md text-meta font-medium transition-colors duration-150 lg:min-h-0 lg:py-1.5',
         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
       )}
       style={{ color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
@@ -212,7 +212,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
       <span className="relative flex-1 truncate">{label}</span>
       {badge !== undefined && badge > 0 && (
         <span
-          className="relative text-[10px] px-1.5 rounded-full font-semibold"
+          className="relative text-meta px-1.5 rounded-full font-semibold"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
         >
           {badge}
@@ -600,7 +600,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </button>
           <img src={logoSrc} alt="" className="h-7 w-auto shrink-0" />
           <span
-            className="min-w-0 flex-1 truncate text-start text-[13px] font-semibold"
+            className="min-w-0 flex-1 truncate text-start text-body font-semibold"
             style={{ color: 'var(--flow-text)' }}
           >
             {activeWorkspace.name}
@@ -674,7 +674,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <span
-                className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center text-[9px] font-bold"
+                className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center text-meta font-bold"
                 style={{
                   background: 'var(--accent-muted)',
                   color: 'var(--accent-fg)',
@@ -684,7 +684,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 {activeWorkspace.name.charAt(0)}
               </span>
               <span
-                className="flex-1 text-start text-[12px] font-medium truncate"
+                className="flex-1 text-start text-meta font-medium truncate"
                 style={{ color: 'var(--flow-text)' }}
               >
                 {activeWorkspace.name}
@@ -694,7 +694,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <button
               type="button"
               onClick={() => setCommandBarOpen(true)}
-              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] transition-colors hover:opacity-90"
+              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-meta transition-colors hover:opacity-90"
               style={{
                 background: 'var(--flow-hover)',
                 color: 'var(--flow-text-dim)',
@@ -703,7 +703,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               <Search size={12} />
               <span className="flex-1 text-start">{t('flow.shell.searchPlaceholder')}</span>
               <span
-                className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded-sm sm:inline"
+                className="hidden text-meta font-mono px-1.5 py-0.5 rounded-sm sm:inline"
                 style={{ background: 'var(--flow-active)' }}
               >
                 {modKey}K
@@ -781,7 +781,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               className={cn(sidebarSectionHeaderClass, 'flex-1')}
                             >
                               <span
-                                className="text-[12px] font-semibold tracking-wide"
+                                className="text-meta font-semibold tracking-wide"
                                 style={{ color: 'var(--flow-text-muted)' }}
                               >
                                 {t('flow.shell.plan')}
@@ -855,7 +855,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               className={cn(sidebarSectionHeaderClass, 'flex-1')}
                             >
                               <span
-                                className="text-[12px] font-semibold tracking-wide"
+                                className="text-meta font-semibold tracking-wide"
                                 style={{ color: 'var(--flow-text-muted)' }}
                               >
                                 {t('flow.shell.team')}
@@ -909,7 +909,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               className={cn(sidebarSectionHeaderClass, 'flex-1')}
                             >
                               <span
-                                className="text-[12px] font-semibold tracking-wide"
+                                className="text-meta font-semibold tracking-wide"
                                 style={{ color: 'var(--flow-text-muted)' }}
                               >
                                 {t('flow.time.heading')}
@@ -982,7 +982,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               className={cn(sidebarSectionHeaderClass, 'flex-1 min-w-0')}
                             >
                               <span
-                                className="text-[12px] font-semibold tracking-wide truncate"
+                                className="text-meta font-semibold tracking-wide truncate"
                                 style={{ color: 'var(--flow-text-muted)' }}
                               >
                                 {t('nav.projects')}
@@ -1028,7 +1028,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                                   <React.Fragment key={project.id}>
                                     {startsReports && (
                                       <div
-                                        className="px-2 pb-px pt-2 text-[10px] font-semibold uppercase tracking-wider"
+                                        className="px-2 pb-px pt-2 text-meta font-semibold uppercase tracking-wider"
                                         style={{ color: 'var(--flow-text-muted)' }}
                                       >
                                         {t('flow.sidebar.yourReports')}
@@ -1037,7 +1037,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                                     <Link
                                       to={boardPath}
                                       className={cn(
-                                        'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
+                                        'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-meta transition-colors duration-150',
                                         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
                                       )}
                                       style={{
@@ -1067,7 +1067,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                                         {project.name}
                                       </span>
                                       <span
-                                        className="relative text-[10px]"
+                                        className="relative text-meta"
                                         style={{ color: 'var(--flow-text-dim)' }}
                                       >
                                         {(project.taskCount ?? 0) - (project.completedCount ?? 0)}
@@ -1116,14 +1116,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
-                    className="text-[12px] font-medium truncate w-full text-start"
+                    className="text-meta font-medium truncate w-full text-start"
                     style={{ color: 'var(--flow-text)' }}
                   >
                     {userName}
                   </span>
                   {userEmail && (
                     <span
-                      className="text-[10px] truncate w-full text-start"
+                      className="text-meta truncate w-full text-start"
                       style={{ color: 'var(--flow-text-muted)' }}
                     >
                       {userEmail}
@@ -1153,7 +1153,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   >
                     <div className="px-3 py-2">
                       <p
-                        className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
+                        className="text-meta font-semibold uppercase tracking-wider mb-1.5"
                         style={{ color: 'var(--flow-text-dim)' }}
                       >
                         {t('flow.shell.appearance')}
@@ -1171,7 +1171,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       to="/u/$userId"
                       params={{ userId: user?.id ?? '' }}
                       onClick={() => setUserMenuOpen(false)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-meta text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: 'var(--flow-text)' }}
                     >
                       <UserCircle size={13} />
@@ -1180,7 +1180,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     <Link
                       to="/leave"
                       onClick={() => setUserMenuOpen(false)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-meta text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: 'var(--flow-text)' }}
                     >
                       <CalendarOff size={13} />
@@ -1196,7 +1196,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-meta text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: '#ef4444' }}
                     >
                       <LogOut size={13} />
@@ -1239,7 +1239,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 exit={{ opacity: 0, scale: 0.96, y: 8 }}
                 transition={{ duration: 0.15 }}
               >
-                <p className="text-[14px] font-semibold mb-4" style={{ color: 'var(--flow-text)' }}>
+                <p
+                  className="text-section font-semibold mb-4"
+                  style={{ color: 'var(--flow-text)' }}
+                >
                   {t('flow.shell.newProject')}
                 </p>
                 <div className="flex flex-col gap-3">
@@ -1291,7 +1294,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         }
                         if (e.key === 'Escape') setNewProjectOpen(false);
                       }}
-                      className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none"
+                      className="flex-1 rounded-lg px-3 py-2 text-body outline-none"
                       style={{
                         background: 'var(--flow-input-bg)',
                         border: '1px solid var(--flow-border)',
@@ -1304,7 +1307,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     value={newProjectDescription}
                     onChange={(e) => setNewProjectDescription(e.target.value)}
                     rows={3}
-                    className="w-full rounded-lg px-3 py-2.5 text-[13px] outline-none resize-none placeholder:opacity-45"
+                    className="w-full rounded-lg px-3 py-2.5 text-body outline-none resize-none placeholder:opacity-45"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border)',
@@ -1314,7 +1317,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 </div>
                 {/* Visibility toggle */}
                 <div className="flex items-center justify-between mt-3">
-                  <label className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <label className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                     {t('flow.visibility.label')}
                   </label>
                   <div
@@ -1329,7 +1332,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         role="radio"
                         aria-checked={newProjectVisibility === vis}
                         onClick={() => setNewProjectVisibility(vis)}
-                        className="px-3 h-8 rounded-lg text-[11px] font-semibold transition-colors"
+                        className="px-3 h-8 rounded-lg text-meta font-semibold transition-colors"
                         style={{
                           background:
                             newProjectVisibility === vis ? 'var(--accent)' : 'var(--flow-input-bg)',
@@ -1344,7 +1347,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   </div>
                 </div>
                 {newProjectVisibility === 'public' && (
-                  <p className="mt-1.5 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  <p className="mt-1.5 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                     {t('flow.visibility.publicHint')}
                   </p>
                 )}
@@ -1358,7 +1361,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     <button
                       type="button"
                       onClick={() => setNewProjectOpen(false)}
-                      className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
+                      className="px-3 py-1.5 rounded-lg text-meta font-medium transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: 'var(--flow-text-muted)' }}
                     >
                       {t('common.cancel')}
@@ -1391,7 +1394,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           }
                         );
                       }}
-                      className="px-4 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="px-4 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
                       style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                     >
                       {createProject.isPending ? t('flow.shell.creating') : t('common.create')}
@@ -1409,7 +1412,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <TrialBanner />
             {inQuietHours && (
               <div
-                className="shrink-0 px-3 py-2 text-center text-[10px] sm:px-4 sm:text-[11px] leading-snug"
+                className="shrink-0 px-3 py-2 text-center text-meta sm:px-4 sm:text-meta leading-snug"
                 style={{
                   background: 'var(--flow-hover)',
                   color: 'var(--flow-text-muted)',

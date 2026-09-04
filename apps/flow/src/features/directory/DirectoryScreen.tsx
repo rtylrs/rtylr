@@ -56,7 +56,7 @@ const DirectoryScreen = (): React.JSX.Element => {
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('flow.directory.searchPlaceholder')}
             aria-label={t('flow.directory.searchPlaceholder')}
-            className="flow-focus min-h-[44px] w-full rounded-sm pl-9 pr-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+            className="flow-focus min-h-[44px] w-full rounded-sm pl-9 pr-2 text-title md:min-h-0 md:py-1.5 md:text-body"
             style={inputStyle}
           />
         </div>
@@ -110,15 +110,15 @@ const DirectoryScreen = (): React.JSX.Element => {
                 >
                   <Avatar initials={initials(fullName)} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <div className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                    <div className="text-body font-medium" style={{ color: 'var(--flow-text)' }}>
                       {fullName}
                     </div>
-                    <div className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                    <div className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
                       {[member.role, member.departmentName].filter(Boolean).join(' · ')}
                     </div>
                   </div>
                   <div
-                    className="hidden shrink-0 text-[11px] sm:block"
+                    className="hidden shrink-0 text-meta sm:block"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     {member.email}

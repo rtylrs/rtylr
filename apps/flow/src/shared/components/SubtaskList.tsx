@@ -32,7 +32,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
       {subtasks.length > 0 && (
         <>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.taskDetail.subtaskCount', { done: completed, total: subtasks.length })}
             </span>
             <div
@@ -44,7 +44,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                 style={{ width: `${pct}%`, background: 'var(--accent)' }}
               />
             </div>
-            <span className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+            <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
               {pct}%
             </span>
           </div>
@@ -67,7 +67,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                   {s.completed && <Check size={10} color="#0a0a0a" strokeWidth={3} />}
                 </span>
                 <span
-                  className="text-[12px] flex-1"
+                  className="text-meta flex-1"
                   style={{
                     color: s.completed ? 'var(--flow-text-dim)' : 'var(--flow-text)',
                     textDecoration: s.completed ? 'line-through' : undefined,
@@ -89,7 +89,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
           onKeyDown={(e) => e.key === 'Enter' && submit()}
           placeholder={t('flow.taskDetail.subtaskAddPlaceholder')}
           disabled={disabled}
-          className="flex-1 bg-transparent outline-none text-[12px] disabled:opacity-60"
+          className="flex-1 bg-transparent outline-none text-meta disabled:opacity-60"
           style={{ color: 'var(--flow-text)' }}
         />
       </div>

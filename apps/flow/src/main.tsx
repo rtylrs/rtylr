@@ -43,7 +43,7 @@ const BootLoader = (): React.JSX.Element => {
         background: '#0a0a0a',
         color: 'rgba(240,240,238,0.5)',
         fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-        fontSize: '14px',
+        fontSize: 'var(--text-section)',
       }}
     >
       {t('flow.shell.loadingApp')}

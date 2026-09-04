@@ -107,7 +107,7 @@ export const AllProjects: React.FC = () => {
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <header className="mb-6">
-          <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
+          <h1 className="text-screen font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.allProjects.title')}
           </h1>
 
@@ -212,7 +212,7 @@ export const AllProjects: React.FC = () => {
             {ownProjects.length > 0 && (
               <section className="mb-6">
                 <h2
-                  className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+                  className="mb-2 text-meta font-semibold uppercase tracking-wider"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('flow.allProjects.yourProjects')}
@@ -226,7 +226,7 @@ export const AllProjects: React.FC = () => {
             )}
             <section>
               <h2
-                className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+                className="mb-2 text-meta font-semibold uppercase tracking-wider"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {t('flow.allProjects.yourReports')}
