@@ -82,7 +82,7 @@ const Cycles: React.FC = () => {
             onClick={() => setShowCreate(true)}
             disabled={!selectedProjectId}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
-            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+            style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             <Plus size={11} /> {t('flow.cycles.newCycle')}
           </button>
@@ -161,7 +161,7 @@ const Cycles: React.FC = () => {
               }}
               disabled={createCycle.isPending || !newName.trim() || !newStart || !newEnd}
               className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-50"
-              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {createCycle.isPending ? t('flow.cycles.creating') : t('flow.cycles.create')}
             </button>

@@ -196,7 +196,7 @@ const Inbox: React.FC = () => {
             {id === 'unread' && unreadCount > 0 && (
               <span
                 className="ml-1.5 px-1.5 py-0.5 rounded-full text-meta font-bold"
-                style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+                style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
               >
                 {unreadCount}
               </span>

@@ -90,7 +90,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           onClick={handleSubmit}
           disabled={disabled || !value.trim()}
           className="flex items-center gap-1 px-2.5 py-1 rounded-sm text-meta font-semibold transition-opacity disabled:opacity-40"
-          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           <Send size={11} />
           {t('flow.taskDetail.comment')}
