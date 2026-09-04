@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { TaskRow, StatusGroup } from './ProjectList';
+import { TaskRow, StatusGroup, STATUS_GROUP_COLORS, groupIsVisible } from './ProjectList';
 import StatusIcon from '../../shared/components/StatusIcon';
 import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import type { Task } from '../../shared/stores/flowStore';
@@ -103,5 +103,52 @@ describe('Status label consistency (issue #756)', () => {
     const keys = listStatuses.map((status) => STATUS_LABEL_KEYS[status]);
 
     expect(new Set(keys).size).toBe(listStatuses.length);
+  });
+});
+
+describe('ProjectList status groups (#1049: a backlog task had no home)', () => {
+  const byId = (id: Task['status']) => STATUS_GROUP_COLORS.find((g) => g.id === id);
+
+  it('has a group for every value of the status enum', () => {
+    // The list offered four groups against a six-value enum, so a task in
+    // backlog or cancelled matched no group and rendered nowhere, while the
+    // board showed it in its first column.
+    expect(STATUS_GROUP_COLORS.map((g) => g.id)).toEqual([
+      'backlog',
+      'todo',
+      'in_progress',
+      'in_review',
+      'done',
+      'cancelled',
+    ]);
+  });
+
+  it('covers every status the label map knows about', () => {
+    // STATUS_LABEL_KEYS is the app's single source of status vocabulary, so
+    // any status it names has to be groupable here.
+    expect(STATUS_GROUP_COLORS.map((g) => g.id).sort()).toEqual(
+      Object.keys(STATUS_LABEL_KEYS).sort()
+    );
+  });
+
+  it('shows a backlog or cancelled group only once it holds something', () => {
+    expect(groupIsVisible(byId('backlog')!, 0)).toBe(false);
+    expect(groupIsVisible(byId('backlog')!, 1)).toBe(true);
+    expect(groupIsVisible(byId('cancelled')!, 0)).toBe(false);
+    expect(groupIsVisible(byId('cancelled')!, 3)).toBe(true);
+  });
+
+  it('keeps the four familiar groups on screen when they are empty', () => {
+    // A project that has neither backlog nor cancelled work must look exactly
+    // as it did before, four headers and no more.
+    for (const id of ['todo', 'in_progress', 'in_review', 'done'] as Task['status'][]) {
+      expect(groupIsVisible(byId(id)!, 0)).toBe(true);
+    }
+  });
+
+  it('puts backlog before todo and cancelled last', () => {
+    const order = STATUS_GROUP_COLORS.map((g) => g.id);
+    expect(order.indexOf('backlog')).toBeLessThan(order.indexOf('todo'));
+    expect(order.indexOf('cancelled')).toBe(order.length - 1);
   });
 });
