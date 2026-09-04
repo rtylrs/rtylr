@@ -499,7 +499,7 @@
     "notStarted": "Pas commencé",
     "noResults": "Personne à afficher pour l'instant.",
     "loadFailedTitle": "Impossible de charger qui est présent aujourd'hui",
-    "loadFailedDescription": "Cela peut arriver si votre rôle n'a pas la permission de le voir, ou si les données n'ont pas pu être atteintes. Demandez à un administrateur si vous pensez que c'est une erreur.",
+    "loadFailedDescription": "Réessayez. Si l'échec persiste, demandez à un administrateur si votre rôle peut voir les présences du jour.",
     "retryCta": "Réessayer",
     "refreshCta": "Actualiser"
   },
@@ -509,10 +509,11 @@
     "noResults": "Personne ne correspond à votre recherche.",
     "noMembersYet": "Personne dans l'annuaire pour l'instant.",
     "loadFailedTitle": "Impossible de charger l'annuaire",
-    "loadFailedDescription": "Cela peut arriver si votre rôle n'a pas la permission de le voir, ou si l'annuaire n'a pas pu être atteint. Demandez à un administrateur si vous pensez que c'est une erreur.",
+    "loadFailedDescription": "Réessayez. Si l'échec persiste, demandez à un administrateur si votre rôle peut voir l'annuaire.",
     "retryCta": "Réessayer",
     "clearSearchCta": "Effacer la recherche",
-    "refreshCta": "Actualiser"
+    "refreshCta": "Actualiser",
+    "noDepartment": "Sans département"
   },
   "leave": {
     "heading": "Congés",

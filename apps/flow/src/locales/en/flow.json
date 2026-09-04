@@ -495,7 +495,7 @@
     "notStarted": "Not started",
     "noResults": "No one to show yet.",
     "loadFailedTitle": "Couldn't load who's in today",
-    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or presence couldn't be reached. Ask an admin if you think this is wrong.",
+    "loadFailedDescription": "Try again. If it keeps failing, ask an admin whether your role can see who is in today.",
     "retryCta": "Retry",
     "refreshCta": "Refresh"
   },
@@ -505,10 +505,11 @@
     "noResults": "No one matches your search.",
     "noMembersYet": "No one in the directory yet.",
     "loadFailedTitle": "Couldn't load the directory",
-    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or the directory couldn't be reached. Ask an admin if you think this is wrong.",
+    "loadFailedDescription": "Try again. If it keeps failing, ask an admin whether your role can see the directory.",
     "retryCta": "Retry",
     "clearSearchCta": "Clear search",
-    "refreshCta": "Refresh"
+    "refreshCta": "Refresh",
+    "noDepartment": "No department"
   },
   "leave": {
     "heading": "Leave",

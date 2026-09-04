@@ -141,3 +141,58 @@ describe('DirectoryScreen', () => {
     expect(screen.queryByText('flow.directory.loadFailedTitle')).not.toBeInTheDocument();
   });
 });
+
+describe('DirectoryScreen groups by department (#1094)', () => {
+  it('renders a heading and a count for each department', () => {
+    directoryState.value = {
+      data: [
+        { id: '1', firstName: 'Ada', lastName: 'A', email: 'a@x.com', departmentName: 'Site' },
+        { id: '2', firstName: 'Bea', lastName: 'B', email: 'b@x.com', departmentName: 'Site' },
+        { id: '3', firstName: 'Cy', lastName: 'C', email: 'c@x.com', departmentName: 'Office' },
+      ],
+      isLoading: false,
+      isError: false,
+    } as never;
+    render(<DirectoryScreen />);
+
+    expect(screen.getByText('Office')).toBeInTheDocument();
+    expect(screen.getByText('Site')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+  });
+
+  it('names the group for people with no department', () => {
+    directoryState.value = {
+      data: [{ id: '1', firstName: 'Ada', lastName: 'A', email: 'a@x.com' }],
+      isLoading: false,
+      isError: false,
+    } as never;
+    render(<DirectoryScreen />);
+    expect(screen.getByText('flow.directory.noDepartment')).toBeInTheDocument();
+  });
+
+  it('does not repeat the department on every row', () => {
+    // The department is the heading now. It used to be appended to the role
+    // on each line, so a department of eight people printed its name eight
+    // times.
+    directoryState.value = {
+      data: [
+        {
+          id: '1',
+          firstName: 'Ada',
+          lastName: 'A',
+          email: 'a@x.com',
+          role: 'Foreman',
+          departmentName: 'Site',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    } as never;
+    render(<DirectoryScreen />);
+
+    expect(screen.getAllByText('Site')).toHaveLength(1);
+    expect(screen.getByText('Foreman')).toBeInTheDocument();
+    expect(screen.queryByText('Foreman · Site')).not.toBeInTheDocument();
+  });
+});
