@@ -856,7 +856,13 @@
     "transferDescription": "Transférez la propriété à tout membre de l'organisation. Vous resterez membre.",
     "transferCta": "Transférer",
     "transferConfirmHint": "La propriété sera transférée immédiatement. Cliquez sur Confirmer pour continuer.",
-    "transferring": "Transfert…"
+    "transferring": "Transfert…",
+    "tabs": {
+      "general": "Général",
+      "members": "Membres",
+      "integrations": "Intégrations",
+      "danger": "Zone sensible"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",

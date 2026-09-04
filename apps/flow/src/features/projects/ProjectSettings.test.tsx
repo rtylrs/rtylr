@@ -111,7 +111,7 @@ describe('ProjectSettings integrations tab', () => {
 
   it('shows a translated reason on each disabled Connect button instead of a silent disabled control', () => {
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Integrations' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.integrations' }));
 
     const comingSoonButtons = screen.getAllByRole('button', { name: 'common.comingSoon' });
 
@@ -238,7 +238,7 @@ describe('ProjectSettings role gating (#793)', () => {
   it('disables the member role select and remove button for a non-admin, and hides Add', () => {
     canManageProjectMock.mockReturnValue(false);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     expect(
       screen.getByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' })
@@ -252,7 +252,7 @@ describe('ProjectSettings role gating (#793)', () => {
   it('a non-admin cannot fire a role change even if the disabled select is programmatically changed', () => {
     canManageProjectMock.mockReturnValue(false);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     fireEvent.change(
       screen.getByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' }),
@@ -267,7 +267,7 @@ describe('ProjectSettings role gating (#793)', () => {
   it('leaves the member role select and remove button enabled for a project admin', () => {
     canManageProjectMock.mockReturnValue(true);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     expect(
       screen.getByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' })
@@ -281,7 +281,7 @@ describe('ProjectSettings role gating (#793)', () => {
   it('a project admin can change a member role', () => {
     canManageProjectMock.mockReturnValue(true);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     fireEvent.change(
       screen.getByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' }),
@@ -299,7 +299,7 @@ describe('ProjectSettings role gating (#793)', () => {
   it('disables Archive for a non-admin so the type-to-confirm dialog can never open', () => {
     canManageProjectMock.mockReturnValue(false);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Danger Zone' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.danger' }));
 
     const deleteButton = screen.getByRole('button', { name: 'flow.projectSettings.archiveAction' });
     expect(deleteButton).toBeDisabled();
@@ -312,7 +312,7 @@ describe('ProjectSettings role gating (#793)', () => {
   it('lets a project admin open the archive confirmation dialog', () => {
     canManageProjectMock.mockReturnValue(true);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Danger Zone' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.danger' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.archiveAction' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -321,7 +321,7 @@ describe('ProjectSettings role gating (#793)', () => {
   it('disables the transfer-ownership control for a non-admin', () => {
     canManageProjectMock.mockReturnValue(false);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     expect(screen.getByRole('button', { name: 'flow.projectSettings.transferCta' })).toBeDisabled();
   });
@@ -337,7 +337,7 @@ describe('ProjectSettings members empty state', () => {
   it('offers Add member as the CTA for a project admin', () => {
     canManageProjectMock.mockReturnValue(true);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     expect(screen.getByText('flow.projectSettings.noMembersYet')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'flow.projectSettings.addMemberCta' })).toBeEnabled();
@@ -346,7 +346,7 @@ describe('ProjectSettings members empty state', () => {
   it('offers Refresh instead for a non-admin', () => {
     canManageProjectMock.mockReturnValue(false);
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     expect(
       screen.queryByRole('button', { name: 'flow.projectSettings.addMemberCta' })
@@ -386,7 +386,7 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
 
   it('does not show a call-site toast when removing a member fails - the hook already shows one', () => {
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' }));
 
     const [, options] = removeMemberMutate.mock.calls[0];
@@ -397,7 +397,7 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
 
   it('does not show a call-site toast when updating a member role fails - the hook already shows one', () => {
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
     fireEvent.change(
       screen.getByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' }),
       { target: { value: 'admin' } }
@@ -411,7 +411,7 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
 
   it('does not show a call-site toast when transferring ownership fails, but still resets the confirm state', () => {
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
 
     fireEvent.change(document.getElementById('transfer-select')!, {
       target: { value: '20' },
@@ -431,7 +431,7 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
 
   it('does not show a call-site toast when deleting a project fails - the hook already shows one', () => {
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Danger Zone' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.danger' }));
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.archiveAction' }));
     fireEvent.change(screen.getByPlaceholderText('Demo project'), {
       target: { value: 'Demo project' },
