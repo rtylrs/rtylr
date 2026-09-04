@@ -6,5 +6,6 @@
   "emptyDescription": "Archived tasks will show up here.",
   "emptyCta": "Go to My Tasks",
   "restore": "Restore",
-  "restoreTitle": "Restore task"
+  "restoreTitle": "Restore task",
+  "explanation": "Archived tasks are hidden from lists and boards. They are not deleted, and can be restored at any time."
 }
