@@ -22,16 +22,7 @@ import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
 import { useStatusLabels } from '../../shared/hooks/useStatusLabels';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
-
-// labelKey, not label: this is module scope, so it is built before any hook
-// can run. The priority names already exist as translated copy.
-const PRIORITY_ICONS: Record<string, { color: string; labelKey: string }> = {
-  urgent: { color: 'var(--flow-danger-fg)', labelKey: 'priority.urgent' },
-  high: { color: '#f97316', labelKey: 'priority.high' },
-  medium: { color: '#3b82f6', labelKey: 'priority.medium' },
-  low: { color: '#6b7280', labelKey: 'priority.low' },
-  no_priority: { color: '#4b5563', labelKey: 'priority.noPriority' },
-};
+import PriorityIcon from '../../shared/components/PriorityIcon';
 
 interface StatusGroupDef {
   id: Task['status'];
@@ -129,12 +120,14 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
         {checked && <Check size={10} strokeWidth={3} color="#0a0a0a" />}
       </button>
 
-      {/* Priority dot */}
-      <span
-        className="h-2 w-2 rounded-full shrink-0"
-        style={{ background: PRIORITY_ICONS[task.priority].color }}
-        title={t(PRIORITY_ICONS[task.priority].labelKey)}
-      />
+      {/* The same glyph the board uses for the same task. This was a 6px
+          filled circle, identical in shape and size at every priority, so the
+          only signal was the tint: WCAG 1.4.1, and the two views of one
+          project encoded priority differently. PriorityIcon carries the shape,
+          the tint and an aria-label. */}
+      <span className="shrink-0">
+        <PriorityIcon priority={task.priority} size={12} />
+      </span>
 
       {/* Title */}
       <span
