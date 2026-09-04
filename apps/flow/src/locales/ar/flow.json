@@ -919,5 +919,9 @@
     "deleteTitle": "حذف المهمة",
     "deleteConfirmPrefix": "هل تريد حذف",
     "deleteConfirmSuffix": "؟ لا يمكن التراجع عن هذا الإجراء."
+  },
+  "confirm": {
+    "typeToConfirm": "للتأكيد، اكتب {{word}} أدناه",
+    "working": "جارٍ التنفيذ…"
   }
 }
