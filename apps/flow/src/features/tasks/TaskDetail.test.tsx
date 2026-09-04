@@ -47,9 +47,10 @@ vi.mock('./useTask', () => ({
 }));
 
 const updateTaskMutate = vi.hoisted(() => vi.fn());
+const deleteTaskMutate = vi.hoisted(() => vi.fn());
 vi.mock('./useTasks', () => ({
   useUpdateTask: () => ({ mutate: updateTaskMutate, isPending: false }),
-  useDeleteTask: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteTask: () => ({ mutate: deleteTaskMutate, isPending: false }),
   useAddComment: () => ({ mutate: vi.fn(), isPending: false }),
   useAddSubtask: () => ({ mutate: vi.fn(), isPending: false }),
   useToggleSubtask: () => ({ mutate: vi.fn(), isPending: false }),
@@ -107,6 +108,27 @@ vi.mock('../../shared/components/LabelChip', () => ({
   default: ({ label }: { label: { name: string } }) => <span>{label.name}</span>,
 }));
 vi.mock('../../shared/components/DueDatePicker', () => ({ default: () => null }));
+// Kept about whether deletion requires a confirmation, not about the dialog's
+// own markup, which ConfirmDialog's own usage sites already exercise.
+vi.mock('../../shared/components/ConfirmDialog', () => ({
+  default: ({
+    open,
+    onConfirm,
+    description,
+  }: {
+    open: boolean;
+    onConfirm: () => void;
+    description: React.ReactNode;
+  }) =>
+    open ? (
+      <div role="dialog">
+        <div>{description}</div>
+        <button type="button" onClick={onConfirm}>
+          confirm-delete
+        </button>
+      </div>
+    ) : null,
+}));
 
 import TaskDetail from './TaskDetail';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -434,5 +456,46 @@ describe('TaskDetail completion toast (#1040)', () => {
 
     expect(updateTaskMutate.mock.calls[0][1]).toBeUndefined();
     expect(toast.success).not.toHaveBeenCalled();
+  });
+});
+
+describe('TaskDetail deletion confirmation (#1056)', () => {
+  const renderWithTask = (): void => {
+    taskDetailData.data = {
+      task: apiTask({ title: 'SENTINEL PROBE' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+    renderTaskDetail();
+  };
+
+  const deleteButton = (): HTMLElement =>
+    screen.getByRole('button', { name: 'flow.taskDetail.delete' });
+
+  it('does not delete on the first click', () => {
+    renderWithTask();
+
+    fireEvent.click(deleteButton());
+
+    expect(deleteTaskMutate).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('names the task being deleted', () => {
+    renderWithTask();
+
+    fireEvent.click(deleteButton());
+
+    expect(screen.getByText('SENTINEL PROBE')).toBeInTheDocument();
+  });
+
+  it('deletes once confirmed', () => {
+    renderWithTask();
+
+    fireEvent.click(deleteButton());
+    fireEvent.click(screen.getByRole('button', { name: 'confirm-delete' }));
+
+    expect(deleteTaskMutate).toHaveBeenCalledWith('t-1', expect.any(Object));
   });
 });
