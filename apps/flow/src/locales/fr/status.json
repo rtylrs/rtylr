@@ -2,5 +2,7 @@
   "todo": "À faire",
   "inProgress": "En cours",
   "done": "Terminé",
-  "cancelled": "Annulé"
+  "cancelled": "Annulé",
+  "backlog": "Backlog",
+  "inReview": "En revue"
 }

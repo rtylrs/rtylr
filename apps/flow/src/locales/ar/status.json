@@ -2,5 +2,7 @@
   "todo": "للتنفيذ",
   "inProgress": "قيد التنفيذ",
   "done": "مكتمل",
-  "cancelled": "ملغى"
+  "cancelled": "ملغى",
+  "backlog": "قائمة الانتظار",
+  "inReview": "قيد المراجعة"
 }
