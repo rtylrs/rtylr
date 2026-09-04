@@ -11,6 +11,7 @@ import {
 import { ErrorBoundary } from '@voxire/ui';
 import { Spinner } from '@voxire/components';
 import { BusinessRoute } from './shared/utils/BusinessRoute';
+import { isAdminOrOwner } from './shared/utils/requireAdminOrOwner';
 import { useUserStore } from './shared/stores/userStore';
 import AppLayout from './layouts/AppLayout';
 import SettingsLayout from './features/settings/Settings/components/SettingsLayout';
@@ -70,8 +71,9 @@ const wrap = (children: React.ReactNode) => (
 
 const requireAdminOrOwner = () => {
   const user = useUserStore.getState().user;
-  const role = user?.role;
-  if (role && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'owner') {
+  // Deny by default (including unhydrated users) and let BusinessRoute drive
+  // the auth/onboarding redirect. Previously a null user passed the guard.
+  if (!isAdminOrOwner(user)) {
     throw redirect({ to: '/' });
   }
 };
