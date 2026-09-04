@@ -107,7 +107,10 @@ export const useMenuStore = create<MenuState & MenuActions>()(
       editCategory: (id, updates) =>
         set((state) => ({
           items: state.items.map((item) =>
-            isCategory(item) && item.id === id ? { ...item, ...updates } : item
+            isCategory(item) &&
+            (item._id === id || (item as any).id === id || (item as any).itemId === id)
+              ? { ...item, ...updates }
+              : item
           ),
         })),
 
