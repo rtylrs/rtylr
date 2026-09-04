@@ -47,6 +47,9 @@ jobs:
       - name: Run direct authorization evidence
         run: make direct-authorization-evidence
 
+      - name: Run role access rollback check
+        run: make role-access-control-v2-rollback-check
+
       - name: Tear down MySQL
         if: always()
         run: docker compose -p onion-env -f local-env/docker-compose.yml down --volumes
