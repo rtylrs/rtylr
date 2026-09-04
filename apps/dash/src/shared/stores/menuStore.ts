@@ -86,6 +86,11 @@ function matchesCategoryId(item: Category, id: string): boolean {
   return item._id === id || item.id === id || item.itemId === id;
 }
 
+/** MenuItem identity covers the canonical `_id` plus the legacy alias. */
+function matchesMenuItemId(item: MenuItem, id: string): boolean {
+  return item._id === id || item.itemId === id;
+}
+
 const initialState: MenuState = {
   id: null,
   items: [],
@@ -139,21 +144,42 @@ export const useMenuStore = create<MenuState & MenuActions>()(
         })),
 
       addMenuItem: async (categoryId, item) => {
+        const name = typeof item.name === 'string' && item.name ? item.name : 'New Product';
+        const description = typeof item.description === 'string' ? item.description : '';
+        const rawPrice: unknown = item.price;
         const id = String(Date.now());
         const newItem: MenuItem = {
           _id: id,
           itemId: id,
           type: 'item',
-          name: (item.name as string) ?? 'New Product',
+          name,
           details: {
-            name: (item.name as string) ?? '',
-            description: (item.description as string) ?? '',
-            price: item.price ? Number(item.price) : 0,
+            name,
+            description,
+            price: typeof rawPrice === 'number' ? rawPrice : 0,
             isActive: item.isAvailable !== false,
           },
           ...item,
         };
-        set((state) => ({ items: [...state.items, newItem] }));
+        set((state) => {
+          const idx = state.items.findIndex(
+            (entry) => isCategory(entry) && matchesCategoryId(entry, categoryId)
+          );
+          if (idx === -1) return { items: [...state.items, newItem] };
+          const current = state.items[idx];
+          if (!isCategory(current)) return { items: [...state.items, newItem] };
+          const updated: Category = {
+            ...current,
+            details: {
+              ...(current.details ?? {}),
+              menuItems: [...(current.details?.menuItems ?? []), newItem],
+            },
+            menuItems: [...current.menuItems, newItem],
+          };
+          const items = [...state.items];
+          items[idx] = updated;
+          return { items };
+        });
       },
 
       updateMenuItem: (id, updates) =>
@@ -192,9 +218,20 @@ export const useMenuStore = create<MenuState & MenuActions>()(
 
       deleteMenuItem: (id) =>
         set((state) => ({
-          items: state.items.filter(
-            (item) => item._id !== id && (!isMenuItem(item) || item.itemId !== id)
-          ),
+          items: state.items
+            .filter((item) => item._id !== id && (!isMenuItem(item) || item.itemId !== id))
+            .map((item) => {
+              if (!isCategory(item)) return item;
+              const prunedLegacy = item.menuItems.filter((sub) => !matchesMenuItemId(sub, id));
+              const nested = item.details?.menuItems;
+              const prunedNested = nested?.filter((sub) => !matchesMenuItemId(sub, id));
+              if (!prunedNested && prunedLegacy.length === item.menuItems.length) return item;
+              const next: Category = { ...item, menuItems: prunedLegacy };
+              if (prunedNested) {
+                next.details = { ...(item.details ?? {}), menuItems: prunedNested };
+              }
+              return next;
+            }),
         })),
     }),
     {
