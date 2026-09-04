@@ -603,7 +603,16 @@
     },
     "moveTask": "Déplacer {{title}} vers une autre colonne",
     "moveTaskMenu": "Déplacer vers une colonne",
-    "moveNoTargets": "Ce tableau n'a pas encore d'autre colonne."
+    "moveNoTargets": "Ce tableau n'a pas encore d'autre colonne.",
+    "dueLane": {
+      "overdue": "En retard",
+      "today": "Aujourd'hui",
+      "thisWeek": "Cette semaine",
+      "thisMonth": "Ce mois",
+      "later": "Plus tard",
+      "noDueDate": "Sans échéance"
+    },
+    "groupByLabel": "Grouper :"
   },
   "views": {
     "heading": "Vues enregistrées",
@@ -755,14 +764,22 @@
   },
   "projectList": {
     "pageTitle": "Liste · rtylr",
-    "toggleDoneLabel": "Marquer comme terminé"
+    "toggleDoneLabel": "Marquer comme terminé",
+    "columnTitle": "Titre",
+    "moreOptions": "Plus d'options"
   },
   "projectOverview": {
     "pageTitle": "Aperçu · rtylr",
     "noMilestones": "Aucun jalon défini.",
     "goToMilestonesCta": "Aller aux jalons",
     "noComments": "Aucun commentaire récent.",
-    "goToBoardCta": "Aller au tableau"
+    "goToBoardCta": "Aller au tableau",
+    "health": {
+      "onTrack": "Dans les délais",
+      "offTrack": "Hors délais"
+    },
+    "recentComments": "Commentaires récents",
+    "total": "Total"
   },
   "projectTimeline": {
     "pageTitle": "Chronologie · rtylr",
@@ -805,7 +822,17 @@
     "visibilityPersonalGate": "Votre projet Mes tâches est toujours privé.",
     "archiveNotice": "L'archivage déplace le projet vers la corbeille. Il reste restaurable jusqu'à l'expiration de la rétention.",
     "archiveAction": "Archiver",
-    "archiveConfirm": "Archiver le projet"
+    "archiveConfirm": "Archiver le projet",
+    "deleteDialogTitle": "Supprimer le projet",
+    "deleteDialogPrefix": "Cette action archive définitivement",
+    "deleteDialogSuffix": " et toutes ses tâches. Pour confirmer, saisissez à nouveau le nom du projet ci-dessous.",
+    "deleteHeading": "Supprimer ce projet",
+    "selectNewOwner": "Sélectionner un nouveau propriétaire…",
+    "transferHeading": "Transférer la propriété",
+    "transferDescription": "Transférez la propriété à tout membre de l'organisation. Vous resterez membre.",
+    "transferCta": "Transférer",
+    "transferConfirmHint": "La propriété sera transférée immédiatement. Cliquez sur Confirmer pour continuer.",
+    "transferring": "Transfert…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",
@@ -895,5 +922,23 @@
   "confirm": {
     "typeToConfirm": "Pour confirmer, saisissez {{word}} ci-dessous",
     "working": "En cours…"
+  },
+  "project": {
+    "loading": "Chargement du projet…",
+    "notFound": "Projet introuvable."
+  },
+  "projectViewTabs": {
+    "overview": "Aperçu",
+    "board": "Tableau",
+    "list": "Liste"
+  },
+  "trialBanner": {
+    "endsToday": "Votre essai se termine aujourd'hui.",
+    "endsIn_one": "Votre essai se termine dans {{count}} jour.",
+    "endsIn_many": "Votre essai se termine dans {{count}} jours.",
+    "endsIn_other": "Votre essai se termine dans {{count}} jours.",
+    "addPayment": "Ajoutez un moyen de paiement pour conserver vos données.",
+    "activate": "Activer l'offre",
+    "dismiss": "Fermer"
   }
 }
