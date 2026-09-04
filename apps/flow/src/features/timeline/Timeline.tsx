@@ -140,7 +140,7 @@ const Timeline: React.FC = () => {
                         <div
                           className="absolute -translate-x-1/2 -top-0.5 h-6 w-6 flex items-center justify-center rotate-45"
                           style={{
-                            background: 'var(--flow-warning, #f59e0b)',
+                            background: 'var(--flow-warn-fg)',
                             borderRadius: 3,
                           }}
                         />

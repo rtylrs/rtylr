@@ -162,7 +162,7 @@ export const TaskContextMenu: React.FC<{
           tabIndex={activeIndex === 2 ? 0 : -1}
           style={{
             ...itemStyle,
-            color: canRemove ? '#ef4444' : 'var(--flow-text-dim)',
+            color: canRemove ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)',
             cursor: canRemove ? 'pointer' : 'not-allowed',
           }}
           // aria-disabled rather than disabled: a disabled button leaves the tab
@@ -183,7 +183,10 @@ export const TaskContextMenu: React.FC<{
         >
           <Trash2
             size={12}
-            style={{ color: canRemove ? '#ef4444' : 'var(--flow-text-dim)', flexShrink: 0 }}
+            style={{
+              color: canRemove ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)',
+              flexShrink: 0,
+            }}
           />
           {t('common.delete')}
         </button>

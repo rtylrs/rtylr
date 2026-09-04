@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { apiProjectToProject, apiWorkspaceToWorkspace } from './projectMapper';
+import { ACCENT_DEFAULT } from './colorUtils';
 import type { ApiProject, ApiWorkspace } from '../services/flowApi';
 
 function baseProject(overrides: Partial<ApiProject> = {}): ApiProject {
@@ -29,10 +30,12 @@ describe('apiProjectToProject', () => {
 
   it('falls back to the flow accent when color is missing', () => {
     // Without a color the sidebar dots and project chips render
-    // invisible against a white background. Fallback is the house
-    // teal that every default project has shipped with historically.
+    // invisible against a white background. The fallback is ACCENT_DEFAULT,
+    // asserted through the constant rather than a copy of its value: a
+    // project's colour is persisted, so it has to be a real hex, and
+    // normalizeHex makes the lowercase form the canonical one.
     const out = apiProjectToProject(baseProject({ color: '' }));
-    expect(out.color).toBe('#64C5B9');
+    expect(out.color).toBe(ACCENT_DEFAULT);
   });
 
   it('computes progress percentage from task counts', () => {
@@ -132,7 +135,7 @@ describe('apiWorkspaceToWorkspace', () => {
       name: 'Personal',
       color: '',
     } as ApiWorkspace);
-    expect(out.color).toBe('#64C5B9');
+    expect(out.color).toBe(ACCENT_DEFAULT);
   });
 
   it('preserves explicit colors', () => {

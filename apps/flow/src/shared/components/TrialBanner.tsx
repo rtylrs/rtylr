@@ -32,12 +32,15 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       className="flex items-center gap-3 px-4 py-2.5 text-sm shrink-0"
       role="alert"
       style={{
-        background: 'rgba(245,158,11,0.12)',
-        borderBottom: '1px solid rgba(245,158,11,0.25)',
+        // The pending chip family, which is Flow's amber notice tone and is
+        // contrast-checked per mode. The literals here were the same amber by
+        // eye but did not change with the theme.
+        background: 'var(--flow-status-pending-bg)',
+        borderBottom: '1px solid var(--flow-status-pending-border)',
       }}
     >
-      <Clock size={14} style={{ color: 'var(--flow-warning, #f59e0b)', flexShrink: 0 }} />
-      <p className="flex-1 font-medium" style={{ color: 'var(--flow-warning-dark, #92400e)' }}>
+      <Clock size={14} style={{ color: 'var(--flow-warn-fg)', flexShrink: 0 }} />
+      <p className="flex-1 font-medium" style={{ color: 'var(--flow-status-pending)' }}>
         {/*
           The day count goes through i18next rather than a `days !== 1 ? 's'`
           suffix, which only ever worked for English.
@@ -50,7 +53,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       <a
         href={`${resolveAppUrl('dash')}/settings/billing`}
         className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0"
-        style={{ background: 'var(--flow-warning, #f59e0b)', color: '#fff' }}
+        style={{ background: 'var(--flow-warn-fg)', color: '#fff' }}
       >
         <Zap size={11} />
         {t('flow.trialBanner.activate')}
@@ -60,7 +63,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         aria-label={t('flow.trialBanner.dismiss')}
         onClick={dismiss}
         className="h-6 w-6 flex items-center justify-center rounded-sm shrink-0 hover:bg-amber-100 transition-colors"
-        style={{ color: 'var(--flow-warning-dark, #92400e)' }}
+        style={{ color: 'var(--flow-status-pending)' }}
       >
         <X size={12} />
       </button>

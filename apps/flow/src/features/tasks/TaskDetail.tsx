@@ -426,7 +426,7 @@ const TaskDetail: React.FC = () => {
               type="button"
               onClick={() => setConfirmingDelete(true)}
               className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
-              style={{ color: '#ef4444' }}
+              style={{ color: 'var(--flow-danger-fg)' }}
               title={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
               aria-label={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
               disabled={deleteTaskMut.isPending || !canRemove}
@@ -524,7 +524,8 @@ const TaskDetail: React.FC = () => {
                   className="px-3 py-2 text-meta font-medium capitalize"
                   style={{
                     color: tab === tabName ? 'var(--flow-text)' : 'var(--flow-text-muted)',
-                    borderBottom: tab === tabName ? '2px solid #64C5B9' : '2px solid transparent',
+                    borderBottom:
+                      tab === tabName ? '2px solid var(--accent)' : '2px solid transparent',
                   }}
                 >
                   {tabName === 'comments'
@@ -695,7 +696,7 @@ const TaskDetail: React.FC = () => {
               margin: '-6px 0 8px',
               padding: '6px 10px',
               borderRadius: 8,
-              background: 'var(--flow-warning-bg, rgba(234, 179, 8, 0.12))',
+              background: 'var(--flow-status-pending-bg)',
               color: 'var(--flow-text)',
               fontSize: 'var(--text-meta)',
             }}

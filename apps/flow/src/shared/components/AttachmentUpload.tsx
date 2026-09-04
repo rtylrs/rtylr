@@ -100,7 +100,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
         {uploading ? 'Uploading...' : 'Add attachment'}
       </button>
       {error && (
-        <p className="mt-1 text-meta" style={{ color: 'var(--flow-error, #ef4444)' }}>
+        <p className="mt-1 text-meta" style={{ color: 'var(--flow-danger-fg)' }}>
           {error}
         </p>
       )}

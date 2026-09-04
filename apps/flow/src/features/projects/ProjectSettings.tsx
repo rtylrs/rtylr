@@ -388,7 +388,8 @@ const ProjectSettings: React.FC = () => {
                         className="h-6 w-6 rounded-sm flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ color: 'var(--flow-text-dim)' }}
                         onMouseEnter={(e) => {
-                          if (canManageProject) e.currentTarget.style.color = '#ef4444';
+                          if (canManageProject)
+                            e.currentTarget.style.color = 'var(--flow-danger-fg)';
                         }}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
                         title={t('flow.projectSettings.removeMemberLabel')}
@@ -567,9 +568,9 @@ const ProjectSettings: React.FC = () => {
                 border: '1px solid rgba(239,68,68,0.25)',
               }}
             >
-              <Trash2 size={14} style={{ color: '#ef4444' }} className="mt-0.5" />
+              <Trash2 size={14} style={{ color: 'var(--flow-danger-fg)' }} className="mt-0.5" />
               <div className="flex-1">
-                <p className="text-meta font-semibold" style={{ color: '#ef4444' }}>
+                <p className="text-meta font-semibold" style={{ color: 'var(--flow-danger-fg)' }}>
                   {t('flow.projectSettings.deleteHeading')}
                 </p>
                 <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
@@ -607,7 +608,7 @@ const ProjectSettings: React.FC = () => {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="text-section font-semibold flex items-center gap-2">
-                <Trash2 size={14} style={{ color: '#ef4444' }} />
+                <Trash2 size={14} style={{ color: 'var(--flow-danger-fg)' }} />
                 {t('flow.projectSettings.deleteDialogTitle')}
               </DialogTitle>
               <DialogDescription className="text-meta">

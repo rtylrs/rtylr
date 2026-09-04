@@ -1,4 +1,5 @@
 import React from 'react';
+import { ACCENT_DEFAULT } from '../lib/colorUtils';
 
 interface AssigneeAvatarProps {
   name: string;
@@ -12,7 +13,7 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
   name,
   initials,
   size = 22,
-  color = '#64C5B9',
+  color = ACCENT_DEFAULT,
   stacked = false,
 }) => {
   return (

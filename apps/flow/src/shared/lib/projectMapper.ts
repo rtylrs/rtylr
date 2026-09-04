@@ -1,5 +1,6 @@
 import type { Project, Workspace } from '../stores/flowStore';
 import type { ApiProject, ApiWorkspace } from '../services/flowApi';
+import { ACCENT_DEFAULT } from './colorUtils';
 
 /**
  * The wire contract sends numeric IDs (`id: number`), but the Zustand
@@ -17,7 +18,7 @@ export function apiProjectToProject(p: ApiProject): Project {
   return {
     id: String(p.id),
     name: p.name,
-    color: p.color || '#64C5B9',
+    color: p.color || ACCENT_DEFAULT,
     description: p.description,
     status: p.status,
     taskCount,
@@ -37,6 +38,6 @@ export function apiWorkspaceToWorkspace(w: ApiWorkspace): Workspace {
   return {
     id: String(w.id),
     name: w.name,
-    color: w.color || '#64C5B9',
+    color: w.color || ACCENT_DEFAULT,
   };
 }

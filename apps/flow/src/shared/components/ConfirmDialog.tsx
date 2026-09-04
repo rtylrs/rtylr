@@ -57,7 +57,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-section font-semibold flex items-center gap-2">
-            <AlertTriangle size={14} style={{ color: '#ef4444' }} />
+            <AlertTriangle size={14} style={{ color: 'var(--flow-danger-fg)' }} />
             {title}
           </DialogTitle>
           <DialogDescription className="text-meta">{description}</DialogDescription>

@@ -98,8 +98,8 @@ const Insights: React.FC = () => {
               <svg width="100%" height="100%" viewBox="0 0 400 160" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="bgrad" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0" stopColor="#64C5B9" stopOpacity="0.3" />
-                    <stop offset="1" stopColor="#64C5B9" stopOpacity="0" />
+                    <stop offset="0" stopColor="var(--accent)" stopOpacity="0.3" />
+                    <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 {(() => {
@@ -127,7 +127,7 @@ const Insights: React.FC = () => {
                       <polyline
                         points={pts.join(' ')}
                         fill="none"
-                        stroke="#64C5B9"
+                        stroke="var(--accent)"
                         strokeWidth="2"
                       />
                     </>
@@ -177,7 +177,7 @@ const Insights: React.FC = () => {
                       animate={{ width: `${v.completionRate}%` }}
                       transition={{ duration: 0.5 }}
                       className="h-full"
-                      style={{ background: '#64C5B9' }}
+                      style={{ background: 'var(--accent)' }}
                     />
                   </div>
                 </div>

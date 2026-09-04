@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ListTodo } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
-import { useFlowStore } from '../../shared/stores/flowStore';
+import { STATUS_COLORS, useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
@@ -101,16 +101,16 @@ const ProjectDashboard: React.FC = () => {
           <StatTile
             label="Done"
             value={stats.done}
-            tint="var(--flow-success, #10b981)"
+            tint="var(--flow-status-approved)"
             hint={`${progress}% complete`}
           />
-          <StatTile label="In progress" value={stats.inProgress} tint="var(--flow-info, #3b82f6)" />
-          <StatTile label="Overdue" value={stats.overdue} tint="var(--flow-danger, #ef4444)" />
+          <StatTile label="In progress" value={stats.inProgress} tint={STATUS_COLORS.in_progress} />
+          <StatTile label="Overdue" value={stats.overdue} tint="var(--flow-danger-fg)" />
           {labourCost && Number(labourCost.costMinorUnits ?? 0) > 0 && (
             <StatTile
               label="Labour cost"
               value={Number(labourCost.costMinorUnits ?? 0) / 100}
-              tint="var(--flow-info, #3b82f6)"
+              tint={STATUS_COLORS.in_progress}
               hint={
                 Number(labourCost.uncostedMinutes ?? 0) > 0
                   ? t('flow.projectDashboard.partialCost')
@@ -141,11 +141,11 @@ const ProjectDashboard: React.FC = () => {
               >
                 {(
                   [
-                    ['done', 'var(--flow-success, #10b981)'],
-                    ['in_progress', 'var(--flow-info, #3b82f6)'],
+                    ['done', 'var(--flow-status-approved)'],
+                    ['in_progress', STATUS_COLORS.in_progress],
                     ['in_review', '#a855f7'],
                     ['todo', 'var(--flow-text-dim)'],
-                    ['cancelled', 'var(--flow-danger, #ef4444)'],
+                    ['cancelled', 'var(--flow-danger-fg)'],
                     ['backlog', 'var(--flow-border)'],
                   ] as const
                 ).map(([status, color]) => {
@@ -166,11 +166,11 @@ const ProjectDashboard: React.FC = () => {
               <div className="flex flex-wrap gap-3 mt-3 text-meta">
                 {(
                   [
-                    ['done', 'var(--flow-success, #10b981)', 'Done'],
-                    ['in_progress', 'var(--flow-info, #3b82f6)', 'In progress'],
+                    ['done', 'var(--flow-status-approved)', 'Done'],
+                    ['in_progress', STATUS_COLORS.in_progress, 'In progress'],
                     ['in_review', '#a855f7', 'In review'],
                     ['todo', 'var(--flow-text-dim)', 'To do'],
-                    ['cancelled', 'var(--flow-danger, #ef4444)', 'Cancelled'],
+                    ['cancelled', 'var(--flow-danger-fg)', 'Cancelled'],
                     ['backlog', 'var(--flow-border)', 'Backlog'],
                   ] as const
                 ).map(([status, color, label]) => (

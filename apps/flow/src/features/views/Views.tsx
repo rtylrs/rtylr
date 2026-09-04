@@ -240,7 +240,9 @@ const Views: React.FC = () => {
                         style={{ color: 'var(--flow-text-dim)' }}
                         title={t('flow.views.deleteTooltip')}
                         aria-label={t('flow.views.deleteLabel')}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.color = 'var(--flow-danger-fg)')
+                        }
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
                       >
                         <Trash2 size={9} />
