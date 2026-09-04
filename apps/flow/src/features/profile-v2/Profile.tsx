@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Globe, ChevronLeft } from 'lucide-react';
+import { ChevronLeft, UserX } from 'lucide-react';
 import { profileClient } from '../../shared/lib/clients';
 
 interface ProfileProject {
@@ -50,9 +50,20 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
 
   if (isError || !data) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="text-sm font-medium" style={{ color: 'var(--flow-text)' }}>
+      // The S-24 shell rather than a bare sentence: a 44px glyph, a heading
+      // and one line, sized to its content.
+      <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+        <div
+          className="mb-4 flex h-11 w-11 items-center justify-center rounded-full"
+          style={{ background: 'var(--flow-hover)' }}
+        >
+          <UserX size={20} style={{ color: 'var(--flow-text-muted)' }} aria-hidden />
+        </div>
+        <h1 className="text-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('flow.profile.notFound')}
+        </h1>
+        <p className="mt-1.5 max-w-[44ch] text-body" style={{ color: 'var(--flow-text-muted)' }}>
+          {t('flow.profile.notFoundHint')}
         </p>
       </div>
     );
@@ -73,20 +84,22 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
         </button>
 
         {/* Identity header */}
-        <div className="flex items-center gap-3 mb-6">
+        {/* S-23: avatar 64px, name 20px/600, role 13px muted. The contract
+            carries no department field, so only the role can be shown. */}
+        <div className="mb-6 flex items-center gap-4">
           <div
-            className="h-14 w-14 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
-            style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-title font-bold"
+            style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
             aria-hidden
           >
             {data.initials || '?'}
           </div>
-          <div>
-            <h1 className="text-title font-bold" style={{ color: 'var(--flow-text)' }}>
+          <div className="min-w-0">
+            <h1 className="text-screen font-semibold" style={{ color: 'var(--flow-text)' }}>
               {data.name}
             </h1>
             {data.roleTitle ? (
-              <p className="text-xs" style={{ color: 'var(--flow-text-muted)' }}>
+              <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
                 {data.roleTitle}
               </p>
             ) : null}
@@ -95,61 +108,37 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
 
         {/* Public projects */}
         <section aria-label={t('flow.profile.publicProjects')}>
-          <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--flow-text)' }}>
+          <h2 className="mb-3 text-section font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.profile.publicProjects')}
           </h2>
 
           {(data.publicProjects ?? []).length === 0 ? (
-            <p className="text-xs py-4" style={{ color: 'var(--flow-text-muted)' }}>
+            <p className="py-4 text-body" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.profile.noPublicProjects')}
             </p>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            /* Chips, the same shape a project takes on a task row, a board
+               card and a breadcrumb, so the colour a person recognises the
+               project by finally appears here too. G-C5.
+               No icon: it would carry the raw name through as text, which is
+               what #1085 is about. The colour dot identifies the project. */
+            <ul className="flex flex-wrap gap-2">
               {(data.publicProjects ?? []).map((pp: ProfileProject) => (
-                <div
-                  key={pp.id}
-                  className="rounded-lg border p-3"
-                  style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-surface)' }}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="h-7 w-7 rounded-md flex items-center justify-center text-xs shrink-0"
-                        style={{
-                          background: pp.color ? `${pp.color}20` : 'var(--accent-muted)',
-                          color: pp.color ?? 'var(--accent)',
-                        }}
-                        aria-hidden
-                      >
-                        {pp.icon || '📋'}
-                      </span>
-                      <p
-                        className="font-medium text-sm truncate"
-                        style={{ color: 'var(--flow-text)' }}
-                      >
-                        {pp.name}
-                      </p>
-                    </div>
-                    <Globe size={12} style={{ color: 'var(--flow-text-muted)' }} aria-hidden />
-                  </div>
-                  {pp.description ? (
-                    <p
-                      className="mt-1.5 text-xs line-clamp-2"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      {pp.description}
-                    </p>
-                  ) : null}
-                  <div
-                    className="mt-2 flex items-center gap-2 text-xs"
-                    style={{ color: 'var(--flow-text-muted)' }}
+                <li key={pp.id}>
+                  <span
+                    className="inline-flex min-h-8 items-center gap-2 rounded-full px-3 text-meta font-medium"
+                    style={{ background: 'var(--flow-active)', color: 'var(--flow-text)' }}
                   >
-                    <span>{pp.taskCount ?? 0} tasks</span>
-                    <span>{pp.completedCount ?? 0} done</span>
-                  </div>
-                </div>
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ background: pp.color || 'var(--accent)' }}
+                      aria-hidden
+                    />
+                    {pp.name}
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </section>
       </div>

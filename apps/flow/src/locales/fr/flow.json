@@ -556,7 +556,8 @@
     "notFound": "Profil introuvable.",
     "publicProjects": "Projets publics",
     "noPublicProjects": "Aucun projet public.",
-    "heading": "Profil"
+    "heading": "Profil",
+    "notFoundHint": "Le lien est peut-être ancien, ou cette personne ne fait plus partie de votre entreprise."
   },
   "board": {
     "pageTitle": "Tableau · rtylr",
