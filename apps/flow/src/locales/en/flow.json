@@ -664,6 +664,10 @@
     "createFirst": "Create first milestone",
     "namePlaceholder": "Milestone name",
     "targetDate": "Target date",
+    "newProjectOption": "+ New project…",
+    "newProjectPlaceholder": "New project name",
+    "createProject": "Create project",
+    "cancelProject": "Cancel",
     "creating": "Creating...",
     "create": "Create",
     "cancel": "Cancel",
@@ -678,7 +682,8 @@
     },
     "project": "Project",
     "noProjects": "No projects yet",
-    "noTasksYet": "No tasks yet"
+    "noTasksYet": "No tasks yet",
+    "noProjectsGate": "You need a project before you can add a milestone, and your role cannot create one. Ask an admin to create a project first."
   },
   "roadmap": {
     "loading": "Loading roadmap...",

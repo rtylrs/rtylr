@@ -1,5 +1,6 @@
 {
   "milestoneCreated": "Milestone created",
+  "projectCreated": "Project created",
   "task": {
     "created": "Task created",
     "createFailed": "Failed to create task",
