@@ -11,6 +11,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
 import { useProjectLabourCost } from '../../shared/hooks/queries/useProjectLabourCost';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 /**
  * ProjectDashboard - one-glance health view. Four tiles across the top:
@@ -27,7 +28,12 @@ const ProjectDashboard: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
+  const {
+    project,
+    isLoading: projectLoading,
+    loadFailed: projectLoadFailed,
+    refetch: refetchProjects,
+  } = useCurrentProject(workspaceId, projectId);
   // HR->FLOW-01 (#837): live labour cost from HR's port, admin-gated server-side.
   const { data: labourCost } = useProjectLabourCost(projectId);
   const { data: apiTasks = [] } = useTasks({ projectId, compact: true });
@@ -74,10 +80,17 @@ const ProjectDashboard: React.FC = () => {
     );
   }
 
+  // A failed request is not a missing project, and the sentence has to differ:
+  // this branch used to render the hardcoded English "Project not found." for
+  // both, so a 500 told the user their project had gone.
+  if (projectLoadFailed) {
+    return <ListLoadFailed onRetry={() => void refetchProjects()} />;
+  }
+
   if (!project) {
     return (
-      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Project not found.
+      <div className="p-6 text-body" style={{ color: 'var(--flow-text-muted)' }}>
+        {t('flow.projectNotFound')}
       </div>
     );
   }
