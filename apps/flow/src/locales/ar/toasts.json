@@ -92,7 +92,10 @@
     "deleted": "تم حذف المشروع",
     "restoreFailed": "فشل استعادة المشروع",
     "purgeFailed": "فشل الحذف النهائي للمشروع",
-    "visibilityFailed": "فشل تحديث الظهور"
+    "visibilityFailed": "فشل تحديث الظهور",
+    "archived": "تمت أرشفة المشروع.",
+    "archivedUntil": "تمت أرشفة المشروع. سيتم حذفه نهائيًا في {{date}}.",
+    "archiveFailed": "فشل أرشفة المشروع"
   },
   "milestone": {
     "createFailed": "فشل إنشاء المرحلة",

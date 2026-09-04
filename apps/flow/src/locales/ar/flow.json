@@ -887,12 +887,6 @@
     "active": "نشط",
     "completed": "مكتمل"
   },
-  "toasts": {
-    "project": {
-      "archived": "تمت أرشفة المشروع.",
-      "archivedUntil": "تمت أرشفة المشروع. سيُحذف نهائيًا في {{date}}."
-    }
-  },
   "status": {
     "openSettings": "الحالات",
     "settingsTitle": "الحالات",
