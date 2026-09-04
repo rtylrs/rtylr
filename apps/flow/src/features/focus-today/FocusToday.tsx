@@ -16,6 +16,46 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 
 const ACCENT_VAR = 'var(--accent)';
 
+/**
+ * One titled group with its count. Two of these replace a single flat list
+ * that called everything "pinned" while also containing due-today tasks.
+ *
+ * Renders nothing when its group is empty, so the screen shows only the
+ * reasons that actually apply rather than an empty heading.
+ */
+const FocusSection: React.FC<{
+  titleKey: string;
+  tasks: Task[];
+  projects: Project[];
+  startIndex: number;
+}> = ({ titleKey, tasks, projects, startIndex }) => {
+  const { t } = useTranslation();
+  if (tasks.length === 0) return null;
+  return (
+    <section>
+      <h2
+        className="flex items-baseline gap-2 px-4 py-2 text-meta font-semibold uppercase tracking-wider"
+        style={{ color: 'var(--flow-text-muted)' }}
+      >
+        {t(titleKey)}
+        <span className="font-normal tabular-nums" style={{ color: 'var(--flow-text-dim)' }}>
+          {tasks.length}
+        </span>
+      </h2>
+      <ul className="divide-y" style={{ borderColor: 'var(--flow-border)' }}>
+        {tasks.map((task, i) => (
+          <FocusRow
+            key={task.id}
+            task={task}
+            project={projects.find((p) => p.id === task.projectId)}
+            index={startIndex + i}
+          />
+        ))}
+      </ul>
+    </section>
+  );
+};
+
 const FocusToday: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -46,6 +86,19 @@ const FocusToday: React.FC = () => {
     });
   }, [tasks]);
 
+  // S-05: pinned and due-today are different reasons for a task to be here,
+  // and the screen promised both while calling everything "pinned". A task
+  // that is pinned and also due today belongs to Pinned only, so nothing is
+  // counted or listed twice.
+  const pinnedTasks = useMemo(
+    () => focusTasks.filter((task) => task.focusPin === true),
+    [focusTasks]
+  );
+  const dueTodayTasks = useMemo(
+    () => focusTasks.filter((task) => task.focusPin !== true),
+    [focusTasks]
+  );
+
   const backlogHint = useMemo(() => {
     return tasks.filter((t) => !t.archived && t.status === 'backlog' && isTaskMine(t.assigneeId))
       .length;
@@ -56,12 +109,17 @@ const FocusToday: React.FC = () => {
       <HelmetContainer title={`${t('nav.focusToday')} · Flow`} />
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-2 mb-1">
-          <Sun size={22} style={{ color: ACCENT_VAR }} strokeWidth={2} />
-          <h1 className="text-xl font-bold" style={{ color: 'var(--flow-text)' }}>
+          {/* G-C2: the accent is for actions and focus, not decoration. */}
+          <Sun size={22} style={{ color: 'var(--flow-text-muted)' }} strokeWidth={2} />
+          <h1 className="text-screen font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('nav.focusToday', 'Today')}
           </h1>
         </div>
-        <p className="text-body leading-relaxed" style={{ color: 'var(--flow-text-muted)' }}>
+        {/* G-T3 caps prose at 75 characters; this ran to about 110 per line. */}
+        <p
+          className="max-w-[68ch] text-body leading-relaxed"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
           {t('common.focusToday.subtitle')}
         </p>
         {backlogHint > 0 && (
@@ -79,11 +137,12 @@ const FocusToday: React.FC = () => {
         )}
       </motion.div>
 
-      <div
-        className="flex-1 min-h-0 overflow-y-auto rounded-xl border"
-        style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-card)' }}
-      >
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {focusTasks.length === 0 ? (
+          // G-E1: sized to its content on the page background. It used to sit
+          // in a bordered card stretched to the full viewport height, with
+          // roughly 250px of blank card above the illustration and 400px
+          // below it.
           <EmptyState
             icon={Sun}
             title={t('common.focusToday.emptyTitle')}
@@ -92,18 +151,23 @@ const FocusToday: React.FC = () => {
               label: t('flow.shell.myTasks'),
               onClick: () => navigate({ to: '/my-issues' }),
             }}
+            size="compact"
           />
         ) : (
-          <ul className="divide-y" style={{ borderColor: 'var(--flow-border)' }}>
-            {focusTasks.map((t, i) => (
-              <FocusRow
-                key={t.id}
-                task={t}
-                project={projects.find((p) => p.id === t.projectId)}
-                index={i}
-              />
-            ))}
-          </ul>
+          <>
+            <FocusSection
+              titleKey="common.focusToday.pinnedHeading"
+              tasks={pinnedTasks}
+              projects={projects}
+              startIndex={0}
+            />
+            <FocusSection
+              titleKey="common.focusToday.dueTodayHeading"
+              tasks={dueTodayTasks}
+              projects={projects}
+              startIndex={pinnedTasks.length}
+            />
+          </>
         )}
       </div>
     </div>
