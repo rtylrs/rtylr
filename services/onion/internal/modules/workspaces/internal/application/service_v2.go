@@ -377,6 +377,10 @@ func (s *Service) ListCyclesV2(ctx context.Context, projectID, businessID, calle
 // this would have quietly undone that audit fix on the only remaining path.
 var ErrInvalidCycleDates = errors.New("cycle dates are invalid")
 
+// ErrInvalidMilestoneDate reports a target date a milestone cannot be created
+// with.
+var ErrInvalidMilestoneDate = errors.New("milestone target date is invalid")
+
 // NormalizeCycleDates parses and defaults a cycle's date pair.
 //
 // A pure function so the rules can be tested without a repository: the previous
@@ -448,14 +452,23 @@ func (s *Service) ListMilestonesV2(ctx context.Context, businessID int64, projec
 }
 
 func (s *Service) CreateMilestoneV2(ctx context.Context, businessID, projectID int64, name, description, targetDate string) (domain.Milestone, error) {
+	var dueDate time.Time
+	if targetDate != "" {
+		parsed, parseErr := time.Parse("2006-01-02", targetDate)
+		if parseErr != nil {
+			return domain.Milestone{}, ErrInvalidMilestoneDate
+		}
+		dueDate = parsed
+	}
+
 	id, err := s.repo.CreateMilestoneV2(ctx, domain.MilestoneInput{
 		BusinessID: businessID, ProjectID: projectID,
-		Name: name,
+		Name: name, Description: description, DueDate: dueDate,
 	})
 	if err != nil {
 		return domain.Milestone{}, err
 	}
-	return domain.Milestone{ID: id, ProjectID: projectID, Name: name, Status: "planning"}, nil
+	return domain.Milestone{ID: id, ProjectID: projectID, Name: name, Description: description, Status: "planning", DueDate: dueDate}, nil
 }
 
 // callerID drives the private-view filter: a private view is visible only to

@@ -283,11 +283,15 @@ func (a *MilestoneAPIV2) ListMilestones(ctx context.Context, req *flowmilestonev
 	out := make([]*flowmilestonev2.Milestone, 0, len(milestones))
 	for _, m := range milestones {
 		mp := &flowmilestonev2.MilestoneProject{}
-		out = append(out, &flowmilestonev2.Milestone{
+		mv2 := &flowmilestonev2.Milestone{
 			Id: m.ID, ProjectId: m.ProjectID, Name: m.Name,
 			DoneCount: int32(m.DoneCount), TaskCount: int32(m.TaskCount), Status: m.Status, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Project: mp,
-		})
+		}
+		if !m.DueDate.IsZero() {
+			mv2.TargetDate = m.DueDate.Format("2006-01-02")
+		}
+		out = append(out, mv2)
 	}
 	return &flowmilestonev2.ListMilestonesResponse{Milestones: out, Pagination: buildPagination(page, limit, total, len(out))}, nil
 }
@@ -299,12 +303,19 @@ func (a *MilestoneAPIV2) CreateMilestone(ctx context.Context, req *flowmilestone
 	}
 	m, err := a.Service.CreateMilestoneV2(ctx, businessID, req.GetProjectId(), req.GetName(), req.GetDescription(), req.GetTargetDate())
 	if err != nil {
+		if errors.Is(err, application.ErrInvalidMilestoneDate) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "target_date is invalid")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create milestone")
 	}
-	return &flowmilestonev2.CreateMilestoneResponse{Milestone: &flowmilestonev2.Milestone{
+	resp := &flowmilestonev2.Milestone{
 		Id: m.ID, ProjectId: m.ProjectID, Name: m.Name,
 		Status: m.Status, Description: m.Description,
-	}}, nil
+	}
+	if !m.DueDate.IsZero() {
+		resp.TargetDate = m.DueDate.Format("2006-01-02")
+	}
+	return &flowmilestonev2.CreateMilestoneResponse{Milestone: resp}, nil
 }
 
 func (a *MilestoneAPIV2) UpdateMilestone(ctx context.Context, req *flowmilestonev2.UpdateMilestoneRequest) (*flowmilestonev2.UpdateMilestoneResponse, error) {

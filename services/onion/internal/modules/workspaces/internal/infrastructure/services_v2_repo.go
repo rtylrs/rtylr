@@ -127,10 +127,14 @@ func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, pro
 	}
 	milestones := make([]domain.Milestone, 0, len(rows))
 	for _, m := range rows {
-		milestones = append(milestones, domain.Milestone{
+		milestone := domain.Milestone{
 			ID: m.ID, ProjectID: m.ProjectID, Name: m.Name,
 			Status: string(m.Status), DoneCount: int(m.DoneCount), TaskCount: int(m.TaskCount),
-		})
+		}
+		if m.TargetDate.Valid {
+			milestone.DueDate = m.TargetDate.Time
+		}
+		milestones = append(milestones, milestone)
 	}
 	return milestones, int64(len(rows)), nil
 }
@@ -140,6 +144,7 @@ func (r *Repository) CreateMilestoneV2(ctx context.Context, input domain.Milesto
 		BusinessID: input.BusinessID, ProjectID: input.ProjectID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		TargetDate:  sql.NullTime{Time: input.DueDate, Valid: !input.DueDate.IsZero()},
 	})
 	if err != nil {
 		return 0, err

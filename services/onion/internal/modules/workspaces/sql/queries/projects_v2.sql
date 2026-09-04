@@ -174,7 +174,7 @@ VALUES (?, 0, ?, ?, ?, ?);
 
 -- name: ListMilestonesByBusiness :many
 SELECT m.id, m.project_id, m.name,
-       COALESCE(m.target_date, '') AS target_date,
+       m.target_date,
        COALESCE(m.status, 'upcoming') AS status,
        COALESCE(m.description, '') AS description,
        (SELECT COUNT(*) FROM flow_milestone_tasks mt WHERE mt.milestone_id = m.id) AS task_count,
@@ -192,8 +192,8 @@ ORDER BY m.created_at DESC
 LIMIT ? OFFSET ?;
 
 -- name: CreateMilestoneV2 :execresult
-INSERT INTO flow_milestones (business_id, project_id, name, description, status)
-VALUES (?, ?, ?, ?, 'planning');
+INSERT INTO flow_milestones (business_id, project_id, name, description, target_date, status)
+VALUES (?, ?, ?, ?, ?, 'planning');
 
 -- name: ListViewsV2 :many
 SELECT id, business_id, name, COALESCE(icon,'') AS icon,
