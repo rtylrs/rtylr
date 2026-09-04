@@ -120,3 +120,73 @@ describe('FocusToday lists what is due today (#1035)', () => {
     expect(text.indexOf('Actually pinned')).toBeLessThan(text.indexOf('Just due'));
   });
 });
+
+describe('FocusToday separates pinned from due today (#1083)', () => {
+  const today = new Date().toISOString().slice(0, 10);
+
+  function apiTask(over: Record<string, unknown> = {}): ApiTask {
+    return {
+      id: '1',
+      projectId: 'p1',
+      title: 'Fix the gate hinge',
+      status: 'todo',
+      priority: 'medium',
+      assigneeId: 'u1',
+      dueDate: '',
+      archived: false,
+      ...over,
+    } as unknown as ApiTask;
+  }
+
+  beforeEach(() => {
+    myIssuesState.data = [];
+  });
+
+  it('lists a task that is due today, which the subtitle already promised', () => {
+    // The reported defect: the screen said "Nothing pinned for today" while
+    // tasks carried today's due date, under a subtitle promising "anything
+    // due today".
+    myIssuesState.data = [apiTask({ dueDate: today })];
+    render(<FocusToday />);
+
+    expect(screen.getByText('Fix the gate hinge')).toBeInTheDocument();
+    expect(screen.queryByText('common.focusToday.emptyTitle')).not.toBeInTheDocument();
+  });
+
+  it('puts pinned and due-today under their own headings with counts', () => {
+    myIssuesState.data = [
+      apiTask({ id: '1', title: 'Pinned one', focusPin: true }),
+      apiTask({ id: '2', title: 'Due one', dueDate: today }),
+      apiTask({ id: '3', title: 'Due two', dueDate: today }),
+    ];
+    render(<FocusToday />);
+
+    expect(screen.getByText('common.focusToday.pinnedHeading')).toBeInTheDocument();
+    expect(screen.getByText('common.focusToday.dueTodayHeading')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
+  it('counts a task that is both pinned and due today only once', () => {
+    myIssuesState.data = [apiTask({ focusPin: true, dueDate: today })];
+    render(<FocusToday />);
+
+    expect(screen.getByText('common.focusToday.pinnedHeading')).toBeInTheDocument();
+    expect(screen.queryByText('common.focusToday.dueTodayHeading')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Fix the gate hinge')).toHaveLength(1);
+  });
+
+  it('omits a heading whose group is empty', () => {
+    myIssuesState.data = [apiTask({ dueDate: today })];
+    render(<FocusToday />);
+
+    expect(screen.queryByText('common.focusToday.pinnedHeading')).not.toBeInTheDocument();
+    expect(screen.getByText('common.focusToday.dueTodayHeading')).toBeInTheDocument();
+  });
+
+  it('leaves a task due on another day out', () => {
+    myIssuesState.data = [apiTask({ dueDate: '2020-01-01' })];
+    render(<FocusToday />);
+    expect(screen.getByText('common.focusToday.emptyTitle')).toBeInTheDocument();
+  });
+});

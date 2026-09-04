@@ -17,7 +17,7 @@ vi.mock('@voxire/api', async (importOriginal) => {
 });
 
 import { useUserStore as useAuthUserStore } from '@voxire/auth';
-import { findProjectRole, useCanEditTask, useCanDeleteResource } from './currentUser';
+import { findProjectRole, isTaskMine, useCanEditTask, useCanDeleteResource } from './currentUser';
 import { flowApi } from '../services/flowApi';
 import { useUserStore } from '../stores/userStore';
 import { useFlowStore } from '../stores/flowStore';
@@ -170,5 +170,47 @@ describe('useCanDeleteResource', () => {
     const { result } = renderHook(() => useCanDeleteResource('p1'), { wrapper: createWrapper() });
     await waitFor(() => expect(flowApi.getProjectMembers).toHaveBeenCalled());
     expect(result.current).toBe(false);
+  });
+});
+
+describe('isTaskMine', () => {
+  // This predicate gates the My tasks count, the Today count and the whole
+  // Today list. A strict === between a number and a string is false for every
+  // task, so if either id arrives numeric it fails silently and completely:
+  // the screens report zero rather than erroring. The comment on
+  // findProjectRole already records that the API layer can hand back a
+  // numeric id where the contract types it as a string.
+  beforeEach(() => {
+    useUserStore.setState({
+      user: { id: '7', name: 'Ada', email: 'ada@example.com' },
+      token: 'tok',
+      isAuthenticated: true,
+    });
+  });
+
+  it('matches when both ids are strings', () => {
+    expect(isTaskMine('7')).toBe(true);
+  });
+
+  it('matches when the assignee id arrived as a number', () => {
+    expect(isTaskMine(7 as unknown as string)).toBe(true);
+  });
+
+  it('matches when the stored id arrived as a number', () => {
+    useUserStore.setState({
+      user: { id: 7 as unknown as string, name: 'Ada', email: 'ada@example.com' },
+      token: 'tok',
+      isAuthenticated: true,
+    });
+    expect(isTaskMine('7')).toBe(true);
+  });
+
+  it('does not match a different person', () => {
+    expect(isTaskMine('8')).toBe(false);
+    expect(isTaskMine(8 as unknown as string)).toBe(false);
+  });
+
+  it('does not treat an unassigned task as mine', () => {
+    expect(isTaskMine('')).toBe(false);
   });
 });

@@ -28,13 +28,15 @@
   "comingSoon": "Coming soon",
   "emojiPickerComingSoon": "Emoji picker (coming soon)",
   "focusToday": {
-    "emptyTitle": "Nothing pinned for today",
+    "emptyTitle": "Nothing pinned or due today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway.",
-    "subtitle": "A short list: pinned items and anything due today. Everything else stays out of this view so you can commit without scanning the whole backlog.",
+    "subtitle": "Pinned items and anything due today. Everything else stays out of the way.",
     "backlogHint_one": "{{count}} task still in backlog, use",
     "backlogHint_other": "{{count}} tasks still in backlog, use",
     "backlogHintSuffix": "when you are ready.",
-    "dueToday": "Due today"
+    "dueToday": "Due today",
+    "pinnedHeading": "Pinned",
+    "dueTodayHeading": "Due today"
   },
   "activity": {
     "empty": "No activity yet.",
