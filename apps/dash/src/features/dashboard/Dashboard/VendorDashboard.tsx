@@ -12,6 +12,7 @@ import { ErrorBoundary } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { toFiniteNumber } from '@voxire/api';
 import { canEffectiveAccess } from '@voxire/permissions';
+import { resolveAppUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '../../../shared/stores/userStore';
 import { Button } from '../../../shared/components/ui';
@@ -397,16 +398,33 @@ const AdminDashboard: React.FC = () => {
 
 // ─── Staff (fallback) ───────────────────────────────────────────────────────
 
+/**
+ * The apps a staff member can be sent to from here.
+ *
+ * Also the guard for `resolveAppUrl`: `APP_URLS` has no entry for a string
+ * that is not an app id, so resolving one would produce `undefined` and an
+ * `href="undefined"`. Anything not on this list is not offered.
+ */
+const LAUNCHABLE_APPS = ['pos', 'erp', 'hr', 'crm', 'finance', 'flow', 'insights'] as const;
+
+const isLaunchable = (app: string): app is (typeof LAUNCHABLE_APPS)[number] =>
+  (LAUNCHABLE_APPS as readonly string[]).includes(app);
+
 const StaffDashboard: React.FC<{ userApps: string[] }> = ({ userApps }) => {
+  // Memoised because it is a useEffect dependency: a fresh array every render
+  // would re-run the redirect on every render.
+  const launchable = React.useMemo(() => userApps.filter(isLaunchable), [userApps]);
+
   React.useEffect(() => {
-    if (userApps.length > 0) {
-      const firstApp = userApps[0];
-      const validApps = ['pos', 'erp', 'hr', 'crm', 'finance', 'flow', 'insights'];
-      if (validApps.includes(firstApp)) {
-        window.location.href = `https://${firstApp}.rtylr.com`;
-      }
-    }
-  }, [userApps]);
+    // resolveAppUrl, not a hostname built by hand. APP_URLS already answers
+    // this per environment, and resolveAppUrl layers self-host's runtime
+    // config on top; interpolating rtylr.com sent a local session, and every
+    // self-hosted one, to the hosted product. This runs in an effect with no
+    // click involved, so a staff member with one app was redirected off the
+    // moment they landed on Dash.
+    const [firstApp] = launchable;
+    if (firstApp) window.location.href = resolveAppUrl(firstApp);
+  }, [launchable]);
 
   return (
     <div className="max-w-xl mx-auto py-12 text-center space-y-4">
@@ -417,11 +435,11 @@ const StaffDashboard: React.FC<{ userApps: string[] }> = ({ userApps }) => {
         Select an app below to access your workspace.
       </p>
       <div className="flex flex-wrap justify-center gap-3 pt-2">
-        {userApps.length > 0 ? (
-          userApps.map((app) => (
+        {launchable.length > 0 ? (
+          launchable.map((app) => (
             <a
               key={app}
-              href={`https://${app}.rtylr.com`}
+              href={resolveAppUrl(app)}
               className="px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[var(--dash-hover)]"
               style={{
                 background: 'var(--dash-card)',

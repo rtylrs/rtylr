@@ -168,6 +168,87 @@ describe('useInviteMember', () => {
     });
   });
 
+  // #945 reported that a single invite's group assignment was silently dropped.
+  // That part is fixed: `groupId` is translated into the contract's `group_ids`.
+  // What remained was an ordering bug, since the singular spread sat after the
+  // plural one and replaced it.
+  it('merges a singular groupId into the group list rather than replacing it', async () => {
+    mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
+
+    const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        email: 'both@test.com',
+        fullName: 'Both Inputs',
+        role: 'staff',
+        apps: ['pos'],
+        groupIds: [11, 12],
+        groupId: 13,
+      });
+    });
+
+    const sent = mockInvitationsClient.inviteUser.mock.calls[0][0] as { groupIds: string[] };
+    expect(sent.groupIds).toEqual(['11', '12', '13']);
+  });
+
+  it('sends a singular groupId as the contract group list', async () => {
+    mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
+
+    const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        email: 'single@test.com',
+        fullName: 'Single Group',
+        role: 'staff',
+        apps: ['pos'],
+        groupId: 7,
+      });
+    });
+
+    expect(mockInvitationsClient.inviteUser).toHaveBeenCalledWith(
+      expect.objectContaining({ groupIds: ['7'] })
+    );
+  });
+
+  it('does not duplicate a group named by both inputs', async () => {
+    mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
+
+    const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        email: 'dupe@test.com',
+        fullName: 'Duplicate',
+        role: 'staff',
+        apps: ['pos'],
+        groupIds: [5],
+        groupId: 5,
+      });
+    });
+
+    const sent = mockInvitationsClient.inviteUser.mock.calls[0][0] as { groupIds: string[] };
+    expect(sent.groupIds).toEqual(['5']);
+  });
+
+  it('sends no group list when neither input is given', async () => {
+    mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
+
+    const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        email: 'nogroup@test.com',
+        fullName: 'No Group',
+        role: 'staff',
+        apps: ['pos'],
+      });
+    });
+
+    expect(mockInvitationsClient.inviteUser.mock.calls[0][0]).not.toHaveProperty('groupIds');
+  });
+
   it('includes a temporary password when an administrator provisions credentials directly', async () => {
     mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
 

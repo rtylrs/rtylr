@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({
@@ -66,11 +66,26 @@ vi.mock('../../shared/hooks/queries/useSubscription', () => ({
 // `useEffect(..., [memberLocations])` would re-fire forever.
 const EMPTY_LOCATIONS = vi.hoisted(() => [] as { id: number; locationId: number; name: string }[]);
 
+// Stable identities for the same reason as EMPTY_LOCATIONS above: these feed a
+// useEffect dependency.
+const posState = vi.hoisted(() => ({
+  locations: [] as { id: number; name: string }[],
+  memberLocations: [] as {
+    id: number;
+    locationId: number;
+    canManagePosUsers: boolean;
+    canManageTerminals: boolean;
+    canViewReports: boolean;
+  }[],
+}));
+const assignLocationMock = vi.hoisted(() => vi.fn());
+const removeLocationMock = vi.hoisted(() => vi.fn());
+
 vi.mock('../../shared/hooks/queries/usePOSAccess', () => ({
-  usePOSLocations: () => ({ data: EMPTY_LOCATIONS }),
-  useMemberLocations: () => ({ data: EMPTY_LOCATIONS }),
-  useAssignPOSLocation: () => ({ mutateAsync: vi.fn(), isPending: false }),
-  useRemovePOSLocation: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  usePOSLocations: () => ({ data: posState.locations }),
+  useMemberLocations: () => ({ data: posState.memberLocations }),
+  useAssignPOSLocation: () => ({ mutateAsync: assignLocationMock, isPending: false }),
+  useRemovePOSLocation: () => ({ mutateAsync: removeLocationMock, isPending: false }),
 }));
 
 vi.mock('../../shared/stores/userStore', () => ({
@@ -100,6 +115,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   memberState.data = undefined;
   memberState.isLoading = false;
+  posState.locations = [];
+  posState.memberLocations = [];
   userState.user = {
     role: 'owner',
     isOwner: true,
@@ -187,5 +204,71 @@ describe('MemberDetail: groups empty state', () => {
 
     expect(screen.queryByText('team.memberDetail.notInGroupTitle')).not.toBeInTheDocument();
     expect(screen.getByText('Managers')).toBeInTheDocument();
+  });
+});
+
+describe('MemberDetail: POS location capabilities (#1028)', () => {
+  const KEPT = {
+    id: 501,
+    locationId: 9001,
+    canManagePosUsers: true,
+    canManageTerminals: true,
+    canViewReports: true,
+  };
+
+  const saveWithPosLocations = async (): Promise<void> => {
+    posState.locations = [{ id: 9001, name: 'Downtown' }];
+    posState.memberLocations = [KEPT];
+    memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
+
+    render(<MemberDetail />);
+    fireEvent.click(screen.getByRole('button', { name: /Edit/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    await waitFor(() => expect(assignLocationMock).toHaveBeenCalled());
+  };
+
+  it('carries the existing capabilities across a save', async () => {
+    await saveWithPosLocations();
+
+    // These were hardcoded to false, so saving any member with POS locations
+    // revoked every capability on every location they held, whatever their
+    // role, with no sign of it in the UI.
+    expect(assignLocationMock).toHaveBeenCalledWith({
+      userId: 1,
+      locationId: 9001,
+      canManagePosUsers: true,
+      canManageTerminals: true,
+      canViewReports: true,
+    });
+  });
+
+  it('does not revoke a capability the member already held', async () => {
+    await saveWithPosLocations();
+
+    const sent = assignLocationMock.mock.calls[0][0] as Record<string, unknown>;
+    expect(sent.canManagePosUsers).not.toBe(false);
+    expect(sent.canManageTerminals).not.toBe(false);
+    expect(sent.canViewReports).not.toBe(false);
+  });
+
+  it('preserves a partially granted assignment exactly', async () => {
+    posState.locations = [{ id: 9001, name: 'Downtown' }];
+    posState.memberLocations = [
+      { ...KEPT, canManagePosUsers: false, canManageTerminals: true, canViewReports: false },
+    ];
+    memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
+
+    render(<MemberDetail />);
+    fireEvent.click(screen.getByRole('button', { name: /Edit/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+
+    await waitFor(() => expect(assignLocationMock).toHaveBeenCalled());
+    expect(assignLocationMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        canManagePosUsers: false,
+        canManageTerminals: true,
+        canViewReports: false,
+      })
+    );
   });
 });
