@@ -10,6 +10,7 @@
   "archive": "Archive",
   "description": "Description",
   "roleName": "Role name",
+  "copyFailed": "Failed to copy to clipboard",
   "optionalRoleDescription": "Optional role description",
   "createRole": "Create role",
   "editCustomRole": "Edit custom role",

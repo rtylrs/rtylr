@@ -10,6 +10,7 @@
   "archive": "أرشفة",
   "description": "الوصف",
   "roleName": "اسم الدور",
+  "copyFailed": "فشل النسخ إلى الحافظة",
   "optionalRoleDescription": "وصف اختياري للدور",
   "createRole": "إنشاء الدور",
   "editCustomRole": "تعديل الدور المخصص",

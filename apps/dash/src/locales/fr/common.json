@@ -10,6 +10,7 @@
   "archive": "Archiver",
   "description": "Description",
   "roleName": "Nom du rôle",
+  "copyFailed": "Échec de la copie dans le presse-papiers",
   "optionalRoleDescription": "Description facultative du rôle",
   "createRole": "Créer le rôle",
   "editCustomRole": "Modifier le rôle personnalisé",
