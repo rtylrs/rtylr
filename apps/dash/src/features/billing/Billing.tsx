@@ -22,6 +22,7 @@ import { APP_CONFIG, APP_URLS } from '@voxire/config';
 import type { AppId } from '@voxire/config';
 import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '../../shared/stores/userStore';
+import { isAllowedCheckoutUrl } from '../../shared/utils/checkoutUrl';
 import {
   useBillingDetail,
   useBillingHistory,
@@ -347,6 +348,16 @@ const PlanAction: React.FC<{
   disabledLabel = 'Unavailable',
 }) => {
   const checkout = useCheckout();
+  const { t } = useTranslation();
+  const checkoutFailedMessage = t('billing.checkoutFailed', 'Failed to start checkout. Please try again.');
+
+  const navigateToCheckoutUrl = (checkoutUrl: unknown): void => {
+    if (!isAllowedCheckoutUrl(checkoutUrl)) {
+      toast.error(checkoutFailedMessage);
+      return;
+    }
+    window.location.href = checkoutUrl;
+  };
 
   const handleCheckout = (): void => {
     if ((isCurrent && !isCancelled) || disabled || checkout.isPending) return;
@@ -359,10 +370,10 @@ const PlanAction: React.FC<{
       },
       {
         onSuccess: (data) => {
-          window.location.href = data.checkoutUrl;
+          navigateToCheckoutUrl(data.checkoutUrl);
         },
         onError: () => {
-          toast.error('Failed to start checkout. Please try again.');
+          toast.error(checkoutFailedMessage);
         },
       }
     );
@@ -710,7 +721,17 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
 }) => {
   const ownerEmail = useUserStore((s) => s.user?.email ?? '');
   const checkout = useCheckout();
+  const { t } = useTranslation();
+  const checkoutFailedMessage = t('billing.checkoutFailed', 'Failed to start checkout. Please try again.');
   const hasPayment = !!sub?.paddleSubscriptionId;
+
+  const navigateToCheckoutUrl = (checkoutUrl: unknown): void => {
+    if (!isAllowedCheckoutUrl(checkoutUrl)) {
+      toast.error(checkoutFailedMessage);
+      return;
+    }
+    window.location.href = checkoutUrl;
+  };
 
   const handleAddPayment = (): void => {
     if (!sub) {
@@ -721,9 +742,9 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
       { planSlug: sub.planSlug, email: ownerEmail || undefined },
       {
         onSuccess: (data) => {
-          window.location.href = data.checkoutUrl;
+          navigateToCheckoutUrl(data.checkoutUrl);
         },
-        onError: () => toast.error('Failed to start checkout. Please try again.'),
+        onError: () => toast.error(checkoutFailedMessage),
       }
     );
   };

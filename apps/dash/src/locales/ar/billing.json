@@ -1,5 +1,6 @@
 {
   "emptyNoUsageTitle": "لا يوجد استخدام قابل للفوترة هذا الشهر.",
   "emptyNoInvoicesTitle": "لا توجد فواتير بعد",
-  "emptyNoInvoicesDescription": "ستظهر فاتورتك الأولى بعد انتهاء دورة الفوترة."
+  "emptyNoInvoicesDescription": "ستظهر فاتورتك الأولى بعد انتهاء دورة الفوترة.",
+  "checkoutFailed": "فشل بدء الدفع. يرجى المحاولة مرة أخرى."
 }
