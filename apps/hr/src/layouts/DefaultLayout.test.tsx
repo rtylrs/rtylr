@@ -55,8 +55,15 @@ vi.mock('../shared/lib/clients', () => ({
   licenseClient: {},
   userClient: { getMe: () => Promise.resolve({}) },
 }));
+// `config: null` is production's real state, since nothing populates
+// timeTrackingModel; hrConfig.value lets a test present the field as it would
+// look once something does.
+const hrConfig = vi.hoisted(() => ({
+  value: null as { timeTrackingModel?: string } | null,
+}));
 vi.mock('../shared/stores/hrConfigStore', () => ({
-  useHRConfigStore: (select: (s: { config: null }) => unknown) => select({ config: null }),
+  useHRConfigStore: (select: (s: { config: { timeTrackingModel?: string } | null }) => unknown) =>
+    select({ config: hrConfig.value }),
 }));
 vi.mock('../shared/lib/hrSignOut', () => ({ signOutFromHR: vi.fn() }));
 vi.mock('../shared/components/CommandPalette', () => ({ default: () => null }));
@@ -102,5 +109,61 @@ describe('DefaultLayout reporting-lines nav entry', () => {
     mocks.role = 'viewer';
     render(<DefaultLayout />);
     expect(reportingLink()).toBeNull();
+  });
+});
+
+describe('DefaultLayout time tracking nav entries (#1068)', () => {
+  const linkTo = (href: string): HTMLElement | null =>
+    screen.queryAllByRole('link').find((a) => a.getAttribute('href') === href) ?? null;
+
+  beforeEach(() => {
+    mocks.role = 'admin';
+    hrConfig.value = null;
+  });
+
+  it('does not advertise Time when the config carries no tracking model', () => {
+    // The route requires timeTrackingModel to be time_logging or both, and the
+    // sidebar used to default it to 'both', so it offered a link that
+    // redirected away for every user and every role.
+    render(<DefaultLayout />);
+
+    expect(linkTo('/time')).toBeNull();
+  });
+
+  it('does not advertise Time when the config exists but the field is unset', () => {
+    hrConfig.value = {};
+
+    render(<DefaultLayout />);
+
+    expect(linkTo('/time')).toBeNull();
+  });
+
+  it.each(['time_logging', 'both'])('advertises Time when the model is %s', (model) => {
+    hrConfig.value = { timeTrackingModel: model };
+
+    render(<DefaultLayout />);
+
+    // Guards the fix from over-reaching: once the backend populates the field,
+    // the entry has to come back.
+    expect(linkTo('/time')).not.toBeNull();
+  });
+
+  it('does not advertise Time for an attendance-only model', () => {
+    hrConfig.value = { timeTrackingModel: 'attendance' };
+
+    render(<DefaultLayout />);
+
+    expect(linkTo('/time')).toBeNull();
+  });
+
+  it('keeps Attendance advertised, whose route has no config guard', () => {
+    hrConfig.value = null;
+
+    render(<DefaultLayout />);
+
+    // Attendance uses `wrap`, not `configWrap`, so it is always reachable and
+    // must keep its default. Removing the sidebar's fallback outright would
+    // have hidden a working screen.
+    expect(linkTo('/attendance')).not.toBeNull();
   });
 });
