@@ -219,10 +219,13 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     const draftIds = new Set(locationsDraft);
     const toAdd = locationsDraft.filter((locId) => !currentIds.has(locId));
     const toRemove = current.filter((l) => !draftIds.has(l.locationId));
-    // Re-assign kept locations too, so a role change updates their manage flags.
+    // Kept locations are re-sent so the assignment survives the save.
     const toUpdate = current.filter((l) => draftIds.has(l.locationId));
 
     await Promise.allSettled([
+      // A newly assigned location starts with no elevated capabilities. There
+      // is no prior assignment to carry over, and least privilege is the safe
+      // default; granting them is a separate, deliberate action.
       ...toAdd.map((locationId) =>
         assignLocation.mutateAsync({
           userId: Number(member.id),
@@ -232,13 +235,18 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           canViewReports: false,
         })
       ),
+      // Carry the existing flags across. These were hardcoded to false, so
+      // saving any member with POS locations cleared every capability on every
+      // location they held, whatever their role, and the save gave no sign of
+      // it. The old comment claimed a role change updated these flags; nothing
+      // read the role, so it only ever revoked.
       ...toUpdate.map((l) =>
         assignLocation.mutateAsync({
           userId: Number(member.id),
           locationId: l.locationId,
-          canManagePosUsers: false,
-          canManageTerminals: false,
-          canViewReports: false,
+          canManagePosUsers: l.canManagePosUsers,
+          canManageTerminals: l.canManageTerminals,
+          canViewReports: l.canViewReports,
         })
       ),
       ...toRemove.map((l) => removeLocation.mutateAsync(l.id)),
