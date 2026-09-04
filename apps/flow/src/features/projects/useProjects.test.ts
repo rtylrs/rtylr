@@ -86,6 +86,32 @@ describe('useCreateProject', () => {
     await act(() => result.current.mutateAsync(input));
     expect(flowApi.createProject).toHaveBeenCalledWith(input);
   });
+
+  // The New project modal collects a description and a visibility, and the
+  // hook's parameter type used to omit description, so it had nowhere to send
+  // it (#1060).
+  it('passes the description and visibility straight through', async () => {
+    (flowApi.createProject as any).mockResolvedValue({ id: 'p-new' });
+    const { result } = renderHook(() => useCreateProject(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(() =>
+      result.current.mutateAsync({
+        name: 'QC Delta Two',
+        color: '#6366f1',
+        description: 'DESC SHOULD PERSIST',
+        visibility: 'public',
+      })
+    );
+
+    expect(flowApi.createProject).toHaveBeenCalledWith({
+      name: 'QC Delta Two',
+      color: '#6366f1',
+      description: 'DESC SHOULD PERSIST',
+      visibility: 'public',
+    });
+  });
 });
 
 describe('useUpdateProject', () => {
