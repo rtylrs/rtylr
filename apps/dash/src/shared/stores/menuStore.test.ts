@@ -180,3 +180,126 @@ describe('menuStore', () => {
     expect(getState().items).toHaveLength(1);
   });
 });
+
+describe('menuStore.updateMenuItem', () => {
+  it('updates a top-level item matched by _id and merges details', () => {
+    getState().setItems([
+      {
+        _id: 'm1',
+        name: 'Kebab',
+        type: 'item' as const,
+        details: { name: 'Kebab', description: 'grilled', price: 500 },
+      },
+    ]);
+    getState().updateMenuItem('m1', { name: 'Shish', details: { name: 'Shish', price: 700 } });
+    const item = getState().items[0];
+    expect(item.name).toBe('Shish');
+    // description was not in the update and must survive the merge.
+    expect(item.details).toEqual({ name: 'Shish', description: 'grilled', price: 700 });
+  });
+
+  it('updates a top-level item matched by the legacy itemId alias', () => {
+    getState().setItems([
+      { _id: 'server-1', itemId: 'legacy-1', name: 'Kebab', type: 'item' as const },
+    ]);
+    getState().updateMenuItem('legacy-1', { name: 'Shish' });
+    expect(getState().items[0].name).toBe('Shish');
+  });
+
+  it('synthesizes details from the name when the item carries none', () => {
+    getState().setItems([{ _id: 'm1', name: 'Kebab', type: 'item' as const }]);
+    getState().updateMenuItem('m1', { details: { name: 'Kebab', price: 100 } });
+    expect(getState().items[0].details).toEqual({ name: 'Kebab', price: 100 });
+  });
+
+  it('updates a nested item under details.menuItems matched by _id', () => {
+    getState().setItems([
+      {
+        _id: 'c1',
+        name: 'Grills',
+        type: 'category' as const,
+        menuItems: [],
+        details: {
+          menuItems: [
+            {
+              _id: 'm1',
+              name: 'Kebab',
+              type: 'item' as const,
+              details: { name: 'Kebab', sku: 'K1' },
+            },
+            { _id: 'm2', name: 'Salad', type: 'item' as const },
+          ],
+        },
+      },
+    ]);
+    getState().updateMenuItem('m1', { name: 'Shish', details: { name: 'Shish' } });
+    const category = getState().items[0];
+    if (category.type !== 'category') throw new Error('expected category');
+    const nested = category.details?.menuItems ?? [];
+    expect(nested[0].name).toBe('Shish');
+    // sku was not in the update and must survive the nested merge.
+    expect(nested[0].details).toEqual({ name: 'Shish', sku: 'K1' });
+    expect(nested[1].name).toBe('Salad');
+  });
+
+  it('updates a nested item matched by the legacy itemId alias', () => {
+    getState().setItems([
+      {
+        _id: 'c1',
+        name: 'Grills',
+        type: 'category' as const,
+        menuItems: [],
+        details: {
+          menuItems: [
+            { _id: 'server-1', itemId: 'legacy-1', name: 'Kebab', type: 'item' as const },
+          ],
+        },
+      },
+    ]);
+    getState().updateMenuItem('legacy-1', { name: 'Shish' });
+    const category = getState().items[0];
+    if (category.type !== 'category') throw new Error('expected category');
+    expect(category.details?.menuItems?.[0].name).toBe('Shish');
+  });
+
+  it('leaves a category alone when its own id collides with the target', () => {
+    // The top-level pass used to match any entry by _id, cast it to MenuItem
+    // and replace details with { name }, wiping details.menuItems. Only a
+    // menu item may be updated here.
+    getState().setItems([
+      {
+        _id: 'shared-id',
+        name: 'Grills',
+        type: 'category' as const,
+        menuItems: [{ _id: 'm1', name: 'Kebab', type: 'item' as const }],
+        details: { menuItems: [{ _id: 'm1', name: 'Kebab', type: 'item' as const }] },
+      },
+    ]);
+    getState().updateMenuItem('shared-id', { name: 'Clobbered' });
+    const category = getState().items[0];
+    if (category.type !== 'category') throw new Error('expected category');
+    expect(category.name).toBe('Grills');
+    expect(category.details?.menuItems).toHaveLength(1);
+    expect(category.menuItems).toHaveLength(1);
+  });
+
+  it('leaves a banner alone when its id collides with the target', () => {
+    getState().setItems([{ _id: 'shared-id', bannerImage: 'a.png', menuId: 'menu-1' }]);
+    getState().updateMenuItem('shared-id', { name: 'Clobbered' });
+    expect(getState().items[0]).toEqual({
+      _id: 'shared-id',
+      bannerImage: 'a.png',
+      menuId: 'menu-1',
+    });
+  });
+
+  it('leaves every entry untouched when nothing matches', () => {
+    const items = [
+      { _id: 'm1', name: 'Kebab', type: 'item' as const },
+      { _id: 'c1', name: 'Grills', type: 'category' as const, menuItems: [] },
+    ];
+    getState().setItems(items);
+    getState().updateMenuItem('missing', { name: 'Shish' });
+    expect(getState().items).toEqual(items);
+  });
+});
