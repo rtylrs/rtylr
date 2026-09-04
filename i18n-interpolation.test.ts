@@ -155,3 +155,105 @@ describe('every literal t() key resolves to a string', () => {
     expect([...offenders]).toEqual([]);
   });
 });
+
+describe('every plural group defines the categories its language needs', () => {
+  // A group is the set of `key_<category>` entries sharing a base key. i18next
+  // picks the category from Intl.PluralRules for the active language, so a
+  // group that omits one has nothing to return when that category comes up.
+  //
+  // When the group has no un-suffixed base key, and none of these do, the
+  // fallback lands nowhere and t() returns the bare key: the user sees
+  // `unreadCount` where a sentence belongs. With a base key present the
+  // fallback resolves and the failure is quieter, wrong number agreement
+  // rather than a raw key, which is why the base key is reported alongside.
+  //
+  // Reachability varies sharply by language and is not a reason to skip a
+  // category. French selects `many` only at 1,000,000 and above, so a French
+  // gap is latent. Arabic reaches `two`, `few` and `many` at counts of 2, 3
+  // and 11, so an Arabic gap is an everyday bug.
+  type Group = { file: string; base: string; missing: string[]; hasBase: boolean };
+
+  function flatten(value: unknown, prefix: string, into: Map<string, unknown>): void {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+        flatten(child, prefix ? `${prefix}.${key}` : key, into);
+      }
+      return;
+    }
+    into.set(prefix, value);
+  }
+
+  function incompleteGroups(app: string): Group[] {
+    const found: Group[] = [];
+    for (const file of localeFiles(app)) {
+      const lang = path.basename(path.dirname(file));
+      let required: readonly string[];
+      try {
+        required = new Intl.PluralRules(lang).resolvedOptions().pluralCategories;
+      } catch {
+        // Not a language tag Intl understands, so there is no rule to check.
+        continue;
+      }
+      const entries = new Map<string, unknown>();
+      flatten(JSON.parse(fs.readFileSync(file, 'utf8')), '', entries);
+
+      const groups = new Map<string, Set<string>>();
+      for (const key of entries.keys()) {
+        const match = key.match(/^(.*)_(zero|one|two|few|many|other)$/);
+        if (!match) continue;
+        const forms = groups.get(match[1]) ?? new Set<string>();
+        forms.add(match[2]);
+        groups.set(match[1], forms);
+      }
+
+      for (const [base, forms] of groups) {
+        const missing = required.filter((category) => !forms.has(category));
+        if (missing.length === 0) continue;
+        found.push({
+          file: path.relative(APPS_DIR, file),
+          base,
+          missing,
+          hasBase: entries.has(base),
+        });
+      }
+    }
+    return found;
+  }
+
+  it('finds plural groups to check, so a passing run means something', () => {
+    const total = APPS.reduce((count, app) => {
+      for (const file of localeFiles(app)) {
+        const entries = new Map<string, unknown>();
+        flatten(JSON.parse(fs.readFileSync(file, 'utf8')), '', entries);
+        const bases = new Set<string>();
+        for (const key of entries.keys()) {
+          const match = key.match(/^(.*)_(zero|one|two|few|many|other)$/);
+          if (match) bases.add(`${file}:${match[1]}`);
+        }
+        count += bases.size;
+      }
+      return count;
+    }, 0);
+    expect(total).toBeGreaterThan(40);
+  });
+
+  it.each(APPS)('%s leaves no plural group short of a category', (app) => {
+    const offenders = incompleteGroups(app).map(
+      (group) =>
+        `${group.file}  ${group.base}  missing ${group.missing.join(',')}` +
+        `${group.hasBase ? '  (falls back to the base key)' : '  (no base key: renders the raw key)'}`
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it.each(PLURAL_CATEGORIES)('%s is a category Intl can actually return', (category) => {
+    // Guards the regex above: if a category name here stopped matching what
+    // Intl reports, the scan would silently find fewer groups.
+    const everyCategory = new Set(
+      ['en', 'ar', 'fr'].flatMap((lang) => [
+        ...new Intl.PluralRules(lang).resolvedOptions().pluralCategories,
+      ])
+    );
+    expect(everyCategory).toContain(category);
+  });
+});
