@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import i18n from '../shared/services/i18next';
+import i18n from './i18next';
 
 // Dash's loadResource ignores the namespace i18next asks for and returns the
 // whole locale tree, so the namespace is cosmetic and every key has to be
