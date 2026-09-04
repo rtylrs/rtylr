@@ -127,7 +127,7 @@ const Milestones: React.FC = () => {
             className="w-full rounded-md px-3 py-2 text-meta outline-none"
             style={{
               background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
+              border: '1px solid var(--flow-border-control)',
               color: 'var(--flow-text)',
             }}
             autoFocus
@@ -142,7 +142,7 @@ const Milestones: React.FC = () => {
               className="w-full rounded-md px-3 py-2 text-title outline-none sm:text-meta"
               style={{
                 background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
+                border: '1px solid var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             >

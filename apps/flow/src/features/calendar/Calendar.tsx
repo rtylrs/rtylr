@@ -309,7 +309,7 @@ const Calendar: React.FC = () => {
                 className="w-full rounded-lg px-3 py-2 text-body outline-none mb-3"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               />
@@ -321,7 +321,7 @@ const Calendar: React.FC = () => {
                   className="w-full rounded-lg px-3 py-2 text-meta outline-none mb-4"
                   style={{
                     background: 'var(--flow-input-bg)',
-                    border: '1px solid var(--flow-border)',
+                    border: '1px solid var(--flow-border-control)',
                     color: 'var(--flow-text)',
                   }}
                 >
@@ -341,7 +341,7 @@ const Calendar: React.FC = () => {
                 className="w-full rounded-lg px-3 py-2 text-meta outline-none mb-4 disabled:opacity-50"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               >

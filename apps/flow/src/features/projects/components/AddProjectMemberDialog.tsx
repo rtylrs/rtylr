@@ -84,7 +84,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
             className="flex-1 rounded-sm px-2 py-1.5 text-title md:text-meta outline-none"
             style={{
               background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
+              border: '1px solid var(--flow-border-control)',
               color: 'var(--flow-text)',
             }}
           />
@@ -95,7 +95,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
             className="rounded-sm px-2 py-1.5 text-title md:text-meta outline-none"
             style={{
               background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
+              border: '1px solid var(--flow-border-control)',
               color: 'var(--flow-text)',
             }}
           >

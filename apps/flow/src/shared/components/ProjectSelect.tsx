@@ -26,7 +26,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
         style={{
           color: current ? 'var(--flow-text)' : 'var(--flow-text-muted)',
           background: 'var(--flow-input-bg)',
-          border: '1px solid var(--flow-border)',
+          border: '1px solid var(--flow-border-control)',
         }}
       >
         {current ? (

@@ -91,7 +91,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               className="w-full rounded-lg px-3 py-2 text-body outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
+                border: '1px solid var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             />

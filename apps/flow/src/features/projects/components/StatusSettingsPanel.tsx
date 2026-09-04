@@ -267,7 +267,7 @@ const StatusSettingsPanel = ({
                 className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm px-2 text-title md:min-h-0 md:py-1.5 md:text-body"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               />
@@ -278,7 +278,7 @@ const StatusSettingsPanel = ({
                 className="flow-focus min-h-[44px] rounded-sm px-2 text-title md:min-h-0 md:py-1.5 md:text-body"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               >
@@ -392,7 +392,7 @@ const StatusRow = ({
           className="flow-focus min-h-[44px] rounded-sm px-1.5 text-body disabled:opacity-70 md:min-h-0 md:py-1"
           style={{
             background: 'var(--flow-input-bg)',
-            border: '1px solid var(--flow-border)',
+            border: '1px solid var(--flow-border-control)',
             color: 'var(--flow-text)',
           }}
         >

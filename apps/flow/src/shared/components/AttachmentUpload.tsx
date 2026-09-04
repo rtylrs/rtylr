@@ -91,7 +91,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
         className="flex items-center gap-2 px-3 py-2 rounded-lg text-meta w-full transition-colors disabled:opacity-50"
         style={{
           background: 'var(--flow-input-bg)',
-          border: '1px dashed var(--flow-border)',
+          border: '1px dashed var(--flow-border-control)',
           color: 'var(--flow-text-muted)',
           cursor: uploading ? 'wait' : disabled ? 'not-allowed' : 'pointer',
         }}
