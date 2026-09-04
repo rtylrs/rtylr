@@ -5,7 +5,12 @@ import { getRouteApi } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { DatePicker, EmptyState } from '@voxire/ui';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
-import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
+import {
+  addDays,
+  dayKeyForDate,
+  formatWeekDayShort,
+  startOfWeek,
+} from '../../shared/lib/dateUtils';
 import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useProjects } from '../projects/useProjects';
@@ -32,18 +37,25 @@ const MyDay = (): React.JSX.Element => {
   const addHoursRef = useRef<HTMLDivElement | null>(null);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
+  const dailyTargetMinutes = useTimeSettingsStore((s) => s.dailyTargetMinutes);
   const weekDays = useMemo(() => {
     const start = startOfWeek(date, weekStart);
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [date, weekStart]);
   const { data: weekData } = useWorkDaysRange(weekDays[0], weekDays[6]);
-  const loggedDates = useMemo(() => {
-    const set = new Set<string>();
+  // The minutes, not a boolean. This was a Set of dates used only to decide
+  // whether to draw a dot, so the strip carried the date and nothing else,
+  // and the dot was aria-hidden with a title, which reads as nothing at all.
+  const loggedByDate = useMemo(() => {
+    const map = new Map<string, number>();
     for (const d of weekData?.workDays ?? []) {
-      if (d.date && (d.loggedMinutes ?? 0) > 0) set.add(d.date);
+      if (d.date) map.set(d.date, d.loggedMinutes ?? 0);
     }
-    return set;
+    return map;
   }, [weekData]);
+
+  const dayTargetMinutes = dailyTargetMinutes[dayKeyForDate(date)] ?? 0;
+  const dayLoggedMinutes = data?.workDay?.loggedMinutes ?? 0;
 
   const lines = useMemo(() => data?.lines ?? [], [data]);
 
@@ -65,6 +77,22 @@ const MyDay = (): React.JSX.Element => {
           <h1 className="text-screen font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.myDay')}
           </h1>
+          {/* S-19: the day total belongs where the eye lands, at 20px. It was
+              12px inside a pill at the top right of the Add-hours card, which
+              is the last place you look on this screen. */}
+          <p className="mt-1 flex items-baseline gap-1.5">
+            <span
+              className="text-screen font-semibold tabular-nums"
+              style={{ color: 'var(--flow-text)' }}
+            >
+              {formatDurationClock(dayLoggedMinutes)}
+            </span>
+            {dayTargetMinutes > 0 && (
+              <span className="text-body tabular-nums" style={{ color: 'var(--flow-text-muted)' }}>
+                {t('flow.time.of')} {formatDurationClock(dayTargetMinutes)}
+              </span>
+            )}
+          </p>
           <label htmlFor="work-day-date" className="sr-only">
             {t('flow.time.date')}
           </label>
@@ -85,7 +113,7 @@ const MyDay = (): React.JSX.Element => {
         <div role="group" aria-label={t('flow.time.weekStrip')} className="mb-6 flex gap-1.5">
           {weekDays.map((d) => {
             const active = d === date;
-            const hasEntries = loggedDates.has(d);
+            const dayMinutes = loggedByDate.get(d) ?? 0;
             return (
               <button
                 key={d}
@@ -99,14 +127,18 @@ const MyDay = (): React.JSX.Element => {
                 }}
               >
                 {formatWeekDayShort(d, i18n.language)}
-                {hasEntries && (
-                  <span
-                    title={t('flow.time.weekDayLogged')}
-                    aria-hidden="true"
-                    className="absolute bottom-0.5 h-1 w-1 rounded-full"
-                    style={{ background: active ? 'var(--flow-on-accent)' : 'var(--accent)' }}
-                  />
-                )}
+                {/* The logged total under the date, in tabular digits. A dash
+                    for a day with nothing on it, so the column keeps its
+                    width and the row stays scannable. */}
+                <span
+                  className="mt-0.5 text-meta tabular-nums"
+                  style={{
+                    color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
+                    opacity: dayMinutes > 0 ? 1 : 0.55,
+                  }}
+                >
+                  {dayMinutes > 0 ? formatDurationClock(dayMinutes) : '–'}
+                </span>
               </button>
             );
           })}
