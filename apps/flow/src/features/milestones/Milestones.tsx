@@ -5,9 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { Milestone as MilestoneIcon, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { DatePicker, EmptyState } from '@voxire/ui';
+import { useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useMilestones, useCreateMilestone } from './useMilestones';
+import { canFlowPermission } from '../../shared/lib/roleUtils';
+import { ACCENT_DEFAULT } from '../../shared/lib/colorUtils';
 import { formatDate } from '../../shared/lib/utils';
 import { CardSkeleton } from '../../shared/components/Skeleton';
+import { useProjects, useCreateProject } from '../projects/useProjects';
+import { milestoneProgress } from '../../shared/lib/milestoneUtils';
+import GateNotice from '../../shared/components/GateNotice';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   planning: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
@@ -23,8 +29,11 @@ const STATUS_LABEL_KEYS: Record<string, string> = {
   completed: 'completed',
 };
 
-import { useProjects } from '../projects/useProjects';
-import { milestoneProgress } from '../../shared/lib/milestoneUtils';
+// Sentinel option value. Never stored as the selected project id, so it can
+// not leak into the milestone payload the way a real id would.
+const NEW_PROJECT_OPTION = '__new__';
+
+const NO_PROJECTS_GATE_ID = 'milestone-project-gate';
 
 const Milestones: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -41,6 +50,50 @@ const Milestones: React.FC = () => {
   // empty select that fails on submit.
   const [newProjectId, setNewProjectId] = useState('');
   const selectedProjectId = newProjectId || projects[0]?.id || '';
+
+  // Inline project creation. Every milestone needs a project, so with an empty
+  // project list this form had no way to be completed: the only option carried
+  // value="" and Create stayed disabled. Gated on the same permission the
+  // sidebar's create uses, and hidden rather than disabled - a disabled
+  // <option> in a native select has nowhere to explain itself.
+  const createProject = useCreateProject();
+  const legacyRole = useAuthUserStore((s) => s.user?.role);
+  const effectiveAccess = useAuthUserStore((s) => s.effectiveAccess);
+  const canCreateProject = canFlowPermission(legacyRole, 'flow:projects:create', effectiveAccess);
+  const [creatingProject, setCreatingProject] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  // The list refetch after a create is asynchronous, so for a moment there is
+  // no <option> matching the id just selected. A native select falls back to
+  // rendering its first option, which would show the wrong project while the
+  // payload carried the right one. Keeping the created project here means the
+  // select always has something truthful to display.
+  const [justCreated, setJustCreated] = useState<{ id: string; name: string } | null>(null);
+
+  const submitNewProject = (): void => {
+    const name = newProjectName.trim();
+    if (!name || createProject.isPending) return;
+    createProject.mutate(
+      { name, color: ACCENT_DEFAULT },
+      {
+        onSuccess: (created) => {
+          // The mutation resolves with the { project } envelope the contract
+          // returns, not a bare project. Select what was just created so the
+          // milestone can be submitted without reopening the dropdown.
+          const project = created?.project;
+          if (project?.id) {
+            setNewProjectId(String(project.id));
+            setJustCreated({ id: String(project.id), name: String(project.name ?? name) });
+          }
+          setCreatingProject(false);
+          setNewProjectName('');
+          toast.success(t('toasts.projectCreated'));
+        },
+        // Leave the input open with the text intact; retyping a name because
+        // the request failed is the wrong thing to ask of anyone.
+        onError: () => toast.error(t('errors.generic')),
+      }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -137,26 +190,106 @@ const Milestones: React.FC = () => {
             <span className="mb-1 block text-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.milestones.project')}
             </span>
-            <select
-              value={selectedProjectId}
-              onChange={(e) => setNewProjectId(e.target.value)}
-              className="w-full rounded-md px-3 py-2 text-title sm:text-meta"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border-control)',
-                color: 'var(--flow-text)',
-              }}
-            >
-              {projects.length === 0 ? (
-                <option value="">{t('flow.milestones.noProjects')}</option>
-              ) : (
-                projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
+            {creatingProject ? (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      submitNewProject();
+                    }
+                    if (e.key === 'Escape') {
+                      setCreatingProject(false);
+                      setNewProjectName('');
+                    }
+                  }}
+                  placeholder={t('flow.milestones.newProjectPlaceholder')}
+                  className="w-full rounded-md px-3 py-2 text-meta"
+                  style={{
+                    background: 'var(--flow-input-bg)',
+                    border: '1px solid var(--flow-border-control)',
+                    color: 'var(--flow-text)',
+                  }}
+                  autoFocus
+                />
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={submitNewProject}
+                    disabled={!newProjectName.trim() || createProject.isPending}
+                    className="min-h-11 rounded-sm px-3 py-1.5 text-meta font-semibold disabled:opacity-50"
+                    style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+                  >
+                    {createProject.isPending
+                      ? t('flow.milestones.creating')
+                      : t('flow.milestones.createProject')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCreatingProject(false);
+                      setNewProjectName('');
+                    }}
+                    className="min-h-11 rounded-sm px-3 py-1.5 text-meta"
+                    style={{ color: 'var(--flow-text-muted)' }}
+                  >
+                    {t('flow.milestones.cancelProject')}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <select
+                value={selectedProjectId}
+                aria-describedby={
+                  projects.length === 0 && !canCreateProject ? NO_PROJECTS_GATE_ID : undefined
+                }
+                onChange={(e) => {
+                  if (e.target.value === NEW_PROJECT_OPTION) {
+                    setCreatingProject(true);
+                    return;
+                  }
+                  setNewProjectId(e.target.value);
+                }}
+                className="w-full rounded-md px-3 py-2 text-title sm:text-meta"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border-control)',
+                  color: 'var(--flow-text)',
+                }}
+              >
+                {projects.length === 0 ? (
+                  <option value="">{t('flow.milestones.noProjects')}</option>
+                ) : (
+                  projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))
+                )}
+                {justCreated && !projects.some((p) => String(p.id) === justCreated.id) && (
+                  <option value={justCreated.id}>{justCreated.name}</option>
+                )}
+                {canCreateProject && (
+                  <option value={NEW_PROJECT_OPTION}>
+                    {t('flow.milestones.newProjectOption')}
                   </option>
-                ))
-              )}
-            </select>
+                )}
+              </select>
+            )}
+            {/* Without this a member who has no projects and cannot create
+                one still reaches a dead end: the only option carries
+                value="", so Create stays disabled with nothing saying why.
+                Root CLAUDE.md rule 12, and the same GateNotice the settings
+                screen uses for its eleven gated controls. */}
+            {projects.length === 0 && !canCreateProject && !justCreated && (
+              <GateNotice
+                id={NO_PROJECTS_GATE_ID}
+                className="mt-2"
+                reason={t('flow.milestones.noProjectsGate')}
+              />
+            )}
           </label>
           <DatePicker
             value={newDate}
