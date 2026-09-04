@@ -7,6 +7,9 @@
   "apiKeys": {
     "emptyTitle": "لا توجد مفاتيح API بعد",
     "emptyDescription": "أنشئ أول مفتاح API للبدء بالتطوير.",
-    "newKey": "مفتاح جديد"
+    "newKey": "مفتاح جديد",
+    "previewCopied": "تم نسخ معاينة المفتاح",
+    "copied": "تم نسخ المفتاح",
+    "copyFailed": "فشل نسخ المفتاح إلى الحافظة"
   }
 }
