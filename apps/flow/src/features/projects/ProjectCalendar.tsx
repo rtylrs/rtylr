@@ -16,7 +16,7 @@ import { useCurrentProject } from './useCurrentProject';
  * for now tasks render as compact chips on the owning day.
  */
 const ProjectCalendar: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
@@ -47,12 +47,15 @@ const ProjectCalendar: React.FC = () => {
 
     return {
       weeks: rows,
-      monthLabel: cursor.toLocaleDateString(undefined, {
+      // `undefined` here meant "the browser's locale", which is unrelated to
+      // the language the user picked in Flow. The global calendar threads
+      // i18n.language through; this now matches it.
+      monthLabel: cursor.toLocaleString(i18n.language, {
         month: 'long',
         year: 'numeric',
       }),
     };
-  }, [cursor]);
+  }, [cursor, i18n.language]);
 
   const tasksByDay = useMemo(() => {
     const map = new Map<string, typeof apiTasks>();
@@ -83,7 +86,16 @@ const ProjectCalendar: React.FC = () => {
   }
 
   const today = new Date().toDateString();
-  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Built from Intl rather than hardcoded English. The grid's first column is
+  // Sunday, so the names are generated from a known Sunday; which day the week
+  // starts on is unchanged, only the language of the labels.
+  const weekdays = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' });
+    const knownSunday = new Date(2026, 0, 4);
+    return Array.from({ length: 7 }, (_, offset) =>
+      formatter.format(new Date(2026, 0, knownSunday.getDate() + offset))
+    );
+  }, [i18n.language]);
 
   return (
     <div className="flex flex-col h-full">
