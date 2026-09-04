@@ -4,11 +4,35 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Milestones from './Milestones';
 
 const mutateSpy = vi.fn();
+// The mutation resolves with the { project } envelope the contract returns.
+// Mocking a bare project here hid a real bug: the component read .id off the
+// envelope and got undefined, and only the typecheck caught it.
+const createProjectSpy = vi.fn((_vars: unknown, opts?: { onSuccess?: (p: unknown) => void }) =>
+  opts?.onSuccess?.({ project: { id: 'p-new', name: 'Ras Beirut refit' } })
+);
+
+const projectsState = vi.hoisted(() => ({
+  data: [{ id: 'p-1', name: 'Website Redesign' }] as Array<{ id: string; name: string }>,
+}));
+const createProjectState = vi.hoisted(() => ({ isPending: false }));
+const accessState = vi.hoisted(() => ({ canCreate: true }));
 
 // The create form asks which project the milestone belongs to, so the screen
-// now reads the project list too.
+// reads the project list, and can create one inline when none will do.
 vi.mock('../projects/useProjects', () => ({
-  useProjects: () => ({ data: [{ id: 'p-1', name: 'Website Redesign' }], isLoading: false }),
+  useProjects: () => ({ data: projectsState.data, isLoading: false }),
+  useCreateProject: () => ({ mutate: createProjectSpy, isPending: createProjectState.isPending }),
+}));
+
+// The inline create is permission gated exactly as the sidebar's is. The
+// permission itself has its own tests; here it is a boolean input.
+vi.mock('../../shared/lib/roleUtils', () => ({
+  canFlowPermission: () => accessState.canCreate,
+}));
+
+vi.mock('@voxire/auth', () => ({
+  useUserStore: (selector: (s: unknown) => unknown) =>
+    selector({ user: { role: 'member' }, effectiveAccess: {} }),
 }));
 
 const milestonesState = vi.hoisted(() => ({ data: [] as Array<Record<string, unknown>> }));
@@ -139,5 +163,175 @@ describe('Milestones progress bar (#1080)', () => {
     const { container } = render(<Milestones />);
     expect(fillWidth(container)).toBe('100%');
     expect(screen.getByText('100%')).toBeInTheDocument();
+  });
+});
+
+// ─── Creating a project from the milestone form ──────────────────────────────
+//
+// Every milestone needs a project (project_id is @required on v2), so with no
+// projects the form was a dead end: the only option carried value="" and Create
+// stayed disabled with no way out. These cover the inline escape hatch.
+
+describe('Milestones inline project creation', () => {
+  beforeEach(() => {
+    createProjectSpy.mockClear();
+    createProjectState.isPending = false;
+    projectsState.data = [{ id: 'p-1', name: 'Website Redesign' }];
+    accessState.canCreate = true;
+    mutateSpy.mockClear();
+  });
+
+  const openForm = (): void => {
+    fireEvent.click(
+      screen.queryByText('flow.milestones.createFirst') ??
+        screen.getByText('flow.milestones.newMilestone')
+    );
+  };
+
+  const chooseNewProject = (): void => {
+    fireEvent.change(screen.getByLabelText('flow.milestones.project', { selector: 'select' }), {
+      target: { value: '__new__' },
+    });
+  };
+
+  it('offers the new-project option and does not treat it as a project id', () => {
+    render(<Milestones />);
+    openForm();
+
+    const select = screen.getByLabelText('flow.milestones.project', { selector: 'select' });
+    expect(select).toHaveValue('p-1');
+    expect(screen.getByText('flow.milestones.newProjectOption')).toBeInTheDocument();
+  });
+
+  it('reveals a name input instead of submitting a milestone', () => {
+    render(<Milestones />);
+    openForm();
+    chooseNewProject();
+
+    expect(
+      screen.getByPlaceholderText('flow.milestones.newProjectPlaceholder')
+    ).toBeInTheDocument();
+    expect(mutateSpy).not.toHaveBeenCalled();
+    expect(createProjectSpy).not.toHaveBeenCalled();
+  });
+
+  it('creates the project, selects it, and keeps what was already typed', () => {
+    render(<Milestones />);
+    openForm();
+    fireEvent.change(screen.getByPlaceholderText('flow.milestones.namePlaceholder'), {
+      target: { value: 'Launch' },
+    });
+    chooseNewProject();
+    fireEvent.change(screen.getByPlaceholderText('flow.milestones.newProjectPlaceholder'), {
+      target: { value: 'Ras Beirut refit' },
+    });
+    fireEvent.click(screen.getByText('flow.milestones.createProject'));
+
+    expect(createProjectSpy).toHaveBeenCalledTimes(1);
+    expect(createProjectSpy.mock.calls[0][0].name).toBe('Ras Beirut refit');
+
+    // The new project is now selected and the milestone name survived.
+    expect(screen.getByLabelText('flow.milestones.project', { selector: 'select' })).toHaveValue(
+      'p-new'
+    );
+    expect(screen.getByPlaceholderText('flow.milestones.namePlaceholder')).toHaveValue('Launch');
+  });
+
+  it('does not send a blank project name', () => {
+    render(<Milestones />);
+    openForm();
+    chooseNewProject();
+
+    const createButton = screen.getByText('flow.milestones.createProject');
+    expect(createButton).toBeDisabled();
+    fireEvent.click(createButton);
+    expect(createProjectSpy).not.toHaveBeenCalled();
+  });
+
+  it('restores the previous selection when cancelled', () => {
+    render(<Milestones />);
+    openForm();
+    chooseNewProject();
+    fireEvent.click(screen.getByText('flow.milestones.cancelProject'));
+
+    const select = screen.getByLabelText('flow.milestones.project', { selector: 'select' });
+    expect(select).toHaveValue('p-1');
+    expect(createProjectSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps the typed name on screen when the create fails', () => {
+    createProjectSpy.mockImplementation((_vars, opts) => opts?.onError?.(new Error('nope')));
+    render(<Milestones />);
+    openForm();
+    chooseNewProject();
+    fireEvent.change(screen.getByPlaceholderText('flow.milestones.newProjectPlaceholder'), {
+      target: { value: 'Doomed' },
+    });
+    fireEvent.click(screen.getByText('flow.milestones.createProject'));
+
+    expect(screen.getByPlaceholderText('flow.milestones.newProjectPlaceholder')).toHaveValue(
+      'Doomed'
+    );
+  });
+
+  it('is reachable with no projects at all, which is the dead end it fixes', () => {
+    projectsState.data = [];
+    render(<Milestones />);
+    openForm();
+
+    // Without this option the form cannot be completed: Create needs a
+    // project id and there is no other way to obtain one from here.
+    expect(screen.getByText('flow.milestones.newProjectOption')).toBeInTheDocument();
+    expect(screen.getByText('flow.milestones.create')).toBeDisabled();
+  });
+
+  it('hides the option when the user cannot create projects', () => {
+    accessState.canCreate = false;
+    render(<Milestones />);
+    openForm();
+
+    expect(screen.queryByText('flow.milestones.newProjectOption')).not.toBeInTheDocument();
+  });
+
+  it('explains the dead end when there are no projects and no permission', () => {
+    // Hiding the option is right, but on its own it leaves the original
+    // defect for this user: the only option carries value="", so Create stays
+    // disabled with nothing saying why.
+    accessState.canCreate = false;
+    projectsState.data = [];
+    render(<Milestones />);
+    openForm();
+
+    expect(screen.getByText('flow.milestones.noProjectsGate')).toBeInTheDocument();
+    expect(screen.getByText('flow.milestones.create')).toBeDisabled();
+  });
+
+  it('does not explain a dead end that is not there', () => {
+    accessState.canCreate = false;
+    projectsState.data = [{ id: 'p-1', name: 'Website Redesign' }];
+    render(<Milestones />);
+    openForm();
+
+    expect(screen.queryByText('flow.milestones.noProjectsGate')).not.toBeInTheDocument();
+  });
+
+  it('does not explain a dead end to someone who can create a project', () => {
+    accessState.canCreate = true;
+    projectsState.data = [];
+    render(<Milestones />);
+    openForm();
+
+    expect(screen.queryByText('flow.milestones.noProjectsGate')).not.toBeInTheDocument();
+    expect(screen.getByText('flow.milestones.newProjectOption')).toBeInTheDocument();
+  });
+
+  it('points the select at the reason so a screen reader reads it', () => {
+    accessState.canCreate = false;
+    projectsState.data = [];
+    const { container } = render(<Milestones />);
+    openForm();
+
+    const select = container.querySelector('select');
+    expect(select?.getAttribute('aria-describedby')).toBe('milestone-project-gate');
   });
 });

@@ -688,6 +688,10 @@
     "createFirst": "إنشاء أول معلم",
     "namePlaceholder": "اسم المعلم",
     "targetDate": "التاريخ المستهدف",
+    "newProjectOption": "+ مشروع جديد…",
+    "newProjectPlaceholder": "اسم المشروع الجديد",
+    "createProject": "إنشاء المشروع",
+    "cancelProject": "إلغاء",
     "creating": "جارٍ الإنشاء...",
     "create": "إنشاء",
     "cancel": "إلغاء",
@@ -702,7 +706,8 @@
     },
     "project": "المشروع",
     "noProjects": "لا توجد مشاريع بعد",
-    "noTasksYet": "لا مهام بعد"
+    "noTasksYet": "لا مهام بعد",
+    "noProjectsGate": "تحتاج إلى مشروع قبل إضافة معلم، ودورك لا يسمح بإنشاء واحد. اطلب من مسؤول إنشاء مشروع أولاً."
   },
   "roadmap": {
     "loading": "جارٍ تحميل خارطة الطريق...",

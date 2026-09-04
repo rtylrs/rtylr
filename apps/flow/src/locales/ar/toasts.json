@@ -1,5 +1,6 @@
 {
   "milestoneCreated": "تم إنشاء المرحلة",
+  "projectCreated": "تم إنشاء المشروع",
   "task": {
     "created": "تم إنشاء المهمة",
     "createFailed": "تعذّر إنشاء المهمة",
