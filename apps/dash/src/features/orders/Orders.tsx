@@ -79,6 +79,11 @@ function formatTime(iso: string): string {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+// POS API amounts are in minor units (cents); render as dollars.
+function formatMinor(value: number): string {
+  return `$${(Number(value) / 100).toFixed(2)}`;
+}
+
 const OrdersTable: React.FC<{
   orders: HubOrder[];
   emptyLabel: string;
@@ -105,8 +110,8 @@ const OrdersTable: React.FC<{
           <TableRow key={order.id}>
             <TableCell className="font-mono text-xs">#{order.id}</TableCell>
             <TableCell>{order.customerName || order.customerEmail || '-'}</TableCell>
-            <TableCell>${order.subtotal.toFixed(2)}</TableCell>
-            <TableCell>${order.total.toFixed(2)}</TableCell>
+            <TableCell>{formatMinor(order.subtotal)}</TableCell>
+            <TableCell>{formatMinor(order.total)}</TableCell>
             <TableCell>
               <Badge variant={statusBadgeVariant[order.status] || 'outline'}>
                 {statusLabel[order.status] || order.status.replace('_', ' ')}
@@ -333,7 +338,7 @@ const Orders: React.FC = () => {
                 >
                   <span>Subtotal</span>
                   <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
-                    ${selectedOrder.subtotal.toFixed(2)}
+                    {formatMinor(selectedOrder.subtotal)}
                   </span>
                 </div>
                 <div
@@ -342,7 +347,7 @@ const Orders: React.FC = () => {
                 >
                   <span>Total</span>
                   <span className="font-bold text-base" style={{ color: 'var(--dash-text)' }}>
-                    ${selectedOrder.total.toFixed(2)}
+                    {formatMinor(selectedOrder.total)}
                   </span>
                 </div>
                 <div className="flex justify-between pt-1 text-xs">
