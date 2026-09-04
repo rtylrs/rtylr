@@ -82,7 +82,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
     const menuH = 120;
     const x = e.clientX + menuW > vw ? e.clientX - menuW : e.clientX;
     const y = e.clientY + menuH > vh ? e.clientY - menuH : e.clientY;
-    setContextMenu({ x, y, taskId: task.id, projectId: task.projectId });
+    setContextMenu({ x, y, taskId: task.id, projectId: task.projectId, taskTitle: task.title });
   };
 
   return (

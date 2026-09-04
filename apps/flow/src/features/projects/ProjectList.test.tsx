@@ -57,21 +57,23 @@ function renderRow(): void {
 }
 
 describe('ProjectList TaskRow more menu', () => {
+  // The labels are translation keys now: they were literal English until the
+  // menu was internationalised, and this suite's `t` mock returns the key.
   it('opens a menu with open/copy link/delete actions when the more button is clicked', () => {
     renderRow();
 
     fireEvent.click(screen.getByRole('button', { name: /more options/i }));
 
-    expect(screen.getByText('Open task')).toBeInTheDocument();
-    expect(screen.getByText('Copy link')).toBeInTheDocument();
-    expect(screen.getByText('Delete')).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'flow.taskMenu.openTask' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'flow.taskMenu.copyLink' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'common.delete' })).toBeInTheDocument();
   });
 
-  it('navigates to the task detail page when "Open task" is clicked', () => {
+  it('navigates to the task detail page when Open task is chosen', () => {
     renderRow();
 
     fireEvent.click(screen.getByRole('button', { name: /more options/i }));
-    fireEvent.click(screen.getByText('Open task'));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'flow.taskMenu.openTask' }));
 
     expect(mockNavigate).toHaveBeenCalledWith({ to: '/task/t1' });
   });
