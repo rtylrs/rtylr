@@ -17,11 +17,21 @@ interface MenuItem {
   [key: string]: unknown;
 }
 
+interface CategoryDetails {
+  menuItems?: MenuItem[];
+  [key: string]: unknown;
+}
+
 interface Category {
   _id: string;
+  /** Legacy wire id alias; canonical identity is `_id`. */
+  id?: string;
+  /** Legacy wire id alias; canonical identity is `_id`. */
+  itemId?: string;
   name: string;
   type: 'category';
   menuItems: MenuItem[];
+  details?: CategoryDetails;
   [key: string]: unknown;
 }
 
@@ -71,6 +81,11 @@ function isMenuItem(item: Category | Banner | MenuItem): item is MenuItem {
   return !isCategory(item) && !('bannerImage' in item);
 }
 
+/** Category identity covers the canonical `_id` plus legacy wire aliases. */
+function matchesCategoryId(item: Category, id: string): boolean {
+  return item._id === id || item.id === id || item.itemId === id;
+}
+
 const initialState: MenuState = {
   id: null,
   items: [],
@@ -107,7 +122,7 @@ export const useMenuStore = create<MenuState & MenuActions>()(
       editCategory: (id, updates) =>
         set((state) => ({
           items: state.items.map((item) =>
-            isCategory(item) && item.id === id ? { ...item, ...updates } : item
+            isCategory(item) && matchesCategoryId(item, id) ? { ...item, ...updates } : item
           ),
         })),
 
@@ -115,11 +130,7 @@ export const useMenuStore = create<MenuState & MenuActions>()(
 
       deleteCategory: (id) =>
         set((state) => ({
-          items: state.items.filter(
-            (item) =>
-              !isCategory(item) ||
-              (item._id !== id && (item as any).id !== id && item.itemId !== id)
-          ),
+          items: state.items.filter((item) => !isCategory(item) || !matchesCategoryId(item, id)),
         })),
 
       deleteBanner: (id) =>
