@@ -1,20 +1,21 @@
 import { describe, it, expect } from 'vitest';
 
 import {
-  isPast,
-  isToday,
-  isFuture,
+  addDays,
   daysBetween,
   daysUntil,
-  relativeDayLabel,
-  isWithinDays,
+  endOfWeek,
   formatDateShort,
   formatEntryTimestamp,
-  formatWeekDayShort,
   formatFullDayLabel,
-  addDays,
+  formatWeekDayShort,
+  isFuture,
+  isPast,
+  isToday,
+  isWithinDays,
+  relativeDayLabel,
   startOfWeek,
-  endOfWeek,
+  todayIso,
 } from './dateUtils';
 
 const TODAY = '2026-06-15';
@@ -27,8 +28,12 @@ describe('isPast', () => {
 
 describe('isToday', () => {
   it('matches today exactly', () => {
-    const today = new Date().toISOString().slice(0, 10);
-    expect(isToday(today)).toBe(true);
+    // todayIso, not toISOString. This built the UTC date, and only passed
+    // because todayIso was also UTC: both sides shared one wrong definition,
+    // so the test agreed with the bug instead of catching it. Now that
+    // todayIso is local it would fail every night between local and UTC
+    // midnight.
+    expect(isToday(todayIso())).toBe(true);
   });
 });
 

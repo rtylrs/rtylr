@@ -1,11 +1,14 @@
-/** Today in local YYYY-MM-DD */
-export function todayIso(): string {
-  const t = new Date();
-  const y = t.getFullYear();
-  const m = String(t.getMonth() + 1).padStart(2, '0');
-  const d = String(t.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+/**
+ * Re-exported, not reimplemented.
+ *
+ * There were two functions called todayIso, this one local and dateUtils'
+ * one UTC, so they returned different dates for hours every day and an
+ * import from the wrong module was invisible at the call site. dateUtils has
+ * the single definition now, and it is the local one this file had.
+ */
+import { todayIso } from './dateUtils';
+
+export { todayIso };
 
 export function isDueToday(dueDate: string | undefined): boolean {
   if (!dueDate) return false;
