@@ -263,6 +263,23 @@ export type WirePriority = 'none' | 'low' | 'medium' | 'high' | 'urgent';
 export const toWirePriority = (priority: ApiTask['priority']): WirePriority =>
   priority === 'no_priority' ? 'none' : priority;
 
+/**
+ * The value `flow_projects.icon` actually holds.
+ *
+ * Every reader in Flow treats this column as a glyph and falls back to this
+ * same character, and the backend seeds personal projects with a glyph too. In
+ * the dev database 2322 of ~2354 rows hold this exact value and 18 hold '\u2705';
+ * the only rows holding anything else are the ten Flow itself corrupted by
+ * writing lucide component names here ('folder', 'rocket', 'globe', 'flask',
+ * 'building-2'), which then render as those words.
+ *
+ * `icon` is `@required` on both the create and the update body, so a writer
+ * cannot decline to send one, which is why this is a constant rather than an
+ * omission. #1085 proposes moving the whole convention to lucide names; doing
+ * that needs those 2340 rows migrated, so it is not settled here.
+ */
+export const DEFAULT_PROJECT_ICON = '\u{1F4CB}';
+
 const toTaskCreatePayload = (data: {
   projectId?: string;
   title: string;
@@ -516,7 +533,7 @@ export const flowApi = {
         // description has to travel as the '-' sentinel the rest of this file
         // uses. Sending '' 400s with "description is required".
         description: data.description ?? '-',
-        icon: 'folder',
+        icon: DEFAULT_PROJECT_ICON,
         color: data.color ?? '#6366f1',
         // visibility is optional in the contract and empty already means
         // private, but sending it explicitly keeps the default visible at the
@@ -540,7 +557,7 @@ export const flowApi = {
         body: {
           name: data.name ?? '-',
           description: data.description ?? '-',
-          icon: data.icon ?? 'folder',
+          icon: data.icon ?? DEFAULT_PROJECT_ICON,
           color: data.color ?? '#6366f1',
           status: data.status ?? 'active',
           startDate: data.startDate ?? '',

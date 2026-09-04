@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useUpdateProject, useArchiveProject } from './useProjects';
+import { DEFAULT_PROJECT_ICON } from '../../shared/services/flowApi';
 import {
   useProjectMembers,
   useRemoveProjectMember,
@@ -210,7 +211,11 @@ const ProjectSettings: React.FC = () => {
                       // createProject uses. The field only ever displays as
                       // empty; it must not save as an empty string.
                       description: description.trim() || '-',
-                      icon: project.icon ?? 'folder',
+                      // Not 'folder'. The update body is a replacement, so a
+                      // project with no icon had a lucide component name
+                      // written into a column every reader renders as a glyph,
+                      // and the settings page then showed that word.
+                      icon: project.icon ?? DEFAULT_PROJECT_ICON,
                       color: project.color,
                       status: project.status ?? 'active',
                       startDate: project.startDate,
