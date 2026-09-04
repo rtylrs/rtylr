@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Users, AlertCircle } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
@@ -6,6 +6,7 @@ import { Avatar, EmptyState } from '@voxire/ui';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { useDirectory } from './useDirectory';
+import { groupByDepartment } from './groupByDepartment';
 
 const inputStyle: React.CSSProperties = {
   background: 'var(--flow-input-bg)',
@@ -34,6 +35,7 @@ const DirectoryScreen = (): React.JSX.Element => {
   const directoryQuery = useDirectory(search);
   const { data: members, isLoading, refetch } = directoryQuery;
   const isError = hasQueryFailed(directoryQuery);
+  const groups = useMemo(() => groupByDepartment(members ?? []), [members]);
 
   return (
     <>
@@ -99,34 +101,60 @@ const DirectoryScreen = (): React.JSX.Element => {
           ))}
 
         {!isLoading && !isError && members && members.length > 0 && (
-          <ul className="space-y-1.5">
-            {members.map((member) => {
-              const fullName = `${member.firstName ?? ''} ${member.lastName ?? ''}`.trim();
-              return (
-                <li
-                  key={member.id}
-                  className="flex items-center gap-3 rounded-md p-2"
-                  style={{ background: 'var(--flow-hover)' }}
+          <div className="space-y-5">
+            {groups.map((group) => (
+              <section key={group.key}>
+                <h2
+                  className="mb-2 flex items-baseline gap-2 text-meta font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  <Avatar initials={initials(fullName)} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-body font-medium" style={{ color: 'var(--flow-text)' }}>
-                      {fullName}
-                    </div>
-                    <div className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
-                      {[member.role, member.departmentName].filter(Boolean).join(' · ')}
-                    </div>
-                  </div>
-                  <div
-                    className="hidden shrink-0 text-meta sm:block"
-                    style={{ color: 'var(--flow-text-muted)' }}
+                  {group.name ?? t('flow.directory.noDepartment')}
+                  <span
+                    className="font-normal tabular-nums"
+                    style={{ color: 'var(--flow-text-dim)' }}
                   >
-                    {member.email}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                    {group.members.length}
+                  </span>
+                </h2>
+                <ul className="space-y-1.5">
+                  {group.members.map((member) => {
+                    const fullName = `${member.firstName ?? ''} ${member.lastName ?? ''}`.trim();
+                    return (
+                      <li
+                        key={member.id}
+                        className="flex items-center gap-3 rounded-md p-2"
+                        style={{ background: 'var(--flow-hover)' }}
+                      >
+                        <Avatar initials={initials(fullName)} size="sm" />
+                        <div className="min-w-0 flex-1">
+                          <div
+                            className="text-body font-medium"
+                            style={{ color: 'var(--flow-text)' }}
+                          >
+                            {fullName}
+                          </div>
+                          {/* The department is the group heading now, so the
+                              row carries the role alone rather than repeating
+                              it on every line. */}
+                          {member.role ? (
+                            <div className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
+                              {member.role}
+                            </div>
+                          ) : null}
+                        </div>
+                        <div
+                          className="hidden shrink-0 text-meta sm:block"
+                          style={{ color: 'var(--flow-text-muted)' }}
+                        >
+                          {member.email}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+          </div>
         )}
       </div>
     </>
