@@ -1,6 +1,23 @@
-/** Returns today's date as an ISO string (YYYY-MM-DD). */
+/**
+ * Today as YYYY-MM-DD in the reader's own timezone.
+ *
+ * Local, not UTC. A due date is a calendar day where the person is standing,
+ * and `toISOString()` gives the UTC day: the two differ between local
+ * midnight and UTC midnight, which is three hours a night at UTC+3 and the
+ * whole evening further east. In that window `isToday` called a task due
+ * yesterday today, `isPast` refused to call an overdue task overdue, and this
+ * function disagreed with the identically named one in lifeRhythm.ts, so the
+ * Today screen and a task row could label the same task differently on the
+ * same render.
+ *
+ * lifeRhythm.ts now re-exports this one, so there is a single definition.
+ */
 export function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /** Short day-of-week key, Sunday first to match `Date#getUTCDay()`'s own indexing. */
