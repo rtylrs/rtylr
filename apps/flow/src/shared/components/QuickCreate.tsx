@@ -209,7 +209,7 @@ export const QuickCreate: React.FC = () => {
                 }}
                 placeholder={t('flow.quickCreate.titlePlaceholder')}
                 rows={2}
-                className="w-full bg-transparent outline-none resize-none text-screen font-semibold leading-snug placeholder:opacity-40 mb-1"
+                className="w-full bg-transparent resize-none text-screen font-semibold leading-snug placeholder:opacity-40 mb-1"
                 style={{ color: 'var(--flow-text)' }}
               />
 
@@ -347,7 +347,7 @@ export const QuickCreate: React.FC = () => {
                     value={labelId}
                     onChange={(e) => setLabelId(e.target.value)}
                     disabled={labels.length === 0}
-                    className="w-full max-w-[240px] rounded-md px-2 py-1.5 text-body outline-none disabled:opacity-50"
+                    className="w-full max-w-[240px] rounded-md px-2 py-1.5 text-body disabled:opacity-50"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border-control)',
@@ -382,7 +382,7 @@ export const QuickCreate: React.FC = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder={t('flow.quickCreate.descriptionPlaceholder')}
                   rows={6}
-                  className="w-full rounded-lg px-3 py-2.5 text-body leading-relaxed outline-none resize-y min-h-[120px] placeholder:opacity-45"
+                  className="w-full rounded-lg px-3 py-2.5 text-body leading-relaxed resize-y min-h-[120px] placeholder:opacity-45"
                   style={{
                     background: 'var(--flow-input-bg)',
                     border: '1px solid var(--flow-border-control)',

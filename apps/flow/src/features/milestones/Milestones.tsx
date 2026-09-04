@@ -124,7 +124,7 @@ const Milestones: React.FC = () => {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('flow.milestones.namePlaceholder')}
-            className="w-full rounded-md px-3 py-2 text-meta outline-none"
+            className="w-full rounded-md px-3 py-2 text-meta"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border-control)',
@@ -139,7 +139,7 @@ const Milestones: React.FC = () => {
             <select
               value={selectedProjectId}
               onChange={(e) => setNewProjectId(e.target.value)}
-              className="w-full rounded-md px-3 py-2 text-title outline-none sm:text-meta"
+              className="w-full rounded-md px-3 py-2 text-title sm:text-meta"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border-control)',

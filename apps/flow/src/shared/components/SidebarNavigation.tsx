@@ -231,6 +231,10 @@ const SidebarItemRow: React.FC<{
   const active = item.route ? location.pathname === item.route.split('?')[0] : false;
   const Icon = ICONS[item.icon] ?? Circle;
   const commonClass = cn(
+    // flow-focus-inset, not the default ring: the sidebar drawer needs
+    // overflow:hidden for its slide transition, which clips a ring drawn at a
+    // positive offset on every row.
+    'flow-focus-inset',
     'group relative flex min-h-10 items-center gap-2 rounded-md px-2 text-meta font-medium transition-[background,box-shadow,opacity,transform] duration-150 lg:min-h-0 lg:py-1.5',
     active ? '' : 'hover:bg-[var(--flow-hover)]',
     isDragging && 'scale-[0.98] opacity-45',

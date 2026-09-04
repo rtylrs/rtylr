@@ -17,7 +17,7 @@ function ProjectCard({ project }: { project: Project }) {
     <button
       type="button"
       onClick={() => navigate({ to: `/p/${project.id}` })}
-      className="w-full text-left rounded-lg border p-4 transition-colors hover:bg-[var(--flow-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="w-full text-left rounded-lg border p-4 transition-colors hover:bg-[var(--flow-hover)] focus-visible:focus-visible:ring-2 focus-visible:ring-ring"
       style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-surface)' }}
     >
       <div className="flex items-start justify-between gap-2">
@@ -124,7 +124,7 @@ export const AllProjects: React.FC = () => {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t('flow.allProjects.search')}
-                className="w-full h-9 pl-8 pr-3 rounded-lg border text-sm outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-9 pl-8 pr-3 rounded-lg border text-sm focus:ring-1 focus:ring-ring"
                 style={{
                   borderColor: 'var(--flow-border-control)',
                   background: 'var(--flow-surface)',

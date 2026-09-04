@@ -210,7 +210,7 @@ export const NotificationsSection: React.FC = () => {
               onClick={() => toggle(item.key)}
               className={cn(
                 'flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full p-0.5',
-                'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-focus)]',
+                'transition-colors focus:focus-visible:ring-2 focus-visible:ring-[var(--accent-focus)]',
                 'focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--flow-bg)]'
               )}
               style={{
@@ -259,7 +259,7 @@ const LifeRhythmSection: React.FC = () => {
             type="time"
             value={prefs.quietStart}
             onChange={(e) => setPrefs({ quietStart: e.target.value })}
-            className="w-full rounded-lg px-3 py-2 text-body outline-none"
+            className="w-full rounded-lg px-3 py-2 text-body"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border-control)',
@@ -278,7 +278,7 @@ const LifeRhythmSection: React.FC = () => {
             type="time"
             value={prefs.quietEnd}
             onChange={(e) => setPrefs({ quietEnd: e.target.value })}
-            className="w-full rounded-lg px-3 py-2 text-body outline-none"
+            className="w-full rounded-lg px-3 py-2 text-body"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border-control)',
@@ -298,7 +298,7 @@ const LifeRhythmSection: React.FC = () => {
         <select
           value={prefs.digestHour}
           onChange={(e) => setPrefs({ digestHour: Number(e.target.value) })}
-          className="w-full max-w-[200px] rounded-lg px-3 py-2 text-body outline-none"
+          className="w-full max-w-[200px] rounded-lg px-3 py-2 text-body"
           style={{
             background: 'var(--flow-input-bg)',
             border: '1px solid var(--flow-border-control)',
@@ -600,7 +600,7 @@ export const AppearanceSection = (): React.JSX.Element => {
               aria-describedby={hexInvalid ? 'appearance-accent-hex-error' : undefined}
               onChange={(e) => onHexChange(e.target.value)}
               /* 16px minimum, or iOS auto-zooms the whole panel on focus. */
-              className="flow-focus min-h-[44px] w-full px-3 text-title outline-none"
+              className="flow-focus min-h-[44px] w-full px-3 text-title"
               style={inputStyle}
             />
           </div>
@@ -877,7 +877,7 @@ export const LabelsSection: React.FC = () => {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            className="flex-1 rounded-lg px-3 py-2 text-body outline-none"
+            className="flex-1 rounded-lg px-3 py-2 text-body"
             style={inputStyle}
           />
         </div>

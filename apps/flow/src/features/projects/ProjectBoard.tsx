@@ -470,7 +470,7 @@ const ProjectBoard: React.FC = () => {
                     if (e.key === 'Escape') setAddingColumn(false);
                   }}
                   placeholder={t('flow.board.columnName')}
-                  className="w-full bg-transparent outline-none text-meta font-medium mb-1.5"
+                  className="w-full bg-transparent text-meta font-medium mb-1.5"
                   style={{ color: 'var(--flow-text)' }}
                 />
                 <div className="flex items-center gap-1.5">
@@ -650,7 +650,7 @@ const KanbanColumn: React.FC<{
                 setEditing(false);
               }
             }}
-            className="flex-1 bg-transparent outline-none text-meta font-semibold min-w-0"
+            className="flex-1 bg-transparent text-meta font-semibold min-w-0"
             style={{ color: 'var(--flow-text)' }}
           />
         ) : (

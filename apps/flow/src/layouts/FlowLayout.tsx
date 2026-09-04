@@ -1294,7 +1294,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         }
                         if (e.key === 'Escape') setNewProjectOpen(false);
                       }}
-                      className="flex-1 rounded-lg px-3 py-2 text-body outline-none"
+                      className="flex-1 rounded-lg px-3 py-2 text-body"
                       style={{
                         background: 'var(--flow-input-bg)',
                         border: '1px solid var(--flow-border-control)',
@@ -1307,7 +1307,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     value={newProjectDescription}
                     onChange={(e) => setNewProjectDescription(e.target.value)}
                     rows={3}
-                    className="w-full rounded-lg px-3 py-2.5 text-body outline-none resize-none placeholder:opacity-45"
+                    className="w-full rounded-lg px-3 py-2.5 text-body resize-none placeholder:opacity-45"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border-control)',

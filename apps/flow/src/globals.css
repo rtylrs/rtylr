@@ -412,16 +412,6 @@
   animation: flow-shimmer 1.4s infinite;
 }
 
-/* --flow-border is 1.1:1 and cannot serve as a focus indicator. This is the
- * one focus treatment: 2px at 2px offset, 9.4:1 against --flow-bg. */
-.flow-focus {
-  outline: none;
-}
-.flow-focus:focus-visible {
-  outline: 2px solid var(--flow-focus-ring);
-  outline-offset: 2px;
-}
-
 /* Directional affordances should follow the language direction without
  * requiring each control to choose a separate icon. */
 [dir='rtl'] .flow-directional-icon {
@@ -429,13 +419,32 @@
 }
 
 /* --flow-border is 1.1:1 and cannot serve as a focus indicator. This is the
- * one focus treatment: 2px at 2px offset, 9.4:1 against --flow-bg. */
-.flow-focus {
-  outline: none;
+ * one focus treatment: 2px at 2px offset, 9.4:1 against --flow-bg.
+ *
+ * It applies to every interactive element by default rather than waiting for
+ * a class. 296 of the app's 317 interactive elements carried no focus
+ * treatment of their own, so an opt-in class meant the ring was missing far
+ * more often than it was present, and a new component started out missing it.
+ *
+ * .flow-focus stays for the same treatment applied explicitly, and
+ * .flow-focus-inset draws the ring inside the element's box for rows that sit
+ * inside an overflow:hidden ancestor, which would otherwise clip it. */
+:is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: 2px;
 }
+
 .flow-focus:focus-visible {
   outline: 2px solid var(--flow-focus-ring);
   outline-offset: 2px;
+}
+
+/* The sidebar drawer needs overflow:hidden for its slide transition, so a
+ * ring at a positive offset is cut off on every nav row. Drawing it inside
+ * the box keeps it visible without touching the transition. */
+.flow-focus-inset:focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: -2px;
 }
 
 /* Add Hours' own submitting spinner: 0.7s reads faster than the shared

@@ -89,7 +89,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
           onKeyDown={(e) => e.key === 'Enter' && submit()}
           placeholder={t('flow.taskDetail.subtaskAddPlaceholder')}
           disabled={disabled}
-          className="flex-1 bg-transparent outline-none text-meta disabled:opacity-60"
+          className="flex-1 bg-transparent text-meta disabled:opacity-60"
           style={{ color: 'var(--flow-text)' }}
         />
       </div>

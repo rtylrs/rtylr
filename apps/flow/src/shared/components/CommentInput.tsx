@@ -54,7 +54,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
         onKeyDown={handleKey}
         placeholder={placeholder ?? t('flow.taskDetail.commentPlaceholder')}
         disabled={disabled}
-        className="w-full bg-transparent outline-none resize-none p-3 text-meta disabled:opacity-60"
+        className="w-full bg-transparent resize-none p-3 text-meta disabled:opacity-60"
         rows={3}
         style={{ color: 'var(--flow-text)' }}
       />
