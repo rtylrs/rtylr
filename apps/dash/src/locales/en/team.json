@@ -13,7 +13,7 @@
     "userSingular": "user",
     "userPlural": "users",
     "noneLabel": "None",
-    "sectionsCount": "{{count}} section",
+    "sectionsCount_one": "{{count}} section",
     "sectionsCount_other": "{{count}} sections",
     "deleteTitle": "Delete \"{{name}}\"?",
     "deleteDescription": "Members will lose access granted by this group. This cannot be undone.",
@@ -46,7 +46,7 @@
     "addMembersTitle": "Add members",
     "allMembersInGroup": "All team members are already in this group.",
     "cancelButton": "Cancel",
-    "addNButton": "Add {{count}} member",
+    "addNButton_one": "Add {{count}} member",
     "addNButton_other": "Add {{count}} members",
     "removeMemberAriaLabel": "Remove {{name}} from group"
   },
