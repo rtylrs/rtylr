@@ -84,7 +84,10 @@
     "deleted": "Projet supprimé",
     "restoreFailed": "Échec de la restauration du projet",
     "purgeFailed": "Échec de la suppression définitive du projet",
-    "visibilityFailed": "Échec de la mise à jour de la visibilité"
+    "visibilityFailed": "Échec de la mise à jour de la visibilité",
+    "archived": "Projet archivé.",
+    "archivedUntil": "Projet archivé. Il sera définitivement supprimé le {{date}}.",
+    "archiveFailed": "Échec de l'archivage du projet"
   },
   "milestone": {
     "createFailed": "Échec de la création du jalon",

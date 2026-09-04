@@ -856,12 +856,6 @@
     "active": "Actif",
     "completed": "Terminé"
   },
-  "toasts": {
-    "project": {
-      "archived": "Projet archivé.",
-      "archivedUntil": "Projet archivé. Il sera supprimé définitivement le {{date}}."
-    }
-  },
   "status": {
     "openSettings": "Statuts",
     "settingsTitle": "Statuts",
