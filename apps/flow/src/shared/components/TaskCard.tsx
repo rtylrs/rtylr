@@ -88,7 +88,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           opacity: dimmed ? 0.5 : undefined,
           background: 'var(--flow-card)',
           border: selected ? '1px solid var(--accent)' : '1px solid var(--flow-border)',
-          boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : '0 1px 3px rgba(0,0,0,0.15)',
+          boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : 'var(--flow-shadow-card)',
         }}
         whileHover={{ y: -1 }}
       >
