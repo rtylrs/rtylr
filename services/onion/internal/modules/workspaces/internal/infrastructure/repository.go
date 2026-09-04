@@ -759,6 +759,23 @@ func (r *Repository) CreateComment(ctx context.Context, taskID, userID int64, co
 	return res.LastInsertId()
 }
 
+func (r *Repository) GetCommentByID(ctx context.Context, commentID int64) (domain.TaskComment, error) {
+	row, err := r.queries.GetCommentByID(ctx, commentID)
+	if err != nil {
+		logger.Ctx(ctx).Error("GetCommentByID failed", logger.Error(err))
+		return domain.TaskComment{}, err
+	}
+	return domain.TaskComment{
+		ID:        row.ID,
+		TaskID:    row.TaskID,
+		UserID:    row.UserID,
+		Content:   row.Content,
+		IsEdited:  row.IsEdited.Bool,
+		CreatedAt: row.CreatedAt.Time,
+		UpdatedAt: row.UpdatedAt.Time,
+	}, nil
+}
+
 func (r *Repository) GetCommentsByTask(ctx context.Context, taskID int64) ([]domain.TaskComment, error) {
 	rows, err := r.queries.GetCommentsByTask(ctx, taskID)
 	if err != nil {
@@ -1169,7 +1186,7 @@ func enrichedTaskColumns(includeDescription bool) []string {
 	}
 
 	return []string{
-		"t.id", "t.project_id", "t.workspace_id", "t.owner_id", "t.parent_task_id", "t.section_id",
+		"t.id", "t.project_id", "t.workspace_id", "t.owner_id", "t.business_id", "t.parent_task_id", "t.section_id",
 		"t.title", descriptionColumn, "COALESCE(t.status, 'todo') AS status", "COALESCE(t.priority, 'none') AS priority",
 		"t.assignee_id", "t.reporter_id", "t.due_date", "t.start_date", "t.completed_at",
 		"t.estimated_hours", "t.actual_hours", "t.sort_order", "t.labels",
@@ -1252,7 +1269,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 	var labelsRaw []byte
 
 	err := rows.Scan(
-		&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &parentID, &sectionID,
+		&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &t.BusinessID, &parentID, &sectionID,
 		&t.Title, &desc, &t.Status, &t.Priority,
 		&assigneeID, &t.ReporterID,
 		&dueDate, &startDate, &completedAt,
@@ -1868,6 +1885,22 @@ func (r *Repository) LookupUserByEmail(ctx context.Context, email string) (int64
 	}
 	if err != nil {
 		logger.Ctx(ctx).Error("LookupUserByEmail failed", logger.Error(err))
+		return 0, false, err
+	}
+	return id, true, nil
+}
+
+func (r *Repository) LookupUserByUsername(ctx context.Context, username string, businessID int64) (int64, bool, error) {
+	id, err := r.queries.LookupUserByUsername(ctx, sqlc.LookupUserByUsernameParams{
+		Username:     sql.NullString{String: username, Valid: true},
+		BusinessID:   sql.NullInt64{Int64: businessID, Valid: businessID != 0},
+		BusinessID_2: businessID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, false, nil
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("LookupUserByUsername failed", logger.Error(err))
 		return 0, false, err
 	}
 	return id, true, nil

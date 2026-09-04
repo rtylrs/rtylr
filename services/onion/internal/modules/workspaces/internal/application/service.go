@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -47,6 +48,13 @@ const (
 	// resolved per reader; the task title, project and actor travel in their own
 	// columns alongside it.
 	assignedNotificationTitle = "Assigned to you"
+
+	commentNotification      = "comment"
+	commentNotificationTitle = "New comment on your task"
+	mentionNotification      = "mention"
+	mentionNotificationTitle = "You were mentioned in a task"
+	statusNotification       = "status_change"
+	statusNotificationTitle  = "Task status changed"
 )
 
 func invalidateWorkspacesScope(ctx context.Context, businessID int64) {
@@ -619,6 +627,7 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 		ProjectID:    input.ProjectID,
 		WorkspaceID:  input.WorkspaceID,
 		OwnerID:      input.OwnerID,
+		BusinessID:   input.BusinessID,
 		ParentTaskID: input.ParentTaskID,
 		Title:        input.Title,
 		Description:  input.Description,
@@ -758,6 +767,18 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		}
 	}
 
+	if input.Status != "" && existing.Status != input.Status {
+		notificationTask := existing
+		notificationTask.Status = input.Status
+		if input.Title != "" {
+			notificationTask.Title = input.Title
+		}
+		if input.AssigneeID != nil {
+			notificationTask.AssigneeID = input.AssigneeID
+		}
+		s.announceStatusChange(ctx, notificationTask, userID, input.Status)
+	}
+
 	announced = reassignment
 	return nil
 }
@@ -839,6 +860,137 @@ func (s *Service) announceAssigneeChange(ctx context.Context, change assigneeCha
 	}
 }
 
+func (s *Service) notifyTaskRecipient(
+	ctx context.Context,
+	task domain.Task,
+	recipientID, actorID int64,
+	notificationType, title, description string,
+	settingEnabled func(domain.UserSettings) bool,
+) {
+	if recipientID == 0 || recipientID == actorID {
+		return
+	}
+
+	settings, err := s.repo.GetUserSettings(ctx, recipientID)
+	if err != nil {
+		logger.Ctx(ctx).Error("notifyTaskRecipient: failed to read notification settings",
+			logger.Int("owner_id", int(task.OwnerID)),
+			logger.Int("task_id", int(task.ID)),
+			logger.Int("recipient_id", int(recipientID)),
+			logger.Error(err))
+		return
+	}
+	if !settingEnabled(settings) {
+		return
+	}
+
+	taskID := task.ID
+	actor := actorID
+	notification := domain.CreateNotificationInput{
+		UserID:       recipientID,
+		Type:         notificationType,
+		Title:        title,
+		Description:  description,
+		TaskID:       &taskID,
+		TaskTitle:    task.Title,
+		ActorID:      &actor,
+		Project:      task.ProjectName,
+		ProjectColor: task.ProjectColor,
+	}
+	if task.WorkspaceID != 0 {
+		workspaceID := task.WorkspaceID
+		notification.WorkspaceID = &workspaceID
+	}
+
+	if err := s.CreateNotification(ctx, notification); err != nil {
+		logger.Ctx(ctx).Error("notifyTaskRecipient: failed to create notification",
+			logger.Int("owner_id", int(task.OwnerID)),
+			logger.Int("task_id", int(task.ID)),
+			logger.Int("recipient_id", int(recipientID)),
+			logger.String("type", notificationType),
+			logger.Error(err))
+	}
+}
+
+func mentionedUsernames(content string) []string {
+	usernames := make([]string, 0)
+	seen := make(map[string]struct{})
+	for index := 0; index < len(content); index++ {
+		if content[index] != '@' || (index > 0 && isMentionPrefixChar(content[index-1])) {
+			continue
+		}
+
+		start := index + 1
+		if start >= len(content) || !isMentionFirstChar(content[start]) {
+			continue
+		}
+		end := start
+		for end < len(content) && isMentionTokenChar(content[end]) {
+			end++
+		}
+		if end == start {
+			continue
+		}
+
+		username := strings.ToLower(content[start:end])
+		if _, found := seen[username]; found {
+			index = end - 1
+			continue
+		}
+		seen[username] = struct{}{}
+		usernames = append(usernames, username)
+		index = end - 1
+	}
+	return usernames
+}
+
+func isMentionTokenChar(character byte) bool {
+	return (character >= 'a' && character <= 'z') ||
+		(character >= 'A' && character <= 'Z') ||
+		(character >= '0' && character <= '9') ||
+		character == '.' || character == '_' || character == '-'
+}
+
+func isMentionFirstChar(character byte) bool {
+	return (character >= 'a' && character <= 'z') ||
+		(character >= 'A' && character <= 'Z') ||
+		(character >= '0' && character <= '9')
+}
+
+func isMentionPrefixChar(character byte) bool {
+	return isMentionTokenChar(character) || character == '@'
+}
+
+func (s *Service) announceCommentNotifications(ctx context.Context, task domain.Task, actorID int64, content string) {
+	s.notifyTaskRecipient(ctx, task, assigneeID(task.AssigneeID), actorID,
+		commentNotification, commentNotificationTitle, content,
+		func(settings domain.UserSettings) bool { return settings.TaskComments })
+
+	for _, username := range mentionedUsernames(content) {
+		recipientID, found, err := s.repo.LookupUserByUsername(ctx, username, task.BusinessID)
+		if err != nil {
+			logger.Ctx(ctx).Error("announceCommentNotifications: failed to resolve mention",
+				logger.Int("owner_id", int(task.OwnerID)),
+				logger.Int("task_id", int(task.ID)),
+				logger.String("username", username),
+				logger.Error(err))
+			continue
+		}
+		if !found {
+			continue
+		}
+		s.notifyTaskRecipient(ctx, task, recipientID, actorID,
+			mentionNotification, mentionNotificationTitle, content,
+			func(settings domain.UserSettings) bool { return settings.Mentions })
+	}
+}
+
+func (s *Service) announceStatusChange(ctx context.Context, task domain.Task, actorID int64, status string) {
+	s.notifyTaskRecipient(ctx, task, assigneeID(task.AssigneeID), actorID,
+		statusNotification, statusNotificationTitle, status,
+		func(settings domain.UserSettings) bool { return settings.StatusChanges })
+}
+
 // publishUserTaskEvent sends a task event to one person's own user topic.
 //
 // This is the only place a task event reaches a `user:<id>` topic, and it only
@@ -877,7 +1029,16 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskS
 		}
 	}
 
-	return s.repo.UpdateTaskStatus(ctx, input)
+	if updateErr := s.repo.UpdateTaskStatus(ctx, input); updateErr != nil {
+		return updateErr
+	}
+
+	if existing.Status != input.Status {
+		notificationTask := existing
+		notificationTask.Status = input.Status
+		s.announceStatusChange(ctx, notificationTask, userID, input.Status)
+	}
+	return nil
 }
 
 func (s *Service) DeleteTask(ctx context.Context, taskID, businessID int64) error {
@@ -930,6 +1091,11 @@ func (s *Service) SearchTasks(ctx context.Context, workspaceID int64, q string, 
 // ─────────────────────────────────────────────
 
 func (s *Service) AddComment(ctx context.Context, taskID, userID int64, content string) (domain.TaskComment, error) {
+	task, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		return domain.TaskComment{}, err
+	}
+
 	id, err := s.repo.CreateComment(ctx, taskID, userID, content)
 	if err != nil {
 		return domain.TaskComment{}, err
@@ -939,12 +1105,20 @@ func (s *Service) AddComment(ctx context.Context, taskID, userID int64, content 
 		logger.Ctx(ctx).Error("AddComment: failed to log activity", logger.Error(actErr))
 	}
 
-	return domain.TaskComment{
+	comment := domain.TaskComment{
 		ID:      id,
 		TaskID:  taskID,
 		UserID:  userID,
 		Content: content,
-	}, nil
+	}
+	if stored, readErr := s.repo.GetCommentByID(ctx, id); readErr != nil {
+		logger.Ctx(ctx).Error("AddComment: failed to read stored comment", logger.Error(readErr))
+	} else {
+		comment = stored
+	}
+
+	s.announceCommentNotifications(ctx, task, userID, content)
+	return comment, nil
 }
 
 func (s *Service) DeleteComment(ctx context.Context, commentID, userID int64) error {

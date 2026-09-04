@@ -120,5 +120,9 @@ func (s *Service) SetTaskStatus(ctx context.Context, taskID, statusID, callerID,
 	if err := s.repo.SetTaskStatusID(ctx, taskID, businessID, statusID, status.LegacyStatus); err != nil {
 		return "", err
 	}
+	if task.Status != status.LegacyStatus {
+		task.Status = status.LegacyStatus
+		s.announceStatusChange(ctx, task, callerID, status.LegacyStatus)
+	}
 	return status.LegacyStatus, nil
 }

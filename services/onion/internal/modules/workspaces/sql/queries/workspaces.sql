@@ -113,6 +113,12 @@ DELETE FROM flow_tasks WHERE id = ? AND business_id = ?;
 -- name: CreateComment :execresult
 INSERT INTO flow_task_comments (task_id, user_id, content) VALUES (?, ?, ?);
 
+-- name: GetCommentByID :one
+SELECT id, task_id, user_id, content, is_edited, created_at, updated_at
+FROM flow_task_comments
+WHERE id = ?
+LIMIT 1;
+
 -- name: GetCommentsByTask :many
 SELECT id, task_id, user_id, content, is_edited, created_at, updated_at
 FROM flow_task_comments WHERE task_id = ? ORDER BY created_at ASC, id ASC LIMIT 500;

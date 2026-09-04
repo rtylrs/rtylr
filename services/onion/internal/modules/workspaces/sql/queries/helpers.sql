@@ -67,6 +67,23 @@ FROM users
 WHERE email = ?
 LIMIT 1;
 
+-- cross-schema read from users and user_business_access: resolve a mention
+-- inside the task's business without exposing same-named users from another
+-- tenant
+-- name: LookupUserByUsername :one
+SELECT u.id
+FROM users u
+WHERE u.username = ?
+  AND (
+      u.business_id = ?
+      OR EXISTS (
+          SELECT 1
+          FROM user_business_access uba
+          WHERE uba.user_id = u.id AND uba.business_id = ?
+      )
+  )
+LIMIT 1;
+
 -- name: IsWorkspaceMember :one
 SELECT EXISTS(
     SELECT 1 FROM flow_workspaces w
