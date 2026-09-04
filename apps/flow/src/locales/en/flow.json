@@ -725,7 +725,13 @@
     "noTasks": "No tasks",
     "quickAddPlaceholder": "Add a personal task and press Enter",
     "quickAddButton": "Add",
-    "quickAddNoLabelsReason": "Add a label in Settings before creating tasks."
+    "quickAddNoLabelsReason": "Add a label in Settings before creating tasks.",
+    "buckets": {
+      "recentlyAssigned": "Recently assigned",
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "later": "Later"
+    }
   },
   "commandBar": {
     "goToInbox": "Go to Inbox",
