@@ -10,6 +10,9 @@ import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
 import { useProjects } from '../projects/useProjects';
+import GateNotice from '../../shared/components/GateNotice';
+
+const NO_PROJECT_GATE_ID = 'cycles-project-gate';
 
 const Cycles: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -54,7 +57,16 @@ const Cycles: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1.5">
-            <span className="sr-only">{t('flow.cycles.project')}</span>
+            {/* Visible, not sr-only. S-15 asks for a Project label, and a
+                selector holding a 60-character truncated project name is
+                exactly the case where the reader needs to know what the
+                truncated thing is. */}
+            <span
+              className="hidden text-meta sm:inline"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {t('flow.cycles.project')}
+            </span>
             <select
               value={selectedProjectId}
               onChange={(e) => setProjectId(e.target.value)}
@@ -81,6 +93,7 @@ const Cycles: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             disabled={!selectedProjectId}
+            aria-describedby={selectedProjectId ? undefined : NO_PROJECT_GATE_ID}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
@@ -88,6 +101,18 @@ const Cycles: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* A cycle belongs to a project, so with no project there is nothing to
+          create one against. The button was simply dim, which is the case
+          root CLAUDE.md rule 12 exists for: state the reason or drop the
+          control. */}
+      {!selectedProjectId && (
+        <GateNotice
+          id={NO_PROJECT_GATE_ID}
+          className="mx-6 mt-3"
+          reason={t('flow.cycles.newCycleGate')}
+        />
+      )}
 
       {showCreate && (
         <div
