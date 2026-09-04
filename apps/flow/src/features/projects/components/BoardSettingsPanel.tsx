@@ -7,6 +7,7 @@ import { useCreateColumn, useUpdateColumn, useDeleteColumn } from '../useColumns
 import GateNotice from '../../../shared/components/GateNotice';
 import type { ApiProjectColumn } from '../../../shared/services/flowApi';
 import type { BoardGroupKey } from '../../../shared/lib/boardUtils';
+import { useDialogBehavior } from '../../../shared/lib/useDialogBehavior';
 
 const GROUP_KEYS: BoardGroupKey[] = ['none', 'assignee', 'priority', 'due'];
 
@@ -50,6 +51,7 @@ const BoardSettingsPanel = ({
   onGroupByChange,
 }: BoardSettingsPanelProps): React.JSX.Element | null => {
   const { t } = useTranslation();
+  const { panelRef } = useDialogBehavior<HTMLDivElement>(open, onClose);
   const createColumn = useCreateColumn(projectId);
   const updateColumn = useUpdateColumn(projectId);
   const deleteColumn = useDeleteColumn(projectId);
@@ -108,12 +110,15 @@ const BoardSettingsPanel = ({
       aria-label={t('flow.board.settingsTitle')}
       className="fixed inset-0 z-50 flex flex-col overflow-y-auto p-4 md:items-center md:justify-center"
       style={{ background: 'rgba(0,0,0,.5)' }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
     >
       <div
-        className="w-full rounded-lg p-4 md:max-w-[520px]"
+        ref={panelRef}
+        tabIndex={-1}
+        // A panel taller than the viewport was centred by the overlay, which
+        // pushed its top off the screen: the measured case was 1242px in a
+        // 900px viewport with its own title at -171px. Bounding the height and
+        // scrolling the panel keeps the title reachable at any viewport.
+        className="max-h-[calc(100dvh-64px)] w-full overflow-y-auto rounded-lg p-4 md:max-w-[520px]"
         style={{
           background: 'var(--flow-card)',
           border: '1px solid var(--flow-border)',
