@@ -510,12 +510,7 @@ const GroupDetail = (): React.JSX.Element => {
                     onClick={handleAddMembers}
                     disabled={selectedToAdd.length === 0 || addMembers.isPending}
                   >
-                    {t(
-                      selectedToAdd.length === 1
-                        ? 'groupDetail.addNButton'
-                        : 'groupDetail.addNButton_other',
-                      { count: selectedToAdd.length }
-                    )}
+                    {t('groupDetail.addNButton', { count: selectedToAdd.length })}
                   </Button>
                 </div>
               </div>
