@@ -745,7 +745,8 @@
     "emptyDescription": "Démarrez votre premier sprint de livraison de deux semaines pour suivre le périmètre et la progression.",
     "createFirst": "Créer le premier cycle",
     "project": "Projet",
-    "noProjects": "Aucun projet pour le moment"
+    "noProjects": "Aucun projet pour le moment",
+    "newCycleGate": "Un cycle appartient à un projet, et cette entreprise n'en a encore aucun. Créez d'abord un projet."
   },
   "myIssues": {
     "loading": "Chargement…",
