@@ -883,7 +883,13 @@
     "transferDescription": "انقل الملكية إلى أي عضو في المؤسسة. ستبقى عضوًا.",
     "transferCta": "نقل",
     "transferConfirmHint": "سيتم نقل الملكية فورًا. اضغط تأكيد للمتابعة.",
-    "transferring": "جارٍ النقل…"
+    "transferring": "جارٍ النقل…",
+    "tabs": {
+      "general": "عام",
+      "members": "الأعضاء",
+      "integrations": "التكاملات",
+      "danger": "منطقة الخطر"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد",
