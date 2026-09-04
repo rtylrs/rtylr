@@ -220,7 +220,14 @@ const TaskDetail: React.FC = () => {
     patch: Partial<Task>,
     options?: { onSuccess?: () => void }
   ) => {
-    updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> }, options);
+    // Only pass options when there are some: `mutate(payload, undefined)` and
+    // `mutate(payload)` behave identically, but they are not the same call, and
+    // every existing caller here passes none.
+    if (options) {
+      updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> }, options);
+      return;
+    }
+    updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> });
   };
   const addComment = (
     taskId: string,
