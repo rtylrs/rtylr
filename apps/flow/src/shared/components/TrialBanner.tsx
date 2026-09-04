@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Clock, Zap } from 'lucide-react';
 import { resolveAppUrl } from '@voxire/config';
 import { useFlowSubscription } from '../hooks/queries/useFlowSubscription';
@@ -11,6 +12,7 @@ function daysLeft(trialEndsAt: string | null): number {
 const DISMISSED_KEY = 'trial_banner_dismissed';
 
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === '1');
 
   const { data } = useFlowSubscription();
@@ -36,10 +38,14 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
     >
       <Clock size={14} style={{ color: 'var(--flow-warning, #f59e0b)', flexShrink: 0 }} />
       <p className="flex-1 font-medium" style={{ color: 'var(--flow-warning-dark, #92400e)' }}>
+        {/*
+          The day count goes through i18next rather than a `days !== 1 ? 's'`
+          suffix, which only ever worked for English.
+        */}
         {days === 0
-          ? 'Your trial ends today.'
-          : `Your trial ends in ${days} day${days !== 1 ? 's' : ''}.`}{' '}
-        Add a payment method to keep your data.
+          ? t('flow.trialBanner.endsToday')
+          : t('flow.trialBanner.endsIn', { count: days })}{' '}
+        {t('flow.trialBanner.addPayment')}
       </p>
       <a
         href={`${resolveAppUrl('dash')}/settings/billing`}
@@ -47,11 +53,11 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         style={{ background: 'var(--flow-warning, #f59e0b)', color: '#fff' }}
       >
         <Zap size={11} />
-        Activate plan
+        {t('flow.trialBanner.activate')}
       </a>
       <button
         type="button"
-        aria-label="Dismiss"
+        aria-label={t('flow.trialBanner.dismiss')}
         onClick={dismiss}
         className="h-6 w-6 flex items-center justify-center rounded-sm shrink-0 hover:bg-amber-100 transition-colors"
         style={{ color: 'var(--flow-warning-dark, #92400e)' }}
