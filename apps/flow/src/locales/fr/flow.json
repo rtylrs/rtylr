@@ -888,5 +888,13 @@
     "confirmRemoveStatus": "Supprimer le statut",
     "cancel": "Annuler",
     "none": "Aucun statut personnalisé"
+  },
+  "taskMenu": {
+    "label": "Actions de la tâche",
+    "openTask": "Ouvrir la tâche",
+    "copyLink": "Copier le lien",
+    "deleteTitle": "Supprimer la tâche",
+    "deleteConfirmPrefix": "Supprimer",
+    "deleteConfirmSuffix": " ? Cette action est irréversible."
   }
 }
