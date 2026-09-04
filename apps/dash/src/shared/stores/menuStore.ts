@@ -74,7 +74,7 @@ interface MenuActions {
 }
 
 function isCategory(item: Category | Banner | MenuItem): item is Category {
-  return (item as Category).type === 'category';
+  return 'type' in item && item.type === 'category';
 }
 
 function isMenuItem(item: Category | Banner | MenuItem): item is MenuItem {
@@ -140,7 +140,7 @@ export const useMenuStore = create<MenuState & MenuActions>()(
 
       deleteBanner: (id) =>
         set((state) => ({
-          items: state.items.filter((item) => (item as Banner)._id !== id),
+          items: state.items.filter((item) => item._id !== id),
         })),
 
       addMenuItem: async (categoryId, item) => {
@@ -184,33 +184,32 @@ export const useMenuStore = create<MenuState & MenuActions>()(
 
       updateMenuItem: (id, updates) =>
         set((state) => ({
-          items: state.items.map((item) => {
-            const itemIdMatch = (item as any)._id === id || (item as any).itemId === id;
-            if (itemIdMatch) {
-              const currentDetails = (item as MenuItem).details || {
-                name: (item as MenuItem).name || '',
-              };
-              const newDetails = { ...currentDetails, ...updates.details };
-              return { ...item, ...updates, details: newDetails } as MenuItem;
+          items: state.items.map((item): Category | Banner | MenuItem => {
+            // The top-level pass is menu items only. It used to match any
+            // entry in the union by `_id`, cast the result to MenuItem and
+            // overwrite `details` with `{ name }`, which for a category
+            // whose id collided wiped `details.menuItems` outright and for a
+            // banner produced an entry that was neither shape. Both were
+            // reachable only through an id collision, and the `as any` casts
+            // are what allowed them to compile.
+            if (isMenuItem(item) && matchesMenuItemId(item, id)) {
+              const currentDetails = item.details ?? { name: item.name || '' };
+              return { ...item, ...updates, details: { ...currentDetails, ...updates.details } };
             }
-            if (isCategory(item) && (item as any).details?.menuItems) {
-              const updatedSubItems = ((item as any).details.menuItems as MenuItem[]).map(
-                (subItem) => {
-                  if (subItem._id === id || subItem.itemId === id) {
-                    const currentSubDetails = subItem.details || { name: subItem.name || '' };
-                    const newSubDetails = { ...currentSubDetails, ...updates.details };
-                    return { ...subItem, ...updates, details: newSubDetails } as MenuItem;
-                  }
-                  return subItem;
-                }
-              );
+            if (isCategory(item) && item.details?.menuItems) {
+              const updatedSubItems = item.details.menuItems.map((subItem) => {
+                if (!matchesMenuItemId(subItem, id)) return subItem;
+                const currentSubDetails = subItem.details ?? { name: subItem.name || '' };
+                return {
+                  ...subItem,
+                  ...updates,
+                  details: { ...currentSubDetails, ...updates.details },
+                };
+              });
               return {
                 ...item,
-                details: {
-                  ...((item as any).details || {}),
-                  menuItems: updatedSubItems,
-                },
-              } as Category;
+                details: { ...item.details, menuItems: updatedSubItems },
+              };
             }
             return item;
           }),
