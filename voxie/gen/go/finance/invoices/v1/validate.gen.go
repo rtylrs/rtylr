@@ -31,6 +31,17 @@ func (m *InvoiceSummary) Validate() error {
 	return nil
 }
 
+func (m *BillableTimeEntry) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *InvoiceDetail) Validate() error {
 	if m == nil {
 		return nil
@@ -204,6 +215,33 @@ func (m *ListInvoicesResponse) Validate() error {
 	for _, value := range m.Invoices {
 		if err := value.Validate(); err != nil {
 			violations = append(violations, "invoices: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListBillableTimeEntriesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListBillableTimeEntriesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Entries {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "entries: "+err.Error())
 		}
 	}
 	if len(violations) > 0 {

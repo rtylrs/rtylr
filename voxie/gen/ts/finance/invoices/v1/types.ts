@@ -118,6 +118,65 @@ if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt ==
 return violations;
 }
 
+export interface BillableTimeEntry {
+id?: string;
+employeeId?: string;
+projectId?: string;
+taskId?: string;
+date?: string;
+durationMinutes?: string;
+description?: string;
+isBillable?: boolean;
+status?: string;
+source?: string;
+}
+
+export function decodeBillableTimeEntry(v: any): BillableTimeEntry {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+employeeId: v.employee_id,
+projectId: v.project_id,
+taskId: v.task_id,
+date: v.date,
+durationMinutes: v.duration_minutes,
+description: v.description,
+isBillable: v.is_billable,
+status: v.status,
+source: v.source,
+};
+}
+
+export function encodeBillableTimeEntry(v: BillableTimeEntry): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.date !== undefined) { out.date = v.date; }
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.isBillable !== undefined) { out.is_billable = v.isBillable; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.source !== undefined) { out.source = v.source; }
+return out;
+}
+
+export function validateBillableTimeEntry(v: BillableTimeEntry): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.durationMinutes))) violations.push("duration_minutes has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.isBillable !== undefined && v.isBillable !== null && !(typeof v.isBillable === "boolean")) violations.push("is_billable has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.source !== undefined && v.source !== null && !(typeof v.source === "string")) violations.push("source has invalid type");
+return violations;
+}
+
 export interface InvoiceDetail {
 id?: string;
 ownerId?: string;
@@ -629,6 +688,77 @@ export function validateListInvoicesResponse(v: ListInvoicesResponse): string[] 
 const violations: string[] = [];
 if (v.invoices !== undefined && v.invoices !== null && !(Array.isArray(v.invoices) && (v.invoices).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("invoices has invalid type");
 if (v.invoices !== undefined && v.invoices !== null) for (const item of v.invoices) violations.push(...validateInvoiceSummary(item).map((message) => "invoices: " + message));
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
+return violations;
+}
+
+export interface ListBillableTimeEntriesRequest {
+page?: number;
+pageSize?: number;
+}
+
+export function decodeListBillableTimeEntriesRequest(v: any): ListBillableTimeEntriesRequest {
+if (v === null || v === undefined) return v;
+return {
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListBillableTimeEntriesRequest(v: ListBillableTimeEntriesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
+}
+
+export function validateListBillableTimeEntriesRequest(v: ListBillableTimeEntriesRequest): string[] {
+const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
+return violations;
+}
+
+export interface ListBillableTimeEntriesResponse {
+entries?: (BillableTimeEntry)[];
+total?: number;
+totalMinutes?: number;
+page?: number;
+pageSize?: number;
+hasMore?: boolean;
+}
+
+export function decodeListBillableTimeEntriesResponse(v: any): ListBillableTimeEntriesResponse {
+if (v === null || v === undefined) return v;
+return {
+entries: (v.entries !== undefined ? (v.entries as any[]).map(decodeBillableTimeEntry) : v.entries),
+total: v.total,
+totalMinutes: v.total_minutes,
+page: v.page,
+pageSize: v.page_size,
+hasMore: v.has_more,
+};
+}
+
+export function encodeListBillableTimeEntriesResponse(v: ListBillableTimeEntriesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.entries !== undefined) { out.entries = (v.entries as any[]).map(encodeBillableTimeEntry); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.totalMinutes !== undefined) { out.total_minutes = v.totalMinutes; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
+return out;
+}
+
+export function validateListBillableTimeEntriesResponse(v: ListBillableTimeEntriesResponse): string[] {
+const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null && !(Array.isArray(v.entries) && (v.entries).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("entries has invalid type");
+if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateBillableTimeEntry(item).map((message) => "entries: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.totalMinutes !== undefined && v.totalMinutes !== null && !(typeof v.totalMinutes === "number" && Number.isSafeInteger(v.totalMinutes) && v.totalMinutes >= Number.MIN_SAFE_INTEGER && v.totalMinutes <= Number.MAX_SAFE_INTEGER)) violations.push("total_minutes has invalid type");
 if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
 if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");

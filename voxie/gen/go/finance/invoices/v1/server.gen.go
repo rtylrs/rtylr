@@ -234,6 +234,7 @@ func (w *statusResponseWriter) Flush() {
 
 type InvoicesServiceServer interface {
 	ListInvoices(ctx context.Context, req *ListInvoicesRequest) (*ListInvoicesResponse, error)
+	ListBillableTimeEntries(ctx context.Context, req *ListBillableTimeEntriesRequest) (*ListBillableTimeEntriesResponse, error)
 	CreateInvoice(ctx context.Context, req *CreateInvoiceRequest) (*CreateInvoiceResponse, error)
 	GetInvoice(ctx context.Context, req *GetInvoiceRequest) (*GetInvoiceResponse, error)
 	UpdateInvoice(ctx context.Context, req *UpdateInvoiceRequest) (*UpdateInvoiceResponse, error)
@@ -333,6 +334,40 @@ func RegisterInvoicesServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "InvoicesService", Method: "listInvoices", HTTPMethod: "GET", Route: "/finance/invoices/v1/invoices", AuthSchemes: nil}))
+	mux.Handle("GET /finance/invoices/v1/invoices/billable-time", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListBillableTimeEntriesRequest)
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
+		}
+		if values := r.URL.Query()["page_size"]; len(values) > 0 {
+			value := values[0]
+			parsedPageSize, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
+				return
+			}
+			req.PageSize = parsedPageSize
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListBillableTimeEntries(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "InvoicesService", Method: "listBillableTimeEntries", HTTPMethod: "GET", Route: "/finance/invoices/v1/invoices/billable-time", AuthSchemes: nil}))
 	mux.Handle("POST /finance/invoices/v1/invoices", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateInvoiceRequest)
 		if r.Body != nil {

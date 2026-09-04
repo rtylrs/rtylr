@@ -48,6 +48,31 @@ message InvoiceSummary {
   created_at: string
 }
 
+/// BillableTimeEntry is approved billable HR time that has not been linked to
+/// a finance invoice yet.
+message BillableTimeEntry {
+  /// id is the unique identifier for the time entry.
+  id: int64
+  /// employee_id identifies the employee who logged the time.
+  employee_id: int64
+  /// project_id identifies the optional Flow project.
+  project_id: int64?
+  /// task_id identifies the optional Flow task.
+  task_id: int64?
+  /// date is the day on which the time was logged.
+  date: string
+  /// duration_minutes is the approved billable duration.
+  duration_minutes: int64
+  /// description is the time entry description.
+  description: string
+  /// is_billable is always true for this response.
+  is_billable: bool
+  /// status is always approved for this response.
+  status: string
+  /// source identifies the system that recorded the time.
+  source: string
+}
+
 /// InvoiceDetail is the full invoice record.
 message InvoiceDetail {
   /// id is the unique identifier for the resource.
@@ -232,6 +257,28 @@ message ListInvoicesRequest {
 message ListInvoicesResponse {
   /// invoices is the invoices value for this contract.
   invoices: InvoiceSummary[]
+  /// page is the current result page.
+  page: int64 @encode(number)
+  /// page_size is the number of records requested per page.
+  page_size: int64 @encode(number)
+  /// has_more indicates whether additional pages are available.
+  has_more: bool
+}
+
+message ListBillableTimeEntriesRequest {
+  /// page is the one-based page number to return.
+  page: int64 @query("page") @encode(number)
+  /// page_size is the maximum number of time entries to return.
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListBillableTimeEntriesResponse {
+  /// entries contains approved billable time not yet linked to an invoice.
+  entries: BillableTimeEntry[]
+  /// total is the number of matching time entries.
+  total: int64 @encode(number)
+  /// total_minutes is the sum of matching entry durations.
+  total_minutes: int64 @encode(number)
   /// page is the current result page.
   page: int64 @encode(number)
   /// page_size is the number of records requested per page.

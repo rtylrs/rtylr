@@ -4,6 +4,8 @@ package finance.invoices.v1
 service InvoicesService {
   listInvoices(ListInvoicesRequest) -> ListInvoicesResponse @get("/invoices")
 
+  listBillableTimeEntries(ListBillableTimeEntriesRequest) -> ListBillableTimeEntriesResponse @get("/invoices/billable-time")
+
   createInvoice(CreateInvoiceRequest) -> CreateInvoiceResponse @post("/invoices")
 
   getInvoice(GetInvoiceRequest) -> GetInvoiceResponse @get("/invoices/{id}")

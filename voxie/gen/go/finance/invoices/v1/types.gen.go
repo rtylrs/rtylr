@@ -250,6 +250,182 @@ func (x *InvoiceSummary) GetCreatedAt() string {
 	return x.CreatedAt
 }
 
+type BillableTimeEntry struct {
+	Id              int64  `json:"id,omitempty"`
+	EmployeeId      int64  `json:"employee_id,omitempty"`
+	ProjectId       *int64 `json:"project_id,omitempty"`
+	TaskId          *int64 `json:"task_id,omitempty"`
+	Date            string `json:"date,omitempty"`
+	DurationMinutes int64  `json:"duration_minutes,omitempty"`
+	Description     string `json:"description,omitempty"`
+	IsBillable      bool   `json:"is_billable,omitempty"`
+	Status          string `json:"status,omitempty"`
+	Source          string `json:"source,omitempty"`
+}
+
+func (m *BillableTimeEntry) MarshalJSON() ([]byte, error) {
+	type alias BillableTimeEntry
+	aux := struct {
+		*alias
+		Id              string  `json:"id,omitempty"`
+		EmployeeId      string  `json:"employee_id,omitempty"`
+		DurationMinutes string  `json:"duration_minutes,omitempty"`
+		ProjectId       *string `json:"project_id,omitempty"`
+		TaskId          *string `json:"task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	aux.DurationMinutes = strconv.FormatInt(m.DurationMinutes, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *BillableTimeEntry) UnmarshalJSON(data []byte) error {
+	type alias BillableTimeEntry
+	aux := struct {
+		*alias
+		Id              string  `json:"id,omitempty"`
+		EmployeeId      string  `json:"employee_id,omitempty"`
+		DurationMinutes string  `json:"duration_minutes,omitempty"`
+		ProjectId       *string `json:"project_id,omitempty"`
+		TaskId          *string `json:"task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.EmployeeId != "" {
+		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = v
+	}
+	if aux.DurationMinutes != "" {
+		v, err := strconv.ParseInt(aux.DurationMinutes, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DurationMinutes = v
+	}
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = &v
+	}
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = &v
+	}
+	return nil
+}
+
+func (x *BillableTimeEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BillableTimeEntry) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *BillableTimeEntry) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
+}
+
+func (x *BillableTimeEntry) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TaskId
+}
+
+func (x *BillableTimeEntry) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *BillableTimeEntry) GetDurationMinutes() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *BillableTimeEntry) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *BillableTimeEntry) GetIsBillable() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsBillable
+}
+
+func (x *BillableTimeEntry) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *BillableTimeEntry) GetSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Source
+}
+
 type InvoiceDetail struct {
 	Id             int64          `json:"id,omitempty"`
 	OwnerId        int64          `json:"owner_id,omitempty"`
@@ -1187,6 +1363,84 @@ func (x *ListInvoicesResponse) GetPageSize() int64 {
 }
 
 func (x *ListInvoicesResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+type ListBillableTimeEntriesRequest struct {
+	Page     int64 `json:"page,omitempty"`
+	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (x *ListBillableTimeEntriesRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListBillableTimeEntriesRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+type ListBillableTimeEntriesResponse struct {
+	Entries      []*BillableTimeEntry `json:"entries,omitempty"`
+	Total        int64                `json:"total,omitempty"`
+	TotalMinutes int64                `json:"total_minutes,omitempty"`
+	Page         int64                `json:"page,omitempty"`
+	PageSize     int64                `json:"page_size,omitempty"`
+	HasMore      bool                 `json:"has_more,omitempty"`
+}
+
+func (x *ListBillableTimeEntriesResponse) GetEntries() []*BillableTimeEntry {
+	if x == nil {
+		var zero []*BillableTimeEntry
+		return zero
+	}
+	return x.Entries
+}
+
+func (x *ListBillableTimeEntriesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListBillableTimeEntriesResponse) GetTotalMinutes() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalMinutes
+}
+
+func (x *ListBillableTimeEntriesResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListBillableTimeEntriesResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListBillableTimeEntriesResponse) GetHasMore() bool {
 	if x == nil {
 		var zero bool
 		return zero
