@@ -677,7 +677,8 @@
       "completed": "Completed"
     },
     "project": "Project",
-    "noProjects": "No projects yet"
+    "noProjects": "No projects yet",
+    "noTasksYet": "No tasks yet"
   },
   "roadmap": {
     "loading": "Loading roadmap...",
