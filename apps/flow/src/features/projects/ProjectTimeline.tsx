@@ -10,6 +10,7 @@ import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 /**
  * ProjectTimeline - a lightweight Gantt-style view. Each task is drawn as
@@ -26,7 +27,12 @@ const ProjectTimeline: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
+  const {
+    project,
+    isLoading: projectLoading,
+    loadFailed: projectLoadFailed,
+    refetch: refetchProjects,
+  } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
 
   // Derive a 30-day horizon anchored on the earliest task start (or today)
@@ -56,10 +62,17 @@ const ProjectTimeline: React.FC = () => {
     );
   }
 
+  // A failed request is not a missing project, and the sentence has to differ:
+  // this branch used to render the hardcoded English "Project not found." for
+  // both, so a 500 told the user their project had gone.
+  if (projectLoadFailed) {
+    return <ListLoadFailed onRetry={() => void refetchProjects()} />;
+  }
+
   if (!project) {
     return (
-      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Project not found.
+      <div className="p-6 text-body" style={{ color: 'var(--flow-text-muted)' }}>
+        {t('flow.projectNotFound')}
       </div>
     );
   }
