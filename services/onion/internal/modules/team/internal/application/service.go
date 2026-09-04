@@ -375,6 +375,16 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	}
 
 	userID := existingID
+	createdUser := false
+	cleanupCreatedUser := func(cause error) (int64, string, error) {
+		if !createdUser {
+			return 0, "", cause
+		}
+		if cleanupErr := s.repo.DeleteInvitedUser(ctx, businessID, ownerID, userID); cleanupErr != nil {
+			return 0, "", fmt.Errorf("%w; failed to clean up newly created user: %w", cause, cleanupErr)
+		}
+		return 0, "", cause
+	}
 
 	if userID == 0 {
 		// Hash password if provided (manual auth), otherwise empty (invite link)
@@ -391,6 +401,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		if err != nil {
 			return 0, "", err
 		}
+		createdUser = true
 	}
 	if userID != 0 && existingID != 0 && input.Password != "" {
 		return 0, "", errors.New("direct credentials require a new user")
@@ -424,13 +435,13 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	}
 
 	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, userID, apps, role); err != nil {
-		return 0, "", err
+		return cleanupCreatedUser(err)
 	}
 	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, userID, apps, role, input.DashRole, input.AppAssignments, input.GroupIDs); err != nil {
-		return 0, "", err
+		return cleanupCreatedUser(err)
 	}
 	if err := s.repo.SetNormalizedAuthorizationPending(ctx, businessID, userID); err != nil {
-		return 0, "", err
+		return cleanupCreatedUser(err)
 	}
 	provisioningState := "pending_invitation"
 	passwordChangeRequired := false
@@ -439,7 +450,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		passwordChangeRequired = true
 	}
 	if err := s.repo.UpsertProvisioningState(ctx, userID, businessID, provisioningMode, provisioningState, false, passwordChangeRequired); err != nil {
-		return 0, "", err
+		return cleanupCreatedUser(err)
 	}
 
 	// businessID, not the invitee's own users.business_id, which is still NULL
@@ -464,13 +475,13 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	// Generate invite token (32 bytes = 64 hex chars)
 	tokenBytes := make([]byte, 32)
 	if _, err := rand.Read(tokenBytes); err != nil {
-		return 0, "", err
+		return cleanupCreatedUser(err)
 	}
 	token := hex.EncodeToString(tokenBytes)
 
 	expiresAt := time.Now().Add(7 * 24 * time.Hour) // 7 days
 	if err := s.repo.CreateInviteToken(ctx, userID, ownerID, token, expiresAt); err != nil {
-		return 0, "", err
+		return cleanupCreatedUser(err)
 	}
 
 	return userID, token, nil
