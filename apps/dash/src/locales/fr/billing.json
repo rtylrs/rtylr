@@ -1,5 +1,6 @@
 {
   "emptyNoUsageTitle": "Aucune utilisation facturable enregistrée ce mois-ci.",
   "emptyNoInvoicesTitle": "Aucune facture pour l'instant",
-  "emptyNoInvoicesDescription": "Votre première facture apparaîtra à la fin d'un cycle de facturation."
+  "emptyNoInvoicesDescription": "Votre première facture apparaîtra à la fin d'un cycle de facturation.",
+  "checkoutFailed": "Échec du démarrage du paiement. Veuillez réessayer."
 }

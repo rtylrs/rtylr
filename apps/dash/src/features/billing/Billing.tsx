@@ -22,6 +22,7 @@ import { APP_CONFIG, APP_URLS } from '@voxire/config';
 import type { AppId } from '@voxire/config';
 import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '../../shared/stores/userStore';
+import { isAllowedCheckoutUrl } from '../../shared/utils/checkoutUrl';
 import {
   useBillingDetail,
   useBillingHistory,
@@ -39,32 +40,6 @@ import {
 
 type BillingCycle = 'monthly' | 'yearly';
 type SubStatus = SubscriptionPayload['status'];
-
-// Checkout URLs come from the subscription backend but trigger a full-page
-// navigation, so validate them against the Paddle hosted-checkout hosts
-// before assigning to window.location.
-const CHECKOUT_HOSTS = ['buy.paddle.com', 'checkout.paddle.com', 'paddle.com'];
-
-function isAllowedCheckoutUrl(raw: unknown): raw is string {
-  if (typeof raw !== 'string' || raw.length === 0 || raw.length > 2048) return false;
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    return false;
-  }
-  if (url.protocol !== 'https:') return false;
-  const host = url.hostname.toLowerCase();
-  return CHECKOUT_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
-}
-
-function navigateToCheckoutUrl(checkoutUrl: unknown): void {
-  if (!isAllowedCheckoutUrl(checkoutUrl)) {
-    toast.error('Failed to start checkout. Please try again.');
-    return;
-  }
-  window.location.href = checkoutUrl;
-}
 
 interface StatusConfig {
   label: string;
@@ -373,6 +348,16 @@ const PlanAction: React.FC<{
   disabledLabel = 'Unavailable',
 }) => {
   const checkout = useCheckout();
+  const { t } = useTranslation();
+  const checkoutFailedMessage = t('billing.checkoutFailed', 'Failed to start checkout. Please try again.');
+
+  const navigateToCheckoutUrl = (checkoutUrl: unknown): void => {
+    if (!isAllowedCheckoutUrl(checkoutUrl)) {
+      toast.error(checkoutFailedMessage);
+      return;
+    }
+    window.location.href = checkoutUrl;
+  };
 
   const handleCheckout = (): void => {
     if ((isCurrent && !isCancelled) || disabled || checkout.isPending) return;
@@ -388,7 +373,7 @@ const PlanAction: React.FC<{
           navigateToCheckoutUrl(data.checkoutUrl);
         },
         onError: () => {
-          toast.error('Failed to start checkout. Please try again.');
+          toast.error(checkoutFailedMessage);
         },
       }
     );
@@ -736,7 +721,17 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
 }) => {
   const ownerEmail = useUserStore((s) => s.user?.email ?? '');
   const checkout = useCheckout();
+  const { t } = useTranslation();
+  const checkoutFailedMessage = t('billing.checkoutFailed', 'Failed to start checkout. Please try again.');
   const hasPayment = !!sub?.paddleSubscriptionId;
+
+  const navigateToCheckoutUrl = (checkoutUrl: unknown): void => {
+    if (!isAllowedCheckoutUrl(checkoutUrl)) {
+      toast.error(checkoutFailedMessage);
+      return;
+    }
+    window.location.href = checkoutUrl;
+  };
 
   const handleAddPayment = (): void => {
     if (!sub) {
@@ -749,7 +744,7 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
         onSuccess: (data) => {
           navigateToCheckoutUrl(data.checkoutUrl);
         },
-        onError: () => toast.error('Failed to start checkout. Please try again.'),
+        onError: () => toast.error(checkoutFailedMessage),
       }
     );
   };
