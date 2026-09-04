@@ -21,8 +21,8 @@ vi.mock('../../shared/stores/flowStore', () => ({
   useFlowStore: () => ({ selectedTaskIds: [], setQuickCreateOpen }),
 }));
 
-vi.mock('../../shared/components/TaskCard', () => ({
-  default: ({ task }: { task: { title: string } }) => <div>{task.title}</div>,
+vi.mock('../../shared/components/TaskRow', () => ({
+  TaskRow: ({ task }: { task: { title: string } }) => <div>{task.title}</div>,
 }));
 
 import MyIssues from './MyIssues';
@@ -34,15 +34,14 @@ beforeEach(() => {
 });
 
 describe('MyIssues empty state', () => {
-  it('shows the normal kanban columns and board-level CTA when there are no tasks', () => {
+  it('shows the board-level CTA and no status columns when there are no tasks', () => {
     myIssuesData.data = [];
     render(<MyIssues />);
 
-    expect(screen.getByText('flow.taskDetail.backlog')).toBeInTheDocument();
-    expect(screen.getByText('flow.taskDetail.todo')).toBeInTheDocument();
-    expect(screen.getByText('flow.taskDetail.inProgress')).toBeInTheDocument();
-    expect(screen.getByText('flow.taskDetail.inReview')).toBeInTheDocument();
-    expect(screen.getByText('flow.taskDetail.done')).toBeInTheDocument();
+    // The five status columns are gone: the screen groups by time bucket now,
+    // which is what myTasksBuckets has always implemented (#1035).
+    expect(screen.queryByText('flow.taskDetail.backlog')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.taskDetail.inProgress')).not.toBeInTheDocument();
     expect(screen.getByText('flow.myIssues.emptyTitle')).toBeInTheDocument();
     expect(screen.getByText('flow.myIssues.emptyDescription')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'flow.board.addTaskLabel' })).toBeInTheDocument();
@@ -73,5 +72,78 @@ describe('MyIssues empty state', () => {
     expect(
       screen.queryByPlaceholderText('flow.myIssues.quickAddPlaceholder')
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('MyIssues time buckets (#1035)', () => {
+  const iso = (offsetDays: number): string => {
+    const d = new Date();
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString();
+  };
+
+  it('groups by time bucket, with overdue folded into Today', () => {
+    myIssuesData.data = [
+      { id: '1', title: 'Overdue thing', status: 'todo', dueDate: iso(-15) },
+      { id: '2', title: 'Due today', status: 'todo', dueDate: iso(0) },
+      { id: '3', title: 'Due this week', status: 'todo', dueDate: iso(3) },
+      { id: '4', title: 'Due much later', status: 'todo', dueDate: iso(60) },
+    ];
+
+    render(<MyIssues />);
+
+    expect(screen.getByText('flow.myIssues.buckets.today')).toBeInTheDocument();
+    expect(screen.getByText('flow.myIssues.buckets.upcoming')).toBeInTheDocument();
+    expect(screen.getByText('flow.myIssues.buckets.later')).toBeInTheDocument();
+    // The overdue task is the point: it used to sit third in a To Do column
+    // with no promotion of any kind.
+    expect(screen.getByText('Overdue thing')).toBeInTheDocument();
+    expect(screen.getByText('Due today')).toBeInTheDocument();
+  });
+
+  it('puts a recently assigned task with no due date in its own bucket', () => {
+    myIssuesData.data = [
+      { id: '5', title: 'No date, just assigned', status: 'todo', dueDate: '', createdAt: iso(-1) },
+    ];
+
+    render(<MyIssues />);
+
+    expect(screen.getByText('flow.myIssues.buckets.recentlyAssigned')).toBeInTheDocument();
+    expect(screen.getByText('No date, just assigned')).toBeInTheDocument();
+  });
+
+  it('renders no heading for an empty bucket', () => {
+    myIssuesData.data = [{ id: '6', title: 'Only one', status: 'todo', dueDate: iso(0) }];
+
+    render(<MyIssues />);
+
+    expect(screen.getByText('flow.myIssues.buckets.today')).toBeInTheDocument();
+    expect(screen.queryByText('flow.myIssues.buckets.later')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.myIssues.buckets.upcoming')).not.toBeInTheDocument();
+  });
+
+  it('leaves finished work out of the buckets', () => {
+    myIssuesData.data = [
+      { id: '7', title: 'Finished', status: 'done', dueDate: iso(0) },
+      { id: '8', title: 'Abandoned', status: 'cancelled', dueDate: iso(0) },
+      { id: '9', title: 'Still open', status: 'todo', dueDate: iso(0) },
+    ];
+
+    render(<MyIssues />);
+
+    expect(screen.getByText('Still open')).toBeInTheDocument();
+    expect(screen.queryByText('Finished')).not.toBeInTheDocument();
+    expect(screen.queryByText('Abandoned')).not.toBeInTheDocument();
+  });
+
+  it('translates every bucket heading rather than printing English', () => {
+    myIssuesData.data = [{ id: '10', title: 'Anything', status: 'todo', dueDate: iso(0) }];
+
+    render(<MyIssues />);
+
+    // MY_TASK_BUCKET_LABEL held literal English while nothing imported it.
+    expect(screen.queryByText('Today')).not.toBeInTheDocument();
+    expect(screen.getByText('flow.myIssues.buckets.today')).toBeInTheDocument();
   });
 });

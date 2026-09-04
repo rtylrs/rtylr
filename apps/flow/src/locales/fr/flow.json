@@ -726,7 +726,13 @@
     "noTasks": "Aucune tâche",
     "quickAddPlaceholder": "Ajoutez une tâche personnelle et appuyez sur Entrée",
     "quickAddButton": "Ajouter",
-    "quickAddNoLabelsReason": "Ajoutez une étiquette dans les paramètres avant de créer des tâches."
+    "quickAddNoLabelsReason": "Ajoutez une étiquette dans les paramètres avant de créer des tâches.",
+    "buckets": {
+      "recentlyAssigned": "Récemment assigné",
+      "today": "Aujourd'hui",
+      "upcoming": "À venir",
+      "later": "Plus tard"
+    }
   },
   "commandBar": {
     "goToInbox": "Aller à la boîte de réception",

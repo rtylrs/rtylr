@@ -5,18 +5,12 @@ import { HelmetContainer } from '@voxire/components';
 import { useMyIssues } from './useMyIssues';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
-import TaskCard from '../../shared/components/TaskCard';
-
-// Backlog lives here as the leftmost column instead of as its own
-// sidebar tab - keeping unscheduled work next to active work means a
-// single view covers personal task management end-to-end.
-const KANBAN_COLUMNS: { status: string; labelKey: string; color: string }[] = [
-  { status: 'backlog', labelKey: 'backlog', color: '#6b7280' },
-  { status: 'todo', labelKey: 'todo', color: '#9ca3af' },
-  { status: 'in_progress', labelKey: 'inProgress', color: '#3b82f6' },
-  { status: 'in_review', labelKey: 'inReview', color: '#f59e0b' },
-  { status: 'done', labelKey: 'done', color: '#22c55e' },
-];
+import { TaskRow } from '../../shared/components/TaskRow';
+import {
+  bucketForMyTask,
+  MY_TASK_BUCKET_LABEL_KEY,
+  MY_TASK_BUCKET_ORDER,
+} from '../../shared/lib/myTasksBuckets';
 
 const MyIssues: React.FC = () => {
   const { t } = useTranslation();
@@ -26,11 +20,15 @@ const MyIssues: React.FC = () => {
   const tasks = useMemo(() => rawTasks.map(apiTaskToTask).filter((t) => !t.archived), [rawTasks]);
   const { selectedTaskIds, setQuickCreateOpen } = useFlowStore();
 
-  const byStatus = useMemo(() => {
-    const map: Record<string, typeof tasks> = {};
-    for (const col of KANBAN_COLUMNS) map[col.status] = [];
-    for (const t of tasks) {
-      if (map[t.status] !== undefined) map[t.status].push(t);
+  // Grouped by time bucket, not by status. `myTasksBuckets` has implemented
+  // exactly this since it was written and nothing imported it, so the screen
+  // rendered a status kanban and scattered overdue work across four columns.
+  // Done and cancelled work is not a bucket of its own here; it is finished.
+  const byBucket = useMemo(() => {
+    const map = new Map<string, typeof tasks>(MY_TASK_BUCKET_ORDER.map((b) => [b, []]));
+    for (const task of tasks) {
+      if (task.status === 'done' || task.status === 'cancelled') continue;
+      map.get(bucketForMyTask(task))?.push(task);
     }
     return map;
   }, [tasks]);
@@ -54,71 +52,47 @@ const MyIssues: React.FC = () => {
         </div>
       </div>
 
-      <div className="relative flex-1 overflow-x-auto overflow-y-hidden">
-        <div className="flex gap-3 h-full p-4 min-w-max">
-          {KANBAN_COLUMNS.map((col, colIdx) => {
-            const colTasks = byStatus[col.status] ?? [];
+      <div className="relative flex-1 overflow-y-auto">
+        <div className="p-4 space-y-5">
+          {MY_TASK_BUCKET_ORDER.map((bucket, bucketIdx) => {
+            const bucketTasks = byBucket.get(bucket) ?? [];
+            if (bucketTasks.length === 0) return null;
             return (
-              <motion.div
-                key={col.status}
+              <motion.section
+                key={bucket}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.15, delay: colIdx * 0.04 }}
-                className="flex flex-col rounded-xl shrink-0"
-                style={{
-                  width: 280,
-                  background: 'var(--flow-card)',
-                  border: '1px solid var(--flow-border)',
-                }}
+                transition={{ duration: 0.15, delay: bucketIdx * 0.04 }}
               >
-                {/* Column header */}
-                <div
-                  className="flex items-center gap-2 px-3 py-2.5 shrink-0"
-                  style={{ borderBottom: '1px solid var(--flow-border)' }}
+                <h2
+                  className="flex items-center gap-2 px-1 pb-1.5 text-[12px] font-semibold"
+                  style={{ color: 'var(--flow-text)' }}
                 >
+                  {t(MY_TASK_BUCKET_LABEL_KEY[bucket])}
                   <span
-                    className="h-2 w-2 rounded-full shrink-0"
-                    style={{ background: col.color }}
-                  />
-                  <span
-                    className="text-[12px] font-semibold flex-1"
-                    style={{ color: 'var(--flow-text)' }}
+                    className="rounded-sm px-1.5 py-0.5 text-[10px] font-medium"
+                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
                   >
-                    {t(`flow.taskDetail.${col.labelKey}`)}
+                    {bucketTasks.length}
                   </span>
-                  <span
-                    className="text-[10px] px-1.5 py-0.5 rounded-sm font-medium"
-                    style={{
-                      background: `${col.color}1a`,
-                      color: col.color,
-                    }}
-                  >
-                    {colTasks.length}
-                  </span>
+                </h2>
+                <div
+                  className="rounded-xl overflow-hidden"
+                  style={{
+                    background: 'var(--flow-card)',
+                    border: '1px solid var(--flow-border)',
+                  }}
+                >
+                  {bucketTasks.map((task) => (
+                    <TaskRow
+                      key={task.id}
+                      task={task}
+                      showProject
+                      selected={selectedTaskIds.includes(task.id)}
+                    />
+                  ))}
                 </div>
-
-                {/* Tasks */}
-                <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-                  {colTasks.length === 0 ? (
-                    <p
-                      className="text-center text-[11px] py-6"
-                      style={{ color: 'var(--flow-text-dim)' }}
-                    >
-                      {t('flow.myIssues.noTasks')}
-                    </p>
-                  ) : (
-                    colTasks.map((t) => (
-                      <TaskCard
-                        key={t.id}
-                        task={t}
-                        compact
-                        showProject
-                        selected={selectedTaskIds.includes(t.id)}
-                      />
-                    ))
-                  )}
-                </div>
-              </motion.div>
+              </motion.section>
             );
           })}
         </div>
