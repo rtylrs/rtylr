@@ -44,7 +44,8 @@
   "time": {
     "logged": "تم تسجيل الوقت",
     "logFailed": "تعذّر تسجيل الوقت",
-    "deleteFailed": "تعذّر حذف سجل الوقت"
+    "deleteFailed": "تعذّر حذف سجل الوقت",
+    "deleted": "تم حذف سجل الوقت"
   },
   "cycle": {
     "created": "تم إنشاء الدورة",
@@ -102,7 +103,10 @@
     "renameFailed": "فشل إعادة تسمية العرض",
     "deleted": "تم حذف العرض",
     "deleteFailed": "فشل حذف العرض",
-    "created": "تم إنشاء العرض"
+    "created": "تم إنشاء العرض",
+    "madePrivate": "العرض الآن خاص",
+    "madeShared": "العرض الآن مشترك",
+    "visibilityFailed": "فشل تغيير ظهور العرض"
   },
   "weeklyReview": {
     "logged": "تم تسجيل المراجعة الأسبوعية",
@@ -165,5 +169,9 @@
     "deletedWithReassignment": "تم حذف الحالة. عادت {{count}} مهمة إلى حالتها المدمجة.",
     "deleteFailed": "تعذّر حذف الحالة",
     "setFailed": "فشل تعيين حالة المهمة"
+  },
+  "attachment": {
+    "addFailed": "تعذّر إضافة المرفق",
+    "removeFailed": "تعذّر حذف المرفق"
   }
 }
