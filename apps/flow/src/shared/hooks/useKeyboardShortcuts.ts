@@ -1,11 +1,17 @@
 import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
 import { useFlowStore } from '../stores/flowStore';
 
 // Keyboard shortcuts: global.
 // c = new task, / = search, g i = inbox, g m = my tasks, cmd+k = command bar
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
+  // The same gate router.tsx puts on these destinations. Without it the g
+  // chords were the remaining way into "Preview route unavailable": the
+  // command bar already filters nav-timeline, nav-roadmap and nav-insights,
+  // and the sidebar, the project view tabs and Settings all hide them.
+  const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const {
     setCommandBarOpen,
     setQuickCreateOpen,
@@ -43,6 +49,7 @@ export function useKeyboardShortcuts() {
       // /
       if (e.key === '/') {
         e.preventDefault();
+        e.stopPropagation();
         setCommandBarOpen(true);
         return;
       }
@@ -51,6 +58,12 @@ export function useKeyboardShortcuts() {
       if (e.key === 'c') {
         if (quickCreateOpen || commandBarOpen) return;
         e.preventDefault();
+        // The command bar prints C as the shortcut for New task, so this
+        // handler has to be the one that wins. It runs in the capture phase
+        // now and stops the event here, because a listener further down that
+        // calls stopPropagation would otherwise take the key and the app
+        // would not honour the shortcut it advertises.
+        e.stopPropagation();
         setQuickCreateOpen(true);
         return;
       }
@@ -73,13 +86,13 @@ export function useKeyboardShortcuts() {
             navigate({ to: '/calendar' });
             break;
           case 't':
-            navigate({ to: '/timeline' });
+            if (showPreviewRoutes) navigate({ to: '/timeline' });
             break;
           case 'r':
-            navigate({ to: '/roadmap' });
+            if (showPreviewRoutes) navigate({ to: '/roadmap' });
             break;
           case 's':
-            navigate({ to: '/insights' });
+            if (showPreviewRoutes) navigate({ to: '/insights' });
             break;
           case 'y':
             navigate({ to: '/cycles' });
@@ -104,8 +117,10 @@ export function useKeyboardShortcuts() {
       }
     };
 
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    // Capture, not bubble. The typing guard above runs first either way, so
+    // a field still receives every key it should.
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
   }, [
     navigate,
     setCommandBarOpen,
@@ -113,5 +128,6 @@ export function useKeyboardShortcuts() {
     commandBarOpen,
     quickCreateOpen,
     activeWorkspaceId,
+    showPreviewRoutes,
   ]);
 }
