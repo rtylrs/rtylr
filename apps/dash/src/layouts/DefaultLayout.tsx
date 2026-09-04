@@ -344,7 +344,7 @@ const LanguageSelector = (): React.JSX.Element => {
         className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
         style={{ color: 'var(--dash-text-dim)' }}
       >
-        {t('nav.language', 'Language')}
+        {t('common.nav.language', 'Language')}
       </p>
       <div ref={containerRef} className="relative">
         <button
@@ -366,7 +366,7 @@ const LanguageSelector = (): React.JSX.Element => {
         {open && (
           <div
             role="menu"
-            aria-label={t('nav.language', 'Language')}
+            aria-label={t('common.nav.language', 'Language')}
             className="absolute start-0 end-0 top-full z-10 mt-1 max-h-48 overflow-y-auto rounded-xl py-1"
             style={{
               background: 'var(--dash-card)',
@@ -541,7 +541,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {/* Storefront section - only shown when menu addon is enabled */}
             {menuAddonEnabled && (
               <SidebarSection
-                label={t('nav.storefront', 'Storefront')}
+                label={t('common.nav.storefront', 'Storefront')}
                 icon={Store}
                 items={menuSubItems}
               />
@@ -568,7 +568,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               }}
             >
               <Settings size={16} />
-              <span className="dash-sidebar-label">{t('nav.manageAccount', 'Manage account')}</span>
+              <span className="dash-sidebar-label">
+                {t('common.nav.manageAccount', 'Manage account')}
+              </span>
             </Link>
 
             <DropdownMenu>
@@ -724,7 +726,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     color: 'var(--dash-text-muted)',
                     border: '1px solid var(--dash-border)',
                   }}
-                  aria-label={t('nav.openCommandPalette', 'Open command palette')}
+                  aria-label={t('common.nav.openCommandPalette', 'Open command palette')}
                 >
                   <motion.span
                     className="inline-flex"
@@ -733,7 +735,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   >
                     <Search size={12} />
                   </motion.span>
-                  <span className="text-[11px]">{t('nav.search', 'Search')}</span>
+                  <span className="text-[11px]">{t('common.nav.search', 'Search')}</span>
                   <kbd
                     className="hidden sm:inline-flex items-center px-1 py-0.5 rounded text-[9px] font-mono"
                     style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
@@ -749,10 +751,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   style={{ color: 'var(--dash-text-muted)' }}
                   aria-label={
                     unreadCount > 0
-                      ? t('nav.notificationsUnread', '{{count}} unread notifications', {
+                      ? t('common.nav.notificationsUnread', '{{count}} unread notifications', {
                           count: unreadCount,
                         })
-                      : t('nav.notifications', 'Notifications')
+                      : t('common.nav.notifications', 'Notifications')
                   }
                 >
                   <Bell size={14} />
