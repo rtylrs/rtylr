@@ -103,6 +103,28 @@ describe('i18n placeholders use the braces i18next reads', () => {
   });
 });
 
+describe('plural selection is left to i18next', () => {
+  // Picking the suffix by hand, as in
+  // `t(n === 1 ? 'x' : 'x_other', { count: n })`, reimplements a job i18next
+  // already does from Intl.PluralRules, and it is wrong outside English: it
+  // cannot express Arabic's dual or French's `many`, so those languages get
+  // the plural form for counts that need a different one.
+  const EXPLICIT_SUFFIX = /['"][A-Za-z0-9_.]+_(?:zero|one|two|few|many|other)['"]/;
+
+  it.each(APPS)('%s names no plural suffix in its source', (app) => {
+    const offenders: string[] = [];
+    for (const file of sourceFiles(path.join(APPS_DIR, app, 'src'))) {
+      const lines = fs.readFileSync(file, 'utf8').split('\n');
+      lines.forEach((line, index) => {
+        if (EXPLICIT_SUFFIX.test(line)) {
+          offenders.push(`${path.relative(APPS_DIR, file)}:${index + 1}  ${line.trim()}`);
+        }
+      });
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe('every literal t() key resolves to a string', () => {
   it.each(APPS)('%s has no key that resolves to an object', (app) => {
     const tree = resources(app, 'en');
