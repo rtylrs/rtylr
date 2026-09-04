@@ -28,6 +28,7 @@ import {
   Lightbulb,
   Activity,
   Type,
+  PartyPopper,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
@@ -214,7 +215,18 @@ const TaskDetail: React.FC = () => {
     }
   }, [setActiveWorkspace, taskWorkspaceId]);
 
-  const updateTask = (taskId: string, patch: Partial<Task>) => {
+  const updateTask = (
+    taskId: string,
+    patch: Partial<Task>,
+    options?: { onSuccess?: () => void }
+  ) => {
+    // Only pass options when there are some: `mutate(payload, undefined)` and
+    // `mutate(payload)` behave identically, but they are not the same call, and
+    // every existing caller here passes none.
+    if (options) {
+      updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> }, options);
+      return;
+    }
     updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> });
   };
   const addComment = (
@@ -311,8 +323,13 @@ const TaskDetail: React.FC = () => {
   // or labels (post-mapping). Accept either shape.
   const taskWithLabelIds = task as Task & { label_ids?: number[] };
   const rawLabels = taskWithLabelIds.label_ids ?? task.labels ?? [];
-  const taskLabelIds: number[] = rawLabels.map((l) => Number(l)).filter((n) => !Number.isNaN(n));
-  const taskLabels = allLabels.filter((l) => taskLabelIds.includes(l.id));
+  // Compare as strings. `ApiLabel` declares `id: number`, but `useLabels` casts
+  // the response rather than converting it, so at runtime the id is the int64
+  // wire string. Coercing the task's ids to numbers and testing them against
+  // that string with Array.includes never matched, so an attached label saved
+  // correctly and then never displayed.
+  const taskLabelIds: string[] = rawLabels.map((l) => String(l));
+  const taskLabels = allLabels.filter((l) => taskLabelIds.includes(String(l.id)));
 
   const cycle = cycles.find((c) => c.id === task.cycleId);
   const milestone = milestones.find((m) => m.id === task.milestoneId);
@@ -585,13 +602,23 @@ const TaskDetail: React.FC = () => {
             value={task.status}
             onChange={(e) => {
               const next = e.target.value as Task['status'];
-              if (next === 'done' && task.status !== 'done') {
-                toast.success(t('toasts.task.niceWork'), {
-                  description: t('flow.taskDetail.taskMarkedComplete'),
-                  icon: '🎉',
-                });
-              }
-              updateTask(task.id, { status: next });
+              // The celebration belongs on the mutation's success path. Firing
+              // it here showed "Nice work!" next to "Failed to update task"
+              // while the status reverted and nothing was saved.
+              const justCompleted = next === 'done' && task.status !== 'done';
+              updateTask(
+                task.id,
+                { status: next },
+                justCompleted
+                  ? {
+                      onSuccess: () =>
+                        toast.success(t('toasts.task.niceWork'), {
+                          description: t('flow.taskDetail.taskMarkedComplete'),
+                          icon: <PartyPopper size={16} />,
+                        }),
+                    }
+                  : undefined
+              );
             }}
             disabled={!canEdit}
             className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
@@ -734,7 +761,7 @@ const TaskDetail: React.FC = () => {
                 border: '1px solid var(--flow-border)',
               }}
             >
-              ,
+              {t('flow.quickCreate.noEffort')}
             </button>
             {EFFORT_PRESETS.map((m) => (
               <button
@@ -999,7 +1026,7 @@ const TaskDetail: React.FC = () => {
                   </p>
                 )}
                 {allLabels.map((l) => {
-                  const active = taskLabelIds.includes(l.id);
+                  const active = taskLabelIds.includes(String(l.id));
                   return (
                     <button
                       type="button"

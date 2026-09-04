@@ -102,7 +102,10 @@ vi.mock('../../shared/components/CommentInput', () => ({ default: () => null }))
 vi.mock('../../shared/components/SubtaskList', () => ({ default: () => null }));
 vi.mock('../../shared/components/AttachmentUpload', () => ({ default: () => null }));
 vi.mock('../../shared/components/AssigneeAvatar', () => ({ default: () => null }));
-vi.mock('../../shared/components/LabelChip', () => ({ default: () => null }));
+// Renders the label name, so the tests can assert which labels reached it.
+vi.mock('../../shared/components/LabelChip', () => ({
+  default: ({ label }: { label: { name: string } }) => <span>{label.name}</span>,
+}));
 vi.mock('../../shared/components/DueDatePicker', () => ({ default: () => null }));
 
 import TaskDetail from './TaskDetail';
@@ -290,5 +293,146 @@ describe('TaskDetail activity empty state', () => {
 
     fireEvent.click(goToComments);
     expect(screen.queryByText('flow.taskDetail.noActivity')).not.toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail label rendering (#1054)', () => {
+  // ApiLabel declares id as a number, but useLabels casts the response instead
+  // of converting it, so at runtime these are int64 wire strings. The mocks use
+  // strings deliberately: with numbers the old code would have worked and the
+  // test would prove nothing.
+  const labels = [
+    { id: '994343', name: 'qa-temp', color: '#ff0000' },
+    { id: '994344', name: 'blocked', color: '#00ff00' },
+  ];
+
+  it('renders a label whose id arrives as a wire string', () => {
+    useLabelsSpy.mockReturnValue({ data: labels });
+    taskDetailData.data = {
+      task: apiTask({ labels: ['994343'] }) as ApiTask,
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+
+    renderTaskDetail();
+
+    expect(screen.getByText('qa-temp')).toBeInTheDocument();
+    expect(screen.queryByText('blocked')).not.toBeInTheDocument();
+  });
+
+  it('renders labels arriving under the snake_case label_ids shape', () => {
+    useLabelsSpy.mockReturnValue({ data: labels });
+    taskDetailData.data = {
+      task: { ...apiTask(), label_ids: ['994344'] },
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+
+    renderTaskDetail();
+
+    expect(screen.getByText('blocked')).toBeInTheDocument();
+  });
+
+  it('renders no label chip when the task has none', () => {
+    useLabelsSpy.mockReturnValue({ data: labels });
+    taskDetailData.data = {
+      task: apiTask({ labels: [] }) as ApiTask,
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+
+    renderTaskDetail();
+
+    expect(screen.queryByText('qa-temp')).not.toBeInTheDocument();
+    expect(screen.queryByText('blocked')).not.toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail effort control (#1053)', () => {
+  it('labels the no-effort option instead of rendering a bare comma', () => {
+    taskDetailData.data = {
+      task: apiTask(),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+
+    renderTaskDetail();
+
+    expect(screen.getByRole('button', { name: 'flow.quickCreate.noEffort' })).toBeInTheDocument();
+    // The comma was the whole visible label of that button.
+    expect(screen.queryByRole('button', { name: ',' })).not.toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail completion toast (#1040)', () => {
+  const renderWithStatus = (status: ApiTask['status']): void => {
+    taskDetailData.data = {
+      task: apiTask({ status }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+    renderTaskDetail();
+  };
+
+  // The selects in TaskDetail carry no accessible name: each label lives in a
+  // sibling element that is not associated with the control. That is a real gap,
+  // tracked by #1096 (replace the native selects with the shared Select), and
+  // out of scope here. Identify the status select by an option only it has.
+  const statusSelect = (): HTMLSelectElement => {
+    const found = (screen.getAllByRole('combobox') as HTMLSelectElement[]).find((select) =>
+      [...select.options].some((option) => option.value === 'in_review')
+    );
+    if (!found) throw new Error('status select not found');
+    return found;
+  };
+
+  it('does not celebrate before the write has succeeded', async () => {
+    const { toast } = await import('sonner');
+    renderWithStatus('todo');
+
+    fireEvent.change(statusSelect(), { target: { value: 'done' } });
+
+    expect(updateTaskMutate).toHaveBeenCalledTimes(1);
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it('celebrates from the mutation success path', async () => {
+    const { toast } = await import('sonner');
+    renderWithStatus('todo');
+
+    fireEvent.change(statusSelect(), { target: { value: 'done' } });
+    const options = updateTaskMutate.mock.calls[0][1] as { onSuccess?: () => void };
+    expect(options?.onSuccess).toBeTypeOf('function');
+
+    options.onSuccess?.();
+
+    expect(toast.success).toHaveBeenCalledTimes(1);
+    expect(toast.success).toHaveBeenCalledWith('toasts.task.niceWork', expect.any(Object));
+  });
+
+  it('passes no success handler for a status change that is not a completion', async () => {
+    renderWithStatus('todo');
+
+    fireEvent.change(statusSelect(), { target: { value: 'in_progress' } });
+
+    expect(updateTaskMutate.mock.calls[0][1]).toBeUndefined();
+  });
+
+  it('does not celebrate re-selecting done on an already done task', async () => {
+    const { toast } = await import('sonner');
+    renderWithStatus('done');
+
+    // fireEvent.change dispatches even for an unchanged value, so the handler
+    // does run; what matters is that it carries no success handler and so
+    // cannot celebrate a completion that already happened.
+    fireEvent.change(statusSelect(), { target: { value: 'done' } });
+
+    expect(updateTaskMutate.mock.calls[0][1]).toBeUndefined();
+    expect(toast.success).not.toHaveBeenCalled();
   });
 });
