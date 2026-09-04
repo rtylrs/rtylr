@@ -201,6 +201,11 @@ export const NotificationsSection: React.FC = () => {
             <button
               type="button"
               role="switch"
+              // The switch is the only control in the row, and the label beside
+              // it is not associated with it, so without this a screen reader
+              // announces six switches with no names at all. item.label is
+              // already translated copy, so this needs no new key.
+              aria-label={item.label}
               aria-checked={settings[item.key]}
               onClick={() => toggle(item.key)}
               className={cn(
