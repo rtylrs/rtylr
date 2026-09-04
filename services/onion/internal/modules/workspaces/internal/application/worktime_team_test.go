@@ -17,8 +17,8 @@ const (
 	teamWSOwnerID    int64 = 920001 // owns the workspace; RequireWorkspaceRole admits owners with no membership row
 	teamWSMemberID   int64 = 920002 // flow_workspace_members.role = member; has an hr_employees row and a work day
 	teamWSStrangerID int64 = 920003 // no membership on the workspace at all
-	teamOwnerID      int64 = 920100 // the tenant scope every fixture row below shares
-	teamBusinessID   int64 = 920200
+	teamOwnerID      int64 = 920100 // flow_work_days.owner_id, distinct from the HR tenant key
+	teamBusinessID   int64 = 920200 // HR owner_id and business_id, and flow_work_days.business_id
 )
 
 // newTeamFixture builds a workspace, one ordinary member with an HR record and
@@ -50,20 +50,20 @@ func newTeamFixture(t *testing.T) (svc *application.Service, repo *infrastructur
 	if _, err := db.ExecContext(ctx,
 		`INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email)
 		 VALUES (?, ?, ?, 'Team', 'Member', 'team-member@example.test')`,
-		teamOwnerID, teamBusinessID, teamWSMemberID,
+		teamBusinessID, teamBusinessID, teamWSMemberID,
 	); err != nil {
 		t.Fatalf("insert hr_employees: %v", err)
 	}
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(context.Background(),
 			`DELETE FROM hr_employees WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-			teamOwnerID, teamBusinessID, teamWSMemberID)
+			teamBusinessID, teamBusinessID, teamWSMemberID)
 	})
 
 	var employeeID int64
 	if err := db.QueryRowContext(ctx,
 		`SELECT id FROM hr_employees WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-		teamOwnerID, teamBusinessID, teamWSMemberID,
+		teamBusinessID, teamBusinessID, teamWSMemberID,
 	).Scan(&employeeID); err != nil {
 		t.Fatalf("read back hr_employees id: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestWorkDaysForDate_ResolvesByEmployeeID(t *testing.T) {
 	var employeeID int64
 	if err := db.QueryRowContext(context.Background(),
 		`SELECT id FROM hr_employees WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-		teamOwnerID, teamBusinessID, teamWSMemberID,
+		teamBusinessID, teamBusinessID, teamWSMemberID,
 	).Scan(&employeeID); err != nil {
 		t.Fatalf("read back hr_employees id: %v", err)
 	}

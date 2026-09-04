@@ -549,11 +549,13 @@ func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, empl
 }
 
 // EmployeeIDsByUserIDs resolves workspace members (auth user ids) to the HR
-// employee ids work days are keyed on. A user with no hr_employees row (or
-// none matching this tenant) is simply absent from the result - there is no
-// day to show for someone who was never onboarded into HR, which is a normal
-// state, not an error.
-func (r *Repository) EmployeeIDsByUserIDs(ctx context.Context, ownerID, businessID int64, userIDs []int64) (map[int64]int64, error) {
+// employee ids work days are keyed on. hrOwnerID is the HR tenant key, which
+// callers pass as businessID because hr_core stores that value in both
+// owner_id and business_id. A user with no hr_employees row (or none matching
+// this tenant) is simply absent from the result - there is no day to show for
+// someone who was never onboarded into HR, which is a normal state, not an
+// error.
+func (r *Repository) EmployeeIDsByUserIDs(ctx context.Context, hrOwnerID, businessID int64, userIDs []int64) (map[int64]int64, error) {
 	if len(userIDs) == 0 {
 		return map[int64]int64{}, nil
 	}
@@ -563,7 +565,7 @@ func (r *Repository) EmployeeIDsByUserIDs(ctx context.Context, ownerID, business
 	}
 
 	rows, err := r.queries.GetEmployeeIDsByUserIDs(ctx, sqlc.GetEmployeeIDsByUserIDsParams{
-		OwnerID:    ownerID,
+		OwnerID:    hrOwnerID,
 		BusinessID: businessID,
 		UserIds:    args,
 	})

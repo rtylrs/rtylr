@@ -144,7 +144,10 @@ func (s *Service) assertCallerOwnsWorkDay(ctx context.Context, input domain.Work
 		return nil
 	}
 
-	byUserID, err := s.repo.EmployeeIDsByUserIDs(ctx, input.OwnerID, input.BusinessID, []int64{callerUserID})
+	// flow_work_days keeps the request's owner_id, but hr_employees is owned by
+	// the business tenant. Resolve the caller in HR with businessID for both
+	// columns rather than leaking the Flow owner scope into the HR lookup.
+	byUserID, err := s.repo.EmployeeIDsByUserIDs(ctx, input.BusinessID, input.BusinessID, []int64{callerUserID})
 	if err != nil {
 		return err
 	}
@@ -285,7 +288,10 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 		userIDs = append(userIDs, ownerUserID)
 	}
 
-	byUserID, err := s.repo.EmployeeIDsByUserIDs(ctx, ownerID, businessID, userIDs)
+	// flow_work_days remains scoped by ownerID below. HR employee resolution is
+	// different: hr_core stores the business tenant key in both owner_id and
+	// business_id, so both lookup arguments must be businessID.
+	byUserID, err := s.repo.EmployeeIDsByUserIDs(ctx, businessID, businessID, userIDs)
 	if err != nil {
 		return nil, 0, err
 	}

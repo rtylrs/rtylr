@@ -1,10 +1,12 @@
 package application
 
 import (
+	"context"
 	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	"github.com/voxire/onion/internal/testutil"
 )
 
 // A work day belongs to one employee, and CreateWorkDayLine used to resolve the
@@ -57,6 +59,45 @@ func TestAssertCallerOwnsWorkDay_AllowsOwnDayWithoutTouchingTheRepository(t *tes
 	svc := &Service{}
 	if err := svc.assertCallerOwnsWorkDay(t.Context(), workDayLineInputWithLoggedBy(9325), 9325); err != nil {
 		t.Fatalf("want nil, got %v", err)
+	}
+}
+
+// Flow work days may use an owner id that differs from the business id. HR
+// employees use the business id for both tenant columns, so the caller's
+// employee must still resolve when those scopes are different.
+func TestAssertCallerOwnsWorkDay_ResolvesHRByBusinessScope(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	svc := NewService(ctx, db)
+
+	const (
+		flowOwnerID  int64 = 930100
+		businessID   int64 = 930200
+		callerUserID int64 = 930300
+	)
+	result, err := db.ExecContext(ctx,
+		`INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email)
+		 VALUES (?, ?, ?, 'Scope', 'Caller', 'scope-caller@example.test')`,
+		businessID, businessID, callerUserID,
+	)
+	if err != nil {
+		t.Fatalf("insert hr_employees: %v", err)
+	}
+	employeeID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("read inserted hr_employees id: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, cleanupErr := db.ExecContext(ctx, "DELETE FROM hr_employees WHERE id = ?", employeeID); cleanupErr != nil {
+			t.Errorf("delete hr_employees fixture: %v", cleanupErr)
+		}
+	})
+
+	input := domain.WorkDayLineInput{
+		OwnerID: flowOwnerID, BusinessID: businessID, LoggedBy: callerUserID,
+	}
+	if err := svc.assertCallerOwnsWorkDay(ctx, input, employeeID); err != nil {
+		t.Fatalf("want caller employee %d to resolve under business %d, got %v", employeeID, businessID, err)
 	}
 }
 
