@@ -884,5 +884,9 @@
     "deleteTitle": "Delete task",
     "deleteConfirmPrefix": "Delete",
     "deleteConfirmSuffix": "? This cannot be undone."
+  },
+  "confirm": {
+    "typeToConfirm": "To confirm, type {{word}} below",
+    "working": "Working…"
   }
 }

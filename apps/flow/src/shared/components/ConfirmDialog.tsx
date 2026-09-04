@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 
@@ -38,6 +39,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   pending,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
+  const typedInputId = useId();
   const [typed, setTyped] = useState('');
 
   // Reset typed-confirmation on each open so reopening a previously
@@ -61,19 +64,38 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </DialogHeader>
 
         {requireText ? (
-          <input
-            autoFocus
-            type="text"
-            value={typed}
-            onChange={(e) => setTyped(e.target.value)}
-            placeholder={requireText}
-            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none mt-2"
-            style={{
-              background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
-              color: 'var(--flow-text)',
-            }}
-          />
+          <div className="mt-2">
+            {/*
+              A visible label, doing two jobs at once: it gives the input an
+              accessible name, which it had none of, and it states the
+              requirement, which the dialog never did. Before this a
+              screen-reader user met an unnamed text field next to a disabled
+              destructive button with no stated reason for either, and a sighted
+              user met a button that looked broken; the only hint was the
+              input's own placeholder.
+            */}
+            <label
+              htmlFor={typedInputId}
+              className="block text-[11px] mb-1"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {t('flow.confirm.typeToConfirm', { word: requireText })}
+            </label>
+            <input
+              id={typedInputId}
+              autoFocus
+              type="text"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder={requireText}
+              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+                color: 'var(--flow-text)',
+              }}
+            />
+          </div>
         ) : null}
 
         <div className="flex justify-end gap-2 mt-4">
@@ -92,7 +114,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
             style={{ background: '#ef4444', color: '#fff' }}
           >
-            {pending ? 'Working…' : confirmLabel}
+            {pending ? t('flow.confirm.working') : confirmLabel}
           </button>
         </div>
       </DialogContent>

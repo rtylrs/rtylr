@@ -885,5 +885,9 @@
     "deleteTitle": "Supprimer la tâche",
     "deleteConfirmPrefix": "Supprimer",
     "deleteConfirmSuffix": " ? Cette action est irréversible."
+  },
+  "confirm": {
+    "typeToConfirm": "Pour confirmer, saisissez {{word}} ci-dessous",
+    "working": "En cours…"
   }
 }
