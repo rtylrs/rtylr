@@ -366,19 +366,8 @@
     "team": {
       "section": "الفريق",
       "subtitle": "الأشخاص الذين لديهم صلاحية الوصول إلى مساحة عمل Flow هذه.",
-      "grantAccess": "منح الوصول إلى Flow",
-      "grantAccessHint": "لا يمكن إضافة إلا أشخاص هم بالفعل جزء من نشاطك التجاري. أضف أشخاصاً جدداً من صفحة الفريق أولاً.",
-      "teamMember": "عضو الفريق",
-      "everyoneHasAccess": "لدى جميع أعضاء نشاطك التجاري صلاحية الوصول إلى Flow بالفعل.",
-      "selectMember": "اختر عضو فريق…",
-      "seatCostNote": "إضافة هذا العضو تكلف {{amount}} هذا الشهر ({{daysRemaining}}/{{daysInMonth}} يومًا)، ثم {{monthlyAmount}} ابتداءً من {{nextMonth}} 1.",
-      "granting": "جارٍ منح الوصول…",
-      "grantAccessAction": "منح الوصول",
-      "addMember": "إضافة عضو",
       "noMembersYet": "لا يوجد أعضاء في الفريق بعد.",
-      "refreshCta": "تحديث",
-      "removeMemberLabel": "إزالة {{name}}",
-      "gateReason": "يمكن فقط لملاك مساحة العمل والمسؤولين منح صلاحية الوصول إلى Flow أو إزالتها."
+      "refreshCta": "تحديث"
     },
     "sectionNotAvailable": "هذا القسم غير متاح بعد.",
     "notifications": {

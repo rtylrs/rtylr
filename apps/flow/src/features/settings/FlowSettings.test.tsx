@@ -288,6 +288,10 @@ describe('TeamSection read-only boundary', () => {
 
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
     expect(
+      // These two names no longer resolve to anything: e5d28904f removed the
+      // controls and the keys went with them in #1047. That is the point of
+      // the assertion, and the string is kept as the record of what must stay
+      // absent.
       screen.queryByRole('button', { name: 'flow.settings.team.addMember' })
     ).not.toBeInTheDocument();
     expect(
