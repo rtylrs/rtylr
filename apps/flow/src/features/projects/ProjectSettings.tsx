@@ -110,7 +110,7 @@ const ProjectSettings: React.FC = () => {
   if (!project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Project not found.
+        {t('flow.project.notFound')}
       </div>
     );
   }
@@ -127,10 +127,13 @@ const ProjectSettings: React.FC = () => {
       <HelmetContainer title={t('flow.projectSettings.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
-          items={[{ label: project.name, to: `/p/${project.id}/overview` }, { label: 'Settings' }]}
+          items={[
+            { label: project.name, to: `/p/${project.id}/overview` },
+            { label: t('nav.settings') },
+          ]}
         />
         <h1 className="text-[17px] font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
-          Settings
+          {t('nav.settings')}
         </h1>
         <div className="flex gap-4 mt-3">
           {tabs.map((t) => (
@@ -365,9 +368,9 @@ const ProjectSettings: React.FC = () => {
                           className="text-[11px] outline-none bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                           style={{ color: roleMeta.color }}
                         >
-                          <option value="admin">Admin</option>
-                          <option value="member">Member</option>
-                          <option value="viewer">Viewer</option>
+                          <option value="admin">{t('common.roles.admin')}</option>
+                          <option value="member">{t('common.roles.member')}</option>
+                          <option value="viewer">{t('common.roles.viewer')}</option>
                         </select>
                       </div>
                       <button
@@ -406,10 +409,10 @@ const ProjectSettings: React.FC = () => {
                   className="text-[11px] font-semibold mb-1"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  Transfer Ownership
+                  {t('flow.projectSettings.transferHeading')}
                 </p>
                 <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
-                  Transfer ownership to any org member. You'll remain a member.
+                  {t('flow.projectSettings.transferDescription')}
                 </p>
                 {!canManageProject && (
                   <GateNotice
@@ -434,7 +437,7 @@ const ProjectSettings: React.FC = () => {
                     defaultValue=""
                   >
                     <option value="" disabled>
-                      Select new owner…
+                      {t('flow.projectSettings.selectNewOwner')}
                     </option>
                     {orgMembers.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -464,7 +467,9 @@ const ProjectSettings: React.FC = () => {
                         className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                         style={{ background: '#ef4444', color: '#fff' }}
                       >
-                        {transferOwnership.isPending ? 'Transferring…' : 'Confirm'}
+                        {transferOwnership.isPending
+                          ? t('flow.projectSettings.transferring')
+                          : t('common.confirm')}
                       </button>
                       <button
                         type="button"
@@ -472,7 +477,7 @@ const ProjectSettings: React.FC = () => {
                         className="px-3 py-1.5 rounded-sm text-[11px]"
                         style={{ color: 'var(--flow-text-muted)' }}
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </>
                   ) : (
@@ -489,13 +494,13 @@ const ProjectSettings: React.FC = () => {
                       className="flex items-center gap-1 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                       style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                     >
-                      <ArrowRightLeft size={10} /> Transfer
+                      <ArrowRightLeft size={10} /> {t('flow.projectSettings.transferCta')}
                     </button>
                   )}
                 </div>
                 {confirmTransfer && (
                   <p className="text-[11px] mt-1.5" style={{ color: '#f97316' }}>
-                    Ownership will transfer immediately. Click Confirm to proceed.
+                    {t('flow.projectSettings.transferConfirmHint')}
                   </p>
                 )}
               </div>
@@ -565,7 +570,7 @@ const ProjectSettings: React.FC = () => {
               <Trash2 size={14} style={{ color: '#ef4444' }} className="mt-0.5" />
               <div className="flex-1">
                 <p className="text-[12px] font-semibold" style={{ color: '#ef4444' }}>
-                  Delete this project
+                  {t('flow.projectSettings.deleteHeading')}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.projectSettings.archiveNotice')}
@@ -603,11 +608,11 @@ const ProjectSettings: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="text-[14px] font-semibold flex items-center gap-2">
                 <Trash2 size={14} style={{ color: '#ef4444' }} />
-                Delete project
+                {t('flow.projectSettings.deleteDialogTitle')}
               </DialogTitle>
               <DialogDescription className="text-[12px]">
-                This permanently archives <strong>{project?.name}</strong> and all its tasks. To
-                confirm, retype the project name below.
+                {t('flow.projectSettings.deleteDialogPrefix')} <strong>{project?.name}</strong>
+                {t('flow.projectSettings.deleteDialogSuffix')}
               </DialogDescription>
             </DialogHeader>
             <input
@@ -630,7 +635,7 @@ const ProjectSettings: React.FC = () => {
                 className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
