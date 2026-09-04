@@ -15,9 +15,10 @@ func TestCreateCustomer_IsActiveByDefault(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "NewActive",
-		LastName:  "User",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "NewActive",
+		LastName:   "User",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -39,9 +40,10 @@ func TestCreateCustomer_NotesIsStored(t *testing.T) {
 
 	const want = "VIP customer, handle with care"
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "NotesCustomer",
-		Notes:     want,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "NotesCustomer",
+		Notes:      want,
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -62,9 +64,10 @@ func TestCreateCustomer_CityIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "CityCustomer",
-		City:      "New York",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "CityCustomer",
+		City:       "New York",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -85,9 +88,10 @@ func TestCreateCustomer_CountryIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "CountryCustomer",
-		Country:   "US",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "CountryCustomer",
+		Country:    "US",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -108,16 +112,18 @@ func TestListCustomers_SearchByEmail(t *testing.T) {
 	ctx := context.Background()
 
 	_, _ = repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "SearchEmail",
-		Email:     "searchme@unique-test.example",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "SearchEmail",
+		Email:      "searchme@unique-test.example",
 	})
 
 	results, total, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Search:   "searchme@unique-test.example",
-		Page:     1,
-		PageSize: 10,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Search:     "searchme@unique-test.example",
+		Page:       1,
+		PageSize:   10,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers with search: %v", err)
@@ -133,8 +139,9 @@ func TestGetCustomerByID_LoyaltyPointsIsNonNegative(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "LoyaltyCheck",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "LoyaltyCheck",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)

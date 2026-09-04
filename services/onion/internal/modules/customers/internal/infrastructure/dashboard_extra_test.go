@@ -45,6 +45,7 @@ func TestInsertTimelineEntry_DescriptionIsStored(t *testing.T) {
 	const want = "Customer placed order #42"
 	if err := repo.InsertTimelineEntry(ctx, domain.TimelineEntry{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		CustomerID:  5301,
 		Type:        "order",
 		Description: want,

@@ -14,9 +14,10 @@ func TestListCustomers_ReturnsJamieAndAlex(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 
 	customers, total, err := repo.ListCustomers(context.Background(), domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Page:     1,
-		PageSize: 50,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Page:       1,
+		PageSize:   50,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers error: %v", err)
@@ -46,9 +47,10 @@ func TestListCustomers_AlexHasGoldTier(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 
 	customers, _, err := repo.ListCustomers(context.Background(), domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Page:     1,
-		PageSize: 50,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Page:       1,
+		PageSize:   50,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers error: %v", err)
@@ -71,10 +73,11 @@ func TestListCustomers_SearchGold_FindsAlex(t *testing.T) {
 	ctx := context.Background()
 
 	customers, total, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Search:   "Gold",
-		Page:     1,
-		PageSize: 20,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Search:     "Gold",
+		Page:       1,
+		PageSize:   20,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers search 'Gold': unexpected error: %v", err)
@@ -156,10 +159,11 @@ func TestListCustomers_SearchJamie_FindsCustomer(t *testing.T) {
 	ctx := context.Background()
 
 	customers, _, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Search:   "Jamie",
-		Page:     1,
-		PageSize: 20,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Search:     "Jamie",
+		Page:       1,
+		PageSize:   20,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers search 'Jamie': %v", err)
@@ -181,10 +185,11 @@ func TestListCustomers_SearchNonExistent_ReturnsEmpty(t *testing.T) {
 	ctx := context.Background()
 
 	customers, total, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Search:   "xyzzy_no_such_customer_9999",
-		Page:     1,
-		PageSize: 20,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Search:     "xyzzy_no_such_customer_9999",
+		Page:       1,
+		PageSize:   20,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers search non-existent: %v", err)
@@ -200,9 +205,10 @@ func TestListCustomers_Pagination_LimitWorks(t *testing.T) {
 	ctx := context.Background()
 
 	customers, _, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Page:     1,
-		PageSize: 1,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Page:       1,
+		PageSize:   1,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers pageSize=1: %v", err)
@@ -268,10 +274,11 @@ func TestCreateCustomer_PersistsAndReturnsID(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "Test",
-		LastName:  "Create",
-		Email:     "test.create@test.local",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "Test",
+		LastName:   "Create",
+		Email:      "test.create@test.local",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -288,10 +295,11 @@ func TestCreateCustomer_EmailIsStored(t *testing.T) {
 
 	email := "email.stored@test.local"
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "Email",
-		LastName:  "Test",
-		Email:     email,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "Email",
+		LastName:   "Test",
+		Email:      email,
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -381,10 +389,11 @@ func TestDeleteCustomer_RemovesRow(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "Delete",
-		LastName:  "Me",
-		Email:     "delete.me@test.local",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "Delete",
+		LastName:   "Me",
+		Email:      "delete.me@test.local",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)

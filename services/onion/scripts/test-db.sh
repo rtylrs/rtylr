@@ -62,32 +62,33 @@ for f in "$FIXTURES_DIR"/*.sql; do
     dbq "$TEST_DB" < "$f" >/dev/null
 done
 
-# A number of legacy integration tests still construct owner-scoped inputs
-# without the business_id field that was added by the tenant migration.  Keep
-# that compatibility at the disposable test-database boundary so the tests
-# exercise the current business-scoped queries without weakening production
-# writes or silently accepting an unset tenant there.
-info "installing legacy fixture compatibility"
-compatibility_sql=$(dbq "$TEST_DB" -sN -e "
-    SELECT CONCAT(
-        'CREATE TRIGGER ', CHAR(96), 'trg_test_business_scope_', TABLE_NAME, CHAR(96), ' BEFORE INSERT ON ', CHAR(96),
-        TABLE_NAME,
-        CHAR(96), ' FOR EACH ROW SET NEW.business_id = IF(NEW.business_id = 0, NEW.owner_id, NEW.business_id), NEW.owner_id = IF(NEW.owner_id = 0, NEW.business_id, NEW.owner_id);'
-    )
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE()
-      AND TABLE_NAME IN (
-          SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
-          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'
-      )
-      AND TABLE_NAME <> 'finance_invoices'
-      AND COLUMN_NAME IN ('owner_id', 'business_id')
-    GROUP BY TABLE_NAME
-    HAVING COUNT(DISTINCT COLUMN_NAME) = 2
-    ORDER BY TABLE_NAME;
-")
-if [ -n "$compatibility_sql" ]; then
-    dbq "$TEST_DB" <<< "$compatibility_sql" >/dev/null
+if [ "${TEST_DB_LEGACY_SCOPE:-}" = "1" ]; then
+    # Legacy fixture compatibility is opt-in.  These triggers rewrite zero
+    # business IDs and can hide missing tenant scoping in tests.
+    info "installing opt-in legacy fixture compatibility"
+    compatibility_sql=$(dbq "$TEST_DB" -sN -e "
+        SELECT CONCAT(
+            'CREATE TRIGGER ', CHAR(96), 'trg_test_business_scope_', TABLE_NAME, CHAR(96), ' BEFORE INSERT ON ', CHAR(96),
+            TABLE_NAME,
+            CHAR(96), ' FOR EACH ROW SET NEW.business_id = IF(NEW.business_id = 0, NEW.owner_id, NEW.business_id), NEW.owner_id = IF(NEW.owner_id = 0, NEW.business_id, NEW.owner_id);'
+        )
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME IN (
+              SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'
+          )
+          AND TABLE_NAME <> 'finance_invoices'
+          AND COLUMN_NAME IN ('owner_id', 'business_id')
+        GROUP BY TABLE_NAME
+        HAVING COUNT(DISTINCT COLUMN_NAME) = 2
+        ORDER BY TABLE_NAME;
+    ")
+    if [ -n "$compatibility_sql" ]; then
+        dbq "$TEST_DB" <<< "$compatibility_sql" >/dev/null
+    fi
+else
+    info "legacy fixture compatibility disabled"
 fi
 
 ok "database ready — running tests"

@@ -78,6 +78,7 @@ func TestCreateDepartment_IncreasesCount(t *testing.T) {
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Integration Test Dept",
 		Description: "Created by integration test",
 	})
@@ -106,8 +107,9 @@ func TestUpdateDepartment_ChangesName(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Before Rename",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Before Rename",
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment: %v", err)
@@ -117,9 +119,10 @@ func TestUpdateDepartment_ChangesName(t *testing.T) {
 	}()
 
 	err = repo.UpdateDepartment(ctx, testutil.OwnerID, domain.DepartmentInput{
-		ID:      id,
-		OwnerID: testutil.OwnerID,
-		Name:    "After Rename",
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "After Rename",
 	})
 	if err != nil {
 		t.Fatalf("UpdateDepartment: %v", err)
@@ -142,8 +145,9 @@ func TestDeleteDepartment_RemovesEntry(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "To Delete",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "To Delete",
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment: %v", err)
@@ -188,6 +192,7 @@ func TestCreateDepartment_WithDescription(t *testing.T) {
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Dept With Desc",
 		Description: "A helpful description",
 	})
@@ -219,8 +224,9 @@ func TestCreateDepartment_ReturnsPositiveID(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Positive ID Test Dept",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Positive ID Test Dept",
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment: %v", err)
@@ -239,6 +245,7 @@ func TestCreateDepartment_MultipleDistinctIDs(t *testing.T) {
 
 	id1, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID: testutil.OwnerID, Name: "Dept Multi A",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment A: %v", err)
@@ -247,6 +254,7 @@ func TestCreateDepartment_MultipleDistinctIDs(t *testing.T) {
 
 	id2, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID: testutil.OwnerID, Name: "Dept Multi B",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment B: %v", err)
@@ -265,6 +273,7 @@ func TestUpdateDepartment_UpdatesDescription(t *testing.T) {
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID: testutil.OwnerID, Name: "Desc Update Dept", Description: "Old desc",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment: %v", err)
@@ -273,6 +282,7 @@ func TestUpdateDepartment_UpdatesDescription(t *testing.T) {
 
 	if err := repo.UpdateDepartment(ctx, testutil.OwnerID, domain.DepartmentInput{
 		ID: id, OwnerID: testutil.OwnerID, Name: "Desc Update Dept", Description: "New desc",
+		BusinessID: testutil.BusinessID,
 	}); err != nil {
 		t.Fatalf("UpdateDepartment: %v", err)
 	}
@@ -321,6 +331,7 @@ func TestUpdateDepartment_WrongOwnerNoEffect(t *testing.T) {
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID: testutil.OwnerID, Name: "Owner Guard Dept",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment: %v", err)
@@ -350,6 +361,7 @@ func TestCreateDepartment_NoDescription_Allowed(t *testing.T) {
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID: testutil.OwnerID, Name: "No Desc Dept",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment without description: %v", err)
@@ -400,6 +412,7 @@ func TestDeleteDepartment_DecreasesCount(t *testing.T) {
 
 	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
 		OwnerID: testutil.OwnerID, Name: "Count Decrease Dept",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateDepartment: %v", err)

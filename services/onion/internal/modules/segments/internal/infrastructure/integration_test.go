@@ -57,6 +57,7 @@ func TestCreateSegment_PersistsAndReturnsID(t *testing.T) {
 
 	input := domain.SegmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "VIP Customers",
 		Description: "High value segment",
 		Filters:     []byte(`{}`),
@@ -78,6 +79,7 @@ func TestCreateSegment_NameIsStored(t *testing.T) {
 
 	input := domain.SegmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "StoredSegment",
 		Description: "",
 		Filters:     []byte(`{}`),
@@ -103,9 +105,10 @@ func TestGetSegmentByID_Exists(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "ExistsSegment",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "ExistsSegment",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
@@ -137,9 +140,10 @@ func TestGetSegmentByID_WrongOwner_Errors(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "WrongOwnerSegment",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "WrongOwnerSegment",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
@@ -157,19 +161,21 @@ func TestUpdateSegment_ChangesName(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "BeforeUpdateSeg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "BeforeUpdateSeg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
 
 	if err := repo.Update(ctx, domain.SegmentUpdateInput{
-		ID:      id,
-		OwnerID: testutil.OwnerID,
-		Name:    "AfterUpdateSeg",
-		Filters: []byte(`{}`),
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "AfterUpdateSeg",
+		Filters:    []byte(`{}`),
 	}); err != nil {
 		t.Fatalf("Update error: %v", err)
 	}
@@ -189,9 +195,10 @@ func TestDeleteSegment_RemovesRow(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "DeleteMeSeg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "DeleteMeSeg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
@@ -223,9 +230,10 @@ func TestListSegments_AfterCreate_ContainsNew(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "NewlyCreatedSeg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "NewlyCreatedSeg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
@@ -251,6 +259,7 @@ func TestCreate_ThenGet_Roundtrip(t *testing.T) {
 
 	input := domain.SegmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "RoundtripSeg",
 		Description: "roundtrip desc",
 		Filters:     []byte(`{"key":"value"}`),

@@ -162,6 +162,7 @@ func TestSessions_Open_ThenGetReturnsStatusOpen(t *testing.T) {
 	locID := int64(3001)
 	id, err := repo.Open(ctx, domain.OpenSessionInput{
 		OwnerID:      testutil.OwnerID,
+		BusinessID:   testutil.BusinessID,
 		LocationID:   &locID,
 		OpeningFloat: 50.0,
 	})
@@ -171,6 +172,11 @@ func TestSessions_Open_ThenGetReturnsStatusOpen(t *testing.T) {
 	if id == 0 {
 		t.Fatal("Open returned ID=0")
 	}
+	t.Cleanup(func() {
+		if _, err := db.ExecContext(context.Background(), "DELETE FROM pos_sessions WHERE id = ?", id); err != nil {
+			t.Errorf("cleanup session: %v", err)
+		}
+	})
 
 	session, err := repo.Get(ctx, testutil.OwnerID, id)
 	if err != nil {
@@ -189,6 +195,7 @@ func TestSessions_Close_ChangesStatus(t *testing.T) {
 	locID := int64(3001)
 	id, err := repo.Open(ctx, domain.OpenSessionInput{
 		OwnerID:      testutil.OwnerID,
+		BusinessID:   testutil.BusinessID,
 		LocationID:   &locID,
 		OpeningFloat: 100.0,
 	})
@@ -199,6 +206,7 @@ func TestSessions_Close_ChangesStatus(t *testing.T) {
 	err = repo.Close(ctx, domain.CloseSessionInput{
 		ID:           id,
 		OwnerID:      testutil.OwnerID,
+		BusinessID:   testutil.BusinessID,
 		ClosingFloat: 120.0,
 	})
 	if err != nil {
@@ -221,6 +229,7 @@ func TestSessions_Close_UnknownIDReturnsNotFound(t *testing.T) {
 	err := repo.Close(context.Background(), domain.CloseSessionInput{
 		ID:           9999999,
 		OwnerID:      testutil.OwnerID,
+		BusinessID:   testutil.BusinessID,
 		ClosingFloat: 0,
 	})
 	if !errors.Is(err, domain.ErrSessionNotFound) {

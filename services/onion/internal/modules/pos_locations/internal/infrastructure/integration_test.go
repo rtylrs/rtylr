@@ -151,9 +151,10 @@ func TestLocations_Create_ThenListContainsNew(t *testing.T) {
 	ctx := context.Background()
 
 	newID, err := repo.Create(ctx, domain.LocationInput{
-		OwnerID:  testutil.OwnerID,
-		Name:     "Integration Test Location",
-		IsActive: true,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Integration Test Location",
+		IsActive:   true,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -185,19 +186,21 @@ func TestLocations_Update_ChangesName(t *testing.T) {
 	active := true
 
 	newID, err := repo.Create(ctx, domain.LocationInput{
-		OwnerID:  testutil.OwnerID,
-		Name:     "Before Update",
-		IsActive: true,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Before Update",
+		IsActive:   true,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
 	err = repo.Update(ctx, domain.LocationUpdateInput{
-		ID:       newID,
-		OwnerID:  testutil.OwnerID,
-		Name:     "After Update",
-		IsActive: &active,
+		ID:         newID,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "After Update",
+		IsActive:   &active,
 	})
 	if err != nil {
 		t.Fatalf("Update: %v", err)
@@ -225,10 +228,11 @@ func TestLocations_Update_UnknownIDReturnsNotFound(t *testing.T) {
 	active := true
 
 	err := repo.Update(ctx, domain.LocationUpdateInput{
-		ID:       9999999,
-		OwnerID:  testutil.OwnerID,
-		Name:     "Ghost",
-		IsActive: &active,
+		ID:         9999999,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Ghost",
+		IsActive:   &active,
 	})
 	if err == nil {
 		t.Fatal("expected error for unknown location, got nil")

@@ -38,13 +38,14 @@ func TestTimeOff_CreateTimeOffRequest_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "vacation",
-		StartDate: "2026-07-01",
-		EndDate:   "2026-07-05",
-		DaysCount: 5.0,
-		Reason:    "Summer vacation",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "vacation",
+		StartDate:  "2026-07-01",
+		EndDate:    "2026-07-05",
+		DaysCount:  5.0,
+		Reason:     "Summer vacation",
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest: %v", err)
@@ -58,12 +59,13 @@ func TestTimeOff_CreateTimeOffRequest_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "sick",
-		StartDate: "2026-08-01",
-		EndDate:   "2026-08-02",
-		DaysCount: 2.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "sick",
+		StartDate:  "2026-08-01",
+		EndDate:    "2026-08-02",
+		DaysCount:  2.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest: %v", err)
@@ -88,12 +90,13 @@ func TestTimeOff_ApproveTimeOffRequest_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "personal",
-		StartDate: "2026-09-01",
-		EndDate:   "2026-09-01",
-		DaysCount: 1.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "personal",
+		StartDate:  "2026-09-01",
+		EndDate:    "2026-09-01",
+		DaysCount:  1.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest: %v", err)
@@ -113,12 +116,13 @@ func TestTimeOff_ApproveTimeOffRequest_UpdatesStatus(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "vacation",
-		StartDate: "2026-10-01",
-		EndDate:   "2026-10-03",
-		DaysCount: 3.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "vacation",
+		StartDate:  "2026-10-01",
+		EndDate:    "2026-10-03",
+		DaysCount:  3.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest: %v", err)
@@ -154,13 +158,14 @@ func TestTimeOff_CreateTimeOffRequest_SickType(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "sick",
-		StartDate: "2026-11-01",
-		EndDate:   "2026-11-01",
-		DaysCount: 1.0,
-		Notes:     "Doctor appointment",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "sick",
+		StartDate:  "2026-11-01",
+		EndDate:    "2026-11-01",
+		DaysCount:  1.0,
+		Notes:      "Doctor appointment",
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest sick: %v", err)
@@ -174,12 +179,13 @@ func TestTimeOff_CreateTimeOffRequest_HalfDay(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "personal",
-		StartDate: "2026-12-01",
-		EndDate:   "2026-12-01",
-		DaysCount: 0.5,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "personal",
+		StartDate:  "2026-12-01",
+		EndDate:    "2026-12-01",
+		DaysCount:  0.5,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest half day: %v", err)
@@ -193,12 +199,13 @@ func TestTimeOff_CreateTimeOffRequest_VacationType(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "vacation",
-		StartDate: "2027-01-10",
-		EndDate:   "2027-01-14",
-		DaysCount: 5.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "vacation",
+		StartDate:  "2027-01-10",
+		EndDate:    "2027-01-14",
+		DaysCount:  5.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest vacation: %v", err)
@@ -216,12 +223,13 @@ func TestTimeOff_CreateTimeOffRequest_MultipleRequests(t *testing.T) {
 	types := []string{"vacation", "sick", "personal"}
 	for i, typ := range types {
 		id, err := repo.CreateTimeOffRequest(ctx, domain.TimeOffInput{
-			OwnerID:   testutil.OwnerID,
-			StaffID:   timeOffStaffID,
-			Type:      typ,
-			StartDate: "2027-02-01",
-			EndDate:   "2027-02-02",
-			DaysCount: 2.0 + float64(i),
+			OwnerID:    testutil.OwnerID,
+			BusinessID: testutil.BusinessID,
+			StaffID:    timeOffStaffID,
+			Type:       typ,
+			StartDate:  "2027-02-01",
+			EndDate:    "2027-02-02",
+			DaysCount:  2.0 + float64(i),
 		})
 		if err != nil {
 			t.Fatalf("type=%s: %v", typ, err)
@@ -238,12 +246,13 @@ func TestTimeOff_ApproveTimeOffRequest_WithNotes(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateTimeOffRequest(ctx, domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "sick",
-		StartDate: "2027-03-01",
-		EndDate:   "2027-03-03",
-		DaysCount: 3.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "sick",
+		StartDate:  "2027-03-01",
+		EndDate:    "2027-03-03",
+		DaysCount:  3.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest: %v", err)
@@ -265,12 +274,13 @@ func TestTimeOff_ApproveTimeOffRequest_Rejected(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateTimeOffRequest(ctx, domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "personal",
-		StartDate: "2027-04-01",
-		EndDate:   "2027-04-01",
-		DaysCount: 1.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "personal",
+		StartDate:  "2027-04-01",
+		EndDate:    "2027-04-01",
+		DaysCount:  1.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest: %v", err)
@@ -297,12 +307,13 @@ func TestTimeOff_ListTimeOffRequests_PositiveIDs(t *testing.T) {
 
 	// Create one so the list is not empty.
 	_, _ = repo.CreateTimeOffRequest(ctx, domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "vacation",
-		StartDate: "2027-05-01",
-		EndDate:   "2027-05-02",
-		DaysCount: 2.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "vacation",
+		StartDate:  "2027-05-01",
+		EndDate:    "2027-05-02",
+		DaysCount:  2.0,
 	})
 
 	requests, err := repo.ListTimeOffRequests(ctx, testutil.OwnerID)
@@ -320,13 +331,14 @@ func TestTimeOff_CreateTimeOffRequest_WithReason(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "personal",
-		StartDate: "2027-06-01",
-		EndDate:   "2027-06-01",
-		DaysCount: 1.0,
-		Reason:    "Family event",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "personal",
+		StartDate:  "2027-06-01",
+		EndDate:    "2027-06-01",
+		DaysCount:  1.0,
+		Reason:     "Family event",
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest with reason: %v", err)
@@ -340,12 +352,13 @@ func TestTimeOff_CreateTimeOffRequest_LargeDaysCount(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "vacation",
-		StartDate: "2027-07-01",
-		EndDate:   "2027-07-30",
-		DaysCount: 22.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "vacation",
+		StartDate:  "2027-07-01",
+		EndDate:    "2027-07-30",
+		DaysCount:  22.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest large days: %v", err)
@@ -379,12 +392,13 @@ func TestTimeOff_ApproveTimeOffRequest_AppearsPending(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateTimeOffRequest(ctx, domain.TimeOffInput{
-		OwnerID:   testutil.OwnerID,
-		StaffID:   timeOffStaffID,
-		Type:      "vacation",
-		StartDate: "2027-09-01",
-		EndDate:   "2027-09-05",
-		DaysCount: 5.0,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "vacation",
+		StartDate:  "2027-09-01",
+		EndDate:    "2027-09-05",
+		DaysCount:  5.0,
 	})
 	if err != nil {
 		t.Fatalf("CreateTimeOffRequest: %v", err)
@@ -413,14 +427,16 @@ func TestTimeOff_CreateTimeOffRequest_UniqueIDs(t *testing.T) {
 
 	id1, err := repo.CreateTimeOffRequest(ctx, domain.TimeOffInput{
 		OwnerID: testutil.OwnerID, StaffID: timeOffStaffID, Type: "sick",
-		StartDate: "2027-08-01", EndDate: "2027-08-01", DaysCount: 1.0,
+		BusinessID: testutil.BusinessID,
+		StartDate:  "2027-08-01", EndDate: "2027-08-01", DaysCount: 1.0,
 	})
 	if err != nil {
 		t.Fatalf("req 1: %v", err)
 	}
 	id2, err := repo.CreateTimeOffRequest(ctx, domain.TimeOffInput{
 		OwnerID: testutil.OwnerID, StaffID: timeOffStaffID, Type: "personal",
-		StartDate: "2027-08-02", EndDate: "2027-08-02", DaysCount: 1.0,
+		BusinessID: testutil.BusinessID,
+		StartDate:  "2027-08-02", EndDate: "2027-08-02", DaysCount: 1.0,
 	})
 	if err != nil {
 		t.Fatalf("req 2: %v", err)

@@ -15,11 +15,12 @@ func TestCreateCampaign_TypeIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Type Check Campaign",
-		Type:    "sms",
-		Subject: "",
-		Body:    "SMS body",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Type Check Campaign",
+		Type:       "sms",
+		Subject:    "",
+		Body:       "SMS body",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -40,9 +41,10 @@ func TestCreateCampaign_OwnerIDIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "OwnerID Check Campaign",
-		Type:    "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "OwnerID Check Campaign",
+		Type:       "email",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -62,11 +64,11 @@ func TestCreateCampaign_IDsAreUnique(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id1, err := repo.Create(ctx, domain.CampaignInput{OwnerID: testutil.OwnerID, Name: "Unique A", Type: "email"})
+	id1, err := repo.Create(ctx, domain.CampaignInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "Unique A", Type: "email"})
 	if err != nil {
 		t.Fatalf("Create A: %v", err)
 	}
-	id2, err := repo.Create(ctx, domain.CampaignInput{OwnerID: testutil.OwnerID, Name: "Unique B", Type: "email"})
+	id2, err := repo.Create(ctx, domain.CampaignInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "Unique B", Type: "email"})
 	if err != nil {
 		t.Fatalf("Create B: %v", err)
 	}
@@ -81,21 +83,23 @@ func TestUpdateCampaign_UpdatesBody(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Body Update Campaign",
-		Type:    "email",
-		Body:    "original body",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Body Update Campaign",
+		Type:       "email",
+		Body:       "original body",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
 	if err := repo.Update(ctx, domain.CampaignUpdateInput{
-		ID:      id,
-		OwnerID: testutil.OwnerID,
-		Name:    "Body Update Campaign",
-		Type:    "email",
-		Body:    "updated body",
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Body Update Campaign",
+		Type:       "email",
+		Body:       "updated body",
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
@@ -120,9 +124,10 @@ func TestListCampaigns_AfterCreate_CountIncreases(t *testing.T) {
 	}
 
 	_, err = repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Count Increase Campaign",
-		Type:    "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Count Increase Campaign",
+		Type:       "email",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -155,9 +160,10 @@ func TestUpdateCampaignStatus_WrongOwner_ReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Status Wrong Owner",
-		Type:    "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Status Wrong Owner",
+		Type:       "email",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)

@@ -37,6 +37,7 @@ func TestUpsert_NoError(t *testing.T) {
 
 	err := repo.Upsert(ctx, domain.SettingsInput{
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		DefaultConsent: true,
 		FromEmail:      "noreply@example.com",
 		FromName:       "Test Store",
@@ -53,9 +54,10 @@ func TestUpsert_ThenGet_FromEmailIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:   testutil.OwnerID,
-		FromEmail: "stored@example.com",
-		Timezone:  "UTC",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromEmail:  "stored@example.com",
+		Timezone:   "UTC",
 	}); err != nil {
 		t.Fatalf("Upsert: %v", err)
 	}
@@ -75,8 +77,9 @@ func TestUpsert_ThenGet_TimezoneIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:  testutil.OwnerID,
-		Timezone: "Europe/London",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Timezone:   "Europe/London",
 	}); err != nil {
 		t.Fatalf("Upsert: %v", err)
 	}
@@ -96,8 +99,9 @@ func TestUpsert_ThenGet_OwnerIDIsSet(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:  testutil.OwnerID,
-		Timezone: "UTC",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Timezone:   "UTC",
 	}); err != nil {
 		t.Fatalf("Upsert: %v", err)
 	}
@@ -117,9 +121,10 @@ func TestUpsert_ThenGet_FromNameIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:  testutil.OwnerID,
-		FromName: "My Brand",
-		Timezone: "UTC",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromName:   "My Brand",
+		Timezone:   "UTC",
 	}); err != nil {
 		t.Fatalf("Upsert: %v", err)
 	}
@@ -140,6 +145,7 @@ func TestUpsert_ThenGet_DefaultConsentIsStored(t *testing.T) {
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		DefaultConsent: false,
 		Timezone:       "UTC",
 	}); err != nil {
@@ -161,9 +167,10 @@ func TestUpsert_Idempotent(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.SettingsInput{
-		OwnerID:   testutil.OwnerID,
-		FromEmail: "idempotent@test.com",
-		Timezone:  "UTC",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromEmail:  "idempotent@test.com",
+		Timezone:   "UTC",
 	}
 
 	if err := repo.Upsert(ctx, input); err != nil {

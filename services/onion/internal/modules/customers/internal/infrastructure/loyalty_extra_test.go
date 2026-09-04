@@ -45,6 +45,7 @@ func TestUpsertLoyaltyConfig_NoError(t *testing.T) {
 
 	err := repo.UpsertLoyaltyConfig(ctx, domain.LoyaltyConfigInput{
 		OwnerID:               testutil.OwnerID,
+		BusinessID:            testutil.BusinessID,
 		IsEnabled:             true,
 		PointsPerCurrencyUnit: 1.0,
 		CurrencyPerPoint:      0.01,
@@ -64,8 +65,9 @@ func TestGetLoyaltyConfig_AfterUpsert_OwnerIDIsSet(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertLoyaltyConfig(ctx, domain.LoyaltyConfigInput{
-		OwnerID:   testutil.OwnerID,
-		IsEnabled: true,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		IsEnabled:  true,
 	}); err != nil {
 		t.Fatalf("UpsertLoyaltyConfig: %v", err)
 	}

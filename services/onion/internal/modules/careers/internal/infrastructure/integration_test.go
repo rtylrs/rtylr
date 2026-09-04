@@ -101,6 +101,7 @@ func TestCareers_CreateCareer_ReturnsPositiveID(t *testing.T) {
 	slug := fmt.Sprintf("integration-test-role-%d", testutil.OwnerID)
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Slug:        slug,
 		Title:       "Integration Test Role",
 		IsPublished: false,
@@ -123,6 +124,7 @@ func TestCareers_CreateCareer_AppearsInList(t *testing.T) {
 
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID: testutil.OwnerID, Slug: "appear-in-list-role", Title: "List Test Role",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
@@ -169,6 +171,7 @@ func TestCareers_UpdateCareer_ChangesTitle(t *testing.T) {
 
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID: testutil.OwnerID, Slug: "update-career-slug", Title: "Old Title",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
@@ -179,6 +182,7 @@ func TestCareers_UpdateCareer_ChangesTitle(t *testing.T) {
 
 	if err := repo.UpdateCareer(ctx, domain.RecruitCareerInput{
 		ID: id, OwnerID: testutil.OwnerID, Slug: "update-career-slug", Title: "New Title",
+		BusinessID: testutil.BusinessID,
 	}); err != nil {
 		t.Fatalf("UpdateCareer: %v", err)
 	}
@@ -201,6 +205,7 @@ func TestCareers_DeleteCareer_RemovesFromList(t *testing.T) {
 
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID: testutil.OwnerID, Slug: "delete-career-slug", Title: "Delete Me",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
@@ -229,6 +234,7 @@ func TestCareers_GetCareerBySlug_ReturnsCareer(t *testing.T) {
 	const slug = "get-by-slug-career"
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID: testutil.OwnerID, Slug: slug, Title: "Slug Career",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
@@ -254,6 +260,7 @@ func TestCareers_SaveApplication_ReturnsPositiveID(t *testing.T) {
 	// First create a career to apply to.
 	careerID, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID: testutil.OwnerID, Slug: "apply-career-slug", Title: "Apply Target",
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
@@ -334,6 +341,7 @@ func TestCareers_CreateSection_ReturnsPositiveID(t *testing.T) {
 
 	id, err := repo.CreateSection(ctx, domain.SectionInput{
 		OwnerID: testutil.OwnerID, Kind: "perks", Title: "Our Perks", Enabled: true,
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateSection: %v", err)
@@ -351,6 +359,7 @@ func TestCareers_CreateSection_AppearsInList(t *testing.T) {
 
 	id, err := repo.CreateSection(ctx, domain.SectionInput{
 		OwnerID: testutil.OwnerID, Kind: "culture", Title: "Our Culture", Enabled: true,
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateSection: %v", err)
@@ -379,6 +388,7 @@ func TestCareers_DeleteSection_RemovesFromList(t *testing.T) {
 
 	id, err := repo.CreateSection(ctx, domain.SectionInput{
 		OwnerID: testutil.OwnerID, Kind: "values", Title: "Our Values", Enabled: true,
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateSection: %v", err)
@@ -404,6 +414,7 @@ func TestCareers_ListCareers_PublishedOnlyFilter(t *testing.T) {
 	// Unpublished career should not appear in publishedOnly=true result.
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID: testutil.OwnerID, Slug: "unpublished-career", Title: "Unpublished", IsPublished: false,
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
@@ -423,7 +434,6 @@ func TestCareers_ListCareers_PublishedOnlyFilter(t *testing.T) {
 	}
 }
 
- 
 func TestCareers_CareerSalary_RoundTripsExactCents(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
@@ -431,12 +441,12 @@ func TestCareers_CareerSalary_RoundTripsExactCents(t *testing.T) {
 
 	const slug = "salary-exact-cents"
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
-		OwnerID:        testutil.OwnerID,
-		BusinessID:     testutil.BusinessID,
-		Slug:           slug,
-		Title:          "Exact Salary Role",
-		SalaryMin:      money.Amount(123456),
-		SalaryMax:      money.Amount(234567),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Slug:       slug,
+		Title:      "Exact Salary Role",
+		SalaryMin:  money.Amount(123456),
+		SalaryMax:  money.Amount(234567),
 	})
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)

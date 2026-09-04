@@ -89,6 +89,7 @@ func TestInsertTimelineEntry_NoError(t *testing.T) {
 
 	err := repo.InsertTimelineEntry(ctx, domain.TimelineEntry{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		CustomerID:  5301,
 		Type:        "visit",
 		Description: "integration test visit",
@@ -111,6 +112,7 @@ func TestInsertTimelineEntry_AppearsInTimeline(t *testing.T) {
 
 	if err := repo.InsertTimelineEntry(ctx, domain.TimelineEntry{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		CustomerID:  5302,
 		Type:        "note",
 		Description: "timeline count check",

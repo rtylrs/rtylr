@@ -45,6 +45,7 @@ func TestCreate_Automation_ReturnsPositiveID(t *testing.T) {
 
 	input := domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "test-automation",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -68,6 +69,7 @@ func TestCreate_Automation_AppearsInList(t *testing.T) {
 
 	input := domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "list-check-automation",
 		TriggerType:   "customer_signup",
 		TriggerConfig: []byte(`{"key":"val"}`),
@@ -104,6 +106,7 @@ func TestUpdate_Automation_ChangesName(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "before-update",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -117,6 +120,7 @@ func TestUpdate_Automation_ChangesName(t *testing.T) {
 	updateInput := domain.AutomationUpdateInput{
 		ID:            id,
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "after-update",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -151,6 +155,7 @@ func TestUpdate_Automation_WrongOwnerReturnsNotFound(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "wrong-owner-update",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -181,6 +186,7 @@ func TestDelete_Automation_NoError(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "to-delete",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -203,6 +209,7 @@ func TestDelete_Automation_ThenNotInList(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "delete-then-check",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -235,6 +242,7 @@ func TestDelete_Automation_WrongOwnerReturnsNotFound(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "wrong-owner-delete",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -258,6 +266,7 @@ func TestList_Automations_ItemsHaveOwnerID(t *testing.T) {
 
 	_, _ = repo.Create(ctx, domain.AutomationInput{
 		OwnerID: testutil.OwnerID, Name: "owner-check", TriggerType: "order_created",
+		BusinessID:    testutil.BusinessID,
 		TriggerConfig: []byte(`{}`), Actions: []byte(`[]`), IsActive: true,
 	})
 
@@ -279,6 +288,7 @@ func TestCreate_Automation_InactiveByDefault(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "inactive-automation",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -312,6 +322,7 @@ func TestCreate_Automation_NameIsStored(t *testing.T) {
 	const want = "name-is-stored-automation"
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          want,
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -345,6 +356,7 @@ func TestCreate_Automation_TriggerTypeIsStored(t *testing.T) {
 	const want = "customer_signup"
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "trigger-type-check",
 		TriggerType:   want,
 		TriggerConfig: []byte(`{}`),
@@ -382,6 +394,7 @@ func TestList_Automations_AfterCreate_CountIncreases(t *testing.T) {
 
 	_, err = repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "count-check",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -407,6 +420,7 @@ func TestUpdate_Automation_TriggerType(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "trigger-update",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -420,6 +434,7 @@ func TestUpdate_Automation_TriggerType(t *testing.T) {
 	if err := repo.Update(ctx, domain.AutomationUpdateInput{
 		ID:            id,
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "trigger-update",
 		TriggerType:   "customer_signup",
 		TriggerConfig: []byte(`{}`),
@@ -451,6 +466,7 @@ func TestUpdate_Automation_IsActiveToggle(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "toggle-active",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -464,6 +480,7 @@ func TestUpdate_Automation_IsActiveToggle(t *testing.T) {
 	if err := repo.Update(ctx, domain.AutomationUpdateInput{
 		ID:            id,
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "toggle-active",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -507,6 +524,7 @@ func TestCreate_Automation_ActiveIsStored(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "active-stored",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -539,6 +557,7 @@ func TestCreate_Automation_IDsAreUnique(t *testing.T) {
 
 	id1, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "unique-a",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -549,6 +568,7 @@ func TestCreate_Automation_IDsAreUnique(t *testing.T) {
 	}
 	id2, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "unique-b",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -569,6 +589,7 @@ func TestList_Automations_ItemsHaveNonZeroID(t *testing.T) {
 
 	_, _ = repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "id-check",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -593,6 +614,7 @@ func TestUpdate_Automation_NoError(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "no-error-update",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),
@@ -606,6 +628,7 @@ func TestUpdate_Automation_NoError(t *testing.T) {
 	err = repo.Update(ctx, domain.AutomationUpdateInput{
 		ID:            id,
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "no-error-update-2",
 		TriggerType:   "order_created",
 		TriggerConfig: []byte(`{}`),

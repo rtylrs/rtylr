@@ -15,10 +15,11 @@ func TestCreateLoyaltyTier_MinPointsIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "MinPoints Tier",
-		MinPoints: 1750,
-		Perks:     []byte(`[]`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "MinPoints Tier",
+		MinPoints:  1750,
+		Perks:      []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("CreateLoyaltyTier: %v", err)
@@ -46,6 +47,7 @@ func TestCreateLoyaltyTier_DiscountPctIsStored(t *testing.T) {
 
 	id, err := repo.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "DiscountPct Tier",
 		DiscountPct: 15.5,
 		Perks:       []byte(`[]`),
@@ -75,9 +77,10 @@ func TestListLoyaltyTiers_AllBelongToOwner(t *testing.T) {
 	ctx := context.Background()
 
 	_, _ = repo.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Owner Check Tier",
-		Perks:   []byte(`[]`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Owner Check Tier",
+		Perks:      []byte(`[]`),
 	})
 
 	tiers, err := repo.ListLoyaltyTiers(ctx, testutil.OwnerID)
@@ -111,19 +114,21 @@ func TestUpdateLoyaltyTier_ChangesName(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Before Tier Name",
-		Perks:   []byte(`[]`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Before Tier Name",
+		Perks:      []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("CreateLoyaltyTier: %v", err)
 	}
 
 	if err := repo.UpdateLoyaltyTier(ctx, domain.LoyaltyTierUpdateInput{
-		ID:      id,
-		OwnerID: testutil.OwnerID,
-		Name:    "After Tier Name",
-		Perks:   []byte(`[]`),
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "After Tier Name",
+		Perks:      []byte(`[]`),
 	}); err != nil {
 		t.Fatalf("UpdateLoyaltyTier: %v", err)
 	}

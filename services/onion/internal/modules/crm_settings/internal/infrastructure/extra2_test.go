@@ -16,6 +16,7 @@ func TestUpsert_ThenGet_SmsSenderIDIsStored(t *testing.T) {
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		SmsSenderID: "MYBRAND",
 		Timezone:    "UTC",
 	}); err != nil {
@@ -37,17 +38,19 @@ func TestUpsert_ThenGet_UpdatesExistingRecord(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:   testutil.OwnerID,
-		FromEmail: "first@example.com",
-		Timezone:  "UTC",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromEmail:  "first@example.com",
+		Timezone:   "UTC",
 	}); err != nil {
 		t.Fatalf("Upsert first: %v", err)
 	}
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:   testutil.OwnerID,
-		FromEmail: "second@example.com",
-		Timezone:  "UTC",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromEmail:  "second@example.com",
+		Timezone:   "UTC",
 	}); err != nil {
 		t.Fatalf("Upsert second: %v", err)
 	}
@@ -68,6 +71,7 @@ func TestUpsert_DefaultConsentTrue_IsStored(t *testing.T) {
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		DefaultConsent: true,
 		Timezone:       "UTC",
 	}); err != nil {

@@ -245,6 +245,7 @@ func TestCreateAndDeleteScheduledReport_RoundTrip(t *testing.T) {
 
 	id, err := repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportRow{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		TemplateID: "weekly_revenue",
 		Cadence:    "weekly",
 		Channel:    "email",
@@ -281,6 +282,7 @@ func TestUpsertSettings_RoundTrip(t *testing.T) {
 
 	row := infrastructure.SettingsRow{
 		OwnerID:         testutil.OwnerID,
+		BusinessID:      testutil.BusinessID,
 		DefaultCurrency: "USD",
 		FiscalYearStart: "01-01",
 		Timezone:        "UTC",

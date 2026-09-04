@@ -36,13 +36,14 @@ func TestTemplates_Create_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "Welcome Email",
-		Type:      "email",
-		Subject:   "Welcome to our service!",
-		Body:      "Hello {{name}}, welcome!",
-		Variables: []byte(`["name"]`),
-		IsActive:  true,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Welcome Email",
+		Type:       "email",
+		Subject:    "Welcome to our service!",
+		Body:       "Hello {{name}}, welcome!",
+		Variables:  []byte(`["name"]`),
+		IsActive:   true,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -58,6 +59,7 @@ func TestTemplates_Create_AppearsInList(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "ListTest", Type: "email", Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -84,6 +86,7 @@ func TestTemplates_Update_ChangesName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "OldName", Type: "sms", Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -92,6 +95,7 @@ func TestTemplates_Update_ChangesName(t *testing.T) {
 
 	if err := repo.Update(context.Background(), domain.TemplateUpdateInput{
 		ID: id, OwnerID: testutil.OwnerID, Name: "NewName", Type: "sms", Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
@@ -109,6 +113,7 @@ func TestTemplates_Update_NotFound_ReturnsError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	err := repo.Update(context.Background(), domain.TemplateUpdateInput{
 		ID: 9999999, OwnerID: testutil.OwnerID, Name: "Missing", Type: "email", Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
 	})
 	if err == nil {
 		t.Fatal("expected error for missing template")
@@ -120,6 +125,7 @@ func TestTemplates_Delete_RemovesFromList(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "DeleteMe", Type: "email", Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -162,12 +168,13 @@ func TestTemplates_Create_SMSType(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "SMS Template",
-		Type:      "sms",
-		Body:      "Your code is {{code}}",
-		Variables: []byte(`["code"]`),
-		IsActive:  true,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "SMS Template",
+		Type:       "sms",
+		Body:       "Your code is {{code}}",
+		Variables:  []byte(`["code"]`),
+		IsActive:   true,
 	})
 	if err != nil {
 		t.Fatalf("Create SMS: %v", err)
@@ -183,7 +190,8 @@ func TestTemplates_Update_IsActive(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "ActiveToggle", Type: "email", Body: "body",
-		Variables: []byte(`[]`), IsActive: true,
+		BusinessID: testutil.BusinessID,
+		Variables:  []byte(`[]`), IsActive: true,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -192,7 +200,8 @@ func TestTemplates_Update_IsActive(t *testing.T) {
 
 	if err := repo.Update(context.Background(), domain.TemplateUpdateInput{
 		ID: id, OwnerID: testutil.OwnerID, Name: "ActiveToggle", Type: "email", Body: "body",
-		Variables: []byte(`[]`), IsActive: false,
+		BusinessID: testutil.BusinessID,
+		Variables:  []byte(`[]`), IsActive: false,
 	}); err != nil {
 		t.Fatalf("Update IsActive: %v", err)
 	}
@@ -202,12 +211,13 @@ func TestTemplates_Create_SubjectStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "SubjectTest",
-		Type:      "email",
-		Subject:   "Test Subject Line",
-		Body:      "body",
-		Variables: []byte(`[]`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "SubjectTest",
+		Type:       "email",
+		Subject:    "Test Subject Line",
+		Body:       "body",
+		Variables:  []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -227,7 +237,8 @@ func TestTemplates_Update_Body(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "BodyUpdate", Type: "email",
-		Body: "old body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "old body", Variables: []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -236,7 +247,8 @@ func TestTemplates_Update_Body(t *testing.T) {
 
 	if err := repo.Update(context.Background(), domain.TemplateUpdateInput{
 		ID: id, OwnerID: testutil.OwnerID, Name: "BodyUpdate", Type: "email",
-		Body: "new body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "new body", Variables: []byte(`[]`),
 	}); err != nil {
 		t.Fatalf("Update body: %v", err)
 	}
@@ -253,12 +265,13 @@ func TestTemplates_Create_PushType(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "Push Notification Template",
-		Type:      "push",
-		Body:      "You have a new message",
-		Variables: []byte(`[]`),
-		IsActive:  true,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Push Notification Template",
+		Type:       "push",
+		Body:       "You have a new message",
+		Variables:  []byte(`[]`),
+		IsActive:   true,
 	})
 	if err != nil {
 		t.Fatalf("Create push type: %v", err)
@@ -274,7 +287,8 @@ func TestTemplates_List_EachHasPositiveID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "IDCheckTmpl", Type: "email",
-		Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "body", Variables: []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -297,7 +311,8 @@ func TestTemplates_List_EachHasNonEmptyName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "NameCheckTmpl", Type: "email",
-		Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "body", Variables: []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -320,11 +335,12 @@ func TestTemplates_Create_Variables_MultipleVars(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	vars := []byte(`["name","email","order_id"]`)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "MultiVar Template",
-		Type:      "email",
-		Body:      "Hello {{name}}",
-		Variables: vars,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "MultiVar Template",
+		Type:       "email",
+		Body:       "Hello {{name}}",
+		Variables:  vars,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -340,7 +356,8 @@ func TestTemplates_Update_Variables(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "VarUpdateTmpl", Type: "email",
-		Body: "body", Variables: []byte(`["v1"]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "body", Variables: []byte(`["v1"]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -349,7 +366,8 @@ func TestTemplates_Update_Variables(t *testing.T) {
 
 	if err := repo.Update(context.Background(), domain.TemplateUpdateInput{
 		ID: id, OwnerID: testutil.OwnerID, Name: "VarUpdateTmpl", Type: "email",
-		Body: "body", Variables: []byte(`["v1","v2"]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "body", Variables: []byte(`["v1","v2"]`),
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
@@ -359,12 +377,13 @@ func TestTemplates_Create_InactiveByDefault(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "InactiveTmpl",
-		Type:      "email",
-		Body:      "body",
-		Variables: []byte(`[]`),
-		IsActive:  false,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "InactiveTmpl",
+		Type:       "email",
+		Body:       "body",
+		Variables:  []byte(`[]`),
+		IsActive:   false,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -384,7 +403,8 @@ func TestTemplates_Update_WrongOwner_ReturnsError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "WrongOwnerTmpl", Type: "email",
-		Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "body", Variables: []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -405,7 +425,8 @@ func TestTemplates_Delete_WrongOwner_ReturnsError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "DeleteWrongOwner", Type: "email",
-		Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "body", Variables: []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -435,7 +456,8 @@ func TestTemplates_Create_ThenDeleteThenNotInList(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), domain.TemplateInput{
 		OwnerID: testutil.OwnerID, Name: "LifecycleTmpl", Type: "sms",
-		Body: "body", Variables: []byte(`[]`),
+		BusinessID: testutil.BusinessID,
+		Body:       "body", Variables: []byte(`[]`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)

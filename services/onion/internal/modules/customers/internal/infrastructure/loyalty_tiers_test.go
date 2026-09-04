@@ -16,6 +16,7 @@ func TestCreateLoyaltyTier_PersistsAndReturnsID(t *testing.T) {
 
 	id, err := repo.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Diamond",
 		MinPoints:   5000,
 		DiscountPct: 20.0,
@@ -37,6 +38,7 @@ func TestCreateLoyaltyTier_NameIsStored(t *testing.T) {
 
 	id, err := repo.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Ruby",
 		MinPoints:   2000,
 		DiscountPct: 10.0,
@@ -99,6 +101,7 @@ func TestUpdateLoyaltyTier_ChangesDiscountPct(t *testing.T) {
 
 	id, err := repo.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "DiscountUpdate",
 		MinPoints:   1000,
 		DiscountPct: 5.0,
@@ -112,6 +115,7 @@ func TestUpdateLoyaltyTier_ChangesDiscountPct(t *testing.T) {
 	if err := repo.UpdateLoyaltyTier(ctx, domain.LoyaltyTierUpdateInput{
 		ID:          id,
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "DiscountUpdate",
 		MinPoints:   1000,
 		DiscountPct: 15.0,

@@ -16,9 +16,10 @@ func TestCreateSegmentViaCustomersRepo_FiltersAreStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateSegment(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Filtered Segment",
-		Rules:   []byte(`{"tier":"gold"}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Filtered Segment",
+		Rules:      []byte(`{"tier":"gold"}`),
 	})
 	if err != nil {
 		t.Fatalf("CreateSegment: %v", err)
@@ -67,8 +68,9 @@ func TestDeleteSegmentViaCustomersRepo_RemovesRow(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateSegment(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "To Be Deleted Segment",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "To Be Deleted Segment",
 	})
 	if err != nil {
 		t.Fatalf("CreateSegment: %v", err)
@@ -91,6 +93,7 @@ func TestUpdateSegmentViaCustomersRepo_ChangesDescription(t *testing.T) {
 
 	id, err := repo.CreateSegment(ctx, domain.SegmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Desc Update Seg",
 		Description: "before",
 	})
@@ -101,6 +104,7 @@ func TestUpdateSegmentViaCustomersRepo_ChangesDescription(t *testing.T) {
 	if err := repo.UpdateSegment(ctx, domain.SegmentUpdateInput{
 		ID:          id,
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Desc Update Seg",
 		Description: "after",
 	}); err != nil {

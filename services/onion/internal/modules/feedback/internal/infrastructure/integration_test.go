@@ -47,6 +47,7 @@ func TestCreateFeedback_ReturnsPositiveID(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      5,
@@ -71,6 +72,7 @@ func TestCreateFeedback_AppearsInList(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      4,
@@ -107,6 +109,7 @@ func TestListFeedback_FilterByType(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "nps",
 		Score:      8,
@@ -136,6 +139,7 @@ func TestListFeedback_FilterBySource(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5302,
 		Type:       "review",
 		Source:     "email",
@@ -166,6 +170,7 @@ func TestListFeedback_MinScoreFilter(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      9,
@@ -229,6 +234,7 @@ func TestCreateFeedback_ScoreAndCommentPersisted(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      7,
@@ -266,6 +272,7 @@ func TestListFeedback_MaxScoreFilter(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      2,
@@ -295,6 +302,7 @@ func TestListFeedback_MinAndMaxScoreCombined(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      6,
@@ -324,6 +332,7 @@ func TestCreateFeedback_TypePersisted(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "nps",
 		Score:      10,
@@ -357,6 +366,7 @@ func TestCreateFeedback_SourcePersisted(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Source:     "kiosk",
@@ -393,6 +403,7 @@ func TestListFeedback_PageTwoReturnsResults(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		id, err := repo.Create(ctx, domain.FeedbackInput{
 			OwnerID:    testutil.OwnerID,
+			BusinessID: testutil.BusinessID,
 			CustomerID: 5301,
 			Type:       "review",
 			Score:      i + 1,
@@ -438,6 +449,7 @@ func TestCreateMultipleFeedback_CountGrows(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		id, err := repo.Create(ctx, domain.FeedbackInput{
 			OwnerID:    testutil.OwnerID,
+			BusinessID: testutil.BusinessID,
 			CustomerID: 5301,
 			Type:       "review",
 			Score:      5,
@@ -469,6 +481,7 @@ func TestListFeedback_TypeAndSourceCombined(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "nps",
 		Source:     "sms",
@@ -498,10 +511,11 @@ func TestCreateFeedback_WithZeroCustomerID(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
-		OwnerID: testutil.OwnerID,
-		Type:    "review",
-		Score:   3,
-		Comment: "anonymous feedback",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Type:       "review",
+		Score:      3,
+		Comment:    "anonymous feedback",
 	})
 	if err != nil {
 		t.Fatalf("Create with zero CustomerID: %v", err)
@@ -538,6 +552,7 @@ func TestCreateFeedback_ScoreZeroAllowed(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      0,
@@ -560,6 +575,7 @@ func TestListFeedback_EmptySourceFilterReturnsAll(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.FeedbackInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Type:       "review",
 		Score:      4,

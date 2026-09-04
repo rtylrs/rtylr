@@ -17,9 +17,10 @@ func TestCreateCampaign_NameIsStored(t *testing.T) {
 
 	const want = "My Stored Campaign"
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    want,
-		Type:    "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       want,
+		Type:       "email",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -40,10 +41,11 @@ func TestCreateCampaign_SubjectIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Subject Campaign",
-		Type:    "email",
-		Subject: "Hello World",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Subject Campaign",
+		Type:       "email",
+		Subject:    "Hello World",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -64,9 +66,10 @@ func TestGetCampaign_WrongOwner_ReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Wrong Owner Get",
-		Type:    "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Wrong Owner Get",
+		Type:       "email",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -87,19 +90,21 @@ func TestUpdateCampaign_ChangesName(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Before Name",
-		Type:    "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Before Name",
+		Type:       "email",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
 	if err := repo.Update(ctx, domain.CampaignUpdateInput{
-		ID:      id,
-		OwnerID: testutil.OwnerID,
-		Name:    "After Name",
-		Type:    "email",
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "After Name",
+		Type:       "email",
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
@@ -119,9 +124,10 @@ func TestListCampaigns_AllBelongToOwner(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Owner Check Campaign",
-		Type:    "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Owner Check Campaign",
+		Type:       "email",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)

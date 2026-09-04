@@ -15,10 +15,11 @@ func TestCreateCustomer_PhoneIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "Phone",
-		LastName:  "Test",
-		Phone:     "+15551234567",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "Phone",
+		LastName:   "Test",
+		Phone:      "+15551234567",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -39,9 +40,10 @@ func TestCreateCustomer_FirstNameIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "Cassidy",
-		LastName:  "Rivers",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "Cassidy",
+		LastName:   "Rivers",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -62,8 +64,9 @@ func TestCreateCustomer_OwnerIDIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "Owner",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "Owner",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -83,11 +86,11 @@ func TestCreateCustomer_IDsAreUnique(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id1, err := repo.CreateCustomer(ctx, domain.CustomerInput{OwnerID: testutil.OwnerID, FirstName: "UniqueA"})
+	id1, err := repo.CreateCustomer(ctx, domain.CustomerInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, FirstName: "UniqueA"})
 	if err != nil {
 		t.Fatalf("CreateCustomer A: %v", err)
 	}
-	id2, err := repo.CreateCustomer(ctx, domain.CustomerInput{OwnerID: testutil.OwnerID, FirstName: "UniqueB"})
+	id2, err := repo.CreateCustomer(ctx, domain.CustomerInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, FirstName: "UniqueB"})
 	if err != nil {
 		t.Fatalf("CreateCustomer B: %v", err)
 	}
@@ -102,17 +105,19 @@ func TestUpdateCustomer_ChangesFirstName(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "BeforeUpdate",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "BeforeUpdate",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
 	}
 
 	if err := repo.UpdateCustomer(ctx, domain.CustomerUpdateInput{
-		ID:        id,
-		OwnerID:   testutil.OwnerID,
-		FirstName: "AfterUpdate",
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "AfterUpdate",
 	}); err != nil {
 		t.Fatalf("UpdateCustomer: %v", err)
 	}
@@ -132,8 +137,9 @@ func TestUpdateCustomer_WrongOwner_ReturnsNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "WrongOwner",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "WrongOwner",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -155,8 +161,9 @@ func TestDeleteCustomer_WrongOwner_ReturnsNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
-		OwnerID:   testutil.OwnerID,
-		FirstName: "DeleteWrongOwner",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FirstName:  "DeleteWrongOwner",
 	})
 	if err != nil {
 		t.Fatalf("CreateCustomer: %v", err)
@@ -174,9 +181,10 @@ func TestListCustomers_Pagination_Page2(t *testing.T) {
 	ctx := context.Background()
 
 	all, _, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Page:     1,
-		PageSize: 100,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Page:       1,
+		PageSize:   100,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers page1: %v", err)
@@ -187,9 +195,10 @@ func TestListCustomers_Pagination_Page2(t *testing.T) {
 	}
 
 	page2, _, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Page:     2,
-		PageSize: 1,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Page:       2,
+		PageSize:   1,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers page2: %v", err)
@@ -205,10 +214,11 @@ func TestListCustomers_FilterByGoldTier(t *testing.T) {
 	ctx := context.Background()
 
 	customers, _, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  testutil.OwnerID,
-		Tier:     "gold",
-		Page:     1,
-		PageSize: 50,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Tier:       "gold",
+		Page:       1,
+		PageSize:   50,
 	})
 	if err != nil {
 		t.Fatalf("ListCustomers tier=gold: %v", err)

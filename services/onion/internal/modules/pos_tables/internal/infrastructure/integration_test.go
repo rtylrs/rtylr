@@ -160,6 +160,7 @@ func TestCreateTable_PersistsAndReturnsID(t *testing.T) {
 	locationID := int64(3001)
 	input := domain.TableInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		LocationID: &locationID,
 		Label:      "T99",
 		Seats:      6,
@@ -182,6 +183,7 @@ func TestCreateTable_NameIsStored(t *testing.T) {
 	locationID := int64(3001)
 	input := domain.TableInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		LocationID: &locationID,
 		Label:      "StoredTable",
 		Seats:      2,
@@ -216,6 +218,7 @@ func TestCreateTable_CapacityIsStored(t *testing.T) {
 	locationID := int64(3001)
 	input := domain.TableInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		LocationID: &locationID,
 		Label:      "CapacityTable",
 		Seats:      8,
@@ -250,6 +253,7 @@ func TestUpdateTable_ChangesName(t *testing.T) {
 	locationID := int64(3001)
 	id, err := repo.Create(ctx, domain.TableInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		LocationID: &locationID,
 		Label:      "OldLabel",
 		Seats:      4,
@@ -261,6 +265,7 @@ func TestUpdateTable_ChangesName(t *testing.T) {
 	if err := repo.Update(ctx, domain.TableUpdateInput{
 		ID:         id,
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		LocationID: &locationID,
 		Label:      "NewLabel",
 		Seats:      4,
@@ -293,6 +298,7 @@ func TestDeleteTable_RemovesRow(t *testing.T) {
 	locationID := int64(3001)
 	id, err := repo.Create(ctx, domain.TableInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		LocationID: &locationID,
 		Label:      "DeleteMe",
 		Seats:      2,
@@ -340,6 +346,7 @@ func TestListTables_AfterCreate_CountIncreases(t *testing.T) {
 	locationID := int64(3001)
 	_, err = repo.Create(ctx, domain.TableInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		LocationID: &locationID,
 		Label:      "ExtraTable",
 		Seats:      3,

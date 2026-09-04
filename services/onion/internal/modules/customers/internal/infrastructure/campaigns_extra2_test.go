@@ -17,6 +17,7 @@ func TestCreateCampaignViaCustomersRepo_DescriptionIsStored(t *testing.T) {
 	const want = "Our summer promo campaign"
 	id, err := repo.CreateCampaign(ctx, domain.CampaignInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Summer Promo",
 		Channel:     "email",
 		Description: want,
@@ -40,9 +41,10 @@ func TestCreateCampaignViaCustomersRepo_ChannelIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCampaign(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "SMS Campaign",
-		Channel: "sms",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "SMS Campaign",
+		Channel:    "sms",
 	})
 	if err != nil {
 		t.Fatalf("CreateCampaign: %v", err)
@@ -63,9 +65,10 @@ func TestListCampaignsViaCustomersRepo_AllBelongToOwner(t *testing.T) {
 	ctx := context.Background()
 
 	_, _ = repo.CreateCampaign(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Owner Filter Check",
-		Channel: "email",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Owner Filter Check",
+		Channel:    "email",
 	})
 
 	campaigns, err := repo.ListCampaigns(ctx, testutil.OwnerID, "")
@@ -85,21 +88,23 @@ func TestUpdateCampaignViaCustomersRepo_ChangesSubject(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateCampaign(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Subject Update Campaign",
-		Channel: "email",
-		Subject: "Original Subject",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Subject Update Campaign",
+		Channel:    "email",
+		Subject:    "Original Subject",
 	})
 	if err != nil {
 		t.Fatalf("CreateCampaign: %v", err)
 	}
 
 	if err := repo.UpdateCampaign(ctx, domain.CampaignUpdateInput{
-		ID:      id,
-		OwnerID: testutil.OwnerID,
-		Name:    "Subject Update Campaign",
-		Channel: "email",
-		Subject: "Updated Subject",
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Subject Update Campaign",
+		Channel:    "email",
+		Subject:    "Updated Subject",
 	}); err != nil {
 		t.Fatalf("UpdateCampaign: %v", err)
 	}

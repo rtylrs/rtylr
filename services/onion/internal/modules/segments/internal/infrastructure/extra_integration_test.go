@@ -16,6 +16,7 @@ func TestCreateSegment_DescriptionIsStored(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Desc Stored Seg",
 		Description: "a test description",
 		Filters:     []byte(`{}`),
@@ -39,9 +40,10 @@ func TestCreateSegment_OwnerIDIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "OwnerID Stored Seg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "OwnerID Stored Seg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -61,11 +63,11 @@ func TestCreateSegment_IDsAreUnique(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id1, err := repo.Create(ctx, domain.SegmentInput{OwnerID: testutil.OwnerID, Name: "UniqueA", Filters: []byte(`{}`)})
+	id1, err := repo.Create(ctx, domain.SegmentInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "UniqueA", Filters: []byte(`{}`)})
 	if err != nil {
 		t.Fatalf("Create A: %v", err)
 	}
-	id2, err := repo.Create(ctx, domain.SegmentInput{OwnerID: testutil.OwnerID, Name: "UniqueB", Filters: []byte(`{}`)})
+	id2, err := repo.Create(ctx, domain.SegmentInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "UniqueB", Filters: []byte(`{}`)})
 	if err != nil {
 		t.Fatalf("Create B: %v", err)
 	}
@@ -81,6 +83,7 @@ func TestUpdateSegment_ChangesDescription(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Desc Update Seg",
 		Description: "before desc",
 		Filters:     []byte(`{}`),
@@ -92,6 +95,7 @@ func TestUpdateSegment_ChangesDescription(t *testing.T) {
 	if err := repo.Update(ctx, domain.SegmentUpdateInput{
 		ID:          id,
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Desc Update Seg",
 		Description: "after desc",
 		Filters:     []byte(`{}`),
@@ -119,9 +123,10 @@ func TestListSegments_AfterCreate_CountIncreases(t *testing.T) {
 	}
 
 	_, err = repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Count Check Seg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Count Check Seg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -142,9 +147,10 @@ func TestListSegments_AllBelongToOwner(t *testing.T) {
 	ctx := context.Background()
 
 	_, _ = repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Owner Check Seg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Owner Check Seg",
+		Filters:    []byte(`{}`),
 	})
 
 	segments, err := repo.List(ctx, testutil.OwnerID)
@@ -164,9 +170,10 @@ func TestUpdateSegment_WrongOwner_ReturnsNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "WrongOwner Update Seg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "WrongOwner Update Seg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)

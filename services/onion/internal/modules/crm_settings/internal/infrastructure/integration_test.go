@@ -62,6 +62,7 @@ func TestUpsert_PersistsFromEmail(t *testing.T) {
 
 	input := domain.SettingsInput{
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		DefaultConsent: true,
 		FromEmail:      "integration@test.local",
 		FromName:       "Integration Test",
@@ -86,8 +87,9 @@ func TestUpsert_UpdatesTimezone(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.SettingsInput{
-		OwnerID:  testutil.OwnerID,
-		Timezone: "Europe/London",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Timezone:   "Europe/London",
 	}
 	if err := repo.Upsert(ctx, input); err != nil {
 		t.Fatalf("Upsert: %v", err)
@@ -109,6 +111,7 @@ func TestUpsert_DefaultConsentStored(t *testing.T) {
 
 	input := domain.SettingsInput{
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		DefaultConsent: false,
 	}
 	if err := repo.Upsert(ctx, input); err != nil {
@@ -124,7 +127,7 @@ func TestUpsert_DefaultConsentStored(t *testing.T) {
 	}
 
 	// Restore to true.
-	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, DefaultConsent: true})
+	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, DefaultConsent: true})
 }
 
 func TestUpsert_SmsSenderIDPersisted(t *testing.T) {
@@ -134,6 +137,7 @@ func TestUpsert_SmsSenderIDPersisted(t *testing.T) {
 
 	input := domain.SettingsInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		SmsSenderID: "RTYLR",
 	}
 	if err := repo.Upsert(ctx, input); err != nil {
@@ -169,8 +173,9 @@ func TestUpsert_FromNamePersisted(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.SettingsInput{
-		OwnerID:  testutil.OwnerID,
-		FromName: "Test Sender",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromName:   "Test Sender",
 	}
 	if err := repo.Upsert(ctx, input); err != nil {
 		t.Fatalf("Upsert: %v", err)
@@ -207,6 +212,7 @@ func TestUpsertSettings_ThenGet_Roundtrip(t *testing.T) {
 
 	input := domain.SettingsInput{
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		FromEmail:      "roundtrip@test.local",
 		FromName:       "Roundtrip Sender",
 		Timezone:       "Asia/Beirut",
@@ -250,8 +256,9 @@ func TestUpsertSettings_CurrencyIsStored(t *testing.T) {
 
 	// Store a distinct from_email to verify persistence
 	input := domain.SettingsInput{
-		OwnerID:   testutil.OwnerID,
-		FromEmail: "currency.check@test.local",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromEmail:  "currency.check@test.local",
 	}
 	if err := repo.Upsert(ctx, input); err != nil {
 		t.Fatalf("Upsert: %v", err)
@@ -272,8 +279,9 @@ func TestUpsertSettings_TimezoneIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.SettingsInput{
-		OwnerID:  testutil.OwnerID,
-		Timezone: "Pacific/Auckland",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Timezone:   "Pacific/Auckland",
 	}
 	if err := repo.Upsert(ctx, input); err != nil {
 		t.Fatalf("Upsert: %v", err)
@@ -293,9 +301,9 @@ func TestUpsertSettings_MultipleUpserts_LastWins(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, FromName: "First"})
-	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, FromName: "Second"})
-	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, FromName: "Third"})
+	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, FromName: "First"})
+	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, FromName: "Second"})
+	_ = repo.Upsert(ctx, domain.SettingsInput{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, FromName: "Third"})
 
 	got, err := repo.Get(ctx, testutil.OwnerID)
 	if err != nil {
@@ -324,8 +332,9 @@ func TestUpsert_Idempotent_NoError(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.SettingsInput{
-		OwnerID:  testutil.OwnerID,
-		Timezone: "Europe/Paris",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Timezone:   "Europe/Paris",
 	}
 	if err := repo.Upsert(ctx, input); err != nil {
 		t.Fatalf("first Upsert: %v", err)
@@ -343,15 +352,17 @@ func TestUpsertSettings_OwnerIDScoped(t *testing.T) {
 	const altOwner int64 = 555444333
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:   altOwner,
-		FromEmail: "alt@test.local",
+		OwnerID:    altOwner,
+		BusinessID: altOwner,
+		FromEmail:  "alt@test.local",
 	}); err != nil {
 		t.Fatalf("Upsert altOwner: %v", err)
 	}
 
 	if err := repo.Upsert(ctx, domain.SettingsInput{
-		OwnerID:   testutil.OwnerID,
-		FromEmail: "main@test.local",
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		FromEmail:  "main@test.local",
 	}); err != nil {
 		t.Fatalf("Upsert mainOwner: %v", err)
 	}

@@ -16,6 +16,7 @@ func TestCreate_Automation_BirthdayTrigger(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "Birthday Greet",
 		TriggerType:   domain.TriggerDateBirthday,
 		TriggerConfig: []byte(`{}`),
@@ -37,6 +38,7 @@ func TestCreate_Automation_InactivityTrigger(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "Re-engagement",
 		TriggerType:   domain.TriggerInactivity,
 		TriggerConfig: []byte(`{"days":30}`),
@@ -58,6 +60,7 @@ func TestCreate_Automation_LoyaltyTierUpTrigger(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "Tier Up Congrats",
 		TriggerType:   domain.TriggerLoyaltyTierUp,
 		TriggerConfig: []byte(`{}`),
@@ -79,6 +82,7 @@ func TestDelete_AfterCreate_NotInList(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "Extra Delete Check",
 		TriggerType:   domain.TriggerOrderCreated,
 		TriggerConfig: []byte(`{}`),
@@ -110,6 +114,7 @@ func TestUpdate_Automation_ChangesIsActiveFromTrueToFalse(t *testing.T) {
 
 	id, err := repo.Create(ctx, domain.AutomationInput{
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "Active-to-Inactive",
 		TriggerType:   domain.TriggerOrderCreated,
 		TriggerConfig: []byte(`{}`),
@@ -123,6 +128,7 @@ func TestUpdate_Automation_ChangesIsActiveFromTrueToFalse(t *testing.T) {
 	if err := repo.Update(ctx, domain.AutomationUpdateInput{
 		ID:            id,
 		OwnerID:       testutil.OwnerID,
+		BusinessID:    testutil.BusinessID,
 		Name:          "Active-to-Inactive",
 		TriggerType:   domain.TriggerOrderCreated,
 		TriggerConfig: []byte(`{}`),

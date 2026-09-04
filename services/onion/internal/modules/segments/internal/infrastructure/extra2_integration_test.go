@@ -16,9 +16,10 @@ func TestCreateSegment_PositiveIDReturned(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Positive ID Seg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Positive ID Seg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -34,9 +35,10 @@ func TestGetByID_WrongOwner_ReturnsNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "WrongOwner Get Seg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "WrongOwner Get Seg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -57,9 +59,10 @@ func TestDeleteSegment_ThenNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, domain.SegmentInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Delete Then Get Seg",
-		Filters: []byte(`{}`),
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		Name:       "Delete Then Get Seg",
+		Filters:    []byte(`{}`),
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
