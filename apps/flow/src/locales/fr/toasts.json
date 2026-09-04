@@ -36,7 +36,8 @@
   "time": {
     "logged": "Temps enregistré",
     "logFailed": "Impossible d'enregistrer le temps",
-    "deleteFailed": "Impossible de supprimer l'entrée de temps"
+    "deleteFailed": "Impossible de supprimer l'entrée de temps",
+    "deleted": "Entrée de temps supprimée"
   },
   "cycle": {
     "created": "Itération créée",
@@ -94,7 +95,10 @@
     "renameFailed": "Échec du renommage de la vue",
     "deleted": "Vue supprimée",
     "deleteFailed": "Échec de la suppression de la vue",
-    "created": "Vue créée"
+    "created": "Vue créée",
+    "madePrivate": "La vue est maintenant privée",
+    "madeShared": "La vue est maintenant partagée",
+    "visibilityFailed": "Échec du changement de visibilité de la vue"
   },
   "weeklyReview": {
     "logged": "Bilan hebdomadaire enregistré",
@@ -149,5 +153,9 @@
     "deletedWithReassignment": "Statut supprimé. {{count}} tâche(s) revenue(s) à leur statut intégré.",
     "deleteFailed": "Impossible de supprimer le statut",
     "setFailed": "Échec de la définition du statut de la tâche"
+  },
+  "attachment": {
+    "addFailed": "Impossible d'ajouter la pièce jointe",
+    "removeFailed": "Impossible de supprimer la pièce jointe"
   }
 }

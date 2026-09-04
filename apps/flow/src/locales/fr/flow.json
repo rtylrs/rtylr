@@ -87,7 +87,8 @@
     "externalUrlPlaceholder": "https://example.com",
     "settingsSection": "Barre latérale",
     "recent": "Récent",
-    "topItems": "Navigation principale"
+    "topItems": "Navigation principale",
+    "yourReports": "Vos rapports"
   },
   "taskDetail": {
     "loading": "Chargement de la tâche…",
@@ -562,7 +563,8 @@
     "back": "Retour",
     "notFound": "Profil introuvable.",
     "publicProjects": "Projets publics",
-    "noPublicProjects": "Aucun projet public."
+    "noPublicProjects": "Aucun projet public.",
+    "heading": "Profil"
   },
   "board": {
     "pageTitle": "Tableau · rtylr",
