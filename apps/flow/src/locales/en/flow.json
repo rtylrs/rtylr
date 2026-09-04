@@ -737,7 +737,8 @@
     "emptyDescription": "Start your first two-week sprint to track scope and progress.",
     "createFirst": "Create first cycle",
     "project": "Project",
-    "noProjects": "No projects yet"
+    "noProjects": "No projects yet",
+    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first."
   },
   "myIssues": {
     "loading": "Loading…",
