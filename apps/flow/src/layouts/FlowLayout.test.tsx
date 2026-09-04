@@ -20,7 +20,17 @@ const mocks = vi.hoisted(() => ({
   // userStore via a `useEffect` keyed on `[authUser, setUser]`. If the mock
   // returned a fresh object on every render, that effect would think the
   // dependency changed every time and call setUser in a loop.
-  authUser: { id: '1', name: 'Test User', email: 'test@example.com' },
+  // `role` is part of the shape because the project-creation gate reads it:
+  // with no effectiveAccess in the payload, canFlowPermission falls back to
+  // the legacy business role, and undefined correctly denies. Tests that need
+  // to create a project set it, and reset it afterwards, so the object
+  // identity stays stable for the effect described above.
+  authUser: {
+    id: '1',
+    name: 'Test User',
+    email: 'test@example.com',
+    role: undefined as string | undefined,
+  },
 }));
 
 vi.mock('react-i18next', () => ({
@@ -162,9 +172,10 @@ vi.mock('../features/projects-v2/RecycleBinSection', () => ({
 vi.mock('../features/workspace-dashboard/useWorkspaces', () => ({
   useWorkspaces: () => ({ data: undefined, isLoading: false }),
 }));
+const createProjectMutate = vi.hoisted(() => vi.fn());
 vi.mock('../features/projects/useProjects', () => ({
   useProjects: () => ({ data: undefined }),
-  useCreateProject: () => ({ mutate: vi.fn(), isPending: false }),
+  useCreateProject: () => ({ mutate: createProjectMutate, isPending: false }),
 }));
 vi.mock('../features/tasks/useMyTasksProject', () => ({
   useMyTasksProject: () => ({ data: undefined }),
@@ -360,5 +371,95 @@ describe('FlowLayout Caret panel mounting (#1043)', () => {
     renderLayout();
 
     expect(screen.getAllByRole('button', { name: 'Caret' }).length).toBeGreaterThan(0);
+  });
+});
+
+describe('FlowLayout New project modal (#1060)', () => {
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  const openModal = (): void => {
+    fireEvent.click(screen.getByRole('button', { name: 'flow.shell.newProject' }));
+  };
+
+  const fill = (name: string, description: string): void => {
+    fireEvent.change(screen.getByPlaceholderText('flow.shell.projectNamePlaceholder'), {
+      target: { value: name },
+    });
+    fireEvent.change(screen.getByPlaceholderText('flow.shell.projectDescriptionPlaceholder'), {
+      target: { value: description },
+    });
+  };
+
+  beforeEach(() => {
+    createProjectMutate.mockClear();
+    mocks.authUser.role = 'owner';
+  });
+
+  afterEach(() => {
+    mocks.authUser.role = undefined;
+  });
+
+  it('sends the description and the chosen visibility', () => {
+    renderLayout();
+    openModal();
+    fill('QC Delta Two', 'DESC SHOULD PERSIST');
+
+    // The Public option in the visibility radiogroup.
+    const [, publicOption] = screen.getAllByRole('radio');
+    fireEvent.click(publicOption);
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.create' }));
+
+    expect(createProjectMutate).toHaveBeenCalledTimes(1);
+    expect(createProjectMutate.mock.calls[0][0]).toMatchObject({
+      name: 'QC Delta Two',
+      description: 'DESC SHOULD PERSIST',
+      visibility: 'public',
+    });
+  });
+
+  it('defaults to private when the user does not choose', () => {
+    renderLayout();
+    openModal();
+    fill('Quiet project', 'Some notes');
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.create' }));
+
+    expect(createProjectMutate.mock.calls[0][0]).toMatchObject({ visibility: 'private' });
+  });
+
+  it('sends no description rather than an empty string when the field is blank', () => {
+    renderLayout();
+    openModal();
+    fill('No description', '   ');
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.create' }));
+
+    // The contract marks description @required and its validator rejects '',
+    // so a blank field has to travel as undefined for the API layer to
+    // substitute its sentinel.
+    expect(createProjectMutate.mock.calls[0][0]).toMatchObject({ description: undefined });
+  });
+
+  it('sends the same payload from the Enter key path', () => {
+    renderLayout();
+    openModal();
+    fill('Via Enter', 'ENTER PATH DESC');
+
+    fireEvent.keyDown(screen.getByPlaceholderText('flow.shell.projectNamePlaceholder'), {
+      key: 'Enter',
+    });
+
+    expect(createProjectMutate).toHaveBeenCalledTimes(1);
+    expect(createProjectMutate.mock.calls[0][0]).toMatchObject({
+      name: 'Via Enter',
+      description: 'ENTER PATH DESC',
+      visibility: 'private',
+    });
   });
 });

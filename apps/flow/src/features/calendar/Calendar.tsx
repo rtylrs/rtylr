@@ -22,7 +22,7 @@ const Calendar: React.FC = () => {
   const { data: apiTasks = [] } = useTasks({});
   const tasks = apiTasks as ApiTask[];
   const navigate = useNavigate();
-  const { activeWorkspaceId, projects } = useFlowStore();
+  const { projects } = useFlowStore();
   const { data: labels = [] } = useLabels();
   const createTask = useCreateTask();
   const [cursor, setCursor] = useState(() => new Date());
@@ -87,7 +87,12 @@ const Calendar: React.FC = () => {
       return;
     }
     const projectId = newProjectId || projects[0]?.id;
-    if (!projectId || !activeWorkspaceId || !newLabelId) {
+    // The guard used to also require `activeWorkspaceId`, which the removed
+    // workspace layer leaves permanently empty, so Create could never succeed
+    // and always blamed the project, which the modal had pre-filled. It also
+    // required a label, so a business with no labels could not create a task
+    // here at all; a label is optional on the create contract.
+    if (!projectId) {
       toast.error(t('toasts.task.selectProjectFirst'));
       return;
     }
@@ -96,7 +101,7 @@ const Calendar: React.FC = () => {
         projectId,
         title: newTitle.trim(),
         dueDate: createModal!.date,
-        labels: [newLabelId],
+        ...(newLabelId ? { labels: [newLabelId] } : {}),
       },
       {
         onSuccess: () => {
