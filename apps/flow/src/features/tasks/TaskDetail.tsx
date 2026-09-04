@@ -739,7 +739,7 @@ const TaskDetail: React.FC = () => {
                 border: '1px solid var(--flow-border)',
               }}
             >
-              ,
+              {t('flow.quickCreate.noEffort')}
             </button>
             {EFFORT_PRESETS.map((m) => (
               <button
