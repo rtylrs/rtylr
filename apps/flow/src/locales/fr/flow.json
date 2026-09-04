@@ -670,6 +670,10 @@
     "createFirst": "Créer le premier jalon",
     "namePlaceholder": "Nom du jalon",
     "targetDate": "Date cible",
+    "newProjectOption": "+ Nouveau projet…",
+    "newProjectPlaceholder": "Nom du nouveau projet",
+    "createProject": "Créer le projet",
+    "cancelProject": "Annuler",
     "creating": "Création...",
     "create": "Créer",
     "cancel": "Annuler",
@@ -684,7 +688,8 @@
     },
     "project": "Projet",
     "noProjects": "Aucun projet pour le moment",
-    "noTasksYet": "Aucune tâche"
+    "noTasksYet": "Aucune tâche",
+    "noProjectsGate": "Il faut un projet avant d'ajouter un jalon, et votre rôle ne permet pas d'en créer un. Demandez à un administrateur de créer un projet."
   },
   "roadmap": {
     "loading": "Chargement de la feuille de route...",
