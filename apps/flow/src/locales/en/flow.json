@@ -887,5 +887,13 @@
     "confirmRemoveStatus": "Remove status",
     "cancel": "Cancel",
     "none": "No custom status"
+  },
+  "taskMenu": {
+    "label": "Task actions",
+    "openTask": "Open task",
+    "copyLink": "Copy link",
+    "deleteTitle": "Delete task",
+    "deleteConfirmPrefix": "Delete",
+    "deleteConfirmSuffix": "? This cannot be undone."
   }
 }
