@@ -303,7 +303,7 @@ export const CommandBar: React.FC = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('flow.commandBar.searchPlaceholder')}
-                className="flex-1 bg-transparent outline-none text-body"
+                className="flex-1 bg-transparent text-body"
                 style={{ color: 'var(--flow-text)' }}
               />
               <span

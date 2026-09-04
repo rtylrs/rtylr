@@ -59,7 +59,7 @@ const Cycles: React.FC = () => {
               value={selectedProjectId}
               onChange={(e) => setProjectId(e.target.value)}
               aria-label={t('flow.cycles.project')}
-              className="min-h-[44px] rounded-md px-2 text-title outline-none sm:min-h-0 sm:py-1.5 sm:text-meta"
+              className="min-h-[44px] rounded-md px-2 text-title sm:min-h-0 sm:py-1.5 sm:text-meta"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border-control)',
@@ -98,7 +98,7 @@ const Cycles: React.FC = () => {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('flow.cycles.namePlaceholder')}
-            className="w-full rounded-md px-3 py-2 text-meta outline-none"
+            className="w-full rounded-md px-3 py-2 text-meta"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border-control)',

@@ -169,7 +169,7 @@ const Views: React.FC = () => {
                         if (e.key === 'Enter') commitEdit(v);
                         if (e.key === 'Escape') setEditingId(null);
                       }}
-                      className="flex-1 bg-transparent text-meta outline-none"
+                      className="flex-1 bg-transparent text-meta"
                       style={{ color: 'var(--flow-text)' }}
                     />
                     <button

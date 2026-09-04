@@ -216,7 +216,7 @@ const Calendar: React.FC = () => {
                           year: 'numeric',
                         }),
                       })}
-                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-meta opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
+                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-meta opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
                       {t('flow.calendar.addHint')}
@@ -306,7 +306,7 @@ const Calendar: React.FC = () => {
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submitCreate()}
                 placeholder={t('flow.calendar.titlePlaceholder')}
-                className="w-full rounded-lg px-3 py-2 text-body outline-none mb-3"
+                className="w-full rounded-lg px-3 py-2 text-body mb-3"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border-control)',
@@ -318,7 +318,7 @@ const Calendar: React.FC = () => {
                 <select
                   value={newProjectId}
                   onChange={(e) => setNewProjectId(e.target.value)}
-                  className="w-full rounded-lg px-3 py-2 text-meta outline-none mb-4"
+                  className="w-full rounded-lg px-3 py-2 text-meta mb-4"
                   style={{
                     background: 'var(--flow-input-bg)',
                     border: '1px solid var(--flow-border-control)',
@@ -338,7 +338,7 @@ const Calendar: React.FC = () => {
                 value={newLabelId}
                 onChange={(e) => setNewLabelId(e.target.value)}
                 disabled={labels.length === 0}
-                className="w-full rounded-lg px-3 py-2 text-meta outline-none mb-4 disabled:opacity-50"
+                className="w-full rounded-lg px-3 py-2 text-meta mb-4 disabled:opacity-50"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border-control)',

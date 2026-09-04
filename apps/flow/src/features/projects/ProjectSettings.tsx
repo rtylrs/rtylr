@@ -169,7 +169,7 @@ const ProjectSettings: React.FC = () => {
                 onChange={(e) => setName(e.target.value)}
                 disabled={!canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-general-gate'}
-                className="w-full rounded-md px-3 py-2 text-meta outline-none disabled:opacity-60"
+                className="w-full rounded-md px-3 py-2 text-meta disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border-control)',
@@ -185,7 +185,7 @@ const ProjectSettings: React.FC = () => {
                 rows={3}
                 disabled={!canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-general-gate'}
-                className="w-full rounded-md px-3 py-2 text-meta outline-none resize-none disabled:opacity-60"
+                className="w-full rounded-md px-3 py-2 text-meta resize-none disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border-control)',
@@ -365,7 +365,7 @@ const ProjectSettings: React.FC = () => {
                               }
                             );
                           }}
-                          className="text-meta outline-none bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                          className="text-meta bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                           style={{ color: roleMeta.color }}
                         >
                           <option value="admin">{t('common.roles.admin')}</option>
@@ -429,7 +429,7 @@ const ProjectSettings: React.FC = () => {
                     disabled={!canManageProject}
                     aria-describedby={canManageProject ? undefined : 'flow-project-transfer-gate'}
                     onChange={() => setConfirmTransfer(false)}
-                    className="flex-1 rounded-sm px-2 py-1.5 text-meta outline-none disabled:opacity-60"
+                    className="flex-1 rounded-sm px-2 py-1.5 text-meta disabled:opacity-60"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border-control)',
@@ -622,7 +622,7 @@ const ProjectSettings: React.FC = () => {
               value={deleteTypedName}
               onChange={(e) => setDeleteTypedName(e.target.value)}
               placeholder={project?.name ?? ''}
-              className="w-full rounded-lg px-3 py-2 text-body outline-none mt-2"
+              className="w-full rounded-lg px-3 py-2 text-body mt-2"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border-control)',

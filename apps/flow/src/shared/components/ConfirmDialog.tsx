@@ -88,7 +88,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
               placeholder={requireText}
-              className="w-full rounded-lg px-3 py-2 text-body outline-none"
+              className="w-full rounded-lg px-3 py-2 text-body"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border-control)',

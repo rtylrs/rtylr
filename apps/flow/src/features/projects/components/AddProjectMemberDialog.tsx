@@ -81,7 +81,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
                 handleInvite();
               }
             }}
-            className="flex-1 rounded-sm px-2 py-1.5 text-title md:text-meta outline-none"
+            className="flex-1 rounded-sm px-2 py-1.5 text-title md:text-meta"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border-control)',
@@ -92,7 +92,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
             value={role}
             onChange={(e) => setRole(e.target.value as 'admin' | 'member' | 'viewer')}
             aria-label={t('flow.projectSettings.roleLabel')}
-            className="rounded-sm px-2 py-1.5 text-title md:text-meta outline-none"
+            className="rounded-sm px-2 py-1.5 text-title md:text-meta"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border-control)',

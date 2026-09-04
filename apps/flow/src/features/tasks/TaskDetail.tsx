@@ -457,7 +457,7 @@ const TaskDetail: React.FC = () => {
               value={task.title}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
               disabled={!canEdit}
-              className="w-full bg-transparent outline-none font-bold mb-4 text-xl sm:text-2xl disabled:opacity-70"
+              className="w-full bg-transparent font-bold mb-4 text-xl sm:text-2xl disabled:opacity-70"
               style={{
                 color: 'var(--flow-text)',
               }}
@@ -469,7 +469,7 @@ const TaskDetail: React.FC = () => {
               placeholder={t('flow.taskDetail.descriptionPlaceholder')}
               rows={5}
               disabled={!canEdit}
-              className="w-full bg-transparent outline-none text-body leading-relaxed mb-6 resize-none disabled:opacity-70"
+              className="w-full bg-transparent text-body leading-relaxed mb-6 resize-none disabled:opacity-70"
               style={{ color: 'var(--flow-text-muted)' }}
             />
 
@@ -612,7 +612,7 @@ const TaskDetail: React.FC = () => {
               );
             }}
             disabled={!canEdit}
-            className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+            className="bg-transparent text-meta w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           >
             {statuses.map((s) => (
@@ -631,7 +631,7 @@ const TaskDetail: React.FC = () => {
                 setTaskStatus.mutate({ taskId: task.id, statusId: e.target.value || '0' });
               }}
               disabled={!canEdit}
-              className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+              className="bg-transparent text-meta w-full disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               <option value="" style={{ background: 'var(--flow-card)' }}>
@@ -651,7 +651,7 @@ const TaskDetail: React.FC = () => {
             value={task.priority}
             onChange={(e) => updateTask(task.id, { priority: e.target.value as Task['priority'] })}
             disabled={!canEdit}
-            className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+            className="bg-transparent text-meta w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           >
             {priorities.map((p) => (
@@ -677,7 +677,7 @@ const TaskDetail: React.FC = () => {
                   });
               }}
               disabled={!canEdit}
-              className="bg-transparent text-meta outline-none flex-1 disabled:opacity-70"
+              className="bg-transparent text-meta flex-1 disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               {members.map((m) => (
@@ -726,7 +726,7 @@ const TaskDetail: React.FC = () => {
             onChange={(e) => updateTask(task.id, { estimate: Number(e.target.value) })}
             placeholder={t('flow.taskDetail.hours')}
             disabled={!canEdit}
-            className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+            className="bg-transparent text-meta w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -785,7 +785,7 @@ const TaskDetail: React.FC = () => {
             onChange={(e) => updateTask(task.id, { waitingOn: e.target.value || undefined })}
             placeholder={t('flow.taskDetail.waitingPlaceholder')}
             disabled={!canEdit}
-            className="bg-transparent text-meta outline-none w-full placeholder:opacity-50 disabled:opacity-70"
+            className="bg-transparent text-meta w-full placeholder:opacity-50 disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -797,7 +797,7 @@ const TaskDetail: React.FC = () => {
             placeholder={t('flow.taskDetail.decisionPlaceholder')}
             rows={2}
             disabled={!canEdit}
-            className="w-full bg-transparent text-meta outline-none resize-none placeholder:opacity-50 rounded-md px-2 py-1.5 disabled:opacity-70"
+            className="w-full bg-transparent text-meta resize-none placeholder:opacity-50 rounded-md px-2 py-1.5 disabled:opacity-70"
             style={{ border: '1px solid var(--flow-border)', color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -841,7 +841,7 @@ const TaskDetail: React.FC = () => {
               value={task.sectionId ?? ''}
               onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
               disabled={!canEdit}
-              className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+              className="bg-transparent text-meta w-full disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               <option value="">{t('flow.taskDetail.noSection')}</option>
@@ -868,7 +868,7 @@ const TaskDetail: React.FC = () => {
                   })
                 }
                 disabled={!canEdit}
-                className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+                className="bg-transparent text-meta w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               >
                 <option value="">-</option>
@@ -891,7 +891,7 @@ const TaskDetail: React.FC = () => {
                   })
                 }
                 disabled={!canEdit}
-                className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+                className="bg-transparent text-meta w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               />
             ) : (
@@ -906,7 +906,7 @@ const TaskDetail: React.FC = () => {
                   })
                 }
                 disabled={!canEdit}
-                className="bg-transparent text-meta outline-none w-full disabled:opacity-70"
+                className="bg-transparent text-meta w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               />
             )}
@@ -946,7 +946,7 @@ const TaskDetail: React.FC = () => {
                 <select
                   value={depId}
                   onChange={(e) => setDepId(e.target.value)}
-                  className="bg-transparent text-meta outline-none flex-1 min-w-0 rounded-sm px-1"
+                  className="bg-transparent text-meta flex-1 min-w-0 rounded-sm px-1"
                   style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
                 >
                   <option value="">{t('flow.taskDetail.addDependency')}</option>

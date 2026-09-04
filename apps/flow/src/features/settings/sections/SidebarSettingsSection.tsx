@@ -133,7 +133,7 @@ const GroupEditor: React.FC<{
                 if (event.key === 'Enter') event.currentTarget.blur();
                 if (event.key === 'Escape') setEditing(false);
               }}
-              className="min-w-0 flex-1 rounded-md border px-2 py-1 text-title outline-none"
+              className="min-w-0 flex-1 rounded-md border px-2 py-1 text-title"
               style={{
                 background: 'var(--flow-input-bg)',
                 borderColor: 'var(--flow-border-control)',
@@ -654,7 +654,7 @@ const SidebarSettingsSection: React.FC = () => {
               }}
               aria-required="true"
               aria-invalid={groupError !== null}
-              className="min-h-11 min-w-0 flex-1 rounded-lg border px-3 text-title outline-none"
+              className="min-h-11 min-w-0 flex-1 rounded-lg border px-3 text-title"
               style={{
                 background: 'var(--flow-input-bg)',
                 borderColor: groupError ? 'var(--flow-danger-fg)' : 'var(--flow-border-control)',
@@ -766,7 +766,7 @@ const SidebarSettingsSection: React.FC = () => {
               placeholder={t('flow.sidebar.shortcutName')}
               aria-required="true"
               aria-invalid={linkError !== null && linkLabel.trim().length === 0}
-              className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal outline-none"
+              className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal"
               style={{
                 background: 'var(--flow-input-bg)',
                 borderColor:
@@ -817,7 +817,7 @@ const SidebarSettingsSection: React.FC = () => {
                 placeholder={t('flow.sidebar.externalUrlPlaceholder')}
                 aria-required="true"
                 aria-invalid={linkError !== null && linkMode === 'external'}
-                className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal outline-none"
+                className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal"
                 style={{
                   background: 'var(--flow-input-bg)',
                   borderColor:
