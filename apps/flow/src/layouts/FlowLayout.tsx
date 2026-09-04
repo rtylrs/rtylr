@@ -1438,14 +1438,26 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <CaretPanel
-              variant="inline"
-              appId="flow"
-              userId={caretUserId}
-              apiBaseUrl={import.meta.env.VITE_API_URL || 'https://api.voxire.com/'}
-              systemContext="User is in the Flow app (projects, tasks, team workspaces)"
-              pageContext={caretPageContext}
-            />
+            {/*
+              Mounted only while open. The panel used to render at width 0 with
+              overflow hidden, so its composer textarea was always in the DOM
+              and Caret's own autoFocus put the caret in it. useKeyboardShortcuts
+              correctly suppresses single-key shortcuts while a textarea has
+              focus, so a chord worked once and then every following `c`, `/`
+              or `g` was typed into the AI box instead (#1043). Conversation
+              state lives in useCaretStore, outside this component, so it
+              survives the unmount.
+            */}
+            {caretOpen && (
+              <CaretPanel
+                variant="inline"
+                appId="flow"
+                userId={caretUserId}
+                apiBaseUrl={import.meta.env.VITE_API_URL || 'https://api.voxire.com/'}
+                systemContext="User is in the Flow app (projects, tasks, team workspaces)"
+                pageContext={caretPageContext}
+              />
+            )}
           </div>
         </div>
 
