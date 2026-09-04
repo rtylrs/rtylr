@@ -28,6 +28,7 @@ import {
 } from './useViews';
 import TaskRow from '../../shared/components/TaskRow';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import ViewFilterChips, { EMPTY_FILTERS, hasActiveFilters } from './ViewFilterChips';
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
   flame: Flame,
@@ -50,6 +51,7 @@ const Views: React.FC = () => {
 
   const displayView = selected || views[0] || null;
   const tasks = useFilteredTasks(displayView, allTasks);
+  const filtersActive = hasActiveFilters(displayView?.filters);
 
   const startEdit = (v: SavedView, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -277,13 +279,42 @@ const Views: React.FC = () => {
             {t('flow.views.taskCount', { count: tasks.length })}
           </p>
         </div>
+        {displayView && (
+          <ViewFilterChips
+            filters={displayView.filters}
+            disabled={updateView.isPending}
+            onChange={(next) => updateView.mutate({ id: displayView.id, data: { filters: next } })}
+          />
+        )}
         <motion.div
           key={displayView?.id}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.18 }}
         >
-          {tasks.length === 0 && displayView && (
+          {tasks.length === 0 && displayView && filtersActive && (
+            // G-E2: a filtered-empty result gets a plain sentence and a way to
+            // clear the filters, no illustration. Sending the user to My tasks
+            // was the only action available before, because there was no
+            // filter control for the empty state to point at.
+            <div className="px-6 py-10 text-center">
+              <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
+                {t('flow.views.emptyTasksForView')}
+              </p>
+              <button
+                type="button"
+                disabled={updateView.isPending}
+                onClick={() =>
+                  updateView.mutate({ id: displayView.id, data: { filters: EMPTY_FILTERS } })
+                }
+                className="mt-3 inline-flex min-h-11 items-center rounded-md px-4 text-body font-semibold disabled:opacity-50"
+                style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+              >
+                {t('flow.views.filters.clearAll')}
+              </button>
+            </div>
+          )}
+          {tasks.length === 0 && displayView && !filtersActive && (
             <EmptyState
               icon={Eye}
               title={t('flow.views.emptyTasksForView')}
