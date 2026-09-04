@@ -153,7 +153,26 @@ export const useMenuStore = create<MenuState & MenuActions>()(
           },
           ...item,
         };
-        set((state) => ({ items: [...state.items, newItem] }));
+        set((state) => {
+          const idx = state.items.findIndex(
+            (entry) =>
+              isCategory(entry) &&
+              ((entry as Category)._id === categoryId ||
+                (entry as any).id === categoryId ||
+                (entry as any).itemId === categoryId)
+          );
+          if (idx === -1) return { items: [...state.items, newItem] };
+          const items = [...state.items];
+          const target = { ...(items[idx] as Category) } as any;
+          const details = { ...(target.details || {}) };
+          details.menuItems = [...(details.menuItems || []), newItem];
+          target.details = details;
+          if (Array.isArray(target.menuItems)) {
+            target.menuItems = [...target.menuItems, newItem];
+          }
+          items[idx] = target;
+          return { items };
+        });
       },
 
       updateMenuItem: (id, updates) =>
@@ -192,9 +211,26 @@ export const useMenuStore = create<MenuState & MenuActions>()(
 
       deleteMenuItem: (id) =>
         set((state) => ({
-          items: state.items.filter(
-            (item) => item._id !== id && (!isMenuItem(item) || item.itemId !== id)
-          ),
+          items: state.items
+            .filter((item) => item._id !== id && (!isMenuItem(item) || item.itemId !== id))
+            .map((item) => {
+              if (!isCategory(item)) return item;
+              const entry = item as any;
+              const nested = entry.details?.menuItems;
+              const legacy = entry.menuItems;
+              if (!Array.isArray(nested) && !Array.isArray(legacy)) return item;
+              const next: any = { ...entry };
+              if (Array.isArray(nested)) {
+                next.details = {
+                  ...entry.details,
+                  menuItems: nested.filter((sub: any) => sub._id !== id && sub.itemId !== id),
+                };
+              }
+              if (Array.isArray(legacy)) {
+                next.menuItems = legacy.filter((sub: any) => sub._id !== id && sub.itemId !== id);
+              }
+              return next;
+            }),
         })),
     }),
     {
