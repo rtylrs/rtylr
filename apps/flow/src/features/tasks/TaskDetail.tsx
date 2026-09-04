@@ -43,6 +43,7 @@ import {
   useAddAttachment,
   useRemoveAttachment,
 } from './useTasks';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { useLabels, useSetTaskLabels } from './useLabels';
 import { useProjectStatuses, useSetTaskStatus } from '../projects/useStatuses';
 import { useTaskActivity } from './useTaskActivity';
@@ -208,6 +209,7 @@ const TaskDetail: React.FC = () => {
   } = useFlowStore();
 
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (taskWorkspaceId && taskWorkspaceId !== 'personal') {
@@ -422,19 +424,7 @@ const TaskDetail: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => {
-                // Wait for the mutation to actually succeed before
-                // toasting + navigating away - otherwise on API
-                // failure the user sees a success toast, leaves the
-                // page, and the task is still alive in cache.
-                deleteTaskMut.mutate(task.id, {
-                  onSuccess: () => {
-                    toast.success(t('toasts.task.deleted'));
-                    window.history.back();
-                  },
-                  // useDeleteTask already toasts on error.
-                });
-              }}
+              onClick={() => setConfirmingDelete(true)}
               className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: '#ef4444' }}
               title={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
@@ -1060,6 +1050,33 @@ const TaskDetail: React.FC = () => {
           </div>
         </DetailField>
       </aside>
+      <ConfirmDialog
+        open={confirmingDelete}
+        onOpenChange={setConfirmingDelete}
+        title={t('flow.taskMenu.deleteTitle')}
+        description={
+          <>
+            {t('flow.taskMenu.deleteConfirmPrefix')} <strong>{task.title}</strong>
+            {t('flow.taskMenu.deleteConfirmSuffix')}
+          </>
+        }
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        pending={deleteTaskMut.isPending}
+        onConfirm={() => {
+          // Wait for the mutation to actually succeed before toasting and
+          // navigating away: on failure the user would otherwise see a success
+          // toast, leave the page, and the task would still be alive in cache.
+          deleteTaskMut.mutate(task.id, {
+            onSuccess: () => {
+              toast.success(t('toasts.task.deleted'));
+              setConfirmingDelete(false);
+              window.history.back();
+            },
+            // useDeleteTask already toasts on error.
+          });
+        }}
+      />
     </div>
   );
 };
