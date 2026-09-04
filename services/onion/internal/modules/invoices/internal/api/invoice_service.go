@@ -68,6 +68,62 @@ func (a *InvoicesAPI) ListInvoices(ctx context.Context, req *financeinvoicesv1.L
 	}, nil
 }
 
+func (a *InvoicesAPI) ListBillableTimeEntries(ctx context.Context, req *financeinvoicesv1.ListBillableTimeEntriesRequest) (*financeinvoicesv1.ListBillableTimeEntriesResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:view"); err != nil {
+		return nil, err
+	}
+	businessID, errModel := invoiceBusinessID(ctx)
+	if errModel != nil {
+		return nil, errModel
+	}
+
+	page := req.GetPage()
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.GetPageSize()
+	if pageSize < 1 {
+		pageSize = 50
+	}
+
+	entries, total, totalMinutes, hasMore, err := a.Service.ListUnbilledBillableTimeEntries(ctx, businessID, page, pageSize)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list billable time entries")
+	}
+
+	payloads := make([]*financeinvoicesv1.BillableTimeEntry, 0, len(entries))
+	for _, entry := range entries {
+		payload := &financeinvoicesv1.BillableTimeEntry{
+			Id:              entry.ID,
+			EmployeeId:      entry.EmployeeID,
+			Date:            entry.Date,
+			DurationMinutes: entry.DurationMinutes,
+			Description:     entry.Description,
+			IsBillable:      entry.IsBillable,
+			Status:          entry.Status,
+			Source:          entry.Source,
+		}
+		if entry.ProjectID != nil {
+			projectID := *entry.ProjectID
+			payload.ProjectId = &projectID
+		}
+		if entry.TaskID != nil {
+			taskID := *entry.TaskID
+			payload.TaskId = &taskID
+		}
+		payloads = append(payloads, payload)
+	}
+
+	return &financeinvoicesv1.ListBillableTimeEntriesResponse{
+		Entries:      payloads,
+		Total:        total,
+		TotalMinutes: totalMinutes,
+		Page:         page,
+		PageSize:     pageSize,
+		HasMore:      hasMore,
+	}, nil
+}
+
 func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.CreateInvoiceRequest) (*financeinvoicesv1.CreateInvoiceResponse, error) {
 	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
 		return nil, err

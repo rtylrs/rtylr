@@ -238,3 +238,27 @@ LIMIT ? OFFSET ?;
 
 -- name: CountInvoicesByCustomer :one
 SELECT COUNT(*) FROM finance_invoices WHERE business_id = ? AND customer_id = ?;
+
+-- cross-schema read from hr_time: expose approved billable hours that finance
+-- can attach to an invoice without mutating the HR time-entry rows.
+-- name: ListUnbilledBillableTimeEntries :many
+SELECT id, employee_id, project_id, task_id, date, duration_minutes,
+       description, is_billable, status, source
+FROM hr_time_entries
+WHERE business_id = ?
+  AND is_billable = TRUE
+  AND status = 'approved'
+  AND billable_invoice_id IS NULL
+ORDER BY date ASC, id ASC
+LIMIT ? OFFSET ?;
+
+-- cross-schema read from hr_time: count the same invoice-eligible time set
+-- used by ListUnbilledBillableTimeEntries.
+-- name: CountUnbilledBillableTimeEntries :one
+SELECT COUNT(*) AS total,
+       CAST(COALESCE(SUM(duration_minutes), 0) AS SIGNED) AS total_minutes
+FROM hr_time_entries
+WHERE business_id = ?
+  AND is_billable = TRUE
+  AND status = 'approved'
+  AND billable_invoice_id IS NULL;

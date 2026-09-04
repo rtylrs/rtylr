@@ -15,20 +15,23 @@ import (
 // ---- mock ----
 
 type mockRepo struct {
-	invoices    []domain.Invoice
-	invoice     *domain.Invoice
-	expenses    []domain.Expense
-	expense     *domain.Expense
-	categories  []domain.ExpenseCategory
-	taxConfigs  []domain.TaxConfig
-	items       []domain.InvoiceItem
-	payments    []domain.Payment
-	generatedID int64
-	sumVal      float64
-	seqCount    int64
-	err         error
-	writeErr    error
-	created     *domain.Invoice
+	invoices        []domain.Invoice
+	billableTime    []domain.BillableTimeEntry
+	billableTotal   int64
+	billableMinutes int64
+	invoice         *domain.Invoice
+	expenses        []domain.Expense
+	expense         *domain.Expense
+	categories      []domain.ExpenseCategory
+	taxConfigs      []domain.TaxConfig
+	items           []domain.InvoiceItem
+	payments        []domain.Payment
+	generatedID     int64
+	sumVal          float64
+	seqCount        int64
+	err             error
+	writeErr        error
+	created         *domain.Invoice
 
 	createWithItemsCalls int
 	lastCreatedItems     []domain.InvoiceItem
@@ -43,6 +46,14 @@ type mockRepo struct {
 
 func (m *mockRepo) ListInvoices(_ context.Context, _ int64, _, _, _, _ string, _, _ int) ([]domain.Invoice, error) {
 	return m.invoices, m.err
+}
+
+func (m *mockRepo) ListUnbilledBillableTimeEntries(_ context.Context, _ int64, _, _ int) ([]domain.BillableTimeEntry, error) {
+	return m.billableTime, m.err
+}
+
+func (m *mockRepo) CountUnbilledBillableTimeEntries(_ context.Context, _ int64) (int64, int64, error) {
+	return m.billableTotal, m.billableMinutes, m.err
 }
 
 func (m *mockRepo) GetInvoiceByID(_ context.Context, _, _ int64) (*domain.Invoice, error) {
@@ -270,6 +281,36 @@ func TestListInvoices_ReturnsDelegatedItems(t *testing.T) {
 	}
 	if len(got) != 2 || hasMore {
 		t.Errorf("expected 2 items no-more, got len=%d hasMore=%v", len(got), hasMore)
+	}
+}
+
+func TestListUnbilledBillableTimeEntries_PaginatesAndReturnsTotals(t *testing.T) {
+	repo := &mockRepo{
+		billableTime: []domain.BillableTimeEntry{
+			{ID: 1, DurationMinutes: 30},
+			{ID: 2, DurationMinutes: 60},
+			{ID: 3, DurationMinutes: 90},
+		},
+		billableTotal:   3,
+		billableMinutes: 180,
+	}
+	s := &Service{repo: repo}
+
+	entries, total, totalMinutes, hasMore, err := s.ListUnbilledBillableTimeEntries(context.Background(), 1001, 1, 2)
+	if err != nil {
+		t.Fatalf("ListUnbilledBillableTimeEntries returned error: %v", err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("got %d entries, want 2", len(entries))
+	}
+	if total != 3 {
+		t.Errorf("total = %d, want 3", total)
+	}
+	if totalMinutes != 180 {
+		t.Errorf("total minutes = %d, want 180", totalMinutes)
+	}
+	if !hasMore {
+		t.Error("hasMore = false, want true")
 	}
 }
 

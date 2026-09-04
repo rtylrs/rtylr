@@ -34,6 +34,8 @@ func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 
 type repository interface {
 	ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
+	ListUnbilledBillableTimeEntries(ctx context.Context, businessID int64, limit, offset int) ([]domain.BillableTimeEntry, error)
+	CountUnbilledBillableTimeEntries(ctx context.Context, businessID int64) (int64, int64, error)
 	ListInvoicesByCustomer(ctx context.Context, businessID, customerID int64, limit, offset int) ([]domain.Invoice, error)
 	CountInvoicesByCustomer(ctx context.Context, businessID, customerID int64) (int64, error)
 	GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error)
@@ -97,6 +99,26 @@ func (s *Service) ListInvoices(ctx context.Context, businessID int64, status, se
 		rows = rows[:limit]
 	}
 	return rows, hasMore, nil
+}
+
+func (s *Service) ListUnbilledBillableTimeEntries(ctx context.Context, businessID, page, pageSize int64) ([]domain.BillableTimeEntry, int64, int64, bool, error) {
+	limit, offset := paginateInvoices(page, pageSize)
+
+	total, totalMinutes, err := s.repo.CountUnbilledBillableTimeEntries(ctx, businessID)
+	if err != nil {
+		return nil, 0, 0, false, err
+	}
+
+	rows, err := s.repo.ListUnbilledBillableTimeEntries(ctx, businessID, limit+1, offset)
+	if err != nil {
+		return nil, 0, 0, false, err
+	}
+
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, total, totalMinutes, hasMore, nil
 }
 
 func paginateInvoices(page, pageSize int64) (int, int) {

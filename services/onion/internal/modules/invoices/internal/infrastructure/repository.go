@@ -108,6 +108,52 @@ func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status,
 	return invoices, rows.Err()
 }
 
+func (r *Repository) ListUnbilledBillableTimeEntries(ctx context.Context, businessID int64, limit, offset int) ([]domain.BillableTimeEntry, error) {
+	rows, err := r.queries.ListUnbilledBillableTimeEntries(ctx, sqlc.ListUnbilledBillableTimeEntriesParams{
+		BusinessID: businessID,
+		Limit:      int32(limit),  // #nosec G115 -- pagination is normalized by the application policy.
+		Offset:     int32(offset), // #nosec G115 -- pagination is normalized by the application policy.
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list unbilled billable time entries", logger.Any("business_id", businessID), logger.Error(err))
+		return nil, err
+	}
+
+	entries := make([]domain.BillableTimeEntry, 0, len(rows))
+	for _, row := range rows {
+		entry := domain.BillableTimeEntry{
+			ID:              row.ID,
+			EmployeeID:      row.EmployeeID,
+			Date:            row.Date.Format("2006-01-02"),
+			DurationMinutes: int64(row.DurationMinutes),
+			IsBillable:      row.IsBillable,
+			Status:          row.Status,
+			Source:          row.Source,
+		}
+		if row.ProjectID.Valid {
+			projectID := row.ProjectID.Int64
+			entry.ProjectID = &projectID
+		}
+		if row.TaskID.Valid {
+			taskID := row.TaskID.Int64
+			entry.TaskID = &taskID
+		}
+		if row.Description.Valid {
+			entry.Description = row.Description.String
+		}
+		entries = append(entries, entry)
+	}
+	return entries, nil
+}
+
+func (r *Repository) CountUnbilledBillableTimeEntries(ctx context.Context, businessID int64) (int64, int64, error) {
+	totals, err := r.queries.CountUnbilledBillableTimeEntries(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to count unbilled billable time entries", logger.Any("business_id", businessID), logger.Error(err))
+	}
+	return totals.Total, totals.TotalMinutes, err
+}
+
 func (r *Repository) GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error) {
 	row, err := r.queries.GetInvoiceByID(ctx, sqlc.GetInvoiceByIDParams{
 		ID:         invoiceID,
