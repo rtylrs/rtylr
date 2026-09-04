@@ -70,8 +70,26 @@ const wrap = (children: React.ReactNode) => (
 
 const requireAdminOrOwner = () => {
   const user = useUserStore.getState().user;
-  const role = user?.role;
-  if (role && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'owner') {
+  // No hydrated user yet: deny at this layer and let BusinessRoute drive
+  // the auth/onboarding redirect. (Previously a null user passed the guard.)
+  if (!user) {
+    throw redirect({ to: '/' });
+  }
+  // Mirror BusinessRoute: owners pass; otherwise the normalized access
+  // document is authoritative when present, with legacy role as fallback.
+  if (user.isOwner === true) return;
+  const hasManagementGrant = user.effectiveAccess
+    ? user.effectiveAccess.dashPermissions.some(
+        (permission) =>
+          permission === 'hub:team:edit' ||
+          permission === 'hub:roles:view' ||
+          permission === 'hub:licenses:manage'
+      )
+    : (user.role ?? '').toLowerCase() === 'admin' ||
+      (user.role ?? '').toLowerCase() === 'owner' ||
+      (user.dashRole ?? '').toLowerCase() === 'admin' ||
+      (user.dashRole ?? '').toLowerCase() === 'owner';
+  if (user.isOwner === false && !hasManagementGrant) {
     throw redirect({ to: '/' });
   }
 };
