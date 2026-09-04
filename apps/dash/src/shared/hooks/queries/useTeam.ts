@@ -153,9 +153,23 @@ export const useInviteMember = () => {
         apps: payload.apps,
         ...(payload.dashRole ? { dashRole: payload.dashRole } : {}),
         ...(payload.appAssignments ? { appAssignments: payload.appAssignments } : {}),
-        ...(payload.groupIds ? { groupIds: payload.groupIds.map(String) } : {}),
+        // One `groupIds`, merged from both inputs. The singular `groupId` used
+        // to be spread after the plural list, so supplying both sent only the
+        // single id and silently dropped every other group. The contract has
+        // no singular field, which is what #945 originally reported; it is
+        // translated here instead.
+        ...(payload.groupIds?.length || payload.groupId
+          ? {
+              groupIds: [
+                ...new Set(
+                  [...(payload.groupIds ?? []), ...(payload.groupId ? [payload.groupId] : [])].map(
+                    String
+                  )
+                ),
+              ],
+            }
+          : {}),
         ...(payload.provisioningMode ? { provisioningMode: payload.provisioningMode } : {}),
-        ...(payload.groupId ? { groupIds: [String(payload.groupId)] } : {}),
         ...(payload.username ? { username: payload.username } : {}),
         ...(payload.temporaryPassword ? { temporaryPassword: payload.temporaryPassword } : {}),
       });
