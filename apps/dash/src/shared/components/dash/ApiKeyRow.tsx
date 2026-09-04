@@ -24,9 +24,9 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(preview);
-      toast.success('Key preview copied');
+      toast.success(t('developer.apiKeys.previewCopied', 'Key preview copied'));
     } catch {
-      toast.error(t('copyFailed', 'Failed to copy to clipboard'));
+      toast.error(t('common.copyFailed', 'Failed to copy to clipboard'));
     }
   };
 
