@@ -22,6 +22,10 @@ func toTask(t domain.Task) *flowtaskv1.Task {
 	if labels == nil {
 		labels = []int64{}
 	}
+	dependencies := t.Dependencies
+	if dependencies == nil {
+		dependencies = []int64{}
+	}
 
 	task := &flowtaskv1.Task{
 		Id:               t.ID,
@@ -51,6 +55,7 @@ func toTask(t domain.Task) *flowtaskv1.Task {
 		CycleId:          t.CycleID,
 		MilestoneId:      t.MilestoneID,
 		Archived:         t.Archived,
+		Dependencies:     dependencies,
 	}
 	if t.DueDate != nil {
 		s := t.DueDate.Format("2006-01-02T15:04:05Z")

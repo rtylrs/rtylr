@@ -662,6 +662,15 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 		return domain.TaskDetail{}, err
 	}
 
+	dependencyMap, err := s.repo.ListTaskDependencies(ctx, []int64{taskID}, task.BusinessID)
+	if err != nil {
+		return domain.TaskDetail{}, err
+	}
+	task.Dependencies = dependencyMap[taskID]
+	if task.Dependencies == nil {
+		task.Dependencies = []int64{}
+	}
+
 	return domain.TaskDetail{
 		Task:     task,
 		Subtasks: subtasks,

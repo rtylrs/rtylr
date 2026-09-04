@@ -78,6 +78,59 @@ func TestAddTaskDependency_ThroughService_IsReadableBack(t *testing.T) {
 	}
 }
 
+func TestGetTaskDetail_IncludesDependencies(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	svc := application.NewService(context.Background(), db)
+	ctx := context.Background()
+	const owner int64 = 970903
+
+	projectID, err := repo.CreateProject(ctx, domain.ProjectInput{
+		OwnerID: owner, BusinessID: testutil.BusinessID, Name: "Detail dependencies", CreatedBy: owner,
+	})
+	if err != nil {
+		t.Fatalf("CreateProject: %v", err)
+	}
+	createTask := func(title string) int64 {
+		taskID, createErr := repo.CreateTask(ctx, domain.TaskInput{
+			ProjectID: projectID, OwnerID: owner, BusinessID: testutil.BusinessID,
+			Title: title, ReporterID: owner,
+		})
+		if createErr != nil {
+			t.Fatalf("CreateTask(%s): %v", title, createErr)
+		}
+		return taskID
+	}
+	taskID := createTask("blocked")
+	blockerID := createTask("blocker")
+	t.Cleanup(func() {
+		if _, cleanupErr := db.ExecContext(ctx, "DELETE FROM flow_task_dependencies WHERE task_id = ?", taskID); cleanupErr != nil {
+			t.Errorf("cleanup dependencies: %v", cleanupErr)
+		}
+		if _, cleanupErr := db.ExecContext(ctx, "DELETE FROM flow_tasks WHERE project_id = ?", projectID); cleanupErr != nil {
+			t.Errorf("cleanup tasks: %v", cleanupErr)
+		}
+		if _, cleanupErr := db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projectID); cleanupErr != nil {
+			t.Errorf("cleanup project: %v", cleanupErr)
+		}
+	})
+
+	if err := svc.AddTaskDependency(ctx, taskID, blockerID, testutil.BusinessID); err != nil {
+		t.Fatalf("AddTaskDependency: %v", err)
+	}
+
+	detail, err := svc.GetTaskDetail(ctx, taskID)
+	if err != nil {
+		t.Fatalf("GetTaskDetail: %v", err)
+	}
+	if detail.Task.BusinessID != testutil.BusinessID {
+		t.Fatalf("task business_id = %d, want %d", detail.Task.BusinessID, testutil.BusinessID)
+	}
+	if len(detail.Task.Dependencies) != 1 || detail.Task.Dependencies[0] != blockerID {
+		t.Fatalf("task dependencies = %v, want [%d]", detail.Task.Dependencies, blockerID)
+	}
+}
+
 // Ruling T2: dependencies are cross-project but within the business. The blocker
 // is checked rather than trusted, so an id from another tenant is refused.
 func TestAddTaskDependency_RefusesABlockerFromAnotherBusiness(t *testing.T) {

@@ -62,6 +62,7 @@ type Task struct {
 	SubtaskCount     int32
 	StatusName       string
 	StatusColor      string
+	Dependencies     []int64
 }
 
 type ProjectColumn struct {

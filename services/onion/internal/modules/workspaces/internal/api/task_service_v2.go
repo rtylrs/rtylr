@@ -93,6 +93,10 @@ func subtasksToCompactV2(tasks []domain.Task) []*flowtaskv2.TaskPayloadCompact {
 }
 
 func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
+	dependencies := t.Dependencies
+	if dependencies == nil {
+		dependencies = []int64{}
+	}
 	out := &flowtaskv2.FlowTask{
 		Id:               t.ID,
 		ProjectId:        t.ProjectID,
@@ -114,6 +118,7 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 		SubtaskCount:     t.SubtaskCount,
 		StatusName:       t.StatusName,
 		StatusColor:      t.StatusColor,
+		Dependencies:     dependencies,
 	}
 	if t.ParentTaskID != nil {
 		v := *t.ParentTaskID
