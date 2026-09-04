@@ -262,7 +262,7 @@ const LifeRhythmSection: React.FC = () => {
             className="w-full rounded-lg px-3 py-2 text-body outline-none"
             style={{
               background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
+              border: '1px solid var(--flow-border-control)',
               color: 'var(--flow-text)',
             }}
           />
@@ -281,7 +281,7 @@ const LifeRhythmSection: React.FC = () => {
             className="w-full rounded-lg px-3 py-2 text-body outline-none"
             style={{
               background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
+              border: '1px solid var(--flow-border-control)',
               color: 'var(--flow-text)',
             }}
           />
@@ -301,7 +301,7 @@ const LifeRhythmSection: React.FC = () => {
           className="w-full max-w-[200px] rounded-lg px-3 py-2 text-body outline-none"
           style={{
             background: 'var(--flow-input-bg)',
-            border: '1px solid var(--flow-border)',
+            border: '1px solid var(--flow-border-control)',
             color: 'var(--flow-text)',
           }}
         >
@@ -420,7 +420,7 @@ export const AppearanceSection = (): React.JSX.Element => {
   const labelStyle = { color: 'var(--flow-text-muted)' };
   const inputStyle = {
     background: 'var(--flow-input-bg)',
-    border: '1px solid var(--flow-border)',
+    border: '1px solid var(--flow-border-control)',
     borderRadius: 'var(--flow-r)',
     color: 'var(--flow-text)',
   };
@@ -613,7 +613,10 @@ export const AppearanceSection = (): React.JSX.Element => {
             value={appliedAccent}
             onChange={(e) => commitAccent(normalizeHex(e.target.value))}
             className="flow-focus h-[44px] w-[44px] shrink-0 cursor-pointer bg-transparent p-0.5"
-            style={{ border: '1px solid var(--flow-border)', borderRadius: 'var(--flow-r)' }}
+            style={{
+              border: '1px solid var(--flow-border-control)',
+              borderRadius: 'var(--flow-r)',
+            }}
           />
         </div>
 
@@ -843,7 +846,7 @@ export const LabelsSection: React.FC = () => {
 
   const inputStyle = {
     background: 'var(--flow-input-bg)',
-    border: '1px solid var(--flow-border)',
+    border: '1px solid var(--flow-border-control)',
     color: 'var(--flow-text)',
   };
 
@@ -892,7 +895,7 @@ export const LabelsSection: React.FC = () => {
                 outline: !LABEL_COLORS.includes(newColor) ? `2px solid ${newColor}` : 'none',
                 outlineOffset: 2,
                 boxShadow: !LABEL_COLORS.includes(newColor) ? '0 0 0 2px var(--flow-bg)' : 'none',
-                border: '1px solid var(--flow-border)',
+                border: '1px solid var(--flow-border-control)',
               }}
               title={t('flow.settings.labels.chooseCustomColor')}
               aria-label={t('flow.settings.labels.chooseCustomColor')}

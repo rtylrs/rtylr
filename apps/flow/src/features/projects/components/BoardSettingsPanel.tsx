@@ -196,7 +196,7 @@ const BoardSettingsPanel = ({
                 className="flow-focus min-h-[44px] rounded-sm px-2 text-title sm:flex-1 md:min-h-0 md:py-1.5 md:text-body"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               />
@@ -410,7 +410,7 @@ const ColumnRow = ({
           className="w-[80px] rounded-sm px-2 py-1 text-body opacity-50"
           style={{
             background: 'var(--flow-input-bg)',
-            border: '1px solid var(--flow-border)',
+            border: '1px solid var(--flow-border-control)',
             color: 'var(--flow-text-muted)',
           }}
         />

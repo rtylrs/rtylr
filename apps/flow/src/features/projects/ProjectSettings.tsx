@@ -172,7 +172,7 @@ const ProjectSettings: React.FC = () => {
                 className="w-full rounded-md px-3 py-2 text-meta outline-none disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               />
@@ -188,7 +188,7 @@ const ProjectSettings: React.FC = () => {
                 className="w-full rounded-md px-3 py-2 text-meta outline-none resize-none disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               />
@@ -318,7 +318,7 @@ const ProjectSettings: React.FC = () => {
                       className="flex items-center gap-3 rounded-md px-3 py-2"
                       style={{
                         background: 'var(--flow-input-bg)',
-                        border: '1px solid var(--flow-border)',
+                        border: '1px solid var(--flow-border-control)',
                       }}
                     >
                       <span
@@ -431,7 +431,7 @@ const ProjectSettings: React.FC = () => {
                     className="flex-1 rounded-sm px-2 py-1.5 text-meta outline-none disabled:opacity-60"
                     style={{
                       background: 'var(--flow-input-bg)',
-                      border: '1px solid var(--flow-border)',
+                      border: '1px solid var(--flow-border-control)',
                       color: 'var(--flow-text)',
                     }}
                     defaultValue=""
@@ -525,7 +525,7 @@ const ProjectSettings: React.FC = () => {
                 className="flex items-center gap-3 rounded-md px-3 py-2.5"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
+                  border: '1px solid var(--flow-border-control)',
                 }}
               >
                 <Icon size={14} style={{ color: 'var(--flow-text-muted)' }} />
@@ -624,7 +624,7 @@ const ProjectSettings: React.FC = () => {
               className="w-full rounded-lg px-3 py-2 text-body outline-none mt-2"
               style={{
                 background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
+                border: '1px solid var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             />

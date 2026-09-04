@@ -9,7 +9,7 @@ import { useDirectory } from './useDirectory';
 
 const inputStyle: React.CSSProperties = {
   background: 'var(--flow-input-bg)',
-  border: '1px solid var(--flow-border)',
+  border: '1px solid var(--flow-border-control)',
   color: 'var(--flow-text)',
 };
 

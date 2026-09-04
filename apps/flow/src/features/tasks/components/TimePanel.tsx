@@ -360,7 +360,7 @@ const TimePanel = ({
               className="min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1 md:text-meta"
               style={{
                 background: 'var(--flow-hover)',
-                border: '1px solid var(--flow-border)',
+                border: '1px solid var(--flow-border-control)',
                 color: 'var(--flow-text-muted)',
               }}
             />
@@ -397,7 +397,7 @@ const TimePanel = ({
               className="flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1 md:text-meta"
               style={{
                 background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
+                border: '1px solid var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             />

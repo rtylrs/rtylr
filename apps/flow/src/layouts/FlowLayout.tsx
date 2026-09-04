@@ -1255,7 +1255,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       className="h-8 w-8 shrink-0 rounded-md cursor-pointer border-0 p-0.5"
                       style={{
                         background: 'var(--flow-input-bg)',
-                        border: '1px solid var(--flow-border)',
+                        border: '1px solid var(--flow-border-control)',
                       }}
                     />
                     <input
@@ -1297,7 +1297,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       className="flex-1 rounded-lg px-3 py-2 text-body outline-none"
                       style={{
                         background: 'var(--flow-input-bg)',
-                        border: '1px solid var(--flow-border)',
+                        border: '1px solid var(--flow-border-control)',
                         color: 'var(--flow-text)',
                       }}
                     />
@@ -1310,7 +1310,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     className="w-full rounded-lg px-3 py-2.5 text-body outline-none resize-none placeholder:opacity-45"
                     style={{
                       background: 'var(--flow-input-bg)',
-                      border: '1px solid var(--flow-border)',
+                      border: '1px solid var(--flow-border-control)',
                       color: 'var(--flow-text)',
                     }}
                   />
@@ -1338,7 +1338,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             newProjectVisibility === vis ? 'var(--accent)' : 'var(--flow-input-bg)',
                           color:
                             newProjectVisibility === vis ? '#0a0a0a' : 'var(--flow-text-muted)',
-                          border: '1px solid var(--flow-border)',
+                          border: '1px solid var(--flow-border-control)',
                         }}
                       >
                         {t(`flow.visibility.${vis}`)}

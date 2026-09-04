@@ -24,6 +24,22 @@
   --flow-surface: #111111;
   --flow-card: #161616;
   --flow-border: rgba(255, 255, 255, 0.07);
+  /* The decorative hairline above is 1.20:1 on --flow-card and 1.18:1 on
+   * --flow-surface. That is a deliberate aesthetic choice for dividers and
+   * card edges, where no WCAG rule applies, and it is left alone.
+   *
+   * WCAG 2.1 SC 1.4.11 asks 3:1 for the visual boundary of a component, so
+   * anything whose shape is its only affordance needs a stronger line: text
+   * fields, selects, textareas, checkboxes, radios, switches, segmented
+   * controls and icon buttons with no fill. This is that line. It is a second
+   * token rather than a change to the first, because raising --flow-border
+   * would re-draw every card edge in the product.
+   *
+   * .42 measures 3.71:1 against the worst of the three grounds it lands on
+   * (--flow-card #161616, --flow-surface #111111, --flow-bg #0a0a0a). The
+   * review proposed .38, which measures 3.20:1: it passes, but a token sitting
+   * that close to the threshold breaks on the next surface tweak. */
+  --flow-border-control: rgba(240, 240, 238, 0.42);
   --flow-border-focus: var(--accent-focus);
   --flow-text: rgba(240, 240, 238, 0.92);
   /* .58, not .5: at .5 this measures 4.39:1 on --flow-card and fails AA for
@@ -60,6 +76,15 @@
   --flow-surface: #ffffff;
   --flow-card: #ffffff;
   --flow-border: rgba(0, 0, 0, 0.08);
+  /* See the dark-mode note above. Keyed to --flow-text's rgb so it reads as
+   * the same ink at lower strength rather than as a grey of its own.
+   *
+   * .48 measures 3.44:1 on white and on --flow-bg #f4f4f5. The review
+   * proposed .42, which measures 2.88:1 and does not meet 1.4.11 at all:
+   * light mode needs more ink than dark to carry the same weight, the same
+   * way --flow-text-muted needs .62 here against .58 in dark. The floor is
+   * .44 at 3.02:1, so .48 is the first value with room to spare. */
+  --flow-border-control: rgba(9, 9, 11, 0.48);
   --flow-border-focus: var(--accent-focus);
   --flow-text: rgb(9, 9, 11);
   /* .62, not .5: at .5 this measures 3.74:1 on white. .62 measures 5.75:1. */

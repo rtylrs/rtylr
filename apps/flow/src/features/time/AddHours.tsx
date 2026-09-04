@@ -28,7 +28,7 @@ const routeApi = getRouteApi('/time');
 const labelClass = 'mb-[7px] block text-meta font-bold uppercase tracking-[0.07em]' as const;
 const fieldStyle: React.CSSProperties = {
   background: 'var(--flow-input-bg)',
-  border: '1px solid var(--flow-border)',
+  border: '1px solid var(--flow-border-control)',
   color: 'var(--flow-text)',
 };
 const fieldSizing =

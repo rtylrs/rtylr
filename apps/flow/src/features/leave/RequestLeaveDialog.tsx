@@ -15,7 +15,7 @@ import { useCreateLeaveRequest } from './useLeave';
 const labelClass = 'mb-1 block text-meta font-semibold uppercase tracking-wider';
 const inputStyle: React.CSSProperties = {
   background: 'var(--flow-input-bg)',
-  border: '1px solid var(--flow-border)',
+  border: '1px solid var(--flow-border-control)',
   color: 'var(--flow-text)',
 };
 

@@ -44,7 +44,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
       className="relative rounded-lg"
       style={{
         background: 'var(--flow-input-bg)',
-        border: '1px solid var(--flow-border)',
+        border: '1px solid var(--flow-border-control)',
       }}
     >
       <textarea

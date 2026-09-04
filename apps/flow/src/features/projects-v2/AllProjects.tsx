@@ -126,7 +126,7 @@ export const AllProjects: React.FC = () => {
                 placeholder={t('flow.allProjects.search')}
                 className="w-full h-9 pl-8 pr-3 rounded-lg border text-sm outline-none focus:ring-1 focus:ring-ring"
                 style={{
-                  borderColor: 'var(--flow-border)',
+                  borderColor: 'var(--flow-border-control)',
                   background: 'var(--flow-surface)',
                   color: 'var(--flow-text)',
                 }}
@@ -139,7 +139,7 @@ export const AllProjects: React.FC = () => {
               onChange={(e) => setStatus(e.target.value)}
               className="h-9 px-2 rounded-lg border text-sm"
               style={{
-                borderColor: 'var(--flow-border)',
+                borderColor: 'var(--flow-border-control)',
                 background: 'var(--flow-surface)',
                 color: 'var(--flow-text)',
               }}
@@ -157,7 +157,7 @@ export const AllProjects: React.FC = () => {
               onChange={(e) => setVisibility(e.target.value)}
               className="h-9 px-2 rounded-lg border text-sm"
               style={{
-                borderColor: 'var(--flow-border)',
+                borderColor: 'var(--flow-border-control)',
                 background: 'var(--flow-surface)',
                 color: 'var(--flow-text)',
               }}

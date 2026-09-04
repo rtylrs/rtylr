@@ -136,7 +136,7 @@ const GroupEditor: React.FC<{
               className="min-w-0 flex-1 rounded-md border px-2 py-1 text-title outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
-                borderColor: 'var(--flow-border)',
+                borderColor: 'var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             />
@@ -305,7 +305,7 @@ const GroupEditor: React.FC<{
               className="min-h-10 rounded-md border px-2 text-title"
               style={{
                 background: 'var(--flow-input-bg)',
-                borderColor: 'var(--flow-border)',
+                borderColor: 'var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             >
@@ -657,7 +657,7 @@ const SidebarSettingsSection: React.FC = () => {
               className="min-h-11 min-w-0 flex-1 rounded-lg border px-3 text-title outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
-                borderColor: groupError ? 'var(--flow-danger-fg)' : 'var(--flow-border)',
+                borderColor: groupError ? 'var(--flow-danger-fg)' : 'var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             />
@@ -772,7 +772,7 @@ const SidebarSettingsSection: React.FC = () => {
                 borderColor:
                   linkError !== null && linkLabel.trim().length === 0
                     ? 'var(--flow-danger-fg)'
-                    : 'var(--flow-border)',
+                    : 'var(--flow-border-control)',
                 color: 'var(--flow-text)',
               }}
             />
@@ -796,7 +796,7 @@ const SidebarSettingsSection: React.FC = () => {
                 className="mt-1 min-h-11 w-full rounded-lg border px-3 text-title font-normal"
                 style={{
                   background: 'var(--flow-input-bg)',
-                  borderColor: 'var(--flow-border)',
+                  borderColor: 'var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               >
@@ -823,7 +823,7 @@ const SidebarSettingsSection: React.FC = () => {
                   borderColor:
                     linkError !== null && linkMode === 'external'
                       ? 'var(--flow-danger-fg)'
-                      : 'var(--flow-border)',
+                      : 'var(--flow-border-control)',
                   color: 'var(--flow-text)',
                 }}
               />
