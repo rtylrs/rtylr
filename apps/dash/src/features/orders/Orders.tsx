@@ -313,8 +313,7 @@ const Orders: React.FC = () => {
                 <div className="flex items-center justify-between pr-6">
                   <DialogTitle>Order #{selectedOrder.id}</DialogTitle>
                   <Badge variant={statusBadgeVariant[selectedOrder.status] || 'outline'}>
-                    {statusLabel[selectedOrder.status] ||
-                      selectedOrder.status.replace('_', ' ')}
+                    {statusLabel[selectedOrder.status] || selectedOrder.status.replace('_', ' ')}
                   </Badge>
                 </div>
               </DialogHeader>
