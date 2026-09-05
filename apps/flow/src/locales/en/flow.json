@@ -696,11 +696,14 @@
     "noTasksHint": "Tasks cannot be added to a milestone yet"
   },
   "roadmap": {
+    "emptyCta": "View projects",
+    "emptyDescription": "Projects with a start and target date appear here.",
+    "emptyTitle": "Nothing on the roadmap yet",
     "loading": "Loading roadmap...",
-    "subtitle": "High-level view of projects in flight",
-    "taskCount": "{{done}} of {{total}} tasks done",
     "start": "Start:",
-    "target": "Target:"
+    "subtitle": "High-level view of projects in flight",
+    "target": "Target:",
+    "taskCount": "{{done}} of {{total}} tasks done"
   },
   "triage": {
     "subtitle_one": "{{count}} task needs attention",
@@ -711,6 +714,9 @@
     "explanation": "Anything without a priority or a due date, or still in the backlog, shows up here."
   },
   "team": {
+    "emptyCta": "View projects",
+    "emptyDescription": "People with assigned work appear here.",
+    "emptyTitle": "No one to show yet",
     "loading": "Loading team...",
     "memberCount_one": "{{count}} member · capacity and workload",
     "memberCount_other": "{{count}} members · capacity and workload",
