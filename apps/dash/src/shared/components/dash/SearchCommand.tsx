@@ -17,7 +17,6 @@ import {
   MonitorSpeaker,
   UserCheck,
   Layers,
-  BarChart3,
   Palette,
   QrCode,
   UtensilsCrossed,
@@ -181,13 +180,6 @@ export const SearchCommand: React.FC = () => {
         group: groupNavigate,
         icon: Palette,
         action: go('/design'),
-      },
-      {
-        id: 'nav-analytics',
-        label: t('common.nav.analytics', 'Analytics'),
-        group: groupNavigate,
-        icon: BarChart3,
-        action: go('/analytics'),
       },
 
       // Apps launcher

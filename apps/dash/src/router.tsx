@@ -26,7 +26,6 @@ const CreateBanner = React.lazy(() => import('./features/menu/Components/CreateB
 const QrCodes = React.lazy(() => import('./features/qr-codes/QrCodes.tsx'));
 const QrCode = React.lazy(() => import('./features/qr-codes/QrCode.tsx'));
 const Design = React.lazy(() => import('./features/design/Design.tsx'));
-const Analytics = React.lazy(() => import('./features/analytics/Analytics.tsx'));
 const Chat = React.lazy(() => import('./features/chat/Chat'));
 
 const Account = React.lazy(() => import('./features/settings/Settings/components/Account'));
@@ -144,12 +143,6 @@ const designRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/design',
   component: () => wrap(<Design />),
-});
-
-const analyticsRoute = createRoute({
-  getParentRoute: () => businessRoute,
-  path: '/analytics',
-  component: () => wrap(<Analytics />),
 });
 
 const chatRoute = createRoute({
@@ -420,7 +413,6 @@ const routeTree = rootRoute.addChildren([
     qrCodesRoute,
     qrCodeCreateRoute,
     designRoute,
-    analyticsRoute,
     chatRoute,
     teamRoute,
     teamInviteRoute,

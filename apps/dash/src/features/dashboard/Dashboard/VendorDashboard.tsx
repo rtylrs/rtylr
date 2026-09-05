@@ -12,7 +12,6 @@ import {
   Search,
   UserCheck,
   Users,
-  BarChart3,
   Plug2,
   History,
   LayoutGrid,
@@ -112,7 +111,6 @@ interface Shortcut {
 
 const SHORTCUTS: Shortcut[] = [
   { label: 'Team', hint: 'Members & roles', path: '/team', icon: Users },
-  { label: 'Analytics', hint: 'Revenue & reports', path: '/analytics', icon: BarChart3 },
   { label: 'Audit log', hint: 'Activity history', path: '/audit', icon: History },
   { label: 'Integrations', hint: 'API keys & webhooks', path: '/integrations', icon: Plug2 },
   { label: 'Billing', hint: 'Plan & usage', path: '/settings/billing', icon: CreditCard },
@@ -172,9 +170,11 @@ const AdminHome: React.FC = () => {
     [navigate]
   );
 
-  const openExternal = useCallback((label: string, href: string, pathForRecent: string) => {
-    recordRecent(label, pathForRecent);
-    setRecents(readRecents());
+  const openExternal = useCallback((label: string, href: string, pathForRecent?: string) => {
+    if (pathForRecent) {
+      recordRecent(label, pathForRecent);
+      setRecents(readRecents());
+    }
     window.open(href, '_blank', 'noopener');
   }, []);
 
@@ -345,7 +345,7 @@ const AdminHome: React.FC = () => {
           <div className="mx-2 mt-3 py-4" style={{ borderTop: '1px solid var(--dash-border)' }}>
             <button
               type="button"
-              onClick={() => openExternal('Insights', APP_URLS.insights, '/analytics')}
+              onClick={() => openExternal('Insights', APP_URLS.insights)}
               className="flex items-center gap-1.5 text-xs font-medium"
               style={{ color: 'var(--accent)' }}
             >

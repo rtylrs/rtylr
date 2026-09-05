@@ -86,7 +86,6 @@ const routeKeys: Record<string, { key: string; fallback: string }> = {
   '/orders': { key: 'orders', fallback: 'Orders' },
   '/qr-codes': { key: 'qrCodes', fallback: 'QR Codes' },
   '/design': { key: 'design', fallback: 'Design' },
-  '/analytics': { key: 'analytics', fallback: 'Analytics' },
   '/menu': { key: 'menu', fallback: 'Menu' },
   '/create-item': { key: 'createItem', fallback: 'Create Item' },
   '/create-banner': { key: 'createBanner', fallback: 'Create Banner' },
@@ -415,7 +414,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     '/orders': () => import('../features/orders/Orders'),
     '/qr-codes': () => import('../features/qr-codes/QrCodes'),
     '/design': () => import('../features/design/Design'),
-    '/analytics': () => import('../features/analytics/Analytics'),
   });
 
   useKeyboardShortcuts();
