@@ -101,7 +101,7 @@ describe('Milestones create form', () => {
   });
 });
 
-describe('Milestones progress bar (#1080)', () => {
+describe('Milestones show no progress until a task can be attached (#1064)', () => {
   function milestone(over: Record<string, unknown> = {}): Record<string, unknown> {
     return {
       id: 'm-1',
@@ -123,54 +123,47 @@ describe('Milestones progress bar (#1080)', () => {
     milestonesState.data = [];
   });
 
-  function fillWidth(container: HTMLElement): string | undefined {
-    // The fill is the only element inside the rounded track.
-    const track = container.querySelector('.rounded-full.overflow-hidden');
-    return (track?.firstElementChild as HTMLElement | null)?.style.width;
-  }
+  // The five cases that were here covered the progress bar's arithmetic:
+  // an empty track for unknown progress, the clamp above 100, and a full
+  // track only when done. They were correct, and #1160 fixed a real defect
+  // in that markup. The bar itself is gone until a task can be put into a
+  // milestone, so they are replaced rather than deleted: milestoneProgress
+  // keeps its own unit tests in milestoneUtils.test.ts, which is where the
+  // arithmetic lives and where it will still be when the bar returns.
+  // rtylr#1064 and REQ-R15.
 
-  it('renders an empty track when progress is unknown', () => {
-    // computedProgress is optional. `width: undefined%` is invalid, the
-    // browser drops the declaration, and the fill took its parent's width, so
-    // a milestone with unknown progress looked like a completed one.
-    milestonesState.data = [milestone({ computedProgress: undefined })];
+  it('renders no progress track', () => {
+    milestonesState.data = [milestone()];
     const { container } = render(<Milestones />);
-    expect(fillWidth(container)).toBe('0%');
+    expect(container.querySelector('.rounded-full.overflow-hidden')).toBeNull();
   });
 
-  it('says there are no tasks yet instead of a bare percent sign', () => {
-    milestonesState.data = [milestone({ computedProgress: undefined })];
+  it('claims no percentage', () => {
+    milestonesState.data = [milestone({ computedProgress: 40 })];
     render(<Milestones />);
-    expect(screen.getByText('flow.milestones.noTasksYet')).toBeInTheDocument();
-    expect(screen.queryByText('%')).not.toBeInTheDocument();
+    expect(screen.queryByText(/%$/)).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.milestones.progress')).not.toBeInTheDocument();
   });
 
-  it('renders the real percentage when there are tasks', () => {
-    milestonesState.data = [milestone({ taskCount: 19, doneCount: 7, computedProgress: 37 })];
-    const { container } = render(<Milestones />);
-    expect(screen.getByText('37%')).toBeInTheDocument();
-    expect(fillWidth(container)).toBe('37%');
+  it('says why there is nothing to show', () => {
+    milestonesState.data = [milestone()];
+    render(<Milestones />);
+    expect(screen.getByText('flow.milestones.noTasksHint')).toBeInTheDocument();
   });
 
-  it('clamps a percentage above a hundred', () => {
-    milestonesState.data = [milestone({ taskCount: 3, doneCount: 3, computedProgress: 140 })];
-    const { container } = render(<Milestones />);
-    expect(fillWidth(container)).toBe('100%');
+  it('reports no task count, since it can only ever be zero of zero', () => {
+    milestonesState.data = [milestone({ taskCount: 0, doneCount: 0 })];
+    render(<Milestones />);
+    expect(screen.queryByText('flow.milestones.taskCount')).not.toBeInTheDocument();
   });
 
-  it('shows a full track only when the work is actually done', () => {
-    milestonesState.data = [milestone({ taskCount: 4, doneCount: 4, computedProgress: 100 })];
-    const { container } = render(<Milestones />);
-    expect(fillWidth(container)).toBe('100%');
-    expect(screen.getByText('100%')).toBeInTheDocument();
+  it('still shows the milestone and its target date', () => {
+    milestonesState.data = [milestone()];
+    render(<Milestones />);
+    expect(screen.getByText('Launch')).toBeInTheDocument();
+    expect(screen.getByText(/flow\.milestones\.target/)).toBeInTheDocument();
   });
 });
-
-// ─── Creating a project from the milestone form ──────────────────────────────
-//
-// Every milestone needs a project (project_id is @required on v2), so with no
-// projects the form was a dead end: the only option carried value="" and Create
-// stayed disabled with no way out. These cover the inline escape hatch.
 
 describe('Milestones inline project creation', () => {
   beforeEach(() => {
