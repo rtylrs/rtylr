@@ -69,6 +69,20 @@ function createWrapperWithData() {
     React.createElement(QueryClientProvider, { client }, children);
 }
 
+function createWrapperWithPages() {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  client.setQueryData(['notifications'], sampleNotifications);
+  client.setQueryData(['notifications', 'pages'], {
+    pages: [{ notifications: sampleNotifications, nextCursor: '' }],
+    pageParams: [''],
+  });
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client }, children);
+  return { wrapper, client };
+}
+
 describe('useNotifications', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -171,6 +185,27 @@ describe('useMarkNotificationRead', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
+
+  it('restores the paged cache on error', async () => {
+    mockNotificationClient.markNotificationRead.mockRejectedValue(new Error('fail'));
+    mockNotificationClient.listNotifications.mockResolvedValue({
+      notifications: sampleNotifications,
+    });
+
+    const { wrapper, client } = createWrapperWithPages();
+    const { result } = renderHook(() => useMarkNotificationRead(), { wrapper });
+
+    await act(async () => {
+      result.current.mutate('1');
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    const pages = client.getQueryData<{ pages: { notifications: Notification[] }[] }>([
+      'notifications',
+      'pages',
+    ]);
+    expect(pages?.pages[0]?.notifications.find((n) => n.id === '1')?.read).toBe(false);
+  });
 });
 
 describe('useMarkAllNotificationsRead', () => {
@@ -200,5 +235,26 @@ describe('useMarkAllNotificationsRead', () => {
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
+  });
+
+  it('restores the paged cache on error', async () => {
+    mockNotificationClient.markAllRead.mockRejectedValue(new Error('fail'));
+    mockNotificationClient.listNotifications.mockResolvedValue({
+      notifications: sampleNotifications,
+    });
+
+    const { wrapper, client } = createWrapperWithPages();
+    const { result } = renderHook(() => useMarkAllNotificationsRead(), { wrapper });
+
+    await act(async () => {
+      result.current.mutate();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    const pages = client.getQueryData<{ pages: { notifications: Notification[] }[] }>([
+      'notifications',
+      'pages',
+    ]);
+    expect(pages?.pages[0]?.notifications.filter((n) => !n.read)).toHaveLength(2);
   });
 });

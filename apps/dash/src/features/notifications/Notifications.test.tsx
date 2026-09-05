@@ -32,14 +32,17 @@ const makeNotification = (overrides: Partial<Notification>): Notification => ({
 });
 
 const notificationsData = vi.hoisted(() => ({
-  firstPage: [] as Notification[],
   pages: undefined as { pages: { notifications: Notification[] }[] } | undefined,
   isLoading: false,
   refetch: vi.fn(),
 }));
 
+const setPages = (list: Notification[]) => {
+  notificationsData.pages = { pages: [{ notifications: list }] };
+};
+
 vi.mock('../../shared/hooks/queries/useNotifications', () => ({
-  useNotifications: () => ({ data: notificationsData.firstPage }),
+  useNotifications: () => ({ data: [] }),
   useNotificationPages: () => ({
     data: notificationsData.pages,
     isLoading: notificationsData.isLoading,
@@ -56,7 +59,6 @@ import Notifications from './Notifications';
 
 beforeEach(() => {
   vi.clearAllMocks();
-  notificationsData.firstPage = [];
   notificationsData.pages = undefined;
   notificationsData.isLoading = false;
 });
@@ -79,7 +81,7 @@ describe('Notifications empty state', () => {
   });
 
   it('shows a "view all" action instead of refresh on the "unread" tab when everything is read', () => {
-    notificationsData.firstPage = [makeNotification({ read: true })];
+    setPages([makeNotification({ read: true })]);
     render(<Notifications />);
 
     fireEvent.click(screen.getByRole('button', { name: 'unread' }));
@@ -91,7 +93,7 @@ describe('Notifications empty state', () => {
   });
 
   it('switches back to the "all" tab when "view all" is clicked from the unread empty state', () => {
-    notificationsData.firstPage = [makeNotification({ read: true, title: 'Read receipt' })];
+    setPages([makeNotification({ read: true, title: 'Read receipt' })]);
     render(<Notifications />);
 
     fireEvent.click(screen.getByRole('button', { name: 'unread' }));
@@ -105,7 +107,7 @@ describe('Notifications empty state', () => {
   });
 
   it('does not show the empty state when there are notifications', () => {
-    notificationsData.firstPage = [makeNotification({ read: false })];
+    setPages([makeNotification({ read: false })]);
     render(<Notifications />);
 
     expect(screen.queryByText('notifications.emptyAllCaughtUpTitle')).not.toBeInTheDocument();
