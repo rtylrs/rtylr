@@ -698,7 +698,8 @@
     "project": "Projet",
     "noProjects": "Aucun projet pour le moment",
     "noTasksYet": "Aucune tâche",
-    "noProjectsGate": "Il faut un projet avant d'ajouter un jalon, et votre rôle ne permet pas d'en créer un. Demandez à un administrateur de créer un projet."
+    "noProjectsGate": "Il faut un projet avant d'ajouter un jalon, et votre rôle ne permet pas d'en créer un. Demandez à un administrateur de créer un projet.",
+    "noTasksHint": "Les tâches ne peuvent pas encore être ajoutées à un jalon"
   },
   "roadmap": {
     "loading": "Chargement de la feuille de route...",
