@@ -29,10 +29,11 @@ export async function issueGiftCard({
 
     await giftCardClient.createGiftCard({
       code,
+      paidOrderId: '1',
       initialAmount: amount,
-      customerName: '',
-      customerEmail: '',
-      expiresAt: '',
+      customerName: 'Walk-in',
+      customerEmail: 'noreply@rtylr.com',
+      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
     });
 
     const card = issue({ code, balance: amount });

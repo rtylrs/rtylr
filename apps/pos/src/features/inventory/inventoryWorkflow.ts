@@ -36,7 +36,9 @@ export interface StockActionParams {
 }
 
 export type BuiltStockAction =
-  | { payload: ReceiveStockRequest | AdjustStockRequest | WasteStockRequest; action: Exclude<StockAction, 'transfer'> }
+  | { payload: ReceiveStockRequest; action: 'receive' }
+  | { payload: AdjustStockRequest; action: 'adjust' }
+  | { payload: WasteStockRequest; action: 'waste' }
   | { payload: TransferStockRequest; action: 'transfer' };
 
 function parsePositiveQuantity(input: string): number {
@@ -88,8 +90,34 @@ export function buildStockAction({
     };
   }
 
+  if (action === 'receive') {
+    return {
+      action: 'receive',
+      payload: {
+        branchId: String(branchId),
+        productId: String(itemId),
+        quantity,
+        note: trimmedNote ?? '',
+        employeeId: String(employeeId ?? 0),
+      },
+    };
+  }
+
+  if (action === 'waste') {
+    return {
+      action: 'waste',
+      payload: {
+        branchId: String(branchId),
+        productId: String(itemId),
+        quantity,
+        note: trimmedNote ?? '',
+        employeeId: String(employeeId ?? 0),
+      },
+    };
+  }
+
   return {
-    action,
+    action: 'adjust',
     payload: {
       branchId: String(branchId),
       productId: String(itemId),

@@ -80,12 +80,6 @@ export function buildStaffUpdate(
     id: String(user.id),
     name: user.name,
     ...(pin ? { pin } : {}),
-    role: edits.role,
     isActive: edits.isActive,
-    maxDiscountPct: edits.maxDiscountPct,
-    canVoid: edits.canVoid,
-    canRefund: edits.canRefund,
-    canOpenDrawer: edits.canOpenDrawer,
-    canApplyDiscount: edits.canApplyDiscount,
   };
 }

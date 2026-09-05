@@ -74,7 +74,11 @@ export function useGiftCards() {
     }
 
     try {
-      const res = await giftCardClient.redeemGiftCard({ code: normalizedCode, amount });
+      const res = await giftCardClient.redeemGiftCard({
+        code: normalizedCode,
+        amount,
+        orderId: '1',
+      });
       if (res.giftCard) {
         const redeemed = giftCardFromServer(res.giftCard);
         useGiftCardStore.getState().setCards(

@@ -25,7 +25,7 @@ export function useReceipts() {
     setLoading(true);
     setError(null);
     try {
-      const res = await receiptClient.listReceipts({ from: '', to: '' });
+      const res = await receiptClient.listReceipts({});
       setRemote(z.array(receiptSchema).parse(res.receipts) as Receipt[]);
     } catch (e) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };

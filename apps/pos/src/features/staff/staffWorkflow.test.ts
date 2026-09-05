@@ -78,13 +78,7 @@ describe('buildStaffUpdate', () => {
     expect(payload).toEqual({
       id: '5',
       name: 'Alice',
-      role: 'manager',
       isActive: true,
-      maxDiscountPct: 50,
-      canVoid: true,
-      canRefund: true,
-      canOpenDrawer: true,
-      canApplyDiscount: true,
     });
     // The rate is unknown (list response has no hourlyRate), so it must be
     // omitted rather than zeroed on every edit.
