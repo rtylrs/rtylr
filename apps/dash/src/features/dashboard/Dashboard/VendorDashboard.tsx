@@ -1,33 +1,30 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import {
-  Responsive as ResponsiveGridLayout,
-  type Layout,
-  type ResponsiveLayouts,
-} from 'react-grid-layout/legacy';
-import { motion, AnimatePresence } from 'motion/react';
-import { Settings2, X, Plus, GripVertical } from 'lucide-react';
-import { ErrorBoundary } from '@voxire/ui';
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  ChevronRight,
+  CreditCard,
+  Globe,
+  Layers,
+  MonitorSpeaker,
+  Package,
+  Search,
+  UserCheck,
+  Users,
+  BarChart3,
+  Plug2,
+  History,
+  LayoutGrid,
+  ListChecks,
+  Rocket,
+} from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { toFiniteNumber } from '@voxire/api';
-import { canEffectiveAccess } from '@voxire/permissions';
-import { resolveAppUrl } from '@voxire/config';
-import { useTranslation } from 'react-i18next';
+import { APP_URLS, resolveAppUrl } from '@voxire/config';
 import { useUserStore } from '../../../shared/stores/userStore';
-import { Button } from '../../../shared/components/ui';
-import {
-  getWidgetComponent,
-  WIDGET_CATALOG,
-  loadLayout,
-  saveLayout,
-  loadActiveWidgets,
-  saveActiveWidgets,
-  DEFAULT_LAYOUT,
-} from './widgets';
-
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
+import { useCommandPalette } from '../../../shared/stores/commandPaletteStore';
+import { getTenantKey } from '../../../shared/utils/tenantStorage';
 
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -36,370 +33,498 @@ const today = new Date().toLocaleDateString('en-US', {
   day: 'numeric',
 });
 
-type SavedLayoutItem = Record<string, unknown> & {
-  i: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  minW?: number;
-  minH?: number;
-  maxW?: number;
-  maxH?: number;
-};
-type SavedLayout = SavedLayoutItem[];
-type LayoutSignatureItem = Partial<
-  Pick<SavedLayoutItem, 'i' | 'x' | 'y' | 'w' | 'h' | 'minW' | 'minH' | 'maxW' | 'maxH'>
->;
+// ─── Zero-query home ──────────────────────────────────────────────────────────
+// Deliberately fires NO backend queries: no KPIs, no activity feed, no team
+// list, no time-off scan, no revenue/invoice aggregations. Everything below is
+// static config + localStorage (command palette, recents, checklist). Heavy
+// analytics live in the Insights app and per-app pages, loaded on demand.
 
-function layoutSignature(layout: ReadonlyArray<LayoutSignatureItem> | undefined): string {
-  return JSON.stringify(
-    (layout ?? []).map((item) => ({
-      i: String(item.i ?? ''),
-      x: toFiniteNumber(item.x),
-      y: toFiniteNumber(item.y),
-      w: toFiniteNumber(item.w),
-      h: toFiniteNumber(item.h),
-      minW: toFiniteNumber(item.minW),
-      minH: toFiniteNumber(item.minH),
-      maxW: toFiniteNumber(item.maxW),
-      maxH: toFiniteNumber(item.maxH),
-    }))
-  );
+interface AppLink {
+  id: string;
+  name: string;
+  blurb: string;
+  href: string;
+  external: boolean;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  color: string;
 }
 
-// ─── Admin Dashboard ────────────────────────────────────────────────────────
+const APP_LINKS: AppLink[] = [
+  {
+    id: 'pos',
+    name: 'Point of Sale',
+    blurb: 'Take orders',
+    href: APP_URLS.pos,
+    external: true,
+    icon: MonitorSpeaker,
+    color: '#4583C4',
+  },
+  {
+    id: 'erp',
+    name: 'Inventory',
+    blurb: 'Stock & suppliers',
+    href: APP_URLS.erp,
+    external: true,
+    icon: Package,
+    color: '#10b981',
+  },
+  {
+    id: 'hr',
+    name: 'Human Resources',
+    blurb: 'Staff & shifts',
+    href: APP_URLS.hr,
+    external: true,
+    icon: UserCheck,
+    color: '#f59e0b',
+  },
+  {
+    id: 'crm',
+    name: 'Customers',
+    blurb: 'CRM & loyalty',
+    href: APP_URLS.crm,
+    external: true,
+    icon: Users,
+    color: '#8b5cf6',
+  },
+  {
+    id: 'finance',
+    name: 'Finance',
+    blurb: 'Invoices & bills',
+    href: APP_URLS.finance,
+    external: true,
+    icon: CreditCard,
+    color: '#ef4444',
+  },
+  {
+    id: 'flow',
+    name: 'Flow',
+    blurb: 'Projects & inbox',
+    href: APP_URLS.flow,
+    external: true,
+    icon: Layers,
+    color: '#64C5B9',
+  },
+];
 
-const AdminDashboard: React.FC = () => {
+interface Shortcut {
+  label: string;
+  hint: string;
+  path: string;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+}
+
+const SHORTCUTS: Shortcut[] = [
+  { label: 'Team', hint: 'Members & roles', path: '/team', icon: Users },
+  { label: 'Analytics', hint: 'Revenue & reports', path: '/analytics', icon: BarChart3 },
+  { label: 'Audit log', hint: 'Activity history', path: '/audit', icon: History },
+  { label: 'Integrations', hint: 'API keys & webhooks', path: '/integrations', icon: Plug2 },
+  { label: 'Billing', hint: 'Plan & usage', path: '/settings/billing', icon: CreditCard },
+  { label: 'All apps', hint: 'Browse everything', path: '/apps', icon: LayoutGrid },
+];
+
+interface RecentEntry {
+  label: string;
+  path: string;
+  at: number;
+}
+
+const RECENTS_KEY = 'rtylr-home-recents';
+const CHECKLIST_KEY = 'rtylr-home-checklist';
+const MAX_RECENTS = 5;
+
+function readRecents(): RecentEntry[] {
+  try {
+    const raw = localStorage.getItem(getTenantKey(RECENTS_KEY));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.slice(0, MAX_RECENTS) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function recordRecent(label: string, path: string) {
+  try {
+    const next = [
+      { label, path, at: Date.now() },
+      ...readRecents().filter((r) => r.path !== path),
+    ].slice(0, MAX_RECENTS);
+    localStorage.setItem(getTenantKey(RECENTS_KEY), JSON.stringify(next));
+  } catch {
+    // localStorage full or blocked — recents are best-effort
+  }
+}
+
+interface ChecklistStep {
+  id: string;
+  title: string;
+  description: string;
+  path?: string;
+  href?: string;
+  external?: boolean;
+}
+
+const CHECKLIST_STEPS: ChecklistStep[] = [
+  {
+    id: 'invite-team',
+    title: 'Invite your team',
+    description: 'Add staff and control which apps they can access.',
+    path: '/team/invite',
+  },
+  {
+    id: 'open-pos',
+    title: 'Open Point of Sale',
+    description: 'Take your first order.',
+    href: APP_URLS.pos,
+    external: true,
+  },
+  {
+    id: 'setup-menu',
+    title: 'Set up your menu',
+    description: 'Add items, menus, and QR codes for your storefront.',
+    path: '/menus',
+  },
+  {
+    id: 'explore-analytics',
+    title: 'Explore analytics',
+    description: 'Revenue, customers, and products live here — loaded on demand.',
+    path: '/analytics',
+  },
+  {
+    id: 'connect-integration',
+    title: 'Connect an integration',
+    description: 'API keys, webhooks, and add-ons.',
+    path: '/integrations',
+  },
+];
+
+function readChecklist(): string[] {
+  try {
+    const raw = localStorage.getItem(getTenantKey(CHECKLIST_KEY));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+const cardStyle: React.CSSProperties = {
+  background: 'var(--dash-card)',
+  border: '1px solid var(--dash-border)',
+};
+
+const AdminHome: React.FC = () => {
   const { user } = useUserStore();
+  const { setOpen: setPaletteOpen } = useCommandPalette();
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const businessName = (user?.businessName as string | undefined) || 'Dashboard';
-  const canCreateRole = user?.effectiveAccess
-    ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:create')
-    : user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
+  const businessName = (user?.businessName as string | undefined) || 'Welcome';
+
+  const [recents, setRecents] = useState<RecentEntry[]>([]);
+  const [done, setDone] = useState<string[]>([]);
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const nextWidth = Math.round(entry.contentRect.width);
-        setContainerWidth((current) => (current === nextWidth ? current : nextWidth));
-      }
-    });
-    ro.observe(el);
-    setContainerWidth((current) => (current === el.clientWidth ? current : el.clientWidth));
-    return () => ro.disconnect();
+    setRecents(readRecents());
+    setDone(readChecklist());
   }, []);
 
-  const [layouts, setLayouts] = useState<{ lg: SavedLayout }>(() => ({ lg: loadLayout() }));
-  const [activeWidgets, setActiveWidgets] = useState<string[]>(loadActiveWidgets);
-  const [showCatalog, setShowCatalog] = useState(false);
-  // Synchronous mirrors so rapid double activation sees the first update
-  // immediately; updater side effects would double-fire under StrictMode.
-  const activeRef = useRef(activeWidgets);
-  const layoutsRef = useRef(layouts);
-  activeRef.current = activeWidgets;
-  layoutsRef.current = layouts;
-
-  const handleLayoutChange = useCallback((_: Layout, allLayouts: ResponsiveLayouts) => {
-    const nextLayout = (allLayouts.lg ?? []) as unknown as SavedLayout;
-    setLayouts((current) => {
-      if (layoutSignature(current.lg) === layoutSignature(nextLayout)) return current;
-      saveLayout(nextLayout);
-      return { lg: nextLayout };
-    });
-  }, []);
-
-  const addWidget = useCallback((widgetId: string) => {
-    const config = WIDGET_CATALOG.find((w) => w.id === widgetId);
-    if (!config) return;
-
-    // Guarded against the synchronous mirrors (not just rendered state) so a
-    // rapid double activation cannot append the same grid key twice.
-    if (activeRef.current.includes(widgetId)) return;
-    const currentLayout = layoutsRef.current.lg || [];
-    if (currentLayout.some((item) => item.i === widgetId)) return;
-
-    let maxY = 0;
-    for (const item of currentLayout) {
-      const bottom = item.y + item.h;
-      if (bottom > maxY) maxY = bottom;
+  const persistDone = useCallback((next: string[]) => {
+    setDone(next);
+    try {
+      localStorage.setItem(getTenantKey(CHECKLIST_KEY), JSON.stringify(next));
+    } catch {
+      // best-effort
     }
-    const newLayout = [
-      ...currentLayout,
-      {
-        i: widgetId,
-        x: 0,
-        y: maxY,
-        w: config.defaultW,
-        h: config.defaultH,
-        minW: config.minW,
-        minH: config.minH,
-        maxW: config.maxW,
-        maxH: config.maxH,
-      },
-    ];
-    const newActive = [...activeRef.current, widgetId];
-    activeRef.current = newActive;
-    layoutsRef.current = { lg: newLayout };
-    setLayouts({ lg: newLayout });
-    setActiveWidgets(newActive);
-    saveLayout(newLayout);
-    saveActiveWidgets(newActive);
   }, []);
 
-  const removeWidget = useCallback(
-    (widgetId: string) => {
-      const newLayout = (layouts.lg || []).filter((l: { i: string }) => l.i !== widgetId);
-      const newActive = activeWidgets.filter((id) => id !== widgetId);
-      setLayouts({ lg: newLayout });
-      setActiveWidgets(newActive);
-      saveLayout(newLayout);
-      saveActiveWidgets(newActive);
+  const toggleStep = useCallback(
+    (id: string) => {
+      persistDone(done.includes(id) ? done.filter((d) => d !== id) : [...done, id]);
     },
-    [layouts, activeWidgets]
+    [done, persistDone]
   );
 
-  const resetLayout = useCallback(() => {
-    const ids = DEFAULT_LAYOUT.map((l) => l.i);
-    setLayouts({ lg: DEFAULT_LAYOUT });
-    setActiveWidgets(ids);
-    saveLayout(DEFAULT_LAYOUT);
-    saveActiveWidgets(ids);
-    setShowCatalog(false);
+  const goInternal = useCallback(
+    (label: string, path: string) => {
+      recordRecent(label, path);
+      setRecents(readRecents());
+      void navigate({ to: path });
+    },
+    [navigate]
+  );
+
+  const openExternal = useCallback((label: string, href: string, pathForRecent: string) => {
+    recordRecent(label, pathForRecent);
+    setRecents(readRecents());
+    window.open(href, '_blank', 'noopener');
   }, []);
 
+  const remaining = useMemo(() => CHECKLIST_STEPS.filter((s) => !done.includes(s.id)), [done]);
+
   return (
-    <div ref={containerRef} className="space-y-4 overflow-hidden">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-            {businessName}
-          </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-            {today}
-          </p>
-        </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          {canCreateRole && (
-            <Button
-              type="button"
-              size="lg"
-              className="min-h-11 flex-1 sm:flex-none"
-              onClick={() => void navigate({ to: '/roles', search: { create: 1 } })}
-              aria-label={t('dashboard.createCustomRole')}
-            >
-              <Plus size={16} />
-              {t('dashboard.createCustomRole')}
-            </Button>
-          )}
-          <button
-            type="button"
-            onClick={() => setShowCatalog(true)}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-colors"
-            style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'var(--dash-hover)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'transparent';
-            }}
-            title="Customize dashboard"
-          >
-            <Settings2 size={15} />
-          </button>
-        </div>
+      <div className="text-center pt-4">
+        <h1 className="text-2xl font-semibold tracking-tight" style={{ color: 'var(--dash-text)' }}>
+          {businessName}
+        </h1>
+        <p className="text-xs mt-1" style={{ color: 'var(--dash-text-dim)' }}>
+          {today}
+        </p>
       </div>
 
-      {/* Grid */}
-      {containerWidth > 0 && (
-        <ResponsiveGridLayout
-          className="layout"
-          layouts={layouts}
-          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }}
-          rowHeight={80}
-          width={containerWidth}
-          onLayoutChange={handleLayoutChange}
-          isDraggable={showCatalog}
-          isResizable={showCatalog}
-          draggableHandle=".widget-drag-handle"
-          containerPadding={[0, 0]}
-          margin={[12, 12]}
+      {/* Big search — opens the existing command palette, zero queries */}
+      <button
+        type="button"
+        onClick={() => setPaletteOpen(true)}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors hover:bg-[var(--dash-hover)]"
+        style={{ ...cardStyle, color: 'var(--dash-text-dim)' }}
+      >
+        <Search size={16} className="shrink-0" />
+        <span className="flex-1 text-sm">Search apps, pages, actions…</span>
+        <kbd
+          className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono"
+          style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
         >
-          {activeWidgets.map((widgetId) => {
-            const Widget = getWidgetComponent(widgetId);
-            if (!Widget) return <div key={widgetId} />;
+          ⌘K
+        </kbd>
+      </button>
 
-            return (
-              <div
-                key={widgetId}
-                className="rounded-xl overflow-hidden relative"
-                style={{
-                  background: 'var(--dash-card)',
-                  border: showCatalog
-                    ? '1px dashed rgba(69,131,196,0.4)'
-                    : '1px solid var(--dash-border)',
-                }}
-              >
-                {showCatalog && (
-                  <div className="absolute top-1.5 right-1.5 z-10 flex items-center gap-1">
-                    <div
-                      className="widget-drag-handle cursor-grab h-6 w-6 rounded-md flex items-center justify-center"
-                      style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
+      {/* Three columns — Cloudflare style, all static */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Apps */}
+        <section className="rounded-xl overflow-hidden" style={cardStyle}>
+          <header
+            className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--dash-text-dim)', borderBottom: '1px solid var(--dash-border)' }}
+          >
+            Apps
+          </header>
+          <ul className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
+            {APP_LINKS.map((app) => {
+              const Icon = app.icon;
+              return (
+                <li key={app.id}>
+                  <button
+                    type="button"
+                    onClick={() => openExternal(app.name, app.href, `/apps/${app.id}`)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[var(--dash-hover)]"
+                  >
+                    <span
+                      className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: `${app.color}12` }}
                     >
-                      <GripVertical size={12} />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeWidget(widgetId)}
-                      className="h-6 w-6 rounded-md flex items-center justify-center"
+                      <Icon size={14} style={{ color: app.color }} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span
+                        className="block text-[13px] font-medium truncate"
+                        style={{ color: 'var(--dash-text)' }}
+                      >
+                        {app.name}
+                      </span>
+                      <span
+                        className="block text-[11px] truncate"
+                        style={{ color: 'var(--dash-text-dim)' }}
+                      >
+                        {app.blurb}
+                      </span>
+                    </span>
+                    <ArrowUpRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* Shortcuts */}
+        <section className="rounded-xl overflow-hidden" style={cardStyle}>
+          <header
+            className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--dash-text-dim)', borderBottom: '1px solid var(--dash-border)' }}
+          >
+            Shortcuts
+          </header>
+          <ul className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
+            {SHORTCUTS.map((s) => {
+              const Icon = s.icon;
+              return (
+                <li key={s.path}>
+                  <button
+                    type="button"
+                    onClick={() => goInternal(s.label, s.path)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[var(--dash-hover)]"
+                  >
+                    <Icon size={14} style={{ color: 'var(--dash-text-dim)' }} />
+                    <span className="flex-1 min-w-0">
+                      <span
+                        className="block text-[13px] font-medium truncate"
+                        style={{ color: 'var(--dash-text)' }}
+                      >
+                        {s.label}
+                      </span>
+                      <span
+                        className="block text-[11px] truncate"
+                        style={{ color: 'var(--dash-text-dim)' }}
+                      >
+                        {s.hint}
+                      </span>
+                    </span>
+                    <ChevronRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* Recents — localStorage only */}
+        <section className="rounded-xl overflow-hidden" style={cardStyle}>
+          <header
+            className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5"
+            style={{ color: 'var(--dash-text-dim)', borderBottom: '1px solid var(--dash-border)' }}
+          >
+            <History size={12} />
+            Recents
+          </header>
+          {recents.length === 0 ? (
+            <p
+              className="px-4 py-6 text-xs leading-relaxed"
+              style={{ color: 'var(--dash-text-dim)' }}
+            >
+              Pages you open will show up here. Press{' '}
+              <kbd
+                className="px-1 py-0.5 rounded font-mono"
+                style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
+              >
+                ⌘K
+              </kbd>{' '}
+              to jump anywhere.
+            </p>
+          ) : (
+            <ul className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
+              {recents.map((r) => (
+                <li key={r.path}>
+                  <button
+                    type="button"
+                    onClick={() => goInternal(r.label, r.path)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[var(--dash-hover)]"
+                  >
+                    <History size={14} style={{ color: 'var(--dash-text-dim)' }} />
+                    <span
+                      className="flex-1 text-[13px] font-medium truncate"
+                      style={{ color: 'var(--dash-text)' }}
+                    >
+                      {r.label}
+                    </span>
+                    <ChevronRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="px-4 py-3" style={{ borderTop: '1px solid var(--dash-border)' }}>
+            <button
+              type="button"
+              onClick={() => openExternal('Insights', APP_URLS.insights, '/analytics')}
+              className="flex items-center gap-1.5 text-xs font-medium"
+              style={{ color: 'var(--accent)' }}
+            >
+              <Globe size={12} />
+              Analytics live in Insights
+              <ArrowRight size={12} />
+            </button>
+          </div>
+        </section>
+      </div>
+
+      {/* Getting started — BetterStack style, static + localStorage */}
+      <section className="rounded-xl overflow-hidden" style={cardStyle}>
+        <header className="px-5 py-3.5 flex items-center justify-between gap-3">
+          <p
+            className="text-sm font-semibold flex items-center gap-2"
+            style={{ color: 'var(--dash-text)' }}
+          >
+            <Rocket size={14} style={{ color: 'var(--accent)' }} />
+            Get the most out of rtylr
+          </p>
+          <p className="text-xs shrink-0" style={{ color: 'var(--dash-text-dim)' }}>
+            {remaining.length === 0 ? (
+              'All done 🎉'
+            ) : (
+              <>
+                <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  {remaining.length}
+                </span>{' '}
+                of {CHECKLIST_STEPS.length} steps left
+              </>
+            )}
+          </p>
+        </header>
+        <ul className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
+          {CHECKLIST_STEPS.map((step) => {
+            const isDone = done.includes(step.id);
+            return (
+              <li key={step.id} className="flex items-center gap-3 px-5 py-3">
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={isDone}
+                  aria-label={`Mark "${step.title}" as ${isDone ? 'not done' : 'done'}`}
+                  onClick={() => toggleStep(step.id)}
+                  className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                  style={{
+                    background: isDone ? 'var(--accent)' : 'transparent',
+                    border: isDone ? '1px solid var(--accent)' : '1px dashed var(--dash-text-dim)',
+                    color: '#fff',
+                  }}
+                >
+                  {isDone && <Check size={12} />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (step.href) openExternal(step.title, step.href, step.path ?? step.href);
+                    else if (step.path) goInternal(step.title, step.path);
+                  }}
+                  className="flex-1 min-w-0 flex items-center gap-3 text-left group"
+                >
+                  <span className="flex-1 min-w-0">
+                    <span
+                      className="block text-[13px] font-medium truncate"
                       style={{
-                        background: 'var(--status-cancelled-bg)',
-                        color: 'var(--status-cancelled)',
+                        color: isDone ? 'var(--dash-text-dim)' : 'var(--dash-text)',
+                        textDecoration: isDone ? 'line-through' : 'none',
                       }}
                     >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-                <div className="h-full">
-                  <ErrorBoundary>
-                    <Widget />
-                  </ErrorBoundary>
-                </div>
-              </div>
+                      {step.title}
+                    </span>
+                    <span
+                      className="block text-[11px] truncate"
+                      style={{ color: 'var(--dash-text-dim)' }}
+                    >
+                      {step.description}
+                    </span>
+                  </span>
+                  <ChevronRight
+                    size={14}
+                    className="shrink-0 transition-transform group-hover:translate-x-0.5"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  />
+                </button>
+              </li>
             );
           })}
-        </ResponsiveGridLayout>
-      )}
-
-      {/* Widget catalog modal (portaled to body) */}
-      {createPortal(
-        <AnimatePresence>
-          {showCatalog && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center"
-              style={{ background: 'rgba(0,0,0,0.4)' }}
-              onClick={() => setShowCatalog(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="rounded-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col"
-                style={{
-                  background: 'var(--dash-surface)',
-                  border: '1px solid var(--dash-border)',
-                }}
-              >
-                {/* Modal header */}
-                <div
-                  className="flex items-center justify-between px-6 py-4"
-                  style={{ borderBottom: '1px solid var(--dash-border)' }}
-                >
-                  <div>
-                    <h2 className="text-base font-semibold" style={{ color: 'var(--dash-text)' }}>
-                      Customize dashboard
-                    </h2>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-                      Add, remove, or rearrange widgets
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowCatalog(false)}
-                    className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
-                    style={{ color: 'var(--dash-text-muted)' }}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                {/* Widget list */}
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
-                  <p
-                    className="text-[11px] font-semibold uppercase tracking-wider mb-2"
-                    style={{ color: 'var(--dash-text-dim)' }}
-                  >
-                    Widgets
-                  </p>
-                  {WIDGET_CATALOG.map((w) => {
-                    const isActive = activeWidgets.includes(w.id);
-                    return (
-                      <div
-                        key={w.id}
-                        className="flex items-center justify-between py-2.5 px-3 rounded-lg"
-                        style={{ background: isActive ? 'rgba(69,131,196,0.05)' : 'transparent' }}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                            {w.label}
-                          </p>
-                          <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                            {w.description}
-                          </p>
-                        </div>
-                        {isActive ? (
-                          <button
-                            type="button"
-                            onClick={() => removeWidget(w.id)}
-                            className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
-                            style={{
-                              color: 'var(--status-cancelled)',
-                              background: 'var(--status-cancelled-bg)',
-                            }}
-                          >
-                            Remove
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => addWidget(w.id)}
-                            className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
-                            style={{
-                              color: 'var(--accent)',
-                              background: 'var(--accent-muted)',
-                            }}
-                          >
-                            <Plus size={12} className="inline mr-1" />
-                            Add
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Footer */}
-                <div
-                  className="px-6 py-3 flex justify-end"
-                  style={{ borderTop: '1px solid var(--dash-border)' }}
-                >
-                  <button
-                    type="button"
-                    onClick={resetLayout}
-                    className="text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
-                    style={{ color: 'var(--dash-text-muted)', background: 'var(--dash-hover)' }}
-                  >
-                    Reset to default
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+        </ul>
+        <div
+          className="px-5 py-3 flex items-center gap-1.5 text-[11px]"
+          style={{ borderTop: '1px solid var(--dash-border)', color: 'var(--dash-text-dim)' }}
+        >
+          <ListChecks size={12} />
+          Progress is saved on this device only — no server round-trips.
+        </div>
+      </section>
     </div>
   );
 };
@@ -485,7 +610,7 @@ const VendorDashboard: React.FC = () => {
   return (
     <>
       <HelmetContainer title="Dashboard · rtylr" />
-      <AdminDashboard />
+      <AdminHome />
     </>
   );
 };

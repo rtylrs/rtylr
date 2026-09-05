@@ -27,7 +27,7 @@ const TOUR_STEPS: StepOptions[] = [
   {
     id: 'dashboard',
     attachTo: { element: '[data-tour="dashboard"]', on: 'right' },
-    text: 'This is your Dashboard. See your KPIs, recent activity, and changelog at a glance.',
+    text: 'This is your home. Search anything, launch apps, and pick up where you left off.',
     buttons: [
       {
         text: 'Back',

@@ -1,146 +1,91 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import VendorDashboard from './VendorDashboard';
 import { useUserStore } from '../../../shared/stores/userStore';
-
-const navigateMock = vi.hoisted(() => vi.fn());
-const saveActiveWidgetsMock = vi.hoisted(() => vi.fn());
-const saveLayoutMock = vi.hoisted(() => vi.fn());
-
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => navigateMock,
-}));
-
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
-vi.mock('@voxire/ui', () => ({
-  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+import { useCommandPalette } from '../../../shared/stores/commandPaletteStore';
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('react-grid-layout', () => ({
-  ResponsiveGridLayout: () => <div data-testid="grid-layout" />,
-}));
-
-vi.mock('react-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-dom')>('react-dom');
-  return { ...actual, createPortal: (node: React.ReactNode) => node };
-});
-
-vi.mock('motion/react', () => ({
-  motion: { div: ({ children }: { children: React.ReactNode }) => <div>{children}</div> },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-vi.mock('./widgets', () => ({
-  getWidgetComponent: () => null,
-  WIDGET_CATALOG: [
-    {
-      id: 'w-test',
-      label: 'Test widget',
-      description: 'Widget for duplicate-add regression coverage',
-      defaultW: 4,
-      defaultH: 3,
-      minW: 2,
-      minH: 2,
-      maxW: 6,
-      maxH: 5,
-    },
-  ],
-  loadLayout: () => [],
-  saveLayout: (...args: unknown[]) => saveLayoutMock(...args),
-  loadActiveWidgets: () => [],
-  saveActiveWidgets: (...args: unknown[]) => saveActiveWidgetsMock(...args),
-  DEFAULT_LAYOUT: [],
+const mockNavigate = vi.fn();
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => mockNavigate,
 }));
 
 describe('VendorDashboard', () => {
   beforeEach(() => {
-    navigateMock.mockClear();
+    localStorage.clear();
+    mockNavigate.mockClear();
     useUserStore.setState({ user: null });
+    useCommandPalette.setState({ open: false });
   });
 
-  it.each(['admin', 'owner', 'Admin', 'OWNER'])(
-    'renders AdminDashboard for role "%s"',
-    async (role) => {
-      useUserStore.setState({ user: { id: 1, role } });
-
-      render(<VendorDashboard />);
-
-      expect(await screen.findByTitle('Customize dashboard')).toBeTruthy();
-      expect(screen.queryByText(/Welcome to rtylr/i)).toBeNull();
-    }
-  );
-
-  it('shows the custom role action and opens role creation from the dashboard', async () => {
-    useUserStore.setState({ user: { id: 1, role: 'admin' } });
+  it.each(['admin', 'owner', 'Admin', 'OWNER'])('renders zero-query home for role "%s"', (role) => {
+    useUserStore.setState({
+      user: { id: 1, role, businessName: 'Acme' } as never,
+    });
 
     render(<VendorDashboard />);
 
-    const createRoleButton = await screen.findByRole('button', {
-      name: 'dashboard.createCustomRole',
-    });
-    createRoleButton.click();
-
-    expect(navigateMock).toHaveBeenCalledWith({ to: '/roles', search: { create: 1 } });
+    // Static home: greeting, search entry, nav columns, checklist — no widgets.
+    expect(screen.getByText('Acme')).toBeTruthy();
+    expect(screen.getByText(/Search apps, pages, actions/i)).toBeTruthy();
+    expect(screen.getByText('Apps')).toBeTruthy();
+    expect(screen.getByText('Shortcuts')).toBeTruthy();
+    expect(screen.getByText('Recents')).toBeTruthy();
+    expect(screen.getByText(/Get the most out of rtylr/i)).toBeTruthy();
+    expect(screen.queryByText(/Welcome to rtylr/i)).toBeNull();
   });
 
-  it('adds a widget only once on rapid double activation', async () => {
-    useUserStore.setState({ user: { id: 1, role: 'admin' } });
-    saveActiveWidgetsMock.mockClear();
-    saveLayoutMock.mockClear();
+  it('opens the command palette from the big search button', () => {
+    useUserStore.setState({ user: { id: 1, role: 'admin' } as never });
 
     render(<VendorDashboard />);
-    fireEvent.click(await screen.findByTitle('Customize dashboard'));
 
-    // Native clicks inside a single act() commit both activations in the
-    // same tick, reproducing the double-add race.
-    const add = await screen.findByRole('button', { name: 'Add' });
-    act(() => {
-      add.click();
-      add.click();
-    });
+    fireEvent.click(screen.getByText(/Search apps, pages, actions/i));
+    expect(useCommandPalette.getState().open).toBe(true);
+  });
 
-    expect(saveActiveWidgetsMock).toHaveBeenCalledTimes(1);
-    expect(saveActiveWidgetsMock).toHaveBeenCalledWith(['w-test']);
-    expect(screen.queryByRole('button', { name: 'Add' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Remove' })).toBeInTheDocument();
+  it('persists checklist toggles to localStorage only', () => {
+    useUserStore.setState({ user: { id: 1, role: 'owner' } as never });
+
+    render(<VendorDashboard />);
+
+    const checkbox = screen.getByRole('checkbox', { name: /Invite your team/i });
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+    fireEvent.click(checkbox);
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByText(/of 5 steps left/i)).toBeTruthy();
   });
 
   it.each(['operator', 'billing', 'menu_manager', 'store_manager', 'staff', 'viewer'])(
-    'renders StaffDashboard, not AdminDashboard, for role "%s"',
+    'renders StaffDashboard, not home, for role "%s"',
     (role) => {
-      useUserStore.setState({ user: { id: 2, role, apps: [] } });
+      useUserStore.setState({ user: { id: 2, role, apps: [] } as never });
 
       render(<VendorDashboard />);
 
       expect(screen.getByText(/Welcome to rtylr/i)).toBeTruthy();
-      expect(screen.queryByTitle('Customize dashboard')).toBeNull();
+      expect(screen.queryByText(/Search apps, pages, actions/i)).toBeNull();
     }
   );
 
-  it('renders the restrictive StaffDashboard, not AdminDashboard, when role is absent', () => {
-    useUserStore.setState({ user: { id: 3, apps: [] } });
+  it('renders the restrictive StaffDashboard, not home, when role is absent', () => {
+    useUserStore.setState({ user: { id: 3, apps: [] } as never });
 
     render(<VendorDashboard />);
 
     expect(screen.getByText(/Welcome to rtylr/i)).toBeTruthy();
-    expect(screen.queryByTestId('grid-layout')).toBeNull();
   });
 
-  it('renders the restrictive StaffDashboard, not AdminDashboard, when there is no user at all', () => {
+  it('renders the restrictive StaffDashboard, not home, when there is no user at all', () => {
     useUserStore.setState({ user: null });
 
     render(<VendorDashboard />);
 
     expect(screen.getByText(/Welcome to rtylr/i)).toBeTruthy();
-    expect(screen.queryByTestId('grid-layout')).toBeNull();
   });
 });
 
@@ -167,7 +112,7 @@ describe('StaffDashboard app links (#1069)', () => {
   });
 
   const asStaffWith = (apps: string[]): void => {
-    useUserStore.setState({ user: { id: 2, role: 'staff', apps } });
+    useUserStore.setState({ user: { id: 2, role: 'staff', apps } as never });
   };
 
   it('redirects a single-app staff member to a resolved URL, not to rtylr.com', () => {
