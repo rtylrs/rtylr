@@ -702,11 +702,14 @@
     "noTasksHint": "Les tâches ne peuvent pas encore être ajoutées à un jalon"
   },
   "roadmap": {
+    "emptyCta": "Voir les projets",
+    "emptyDescription": "Les projets ayant une date de début et une date cible apparaissent ici.",
+    "emptyTitle": "Rien dans la feuille de route",
     "loading": "Chargement de la feuille de route...",
-    "subtitle": "Vue d'ensemble des projets en cours",
-    "taskCount": "{{done}} sur {{total}} tâches terminées",
     "start": "Début :",
-    "target": "Cible :"
+    "subtitle": "Vue d'ensemble des projets en cours",
+    "target": "Cible :",
+    "taskCount": "{{done}} sur {{total}} tâches terminées"
   },
   "triage": {
     "subtitle_one": "{{count}} tâche nécessite de l'attention",
@@ -718,9 +721,12 @@
     "explanation": "Tout ce qui n'a ni priorité ni date d'échéance, ou reste dans le backlog, apparaît ici."
   },
   "team": {
+    "emptyCta": "Voir les projets",
+    "emptyDescription": "Les personnes ayant du travail assigné apparaissent ici.",
+    "emptyTitle": "Personne à afficher pour l'instant",
     "loading": "Chargement de l'équipe...",
-    "memberCount_one": "{{count}} membre · capacité et charge de travail",
     "memberCount_many": "{{count}} membres · capacité et charge de travail",
+    "memberCount_one": "{{count}} membre · capacité et charge de travail",
     "memberCount_other": "{{count}} membres · capacité et charge de travail",
     "moreCount": "+{{count}} de plus"
   },
