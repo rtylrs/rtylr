@@ -9,6 +9,7 @@ import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 /**
  * ProjectCalendar - month grid with tasks placed on their due_date.
@@ -198,7 +199,7 @@ const ProjectCalendar: React.FC = () => {
                           key={t.id}
                           className="text-meta px-1.5 py-0.5 rounded-sm truncate"
                           style={{
-                            background: `${project.color}22`,
+                            background: withAlpha(project.color, 13),
                             color: project.color,
                             cursor: 'pointer',
                           }}

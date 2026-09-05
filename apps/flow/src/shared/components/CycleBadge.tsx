@@ -1,6 +1,7 @@
 import React from 'react';
 import { Timer } from 'lucide-react';
 import { Cycle } from '../stores/flowStore';
+import { withAlpha } from '../lib/colorUtils';
 
 interface CycleBadgeProps {
   cycle: Cycle;
@@ -8,7 +9,7 @@ interface CycleBadgeProps {
 }
 
 const STATUS_COLORS: Record<Cycle['status'], string> = {
-  active: '#22c55e',
+  active: 'var(--flow-status-approved)',
   upcoming: '#3b82f6',
   completed: '#6b7280',
 };
@@ -20,8 +21,11 @@ export const CycleBadge: React.FC<CycleBadgeProps> = ({ cycle, compact }) => {
     <div
       className="inline-flex items-center gap-1.5 rounded-full"
       style={{
-        background: `${color}18`,
-        border: `1px solid ${color}33`,
+        // withAlpha, not a hex suffix: STATUS_COLORS.active is a token now,
+        // and `var(--flow-status-approved)18` is not a colour, so the whole
+        // declaration would be dropped and the badge would lose its fill.
+        background: withAlpha(color, 9),
+        border: `1px solid ${withAlpha(color, 20)}`,
         color,
         padding: compact ? '1px 6px' : '2px 10px',
         fontSize: 'var(--text-meta)',

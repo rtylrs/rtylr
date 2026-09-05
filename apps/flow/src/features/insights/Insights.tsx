@@ -62,7 +62,7 @@ const Insights: React.FC = () => {
             label={t('common.insights.kpi.completed')}
             value={String(data.doneTasks)}
             hint={t('common.insights.kpi.completedHint', { total: data.totalTasks })}
-            color="#22c55e"
+            color="var(--flow-status-approved)"
           />
           <Kpi
             icon={TrendingUp}

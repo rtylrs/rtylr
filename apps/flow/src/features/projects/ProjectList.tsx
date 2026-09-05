@@ -46,7 +46,7 @@ export const STATUS_GROUP_COLORS: { id: Task['status']; color: string; alwaysSho
   { id: 'todo', color: '#9ca3af', alwaysShown: true },
   { id: 'in_progress', color: '#3b82f6', alwaysShown: true },
   { id: 'in_review', color: '#f59e0b', alwaysShown: true },
-  { id: 'done', color: '#22c55e', alwaysShown: true },
+  { id: 'done', color: 'var(--flow-status-approved)', alwaysShown: true },
   { id: 'cancelled', color: '#4b5563', alwaysShown: false },
 ];
 

@@ -232,10 +232,13 @@ const Cycles: React.FC = () => {
               }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <span className="h-2 w-2 rounded-full" style={{ background: '#22c55e' }} />
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: 'var(--flow-status-approved)' }}
+                />
                 <span
                   className="text-meta uppercase tracking-wider font-semibold"
-                  style={{ color: '#22c55e' }}
+                  style={{ color: 'var(--flow-status-approved)' }}
                 >
                   {t('flow.cycles.activeCycle')}
                 </span>

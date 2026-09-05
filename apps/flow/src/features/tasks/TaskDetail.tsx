@@ -67,6 +67,7 @@ import { getInitials } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -766,7 +767,7 @@ const TaskDetail: React.FC = () => {
                   color: 'var(--flow-text)',
                   border:
                     task.effortMinutes === m
-                      ? `1px solid ${'var(--accent)'}66`
+                      ? `1px solid ${withAlpha('var(--accent)', 40)}`
                       : '1px solid var(--flow-border)',
                 }}
                 title={
@@ -812,7 +813,9 @@ const TaskDetail: React.FC = () => {
             style={{
               background: task.focusPin ? 'var(--accent-muted)' : 'var(--flow-hover)',
               color: 'var(--flow-text)',
-              border: task.focusPin ? `1px solid ${'var(--accent)'}55` : '1px solid transparent',
+              border: task.focusPin
+                ? `1px solid ${withAlpha('var(--accent)', 33)}`
+                : '1px solid transparent',
             }}
           >
             {task.focusPin ? t('flow.taskDetail.pinnedToToday') : t('flow.taskDetail.pinToToday')}

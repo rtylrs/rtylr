@@ -20,10 +20,14 @@ import { formatDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 // labelKey, not label: module scope again, so it cannot call `t` itself.
 const HEALTH: Record<string, { color: string; labelKey: string }> = {
-  on_track: { color: '#22c55e', labelKey: 'flow.projectOverview.health.onTrack' },
+  on_track: {
+    color: 'var(--flow-status-approved)',
+    labelKey: 'flow.projectOverview.health.onTrack',
+  },
   at_risk: { color: '#f59e0b', labelKey: 'flow.milestones.status.atRisk' },
   off_track: { color: 'var(--flow-danger-fg)', labelKey: 'flow.projectOverview.health.offTrack' },
 };
@@ -75,9 +79,9 @@ const ProjectOverview: React.FC = () => {
           <span
             className="text-meta px-2 py-0.5 rounded-full font-semibold"
             style={{
-              background: `${health.color}1a`,
+              background: withAlpha(health.color, 10),
               color: health.color,
-              border: `1px solid ${health.color}33`,
+              border: `1px solid ${withAlpha(health.color, 20)}`,
             }}
           >
             {t(health.labelKey)}
@@ -129,7 +133,7 @@ const ProjectOverview: React.FC = () => {
               icon={CheckCircle2}
               label={t('flow.taskDetail.done')}
               value={stats.done}
-              color="#22c55e"
+              color="var(--flow-status-approved)"
             />
             <StatCard
               icon={Activity}

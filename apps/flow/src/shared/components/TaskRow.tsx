@@ -10,6 +10,7 @@ import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
+import { withAlpha } from '../lib/colorUtils';
 
 interface TaskRowProps {
   task: Task;
@@ -128,7 +129,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
           <span
             className="text-meta px-2 py-0.5 rounded-sm shrink-0 font-medium"
             style={{
-              background: `${project.color}22`,
+              background: withAlpha(project.color, 13),
               color: project.color,
             }}
           >
@@ -141,9 +142,9 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
               key={l.id}
               className="inline-flex items-center gap-0.5 rounded-full"
               style={{
-                background: `${l.color}1a`,
+                background: withAlpha(l.color, 10),
                 color: l.color,
-                border: `1px solid ${l.color}33`,
+                border: `1px solid ${withAlpha(l.color, 20)}`,
                 padding: '1px 5px',
                 fontSize: 'var(--text-meta)',
               }}

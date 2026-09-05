@@ -34,6 +34,7 @@ import BoardSettingsPanel from './components/BoardSettingsPanel';
 import StatusSettingsPanel from './components/StatusSettingsPanel';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 // ── Group-by (swimlanes) ────────────────────────────────────────────────
 // "None" = plain kanban columns. Any other value partitions each column's
@@ -628,7 +629,7 @@ const KanbanColumn: React.FC<{
       ref={registerRef}
       className="flex w-[min(248px,calc(100vw-1.5rem))] min-w-[min(248px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[248px] sm:min-w-[248px]"
       style={{
-        background: isOver ? `${col.color}12` : 'transparent',
+        background: isOver ? withAlpha(col.color, 5) : 'transparent',
         border: isOver ? `1px dashed ${col.color}` : '1px solid transparent',
         transition: 'background 0.15s, border 0.15s',
       }}
@@ -666,7 +667,7 @@ const KanbanColumn: React.FC<{
 
         <span
           className="text-meta px-1.5 py-0.5 rounded-full font-medium shrink-0"
-          style={{ background: `${col.color}22`, color: col.color }}
+          style={{ background: withAlpha(col.color, 13), color: col.color }}
         >
           {colTaskCount}
         </span>
