@@ -1,4 +1,5 @@
 import type { Task, Project } from '../stores/flowStore';
+import { todayIso } from './dateUtils';
 
 /** Converts a task to a flat CSV row string. */
 export function taskToCsvRow(task: Task): string {
@@ -59,6 +60,6 @@ export function csvToDataUri(csv: string): string {
 
 /** Generates a filename with the given prefix and current date. */
 export function exportFilename(prefix: string, ext = 'csv'): string {
-  const date = new Date().toISOString().slice(0, 10);
+  const date = todayIso();
   return `${prefix}-${date}.${ext}`;
 }

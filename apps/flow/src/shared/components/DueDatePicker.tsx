@@ -3,6 +3,7 @@ import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarGrid, todayISODate } from '@voxire/ui';
 import { formatDate } from '../lib/utils';
+import { toLocalIso } from '../lib/dateUtils';
 
 interface DueDatePickerProps {
   value?: string;
@@ -64,7 +65,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
           {quickOptions.map((o) => {
             const d = new Date();
             d.setDate(d.getDate() + o.days);
-            const iso = d.toISOString().split('T')[0];
+            const iso = toLocalIso(d);
             return (
               <button
                 type="button"

@@ -1,4 +1,5 @@
 import type { ActivityEntry } from '../stores/flowStore';
+import { toLocalIso } from './dateUtils';
 
 /** Returns the most recent activity entry across all tasks. */
 export function latestActivityEntry(activity: ActivityEntry[]): ActivityEntry | undefined {
@@ -14,7 +15,7 @@ export function recentActivity(
 ): ActivityEntry[] {
   const cutoff = new Date(now ?? new Date());
   cutoff.setDate(cutoff.getDate() - days);
-  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  const cutoffStr = toLocalIso(cutoff);
   return activity.filter((e) => e.createdAt >= cutoffStr);
 }
 
