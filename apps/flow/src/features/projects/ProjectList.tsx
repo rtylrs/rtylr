@@ -23,6 +23,7 @@ import { useCurrentProject } from './useCurrentProject';
 import { useStatusLabels } from '../../shared/hooks/useStatusLabels';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 import PriorityIcon from '../../shared/components/PriorityIcon';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 interface StatusGroupDef {
   id: Task['status'];
@@ -258,7 +259,12 @@ const ProjectList: React.FC = () => {
   useProjectRealtime(projectId);
 
   const { tasks, sections } = useFlowStore();
-  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
+  const {
+    project,
+    isLoading: projectLoading,
+    loadFailed: projectLoadFailed,
+    refetch: refetchProjects,
+  } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks } = useTasks({ projectId, activeOnly: true, compact: true });
 
   // `activeOnly` is a query param the backend doesn't currently act on, so
@@ -292,6 +298,12 @@ const ProjectList: React.FC = () => {
         {t('flow.project.loading')}
       </div>
     );
+  }
+
+  // A failed project list leaves `project` undefined exactly as a missing one
+  // does, so a 500 used to tell the user their project had gone.
+  if (projectLoadFailed) {
+    return <ListLoadFailed onRetry={() => void refetchProjects()} />;
   }
 
   if (!project) {

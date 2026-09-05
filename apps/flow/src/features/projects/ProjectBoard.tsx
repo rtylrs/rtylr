@@ -35,6 +35,7 @@ import StatusSettingsPanel from './components/StatusSettingsPanel';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 import { withAlpha } from '../../shared/lib/colorUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 // ── Group-by (swimlanes) ────────────────────────────────────────────────
 // "None" = plain kanban columns. Any other value partitions each column's
@@ -180,7 +181,12 @@ const ProjectBoard: React.FC = () => {
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   const { selectedTaskIds, toggleSelectTask } = useFlowStore();
-  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
+  const {
+    project,
+    isLoading: projectLoading,
+    loadFailed: projectLoadFailed,
+    refetch: refetchProjects,
+  } = useCurrentProject(workspaceId, projectId);
   const moveTask = useMoveTaskToColumn();
   const canEdit = useCanEditTask(projectId);
   // "Manage project" for board setup. A viewer still opens the panel and sees
@@ -252,6 +258,12 @@ const ProjectBoard: React.FC = () => {
         {t('flow.project.loading')}
       </div>
     );
+  }
+
+  // A failed project list leaves `project` undefined exactly as a missing one
+  // does, so a 500 used to tell the user their project had gone.
+  if (projectLoadFailed) {
+    return <ListLoadFailed onRetry={() => void refetchProjects()} />;
   }
 
   if (!project) {
