@@ -45,9 +45,10 @@ func NewAuthAPI(
 
 func (a *AuthAPI) Register(ctx context.Context, req *commonauthv1.RegisterRequest) (*commonauthv1.RegisterResponse, error) {
 	registerData := application.RegisterUserData{
-		Email:    strings.TrimSpace(req.GetEmail()),
-		Password: req.GetPassword(),
-		FullName: strings.TrimSpace(req.GetName()),
+		Email:        strings.TrimSpace(req.GetEmail()),
+		Password:     req.GetPassword(),
+		FullName:     strings.TrimSpace(req.GetName()),
+		BusinessName: strings.TrimSpace(req.GetBusinessName()),
 	}
 
 	userID, err := a.UserService.Register(ctx, registerData)

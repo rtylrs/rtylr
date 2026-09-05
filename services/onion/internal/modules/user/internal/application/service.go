@@ -112,6 +112,7 @@ type RegisterUserData struct {
 	Email           string
 	Password        string
 	FullName        string
+	BusinessName    string
 	SignupIPAddress netip.Addr
 	DeviceInfo      string
 }
@@ -149,6 +150,12 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 	userID, err := s.repo.CreateUser(ctx, user)
 	if err != nil {
 		return 0, err
+	}
+
+	if businessName := strings.TrimSpace(data.BusinessName); businessName != "" {
+		if err := s.CreateBusinessForUser(ctx, userID, businessName); err != nil {
+			return 0, fmt.Errorf("create registration business: %w", err)
+		}
 	}
 
 	if s.db != nil {
