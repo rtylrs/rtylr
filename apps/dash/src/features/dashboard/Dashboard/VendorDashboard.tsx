@@ -98,6 +98,12 @@ const AdminDashboard: React.FC = () => {
   const [layouts, setLayouts] = useState<{ lg: SavedLayout }>(() => ({ lg: loadLayout() }));
   const [activeWidgets, setActiveWidgets] = useState<string[]>(loadActiveWidgets);
   const [showCatalog, setShowCatalog] = useState(false);
+  // Synchronous mirrors so rapid double activation sees the first update
+  // immediately; updater side effects would double-fire under StrictMode.
+  const activeRef = useRef(activeWidgets);
+  const layoutsRef = useRef(layouts);
+  activeRef.current = activeWidgets;
+  layoutsRef.current = layouts;
 
   const handleLayoutChange = useCallback((_: Layout, allLayouts: ResponsiveLayouts) => {
     const nextLayout = (allLayouts.lg ?? []) as unknown as SavedLayout;
@@ -108,41 +114,43 @@ const AdminDashboard: React.FC = () => {
     });
   }, []);
 
-  const addWidget = useCallback(
-    (widgetId: string) => {
-      const config = WIDGET_CATALOG.find((w) => w.id === widgetId);
-      if (!config) return;
+  const addWidget = useCallback((widgetId: string) => {
+    const config = WIDGET_CATALOG.find((w) => w.id === widgetId);
+    if (!config) return;
 
-      const currentLayout = layouts.lg || [];
-      let maxY = 0;
-      for (const item of currentLayout) {
-        const bottom = item.y + item.h;
-        if (bottom > maxY) maxY = bottom;
-      }
+    // Guarded against the synchronous mirrors (not just rendered state) so a
+    // rapid double activation cannot append the same grid key twice.
+    if (activeRef.current.includes(widgetId)) return;
+    const currentLayout = layoutsRef.current.lg || [];
+    if (currentLayout.some((item) => item.i === widgetId)) return;
 
-      const newLayout = [
-        ...currentLayout,
-        {
-          i: widgetId,
-          x: 0,
-          y: maxY,
-          w: config.defaultW,
-          h: config.defaultH,
-          minW: config.minW,
-          minH: config.minH,
-          maxW: config.maxW,
-          maxH: config.maxH,
-        },
-      ];
-      const newActive = [...activeWidgets, widgetId];
-
-      setLayouts({ lg: newLayout });
-      setActiveWidgets(newActive);
-      saveLayout(newLayout);
-      saveActiveWidgets(newActive);
-    },
-    [layouts, activeWidgets]
-  );
+    let maxY = 0;
+    for (const item of currentLayout) {
+      const bottom = item.y + item.h;
+      if (bottom > maxY) maxY = bottom;
+    }
+    const newLayout = [
+      ...currentLayout,
+      {
+        i: widgetId,
+        x: 0,
+        y: maxY,
+        w: config.defaultW,
+        h: config.defaultH,
+        minW: config.minW,
+        minH: config.minH,
+        maxW: config.maxW,
+        maxH: config.maxH,
+      },
+    ];
+    const newActive = [...activeRef.current, widgetId];
+    activeRef.current = newActive;
+    layoutsRef.current = { lg: newLayout };
+    setLayouts({ lg: newLayout });
+    setActiveWidgets(newActive);
+    saveLayout(newLayout);
+    saveActiveWidgets(newActive);
+  }, []);
 
   const removeWidget = useCallback(
     (widgetId: string) => {
