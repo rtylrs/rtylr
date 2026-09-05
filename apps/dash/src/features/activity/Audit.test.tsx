@@ -17,10 +17,14 @@ const auditData = vi.hoisted(() => ({
   isLoading: false,
   isFetching: false,
   refetch: vi.fn(),
+  params: [] as unknown[],
 }));
 
 vi.mock('../../shared/hooks/queries/useActivity', () => ({
-  useAuditLog: () => auditData,
+  useAuditLog: (params: unknown) => {
+    auditData.params.push(params);
+    return auditData;
+  },
 }));
 
 import Audit from './Audit';
@@ -30,6 +34,7 @@ beforeEach(() => {
   auditData.data = { entries: [], total: 0 };
   auditData.isLoading = false;
   auditData.isFetching = false;
+  auditData.params = [];
 });
 
 describe('Audit log empty state', () => {
@@ -66,5 +71,57 @@ describe('Audit log empty state', () => {
     render(<Audit />);
 
     expect(screen.queryByText('activity.audit.emptyTitle')).not.toBeInTheDocument();
+  });
+
+  it('narrows rows to the query and labels the footer as page-filtered', () => {
+    auditData.data = {
+      entries: [
+        {
+          id: '1',
+          actor: 'jane@rtylr.com',
+          action: 'login',
+          target: 'session',
+          app: 'dash',
+          severity: 'warning',
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          actor: 'ops@rtylr.com',
+          action: 'delete menu',
+          target: 'menu-1',
+          app: 'dash',
+          severity: 'critical',
+          createdAt: new Date().toISOString(),
+        },
+      ] as unknown as { id: string }[],
+      total: 2,
+    };
+    render(<Audit />);
+
+    fireEvent.change(screen.getByPlaceholderText('Search actor, action, IP...'), {
+      target: { value: 'jane' },
+    });
+
+    expect(screen.getByText('jane@rtylr.com')).toBeInTheDocument();
+    expect(screen.queryByText('ops@rtylr.com')).not.toBeInTheDocument();
+    expect(screen.getByText('activity.audit.filteredShowing')).toBeInTheDocument();
+  });
+
+  it('resets to the first page when the query or severity changes', () => {
+    auditData.data = { entries: [], total: 120 };
+    render(<Audit />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(auditData.params[auditData.params.length - 1]).toMatchObject({ page: 2 });
+
+    fireEvent.change(screen.getByPlaceholderText('Search actor, action, IP...'), {
+      target: { value: 'jane' },
+    });
+    expect(auditData.params[auditData.params.length - 1]).toMatchObject({ page: 1 });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'critical' }));
+    expect(auditData.params[auditData.params.length - 1]).toMatchObject({ page: 1 });
   });
 });

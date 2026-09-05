@@ -16,6 +16,7 @@ const Audit: React.FC = () => {
   const { data, isLoading, isFetching, refetch } = useAuditLog({ page, pageSize: PAGE_SIZE });
   const [query, setQuery] = useState('');
   const [severity, setSeverity] = useState<'all' | 'info' | 'warning' | 'critical'>('all');
+  const isFiltering = query.trim() !== '' || severity !== 'all';
 
   const entries = useMemo(() => data?.entries ?? [], [data]);
   const total = data?.total ?? 0;
@@ -23,7 +24,8 @@ const Audit: React.FC = () => {
   const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
-  // Search + severity refine the current page; pagination is server-side.
+  // Search + severity refine the current page; pagination is server-side,
+  // so changing either resets to the first page.
   const filtered = useMemo(() => {
     return entries.filter((e) => {
       const matchesQuery =
@@ -100,7 +102,10 @@ const Audit: React.FC = () => {
             />
             <Input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
               placeholder="Search actor, action, IP..."
               className="pl-9"
             />
@@ -110,7 +115,10 @@ const Audit: React.FC = () => {
               <button
                 type="button"
                 key={s}
-                onClick={() => setSeverity(s)}
+                onClick={() => {
+                  setSeverity(s);
+                  setPage(1);
+                }}
                 className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"
                 style={{
                   background: severity === s ? 'rgba(239,68,68,0.15)' : 'var(--dash-hover)',
@@ -155,7 +163,14 @@ const Audit: React.FC = () => {
 
         <div className="flex items-center justify-between">
           <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-            {total === 0 ? 'No entries' : `Showing ${rangeStart}–${rangeEnd} of ${total}`}
+            {total === 0
+              ? 'No entries'
+              : isFiltering
+                ? t('activity.audit.filteredShowing', 'Showing {{shown}} of {{total}} on this page', {
+                    shown: filtered.length,
+                    total,
+                  })
+                : `Showing ${rangeStart}–${rangeEnd} of ${total}`}
           </p>
           <div className="flex items-center gap-2">
             <Button

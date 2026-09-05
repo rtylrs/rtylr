@@ -1,6 +1,7 @@
 {
   "audit": {
     "emptyTitle": "لا توجد سجلات تدقيق",
-    "emptyDescription": "ستظهر الأحداث الأمنية المهمة هنا."
+    "emptyDescription": "ستظهر الأحداث الأمنية المهمة هنا.",
+    "filteredShowing": "عرض {{shown}} من {{total}} في هذه الصفحة"
   }
 }
