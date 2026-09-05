@@ -167,6 +167,14 @@
   --flow-warn-fg: #d9a066;
   --flow-danger-fg: #e5776a;
   --flow-locked-fg: #a8a4c8;
+  /* In progress, medium priority, an upcoming cycle and a completed milestone
+   * all read as one informational blue. #3b82f6 carried them, which measured
+   * 4.92:1 here and 3.35:1 in light mode, so it failed AA on white outright.
+   *
+   * 7.27:1 on the worst of the three dark grounds, which sits inside the band
+   * the rest of this family occupies (danger 6.19, locked 7.59, warn 7.90)
+   * rather than being picked to clear the threshold and no more. */
+  --flow-info-fg: #6aa5ff;
 
   --flow-status-draft: var(--flow-text-muted);
   --flow-status-draft-bg: rgba(255, 255, 255, 0.06);
@@ -204,6 +212,9 @@
   --flow-warn-fg: #8f5f14;
   --flow-danger-fg: #b4382a;
   --flow-locked-fg: #5b5591;
+  /* See the dark-mode note. 5.31:1 on white and on --flow-bg, inside this
+   * family's light band (warn 5.01, danger 5.40, locked 6.06). */
+  --flow-info-fg: #2a63bb;
 
   --flow-status-draft: var(--flow-text-muted);
   --flow-status-draft-bg: rgba(0, 0, 0, 0.05);
