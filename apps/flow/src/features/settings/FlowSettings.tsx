@@ -59,6 +59,8 @@ import TimeSection from './sections/TimeSection';
 import BinSection from './sections/BinSection';
 import SidebarSettingsSection from './sections/SidebarSettingsSection';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 interface SettingsSection {
   id: string;
@@ -813,7 +815,8 @@ const LABEL_COLORS = [
 
 export const LabelsSection: React.FC = () => {
   const { t } = useTranslation();
-  const { data: labels = [], isLoading } = useLabels();
+  const labelsQuery = useLabels();
+  const { data: labels = [], isLoading } = labelsQuery;
   const createLabel = useCreateLabel();
   const deleteLabel = useDeleteLabel();
 
@@ -952,6 +955,10 @@ export const LabelsSection: React.FC = () => {
           <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
             {t('common.loading')}
           </p>
+        ) : hasQueryFailed(labelsQuery) ? (
+          // A failed request emptied the list exactly as a first run does, so
+          // a 500 invited the user to recreate labels they already had.
+          <ListLoadFailed onRetry={() => void labelsQuery.refetch()} />
         ) : labels.length === 0 ? (
           <EmptyState
             icon={Tag}
@@ -1034,7 +1041,8 @@ export const LabelsSection: React.FC = () => {
 // ever mounting this component at all.
 export const TeamSection: React.FC = () => {
   const { t } = useTranslation();
-  const { data: allMembers = [], isLoading, refetch: refetchMembers } = useFlowTeam();
+  const flowTeamQuery = useFlowTeam();
+  const { data: allMembers = [], isLoading, refetch: refetchMembers } = flowTeamQuery;
 
   // The /team/members endpoint returns the entire business team. Flow only
   // displays the licensed members here. Role and license changes are owned by
@@ -1063,6 +1071,9 @@ export const TeamSection: React.FC = () => {
             />
           ))}
         </div>
+      ) : hasQueryFailed(flowTeamQuery) ? (
+        // Same again: an unreachable team reads as a team of nobody.
+        <ListLoadFailed onRetry={() => void refetchMembers()} />
       ) : flowMembers.length === 0 ? (
         <EmptyState
           icon={Users}

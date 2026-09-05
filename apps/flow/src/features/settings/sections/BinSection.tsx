@@ -6,6 +6,8 @@ import type { Project } from '@voxire/voxie/flow/project/v2/types';
 import ConfirmDialog from '../../../shared/components/ConfirmDialog';
 import { useArchivedProjects } from '../../projects-v2/useAllProjects';
 import { useRestoreProject, usePurgeProject } from '../../projects-v2/useBin';
+import { hasQueryFailed } from '../../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../../shared/components/ListLoadFailed';
 
 const PAGE_SIZE = 50;
 
@@ -29,7 +31,8 @@ const BinSection = (): React.JSX.Element => {
   const restore = useRestoreProject();
   const purge = usePurgeProject();
 
-  const { data, isLoading, refetch } = useArchivedProjects(1, PAGE_SIZE);
+  const archivedQuery = useArchivedProjects(1, PAGE_SIZE);
+  const { data, isLoading, refetch } = archivedQuery;
   const projects: Project[] = data?.projects ?? [];
   const total = data?.total ?? 0;
 
@@ -83,6 +86,10 @@ const BinSection = (): React.JSX.Element => {
             />
           ))}
         </div>
+      ) : hasQueryFailed(archivedQuery) ? (
+        // A failed request emptied the bin exactly as an empty bin does, so a
+        // 500 told the user nothing was archived when something might be.
+        <ListLoadFailed onRetry={() => void refetch()} />
       ) : projects.length === 0 ? (
         <EmptyState
           icon={Archive}
