@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/console/internal/application"
-	"github.com/voxire/onion/internal/modules/console/internal/routes/handlers"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -39,19 +38,19 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// AI cache analytics has not moved to the generated console contract yet.
-	serverHttp.RegisterGET[handlers.AICacheAnalyticsRequest, handlers.AICacheAnalyticsResponse](
+	serverHttp.RegisterGET[AICacheAnalyticsRequest, AICacheAnalyticsResponse](
 		ctx, router, []string{"/console/ai-cache/analytics"},
-		&handlers.AICacheAnalyticsHandler{},
+		&AICacheAnalyticsHandler{},
 	)
 
 	// Grants
-	serverHttp.RegisterGET[handlers.ListGrantsRequest, handlers.ListGrantsResponse](
+	serverHttp.RegisterGET[ListGrantsRequest, ListGrantsResponse](
 		ctx, router, []string{"/console/grants"},
-		&handlers.ListGrantsHandler{Service: service},
+		&ListGrantsHandler{Service: service},
 	)
-	serverHttp.RegisterPOSTWithValidation[handlers.CreateGrantRequest, handlers.CreateGrantResponse](
+	serverHttp.RegisterPOSTWithValidation[CreateGrantRequest, CreateGrantResponse](
 		ctx, router, []string{"/console/grants"},
-		&handlers.CreateGrantHandler{Service: service},
+		&CreateGrantHandler{Service: service},
 	)
 	serverHttp.RegisterPOSTWithValidation[grantIDRequest, resourceMutationResponse](
 		ctx, router, []string{"/console/grants/{id}/revoke"},
@@ -63,17 +62,17 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// Addon Grants
-	serverHttp.RegisterGET[handlers.ListAddonsRequest, handlers.ListAddonsResponse](
+	serverHttp.RegisterGET[ListAddonsRequest, ListAddonsResponse](
 		ctx, router, []string{"/console/addons"},
-		&handlers.ListAddonsHandler{Service: service},
+		&ListAddonsHandler{Service: service},
 	)
-	serverHttp.RegisterGET[handlers.ListAddonGrantsRequest, handlers.ListAddonGrantsResponse](
+	serverHttp.RegisterGET[ListAddonGrantsRequest, ListAddonGrantsResponse](
 		ctx, router, []string{"/console/addon-grants"},
-		&handlers.ListAddonGrantsHandler{Service: service},
+		&ListAddonGrantsHandler{Service: service},
 	)
-	serverHttp.RegisterPOSTWithValidation[handlers.CreateAddonGrantRequest, handlers.CreateAddonGrantResponse](
+	serverHttp.RegisterPOSTWithValidation[CreateAddonGrantRequest, CreateAddonGrantResponse](
 		ctx, router, []string{"/console/addon-grants"},
-		&handlers.CreateAddonGrantHandler{Service: service},
+		&CreateAddonGrantHandler{Service: service},
 	)
 	serverHttp.RegisterPOSTWithValidation[grantIDRequest, resourceMutationResponse](
 		ctx, router, []string{"/console/addon-grants/{id}/revoke"},

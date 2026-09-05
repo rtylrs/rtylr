@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
 	"context"
@@ -35,7 +35,7 @@ func (h *createResourceRowHandler) Validate(_ context.Context, req *createResour
 }
 
 func (h *createResourceRowHandler) Serve(ctx context.Context, req *createResourceRowRequest) (createResourceRowResponse, error) {
-	if err := requireConsoleAdmin(ctx); err != nil {
+	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return createResourceRowResponse{}, err
 	}
 	id, err := h.Service.CreateResourceRow(ctx, chi.URLParamFromCtx(ctx, "table"), req.Values)
@@ -60,7 +60,7 @@ func (h *deleteResourceRowHandler) Validate(ctx context.Context, _ *deleteResour
 }
 
 func (h *deleteResourceRowHandler) Serve(ctx context.Context, _ *deleteResourceRowRequest) (resourceMutationResponse, error) {
-	if err := requireConsoleAdmin(ctx); err != nil {
+	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return resourceMutationResponse{}, err
 	}
 	if err := h.Service.DeleteResourceRow(ctx, chi.URLParamFromCtx(ctx, "table"), chi.URLParamFromCtx(ctx, "id")); err != nil {
@@ -84,7 +84,7 @@ func (h *revokeGrantHandler) Validate(ctx context.Context, req *grantIDRequest) 
 }
 
 func (h *revokeGrantHandler) Serve(ctx context.Context, _ *grantIDRequest) (resourceMutationResponse, error) {
-	if err := requireConsoleAdmin(ctx); err != nil {
+	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return resourceMutationResponse{}, err
 	}
 	id, err := parseIDPath(ctx, "id")
@@ -106,7 +106,7 @@ func (h *deleteGrantHandler) Validate(ctx context.Context, req *grantIDRequest) 
 }
 
 func (h *deleteGrantHandler) Serve(ctx context.Context, _ *grantIDRequest) (resourceMutationResponse, error) {
-	if err := requireConsoleAdmin(ctx); err != nil {
+	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return resourceMutationResponse{}, err
 	}
 	id, err := parseIDPath(ctx, "id")
@@ -128,7 +128,7 @@ func (h *revokeAddonGrantHandler) Validate(ctx context.Context, req *grantIDRequ
 }
 
 func (h *revokeAddonGrantHandler) Serve(ctx context.Context, _ *grantIDRequest) (resourceMutationResponse, error) {
-	if err := requireConsoleAdmin(ctx); err != nil {
+	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return resourceMutationResponse{}, err
 	}
 	id, err := parseIDPath(ctx, "id")
@@ -150,7 +150,7 @@ func (h *deleteAddonGrantHandler) Validate(ctx context.Context, req *grantIDRequ
 }
 
 func (h *deleteAddonGrantHandler) Serve(ctx context.Context, _ *grantIDRequest) (resourceMutationResponse, error) {
-	if err := requireConsoleAdmin(ctx); err != nil {
+	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return resourceMutationResponse{}, err
 	}
 	id, err := parseIDPath(ctx, "id")
@@ -266,7 +266,7 @@ func consoleAdmin(ctx context.Context) (*authPkg.AuthUser, error) {
 	return admin, nil
 }
 
-func requireConsoleAdmin(ctx context.Context) error {
+func requireConsoleResourceAdmin(ctx context.Context) error {
 	_, err := consoleAdmin(ctx)
 	return err
 }
