@@ -1,4 +1,5 @@
 import { buildCaretRouteContext, type CaretPageContext } from '@voxire/caret';
+import { todayIso } from './dateUtils';
 
 export interface DashSystemContextInput {
   pathname: string;
@@ -154,7 +155,7 @@ function buildCacheContext(
 ): NonNullable<CaretPageContext['cacheContext']> {
   return {
     domains: cacheDomainsForModule(info.module),
-    day: new Date().toISOString().slice(0, 10),
+    day: todayIso(),
     route: pathname,
     selected: selected ?? {},
   };
