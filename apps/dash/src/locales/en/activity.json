@@ -1,6 +1,7 @@
 {
   "audit": {
     "emptyTitle": "No audit entries",
-    "emptyDescription": "Security-relevant events will appear here."
+    "emptyDescription": "Security-relevant events will appear here.",
+    "filteredShowing": "Showing {{shown}} of {{total}} on this page"
   }
 }
