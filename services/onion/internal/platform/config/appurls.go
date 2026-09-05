@@ -16,19 +16,19 @@ const (
 	MenuAppURL     = "https://menu.rtylr.com"
 	InsightsAppURL = "https://insights.rtylr.com"
 	RecruitAppURL  = "https://recruit.rtylr.com"
-	DefaultAPIURL  = "https://api.voxire.dev"
+	DefaultAPIURL  = "https://api.voxire.com"
 	LandingURL     = "https://rtylr.com"
 )
 
 // DefaultLicenseAuthorityURL is the hosted license authority that self-host
 // backends validate their RTYLR_LICENSE_KEY against. It is a product constant,
 // not a customer-configurable value.
-const DefaultLicenseAuthorityURL = "https://license.voxire.com"
+const DefaultLicenseAuthorityURL = "https://api.voxire.com"
 
 // RuntimeURLs returns the per-deployment app URLs that the backend advertises to
 // frontends via /runtime-config. Each is an env override (e.g. DASH_URL) when set,
 // otherwise the hosted default. In self-host these come from the customer's env;
-// hosted keeps the *.rtylr.com / api.voxire.dev defaults.
+// hosted keeps the *.rtylr.com / api.voxire.com defaults.
 func RuntimeURLs(cfg *AppConfig) map[string]string {
 	pick := func(env, def string) string {
 		if v := envFirst(env); v != "" {
@@ -37,7 +37,7 @@ func RuntimeURLs(cfg *AppConfig) map[string]string {
 		return def
 	}
 	auth := AuthAppURL
-	upload := "https://cdn.voxire.com"
+	upload := "https://api.voxire.com"
 	if cfg != nil {
 		if cfg.AuthAppURL != "" {
 			auth = cfg.AuthAppURL

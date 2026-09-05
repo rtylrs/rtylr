@@ -142,6 +142,7 @@ import (
 	"github.com/voxire/onion/internal/modules/warehouses"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/websitelead"
+	"github.com/voxire/onion/internal/cdn"
 	"github.com/voxire/onion/internal/modules/workspaces"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
@@ -159,6 +160,7 @@ import (
 	"github.com/voxire/onion/internal/platform/server/profiling"
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
 	"github.com/voxire/onion/internal/platform/slack"
+	"github.com/voxire/onion/internal/platform/storage"
 	trinoPkg "github.com/voxire/onion/internal/platform/trino"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/wsbus"
@@ -746,6 +748,33 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
 	accessPolicy.RegisterAnonymousRoutes("/invalidate-cache")
 
+	// CDN routes (write endpoints protected by CDN API key auth)
+	accessPolicy.RegisterAnonymousRoutes(
+		"/upload",
+		"/upload/plan",
+		"/upload/responsive",
+		"/upload/variants",
+		"/capabilities",
+		"/files/{id}",
+		"/images/{id}",
+		"/images/{id}/analyze",
+		"/images/{id}/info",
+		"/images/{id}/plan",
+		"/images/{id}/responsive",
+		"/images/{id}/variants",
+		"/videos/info",
+		"/purge",
+		"/sign",
+	)
+
+	// Self-host license authority routes
+	accessPolicy.RegisterAnonymousRoutes(
+		"/license/status",
+		"/license/verify",
+		"/license/activate",
+		"/license/refresh",
+	)
+
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
 		nil,
 	)
@@ -833,6 +862,40 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	if license.IsSelfHosted(platformConfig.GlobalConfig) {
 		go licenseValidator.Refresh(ctx)
 	}
+
+	// License authority routes (/license/status, /license/verify, /license/activate, /license/refresh)
+	if pool := dbclient.Pool(); pool != nil {
+		if err := license.EnsureActivationTable(ctx, pool); err != nil {
+			logger.Ctx(ctx).Warn("license activation ledger unavailable", logger.Error(err))
+		}
+	}
+	http.RegisterLicenseAuthorityRoutes(r, platformConfig.GlobalConfig, dbclient.Pool())
+
+	// Consolidated CDN / Upload routes
+	cfg := platformConfig.GlobalConfig
+	store, storeErr := storage.Default()
+	if storeErr != nil {
+		logger.Ctx(ctx).Warn("object storage is not configured; CDN routes will degrade", logger.Error(storeErr))
+	}
+	cdnService := cdn.New(
+		dbclient.Pool(),
+		store,
+		cfg.CDNBaseURL,
+		cfg.CDNMaxUploadBytes,
+		cfg.CDNMediaEnginePath,
+		cfg.CDNAPIKey,
+	)
+	if err := cdnService.CheckMediaEngine(); err != nil {
+		logger.Ctx(ctx).Warn("media-engine unavailable; image transformations will fail", logger.Error(err))
+	}
+	if moderator, failClosed := cdn.NewModeratorFromConfig(cfg); moderator != nil {
+		cdnService.SetModerator(moderator, failClosed)
+		logger.Ctx(ctx).Info("CDN image moderation enabled",
+			logger.String("provider", cfg.CDNModerationProvider),
+			logger.Bool("fail_closed", failClosed),
+		)
+	}
+	cdnService.RegisterRoutes(r)
 
 	// oneKit contract services: every module's generated service servers
 	// register on one shared mux; the generated code owns every contract path.

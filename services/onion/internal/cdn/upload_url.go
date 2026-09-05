@@ -267,7 +267,7 @@ func (c *CDN) isCDNHost(host, requestHost string) bool {
 	if host == "" {
 		return false
 	}
-	if host == "cdn.voxire.com" || host == "cdn.voxire.dev" {
+	if host == "cdn.voxire.com" || host == "cdn.voxire.dev" || host == "api.voxire.com" || host == "api.voxire.dev" {
 		return true
 	}
 	if base, err := url.Parse(c.baseURL); err == nil && hostnameOnly(base.Host) == host {

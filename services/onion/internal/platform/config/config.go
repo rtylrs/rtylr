@@ -413,7 +413,7 @@ func LoadAndValidate() (*AppConfig, error) {
 	}
 
 	if cfg.CDNBaseURL == "" {
-		cfg.CDNBaseURL = "https://cdn.voxire.com"
+		cfg.CDNBaseURL = "https://api.voxire.com"
 	}
 
 	var missing []string
