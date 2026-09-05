@@ -3,7 +3,6 @@ package time_off
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -11,7 +10,6 @@ import (
 	"github.com/voxire/onion/internal/modules/time_off/internal/api"
 	"github.com/voxire/onion/internal/modules/time_off/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
-	hrtimeoffv1 "github.com/voxire/voxie/gen/go/hr/time_off/v1"
 )
 
 type Module struct {
@@ -24,14 +22,11 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterAPI(mux *http.ServeMux) {
-	if err := hrtimeoffv1.RegisterTimeOffServiceServer(
-		api.NewTimeOffAPI(m.service),
-		hrtimeoffv1.WithMux(mux),
-	); err != nil {
-		panic(fmt.Errorf("register HR time off service: %w", err))
-	}
-}
+// RegisterAPI is intentionally empty: the hr.time_off.v1 OneKit RPC surface
+// (listTimeOff/submitTimeOff) was removed after its only consumer — the dash
+// home PendingWidget — was deleted. HR surfaces read through hr/compat/v1 and
+// the approve REST route below.
+func (m *Module) RegisterAPI(_ *http.ServeMux) {}
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	serverHttp.RegisterPOSTWithValidation[api.ApproveTimeOffRequest, api.ApproveTimeOffResponse](
