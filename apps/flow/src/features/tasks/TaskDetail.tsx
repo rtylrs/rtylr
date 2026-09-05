@@ -68,6 +68,7 @@ import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import { withAlpha } from '../../shared/lib/colorUtils';
+import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -175,9 +176,8 @@ const TaskDetail: React.FC = () => {
   // undated). Hidden entirely when HR is absent or unreachable; assignment
   // itself is never blocked. Ranges are shown without names because leave
   // records key on HR employee ids — the hub-user mapping lands with #848.
-  const warningFrom = new Date().toISOString().slice(0, 10);
-  const warningTo =
-    detail?.task?.dueDate || new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
+  const warningFrom = todayIso();
+  const warningTo = detail?.task?.dueDate || toLocalIso(new Date(Date.now() + 14 * 86_400_000));
   const { data: overlappingLeave } = useApprovedLeaveInRange(warningFrom, warningTo, canEdit);
   const canRemove = useCanDeleteResource(detail?.task?.projectId);
   const updateTaskMut = useUpdateTask();

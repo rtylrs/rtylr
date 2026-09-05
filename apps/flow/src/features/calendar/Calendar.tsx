@@ -10,6 +10,7 @@ import { useLabels } from '../tasks/useLabels';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
+import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
 
 const ACCENT_VAR = 'var(--accent)';
 
@@ -70,11 +71,11 @@ const Calendar: React.FC = () => {
     return map;
   }, [tasks]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayIso();
 
   const openCreate = (date: Date, inMonth: boolean) => {
     if (!inMonth) return;
-    const iso = date.toISOString().split('T')[0];
+    const iso = toLocalIso(date);
     setCreateModal({ date: iso });
     setNewTitle('');
     setNewProjectId(projects[0]?.id ?? '');
@@ -176,7 +177,7 @@ const Calendar: React.FC = () => {
             </div>
           ))}
           {days.map((c, i) => {
-            const iso = c.date.toISOString().split('T')[0];
+            const iso = toLocalIso(c.date);
             const dayTasks = tasksByDate[iso] || [];
             const isToday = iso === today;
             return (
