@@ -23,6 +23,7 @@ import {
   inputStyle,
   labelStyle,
 } from '../../shared/lib/tokens';
+import { todayIso } from '../../shared/lib/date';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   unpaid: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
@@ -45,7 +46,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
   const [form, setForm] = useState<NewBillForm>({
     vendor: '',
     amount: 0,
-    dueDate: new Date().toISOString().slice(0, 10),
+    dueDate: todayIso(),
     description: '',
   });
 
@@ -85,7 +86,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
           setForm({
             vendor: '',
             amount: 0,
-            dueDate: new Date().toISOString().slice(0, 10),
+            dueDate: todayIso(),
             description: '',
           });
         },

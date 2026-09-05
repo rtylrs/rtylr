@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Clock, Zap } from 'lucide-react';
 import { resolveAppUrl } from '@voxire/config';
 import { useFinanceSubscription } from '../hooks/queries/useFinanceSubscription';
+import { todayIso } from '../lib/date';
 
 function daysLeft(trialEndsAt: string | null): number {
   if (!trialEndsAt) return 0;
@@ -11,7 +12,7 @@ function daysLeft(trialEndsAt: string | null): number {
 const DISMISSED_KEY = 'trial_banner_dismissed_date';
 
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === today);
 
   const { data } = useFinanceSubscription();

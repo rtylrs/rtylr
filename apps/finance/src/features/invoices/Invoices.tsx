@@ -25,6 +25,7 @@ import DownloadPdfButton from '../../shared/components/DownloadPdfButton';
 import SendInvoiceModal from '../../shared/components/SendInvoiceModal';
 import { exportQuickbooksInvoices, exportXeroInvoices } from '../../shared/lib/exports';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
+import { toLocalIso, todayIso } from '../../shared/lib/date';
 
 type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled';
 
@@ -47,8 +48,8 @@ const Invoices: React.FC = () => {
   // The billable loop's Finance half (#836): pick approved billable HR time,
   // raise one invoice for it, and the loop stamps those hours invoiced so the
   // list stops offering them. Hidden when HR is absent or unreachable.
-  const rangeFrom = new Date(Date.now() - 90 * 864e5).toISOString().slice(0, 10);
-  const rangeTo = new Date().toISOString().slice(0, 10);
+  const rangeFrom = toLocalIso(new Date(Date.now() - 90 * 864e5));
+  const rangeTo = todayIso();
   const { data: unbilled } = useUnbilledBillableEntries(rangeFrom, rangeTo);
   const [pickedHours, setPickedHours] = useState<Set<string>>(new Set());
   const markInvoiced = useMarkEntriesInvoiced();

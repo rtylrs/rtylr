@@ -11,6 +11,7 @@ import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useExpenseCategories } from '../../shared/hooks/useExpenseCategories';
 import { useCreateExpense } from './useExpenses';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
+import { todayIso } from '../../shared/lib/date';
 
 const NewExpense: React.FC = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const NewExpense: React.FC = () => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState(0);
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(todayIso());
   const [notes, setNotes] = useState('');
   const createExpense = useCreateExpense();
 

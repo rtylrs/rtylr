@@ -1,3 +1,4 @@
+import { todayIso } from './date';
 /**
  * Pure utility helpers for quote state and display logic.
  */
@@ -24,7 +25,7 @@ export function isTerminal(status: QuoteStatus): boolean {
  */
 export function isExpired(expiryDate: string | null | undefined, today?: string): boolean {
   if (!expiryDate) return false;
-  const ref = today ?? new Date().toISOString().slice(0, 10);
+  const ref = today ?? todayIso();
   return expiryDate < ref;
 }
 
@@ -37,7 +38,7 @@ export function daysUntilExpiry(
   today?: string
 ): number | null {
   if (!expiryDate) return null;
-  const ref = today ?? new Date().toISOString().slice(0, 10);
+  const ref = today ?? todayIso();
   const msPerDay = 86_400_000;
   const diff = new Date(expiryDate).getTime() - new Date(ref).getTime();
   return Math.round(diff / msPerDay);

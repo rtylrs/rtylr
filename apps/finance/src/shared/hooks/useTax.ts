@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
 import type { TaxConfig, TaxReport, PLReport } from '../services/financeApi';
 import { taxConfigSchema, taxReportSchema, plReportSchema } from '../schemas/tax';
+import { toLocalIso } from '../lib/date';
 
 const reportClient = createOneKitClient(ReportServiceClient, 'finance');
 
@@ -55,13 +56,13 @@ function periodToAnchor(period: string): { period: string; date: string } {
   const m = now.getMonth();
 
   if (period === 'last_month') {
-    return { period: 'month', date: new Date(y, m - 1, 15).toISOString().slice(0, 10) };
+    return { period: 'month', date: toLocalIso(new Date(y, m - 1, 15)) };
   }
   if (period === 'quarter' || period === 'year') {
-    return { period, date: now.toISOString().slice(0, 10) };
+    return { period, date: toLocalIso(now) };
   }
   // default: 'month'
-  return { period: 'month', date: now.toISOString().slice(0, 10) };
+  return { period: 'month', date: toLocalIso(now) };
 }
 
 /** Use this hook in ProfitLoss.tsx. Accepts a short period token (month/last_month/quarter/year). */

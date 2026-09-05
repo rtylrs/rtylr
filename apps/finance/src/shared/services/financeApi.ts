@@ -7,6 +7,7 @@ import type { CreateBankAccountRequest } from '@voxire/voxie/finance/bank_accoun
 import type { CreateAccountRequest } from '@voxire/voxie/finance/account/v1/types';
 import type { CreateJournalEntryRequest } from '@voxire/voxie/finance/journal/v1/types';
 import { expensesClient, financeCompatibilityClient, invoicesClient } from '../lib/clients';
+import { todayIso } from '../lib/date';
 
 export const plReportQueryParams = (params?: {
   period?: string;
@@ -18,7 +19,7 @@ export const plReportQueryParams = (params?: {
 }) => {
   const from = params?.from ?? params?.start;
   const to = params?.to ?? params?.end;
-  const date = params?.date ?? to ?? from ?? new Date().toISOString().slice(0, 10);
+  const date = params?.date ?? to ?? from ?? todayIso();
   const period = params?.period ?? (from && to ? `${from},${to}` : 'month');
   return { period, date };
 };
@@ -339,9 +340,7 @@ export const financeApi = {
   // P&L
   getPL: (period: string) =>
     compatResult<PLReport>(() =>
-      financeCompatibilityClient.getPL(
-        plReportQueryParams({ period, date: new Date().toISOString().slice(0, 10) })
-      )
+      financeCompatibilityClient.getPL(plReportQueryParams({ period, date: todayIso() }))
     ),
 
   // Tax
@@ -353,9 +352,7 @@ export const financeApi = {
     ),
 
   getTaxReport: () =>
-    compatResult<TaxReport>(() =>
-      financeCompatibilityClient.getTaxReport({ date: new Date().toISOString().slice(0, 10) })
-    ),
+    compatResult<TaxReport>(() => financeCompatibilityClient.getTaxReport({ date: todayIso() })),
 
   updateTaxConfig: (data: Record<string, unknown>) =>
     compatResult<unknown>(() => financeCompatibilityClient.updateTaxConfig(flat(data))),
