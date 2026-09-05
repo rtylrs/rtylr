@@ -27,6 +27,7 @@ export const useThemeStore = create<ThemeStore>()(
       theme: 'light',
       setTheme: (theme) => {
         applyTheme(theme);
+        syncSystemListener(theme);
         set({ theme });
       },
     }),
@@ -34,18 +35,37 @@ export const useThemeStore = create<ThemeStore>()(
   )
 );
 
+let systemListener: { mq: MediaQueryList; handler: () => void } | null = null;
+
+function stopSystemListener() {
+  if (systemListener) {
+    systemListener.mq.removeEventListener('change', systemListener.handler);
+    systemListener = null;
+  }
+}
+
+/** Follows OS changes only while the resolved theme is `system`. */
+function syncSystemListener(theme: Theme) {
+  stopSystemListener();
+  if (theme !== 'system') return;
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const handler = () => applyTheme('system');
+  mq.addEventListener('change', handler);
+  systemListener = { mq, handler };
+}
+
+/** Test hook: whether the OS-change listener is currently attached. */
+export function isSystemListenerActive(): boolean {
+  return systemListener !== null;
+}
+
 /** Call once at app startup before first render to prevent flash */
 export function initTheme() {
   try {
     const raw = localStorage.getItem('dash-theme');
     const theme: Theme = raw ? (JSON.parse(raw).state?.theme ?? 'light') : 'light';
     applyTheme(theme);
-
-    if (theme === 'system') {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        applyTheme('system');
-      });
-    }
+    syncSystemListener(theme);
   } catch {
     applyTheme('light');
   }
