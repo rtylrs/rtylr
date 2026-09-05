@@ -6,9 +6,11 @@ import type { LateFeeInput } from './lateFee';
 // provided dueDate string, so tests are deterministic regardless of wall
 // clock time.
 function todayOffset(dueDate: string, daysAfterDue: number): Date {
-  const d = new Date(dueDate);
-  d.setDate(d.getDate() + daysAfterDue);
-  return d;
+  // Built from local parts. `new Date('2026-04-01')` is UTC midnight, so
+  // reading it back with a local getter lands on 31 March west of Greenwich
+  // and every offset here came out a day short.
+  const [year, month, day] = dueDate.split('-').map(Number);
+  return new Date(year, month - 1, day + daysAfterDue);
 }
 
 describe('computeLateFee - not yet late', () => {

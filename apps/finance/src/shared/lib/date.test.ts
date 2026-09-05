@@ -20,7 +20,7 @@ describe('formatDate', () => {
   });
 
   it('formats a Date object', () => {
-    const d = new Date('2026-01-01T00:00:00.000Z');
+    const d = new Date(2026, 0, 1);
     const result = formatDate(d);
     expect(result).toMatch(/2026/);
   });
@@ -59,8 +59,8 @@ describe('daysBetween', () => {
   });
 
   it('works with Date objects', () => {
-    const a = new Date('2026-01-01');
-    const b = new Date('2026-01-31');
+    const a = new Date(2026, 0, 1);
+    const b = new Date(2026, 0, 31);
     expect(daysBetween(a, b)).toBe(30);
   });
 });
@@ -89,7 +89,7 @@ describe('addDays', () => {
   });
 
   it('accepts a Date object', () => {
-    const d = new Date('2026-06-01');
+    const d = new Date(2026, 5, 1);
     const result = addDays(d, 1);
     expect(result.getDate()).toBe(2);
   });
@@ -97,21 +97,21 @@ describe('addDays', () => {
 
 describe('monthKey', () => {
   it('returns YYYY-MM for January', () => {
-    expect(monthKey(new Date('2026-01-15'))).toBe('2026-01');
+    expect(monthKey(new Date(2026, 0, 15))).toBe('2026-01');
   });
 
   it('pads single-digit months with a leading zero', () => {
-    expect(monthKey(new Date('2026-09-01'))).toBe('2026-09');
+    expect(monthKey(new Date(2026, 8, 1))).toBe('2026-09');
   });
 
   it('handles December', () => {
-    expect(monthKey(new Date('2026-12-31'))).toBe('2026-12');
+    expect(monthKey(new Date(2026, 11, 31))).toBe('2026-12');
   });
 });
 
 describe('monthLabel', () => {
   it('returns short month and year', () => {
-    const result = monthLabel(new Date('2026-04-01'));
+    const result = monthLabel(new Date(2026, 3, 1));
     expect(result).toMatch(/Apr/);
     expect(result).toMatch(/2026/);
   });
@@ -125,7 +125,7 @@ describe('monthLabel', () => {
 describe('fiscalYearStartFromDate', () => {
   it('returns the start of the fiscal year when the date is after the fiscal start month', () => {
     // Default fiscal start = January. Date in April → FY started in January of same year.
-    const result = fiscalYearStartFromDate(new Date('2026-04-15'));
+    const result = fiscalYearStartFromDate(new Date(2026, 3, 15));
     expect(result.getFullYear()).toBe(2026);
     expect(result.getMonth()).toBe(0); // January
     expect(result.getDate()).toBe(1);
@@ -133,13 +133,13 @@ describe('fiscalYearStartFromDate', () => {
 
   it('returns previous year when date is before fiscal start month', () => {
     // Fiscal year starts in July. Date in March → FY started in July of the prior year.
-    const result = fiscalYearStartFromDate(new Date('2026-03-01'), 7);
+    const result = fiscalYearStartFromDate(new Date(2026, 2, 1), 7);
     expect(result.getFullYear()).toBe(2025);
     expect(result.getMonth()).toBe(6); // July = 6
   });
 
   it('handles fiscal start month = 1 (January)', () => {
-    const result = fiscalYearStartFromDate(new Date('2026-01-01'), 1);
+    const result = fiscalYearStartFromDate(new Date(2026, 0, 1), 1);
     expect(result.getFullYear()).toBe(2026);
     expect(result.getMonth()).toBe(0);
   });
@@ -147,30 +147,30 @@ describe('fiscalYearStartFromDate', () => {
 
 describe('quarterOf', () => {
   it('returns Q1 for January', () => {
-    expect(quarterOf(new Date('2026-01-01'))).toBe(1);
+    expect(quarterOf(new Date(2026, 0, 1))).toBe(1);
   });
 
   it('returns Q1 for March', () => {
-    expect(quarterOf(new Date('2026-03-31'))).toBe(1);
+    expect(quarterOf(new Date(2026, 2, 31))).toBe(1);
   });
 
   it('returns Q2 for April', () => {
-    expect(quarterOf(new Date('2026-04-01'))).toBe(2);
+    expect(quarterOf(new Date(2026, 3, 1))).toBe(2);
   });
 
   it('returns Q2 for June', () => {
-    expect(quarterOf(new Date('2026-06-30'))).toBe(2);
+    expect(quarterOf(new Date(2026, 5, 30))).toBe(2);
   });
 
   it('returns Q3 for July', () => {
-    expect(quarterOf(new Date('2026-07-01'))).toBe(3);
+    expect(quarterOf(new Date(2026, 6, 1))).toBe(3);
   });
 
   it('returns Q4 for October', () => {
-    expect(quarterOf(new Date('2026-10-15'))).toBe(4);
+    expect(quarterOf(new Date(2026, 9, 15))).toBe(4);
   });
 
   it('returns Q4 for December', () => {
-    expect(quarterOf(new Date('2026-12-31'))).toBe(4);
+    expect(quarterOf(new Date(2026, 11, 31))).toBe(4);
   });
 });
