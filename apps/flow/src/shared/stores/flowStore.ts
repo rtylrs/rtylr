@@ -530,7 +530,7 @@ export const STATUS_COLORS: Record<Task['status'], string> = {
   todo: '#9ca3af',
   in_progress: '#3b82f6',
   in_review: '#f59e0b',
-  done: '#22c55e',
+  done: 'var(--flow-status-approved)',
   cancelled: '#ef4444',
 };
 

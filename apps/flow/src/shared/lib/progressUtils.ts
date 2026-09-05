@@ -25,7 +25,7 @@ export function projectHealthLabel(health: Project['health']): string {
 /** Returns a CSS color for a project health value. */
 export function projectHealthColor(health: Project['health']): string {
   const colors: Record<Project['health'], string> = {
-    on_track: '#22c55e',
+    on_track: 'var(--flow-status-approved)',
     at_risk: '#f59e0b',
     off_track: '#ef4444',
   };
