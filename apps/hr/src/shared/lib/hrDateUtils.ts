@@ -1,3 +1,5 @@
+import { todayIso } from './dateUtils';
+
 export function formatDate(
   dateIso: string,
   format: 'short' | 'long' | 'numeric' = 'short'
@@ -16,8 +18,12 @@ export function daysBetween(startIso: string, endIso: string): number {
 }
 
 export function addDays(dateIso: string, days: number): string {
+  // UTC setters, not local ones. A bare YYYY-MM-DD parses as UTC midnight, so
+  // reading it back with a local getter and writing with a local setter loses
+  // a day whenever the clocks go forward: addDays('2026-03-28', 1) returned
+  // '2026-03-28' in Beirut, and the equivalent day in every other DST zone.
   const d = new Date(dateIso);
-  d.setDate(d.getDate() + days);
+  d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
 
@@ -32,13 +38,15 @@ export function endOfMonth(dateIso: string): string {
 }
 
 export function isWeekend(dateIso: string): boolean {
-  const day = new Date(dateIso).getDay();
+  // getUTCDay, to match the UTC midnight a bare YYYY-MM-DD parses to. With the
+  // local getter, 2026-09-05 is a Saturday in Beirut and a Friday in New York,
+  // so leave day counts and rosters disagreed by a day west of Greenwich.
+  const day = new Date(dateIso).getUTCDay();
   return day === 0 || day === 6;
 }
 
 export function isToday(dateIso: string): boolean {
-  const today = new Date().toISOString().slice(0, 10);
-  return dateIso === today;
+  return dateIso === todayIso();
 }
 
 export function isFutureDate(dateIso: string): boolean {
