@@ -38,9 +38,24 @@ export function isFuture(date: Date, now = new Date()): boolean {
   return date > now;
 }
 
-/** Return the ISO date string (YYYY-MM-DD) for a Date object. */
+/**
+ * Return the ISO date string (YYYY-MM-DD) for a Date object, in the reader's
+ * own timezone.
+ *
+ * Local, not UTC. `new Date(2026, 8, 5)` is local midnight, which at UTC+3 is
+ * 21:00 on the 4th, so `toISOString()` names the wrong day for the whole day
+ * rather than only near midnight.
+ */
 export function toIsoDate(date: Date): string {
-  return date.toISOString().split('T')[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/** Today as YYYY-MM-DD in the reader's own timezone. */
+export function todayIso(): string {
+  return toIsoDate(new Date());
 }
 
 /** Return the number of calendar days between two dates. */
