@@ -10,6 +10,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
 import { withAlpha } from '../../shared/lib/colorUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 /**
  * ProjectCalendar - month grid with tasks placed on their due_date.
@@ -23,7 +24,12 @@ const ProjectCalendar: React.FC = () => {
   useProjectRealtime(projectId);
 
   const navigate = useNavigate();
-  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
+  const {
+    project,
+    isLoading: projectLoading,
+    loadFailed: projectLoadFailed,
+    refetch: refetchProjects,
+  } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
 
   const [cursor, setCursor] = useState(() => {
@@ -88,6 +94,12 @@ const ProjectCalendar: React.FC = () => {
         {t('flow.project.loading')}
       </div>
     );
+  }
+
+  // A failed project list leaves `project` undefined exactly as a missing one
+  // does, so a 500 used to tell the user their project had gone.
+  if (projectLoadFailed) {
+    return <ListLoadFailed onRetry={() => void refetchProjects()} />;
   }
 
   if (!project) {

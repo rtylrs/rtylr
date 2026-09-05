@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 const { language } = vi.hoisted(() => ({ language: { value: 'en-US' } }));
 
@@ -20,8 +20,14 @@ vi.mock('../../shared/stores/flowStore', () => ({ useFlowStore: () => ({ project
 vi.mock('../tasks/useTasks', () => ({ useTasks: () => ({ data: [] }) }));
 vi.mock('../../shared/lib/useProjectRealtime', () => ({ useProjectRealtime: () => undefined }));
 vi.mock('./ProjectViewTabs', () => ({ default: () => null }));
+const currentProjectState = vi.hoisted(() => ({
+  project: { id: 'p-9', name: 'Web' } as { id: string; name: string } | undefined,
+  isLoading: false,
+  loadFailed: false,
+  refetch: vi.fn(),
+}));
 vi.mock('./useCurrentProject', () => ({
-  useCurrentProject: () => ({ project: { id: 'p-9', name: 'Web' }, isLoading: false }),
+  useCurrentProject: () => currentProjectState,
 }));
 
 import ProjectCalendar from './ProjectCalendar';
@@ -81,5 +87,32 @@ describe('ProjectCalendar localisation (#1052)', () => {
 
     const month = new Date().toLocaleString('fr', { month: 'long', year: 'numeric' });
     expect(screen.getByText(month)).toBeInTheDocument();
+  });
+});
+
+describe('ProjectCalendar when the projects request fails', () => {
+  afterEach(() => {
+    currentProjectState.project = { id: 'p-9', name: 'Web' };
+    currentProjectState.loadFailed = false;
+  });
+
+  it('offers a retry instead of reporting the project deleted', () => {
+    // A failed list leaves `project` undefined exactly as a missing one does.
+    currentProjectState.project = undefined;
+    currentProjectState.loadFailed = true;
+    render(<ProjectCalendar />);
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.project.notFound')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.loadFailed.retry' }));
+    expect(currentProjectState.refetch).toHaveBeenCalled();
+  });
+
+  it('still reports a genuinely missing project as not found', () => {
+    currentProjectState.project = undefined;
+    render(<ProjectCalendar />);
+    expect(screen.getByText('flow.project.notFound')).toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
   });
 });

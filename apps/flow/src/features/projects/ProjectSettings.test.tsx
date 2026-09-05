@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { toast } from 'sonner';
 
 vi.mock('react-i18next', () => ({
@@ -34,9 +34,15 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }));
 
+let projectsQueryState = { isError: false, isPaused: false, failureCount: 0, refetch: vi.fn() };
+
 vi.mock('./useProjects', () => ({
   useUpdateProject: () => ({ mutate: updateProjectMutate, isPending: false }),
   useArchiveProject: () => ({ mutate: deleteProjectMutate, isPending: false }),
+  // Settings reads the projects query only to tell a failed fetch from a
+  // deleted project. A settled, successful query keeps these cases on the
+  // normal path; the failure case has its own test below.
+  useProjects: () => projectsQueryState,
 }));
 
 vi.mock('./useProjectMembers', () => ({
@@ -450,5 +456,52 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
 
     const [, options] = updateProjectMutate.mock.calls[0];
     expect(options.onError).toBeUndefined();
+  });
+});
+
+describe('ProjectSettings when the projects request fails', () => {
+  beforeEach(() => {
+    useFlowStore.setState({ projects: [], workspaces: [] });
+  });
+
+  afterEach(() => {
+    projectsQueryState = { isError: false, isPaused: false, failureCount: 0, refetch: vi.fn() };
+  });
+
+  it('offers a retry instead of reporting the project deleted', () => {
+    // The store is filled by this same query, so a failed fetch leaves it
+    // empty and settings used to say the project was gone.
+    const refetch = vi.fn();
+    projectsQueryState = { isError: true, isPaused: false, failureCount: 1, refetch };
+    renderProjectSettings();
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.project.notFound')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.loadFailed.retry' }));
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('reports a paused query that already failed as a failure, not as loading', () => {
+    // networkMode 'online' can park a failed query at pending/paused, which
+    // never reaches isError and used to fall through to the empty branch.
+    projectsQueryState = { isError: false, isPaused: true, failureCount: 1, refetch: vi.fn() };
+    renderProjectSettings();
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+  });
+
+  it('still reports a genuinely missing project as not found', () => {
+    // Both directions matter: without this the branch above could swallow a
+    // real deletion, and the screen would invite a pointless retry forever.
+    // Rendered directly rather than through the helper, which seeds a project.
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ProjectSettings />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText('flow.project.notFound')).toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
   });
 });

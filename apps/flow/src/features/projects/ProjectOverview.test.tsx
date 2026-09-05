@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ApiMilestone } from '../../shared/services/flowApi';
 
 vi.mock('react-i18next', () => ({
@@ -34,6 +34,10 @@ const overviewState = vi.hoisted(() => ({
     milestones: ApiMilestone[];
   } | null,
   isLoading: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
 }));
 vi.mock('./useProjectOverview', () => ({
   useProjectOverview: () => overviewState,
@@ -86,5 +90,34 @@ describe('ProjectOverview: no recent comments', () => {
       to: '/p/$projectId/board',
       params: { projectId: 'p1' },
     });
+  });
+});
+
+describe('ProjectOverview when the request fails', () => {
+  afterEach(() => {
+    overviewState.isError = false;
+    overviewState.isPaused = false;
+    overviewState.failureCount = 0;
+  });
+
+  it('offers a retry instead of reporting the project deleted', () => {
+    // A failed overview leaves `data` undefined exactly as a missing project
+    // does, so a 500 used to say the project was gone.
+    overviewState.isError = true;
+    overviewState.failureCount = 1;
+    render(<ProjectOverview />);
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.project.notFound')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.loadFailed.retry' }));
+    expect(overviewState.refetch).toHaveBeenCalled();
+  });
+
+  it('reports a paused query that already failed as a failure', () => {
+    overviewState.isPaused = true;
+    overviewState.failureCount = 1;
+    render(<ProjectOverview />);
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
   });
 });

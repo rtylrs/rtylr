@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useUpdateProject, useArchiveProject } from './useProjects';
+import { useUpdateProject, useArchiveProject, useProjects } from './useProjects';
 import { DEFAULT_PROJECT_ICON } from '../../shared/services/flowApi';
 import {
   useProjectMembers,
@@ -40,6 +40,8 @@ import AddProjectMemberDialog from './components/AddProjectMemberDialog';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { useCanAdministerProject } from '../../shared/lib/currentUser';
 import ProjectVisibilityField from './components/ProjectVisibilityField';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
   admin: { icon: <Crown size={10} />, color: '#f59e0b' },
@@ -53,6 +55,7 @@ const ProjectSettings: React.FC = () => {
   const navigate = useNavigate();
   const { projects } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
+  const projectsQuery = useProjects();
 
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(displayDescription(project?.description));
@@ -102,9 +105,15 @@ const ProjectSettings: React.FC = () => {
   if (!projectId) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Loading…
+        {t('flow.project.loading')}
       </div>
     );
+  }
+
+  // The store is filled by the projects query, so a failed fetch empties it
+  // exactly as a deleted project would, and settings reported the project gone.
+  if (hasQueryFailed(projectsQuery)) {
+    return <ListLoadFailed onRetry={() => void projectsQuery.refetch()} />;
   }
 
   if (!project) {
