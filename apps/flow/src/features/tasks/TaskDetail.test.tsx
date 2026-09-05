@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 
 vi.mock('react-i18next', () => ({
@@ -41,6 +41,10 @@ function apiTask(overrides: Partial<ApiTask> = {}): ApiTask {
 const taskDetailData = vi.hoisted(() => ({
   data: undefined as ApiTaskDetail | undefined,
   isLoading: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
 }));
 vi.mock('./useTask', () => ({
   useTask: () => taskDetailData,
@@ -497,5 +501,46 @@ describe('TaskDetail deletion confirmation (#1056)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'confirm-delete' }));
 
     expect(deleteTaskMutate).toHaveBeenCalledWith('t-1', expect.any(Object));
+  });
+});
+
+describe('TaskDetail when the request fails', () => {
+  afterEach(() => {
+    taskDetailData.isError = false;
+    taskDetailData.isPaused = false;
+    taskDetailData.failureCount = 0;
+  });
+
+  it('offers a retry instead of reporting the task deleted', () => {
+    // A failed request leaves the task undefined exactly as a deleted one
+    // does, so a 500 used to say the task was gone and offer no way back.
+    taskDetailData.data = undefined;
+    taskDetailData.isError = true;
+    taskDetailData.failureCount = 1;
+    renderTaskDetail();
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.taskDetail.notFound')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.loadFailed.retry' }));
+    expect(taskDetailData.refetch).toHaveBeenCalled();
+  });
+
+  it('reports a paused query that already failed as a failure, not as missing', () => {
+    // networkMode 'online' parks a failed query at pending/paused, which never
+    // reaches isError and used to fall through to the not-found branch.
+    taskDetailData.data = undefined;
+    taskDetailData.isPaused = true;
+    taskDetailData.failureCount = 1;
+    renderTaskDetail();
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+  });
+
+  it('still reports a genuinely missing task as not found', () => {
+    // Both directions, or the branch above could swallow a real deletion.
+    taskDetailData.data = undefined;
+    renderTaskDetail();
+    expect(screen.getByText('flow.taskDetail.notFound')).toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
   });
 });
