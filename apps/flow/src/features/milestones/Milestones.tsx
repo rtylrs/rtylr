@@ -19,7 +19,7 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   planning: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
   active: { bg: 'var(--flow-status-approved-bg)', color: 'var(--flow-status-approved)' },
   at_risk: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-  completed: { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
+  completed: { bg: withAlpha('var(--flow-info-fg)', 12), color: 'var(--flow-info-fg)' },
 };
 
 const STATUS_LABEL_KEYS: Record<string, string> = {

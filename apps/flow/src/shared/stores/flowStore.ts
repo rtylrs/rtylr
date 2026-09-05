@@ -528,7 +528,7 @@ export const PRIORITY_ORDER: Record<Task['priority'], number> = {
 export const STATUS_COLORS: Record<Task['status'], string> = {
   backlog: '#6b7280',
   todo: '#9ca3af',
-  in_progress: '#3b82f6',
+  in_progress: 'var(--flow-info-fg)',
   in_review: '#f59e0b',
   done: 'var(--flow-status-approved)',
   cancelled: '#ef4444',
@@ -537,7 +537,7 @@ export const STATUS_COLORS: Record<Task['status'], string> = {
 export const PRIORITY_COLORS: Record<Task['priority'], string> = {
   urgent: '#ef4444',
   high: '#f97316',
-  medium: '#3b82f6',
+  medium: 'var(--flow-info-fg)',
   low: '#6b7280',
   no_priority: '#4b5563',
 };

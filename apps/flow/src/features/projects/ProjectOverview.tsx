@@ -139,7 +139,7 @@ const ProjectOverview: React.FC = () => {
               icon={Activity}
               label={t('flow.taskDetail.inProgress')}
               value={stats.inProgress}
-              color="#3b82f6"
+              color="var(--flow-info-fg)"
             />
             <StatCard
               icon={Clock}

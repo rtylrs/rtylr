@@ -71,7 +71,7 @@ describe('no colour gets an alpha by string concatenation', () => {
   });
 });
 
-describe("Flow's positive tone is the teal token", () => {
+describe('Flow assigns tones from tokens, not raw hex', () => {
   it.each([
     ['shared/stores/flowStore.ts', 'done'],
     ['shared/lib/progressUtils.ts', 'on_track'],
@@ -85,20 +85,43 @@ describe("Flow's positive tone is the teal token", () => {
     expect(source, `${key} in ${file}`).toContain(`${key}: 'var(--flow-status-approved)'`);
   });
 
-  it('leaves no green as a semantic value', () => {
-    // The palette arrays keep their hex: those are the colours a user picks
-    // from, not a tone the app assigns.
-    const PALETTES = [
-      'features/settings/FlowSettings.tsx',
-      'features/projects/components/StatusSettingsPanel.tsx',
-      'shared/lib/colorUtils.ts',
-    ];
+  // The palette arrays keep their hex: those are the colours a user picks from,
+  // not a tone the app assigns. Everywhere else a tone carries meaning, so it
+  // belongs to a token that can hold a per-mode value.
+  const PALETTES = [
+    'features/settings/FlowSettings.tsx',
+    'features/projects/components/StatusSettingsPanel.tsx',
+    'shared/lib/colorUtils.ts',
+  ];
+
+  it.each([
+    ['green', '#22c55e', '--flow-status-approved'],
+    ['blue', '#3b82f6', '--flow-info-fg'],
+  ])('leaves no %s as a semantic value', (_name, hex, token) => {
     const offenders: string[] = [];
     for (const file of sourceFiles(SRC)) {
       const relative = path.relative(SRC, file);
       if (PALETTES.includes(relative)) continue;
-      if (fs.readFileSync(file, 'utf8').includes('#22c55e')) offenders.push(relative);
+      if (fs.readFileSync(file, 'utf8').includes(hex)) offenders.push(relative);
     }
-    expect(offenders).toEqual([]);
+    expect(offenders, `use var(${token}) instead of ${hex}`).toEqual([]);
   });
+
+  // Each of these carries a literal hex chosen per mode, so a tone added to one
+  // block only resolves to nothing in the other. An unresolved var() paints the
+  // browser default rather than failing, so nothing catches it but a reader.
+  it.each(['--flow-info-fg', '--flow-warn-fg', '--flow-danger-fg', '--flow-locked-fg'])(
+    'declares %s in both modes',
+    (token) => {
+      const css = fs.readFileSync(path.join(SRC, 'globals.css'), 'utf8');
+      const declaredUnder = (mode: string) =>
+        css
+          .split(/:root\[data-theme='/)
+          .filter((block) => block.startsWith(`${mode}'`))
+          .some((block) => block.includes(`${token}:`));
+
+      expect(declaredUnder('dark'), `${token} is missing from dark`).toBe(true);
+      expect(declaredUnder('light'), `${token} is missing from light`).toBe(true);
+    }
+  );
 });
