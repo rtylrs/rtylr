@@ -1,3 +1,4 @@
+import { toIsoDate } from './dateUtils';
 /**
  * Data export helpers for the ERP app (CSV and JSON export formatting).
  * All functions are pure with no side-effects.
@@ -56,7 +57,7 @@ export function sanitizeFilename(name: string): string {
 /** Build an export filename with date suffix. */
 export function exportFilename(prefix: string, extension: string, date?: Date): string {
   const d = date ?? new Date();
-  const dateStr = d.toISOString().slice(0, 10);
+  const dateStr = toIsoDate(d);
   return `${sanitizeFilename(prefix)}_${dateStr}.${extension}`;
 }
 

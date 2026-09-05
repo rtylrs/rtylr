@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
+import { toIsoDate } from '../lib/dateUtils';
 
 export interface DateRange {
   from: string;
@@ -18,9 +19,7 @@ const presets: Array<{ label: string; days: number }> = [
   { label: '90 days', days: 90 },
 ];
 
-function toISO(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
+const toISO = toIsoDate;
 
 const DateRangePicker: React.FC<DateRangePickerProps> = ({ value, onChange }) => {
   const applyPreset = (days: number) => {

@@ -34,6 +34,7 @@ import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
+import { toIsoDate } from '../../shared/lib/dateUtils';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -123,7 +124,7 @@ const Purchasing: React.FC = () => {
   const [newSupplierId, setNewSupplierId] = useState('');
   const [newPoNumber, setNewPoNumber] = useState('');
   const [newExpectedDelivery, setNewExpectedDelivery] = useState(
-    new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
+    toIsoDate(new Date(Date.now() + 7 * 86400000))
   );
   const [newNotes, setNewNotes] = useState('');
   const [newItems, setNewItems] = useState<
@@ -203,7 +204,7 @@ const Purchasing: React.FC = () => {
       setShowCreate(false);
       setNewSupplierId('');
       setNewPoNumber('');
-      setNewExpectedDelivery(new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
+      setNewExpectedDelivery(toIsoDate(new Date(Date.now() + 7 * 86400000)));
       setNewNotes('');
       setNewItems([{ productId: '', quantityOrdered: '', unitCost: '' }]);
     } catch {

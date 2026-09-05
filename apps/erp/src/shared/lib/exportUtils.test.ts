@@ -81,7 +81,7 @@ describe('sanitizeFilename', () => {
 
 describe('exportFilename', () => {
   it('builds filename with prefix, date, and extension', () => {
-    const date = new Date('2026-05-29');
+    const date = new Date(2026, 4, 29);
     const filename = exportFilename('inventory', 'csv', date);
     expect(filename).toBe('inventory_2026-05-29.csv');
   });

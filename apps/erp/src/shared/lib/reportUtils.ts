@@ -70,20 +70,23 @@ function getPeriodKey(dateStr: string, period: ReportPeriod): string {
   switch (period) {
     case 'daily':
       return dateStr.slice(0, 10);
+    // UTC getters throughout, to match the daily and monthly branches, which
+    // slice the string and so never see a local offset. With local getters a
+    // 2026-01-01 row was grouped under 2025 west of Greenwich.
     case 'weekly': {
-      const dayOfWeek = d.getDay();
+      const dayOfWeek = d.getUTCDay();
       const monday = new Date(d);
-      monday.setDate(d.getDate() - ((dayOfWeek + 6) % 7));
+      monday.setUTCDate(d.getUTCDate() - ((dayOfWeek + 6) % 7));
       return monday.toISOString().slice(0, 10);
     }
     case 'monthly':
       return dateStr.slice(0, 7);
     case 'quarterly': {
-      const quarter = Math.floor(d.getMonth() / 3) + 1;
-      return `${d.getFullYear()}-Q${quarter}`;
+      const quarter = Math.floor(d.getUTCMonth() / 3) + 1;
+      return `${d.getUTCFullYear()}-Q${quarter}`;
     }
     case 'yearly':
-      return String(d.getFullYear());
+      return String(d.getUTCFullYear());
   }
 }
 
