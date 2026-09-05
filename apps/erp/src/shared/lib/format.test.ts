@@ -86,8 +86,17 @@ describe('formatDate', () => {
 
 describe('formatDateTime', () => {
   it('returns a string containing the month and day', () => {
-    const result = formatDateTime('2026-03-04T14:30:00Z');
-    expect(result).toMatch(/Mar\s*4/i);
+    // A timestamp is an instant, so it correctly renders in the reader's own
+    // zone: 14:30Z is already 5 March in Sydney. The zone is pinned here
+    // rather than inherited so the assertion means something either way.
+    const original = process.env.TZ;
+    process.env.TZ = 'UTC';
+    try {
+      expect(formatDateTime('2026-03-04T14:30:00Z')).toMatch(/Mar\s*4/i);
+    } finally {
+      if (original === undefined) delete process.env.TZ;
+      else process.env.TZ = original;
+    }
   });
 
   it('returns "Invalid Date" string when given an unparseable date string', () => {
@@ -127,9 +136,19 @@ describe('timeAgo', () => {
   });
 
   it('falls back to formatDate for dates more than a week ago', () => {
-    const result = timeAgo('2026-04-01T12:00:00.000Z');
-    // Should be a formatted date, not a relative label.
-    expect(result).toMatch(/Apr\s*1,\s*2026/i);
+    // The fallback renders an instant in the reader's own zone, where 12:00Z
+    // on 1 April is already the 2nd at UTC+14. Pinned so the assertion holds
+    // wherever this runs.
+    const original = process.env.TZ;
+    process.env.TZ = 'UTC';
+    try {
+      const result = timeAgo('2026-04-01T12:00:00.000Z');
+      // Should be a formatted date, not a relative label.
+      expect(result).toMatch(/Apr\s*1,\s*2026/i);
+    } finally {
+      if (original === undefined) delete process.env.TZ;
+      else process.env.TZ = original;
+    }
   });
 
   it('returns "Invalid Date" string for an unparseable date', () => {
