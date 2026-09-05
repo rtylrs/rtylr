@@ -1,10 +1,10 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { QRCode } from 'react-qrcode-logo';
-import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import { useUserStore } from '../../shared/stores/userStore';
 import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
@@ -12,6 +12,7 @@ import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 import { APP_URLS } from '@voxire/config';
 
 function QrCode() {
+  const { t } = useTranslation();
   const { user } = useUserStore();
   const businessIdentifier =
     user?.businessSlug || user?.business_slug || user?.businessId || user?.id || '';
@@ -45,7 +46,8 @@ function QrCode() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
     const value = target.type === 'checkbox' ? target.checked : target.value;
-    setQrOptions({ ...qrOptions, [target.name]: value });
+    const name = target.name;
+    setQrOptions((current) => ({ ...current, [name]: value }));
   };
 
   const handleDownload = async () => {
@@ -55,25 +57,48 @@ function QrCode() {
     }
 
     if (!qrRef.current) return;
-    const canvas = await html2canvas(qrRef.current);
-    canvas.toBlob((blob) => {
-      if (blob) saveAs(blob, 'qr-code.png');
-    });
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(qrRef.current);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          saveAs(blob, 'qr-code.png');
+        } else {
+          toast.error(t('qrCodes.exportFailed', 'Failed to export the QR code.'));
+        }
+      });
+    } catch {
+      toast.error(t('qrCodes.exportFailed', 'Failed to export the QR code.'));
+    }
   };
 
   useEffect(() => {
-    if (qrOptions.logoImage) {
-      setIsLogoLoaded(false);
-      const img = new Image();
-      img.src = (user?.logo as string) ?? '';
-      img.onload = () => setIsLogoLoaded(true);
-      img.onerror = () => {
-        toast.error('Failed to load logo image.');
-        setIsLogoLoaded(false);
-      };
-    } else {
+    if (!qrOptions.logoImage) {
       setIsLogoLoaded(true);
+      return;
     }
+    const logoSrc = typeof user?.logo === 'string' ? user.logo : '';
+    if (!logoSrc) {
+      setIsLogoLoaded(false);
+      return;
+    }
+    let cancelled = false;
+    setIsLogoLoaded(false);
+    const img = new Image();
+    img.onload = () => {
+      if (!cancelled) setIsLogoLoaded(true);
+    };
+    img.onerror = () => {
+      if (cancelled) return;
+      toast.error('Failed to load logo image.');
+      setIsLogoLoaded(false);
+    };
+    img.src = logoSrc;
+    return () => {
+      cancelled = true;
+      img.onload = null;
+      img.onerror = null;
+    };
   }, [qrOptions.logoImage, user?.logo]);
 
   return (
