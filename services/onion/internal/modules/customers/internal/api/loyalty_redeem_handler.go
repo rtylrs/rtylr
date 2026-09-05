@@ -1,9 +1,8 @@
-package handlers
+package api
 
 import (
 	"context"
 	"errors"
-	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -13,15 +12,15 @@ import (
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
-func LoyaltyAwardRoutes() []string {
-	return []string{"/crm/loyalty/award"}
+func LoyaltyRedeemRoutes() []string {
+	return []string{"/crm/loyalty/redeem"}
 }
 
-type AwardPointsHandler struct {
+type RedeemPointsHandler struct {
 	CRMService *application.Service
 }
 
-type AwardPointsRequest struct {
+type RedeemPointsRequest struct {
 	CustomerID    int64  `json:"customer_id"`
 	Points        int    `json:"points"`
 	Description   string `json:"description"`
@@ -29,11 +28,11 @@ type AwardPointsRequest struct {
 	ReferenceType string `json:"reference_type"`
 }
 
-type AwardPointsResponse struct {
+type RedeemPointsResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest) error {
+func (h *RedeemPointsHandler) Validate(_ context.Context, req *RedeemPointsRequest) error {
 	if req.CustomerID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
@@ -41,30 +40,25 @@ func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest
 	if req.Points <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
-	// The ledger write casts to int32; anything above MaxInt32 would wrap
-	// negative before the merge path's clamp ever sees it (#844).
-	if req.Points > math.MaxInt32 {
-		return onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
-	}
 
 	return nil
 }
 
-func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest) (AwardPointsResponse, error) {
+func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsRequest) (RedeemPointsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
+		return RedeemPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := requireCRMFeaturePermission(ctx, "crm:loyalty:manage"); err != nil {
-		return AwardPointsResponse{}, err
+		return RedeemPointsResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
+		return RedeemPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.CRMService.AwardPoints(ctx, domain.AwardPointsInput{
+	err := h.CRMService.RedeemPoints(ctx, domain.RedeemPointsInput{
 		OwnerID:       device.User.UserID,
 		BusinessID:    businessID,
 		CustomerID:    req.CustomerID,
@@ -75,11 +69,15 @@ func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest)
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
-			return AwardPointsResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
 
-		return AwardPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to award points")
+		if errors.Is(err, domain.ErrInsufficientPoints) {
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Insufficient loyalty points")
+		}
+
+		return RedeemPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem points")
 	}
 
-	return AwardPointsResponse{Message: "Points awarded successfully"}, nil
+	return RedeemPointsResponse{Message: "Points redeemed successfully"}, nil
 }

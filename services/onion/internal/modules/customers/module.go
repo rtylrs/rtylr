@@ -10,7 +10,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/customers/internal/api"
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
-	"github.com/voxire/onion/internal/modules/customers/internal/routes"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
@@ -25,7 +24,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
