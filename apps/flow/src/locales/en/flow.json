@@ -692,7 +692,8 @@
     "project": "Project",
     "noProjects": "No projects yet",
     "noTasksYet": "No tasks yet",
-    "noProjectsGate": "You need a project before you can add a milestone, and your role cannot create one. Ask an admin to create a project first."
+    "noProjectsGate": "You need a project before you can add a milestone, and your role cannot create one. Ask an admin to create a project first.",
+    "noTasksHint": "Tasks cannot be added to a milestone yet"
   },
   "roadmap": {
     "loading": "Loading roadmap...",
