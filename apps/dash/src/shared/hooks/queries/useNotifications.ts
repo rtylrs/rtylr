@@ -24,6 +24,27 @@ const parseNotificationPage = (res: unknown): NotificationPage => {
   };
 };
 
+type PagesData = { pages: NotificationPage[]; pageParams: unknown[] };
+
+type MutationContext = {
+  prev: Notification[] | undefined;
+  prevPages: [readonly unknown[], PagesData | undefined][];
+};
+
+const snapshotPages = (
+  qc: ReturnType<typeof useQueryClient>
+): [readonly unknown[], PagesData | undefined][] =>
+  qc.getQueriesData<PagesData>({ queryKey: ['notifications', 'pages'] });
+
+const restorePages = (
+  qc: ReturnType<typeof useQueryClient>,
+  prevPages: [readonly unknown[], PagesData | undefined][]
+) => {
+  for (const [key, data] of prevPages) {
+    qc.setQueryData(key, data);
+  }
+};
+
 export const useNotifications = () => {
   return useQuery<Notification[]>({
     queryKey: ['notifications'],
@@ -60,31 +81,30 @@ export const useMarkNotificationRead = () => {
       await notificationClient.markNotificationRead({ id });
       return id;
     },
-    onMutate: async (id) => {
+    onMutate: async (id): Promise<MutationContext> => {
       await qc.cancelQueries({ queryKey: ['notifications'] });
       const prev = qc.getQueryData<Notification[]>(['notifications']);
+      const prevPages = snapshotPages(qc);
       qc.setQueryData<Notification[]>(['notifications'], (old) =>
         (old ?? []).map((n) => (n.id === id ? { ...n, read: true } : n))
       );
-      qc.setQueriesData<{ pages: NotificationPage[]; pageParams: unknown[] }>(
-        { queryKey: ['notifications', 'pages'] },
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              notifications: page.notifications.map((n) =>
-                n.id === id ? { ...n, read: true } : n
-              ),
-            })),
-          };
-        }
-      );
-      return { prev };
+      qc.setQueriesData<PagesData>({ queryKey: ['notifications', 'pages'] }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            notifications: page.notifications.map((n) =>
+              n.id === id ? { ...n, read: true } : n
+            ),
+          })),
+        };
+      });
+      return { prev, prevPages };
     },
     onError: (_err, _id, ctx) => {
       if (ctx?.prev) qc.setQueryData(['notifications'], ctx.prev);
+      if (ctx?.prevPages) restorePages(qc, ctx.prevPages);
     },
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: ['notifications'] });
@@ -98,29 +118,28 @@ export const useMarkAllNotificationsRead = () => {
     mutationFn: async () => {
       await notificationClient.markAllRead({});
     },
-    onMutate: async () => {
+    onMutate: async (): Promise<MutationContext> => {
       await qc.cancelQueries({ queryKey: ['notifications'] });
       const prev = qc.getQueryData<Notification[]>(['notifications']);
+      const prevPages = snapshotPages(qc);
       qc.setQueryData<Notification[]>(['notifications'], (old) =>
         (old ?? []).map((n) => ({ ...n, read: true }))
       );
-      qc.setQueriesData<{ pages: NotificationPage[]; pageParams: unknown[] }>(
-        { queryKey: ['notifications', 'pages'] },
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              notifications: page.notifications.map((n) => ({ ...n, read: true })),
-            })),
-          };
-        }
-      );
-      return { prev };
+      qc.setQueriesData<PagesData>({ queryKey: ['notifications', 'pages'] }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            notifications: page.notifications.map((n) => ({ ...n, read: true })),
+          })),
+        };
+      });
+      return { prev, prevPages };
     },
     onError: (_err, _vars, ctx) => {
       if (ctx?.prev) qc.setQueryData(['notifications'], ctx.prev);
+      if (ctx?.prevPages) restorePages(qc, ctx.prevPages);
     },
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: ['notifications'] });

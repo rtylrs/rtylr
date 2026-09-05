@@ -6,7 +6,6 @@ import { EmptyState } from '@voxire/ui';
 import { Button } from '../../shared/components/ui';
 import { Breadcrumbs, NotificationItem, SkeletonList } from '../../shared/components/dash';
 import {
-  useNotifications,
   useNotificationPages,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
@@ -17,7 +16,6 @@ const TABS = ['all', 'unread'] as const;
 const Notifications: React.FC = () => {
   const { t } = useTranslation();
   const [tab, setTab] = useState<(typeof TABS)[number]>('all');
-  const { data: firstPage = [] } = useNotifications();
   const {
     data: pages,
     isLoading,
@@ -29,7 +27,7 @@ const Notifications: React.FC = () => {
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
 
-  const data = pages?.pages.flatMap((page) => page.notifications) ?? firstPage;
+  const data = pages?.pages.flatMap((page) => page.notifications) ?? [];
   const filtered = tab === 'unread' ? data.filter((n) => !n.read) : data;
   const unreadCount = data.filter((n) => !n.read).length;
 
