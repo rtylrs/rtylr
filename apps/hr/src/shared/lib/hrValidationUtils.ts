@@ -2,6 +2,7 @@
  * HR-specific validation helpers.
  * All functions are pure and have no side-effects.
  */
+import { todayIso } from './dateUtils';
 
 /** Return true if the string is a valid email address. */
 export function isValidEmail(email: string): boolean {
@@ -48,7 +49,7 @@ export function isDateRangeValid(start: string, end: string): boolean {
 
 /** Return true if the start date is on or after the reference date (today by default). */
 export function isStartDateValid(startDate: string, today?: string): boolean {
-  const ref = today ?? new Date().toISOString().slice(0, 10);
+  const ref = today ?? todayIso();
   return startDate >= ref;
 }
 

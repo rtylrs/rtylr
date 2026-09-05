@@ -21,6 +21,8 @@ import {
   Label,
 } from '../../shared/components/ui';
 import { ErrorBoundary, EmptyState } from '@voxire/ui';
+import { toLocalIso } from '../../shared/lib/dateUtils';
+import { addDays } from '../../shared/lib/hrDateUtils';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -39,7 +41,7 @@ function getWeekStart(offset: number): string {
   const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1;
   const start = new Date(now);
   start.setDate(now.getDate() - dayOfWeek + offset * 7);
-  return start.toISOString().split('T')[0];
+  return toLocalIso(start);
 }
 
 function formatWeekLabel(weekStart: string): string {
@@ -85,12 +87,10 @@ const RosterBuilderInner = (): React.JSX.Element => {
   });
 
   const weekDates = useMemo((): string[] => {
-    const start = new Date(weekStart);
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      return d.toISOString().split('T')[0];
-    });
+    // addDays does the arithmetic in UTC on the ISO string. Building a Date
+    // from weekStart and stepping it with a local setter lost the day the
+    // clocks go forward, which put a whole roster week on the wrong dates.
+    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   }, [weekStart]);
 
   const openAssignModal = (staffId: number, date: string): void => {

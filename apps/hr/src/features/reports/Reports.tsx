@@ -20,6 +20,7 @@ import ReportTable from './ReportTable';
 import { REPORT_TYPES } from '../../shared/schemas/reports';
 import type { ReportType, ReportPayload } from '../../shared/schemas/reports';
 import { Button, Select, Label, Skeleton, useIsMobile } from '../../shared/components/ui';
+import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
 
 const REPORT_ICONS: Record<ReportType, React.ComponentType<{ size?: number }>> = {
   attendance_summary: Calendar,
@@ -35,13 +36,13 @@ const REPORT_ICONS: Record<ReportType, React.ComponentType<{ size?: number }>> =
 };
 
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  return todayIso();
 }
 
 function thirtyDaysAgoISO(): string {
   const d = new Date();
   d.setDate(d.getDate() - 30);
-  return d.toISOString().slice(0, 10);
+  return toLocalIso(d);
 }
 
 const Reports: React.FC = () => {

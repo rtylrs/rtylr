@@ -30,18 +30,21 @@ export function reportFormatMimeType(format: ReportFormat): string {
 }
 
 export function periodStartDate(referenceIso: string, period: ReportPeriod): string {
+  // UTC throughout: the input is a bare YYYY-MM-DD, which parses to UTC
+  // midnight, so local getters read the previous day west of Greenwich and
+  // every branch below returned a date in the wrong month or year there.
   const d = new Date(referenceIso);
   if (period === 'weekly') {
-    const day = d.getDay();
-    d.setDate(d.getDate() - day);
+    const day = d.getUTCDay();
+    d.setUTCDate(d.getUTCDate() - day);
   } else if (period === 'monthly') {
-    d.setDate(1);
+    d.setUTCDate(1);
   } else if (period === 'quarterly') {
-    const month = d.getMonth();
+    const month = d.getUTCMonth();
     const quarterStart = month - (month % 3);
-    d.setMonth(quarterStart, 1);
+    d.setUTCMonth(quarterStart, 1);
   } else if (period === 'yearly') {
-    d.setMonth(0, 1);
+    d.setUTCMonth(0, 1);
   }
   return d.toISOString().slice(0, 10);
 }

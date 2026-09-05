@@ -1,3 +1,5 @@
+import { todayIso } from './dateUtils';
+
 export type ExportFormat = 'csv' | 'xlsx' | 'json' | 'pdf';
 export type ExportScope = 'all' | 'selected' | 'filtered';
 
@@ -35,7 +37,7 @@ export function generateExportFilename(
   format: ExportFormat,
   dateIso?: string
 ): string {
-  const date = dateIso ?? new Date().toISOString().slice(0, 10);
+  const date = dateIso ?? todayIso();
   const slug = entityName.toLowerCase().replace(/\s+/g, '_');
   return `${slug}_export_${date}.${format}`;
 }

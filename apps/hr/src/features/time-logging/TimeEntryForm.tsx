@@ -6,6 +6,7 @@ import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import { timeEntryFormSchema } from '../../shared/schemas/timeEntries';
 import { Modal, Button, Input, Textarea, Label, Checkbox } from '../../shared/components/ui';
+import { todayIso } from '../../shared/lib/dateUtils';
 
 interface TimeEntryFormProps {
   open: boolean;
@@ -27,7 +28,7 @@ const TimeEntryForm = ({
   const { data: myEmployeeId, isError: employeeLookupFailed } = useMyEmployeeId();
   const config = useHRConfigStore((s) => s.config);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [date, setDate] = useState(today);
   const [hours, setHours] = useState(
     prefill?.durationMinutes ? String(Math.floor(prefill.durationMinutes / 60)) : ''

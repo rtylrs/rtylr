@@ -12,6 +12,7 @@ import {
 } from '../../shared/hooks/queries/useEmployees';
 import { useDepartments } from '../departments/useDepartments';
 import CreateLocationForm from './CreateLocationForm';
+import { todayIso } from '../../shared/lib/dateUtils';
 
 interface NewEmployeeProps {
   onCancel?: () => void;
@@ -36,7 +37,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     email: '',
     contractType: 'full_time',
     status: 'active',
-    hireDate: new Date().toISOString().slice(0, 10),
+    hireDate: todayIso(),
     currency: 'USD',
     accountCreationMode: 'hr_created',
     jobTitle: '',
