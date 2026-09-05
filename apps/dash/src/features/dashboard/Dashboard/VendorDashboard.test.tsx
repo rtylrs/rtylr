@@ -29,13 +29,14 @@ describe('VendorDashboard', () => {
 
     render(<VendorDashboard />);
 
-    // Static home: greeting, search entry, nav columns, checklist — no widgets.
+    // Static home: greeting, search entry, nav columns — no widgets.
     expect(screen.getByText('Acme')).toBeTruthy();
     expect(screen.getByText(/Search apps, pages, actions/i)).toBeTruthy();
     expect(screen.getByText('Apps')).toBeTruthy();
     expect(screen.getByText('Shortcuts')).toBeTruthy();
     expect(screen.getByText('Recents')).toBeTruthy();
-    expect(screen.getByText(/Get the most out of rtylr/i)).toBeTruthy();
+    expect(screen.queryByText(/Get the most out of rtylr/i)).toBeNull();
+    expect(screen.queryByRole('checkbox')).toBeNull();
     expect(screen.queryByText(/Welcome to rtylr/i)).toBeNull();
   });
 
@@ -46,18 +47,6 @@ describe('VendorDashboard', () => {
 
     fireEvent.click(screen.getByText(/Search apps, pages, actions/i));
     expect(useCommandPalette.getState().open).toBe(true);
-  });
-
-  it('persists checklist toggles to localStorage only', () => {
-    useUserStore.setState({ user: { id: 1, role: 'owner' } as never });
-
-    render(<VendorDashboard />);
-
-    const checkbox = screen.getByRole('checkbox', { name: /Invite your team/i });
-    expect(checkbox.getAttribute('aria-checked')).toBe('false');
-    fireEvent.click(checkbox);
-    expect(checkbox.getAttribute('aria-checked')).toBe('true');
-    expect(screen.getByText(/of 5 steps left/i)).toBeTruthy();
   });
 
   it.each(['operator', 'billing', 'menu_manager', 'store_manager', 'staff', 'viewer'])(
