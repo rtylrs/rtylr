@@ -36,24 +36,24 @@ describe('isThisMonth', () => {
 
 describe('daysAgo', () => {
   it('returns a date exactly N days before the reference', () => {
-    const ref = new Date('2024-05-10');
+    const ref = new Date(2024, 4, 10);
     expect(daysAgo(5, ref)).toBe('2024-05-05');
   });
 
   it('returns today for 0 days ago', () => {
-    const ref = new Date('2024-06-01');
+    const ref = new Date(2024, 5, 1);
     expect(daysAgo(0, ref)).toBe('2024-06-01');
   });
 });
 
 describe('daysFromNow', () => {
   it('returns a date exactly N days after the reference', () => {
-    const ref = new Date('2024-05-10');
+    const ref = new Date(2024, 4, 10);
     expect(daysFromNow(5, ref)).toBe('2024-05-15');
   });
 
   it('returns today for 0 days from now', () => {
-    const ref = new Date('2024-06-01');
+    const ref = new Date(2024, 5, 1);
     expect(daysFromNow(0, ref)).toBe('2024-06-01');
   });
 });
