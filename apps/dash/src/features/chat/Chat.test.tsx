@@ -79,3 +79,41 @@ describe('Chat: no-messages welcome empty state', () => {
     expect(screen.getByText('Hello')).toBeInTheDocument();
   });
 });
+
+describe('messageCopyText', () => {
+  const base = {
+    id: 'm1',
+    role: 'assistant',
+    createdAt: new Date().toISOString(),
+  } as const;
+
+  it('prefers message content when present', async () => {
+    const { messageCopyText } = await import('./Chat');
+
+    expect(
+      messageCopyText({
+        ...base,
+        content: 'Hello there',
+        blocks: [{ id: 'b1', type: 'text', content: 'Stale' }],
+      })
+    ).toBe('Hello there');
+  });
+
+  it('falls back to block text when content is an empty string', async () => {
+    const { messageCopyText } = await import('./Chat');
+
+    expect(
+      messageCopyText({
+        ...base,
+        content: '',
+        blocks: [{ id: 'b1', type: 'text', content: 'Streamed text' }],
+      })
+    ).toBe('Streamed text');
+  });
+
+  it('returns empty string when neither content nor blocks carry text', async () => {
+    const { messageCopyText } = await import('./Chat');
+
+    expect(messageCopyText({ ...base, content: '', blocks: [] })).toBe('');
+  });
+});

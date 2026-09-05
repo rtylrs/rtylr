@@ -40,6 +40,15 @@ function blocksToText(blocks: ContentBlock[]): string {
     .join('\n');
 }
 
+/**
+ * Copy/share text for a message. Falls back to the rendered blocks when
+ * content is empty (streaming/partial states), so the copy action never
+ * receives a blank string while the bubble shows block text.
+ */
+export function messageCopyText(message: CaretMessageType): string {
+  return message.content || blocksToText(blocksForMessage(message));
+}
+
 const Chat: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useUserStore();
@@ -147,7 +156,7 @@ const Chat: React.FC = () => {
                   const isLastStreaming =
                     index === messages.length - 1 && msg.role === 'assistant' && isStreaming;
                   const blocks = blocksForMessage(msg);
-                  const text = msg.content ?? blocksToText(blocks);
+                  const text = messageCopyText(msg);
 
                   return (
                     <motion.div
