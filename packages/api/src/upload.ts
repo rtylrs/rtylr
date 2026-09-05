@@ -12,7 +12,7 @@ export interface UploadAssetOptions {
   signal?: AbortSignal;
 }
 
-const DEFAULT_CDN_BASE_URL = 'https://cdn.voxire.com';
+const DEFAULT_CDN_BASE_URL = 'https://api.voxire.com';
 
 const getCdnBaseUrl = (override?: string): string => {
   const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;

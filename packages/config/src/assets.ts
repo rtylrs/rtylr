@@ -29,13 +29,13 @@ export interface CdnImageUrlOptions {
   cdnBaseUrl?: string;
 }
 
-export const DEFAULT_CDN_BASE_URL = 'https://cdn.voxire.com';
+export const DEFAULT_CDN_BASE_URL = 'https://api.voxire.com';
 
 const CDN_READ_PATHS = ['/files/', '/images/'];
 const LOCAL_IMAGE_SCHEMES = /^(?:asset|blob|data):/i;
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:/i;
 const CDN_FILE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const VOXIRE_CDN_HOSTS = new Set(['cdn.voxire.com', 'cdn.voxire.dev']);
+const VOXIRE_CDN_HOSTS = new Set(['cdn.voxire.com', 'cdn.voxire.dev', 'api.voxire.com', 'api.voxire.dev']);
 
 export function getCdnBaseUrl(override?: string): string {
   // In self-host, `resolveCdnBaseUrl()` returns the runtime upload base; hosted

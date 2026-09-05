@@ -29,7 +29,7 @@ import { APP_URLS } from './apps';
  * `assets.ts` — duplicated here (rather than imported) so `assets.ts` can import
  * `resolveCdnBaseUrl` from this module without a circular dependency.
  */
-const DEFAULT_CDN_BASE_URL = 'https://cdn.voxire.com';
+const DEFAULT_CDN_BASE_URL = 'https://api.voxire.com';
 
 interface RuntimeConfigState {
   /** Whether the boot fetch has resolved (success OR handled failure). */
