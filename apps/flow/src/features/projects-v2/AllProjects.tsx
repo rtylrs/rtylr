@@ -6,6 +6,7 @@ import { useAllProjects } from './useAllProjects';
 import type { Project } from '@voxire/voxie/flow/project/v2/types';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import ProjectIcon from '../../shared/components/ProjectIcon';
 
 const STATUS_FILTERS = ['', 'active', 'completed'] as const;
 const VISIBILITY_FILTERS = ['', 'private', 'public'] as const;
@@ -24,15 +25,19 @@ function ProjectCard({ project }: { project: Project }) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
+          {/* G-I1: a lucide glyph, not the stored value painted as text. A
+              project whose icon is "building 2" rendered those words in
+              coloured 14px type, wrapping onto two lines and colliding with
+              the title. */}
           <span
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-sm shrink-0"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
             style={{
               background: project.color ? `${project.color}20` : 'var(--accent-muted)',
               color: project.color ?? 'var(--accent)',
             }}
             aria-hidden
           >
-            {project.icon || '📋'}
+            <ProjectIcon icon={project.icon} size={16} />
           </span>
           <div className="min-w-0">
             <p className="font-medium text-sm truncate" style={{ color: 'var(--flow-text)' }}>
