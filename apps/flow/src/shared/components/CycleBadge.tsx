@@ -10,7 +10,7 @@ interface CycleBadgeProps {
 
 const STATUS_COLORS: Record<Cycle['status'], string> = {
   active: 'var(--flow-status-approved)',
-  upcoming: '#3b82f6',
+  upcoming: 'var(--flow-info-fg)',
   completed: '#6b7280',
 };
 

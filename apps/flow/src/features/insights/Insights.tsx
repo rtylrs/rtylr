@@ -71,7 +71,7 @@ const Insights: React.FC = () => {
               data.velocity.reduce((s, v) => s + v.completed, 0) / Math.max(1, data.velocity.length)
             )}`}
             hint={t('common.insights.kpi.velocityHint')}
-            color="#3b82f6"
+            color="var(--flow-info-fg)"
           />
           <Kpi
             icon={Clock}
