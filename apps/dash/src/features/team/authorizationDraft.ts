@@ -1,7 +1,9 @@
 import type { AppRoleAssignment } from '@voxire/voxie/hub/user/v1/types';
 
 export function legacyRoleToDashRole(role: string): string {
-  switch (role) {
+  switch (role.toLowerCase()) {
+    case 'owner':
+      return 'owner';
     case 'admin':
       return 'admin';
     case 'operator':
