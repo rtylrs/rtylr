@@ -40,6 +40,7 @@ import {
 } from '../../shared/hooks/queries/useSubscription';
 import { useGroups, useAddGroupMembers } from '../../shared/hooks/queries/useGroups';
 import { legacyRoleToDashRole } from './authorizationDraft';
+import { mailtoFor } from '../../shared/utils/mailto';
 
 const APP_ICONS: Record<
   string,
@@ -361,6 +362,7 @@ const Team: React.FC = (): React.JSX.Element => {
                   {paged.map((m) => {
                     const apps = m.apps ?? [];
                     const isChecked = selected.has(m.id);
+                    const emailHref = mailtoFor(m.email);
                     return (
                       <div
                         key={m.id}
@@ -497,14 +499,23 @@ const Team: React.FC = (): React.JSX.Element => {
                               >
                                 <Pencil size={12} /> Edit member
                               </button>
-                              <a
-                                href={`mailto:${m.email}`}
-                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
-                                style={{ color: 'var(--dash-text-muted)' }}
-                                onClick={() => setMenuOpen(null)}
-                              >
-                                <Mail size={12} /> Send email
-                              </a>
+                              {emailHref ? (
+                                <a
+                                  href={emailHref}
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                                  style={{ color: 'var(--dash-text-muted)' }}
+                                  onClick={() => setMenuOpen(null)}
+                                >
+                                  <Mail size={12} /> Send email
+                                </a>
+                              ) : (
+                                <span
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left"
+                                  style={{ color: 'var(--dash-text-dim)' }}
+                                >
+                                  <Mail size={12} /> Send email
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
