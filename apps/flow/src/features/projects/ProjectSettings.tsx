@@ -105,7 +105,7 @@ const ProjectSettings: React.FC = () => {
   if (!projectId) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
-        Loading…
+        {t('flow.project.loading')}
       </div>
     );
   }
