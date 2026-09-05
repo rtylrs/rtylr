@@ -8,6 +8,8 @@ import {
   useUpdateWorkType,
   useWorkTypes,
 } from '../../time/useWorkDay';
+import { hasQueryFailed } from '../../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../../shared/components/ListLoadFailed';
 
 const inputClass =
   'flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-title md:min-h-0 md:py-1.5 md:text-body';
@@ -27,7 +29,8 @@ function inputStyle(): React.CSSProperties {
  */
 const WorkTypesSection = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useWorkTypes();
+  const workTypesQuery = useWorkTypes();
+  const { data, isLoading } = workTypesQuery;
   const createWorkType = useCreateWorkType();
   const updateWorkType = useUpdateWorkType();
   const deleteWorkType = useDeleteWorkType();
@@ -84,6 +87,10 @@ const WorkTypesSection = (): React.JSX.Element => {
         <p className="text-body" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.workTypes.loading')}
         </p>
+      ) : hasQueryFailed(workTypesQuery) ? (
+        // A failed request emptied the list exactly as a first run does, so a
+        // 500 invited the user to recreate work types they already had.
+        <ListLoadFailed onRetry={() => void workTypesQuery.refetch()} />
       ) : workTypes.length === 0 ? (
         <EmptyState
           icon={ListChecks}

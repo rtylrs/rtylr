@@ -29,6 +29,8 @@ import {
 import TaskRow from '../../shared/components/TaskRow';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ViewFilterChips, { EMPTY_FILTERS, hasActiveFilters } from './ViewFilterChips';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
   flame: Flame,
@@ -39,7 +41,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
 const Views: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: views = [] } = useViews();
+  const viewsQuery = useViews();
+  const { data: views = [] } = viewsQuery;
   const createView = useCreateView();
   const updateView = useUpdateView();
   const deleteView = useDeleteView();
@@ -256,7 +259,13 @@ const Views: React.FC = () => {
             );
           })}
 
-          {views.length === 0 && (
+          {/* A failed request emptied this list exactly as a first run does,
+              so a 500 invited the user to create a view they already had. */}
+          {hasQueryFailed(viewsQuery) ? (
+            <ListLoadFailed onRetry={() => void viewsQuery.refetch()} />
+          ) : null}
+
+          {views.length === 0 && !hasQueryFailed(viewsQuery) && (
             <EmptyState
               icon={Eye}
               title={t('flow.views.emptyList')}

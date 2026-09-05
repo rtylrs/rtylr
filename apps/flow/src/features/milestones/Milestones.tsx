@@ -14,6 +14,8 @@ import { CardSkeleton } from '../../shared/components/Skeleton';
 import { useProjects, useCreateProject } from '../projects/useProjects';
 import GateNotice from '../../shared/components/GateNotice';
 import { withAlpha } from '../../shared/lib/colorUtils';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   planning: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
@@ -39,7 +41,8 @@ const Milestones: React.FC = () => {
   const { t, i18n } = useTranslation();
   // Business-wide list; v2 takes project_id only as an optional narrowing
   // filter, which this screen does not use.
-  const { data: milestones = [], isLoading } = useMilestones();
+  const milestonesQuery = useMilestones();
+  const { data: milestones = [], isLoading } = milestonesQuery;
   const { data: projects = [] } = useProjects();
   const createMilestone = useCreateMilestone();
   const [showCreate, setShowCreate] = useState(false);
@@ -103,6 +106,12 @@ const Milestones: React.FC = () => {
         ))}
       </div>
     );
+  }
+
+  // Without this a 500 fell through to the empty state, which reads as "no
+  // milestones yet" and invites creating ones that already exist.
+  if (hasQueryFailed(milestonesQuery) && !showCreate) {
+    return <ListLoadFailed onRetry={() => void milestonesQuery.refetch()} />;
   }
 
   if (milestones.length === 0 && !showCreate) {

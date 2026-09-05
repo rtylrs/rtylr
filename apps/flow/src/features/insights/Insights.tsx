@@ -7,11 +7,20 @@ import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useInsights } from './useInsights';
 import { Skeleton, CardSkeleton } from '../../shared/components/Skeleton';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const Insights: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data, isLoading } = useInsights();
+  const insightsQuery = useInsights();
+  const { data, isLoading } = insightsQuery;
+
+  // A failed request leaves `data` undefined while isLoading is false, and the
+  // guard below treats that as loading, so the skeletons never went away.
+  if (hasQueryFailed(insightsQuery)) {
+    return <ListLoadFailed onRetry={() => void insightsQuery.refetch()} />;
+  }
 
   if (isLoading || !data) {
     return (

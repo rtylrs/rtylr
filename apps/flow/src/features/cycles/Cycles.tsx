@@ -11,6 +11,8 @@ import { formatDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
 import { useProjects } from '../projects/useProjects';
 import GateNotice from '../../shared/components/GateNotice';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const NO_PROJECT_GATE_ID = 'cycles-project-gate';
 
@@ -22,7 +24,8 @@ const Cycles: React.FC = () => {
   const { data: projects = [] } = useProjects();
   const [projectId, setProjectId] = useState('');
   const selectedProjectId = projectId || projects[0]?.id || '';
-  const { data: cycles = [], isLoading } = useCycles(selectedProjectId || undefined);
+  const cyclesQuery = useCycles(selectedProjectId || undefined);
+  const { data: cycles = [], isLoading } = cyclesQuery;
   const createCycle = useCreateCycle();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -35,6 +38,12 @@ const Cycles: React.FC = () => {
         {t('flow.cycles.loading')}
       </div>
     );
+
+  // Without this a 500 fell through to the empty state, which reads as "no
+  // cycles yet" and invites the user to create one that already exists.
+  if (hasQueryFailed(cyclesQuery)) {
+    return <ListLoadFailed onRetry={() => void cyclesQuery.refetch()} />;
+  }
 
   const active = cycles.find((c) => c.status === 'active');
   const upcoming = cycles.filter((c) => c.status === 'upcoming');
