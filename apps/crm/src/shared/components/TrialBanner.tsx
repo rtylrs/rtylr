@@ -5,6 +5,7 @@ import { X, Clock, Zap } from 'lucide-react';
 import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/client';
 import { resolveAppUrl } from '@voxire/config';
 import { readLocalStorage, writeLocalStorage } from '../lib/storage';
+import { todayIso } from '../lib/dateUtils';
 
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 
@@ -16,7 +17,7 @@ function daysLeft(trialEndsAt: string | null): number {
 const DISMISSED_KEY = 'trial_banner_dismissed_date';
 
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [dismissed, setDismissed] = useState(() => readLocalStorage(DISMISSED_KEY) === today);
 
   const { data } = useQuery({
