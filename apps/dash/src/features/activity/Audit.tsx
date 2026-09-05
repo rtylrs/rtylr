@@ -166,10 +166,14 @@ const Audit: React.FC = () => {
             {total === 0
               ? 'No entries'
               : isFiltering
-                ? t('activity.audit.filteredShowing', 'Showing {{shown}} of {{total}} on this page', {
-                    shown: filtered.length,
-                    total,
-                  })
+                ? t(
+                    'activity.audit.filteredShowing',
+                    'Showing {{shown}} of {{total}} on this page',
+                    {
+                      shown: filtered.length,
+                      total,
+                    }
+                  )
                 : `Showing ${rangeStart}–${rangeEnd} of ${total}`}
           </p>
           <div className="flex items-center gap-2">

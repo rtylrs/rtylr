@@ -94,9 +94,7 @@ export const useMarkNotificationRead = () => {
           ...old,
           pages: old.pages.map((page) => ({
             ...page,
-            notifications: page.notifications.map((n) =>
-              n.id === id ? { ...n, read: true } : n
-            ),
+            notifications: page.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
           })),
         };
       });
