@@ -37,6 +37,7 @@ interface NewRecurringForm {
 }
 
 import { useInvoices } from '../invoices/useInvoices';
+import { todayIso } from '../../shared/lib/date';
 
 const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const create = useCreateRecurringInvoice();
@@ -46,7 +47,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
   const emptyForm = (): NewRecurringForm => ({
     templateInvoiceId: 0,
     frequency: 'monthly',
-    nextInvoiceDate: new Date().toISOString().slice(0, 10),
+    nextInvoiceDate: todayIso(),
   });
   const [form, setForm] = useState<NewRecurringForm>(emptyForm);
 

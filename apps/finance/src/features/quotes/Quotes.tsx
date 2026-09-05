@@ -12,7 +12,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
-import { formatDate } from '../../shared/lib/date';
+import { formatDate, toLocalIso, todayIso } from '../../shared/lib/date';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
 import { useSettings } from '../../shared/lib/settings';
 
@@ -38,8 +38,8 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
   const [form, setForm] = useState<NewQuoteForm>({
     client: '',
     amount: 0,
-    issuedDate: new Date().toISOString().slice(0, 10),
-    expiresAt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+    issuedDate: todayIso(),
+    expiresAt: toLocalIso(new Date(Date.now() + 30 * 86400000)),
     description: '',
   });
 
@@ -69,8 +69,8 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
           setForm({
             client: '',
             amount: 0,
-            issuedDate: new Date().toISOString().slice(0, 10),
-            expiresAt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+            issuedDate: todayIso(),
+            expiresAt: toLocalIso(new Date(Date.now() + 30 * 86400000)),
             description: '',
           });
         },

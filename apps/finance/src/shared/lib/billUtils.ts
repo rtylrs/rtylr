@@ -1,3 +1,4 @@
+import { todayIso } from './date';
 /**
  * Pure utility helpers for bill state and display logic.
  */
@@ -15,7 +16,7 @@ export function isBillOverdue(
 ): boolean {
   if (!dueDate) return false;
   if (status === 'Paid') return false;
-  const ref = today ?? new Date().toISOString().slice(0, 10);
+  const ref = today ?? todayIso();
   return dueDate < ref;
 }
 
@@ -53,7 +54,7 @@ export function getBillStatusLabel(status: BillStatus): string {
  */
 export function daysOverdue(dueDate: string | null | undefined, today?: string): number {
   if (!dueDate) return 0;
-  const ref = today ?? new Date().toISOString().slice(0, 10);
+  const ref = today ?? todayIso();
   if (dueDate >= ref) return 0;
   const due = new Date(dueDate).getTime();
   const now = new Date(ref).getTime();
@@ -88,7 +89,7 @@ export function deriveBillStatus(
   if (balance === 0) return 'Paid';
   if (paid > 0) return 'Partial';
   if (dueDate) {
-    const ref = today ?? new Date().toISOString().slice(0, 10);
+    const ref = today ?? todayIso();
     if (dueDate < ref) return 'Overdue';
   }
   return 'Unpaid';

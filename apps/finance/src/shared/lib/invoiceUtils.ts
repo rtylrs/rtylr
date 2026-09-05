@@ -1,3 +1,4 @@
+import { todayIso } from './date';
 /**
  * Pure utility helpers for invoice calculations and display logic.
  */
@@ -33,7 +34,7 @@ export function isFullyPaid(invoice: InvoiceSummary): boolean {
 export function isOverdue(invoice: InvoiceSummary, today?: string): boolean {
   if (!invoice.dueDate) return false;
   if (invoice.status === 'Paid') return false;
-  const ref = today ?? new Date().toISOString().slice(0, 10);
+  const ref = today ?? todayIso();
   return invoice.dueDate < ref;
 }
 

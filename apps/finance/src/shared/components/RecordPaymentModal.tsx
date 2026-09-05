@@ -7,6 +7,7 @@ import CurrencyInput from './CurrencyInput';
 import { inputStyle, primaryBtn, ghostBtn, labelStyle } from '../lib/tokens';
 import { useRecordPayment } from '../../features/invoices/useInvoices';
 import { formatMoney } from '../lib/money';
+import { todayIso } from '../lib/date';
 
 interface RecordPaymentModalProps {
   open: boolean;
@@ -38,7 +39,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 }) => {
   const [value, setValue] = useState(amount);
   const [method, setMethod] = useState(METHODS[0]);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(todayIso());
   const [reference, setReference] = useState('');
   const recordPayment = useRecordPayment();
 

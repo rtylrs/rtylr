@@ -10,6 +10,7 @@ import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useJournal, useCreateJournalEntry } from '../../shared/hooks/useChartOfAccounts';
 import { cardStyle, primaryBtn, ghostBtn, inputStyle } from '../../shared/lib/tokens';
+import { todayIso } from '../../shared/lib/date';
 
 interface LineInput {
   id: string;
@@ -28,7 +29,7 @@ const Journal: React.FC = () => {
   const createMut = useCreateJournalEntry();
   const [showCreate, setShowCreate] = useState(false);
   const [memo, setMemo] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(todayIso());
 
   const [lines, setLines] = useState<LineInput[]>([
     { id: '1', accountName: '', accountId: 0, type: 'debit', amount: 0 },
@@ -72,7 +73,7 @@ const Journal: React.FC = () => {
       );
       return;
     }
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     if (date > today) {
       toast.error(t('futureDate'));
       return;
@@ -262,7 +263,7 @@ const Journal: React.FC = () => {
               style={inputStyle}
               type="date"
               value={date}
-              max={new Date().toISOString().split('T')[0]}
+              max={todayIso()}
               onChange={(e) => setDate(e.target.value)}
             />
             <input

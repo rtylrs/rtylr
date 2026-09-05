@@ -29,6 +29,7 @@ import { useSettings } from '../../shared/lib/settings';
 import { unwrap } from '@voxire/api';
 import { listCrmCustomers } from '../../shared/lib/clients';
 import { parseClientsResponse } from '../../shared/schemas/clients';
+import { toLocalIso, todayIso } from '../../shared/lib/date';
 
 const newInvoiceRoute = getRouteApi('/layout/invoices/new');
 
@@ -41,8 +42,8 @@ const NewInvoice: React.FC = () => {
   const settings = useSettings();
   const [step, setStep] = useState(0);
   const [client, setClient] = useState<Client | null>(null);
-  const today = new Date().toISOString().slice(0, 10);
-  const due = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
+  const today = todayIso();
+  const due = toLocalIso(new Date(Date.now() + 30 * 86_400_000));
   const [issuedDate, setIssuedDate] = useState(today);
   const [dueDate, setDueDate] = useState(due);
   const [invoiceNumber, setInvoiceNumber] = useState(

@@ -9,6 +9,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useBalanceSheet } from './useBalanceSheet';
 import { useErpInventoryValuation } from '../../shared/hooks/queries/useErpInventoryValuation';
 import { cardStyle, ACCENT } from '../../shared/lib/tokens';
+import { todayIso } from '../../shared/lib/date';
 
 const Section: React.FC<{
   title: string;
@@ -69,7 +70,7 @@ const Section: React.FC<{
 
 const BalanceSheet: React.FC = () => {
   const { t } = useTranslation('finance');
-  const [asOfDate, setAsOfDate] = useState(new Date().toISOString().slice(0, 10));
+  const [asOfDate, setAsOfDate] = useState(todayIso());
   const { data, isLoading } = useBalanceSheet(asOfDate);
   // ERP->FIN-02: the Inventory line exists only when ERP answers. A tenant
   // without ERP gets no section at all, never a zero: a balance sheet that
@@ -114,7 +115,7 @@ const BalanceSheet: React.FC = () => {
             <input
               type="date"
               value={asOfDate}
-              max={new Date().toISOString().slice(0, 10)}
+              max={todayIso()}
               onChange={(e) => setAsOfDate(e.target.value)}
               style={{
                 padding: '5px 10px',
