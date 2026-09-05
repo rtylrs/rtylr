@@ -3,5 +3,6 @@
   "emptyTryAnotherSearch": "Try another search.",
   "emptyNoQrCodesYet": "No QR codes yet.",
   "createQrCode": "QR Code",
+  "exportFailed": "Failed to export the QR code.",
   "tableQrComingSoon": "Printable QR links for tables aren't available yet — use the custom generator above in the meantime."
 }
