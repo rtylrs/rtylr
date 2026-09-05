@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import VendorDashboard from './VendorDashboard';
 import { useUserStore } from '../../../shared/stores/userStore';
 
 const navigateMock = vi.hoisted(() => vi.fn());
+const saveActiveWidgetsMock = vi.hoisted(() => vi.fn());
+const saveLayoutMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateMock,
@@ -38,11 +40,23 @@ vi.mock('motion/react', () => ({
 
 vi.mock('./widgets', () => ({
   getWidgetComponent: () => null,
-  WIDGET_CATALOG: [],
+  WIDGET_CATALOG: [
+    {
+      id: 'w-test',
+      label: 'Test widget',
+      description: 'Widget for duplicate-add regression coverage',
+      defaultW: 4,
+      defaultH: 3,
+      minW: 2,
+      minH: 2,
+      maxW: 6,
+      maxH: 5,
+    },
+  ],
   loadLayout: () => [],
-  saveLayout: () => undefined,
+  saveLayout: (...args: unknown[]) => saveLayoutMock(...args),
   loadActiveWidgets: () => [],
-  saveActiveWidgets: () => undefined,
+  saveActiveWidgets: (...args: unknown[]) => saveActiveWidgetsMock(...args),
   DEFAULT_LAYOUT: [],
 }));
 
@@ -75,6 +89,28 @@ describe('VendorDashboard', () => {
     createRoleButton.click();
 
     expect(navigateMock).toHaveBeenCalledWith({ to: '/roles', search: { create: 1 } });
+  });
+
+  it('adds a widget only once on rapid double activation', async () => {
+    useUserStore.setState({ user: { id: 1, role: 'admin' } });
+    saveActiveWidgetsMock.mockClear();
+    saveLayoutMock.mockClear();
+
+    render(<VendorDashboard />);
+    fireEvent.click(await screen.findByTitle('Customize dashboard'));
+
+    // Native clicks inside a single act() commit both activations in the
+    // same tick, reproducing the double-add race.
+    const add = await screen.findByRole('button', { name: 'Add' });
+    act(() => {
+      add.click();
+      add.click();
+    });
+
+    expect(saveActiveWidgetsMock).toHaveBeenCalledTimes(1);
+    expect(saveActiveWidgetsMock).toHaveBeenCalledWith(['w-test']);
+    expect(screen.queryByRole('button', { name: 'Add' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove' })).toBeInTheDocument();
   });
 
   it.each(['operator', 'billing', 'menu_manager', 'store_manager', 'staff', 'viewer'])(
