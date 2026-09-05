@@ -51,9 +51,15 @@ export function formatDateShort(d: Date | string): string {
 }
 
 export function daysBetween(a: Date | string, b: Date | string): number {
+  // Counted in calendar days, not in 24 hour blocks. A local day is 23 or 25
+  // hours long when the clocks change, so dividing raw milliseconds and
+  // flooring made a ten day gap measure eleven across a DST transition. The
+  // one caller is the late fee calculation, which charged the extra day.
   const d1 = parseLocal(a);
   const d2 = parseLocal(b);
-  return Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
+  const start = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+  const end = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+  return Math.round((end - start) / (1000 * 60 * 60 * 24));
 }
 
 export function addDays(d: Date | string, days: number): Date {
