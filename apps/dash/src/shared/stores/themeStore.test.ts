@@ -1,12 +1,36 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useThemeStore, applyTheme, type Theme } from './themeStore';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { useThemeStore, applyTheme, isSystemListenerActive, type Theme } from './themeStore';
 
 const { getState } = useThemeStore;
+
+const listeners = vi.hoisted(() => ({
+  added: [] as (() => void)[],
+  removed: [] as (() => void)[],
+}));
+
+function mockMatchMedia() {
+  listeners.added = [];
+  listeners.removed = [];
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: vi.fn().mockReturnValue({
+      matches: false,
+      addEventListener: vi.fn((_event: string, handler: () => void) => {
+        listeners.added.push(handler);
+      }),
+      removeEventListener: vi.fn((_event: string, handler: () => void) => {
+        listeners.removed.push(handler);
+      }),
+    }),
+  });
+}
 
 beforeEach(() => {
   useThemeStore.setState({ theme: 'light' });
   document.documentElement.removeAttribute('data-theme');
   document.body.style.background = '';
+  getState().setTheme('light');
 });
 
 describe('themeStore (dash)', () => {
@@ -62,5 +86,37 @@ describe('applyTheme', () => {
   it('applies system theme (resolves to light when matchMedia returns false)', () => {
     applyTheme('system');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  });
+});
+
+describe('system theme listener lifecycle', () => {
+  beforeEach(() => {
+    mockMatchMedia();
+  });
+
+  it('attaches the OS listener when switching to system', () => {
+    getState().setTheme('system');
+
+    expect(isSystemListenerActive()).toBe(true);
+    expect(listeners.added).toHaveLength(1);
+  });
+
+  it('detaches the OS listener when leaving system', () => {
+    getState().setTheme('system');
+    const [handler] = listeners.added;
+
+    getState().setTheme('light');
+
+    expect(isSystemListenerActive()).toBe(false);
+    expect(listeners.removed).toEqual([handler]);
+  });
+
+  it('replaces rather than stacks the listener on repeat system sets', () => {
+    getState().setTheme('system');
+    getState().setTheme('system');
+
+    expect(listeners.added).toHaveLength(2);
+    expect(listeners.removed).toHaveLength(1);
+    expect(isSystemListenerActive()).toBe(true);
   });
 });
