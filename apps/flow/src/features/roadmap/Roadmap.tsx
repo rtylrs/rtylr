@@ -8,6 +8,7 @@ import { formatDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 const Roadmap: React.FC = () => {
   const { t } = useTranslation();
@@ -53,7 +54,7 @@ const Roadmap: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <span
                     className="h-8 w-8 rounded-md flex items-center justify-center font-bold text-meta"
-                    style={{ background: `${p.color}22`, color: p.color }}
+                    style={{ background: withAlpha(p.color, 13), color: p.color }}
                   >
                     {p.name.charAt(0)}
                   </span>

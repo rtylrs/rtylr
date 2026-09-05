@@ -57,6 +57,24 @@ export const PROJECT_COLORS = [
 
 export type ProjectColor = (typeof PROJECT_COLORS)[number];
 
+/**
+ * A colour at a given opacity, as a CSS value.
+ *
+ * The codebase built these by concatenating a hex alpha suffix onto the
+ * colour, `${health.color}1a`. That only works when the colour is a literal
+ * hex: the moment it is a token, `var(--flow-status-approved)1a` is not a
+ * colour at all and the declaration is dropped, taking the whole background
+ * with it.
+ *
+ * color-mix takes any colour, including a var(), so a tone can move to a
+ * token without every consumer having to know what shape it is. Tailwind v4
+ * already requires color-mix support for its own opacity modifiers, so this
+ * costs no browser support the app did not already need.
+ */
+export function withAlpha(color: string, percent: number): string {
+  return `color-mix(in srgb, ${color} ${percent}%, transparent)`;
+}
+
 /** Returns a color from the palette by index, wrapping around. */
 export function paletteColor(index: number): ProjectColor {
   return PROJECT_COLORS[index % PROJECT_COLORS.length];

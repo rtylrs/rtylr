@@ -18,7 +18,7 @@ export function loadTierColor(tier: 'over' | 'near' | 'ok'): string {
   const colors: Record<'over' | 'near' | 'ok', string> = {
     over: '#ef4444',
     near: '#f59e0b',
-    ok: '#22c55e',
+    ok: 'var(--flow-status-approved)',
   };
   return colors[tier];
 }

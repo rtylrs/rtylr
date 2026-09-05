@@ -1,0 +1,104 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { withAlpha } from './colorUtils';
+
+/**
+ * A colour at an opacity has to survive the colour being a token.
+ *
+ * The codebase built these by sticking a hex alpha suffix on the end,
+ * `${health.color}1a`. That works only while the colour is a literal hex. Five
+ * sites had already crossed that line and were writing
+ * `var(--accent)66`, which is not a colour, so the browser dropped the whole
+ * declaration and those fills and borders **did not render at all**.
+ */
+const SRC = path.resolve(__dirname, '../..');
+
+function sourceFiles(dir: string, into: string[] = []): string[] {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === 'node_modules' || entry.name === 'locales') continue;
+      sourceFiles(full, into);
+      continue;
+    }
+    if (!/\.tsx?$/.test(entry.name)) continue;
+    if (/\.test\.tsx?$/.test(entry.name)) continue;
+    into.push(full);
+  }
+  return into;
+}
+
+describe('withAlpha', () => {
+  it('works on a hex', () => {
+    expect(withAlpha('#f56d8f', 13)).toBe('color-mix(in srgb, #f56d8f 13%, transparent)');
+  });
+
+  it('works on a token, which a hex suffix cannot', () => {
+    expect(withAlpha('var(--flow-status-approved)', 20)).toBe(
+      'color-mix(in srgb, var(--flow-status-approved) 20%, transparent)'
+    );
+  });
+
+  it('produces a value the browser will parse, not a concatenation', () => {
+    const value = withAlpha('var(--accent)', 40);
+    expect(value).toMatch(/^color-mix\(in srgb, .+ \d+%, transparent\)$/);
+    expect(value).not.toMatch(/\)[0-9a-f]{2}$/i);
+  });
+});
+
+describe('no colour gets an alpha by string concatenation', () => {
+  it('nowhere in the app', () => {
+    // `${color}1a` is the shape. It is silently correct for a hex and
+    // silently broken for a token, which is the worst combination: it works
+    // until someone tokenises the colour, then stops rendering with no error.
+    const offenders: string[] = [];
+    for (const file of sourceFiles(SRC)) {
+      // Comments stripped: withAlpha's own doc comment quotes the shape it
+      // replaces, and a naive scan matches that rather than any code.
+      const lines = fs
+        .readFileSync(file, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, (block) => block.replace(/[^\n]/g, ' '))
+        .split('\n');
+      lines.forEach((line, index) => {
+        if (line.trim().startsWith('//')) return;
+        for (const match of line.matchAll(/\$\{[^}]+\}[0-9a-fA-F]{2}\b/g)) {
+          offenders.push(`${path.relative(SRC, file)}:${index + 1}  ${match[0]}`);
+        }
+      });
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
+describe("Flow's positive tone is the teal token", () => {
+  it.each([
+    ['shared/stores/flowStore.ts', 'done'],
+    ['shared/lib/progressUtils.ts', 'on_track'],
+    ['shared/lib/workloadUtils.ts', 'ok'],
+    ['shared/components/CycleBadge.tsx', 'active'],
+  ])('%s maps %s to the approved token', (file, key) => {
+    // The exact pair, not the first line starting with the key:
+    // progressUtils has an on_track in its label map as well as its colour
+    // map, and the label one comes first.
+    const source = fs.readFileSync(path.join(SRC, file), 'utf8');
+    expect(source, `${key} in ${file}`).toContain(`${key}: 'var(--flow-status-approved)'`);
+  });
+
+  it('leaves no green as a semantic value', () => {
+    // The palette arrays keep their hex: those are the colours a user picks
+    // from, not a tone the app assigns.
+    const PALETTES = [
+      'features/settings/FlowSettings.tsx',
+      'features/projects/components/StatusSettingsPanel.tsx',
+      'shared/lib/colorUtils.ts',
+    ];
+    const offenders: string[] = [];
+    for (const file of sourceFiles(SRC)) {
+      const relative = path.relative(SRC, file);
+      if (PALETTES.includes(relative)) continue;
+      if (fs.readFileSync(file, 'utf8').includes('#22c55e')) offenders.push(relative);
+    }
+    expect(offenders).toEqual([]);
+  });
+});

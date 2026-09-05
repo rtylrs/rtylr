@@ -25,6 +25,7 @@ import { displayUserName } from '../lib/userDisplay';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
 import { useCreateTask } from '../../features/tasks/useTasks';
 import { useLabels } from '../../features/tasks/useLabels';
+import { withAlpha } from '../lib/colorUtils';
 
 function FieldRow({
   label,
@@ -228,7 +229,7 @@ export const QuickCreate: React.FC = () => {
                         background: assignToMe ? 'var(--flow-hover)' : 'transparent',
                         color: 'var(--flow-text)',
                         border: assignToMe
-                          ? `1px solid ${'var(--accent)'}44`
+                          ? `1px solid ${withAlpha('var(--accent)', 27)}`
                           : '1px solid transparent',
                       }}
                     >
@@ -286,7 +287,7 @@ export const QuickCreate: React.FC = () => {
                           color: 'var(--flow-text)',
                           border:
                             effortMinutes === m
-                              ? `1px solid ${'var(--accent)'}55`
+                              ? `1px solid ${withAlpha('var(--accent)', 33)}`
                               : '1px solid var(--flow-border)',
                         }}
                       >

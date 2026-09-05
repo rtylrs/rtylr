@@ -21,6 +21,7 @@ import {
 import type { ApiNotification } from '../../shared/services/flowApi';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 type FilterType = 'all' | 'unread' | 'assigned';
 
@@ -28,7 +29,7 @@ const TYPE_ICONS: Record<ApiNotification['type'], React.ReactNode> = {
   assigned: <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />,
   mention: <AtSign size={14} style={{ color: '#f59e0b' }} />,
   comment: <MessageSquare size={14} style={{ color: '#3b82f6' }} />,
-  status_change: <Circle size={14} style={{ color: '#22c55e' }} />,
+  status_change: <Circle size={14} style={{ color: 'var(--flow-status-approved)' }} />,
   due_soon: <Bell size={14} style={{ color: 'var(--flow-danger-fg)' }} />,
 };
 
@@ -72,7 +73,7 @@ const NotificationRow: React.FC<{
         className="h-8 w-8 rounded-full flex items-center justify-center text-meta font-bold shrink-0 mt-0.5"
         style={{
           background: notification.projectColor
-            ? `${notification.projectColor}22`
+            ? withAlpha(notification.projectColor, 13)
             : 'var(--accent-muted)',
           color: notification.projectColor || 'var(--accent)',
         }}

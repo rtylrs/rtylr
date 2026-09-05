@@ -14,10 +14,11 @@ import { CardSkeleton } from '../../shared/components/Skeleton';
 import { useProjects, useCreateProject } from '../projects/useProjects';
 import { milestoneProgress } from '../../shared/lib/milestoneUtils';
 import GateNotice from '../../shared/components/GateNotice';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   planning: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
-  active: { bg: 'rgba(34,197,94,0.15)', color: '#22c55e' },
+  active: { bg: 'var(--flow-status-approved-bg)', color: 'var(--flow-status-approved)' },
   at_risk: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
   completed: { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
 };
@@ -372,7 +373,7 @@ const Milestones: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <span
                     className="h-8 w-8 rounded-md flex items-center justify-center"
-                    style={{ background: `${m.project?.color || 'var(--accent)'}22` }}
+                    style={{ background: withAlpha(m.project?.color || 'var(--accent)', 13) }}
                   >
                     <MilestoneIcon
                       size={14}

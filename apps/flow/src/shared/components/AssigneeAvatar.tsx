@@ -1,5 +1,6 @@
 import React from 'react';
 import { ACCENT_DEFAULT } from '../lib/colorUtils';
+import { withAlpha } from '../lib/colorUtils';
 
 interface AssigneeAvatarProps {
   name: string;
@@ -23,7 +24,7 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
       style={{
         width: size,
         height: size,
-        background: `${color}22`,
+        background: withAlpha(color, 13),
         color,
         // Initials scale with the circle, so the scale cannot supply this
         // one: at the sizes in use (18 to 28) a 12px floor overflows a two

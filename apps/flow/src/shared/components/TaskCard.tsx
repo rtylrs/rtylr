@@ -10,6 +10,7 @@ import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
+import { withAlpha } from '../lib/colorUtils';
 
 interface TaskCardProps {
   task: Task;
@@ -106,7 +107,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               <span
                 className="min-w-0 max-w-[7rem] shrink-0 truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
                 style={{
-                  background: task.statusColor ? `${task.statusColor}22` : 'var(--accent-muted)',
+                  background: task.statusColor
+                    ? withAlpha(task.statusColor, 13)
+                    : 'var(--accent-muted)',
                   color: task.statusColor ?? 'var(--accent)',
                 }}
                 title={task.statusName}
@@ -120,7 +123,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             <span
               className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
               style={{
-                background: project?.color ? `${project.color}22` : 'var(--accent-muted)',
+                background: project?.color ? withAlpha(project.color, 13) : 'var(--accent-muted)',
                 color: project?.color ?? 'var(--accent)',
               }}
               title={project?.name ?? task.projectName}

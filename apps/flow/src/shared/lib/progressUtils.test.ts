@@ -102,8 +102,11 @@ describe('projectHealthLabel', () => {
 // ---------------------------------------------------------------------------
 
 describe('projectHealthColor', () => {
-  it('returns green for on_track', () => {
-    expect(projectHealthColor('on_track')).toMatch(/^#[0-9a-f]{6}$/i);
+  it('returns the approved token for on_track, not a hex', () => {
+    // This asserted a hex, which pinned the hardcoded #22c55e. Flow's positive
+    // tone is the teal --flow-status-approved: the token set has no green, and
+    // #22c55e measured 2.28:1 as text.
+    expect(projectHealthColor('on_track')).toBe('var(--flow-status-approved)');
   });
 
   it('returns a different color for at_risk vs on_track', () => {
