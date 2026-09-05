@@ -12,7 +12,6 @@ import { ACCENT_DEFAULT } from '../../shared/lib/colorUtils';
 import { formatDate } from '../../shared/lib/utils';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import { useProjects, useCreateProject } from '../projects/useProjects';
-import { milestoneProgress } from '../../shared/lib/milestoneUtils';
 import GateNotice from '../../shared/components/GateNotice';
 import { withAlpha } from '../../shared/lib/colorUtils';
 
@@ -401,36 +400,21 @@ const Milestones: React.FC = () => {
                   {m.description}
                 </p>
               )}
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
-                  {t('flow.milestones.progress')}
-                </span>
-                <span className="text-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
-                  {m.taskCount === 0 ? t('flow.milestones.noTasksYet') : `${milestoneProgress(m)}%`}
-                </span>
-              </div>
-              <div
-                className="h-1.5 rounded-full overflow-hidden mb-3"
-                style={{ background: 'var(--flow-hover)' }}
-              >
-                {/* milestoneProgress, not m.computedProgress. The raw field is
-                    optional, and `width: undefined%` is an invalid
-                    declaration, which the browser drops: the fill then took
-                    its parent's width and a milestone with unknown progress
-                    rendered as a completed one. The percentage beside it read
-                    as a bare "%" for the same reason. */}
-                <div
-                  className="h-full transition-all"
-                  style={{ width: `${milestoneProgress(m)}%`, background: style.color }}
-                />
-              </div>
+              {/* No progress bar, and no task count, until a task can be put
+                  into a milestone. There is no attach operation in the UI or
+                  the API, so every milestone's progress is 0 of 0 forever, and
+                  a bar that can only ever read empty tells a customer their
+                  work has not started when nothing could have started it.
+
+                  Restore both when the attach operation lands: rtylr#1064 and
+                  REQ-R15. The percentage and the fill already read
+                  milestoneProgress, so it is the surrounding markup that comes
+                  back, not the calculation. */}
               <div
                 className="flex items-center justify-between text-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
-                <span>
-                  {t('flow.milestones.taskCount', { done: m.doneCount, total: m.taskCount })}
-                </span>
+                <span>{t('flow.milestones.noTasksHint')}</span>
                 <span>
                   {t('flow.milestones.target')} {formatDate(m.targetDate)}
                 </span>
