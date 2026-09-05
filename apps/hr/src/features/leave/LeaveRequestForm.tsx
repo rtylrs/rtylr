@@ -21,6 +21,7 @@ import {
   Textarea,
   Skeleton,
 } from '../../shared/components/ui';
+import { todayIso } from '../../shared/lib/dateUtils';
 
 const leaveFormSchema = z.object({
   leaveTypeId: z.string().min(1),
@@ -232,7 +233,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
                   type="date"
                   value={form.startDate}
                   onChange={(e) => update('startDate', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={todayIso()}
                   style={errors.startDate ? { borderColor: 'var(--hr-error)' } : undefined}
                 />
                 {errors.startDate && (
@@ -247,7 +248,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
                   type="date"
                   value={form.endDate}
                   onChange={(e) => update('endDate', e.target.value)}
-                  min={form.startDate || new Date().toISOString().split('T')[0]}
+                  min={form.startDate || todayIso()}
                   style={errors.endDate ? { borderColor: 'var(--hr-error)' } : undefined}
                 />
                 {errors.endDate && (

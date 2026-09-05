@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useGetLeaveCalendar } from '../../shared/hooks/queries/useLeave';
 import { Card, Button, Skeleton, Select, Label } from '../../shared/components/ui';
 import { ErrorBoundary, EmptyState } from '@voxire/ui';
+import { toLocalIso } from '../../shared/lib/dateUtils';
 
 const DAYS_OF_WEEK_KEYS = [
   'timesheets.days.mon',
@@ -73,7 +74,7 @@ const LeaveCalendarInner = (): React.JSX.Element => {
   const getEntriesForDate = useCallback(
     (date: Date) => {
       if (!entries) return [];
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = toLocalIso(date);
       return entries.filter((e) => dateStr >= (e.startDate ?? '') && dateStr <= (e.endDate ?? ''));
     },
     [entries]

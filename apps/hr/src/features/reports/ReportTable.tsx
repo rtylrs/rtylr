@@ -6,6 +6,7 @@ import { EmptyState } from '@voxire/ui';
 import { Button } from '../../shared/components/ui';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { ReportPayload } from '../../shared/schemas/reports';
+import { toLocalIso } from '../../shared/lib/dateUtils';
 
 interface ReportTableProps {
   report: ReportPayload;
@@ -164,7 +165,7 @@ const ReportTable = ({
   });
 
   const handleExportCsv = useCallback((): void => {
-    const filename = `${report.reportType}_${new Date(report.generatedAt * 1000).toISOString().slice(0, 10)}.csv`;
+    const filename = `${report.reportType}_${toLocalIso(new Date(report.generatedAt * 1000))}.csv`;
     downloadCsv(report.columns, report.rows, filename);
   }, [report]);
 
@@ -191,7 +192,7 @@ const ReportTable = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${report.reportType}_${new Date(report.generatedAt * 1000).toISOString().slice(0, 10)}.pdf`;
+      a.download = `${report.reportType}_${toLocalIso(new Date(report.generatedAt * 1000))}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {

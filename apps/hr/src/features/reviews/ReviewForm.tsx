@@ -16,6 +16,7 @@ import {
   useIsMobile,
 } from '../../shared/components/ui';
 import RatingStars from '../../shared/components/RatingStars';
+import { todayIso } from '../../shared/lib/dateUtils';
 
 const ReviewForm: React.FC = () => {
   const isMobile = useIsMobile(900);
@@ -54,7 +55,7 @@ const ReviewForm: React.FC = () => {
         values,
         skills,
         notes,
-        date: new Date().toISOString().slice(0, 10),
+        date: todayIso(),
       },
       {
         onSuccess: () => {
