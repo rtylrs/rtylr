@@ -64,7 +64,7 @@ export const SearchCommand: React.FC = () => {
       // Navigation
       {
         id: 'nav-dashboard',
-        label: t('common.nav.goToDashboard', 'Go to Dashboard'),
+        label: t('common.nav.goToDashboard', 'Go to Account Home'),
         group: groupNavigate,
         icon: LayoutDashboard,
         action: go('/'),

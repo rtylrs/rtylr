@@ -118,7 +118,7 @@
   },
   "close": "Fermer",
   "nav": {
-    "dashboard": "Tableau de bord",
+    "dashboard": "Accueil du compte",
     "team": "Équipe",
     "addMember": "Ajouter un membre",
     "permissions": "Autorisations",
@@ -157,7 +157,7 @@
     "search": "Rechercher",
     "openCommandPalette": "Ouvrir la palette de commandes",
     "hub": "Accueil",
-    "goToDashboard": "Aller au tableau de bord",
+    "goToDashboard": "Aller à l'accueil du compte",
     "teamMembers": "Membres de l'équipe",
     "allApps": "Toutes les applications",
     "activityLog": "Journal d'activité",

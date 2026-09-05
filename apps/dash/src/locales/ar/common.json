@@ -118,7 +118,7 @@
     "failedUpdateOrderStatus": "فشل تحديث حالة الطلب"
   },
   "nav": {
-    "dashboard": "لوحة التحكم",
+    "dashboard": "الصفحة الرئيسية للحساب",
     "team": "الفريق",
     "addMember": "إضافة عضو",
     "permissions": "الصلاحيات",
@@ -157,7 +157,7 @@
     "search": "بحث",
     "openCommandPalette": "فتح لوحة الأوامر",
     "hub": "الرئيسية",
-    "goToDashboard": "الذهاب إلى لوحة التحكم",
+    "goToDashboard": "الذهاب إلى الصفحة الرئيسية للحساب",
     "teamMembers": "أعضاء الفريق",
     "allApps": "جميع التطبيقات",
     "activityLog": "سجل النشاط",

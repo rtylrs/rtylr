@@ -75,7 +75,7 @@ export const APP_RESOURCES: AppDef[] = [
   },
   {
     id: 'dash',
-    label: 'Dashboard',
+    label: 'Account Home',
     sections: [{ key: 'dash.overview', label: 'Overview' }],
   },
   {

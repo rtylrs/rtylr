@@ -115,7 +115,7 @@
   },
   "close": "Close",
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Account Home",
     "team": "Team",
     "addMember": "Add a member",
     "permissions": "Permissions",
@@ -154,7 +154,7 @@
     "search": "Search",
     "openCommandPalette": "Open command palette",
     "hub": "Hub",
-    "goToDashboard": "Go to Dashboard",
+    "goToDashboard": "Go to Account Home",
     "teamMembers": "Team Members",
     "allApps": "All Apps",
     "activityLog": "Activity Log",

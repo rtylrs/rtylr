@@ -68,7 +68,7 @@ interface NavItem {
 }
 
 const rawNavItems: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { key: 'dashboard', label: 'Account Home', path: '/', icon: LayoutDashboard },
   { key: 'team', label: 'Team', path: '/team', icon: Users },
   { key: 'apps', label: 'Apps', path: '/apps', icon: Grid3x3 },
 ];
@@ -80,7 +80,7 @@ const rawMenuSubItems: NavItem[] = [
 ];
 
 const routeKeys: Record<string, { key: string; fallback: string }> = {
-  '/': { key: 'dashboard', fallback: 'Dashboard' },
+  '/': { key: 'dashboard', fallback: 'Account Home' },
   '/chat': { key: 'chat', fallback: '__caret__' },
   '/menus': { key: 'menus', fallback: 'Menus' },
   '/orders': { key: 'orders', fallback: 'Orders' },
