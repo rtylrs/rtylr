@@ -17,6 +17,11 @@ func TestIsMaliciousPath(t *testing.T) {
 		{"/console", false},
 		{"/console/stats", false},
 		{"/console/resources", false},
+		{"/upload", false},
+		{"/upload/plan", false},
+		{"/files/abc-123.jpg", false},
+		{"/images/abc-123.png", false},
+		{"/uploads/file.png", false},
 
 		// First-segment matches against the pattern list ARE blocked.
 		{"/admin/settings", true},

@@ -195,17 +195,12 @@ var maliciousPatterns = []string{
 	"/export",
 	"/import",
 	"/download",
-	"/upload",
-	"/file",
-	"/files",
 	"/static",
 	"/assets",
-	"/images",
 	"/css",
 	"/js",
 	"/fonts",
 	"/media",
-	"/uploads",
 	"/public",
 	"/private",
 	"/secret",
@@ -325,6 +320,10 @@ var suspiciousParams = []string{
 
 var maliciousPathAllowedPrefixes = []string{
 	"/console",
+	"/upload",
+	"/files",
+	"/images",
+	"/uploads",
 }
 
 func SecurityMiddleware() MiddlewareFunc {
