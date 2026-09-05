@@ -21,6 +21,8 @@ import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import { withAlpha } from '../../shared/lib/colorUtils';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 // labelKey, not label: module scope again, so it cannot call `t` itself.
 const HEALTH: Record<string, { color: string; labelKey: string }> = {
@@ -38,7 +40,8 @@ const ProjectOverview: React.FC = () => {
   const { projectId = '' } = useParams({ strict: false });
   useProjectRealtime(projectId);
 
-  const { data, isLoading } = useProjectOverview(projectId);
+  const overviewQuery = useProjectOverview(projectId);
+  const { data, isLoading } = overviewQuery;
   const { projects, members } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
 
@@ -48,6 +51,12 @@ const ProjectOverview: React.FC = () => {
         {t('flow.project.loading')}
       </div>
     );
+
+  // A failed overview leaves `data` undefined exactly as a missing project
+  // does, so a 500 used to report the project as gone.
+  if (hasQueryFailed(overviewQuery)) {
+    return <ListLoadFailed onRetry={() => void overviewQuery.refetch()} />;
+  }
 
   if (!data || !project) {
     return (

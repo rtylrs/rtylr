@@ -69,6 +69,8 @@ import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPres
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import { withAlpha } from '../../shared/lib/colorUtils';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -160,7 +162,8 @@ const TaskDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   useTaskRealtime(id);
-  const { data: taskData, isLoading } = useTask(id);
+  const taskQuery = useTask(id);
+  const { data: taskData, isLoading } = taskQuery;
   const user = useUserStore((s) => s.user);
   // Read up here rather than below the isLoading early return: these gates are
   // hooks, so they have to run on every render, and they need the task's project.
@@ -280,6 +283,12 @@ const TaskDetail: React.FC = () => {
     const raw = detail?.subtasks?.find((s) => s.id === subtaskId);
     toggleSubtaskMut.mutate({ id: subtaskId, completed: raw?.status === 'done' });
   };
+
+  // A failed request leaves `task` undefined exactly as a deleted one does,
+  // so a 500 used to report the task as gone.
+  if (hasQueryFailed(taskQuery)) {
+    return <ListLoadFailed onRetry={() => void taskQuery.refetch()} />;
+  }
 
   if (!task) {
     return (
