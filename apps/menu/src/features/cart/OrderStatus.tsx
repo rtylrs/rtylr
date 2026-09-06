@@ -8,18 +8,7 @@ import { orderClient } from '../../shared/lib/clients';
 import { useCartStore } from '../../shared/stores/cartStore';
 
 // The backend returns the internal pos_orders enum, not the FE's display steps.
-type BackendOrderStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'preparing'
-  | 'ready'
-  | 'served'
-  | 'paid'
-  | 'held'
-  | 'cancelled'
-  | 'refunded'
-  | 'voided';
-
+// STEP_FOR_STATUS below maps each known status onto a display step.
 const POLL_INTERVAL_MS = 30_000;
 
 const STATUS_STEPS: { label: string }[] = [

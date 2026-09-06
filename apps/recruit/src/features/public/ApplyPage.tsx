@@ -218,7 +218,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
           </p>
           <button
             type="button"
-            onClick={() => navigate({ to: `/${slug}` as any })}
+            onClick={() => navigate({ to: '/$slug', params: { slug } })}
             className="mt-8 inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium"
             style={{ borderColor: 'var(--recruit-border)' }}
           >
@@ -235,7 +235,8 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       <Header customization={customization} compact />
       <main className="mx-auto max-w-xl px-6 py-12">
         <Link
-          to={`/${slug}/${careerSlug}` as any}
+          to="/$slug/$careerSlug"
+          params={{ slug, careerSlug }}
           className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >

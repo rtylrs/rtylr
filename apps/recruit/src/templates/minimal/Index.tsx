@@ -52,7 +52,8 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
             careers.map((c) => (
               <Link
                 key={c.id}
-                to={`/${customization.slug}/${c.slug}` as any}
+                to="/$slug/$careerSlug"
+                params={{ slug: customization.slug, careerSlug: c.slug }}
                 className="group flex items-center justify-between rounded-lg border bg-white px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-sm"
                 style={{ borderColor: 'var(--recruit-border)' }}
               >

@@ -33,19 +33,6 @@ interface PageItem {
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
-/**
- * Every analytics page other than Overview (the home screen) - reached from the
- * "Pages" menu, not a persistent sidebar. Settings lives in the profile menu instead.
- */
-const pageItems: PageItem[] = [
-  { label: 'Revenue', path: '/revenue', icon: TrendingUp },
-  { label: 'Customers', path: '/customers', icon: Users },
-  { label: 'Products', path: '/products', icon: Package },
-  { label: 'Operations', path: '/operations', icon: Briefcase },
-  { label: 'Financial', path: '/financial', icon: DollarSign },
-  { label: 'Reports', path: '/reports', icon: FileText },
-];
-
 const ACCENT = '#6366f1';
 
 type Theme = 'dark' | 'light' | 'system';

@@ -3,7 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
-import { safeRatio, toFiniteNumber } from '@voxire/api';
+import { safeRatio } from '@voxire/api';
 import { Expense } from '../../shared/services/financeApi';
 import { useExpenses, useExpenseCategories } from './useExpenses';
 
