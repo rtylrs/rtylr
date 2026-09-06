@@ -350,8 +350,14 @@ export const CommandBar: React.FC = () => {
                           onClick={() => run(item)}
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-meta"
                           style={{
-                            background: active ? 'var(--flow-hover)' : 'transparent',
-                            color: 'var(--flow-text)',
+                            // The accent tint, not the neutral hover grey. This
+                            // row is what Enter will run, and a grey that also
+                            // means "the pointer is here" does not say so.
+                            // The -on-muted pair is the sanctioned one: reusing
+                            // --accent-fg on this tint put 40 of 56 light-mode
+                            // combinations under 4.5:1 (#970).
+                            background: active ? 'var(--accent-muted)' : 'transparent',
+                            color: active ? 'var(--accent-on-muted)' : 'var(--flow-text)',
                           }}
                         >
                           <Icon size={13} />
