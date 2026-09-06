@@ -122,7 +122,10 @@ const builtinItems: SidebarItemPreference[] = [
   {
     id: 'builtin:projects-shortcut',
     kind: 'builtin',
-    label: 'nav.projects',
+    // The title of the screen it opens, not nav.projects. That key also names
+    // the Projects group below it, so the sidebar showed two rows called
+    // "Projects" pointing at different places.
+    label: 'flow.allProjects.title',
     route: '/projects',
     icon: 'layout-grid',
     visible: true,
@@ -264,7 +267,10 @@ const builtinItems: SidebarItemPreference[] = [
   {
     id: 'builtin:time-settings',
     kind: 'builtin',
-    label: 'flow.settings.time.section',
+    // Its own key, not flow.settings.time.section. That string is also the
+    // Settings tab label, where "Time" is right; here it sat inside a group
+    // already called Time, so the sidebar showed two entries with one name.
+    label: 'flow.time.settingsLink',
     route: '/settings?section=time',
     icon: 'settings',
     groupId: 'time',
