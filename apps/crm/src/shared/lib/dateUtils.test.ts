@@ -11,7 +11,12 @@ import {
 
 describe('isToday', () => {
   it('returns true for today', () => {
-    const today = new Date().toISOString().split('T')[0];
+    // Built from local parts. isToday reports the reader's day, so deriving
+    // the fixture through toISOString made this test pass only while the UTC
+    // day and the local day agreed: it failed at 00:08 local, three hours
+    // before UTC midnight.
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     expect(isToday(today)).toBe(true);
   });
 
