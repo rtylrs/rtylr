@@ -677,7 +677,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center text-meta font-bold"
                 style={{
                   background: 'var(--accent-muted)',
-                  color: 'var(--accent-fg)',
+                  color: 'var(--accent-on-muted)',
                 }}
                 aria-hidden
               >

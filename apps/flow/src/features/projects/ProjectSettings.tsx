@@ -335,7 +335,10 @@ const ProjectSettings: React.FC = () => {
                     >
                       <span
                         className="h-7 w-7 rounded-full flex items-center justify-center text-meta font-bold shrink-0"
-                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                        style={{
+                          background: 'var(--accent-muted)',
+                          color: 'var(--accent-on-muted)',
+                        }}
                       >
                         {initials}
                       </span>

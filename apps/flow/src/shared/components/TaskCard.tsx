@@ -110,7 +110,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   background: task.statusColor
                     ? withAlpha(task.statusColor, 13)
                     : 'var(--accent-muted)',
-                  color: task.statusColor ?? 'var(--accent)',
+                  color: task.statusColor ?? 'var(--accent-on-muted)',
                 }}
                 title={task.statusName}
               >
@@ -124,7 +124,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
               style={{
                 background: project?.color ? withAlpha(project.color, 13) : 'var(--accent-muted)',
-                color: project?.color ?? 'var(--accent)',
+                color: project?.color ?? 'var(--accent-on-muted)',
               }}
               title={project?.name ?? task.projectName}
             >

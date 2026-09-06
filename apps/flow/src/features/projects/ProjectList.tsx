@@ -152,7 +152,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       {/* Assignee */}
       <span
         className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold shrink-0"
-        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+        style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
       >
         {task.assigneeInitials}
       </span>
@@ -367,7 +367,7 @@ const ProjectList: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-meta font-medium transition-colors"
             style={{
               background: 'var(--accent-muted)',
-              color: 'var(--accent)',
+              color: 'var(--accent-on-muted)',
             }}
           >
             <List size={13} />

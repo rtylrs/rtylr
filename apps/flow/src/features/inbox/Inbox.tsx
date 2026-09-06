@@ -75,7 +75,7 @@ const NotificationRow: React.FC<{
           background: notification.projectColor
             ? withAlpha(notification.projectColor, 13)
             : 'var(--accent-muted)',
-          color: notification.projectColor || 'var(--accent)',
+          color: notification.projectColor || 'var(--accent-on-muted)',
         }}
       >
         {notification.actorInitials || '?'}
@@ -196,7 +196,7 @@ const Inbox: React.FC = () => {
             className="px-3 py-1.5 rounded-md text-meta font-medium transition-colors"
             style={{
               background: activeFilter === id ? 'var(--accent-muted)' : 'transparent',
-              color: activeFilter === id ? 'var(--accent)' : 'var(--flow-text-muted)',
+              color: activeFilter === id ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
             }}
           >
             {label}

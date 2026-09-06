@@ -159,7 +159,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
                 ].join(' ')}
                 style={
                   active
-                    ? { background: 'var(--accent-muted)', color: 'var(--accent)' }
+                    ? { background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }
                     : { color: 'var(--flow-text-muted)' }
                 }
               >
