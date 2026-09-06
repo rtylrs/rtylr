@@ -34,7 +34,7 @@ function ProjectCard({ project }: { project: Project }) {
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
             style={{
               background: project.color ? withAlpha(project.color, 13) : 'var(--accent-muted)',
-              color: project.color ?? 'var(--accent)',
+              color: project.color ?? 'var(--accent-on-muted)',
             }}
             aria-hidden
           >

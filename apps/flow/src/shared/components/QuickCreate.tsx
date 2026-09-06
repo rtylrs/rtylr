@@ -235,7 +235,10 @@ export const QuickCreate: React.FC = () => {
                     >
                       <span
                         className="h-6 w-6 rounded-full flex items-center justify-center text-meta font-bold"
-                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                        style={{
+                          background: 'var(--accent-muted)',
+                          color: 'var(--accent-on-muted)',
+                        }}
                       >
                         {getInitials(assigneeName)}
                       </span>

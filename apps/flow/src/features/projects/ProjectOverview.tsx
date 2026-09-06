@@ -273,7 +273,7 @@ const ProjectOverview: React.FC = () => {
                 <div key={c.id} className="flex items-start gap-2 text-meta">
                   <span
                     className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold shrink-0 mt-0.5"
-                    style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                   >
                     {c.authorInitials}
                   </span>
