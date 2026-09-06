@@ -26,6 +26,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 import {
+  SIDEBAR_GROUP_IDS,
   createDefaultSidebarPreferences,
   parseSidebarPreferences,
   recordRecentSidebarPage,
@@ -39,7 +40,10 @@ describe('sidebar preferences', () => {
   it('starts with the system groups and top navigation', () => {
     const preferences = createDefaultSidebarPreferences();
 
-    expect(preferences.groupOrder).toEqual(['plan', 'team', 'time', 'projects']);
+    // Projects first, deliberately. With it last, three projects put P-Alpha at
+    // y=1080 in a 900px viewport, below a fold with no scrollbar and no fade to
+    // say the region scrolled (#1076).
+    expect(preferences.groupOrder).toEqual(['projects', 'plan', 'team', 'time']);
     expect(preferences.topLevelItemIds).toEqual([
       'builtin:inbox',
       'builtin:my-issues',
@@ -202,5 +206,70 @@ describe('useSidebarPreferences save does not clobber the cache (#1059)', () => 
       mentions: false,
       weeklyDigest: false,
     });
+  });
+});
+
+describe('sidebar defaults keep projects above the fold (#1076)', () => {
+  it('collapses the long groups and leaves projects open', () => {
+    // Expanded, Plan's five items and Time's six pushed the project list off
+    // the bottom of the viewport.
+    const byId = new Map(createDefaultSidebarPreferences().groups.map((g) => [g.id, g]));
+    expect(byId.get('plan')?.collapsed).toBe(true);
+    expect(byId.get('team')?.collapsed).toBe(true);
+    expect(byId.get('time')?.collapsed).toBe(true);
+    expect(byId.get('projects')?.collapsed).toBe(false);
+  });
+
+  it('keeps a group order the user saved, rather than reimposing the default', () => {
+    const stored = JSON.stringify({
+      version: 1,
+      groupOrder: ['time', 'projects', 'plan', 'team'],
+      groups: [],
+      items: [],
+      topLevelItemIds: [],
+    });
+    expect(parseSidebarPreferences(stored).groupOrder).toEqual([
+      'time',
+      'projects',
+      'plan',
+      'team',
+    ]);
+  });
+
+  it('keeps a group the user expanded expanded', () => {
+    const stored = JSON.stringify({
+      version: 1,
+      groupOrder: [...SIDEBAR_GROUP_IDS],
+      // icon is required by normalizeGroup: without it the group is dropped and
+      // the default wins, which is not what a real serialized payload looks like.
+      groups: [
+        {
+          id: 'plan',
+          kind: 'system',
+          label: 'flow.shell.plan',
+          icon: 'map',
+          itemIds: [],
+          visible: true,
+          collapsed: false,
+        },
+      ],
+      items: [],
+      topLevelItemIds: [],
+    });
+    const plan = parseSidebarPreferences(stored).groups.find((g) => g.id === 'plan');
+    expect(plan?.collapsed).toBe(false);
+  });
+
+  it('appends a group missing from a stored order rather than dropping it', () => {
+    const stored = JSON.stringify({
+      version: 1,
+      groupOrder: ['plan'],
+      groups: [],
+      items: [],
+      topLevelItemIds: [],
+    });
+    const order = parseSidebarPreferences(stored).groupOrder;
+    expect(order[0]).toBe('plan');
+    expect([...order].sort()).toEqual([...SIDEBAR_GROUP_IDS].sort());
   });
 });

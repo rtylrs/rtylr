@@ -463,3 +463,55 @@ describe('FlowLayout New project modal (#1060)', () => {
     });
   });
 });
+
+describe('FlowLayout desktop create control (#1076)', () => {
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  it('offers exactly two new-task buttons, one per breakpoint', () => {
+    renderLayout();
+    // Both are in the DOM; CSS decides which is visible, and happy-dom applies
+    // none, so the classes are what the assertion below actually checks.
+    const buttons = screen.getAllByRole('button', { name: 'flow.shell.newTask' });
+    expect(buttons).toHaveLength(2);
+  });
+
+  it('shows one of them at desktop, where the header + is display:none', () => {
+    renderLayout();
+    const buttons = screen.getAllByRole('button', { name: 'flow.shell.newTask' });
+
+    // The header + lives in an lg:hidden container, so at 1440px it measured
+    // 0x0 and the desktop shell had no create control at all. The sidebar one
+    // is lg:flex, so exactly one of the pair is visible at any width.
+    const desktopOnly = buttons.filter((b) => b.className.includes('lg:flex'));
+    expect(desktopOnly).toHaveLength(1);
+    expect(desktopOnly[0].className).toContain('hidden');
+  });
+
+  it('opens quick create when the desktop control is clicked', () => {
+    renderLayout();
+    const desktop = screen
+      .getAllByRole('button', { name: 'flow.shell.newTask' })
+      .find((b) => b.className.includes('lg:flex'));
+    expect(desktop).toBeDefined();
+
+    expect(useFlowStore.getState().quickCreateOpen).toBe(false);
+    fireEvent.click(desktop as HTMLElement);
+    expect(useFlowStore.getState().quickCreateOpen).toBe(true);
+    useFlowStore.getState().setQuickCreateOpen(false);
+  });
+
+  it('does not hide the create control behind a hover', () => {
+    // The + is meant to be the most visible control on the panel, unlike the
+    // ... menus, which reveal on hover.
+    renderLayout();
+    const desktop = screen
+      .getAllByRole('button', { name: 'flow.shell.newTask' })
+      .find((b) => b.className.includes('lg:flex'));
+    expect(desktop?.className).not.toContain('flow-reveal-on-hover');
+  });
+});
