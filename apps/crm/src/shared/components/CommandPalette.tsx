@@ -37,7 +37,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   // Only fetch the customer index while the palette is open — an eager query
   // pulled 50 customer rows on every app mount.
   const { data: fetchedCustomers } = useListCustomers({ limit: 50, offset: 0 }, open);
-  const customers = fetchedCustomers ?? [];
+  const customers = useMemo(() => fetchedCustomers ?? [], [fetchedCustomers]);
 
   useEffect(() => {
     if (!open) setQuery('');

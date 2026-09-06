@@ -232,7 +232,7 @@ export const useCreateContact = (): UseMutationResult<
       const res = await unwrap(crmApi.createContact(data));
       return res as SalesContact;
     },
-    onSuccess: (_data: SalesContact, variables: CreateContactRequest): void => {
+    onSuccess: (_data: SalesContact, _variables: CreateContactRequest): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact added');
     },
@@ -259,7 +259,7 @@ export const useUpdateContact = (): UseMutationResult<
       const res = await unwrap(crmApi.updateContact(payload.id, payload.data));
       return res as SalesContact;
     },
-    onSuccess: (_data: SalesContact, variables: UpdateContactPayload): void => {
+    onSuccess: (_data: SalesContact, _variables: UpdateContactPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact updated');
     },
@@ -279,7 +279,7 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
   return useMutation<unknown, unknown, DeleteContactPayload>({
     mutationFn: (payload: DeleteContactPayload): Promise<unknown> =>
       unwrap(crmApi.deleteContact(payload.id)),
-    onSuccess: (_data: unknown, variables: DeleteContactPayload): void => {
+    onSuccess: (_data: unknown, _variables: DeleteContactPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact removed');
     },

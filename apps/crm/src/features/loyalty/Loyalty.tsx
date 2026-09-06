@@ -14,7 +14,7 @@ import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const ACCENT = '#3b82f6';
 
-const TIER_ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
+const TIER_ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
   Bronze: Award,
   Silver: Star,
   Gold: Trophy,
@@ -321,7 +321,7 @@ const Loyalty: React.FC = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      <Icon size={18} {...({ style: { color: tier.color } } as any)} />
+                      <Icon size={18} style={{ color: tier.color }} />
                     </div>
                   </div>
                   <div>

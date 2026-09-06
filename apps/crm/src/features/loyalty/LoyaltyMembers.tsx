@@ -6,8 +6,9 @@ import { AlertCircle, Search } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useLoyaltyMembers } from '../../shared/hooks/queries/useLoyalty';
 import type { LoyaltyMember } from '../../shared/hooks/queries/useLoyalty';
-import { Button, PageHeader, Card, Input, SkeletonList } from '../../shared/components/ui';
+import { Button, PageHeader, Card, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
+import { getCustomerTier } from '../../shared/lib/tiers';
 import { Users } from 'lucide-react';
 
 const LoyaltyMembers: React.FC = () => {
@@ -144,7 +145,7 @@ const LoyaltyMembers: React.FC = () => {
                       {m.visits} visits • last active {m.lastActive}
                     </div>
                   </div>
-                  <TierBadge tier={m.tier as any} />
+                  <TierBadge tier={getCustomerTier(m.points, m.tier)} />
                   <PointsBadge points={m.points} trend="up" />
                 </div>
               ))}

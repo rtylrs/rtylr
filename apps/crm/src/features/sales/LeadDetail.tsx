@@ -7,7 +7,6 @@ import {
   Phone,
   Mail,
   Users,
-  FileText,
   Plus,
   Trash2,
   Edit2,

@@ -99,6 +99,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   // Authoritative full-product fetch on edit: the list payload lacks the PIM
   // fields, so without this an edit-save would zero compare-at/tax/weight/etc.
   const { data: fullProduct } = useProductFull(editing?.id);
+  const editingImageUrl = editing?.imageUrl;
   useEffect(() => {
     const p = fullProduct;
     if (!p) return;
@@ -108,7 +109,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setSupplierId(p.supplierId !== '0' ? (p.supplierId ?? '') : '');
     setBrandId(p.brandId !== '0' ? (p.brandId ?? '') : '');
     setBarcode(p.barcode ?? '');
-    setImageUrl(p.imageUrl ?? editing?.imageUrl ?? '');
+    setImageUrl(p.imageUrl ?? editingImageUrl ?? '');
     setDescription(p.description ?? '');
     setUnit(p.unit || 'pcs');
     setCostPrice(p.costPrice ? String(p.costPrice) : '');
@@ -129,7 +130,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setHsCode(p.hsCode ?? '');
     setLeadTimeDays(p.leadTimeDays ? String(p.leadTimeDays) : '');
     setAllowBackorder(p.allowBackorder ?? false);
-  }, [fullProduct]);
+  }, [fullProduct, editingImageUrl]);
 
   const { data: categories = [] } = useCategories();
   const { data: supplierData } = useSuppliers();

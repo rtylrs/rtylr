@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import {
   Package,
@@ -71,12 +71,12 @@ const activityIconFor = (type: string) => {
   return Activity;
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -137,14 +137,14 @@ const Dashboard: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="w-full min-w-0 space-y-6"
     >
       <HelmetContainer title="Dashboard · rtylr" />
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="flex flex-wrap items-start justify-between gap-4"
       >
         <div>
@@ -171,14 +171,14 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       <motion.div
-        variants={containerVariants as any}
+        variants={containerVariants}
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
         style={{ gridAutoRows: '168px' }}
       >
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div key={stat.label} variants={itemVariants as any} className="h-full">
+            <motion.div key={stat.label} variants={itemVariants} className="h-full">
               <Link
                 to={stat.to}
                 className={`${CARD_CLASS} justify-between transition-all`}
@@ -222,7 +222,7 @@ const Dashboard: React.FC = () => {
           );
         })}
 
-        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+        <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2">
             <TrendingUp size={14} style={{ color: 'var(--erp-success)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -239,7 +239,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+        <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
             <Package size={14} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -268,7 +268,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+        <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
             <Tags size={14} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -300,7 +300,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+        <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
             <Activity size={14} style={{ color: 'var(--erp-info)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -339,7 +339,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+        <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
             <TrendingDown size={15} style={{ color: 'var(--erp-danger)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -393,7 +393,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+        <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
             <Clock size={15} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>

@@ -327,7 +327,6 @@ const Products: React.FC = () => {
           <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
             {products.map((p) => {
               const imageUrl = cdnImageUrl((p as Product & { imageUrl?: string }).imageUrl);
-              const stockStatus = getProductStockStatus(p);
               return (
                 <div
                   key={p.id}
