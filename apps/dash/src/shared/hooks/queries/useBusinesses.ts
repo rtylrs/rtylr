@@ -137,9 +137,6 @@ export const useSwitchBusiness = () =>
       }),
   });
 
-interface OnboardBusinessResponse {
-  token: string;
-}
 
 // Live availability check for the onboarding screen (business names are globally unique).
 export const useBusinessExists = (name: string) =>

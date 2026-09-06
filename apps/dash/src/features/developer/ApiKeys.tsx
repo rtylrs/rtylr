@@ -17,7 +17,6 @@ import {
 } from '../../shared/components/ui';
 import {
   ApiKeyRow,
-  Breadcrumbs,
   ConfirmDialog,
   PermissionCheckbox,
   SkeletonList,

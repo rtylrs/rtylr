@@ -101,7 +101,7 @@ const initialState: MenuState = {
 
 export const useMenuStore = create<MenuState & MenuActions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       setId: (id) => set({ id }),
@@ -112,7 +112,7 @@ export const useMenuStore = create<MenuState & MenuActions>()(
 
       setActiveMenuId: (activeMenuId) => set({ activeMenuId }),
 
-      fetchMenu: async (userId, force) => {
+      fetchMenu: async () => {
         set({ status: 'loading' });
         try {
           // Placeholder - actual API call would go here

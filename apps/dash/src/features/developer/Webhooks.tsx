@@ -16,7 +16,6 @@ import {
   Label,
 } from '../../shared/components/ui';
 import {
-  Breadcrumbs,
   ConfirmDialog,
   PermissionCheckbox,
   SkeletonList,

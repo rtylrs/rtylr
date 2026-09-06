@@ -5,7 +5,6 @@ import { signOut } from '@voxire/auth';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import type {
   LoginEntry as ApiLoginEntry,
-  LoginHistoryResponse,
 } from '@voxire/voxie/hub/security/v1/types';
 import { toast } from 'sonner';
 import {

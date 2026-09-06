@@ -72,7 +72,7 @@ const Team: React.FC = (): React.JSX.Element => {
     page: 1,
     pageSize: FETCH_WINDOW_SIZE,
   });
-  const members = teamData?.members ?? [];
+  const members = useMemo(() => teamData?.members ?? [], [teamData]);
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useThemeStore, applyTheme, isSystemListenerActive, type Theme } from './themeStore';
+import { useThemeStore, applyTheme, isSystemListenerActive } from './themeStore';
 
 const { getState } = useThemeStore;
 

@@ -388,9 +388,6 @@ interface BillingDetailResponse {
   billing: RawBillingDetailPayload | null;
 }
 
-interface BillingHistoryResponse {
-  history: RawBillingHistoryMonth[];
-}
 
 interface SetSubscriptionRequest {
   planSlug: string;

@@ -34,7 +34,7 @@ interface GroupedCategory {
   children: StoreItem[];
 }
 
-const Menu: React.FC<{}> = () => {
+const Menu: React.FC = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
   const {

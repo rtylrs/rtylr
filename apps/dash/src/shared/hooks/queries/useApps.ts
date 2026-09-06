@@ -14,7 +14,6 @@ import {
   Globe,
   CalendarCheck,
   Headphones,
-  FileText,
 } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import type { AppId } from '@voxire/auth';

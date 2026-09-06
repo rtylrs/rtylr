@@ -64,9 +64,8 @@ vi.mock('../../shared/hooks/queries/useSubscription', () => ({
 // Stable references: a mock returning a fresh [] each call changes the
 // dependency identity on every render, and MemberDetail's
 // `useEffect(..., [memberLocations])` would re-fire forever.
-const EMPTY_LOCATIONS = vi.hoisted(() => [] as { id: number; locationId: number; name: string }[]);
 
-// Stable identities for the same reason as EMPTY_LOCATIONS above: these feed a
+// Stable identities for the same reason: these feed a
 // useEffect dependency.
 const posState = vi.hoisted(() => ({
   locations: [] as { id: number; name: string }[],
