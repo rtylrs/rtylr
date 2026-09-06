@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import {
   Users,
@@ -21,7 +21,7 @@ import { canViewCompensation } from '../../shared/lib/hrPermissions';
 
 const ACCENT = '#8b5cf6';
 
-const DEPT_ICONS: Record<string, React.ComponentType<any>> = {
+const DEPT_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Kitchen: ChefHat,
   'Front-of-House': Coffee,
   Management: Briefcase,
@@ -43,7 +43,7 @@ function fmt(n: number): string {
 }
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
-const cardAnim: Record<string, any> = {
+const cardAnim: Variants = {
   hidden: { opacity: 0, y: 14 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -118,8 +118,8 @@ const Departments: React.FC = () => {
           }}
         >
           {departments.map((dept, idx) => {
-            const color = (dept as any).color || getDeptColor(idx);
-            const bg = (dept as any).bg || `${color}18`;
+            const color = dept.color ?? getDeptColor(idx);
+            const bg = `${color}18`;
             const DeptIcon = getDeptIcon(dept.name);
             return (
               <motion.div

@@ -101,7 +101,7 @@ const TimesheetsList = (): React.JSX.Element => {
                     padding: '14px 16px',
                     cursor: 'pointer',
                   }}
-                  onClick={() => navigate({ to: `/timesheets/${ts.id}` as any })}
+                  onClick={() => navigate({ to: '/timesheets/$id', params: { id: String(ts.id) } })}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div

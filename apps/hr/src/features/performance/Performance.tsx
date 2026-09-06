@@ -37,7 +37,7 @@ function CycleCard({ cycle }: { cycle: ReviewCyclePayload }): React.JSX.Element 
     <>
       <Card
         style={{ cursor: 'pointer' }}
-        onClick={() => navigate({ to: `/performance/cycles/${cycle.id}` as any })}
+        onClick={() => navigate({ to: '/performance/cycles/$id', params: { id: String(cycle.id) } })}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>

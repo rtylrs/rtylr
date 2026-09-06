@@ -41,7 +41,7 @@ const Attendance = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data, isLoading, isError, isFetching, refetch } = useGetMyAttendance({});
 
-  const records = data?.records ?? [];
+  const records = useMemo(() => data?.records ?? [], [data]);
 
   const activeRecord = useMemo((): AttendanceRecordPayload | undefined => {
     return records.find((r) => !r.clockOutAt);

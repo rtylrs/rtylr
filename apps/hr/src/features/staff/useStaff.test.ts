@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -110,12 +110,24 @@ describe('useCreateStaff', () => {
   });
 
   it('calls createStaff service method', async () => {
-    (hrApi.createStaff as any).mockResolvedValue({ id: 2 });
+    (hrApi.createStaff as unknown as Mock).mockResolvedValue({ id: 2 });
     const { result } = renderHook(() => useCreateStaff(), {
       wrapper: createWrapper(),
     });
-    const input = { name: 'John', email: 'john@example.com' };
-    await act(() => result.current.mutateAsync(input as any));
+    const input: {
+      name: string;
+      email: string;
+      role: string;
+      department: string;
+      employmentType: 'Full-time' | 'Part-time' | 'Contractor';
+    } = {
+      name: 'John',
+      email: 'john@example.com',
+      role: 'Staff',
+      department: 'Ops',
+      employmentType: 'Full-time',
+    };
+    await act(() => result.current.mutateAsync(input));
     expect(hrApi.createStaff).toHaveBeenCalledWith(input);
   });
 });
@@ -126,12 +138,12 @@ describe('useUpdateStaff', () => {
   });
 
   it('calls updateStaff with data', async () => {
-    (hrApi.updateStaff as any).mockResolvedValue({ id: 1 });
+    (hrApi.updateStaff as unknown as Mock).mockResolvedValue({ id: 1 });
     const { result } = renderHook(() => useUpdateStaff(), {
       wrapper: createWrapper(),
     });
     const input = { id: 1, name: 'Jane Updated' };
-    await act(() => result.current.mutateAsync(input as any));
+    await act(() => result.current.mutateAsync(input));
     expect(hrApi.updateStaff).toHaveBeenCalledWith(input);
   });
 });
@@ -142,7 +154,7 @@ describe('useDeleteStaff', () => {
   });
 
   it('calls deleteStaff with id', async () => {
-    (hrApi.deleteStaff as any).mockResolvedValue({ ok: true });
+    (hrApi.deleteStaff as unknown as Mock).mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useDeleteStaff(), {
       wrapper: createWrapper(),
     });
@@ -157,7 +169,7 @@ describe('useClockIn', () => {
   });
 
   it('calls clockIn with staffId', async () => {
-    (hrApi.clockIn as any).mockResolvedValue({ ok: true });
+    (hrApi.clockIn as unknown as Mock).mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useClockIn(), {
       wrapper: createWrapper(),
     });
@@ -172,7 +184,7 @@ describe('useClockOut', () => {
   });
 
   it('calls clockOut with staffId', async () => {
-    (hrApi.clockOut as any).mockResolvedValue({ ok: true });
+    (hrApi.clockOut as unknown as Mock).mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useClockOut(), {
       wrapper: createWrapper(),
     });

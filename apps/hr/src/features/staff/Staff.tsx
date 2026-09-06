@@ -14,8 +14,6 @@ import { useIsMobile } from '../../shared/components/ui';
 const ACCENT = '#8b5cf6';
 
 type EmploymentType = 'Full-time' | 'Part-time' | 'Contractor';
-type Status = 'Active' | 'Inactive';
-
 type FilterTab = 'All' | EmploymentType;
 const filterTabs: FilterTab[] = ['All', 'Full-time', 'Part-time', 'Contractor'];
 
@@ -209,7 +207,8 @@ const Staff: React.FC = () => {
             return (
               <motion.div key={s.id} variants={cardAnim} whileHover={{ scale: 1.015 }}>
                 <Link
-                  to={`/staff/${s.id}` as any}
+                  to="/staff/$id"
+                  params={{ id: String(s.id) }}
                   style={{ textDecoration: 'none', display: 'block' }}
                 >
                   <div

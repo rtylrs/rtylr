@@ -184,7 +184,7 @@ const CommandPalette: React.FC = () => {
         label: s.name,
         subtitle: `${s.role} • ${s.department}`,
         icon: Users,
-        run: () => navigate({ to: `/staff/${s.id}` as any }),
+        run: () => navigate({ to: '/staff/$id', params: { id: String(s.id) } }),
         keywords: s.email,
       })),
     [staff, navigate]
