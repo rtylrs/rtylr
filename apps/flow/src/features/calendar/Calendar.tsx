@@ -11,6 +11,7 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
+import { withAlpha } from '../../shared/lib/colorUtils';
 
 const ACCENT_VAR = 'var(--accent)';
 
@@ -59,6 +60,12 @@ const Calendar: React.FC = () => {
       monthLabel: cursor.toLocaleString(i18n.language, { month: 'long', year: 'numeric' }),
     };
   }, [cursor, i18n.language]);
+
+  // One lookup for the whole grid rather than a find() per pill per cell.
+  const projectColorById = useMemo(
+    () => new Map(projects.map((p) => [String(p.id), p.color])),
+    [projects]
+  );
 
   const tasksByDate = useMemo(() => {
     const map: Record<string, ApiTask[]> = {};
@@ -225,24 +232,35 @@ const Calendar: React.FC = () => {
                   )}
                 </div>
                 <div className="space-y-0.5">
-                  {dayTasks.slice(0, 3).map((t) => (
-                    <button
-                      type="button"
-                      key={t.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate({ to: `/task/${t.id}` as string });
-                      }}
-                      className="w-full text-left px-1.5 py-0.5 rounded-sm text-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
-                      style={{
-                        background: 'var(--flow-card)',
-                        color: 'var(--flow-text)',
-                      }}
-                    >
-                      <PriorityIcon priority={t.priority} size={9} />
-                      <span className="truncate">{t.title}</span>
-                    </button>
-                  ))}
+                  {dayTasks.slice(0, 3).map((t) => {
+                    // Tinted by project. This calendar mixes every project
+                    // together, so a single card colour left no way to tell
+                    // whose work a day was full of (#1087). Falls back to the
+                    // card surface when the project is not in the store yet.
+                    const tone = projectColorById.get(String(t.projectId));
+                    return (
+                      <button
+                        type="button"
+                        key={t.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate({ to: `/task/${t.id}` as string });
+                        }}
+                        className="w-full text-left px-1.5 py-0.5 rounded-sm text-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+                        style={{
+                          background: tone ? withAlpha(tone, 13) : 'var(--flow-card)',
+                          color: tone ?? 'var(--flow-text)',
+                        }}
+                      >
+                        <PriorityIcon priority={t.priority} size={9} />
+                        {/* dir="auto" so a right-to-left title truncates at its
+                            own end rather than clipping the start of it. */}
+                        <span dir="auto" className="truncate">
+                          {t.title}
+                        </span>
+                      </button>
+                    );
+                  })}
                   {dayTasks.length > 3 && (
                     <button
                       type="button"

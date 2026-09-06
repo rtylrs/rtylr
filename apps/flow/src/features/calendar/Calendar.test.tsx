@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -36,10 +36,17 @@ vi.mock('../../shared/stores/flowStore', () => ({
   // removed. The old submit guard required it, so a mock carrying 'ws-1' would
   // hide the very defect these tests cover.
   useFlowStore: () => ({ activeWorkspaceId: '', projects: storeProjects.value }),
+  // PriorityIcon reads this, so it is only needed once a test renders a task.
+  PRIORITY_COLORS: {
+    urgent: '#ef4444',
+    high: '#f97316',
+    medium: 'var(--flow-info-fg)',
+    low: '#6b7280',
+  },
 }));
 
 const storeProjects = vi.hoisted(() => ({
-  value: [{ id: 'p-9', name: 'Web' }] as { id: string; name: string }[],
+  value: [{ id: 'p-9', name: 'Web' }] as { id: string; name: string; color?: string }[],
 }));
 
 const mockNavigate = vi.fn();
@@ -188,5 +195,56 @@ describe('Calendar day-add submission (#1057)', () => {
 
     expect(createTaskMutate).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith('toasts.task.selectProjectFirst');
+  });
+});
+
+describe('Calendar pills carry their project (#1087)', () => {
+  const today = new Date();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  afterEach(() => {
+    tasksData.data = [];
+    storeProjects.value = [{ id: 'p-9', name: 'Web' }];
+  });
+
+  it('gives two projects two different tints', () => {
+    // This calendar mixes every project together, so one card colour left no
+    // way to tell whose work a day was full of.
+    storeProjects.value = [
+      { id: 'p-1', name: 'Alpha', color: '#112233' },
+      { id: 'p-2', name: 'Beta', color: '#445566' },
+    ];
+    tasksData.data = [
+      { id: 't1', title: 'From Alpha', projectId: 'p-1', dueDate: iso, priority: 'medium' },
+      { id: 't2', title: 'From Beta', projectId: 'p-2', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+
+    const alpha = screen.getByText('From Alpha').closest('button');
+    const beta = screen.getByText('From Beta').closest('button');
+    expect(alpha?.getAttribute('style')).toContain('112233');
+    expect(beta?.getAttribute('style')).toContain('445566');
+  });
+
+  it('falls back to the card surface when the project is not in the store', () => {
+    // A task can arrive before its project does, and an undefined colour must
+    // not paint the pill with the string "undefined".
+    storeProjects.value = [];
+    tasksData.data = [
+      { id: 't3', title: 'Orphan', projectId: 'p-404', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+
+    const style = screen.getByText('Orphan').closest('button')?.getAttribute('style') ?? '';
+    expect(style).toContain('flow-card');
+    expect(style).not.toContain('undefined');
+  });
+
+  it('lets a right-to-left title decide its own truncation end', () => {
+    tasksData.data = [
+      { id: 't4', title: 'مهمة طويلة جدا', projectId: 'p-9', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+    expect(screen.getByText('مهمة طويلة جدا')).toHaveAttribute('dir', 'auto');
   });
 });

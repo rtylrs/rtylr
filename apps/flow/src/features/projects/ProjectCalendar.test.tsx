@@ -16,8 +16,19 @@ vi.mock('@tanstack/react-router', () => ({
 }));
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
-vi.mock('../../shared/stores/flowStore', () => ({ useFlowStore: () => ({ projects: [] }) }));
-vi.mock('../tasks/useTasks', () => ({ useTasks: () => ({ data: [] }) }));
+vi.mock('../../shared/stores/flowStore', () => ({
+  useFlowStore: () => ({ projects: [] }),
+  STATUS_COLORS: {
+    backlog: '#6b7280',
+    todo: '#9ca3af',
+    in_progress: 'var(--flow-info-fg)',
+    in_review: '#f59e0b',
+    done: 'var(--flow-status-approved)',
+    cancelled: '#ef4444',
+  },
+}));
+const tasksData = vi.hoisted(() => ({ data: [] as Record<string, unknown>[] }));
+vi.mock('../tasks/useTasks', () => ({ useTasks: () => tasksData }));
 vi.mock('../../shared/lib/useProjectRealtime', () => ({ useProjectRealtime: () => undefined }));
 vi.mock('./ProjectViewTabs', () => ({ default: () => null }));
 const currentProjectState = vi.hoisted(() => ({
@@ -114,5 +125,50 @@ describe('ProjectCalendar when the projects request fails', () => {
     render(<ProjectCalendar />);
     expect(screen.getByText('flow.project.notFound')).toBeInTheDocument();
     expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
+  });
+});
+
+describe('ProjectCalendar pills carry status (#1087)', () => {
+  const today = new Date();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  afterEach(() => {
+    tasksData.data = [];
+  });
+
+  const withTasks = (tasks: Record<string, unknown>[]): void => {
+    tasksData.data = tasks;
+    render(<ProjectCalendar />);
+  };
+
+  it('gives two statuses two different tints', () => {
+    // Every task here belongs to the same project, so tinting by project
+    // colour made all 34 pills one shade and carried no information.
+    withTasks([
+      { id: 't1', title: 'Doing', status: 'in_progress', dueDate: iso, priority: 'medium' },
+      { id: 't2', title: 'Finished', status: 'done', dueDate: iso, priority: 'medium' },
+    ]);
+
+    const doing = screen.getByTitle('Doing');
+    const finished = screen.getByTitle('Finished');
+    expect(doing.getAttribute('style')).not.toBe(finished.getAttribute('style'));
+    expect(doing.getAttribute('style')).toContain('flow-info-fg');
+    expect(finished.getAttribute('style')).toContain('flow-status-approved');
+  });
+
+  it('lets a right-to-left title decide its own truncation end', () => {
+    // Without this an Arabic task clipped with the ellipsis at the start of
+    // the phrase rather than at its end.
+    withTasks([
+      { id: 't3', title: 'مهمة طويلة جدا', status: 'todo', dueDate: iso, priority: 'medium' },
+    ]);
+    expect(screen.getByTitle('مهمة طويلة جدا')).toHaveAttribute('dir', 'auto');
+  });
+
+  it('falls back to a muted tint for an unknown status', () => {
+    withTasks([
+      { id: 't4', title: 'Odd', status: 'not-a-status', dueDate: iso, priority: 'medium' },
+    ]);
+    expect(screen.getByTitle('Odd').getAttribute('style')).toContain('flow-text-muted');
   });
 });
