@@ -454,6 +454,32 @@
   outline-offset: 2px;
 }
 
+/**
+ * A control that appears on hover, without stranding anyone who cannot hover.
+ *
+ * Guarded by `(hover: hover)`, so a touch device shows it permanently rather
+ * than hiding a control that can never be revealed. `:focus-within` and
+ * `:focus-visible` bring it back for the keyboard, so tabbing to it does not
+ * land on something invisible.
+ *
+ * Only opacity animates, so the row does not reflow on hover.
+ */
+.flow-reveal-on-hover {
+  transition: opacity 150ms ease-out;
+}
+
+@media (hover: hover) {
+  .flow-reveal-on-hover {
+    opacity: 0;
+  }
+
+  .group:hover .flow-reveal-on-hover,
+  .group:focus-within .flow-reveal-on-hover,
+  .flow-reveal-on-hover:focus-visible {
+    opacity: 1;
+  }
+}
+
 .flow-focus:focus-visible {
   outline: 2px solid var(--flow-focus-ring);
   outline-offset: 2px;

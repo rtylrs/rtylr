@@ -274,7 +274,7 @@ const SidebarItemRow: React.FC<{
       <button
         type="button"
         aria-label={t('flow.sidebar.itemActions', { label })}
-        className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
+        className="flow-reveal-on-hover relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
         style={{ color: 'var(--flow-text-muted)' }}
         onClick={(event) => {
           event.preventDefault();
@@ -483,7 +483,7 @@ const SidebarGroup: React.FC<{
             label: group.kind === 'custom' ? group.label : t(group.label),
           })}
           onClick={() => setGroupActionsOpen((open) => !open)}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
+          className="flow-reveal-on-hover flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <MoreHorizontal size={15} />
