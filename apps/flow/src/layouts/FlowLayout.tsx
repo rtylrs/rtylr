@@ -689,6 +689,21 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               >
                 {activeWorkspace.name}
               </span>
+              {/* The only create control on desktop. The + in the header above
+                  is inside a lg:hidden container, so at 1440px it measures 0x0
+                  and there was no way to start a task without knowing the `c`
+                  shortcut (#1076). Visible at rest, not on hover: the issue
+                  calls the + the most visible control on the panel. */}
+              <button
+                type="button"
+                aria-label={t('flow.shell.newTask')}
+                title={t('flow.shell.newTask')}
+                onClick={() => setQuickCreateOpen(true)}
+                className="flow-focus hidden h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--flow-hover)] lg:flex"
+                style={{ color: 'var(--accent)' }}
+              >
+                <Plus size={14} strokeWidth={2.5} />
+              </button>
             </div>
 
             <button
