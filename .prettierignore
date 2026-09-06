@@ -7,6 +7,13 @@ coverage
 *.min.js
 *.min.css
 voxie
+# The packages submodule. It is a separate repository with its own review and
+# its own CI, and rtylr contributors are not supposed to commit into it, so
+# gating rtylr's format check on code it may not edit only ever blocks work
+# here. It arrived as a real block: one 108-character line in
+# packages/config/src/assets.ts made `pnpm format:check` red on main for every
+# branch.
+packages
 **/next-env.d.ts
 # Scratch files written by the Remember plugin, in this repo and in the packages
 # submodule. They are gitignored, but the pre-commit hook runs `prettier --check`
