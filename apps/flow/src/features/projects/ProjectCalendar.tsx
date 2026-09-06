@@ -3,7 +3,7 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { useFlowStore } from '../../shared/stores/flowStore';
+import { STATUS_COLORS, useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
@@ -206,21 +206,31 @@ const ProjectCalendar: React.FC = () => {
                       {d.getDate()}
                     </div>
                     <div className="flex flex-col gap-1 min-h-0 overflow-hidden">
-                      {dayTasks.slice(0, 3).map((t) => (
-                        <div
-                          key={t.id}
-                          className="text-meta px-1.5 py-0.5 rounded-sm truncate"
-                          style={{
-                            background: withAlpha(project.color, 13),
-                            color: project.color,
-                            cursor: 'pointer',
-                          }}
-                          title={t.title}
-                          onClick={() => navigate({ to: `/task/${t.id}` as string })}
-                        >
-                          {t.title}
-                        </div>
-                      ))}
+                      {dayTasks.slice(0, 3).map((t) => {
+                        // Tinted by status. Every task on this screen belongs to
+                        // the same project, so project.color made all 34 pills
+                        // one shade and carried no information (#1087).
+                        const tone = STATUS_COLORS[t.status] ?? 'var(--flow-text-muted)';
+                        return (
+                          <div
+                            key={t.id}
+                            // dir="auto" so a right-to-left title truncates at
+                            // its own end. Left as-is, an Arabic task clipped
+                            // with the ellipsis at the start of the phrase.
+                            dir="auto"
+                            className="text-meta px-1.5 py-0.5 rounded-sm truncate"
+                            style={{
+                              background: withAlpha(tone, 13),
+                              color: tone,
+                              cursor: 'pointer',
+                            }}
+                            title={t.title}
+                            onClick={() => navigate({ to: `/task/${t.id}` as string })}
+                          >
+                            {t.title}
+                          </div>
+                        );
+                      })}
                       {dayTasks.length > 3 && (
                         <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                           +{dayTasks.length - 3} more
