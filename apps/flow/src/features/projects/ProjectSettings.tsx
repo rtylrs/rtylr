@@ -139,10 +139,10 @@ const ProjectSettings: React.FC = () => {
       <HelmetContainer title={t('flow.projectSettings.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
-          items={[
-            { label: project.name, to: `/p/${project.id}/overview` },
-            { label: t('nav.settings') },
-          ]}
+          // The trail stops at the parent. The h1 directly below already says
+          // Settings, and repeating it in the crumb put the same word twice in
+          // two lines (#1097, D-029).
+          items={[{ label: project.name, to: `/p/${project.id}/overview` }]}
         />
         <h1 className="text-title font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
           {t('nav.settings')}
