@@ -185,7 +185,21 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 export const StatusGroup: React.FC<{
   group: StatusGroupDef;
   tasks: Task[];
-}> = ({ group, tasks }) => {
+  /**
+   * Whether to show the task count beside the status name.
+   *
+   * Off when the list is split into sections. There the count is that
+   * section's, while the board's identically labelled count is the whole
+   * project's, so the two read as a contradiction with nothing on screen
+   * saying which is which: "To Do 28" against "To Do 49" for the same status
+   * (#1166). Both are right. The section total one line above already gives
+   * the number, so the group count is what goes.
+   *
+   * On for an unsectioned list, where the group count and the board's count
+   * are the same number and there is nothing to confuse.
+   */
+  showCount?: boolean;
+}> = ({ group, tasks, showCount = true }) => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -206,9 +220,11 @@ export const StatusGroup: React.FC<{
         <span className="text-meta font-semibold" style={{ color: group.color }}>
           {group.label}
         </span>
-        <span className="text-meta ml-1" style={{ color: 'var(--flow-text-dim)' }}>
-          {tasks.length}
-        </span>
+        {showCount && (
+          <span className="text-meta ml-1 tabular-nums" style={{ color: 'var(--flow-text-dim)' }}>
+            {tasks.length}
+          </span>
+        )}
       </button>
 
       <AnimatePresence>
@@ -391,7 +407,10 @@ const ProjectList: React.FC = () => {
                   }}
                 >
                   {block.title}
-                  <span className="ml-2 font-normal" style={{ color: 'var(--flow-text-dim)' }}>
+                  <span
+                    className="ml-2 font-normal tabular-nums"
+                    style={{ color: 'var(--flow-text-dim)' }}
+                  >
                     {block.tasks.length}
                   </span>
                 </div>
@@ -399,7 +418,12 @@ const ProjectList: React.FC = () => {
                   const groupTasks = block.tasks.filter((t) => t.status === group.id);
                   if (!groupIsVisible(group, groupTasks.length)) return null;
                   return (
-                    <StatusGroup key={`${block.id}-${group.id}`} group={group} tasks={groupTasks} />
+                    <StatusGroup
+                      key={`${block.id}-${group.id}`}
+                      group={group}
+                      tasks={groupTasks}
+                      showCount={false}
+                    />
                   );
                 })}
               </div>
