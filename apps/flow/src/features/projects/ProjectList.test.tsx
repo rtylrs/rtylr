@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -150,5 +152,68 @@ describe('ProjectList status groups (#1049: a backlog task had no home)', () => 
     const order = STATUS_GROUP_COLORS.map((g) => g.id);
     expect(order.indexOf('backlog')).toBeLessThan(order.indexOf('todo'));
     expect(order.indexOf('cancelled')).toBe(order.length - 1);
+  });
+});
+
+describe('StatusGroup count scope (#1166)', () => {
+  const tasks = [
+    { id: 't1', title: 'One', status: 'todo' },
+    { id: 't2', title: 'Two', status: 'todo' },
+  ] as unknown as Parameters<typeof StatusGroup>[0]['tasks'];
+
+  const group = { id: 'todo', color: '#9ca3af', label: 'To Do' } as unknown as Parameters<
+    typeof StatusGroup
+  >[0]['group'];
+
+  const renderGroup = (showCount?: boolean): void => {
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <StatusGroup group={group} tasks={tasks} showCount={showCount} />
+      </QueryClientProvider>
+    );
+  };
+
+  it('shows the count when the list is not split into sections', () => {
+    // Here the group count and the board's count are the same number, so there
+    // is nothing to confuse and the number is worth keeping.
+    renderGroup();
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
+  it('hides the count when the list is sectioned', () => {
+    // The section total one line above already gives the number, and this one
+    // counts only the section while the board's identical label counts the
+    // whole project.
+    renderGroup(false);
+    expect(screen.queryByText('2')).not.toBeInTheDocument();
+  });
+
+  it('still renders the status label either way', () => {
+    renderGroup(false);
+    expect(screen.getByText('To Do')).toBeInTheDocument();
+  });
+});
+
+describe('the sectioned list actually asks for the count to be hidden', () => {
+  it('passes showCount={false} only in the sectioned branch', () => {
+    // Testing StatusGroup alone proves the prop works, not that anything sets
+    // it. Deleting the prop at the call site left every component test green.
+    const source = fs.readFileSync(path.resolve(__dirname, 'ProjectList.tsx'), 'utf8');
+
+    const sectioned = source.slice(
+      source.indexOf('block.tasks.filter'),
+      source.indexOf('projectTasks.filter((t) => t.status === group.id)')
+    );
+    expect(sectioned, 'sliced the wrong region').toContain('StatusGroup');
+    expect(sectioned, 'the sectioned list must hide the group count').toContain(
+      'showCount={false}'
+    );
+
+    const unsectioned = source.slice(
+      source.indexOf('projectTasks.filter((t) => t.status === group.id)')
+    );
+    expect(unsectioned, 'sliced the wrong region').toContain('StatusGroup');
+    expect(unsectioned, 'an unsectioned list keeps its count').not.toContain('showCount={false}');
   });
 });
