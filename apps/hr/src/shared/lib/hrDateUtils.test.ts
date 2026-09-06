@@ -111,7 +111,11 @@ describe('yearsOld', () => {
     expect(age).toBeGreaterThan(30);
   });
   it('returns 0 for today', () => {
-    const today = new Date().toISOString().slice(0, 10);
+    // Local parts, for the same reason as the CRM fixture: the UTC day and
+    // the reader's day differ for the first hours of every local day east of
+    // Greenwich, and a fixture must not be the one deciding which.
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     expect(yearsOld(today)).toBe(0);
   });
 });
