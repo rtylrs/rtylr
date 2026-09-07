@@ -417,7 +417,7 @@ function MFAAccessGate({ enrollmentRequired }: { enrollmentRequired: boolean }):
         <a
           href="/security"
           className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold"
-          style={{ background: 'var(--accent)', color: 'var(--accent-contrast, #fff)' }}
+          style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
         >
           {enrollmentRequired
             ? t('common.mfaGate.openSetup')
