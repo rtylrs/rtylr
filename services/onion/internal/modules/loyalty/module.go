@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/loyalty/internal/api"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/application"
-	"github.com/voxire/onion/internal/modules/loyalty/internal/routes"
 )
 
 type Module struct {
@@ -21,7 +21,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
