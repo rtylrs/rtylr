@@ -71,14 +71,15 @@ export const useRegisterRestaurant = () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data, variables) => {
-      if (variables.businessName) {
-        try {
-          localStorage.setItem('rtylr_business_name', variables.businessName);
-        } catch {
-          // ignore storage quota errors
-        }
-      }
+    onSuccess: (data) => {
+      // The business name is not stashed here any more. It was written to
+      // localStorage['rtylr_business_name'] and never read back, by anything,
+      // in any app or package (#1036, F-1).
+      //
+      // It is not lost: `business_name` is a real field on
+      // common.auth.v1.RegisterRequest, the generated encoder maps it, and the
+      // register call already carries it. Keeping a second copy in storage
+      // only suggested the request did not.
       persistSession(login, data.token);
     },
     onError: (error) => {
