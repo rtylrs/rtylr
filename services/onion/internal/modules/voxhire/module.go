@@ -16,10 +16,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/voxhire/internal/api"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/application"
 	internaljobs "github.com/voxire/onion/internal/modules/voxhire/internal/jobs"
-	"github.com/voxire/onion/internal/modules/voxhire/internal/routes"
-	"github.com/voxire/onion/internal/modules/voxhire/internal/routes/handlers"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 )
 
@@ -32,7 +31,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 // GetAnonymousRoutes returns paths that bypass JWT auth. Both VoxHire
@@ -40,11 +39,11 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 // hire.voxire.com visitors who don't have an Onion account.
 func (m *Module) GetAnonymousRoutes() []string {
 	anon := []string{}
-	anon = append(anon, handlers.ContactRoutes()...)
-	anon = append(anon, handlers.ApplicationsRoutes()...)
+	anon = append(anon, api.ContactRoutes()...)
+	anon = append(anon, api.ApplicationsRoutes()...)
 	// Recruitment service: public careers apply + the recruiter-admin
 	// surface (self-guarded by the admin JWT, see AdminAuthMiddleware).
-	anon = append(anon, handlers.RecruitAnonymousRoutes()...)
+	anon = append(anon, api.RecruitAnonymousRoutes()...)
 	return anon
 }
 

@@ -23,9 +23,9 @@ ALLOWED_RAW_MUTATIONS = {
         "IssuePOSWebSocketTicket",
     ),
     "internal/modules/subscriptions/module.go": ("PaddleWebhookHTTPHandler",),
-    "internal/modules/voxhire/internal/routes/routes.go": (
-        "handlers.ApplicationsHandler",
-        "handlers.CareerApplyHandler",
+    "internal/modules/voxhire/internal/api/routes.go": (
+        "ApplicationsHandler",
+        "CareerApplyHandler",
     ),
     "internal/modules/workspaces/module.go": ("realtime.IssueRealtimeTicket",),
 }
