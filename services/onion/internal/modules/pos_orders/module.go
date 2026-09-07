@@ -8,9 +8,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes"
-	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes/handlers"
 	posdashboardv1 "github.com/voxire/voxie/gen/go/pos/dashboard/v1"
 	posordersdiscountsv1 "github.com/voxire/voxie/gen/go/pos/orders/discounts/v1"
 	posordersholdsv1 "github.com/voxire/voxie/gen/go/pos/orders/holds/v1"
@@ -39,48 +38,48 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	}
 
 	register(posdashboardv1.RegisterDashboardServiceServer(
-		handlers.NewDashboardAPI(m.service),
+		api.NewDashboardAPI(m.service),
 		posdashboardv1.WithMux(mux),
 	), "POS dashboard service")
 
 	register(posordersv1.RegisterOrderServiceServer(
-		handlers.NewOrderAPI(m.service),
+		api.NewOrderAPI(m.service),
 		posordersv1.WithMux(mux),
 	), "POS order service")
 
 	register(posorderspaymentsv1.RegisterOrderPaymentServiceServer(
-		handlers.NewPaymentAPI(m.service),
+		api.NewPaymentAPI(m.service),
 		posorderspaymentsv1.WithMux(mux),
 	), "POS order payment service")
 
 	register(posordersrefundsv1.RegisterOrderRefundServiceServer(
-		handlers.NewRefundAPI(m.service),
+		api.NewRefundAPI(m.service),
 		posordersrefundsv1.WithMux(mux),
 	), "POS order refund service")
 
 	register(posorderssplitv1.RegisterOrderSplitServiceServer(
-		handlers.NewSplitAPI(m.service),
+		api.NewSplitAPI(m.service),
 		posorderssplitv1.WithMux(mux),
 	), "POS order split service")
 
 	register(posordersdiscountsv1.RegisterOrderDiscountServiceServer(
-		handlers.NewDiscountAPI(m.service),
+		api.NewDiscountAPI(m.service),
 		posordersdiscountsv1.WithMux(mux),
 	), "POS order discount service")
 
 	register(posordersholdsv1.RegisterOrderHoldServiceServer(
-		handlers.NewHoldAPI(m.service),
+		api.NewHoldAPI(m.service),
 		posordersholdsv1.WithMux(mux),
 	), "POS order hold service")
 
 	register(posordersitemsv1.RegisterOrderItemServiceServer(
-		handlers.NewItemAPI(m.service),
+		api.NewItemAPI(m.service),
 		posordersitemsv1.WithMux(mux),
 	), "POS order item service")
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

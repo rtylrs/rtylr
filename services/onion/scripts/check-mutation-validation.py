@@ -18,7 +18,7 @@ ALLOWED_RAW_MUTATIONS = {
     "internal/modules/careers/internal/api/routes.go": ("ApplyHandler",),
     "internal/modules/echo/module.go": ("streamHandler.ServeHTTP",),
     "internal/modules/hr_reports/internal/api/routes.go": ("handler.ServeHTTP",),
-    "internal/modules/pos_orders/internal/routes/routes.go": (
+    "internal/modules/pos_orders/internal/api/routes.go": (
         "PaddlePOSWebhookHTTPHandler",
         "IssuePOSWebSocketTicket",
     ),
