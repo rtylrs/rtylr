@@ -20,7 +20,7 @@ import { formatDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
@@ -89,7 +89,7 @@ const ProjectOverview: React.FC = () => {
             className="text-meta px-2 py-0.5 rounded-full font-semibold"
             style={{
               background: withAlpha(health.color, 10),
-              color: health.color,
+              color: onTint(health.color),
               border: `1px solid ${withAlpha(health.color, 20)}`,
             }}
           >

@@ -982,5 +982,8 @@
     "description": "The link may be old, or the item may have been deleted. Nothing has been lost.",
     "cta": "Go to my tasks"
   },
-  "projectNotFound": "Project not found. The link may be old, or it may have been deleted."
+  "projectNotFound": "Project not found. The link may be old, or it may have been deleted.",
+  "labels": {
+    "removeLabel": "Remove {{name}}"
+  }
 }

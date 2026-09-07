@@ -34,7 +34,7 @@ import BoardSettingsPanel from './components/BoardSettingsPanel';
 import StatusSettingsPanel from './components/StatusSettingsPanel';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 // ── Group-by (swimlanes) ────────────────────────────────────────────────
@@ -679,7 +679,7 @@ const KanbanColumn: React.FC<{
 
         <span
           className="text-meta px-1.5 py-0.5 rounded-full font-medium shrink-0"
-          style={{ background: withAlpha(col.color, 13), color: col.color }}
+          style={{ background: withAlpha(col.color, 13), color: onTint(col.color) }}
         >
           {colTaskCount}
         </span>
