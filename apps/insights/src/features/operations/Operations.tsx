@@ -107,7 +107,7 @@ const Operations: React.FC = (): React.JSX.Element => {
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
                     style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: 'var(--accent)' }} />
+                    <Icon size={14} style={{ color: 'var(--accent-on-muted)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
