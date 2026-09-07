@@ -23,6 +23,13 @@ import { contrastRatio, compositeOver } from '@voxire/utils';
  * see it either.
  */
 const ROOT = __dirname;
+
+/**
+ * Set on an ancestor's inline style rather than in a stylesheet, so a scan of
+ * globals.css cannot see them. --pane-u is assigned in AppearancePreview itself,
+ * a few lines above the rules that read it.
+ */
+const RUNTIME_TOKENS = new Set(['--flow-r', '--flow-u', '--pane-u']);
 const APPS = fs
   .readdirSync(path.join(ROOT, 'apps'), { withFileTypes: true })
   .filter((e) => e.isDirectory() && fs.existsSync(path.join(ROOT, 'apps', e.name, 'src')))
@@ -246,5 +253,45 @@ describe('the accent tint is paired with its own foreground', () => {
     }
 
     expect(offenders, 'use var(--<app>-on-accent) on an accent fill').toEqual([]);
+  });
+
+  it('declares every token an app references, whatever its prefix', () => {
+    // The accent-family version of this check above missed three shapes, all
+    // found once it was widened (rtylr#1240): dash reaching for flow's
+    // --flow-on-accent, erp reaching for --finance-danger, and three HR sites
+    // naming a --hr-card-bg that never existed. None carried a fallback, so all
+    // six silently inherited.
+    //
+    // Prefix is not the signal. --hub-* is declared by six apps, so a --hub-
+    // token in crm is perfectly legal; what made crm's --hub-accent a defect is
+    // that no app declares it at all.
+    const missing: string[] = [];
+
+    for (const app of APPS) {
+      const src = path.join(ROOT, 'apps', app, 'src');
+      const cssPath = path.join(src, 'globals.css');
+      const declared = new Set<string>();
+      if (fs.existsSync(cssPath)) {
+        for (const m of fs.readFileSync(cssPath, 'utf8').matchAll(/^\s*(--[a-z0-9-]+)\s*:/gim)) {
+          declared.add(m[1]);
+        }
+      }
+
+      for (const file of sourceFiles(src)) {
+        const lines = fs.readFileSync(file, 'utf8').split('\n');
+        lines.forEach((line, i) => {
+          if (isComment(line)) return;
+          for (const m of line.matchAll(/var\(\s*(--[a-z0-9-]+)\s*([,)])/gi)) {
+            // A fallback means it resolves to the fallback rather than
+            // inheriting, so it is not this defect.
+            if (m[2] === ',') continue;
+            if (declared.has(m[1]) || RUNTIME_TOKENS.has(m[1])) continue;
+            missing.push(`${path.relative(ROOT, file)}:${i + 1} ${m[1]}`);
+          }
+        });
+      }
+    }
+
+    expect(missing, 'a fallback-less var() on an undeclared property inherits').toEqual([]);
   });
 });
