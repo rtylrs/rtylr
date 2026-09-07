@@ -1,6 +1,7 @@
 package stock_core
 
 import (
+	"context"
 	"errors"
 	"testing"
 )
@@ -18,14 +19,14 @@ func TestMovementBusinessIDUsesExplicitBusinessID(t *testing.T) {
 }
 
 func TestSetTotalTxRejectsNegativeTarget(t *testing.T) {
-	_, _, err := SetTotalTx(nil, nil, Movement{LocationID: 1}, -1)
+	_, _, err := SetTotalTx(context.Background(), nil, Movement{LocationID: 1}, -1)
 	if !errors.Is(err, ErrInsufficientStock) {
 		t.Fatalf("SetTotalTx() error = %v, want ErrInsufficientStock", err)
 	}
 }
 
 func TestSetTotalTxRequiresLocation(t *testing.T) {
-	_, _, err := SetTotalTx(nil, nil, Movement{OwnerID: 42}, 1)
+	_, _, err := SetTotalTx(context.Background(), nil, Movement{OwnerID: 42}, 1)
 	if err == nil || err.Error() != "stock_core: location is required for total adjustment" {
 		t.Fatalf("SetTotalTx() error = %v, want missing-location error", err)
 	}

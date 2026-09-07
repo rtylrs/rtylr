@@ -40,7 +40,8 @@ func TestSubmit_PropagatesError(t *testing.T) {
 }
 
 func TestAsyncLeadContextDetachesCancellationAndPreservesValues(t *testing.T) {
-	key := struct{}{}
+	type ctxKey struct{}
+	key := ctxKey{}
 	requestCtx, cancel := context.WithCancel(context.WithValue(context.Background(), key, "request-value"))
 	cancel()
 
