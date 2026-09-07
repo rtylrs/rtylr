@@ -41,7 +41,7 @@ const EmployeeDetail = (): React.JSX.Element => {
           type="button"
           onClick={() => navigate({ to: '/employees' })}
           className="rounded-lg px-4 py-2 text-sm font-medium"
-          style={{ background: 'var(--accent)', color: '#fff' }}
+          style={{ background: 'var(--accent)', color: 'var(--hr-on-accent)' }}
         >
           {t('common.back')}
         </button>
