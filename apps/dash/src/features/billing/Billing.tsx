@@ -172,7 +172,7 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
       style={{
         background: 'var(--accent-muted)',
-        color: 'var(--accent)',
+        color: 'var(--accent-on-muted)',
         border: '1px solid var(--accent-border)',
       }}
     >

@@ -581,7 +581,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     initials={getInitials(userName)}
                     size="sm"
                     className="shrink-0"
-                    style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                   />
                   <div className="dash-sidebar-user flex flex-col items-start min-w-0 flex-1">
                     <span
@@ -630,7 +630,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                         className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
                         style={{
                           background: theme === value ? 'var(--accent-muted)' : 'var(--dash-hover)',
-                          color: theme === value ? 'var(--accent)' : 'var(--dash-text-muted)',
+                          color:
+                            theme === value ? 'var(--accent-on-muted)' : 'var(--dash-text-muted)',
                           border:
                             theme === value
                               ? '1px solid var(--accent-border)'
