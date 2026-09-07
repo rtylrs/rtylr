@@ -40,8 +40,8 @@ const BootLoader = (): React.JSX.Element => {
         height: '100vh',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#0a0a0a',
-        color: 'rgba(240,240,238,0.5)',
+        background: 'var(--flow-bg)',
+        color: 'var(--flow-text-muted)',
         fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
         fontSize: 'var(--text-section)',
       }}
