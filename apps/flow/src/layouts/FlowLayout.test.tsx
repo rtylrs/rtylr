@@ -9,7 +9,7 @@ import { useFlowStore } from '../shared/stores/flowStore';
 // (avatar/name trigger in the sidebar footer - issue #785: it didn't close on
 // Escape or on an outside click), so every react-query-backed hook/component
 // FlowLayout pulls in is stubbed out. Store hooks (userStore, appearanceStore,
-// flowStore) and other pure/local hooks (useSidebarSections, useKeyboardShortcuts,
+// flowStore) and other pure/local hooks (useKeyboardShortcuts,
 // useLifePreferences, useForesightLinks) are left real - none of them touch the
 // network and they're already exercised by other passing tests in this app.
 const mocks = vi.hoisted(() => ({
@@ -165,9 +165,6 @@ vi.mock('../shared/components/QuickCreate', () => ({ default: () => null }));
 vi.mock('../shared/components/BulkEditBar', () => ({ default: () => null }));
 // The bin section runs its own react-query hook; this suite renders the layout
 // without a QueryClientProvider, like the other data-fetching children above.
-vi.mock('../features/projects-v2/RecycleBinSection', () => ({
-  RecycleBinSection: () => null,
-}));
 
 vi.mock('../features/workspace-dashboard/useWorkspaces', () => ({
   useWorkspaces: () => ({ data: undefined, isLoading: false }),
@@ -371,6 +368,31 @@ describe('FlowLayout Caret panel mounting (#1043)', () => {
     renderLayout();
 
     expect(screen.getAllByRole('button', { name: 'Caret' }).length).toBeGreaterThan(0);
+  });
+});
+
+describe('FlowLayout sidebar wiring (#1212)', () => {
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  /**
+   * A direct assertion that the sidebar the user actually sees is mounted.
+   *
+   * FlowLayout carried a second, inline sidebar behind a literal `false` for
+   * long enough that a fix was landed against it with passing unit tests and no
+   * runtime effect at all (#1076). Deleting that block left this one as the only
+   * sidebar, and until now nothing said so out loud: the coverage was incidental,
+   * via the new-project tests below, which reach the create control through it.
+   * A test that fails for the right reason is worth more than four that fail for
+   * a reason nobody stated.
+   */
+  it('mounts the sidebar navigation', () => {
+    renderLayout();
+    expect(screen.getByRole('button', { name: 'flow.shell.newProject' })).toBeTruthy();
   });
 });
 

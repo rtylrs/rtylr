@@ -16,9 +16,11 @@ const PAGE_SIZE = 50;
  *
  * Only reachable for owner/admin/operator, which is also the condition under
  * which listArchivedProjects returns the whole business rather than just the
- * caller's own archived projects (`includeAll` in ListArchivedProjectsV2). The
- * sidebar's bin shows the same data for one user; this is the full view plus
- * bulk purge.
+ * caller's own archived projects (`includeAll` in ListArchivedProjectsV2).
+ *
+ * There is no per-user counterpart. One was written and never reachable, behind
+ * the literal `false` removed in rtylr#1212, so this is the only bin the
+ * product has.
  *
  * Selection is deliberately explicit rather than a "purge everything" button:
  * the action cascades through tasks, comments and attachments with no undo, so
