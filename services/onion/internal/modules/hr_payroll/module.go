@@ -7,10 +7,10 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
+	"github.com/voxire/onion/internal/modules/hr_payroll/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	internaljobs "github.com/voxire/onion/internal/modules/hr_payroll/internal/jobs"
-	"github.com/voxire/onion/internal/modules/hr_payroll/internal/routes"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	"github.com/voxire/onion/internal/platform/labourcost"
 )
@@ -79,7 +79,7 @@ func (m *Module) LabourCostProvider() labourcost.Provider {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
