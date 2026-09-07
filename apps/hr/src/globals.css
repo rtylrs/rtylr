@@ -48,6 +48,11 @@
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {
+  /* Text on the --accent-muted tint. A separate token because the tint is a
+     different background from the card, and the accent itself fails AA on it:
+     #8b5cf6 measures 3.80:1 on the muted card and 3.98:1 on the muted surface
+     (rtylr#1217). Measured against both grounds, worst case first. */
+  --accent-on-muted: #a885f8; /* dark, 5.65:1 on card, 5.92:1 on surface */
   --hr-bg: #0a0a0a;
   --hr-surface: #111111;
   --hr-card: #161616;
@@ -65,6 +70,9 @@
 
 /* ── Light mode ──────────────────────────────────────────────── */
 :root[data-theme='light'] {
+  /* The light half of the same pair. Kept for the reason given in the dark
+     block above; light is the worse mode, at 3.35:1 unfixed. */
+  --accent-on-muted: #5b2fc9; /* light, 6.16:1 on card, 6.70:1 on surface */
   --hr-bg: #f4f4f5;
   --hr-surface: #ffffff;
   --hr-card: #ffffff;

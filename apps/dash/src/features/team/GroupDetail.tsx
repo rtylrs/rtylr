@@ -375,7 +375,7 @@ const GroupDetail = (): React.JSX.Element => {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                 style={{
                   background: 'var(--accent-muted)',
-                  color: 'var(--accent)',
+                  color: 'var(--accent-on-muted)',
                   border: '1px solid var(--accent-border)',
                 }}
               >
@@ -409,7 +409,10 @@ const GroupDetail = (): React.JSX.Element => {
                     <div className="flex items-center gap-3">
                       <div
                         className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                        style={{
+                          background: 'var(--accent-muted)',
+                          color: 'var(--accent-on-muted)',
+                        }}
                       >
                         {(m.fullName || m.email || '?').charAt(0).toUpperCase()}
                       </div>

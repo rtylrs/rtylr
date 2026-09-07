@@ -539,7 +539,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 style={{
                   background: index === singleStep ? 'var(--accent-muted)' : 'var(--dash-card)',
                   border: `1px solid ${index <= singleStep ? 'var(--accent-border)' : 'var(--dash-border)'}`,
-                  color: index <= singleStep ? 'var(--accent)' : 'var(--dash-text-dim)',
+                  color: index <= singleStep ? 'var(--accent-on-muted)' : 'var(--dash-text-dim)',
                 }}
               >
                 <span className="block text-[10px] uppercase tracking-wider">
