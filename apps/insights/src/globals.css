@@ -19,7 +19,12 @@
   --delta-up: #10b981;
   --delta-down: #f87171;
   /* Foreground color for solid-accent buttons */
-  --accent-fg: #ffffff;
+  /* Text on an --accent fill. Was --accent-fg: #ffffff, which measures 3.96:1
+     on #4583c4 and fails AA at every size. Renamed as well as recoloured: flow
+     uses --accent-fg for the accent used AS a foreground, so one name meant
+     opposite things in the two apps. Near-black is what deriveOnAccent
+     returns for this accent. */
+  --hub-on-accent: #0a0a0a; /* 4.99:1 on #4583c4 */
   /* Caret AI brand teal - used to make the Caret nav entry read as the app's hero surface */
   --caret-brand: #63d1c4;
   --caret-brand-soft: rgba(99, 209, 196, 0.12);
