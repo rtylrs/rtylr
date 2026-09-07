@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubbusinessv1 "github.com/voxire/voxie/gen/go/hub/business/v1"
 )
 
@@ -37,7 +38,13 @@ func (a *BusinessAPI) GetBusiness(ctx context.Context, req *hubbusinessv1.GetBus
 	}
 
 	profileScopeID := req.GetBusinessId()
-	if profileScopeID <= 0 {
+	if profileScopeID > 0 {
+		// An explicit business id is attacker-controlled: verify membership
+		// before reading another tenant's profile.
+		if _, err := tenant.ResolveBusinessID(ctx, profileScopeID, device.User.UserID); err != nil {
+			return nil, onekiterrors.PermissionDenied()
+		}
+	} else {
 		profileScopeID = device.User.BusinessID
 	}
 	if profileScopeID == 0 {
