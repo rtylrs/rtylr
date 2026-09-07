@@ -31,6 +31,14 @@
 :root {
   --accent: #4583c4;
   --accent-muted: rgba(69, 131, 196, 0.12);
+  /* Text on an --accent fill. White measures 3.96:1 on #4583c4 and fails AA,
+     which is what BusinessRoute was getting from var(--accent-contrast, #fff),
+     a property no stylesheet in the repo declares. Near-black is what
+     deriveOnAccent returns for this accent.
+     Named --dash-on-accent rather than --accent-fg because that name is taken
+     for the opposite thing: flow uses --accent-fg for the accent used AS a
+     foreground, and --flow-on-accent for text on the fill. */
+  --dash-on-accent: #0a0a0a; /* 4.99:1 on #4583c4 */
   --accent-border: rgba(69, 131, 196, 0.3);
   --accent-focus: rgba(69, 131, 196, 0.5);
 }
