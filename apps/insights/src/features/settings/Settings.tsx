@@ -160,7 +160,7 @@ const Settings: React.FC = (): React.JSX.Element => {
           onClick={handleSave}
           disabled={updateSettings.isPending || settingsLoading}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px] disabled:opacity-50"
-          style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
+          style={{ background: 'var(--accent)', color: 'var(--hub-on-accent)' }}
           aria-label={t('insights.settings.save', 'Save settings')}
         >
           {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
