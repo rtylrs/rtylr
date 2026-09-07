@@ -15,8 +15,8 @@ const BoldJob: React.FC<JobProps> = ({ career, customization, slug }) => {
       <section style={{ background: 'var(--recruit-accent)' }}>
         <div className="mx-auto max-w-5xl px-6 py-20 text-white">
           <Link
-          to="/$slug"
-          params={{ slug }}
+            to="/$slug"
+            params={{ slug }}
             className="inline-flex min-h-[44px] items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80 hover:text-white"
           >
             <ArrowLeft className="h-3.5 w-3.5" />

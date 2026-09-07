@@ -67,7 +67,9 @@ describe('useTasks (remote mode)', () => {
   });
 
   it('starts in loading state when projectId provided', () => {
-    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
+    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      new Promise(() => {})
+    );
     const { result } = renderHook(() => useTasks({ projectId: 'p-1' }), {
       wrapper: createWrapper(),
     });
@@ -177,7 +179,9 @@ describe('useUpdateTaskStatus', () => {
   });
 
   it('calls updateTaskStatus with id and status', async () => {
-    (flowApi.updateTaskStatus as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
+    (flowApi.updateTaskStatus as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+    });
     const { result } = renderHook(() => useUpdateTaskStatus(), {
       wrapper: createWrapper(),
     });

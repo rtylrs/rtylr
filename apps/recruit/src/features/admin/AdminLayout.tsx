@@ -157,7 +157,11 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
   );
 };
 
-type AdminPath = '/admin/careers' | '/admin/submissions' | '/admin/sections' | '/admin/customization';
+type AdminPath =
+  | '/admin/careers'
+  | '/admin/submissions'
+  | '/admin/sections'
+  | '/admin/customization';
 
 const AdminLink: React.FC<{
   to: AdminPath;

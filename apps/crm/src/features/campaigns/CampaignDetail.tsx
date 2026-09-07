@@ -2,11 +2,7 @@ import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import {
-  ArrowLeft,
-  Mail,
-  FileQuestion,
-} from 'lucide-react';
+import { ArrowLeft, Mail, FileQuestion } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
 import { Breadcrumbs, Card, SkeletonList } from '../../shared/components/ui';
