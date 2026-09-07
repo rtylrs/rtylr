@@ -536,7 +536,7 @@ export const STATUS_COLORS: Record<Task['status'], string> = {
 
 export const PRIORITY_COLORS: Record<Task['priority'], string> = {
   urgent: 'var(--flow-danger-fg)',
-  high: '#f97316',
+  high: 'var(--flow-priority-high-fg)',
   medium: 'var(--flow-info-fg)',
   low: 'var(--flow-neutral-fg)',
   no_priority: 'var(--flow-neutral-fg)',
