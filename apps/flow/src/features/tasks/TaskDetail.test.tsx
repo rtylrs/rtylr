@@ -544,3 +544,66 @@ describe('TaskDetail when the request fails', () => {
     expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
   });
 });
+
+describe('every task detail control has an accessible name (#1079)', () => {
+  it('leaves no combobox, textbox or spinbutton unnamed', () => {
+    // WCAG 4.1.2. Ten controls had no name: the title input, six selects in
+    // the properties rail, two custom-field inputs and the dependency picker.
+    // Each sat beside visible label text that was never associated with it,
+    // so a screen reader announced "combo box" with nothing else.
+    //
+    // Queried by role rather than by reading the source, so this measures what
+    // the accessibility tree actually exposes.
+    taskDetailData.data = {
+      task: apiTask({}),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+    renderTaskDetail();
+
+    const controls = [
+      ...screen.queryAllByRole('combobox'),
+      ...screen.queryAllByRole('textbox'),
+      ...screen.queryAllByRole('spinbutton'),
+    ];
+
+    expect(controls.length, 'no controls rendered, so nothing was measured').toBeGreaterThan(4);
+
+    const unnamed = controls.filter((el) => {
+      const label =
+        el.getAttribute('aria-label') ??
+        el.getAttribute('title') ??
+        el.getAttribute('placeholder') ??
+        '';
+      return label.trim() === '';
+    });
+
+    expect(
+      unnamed.map((el) => `${el.tagName.toLowerCase()}[${el.getAttribute('class') ?? ''}]`),
+      'these controls expose no accessible name'
+    ).toEqual([]);
+  });
+
+  it('names the title input, which carried no label at all', () => {
+    taskDetailData.data = {
+      task: apiTask({}),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+    renderTaskDetail();
+    expect(screen.getByRole('textbox', { name: 'flow.taskDetail.taskTitle' })).toBeInTheDocument();
+  });
+
+  it('names the status select after the label shown beside it', () => {
+    taskDetailData.data = {
+      task: apiTask({}),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+    renderTaskDetail();
+    expect(screen.getByRole('combobox', { name: 'flow.taskDetail.status' })).toBeInTheDocument();
+  });
+});
