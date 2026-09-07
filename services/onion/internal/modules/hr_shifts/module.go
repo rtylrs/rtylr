@@ -7,9 +7,9 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
+	"github.com/voxire/onion/internal/modules/hr_shifts/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
-	"github.com/voxire/onion/internal/modules/hr_shifts/internal/routes"
 )
 
 // hrCorePermissionAdapter exposes hr_core's role lookups to this module. It
@@ -45,7 +45,7 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
