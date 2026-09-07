@@ -43,12 +43,12 @@ interface StatusGroupDef {
 // groups appear only when they hold something, so a list that looked like four
 // groups yesterday still does.
 export const STATUS_GROUP_COLORS: { id: Task['status']; color: string; alwaysShown: boolean }[] = [
-  { id: 'backlog', color: '#6b7280', alwaysShown: false },
-  { id: 'todo', color: '#9ca3af', alwaysShown: true },
+  { id: 'backlog', color: 'var(--flow-neutral-fg)', alwaysShown: false },
+  { id: 'todo', color: 'var(--flow-neutral-fg)', alwaysShown: true },
   { id: 'in_progress', color: 'var(--flow-info-fg)', alwaysShown: true },
   { id: 'in_review', color: 'var(--flow-warn-fg)', alwaysShown: true },
   { id: 'done', color: 'var(--flow-status-approved)', alwaysShown: true },
-  { id: 'cancelled', color: '#4b5563', alwaysShown: false },
+  { id: 'cancelled', color: 'var(--flow-neutral-fg)', alwaysShown: false },
 ];
 
 /** Whether a group earns a header: one of the four the list always shows, or non-empty. */

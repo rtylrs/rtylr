@@ -357,7 +357,7 @@ const ProjectBoard: React.FC = () => {
     }
     createColumn.mutate({
       name,
-      color: '#6b7280',
+      color: 'var(--flow-neutral-fg)',
       sortOrder: columns.length,
     });
     setNewColumnName('');

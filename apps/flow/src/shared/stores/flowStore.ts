@@ -526,8 +526,8 @@ export const PRIORITY_ORDER: Record<Task['priority'], number> = {
 };
 
 export const STATUS_COLORS: Record<Task['status'], string> = {
-  backlog: '#6b7280',
-  todo: '#9ca3af',
+  backlog: 'var(--flow-neutral-fg)',
+  todo: 'var(--flow-neutral-fg)',
   in_progress: 'var(--flow-info-fg)',
   in_review: 'var(--flow-warn-fg)',
   done: 'var(--flow-status-approved)',
@@ -538,8 +538,8 @@ export const PRIORITY_COLORS: Record<Task['priority'], string> = {
   urgent: 'var(--flow-danger-fg)',
   high: '#f97316',
   medium: 'var(--flow-info-fg)',
-  low: '#6b7280',
-  no_priority: '#4b5563',
+  low: 'var(--flow-neutral-fg)',
+  no_priority: 'var(--flow-neutral-fg)',
 };
 
 // Hardcoded pending per-tenant workflow config (priorities/labels differ by business type);
