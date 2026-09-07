@@ -497,7 +497,7 @@ function BusinessRoute(): React.JSX.Element | null {
         // auth interceptor handles 401 redirect
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, setAboutContent, setContactInfo, setMaintanance, setToken, setUser, setWebsiteData]);
 
   if (!token) return null;
 

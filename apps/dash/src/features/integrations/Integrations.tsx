@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
-import { Plug2, Search, ExternalLink, Check } from 'lucide-react';
+import { Plug2, Search } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { Input } from '../../shared/components/ui';
 import {
@@ -27,7 +27,7 @@ const Integrations: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]['key']>('all');
 
-  const integrations = Array.isArray(data) ? data : [];
+  const integrations = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
   const filtered = useMemo(() => {
     return integrations.filter((i) => {

@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { LifeBuoy, Search, ExternalLink } from 'lucide-react';
 import { Input } from '../../shared/components/ui';
-import { Breadcrumbs } from '../../shared/components/dash';
 
 interface Article {
   id: string;

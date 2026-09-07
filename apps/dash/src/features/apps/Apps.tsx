@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, Grid3x3 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { Input } from '../../shared/components/ui';
-import { AppCard, Breadcrumbs, SkeletonGrid } from '../../shared/components/dash';
+import { AppCard, SkeletonGrid } from '../../shared/components/dash';
 import { useApps } from '../../shared/hooks/queries/useApps';
 import { useUserStore } from '../../shared/stores/userStore';
 
@@ -27,12 +27,15 @@ const Apps: React.FC = () => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('all');
 
-  const userApps: string[] =
-    user?.effectiveAccess?.apps
-      .filter((app) => app.licensed && app.hasAccess)
-      .map((app) => app.appId) ??
-    user?.apps ??
-    [];
+  const userApps: string[] = useMemo(
+    () =>
+      user?.effectiveAccess?.apps
+        .filter((app) => app.licensed && app.hasAccess)
+        .map((app) => app.appId) ??
+      user?.apps ??
+      [],
+    [user]
+  );
   const isOwner = user?.effectiveAccess
     ? user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin
     : user?.role === 'owner' || user?.role === 'admin';

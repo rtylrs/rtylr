@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Bell, CheckCheck } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { Button } from '../../shared/components/ui';
-import { Breadcrumbs, NotificationItem, SkeletonList } from '../../shared/components/dash';
+import { NotificationItem, SkeletonList } from '../../shared/components/dash';
 import {
   useNotificationPages,
   useMarkNotificationRead,

@@ -9,6 +9,28 @@ import UnavailableNotice from '../../../shared/components/dash/UnavailableNotice
 
 const UNAVAILABLE_ID = 'menu-item-saving-unavailable';
 
+interface StoreItemDetailsLike {
+  name?: string;
+  description?: string;
+  price?: string | number;
+  salePrice?: string | number;
+  isAvailable?: boolean;
+  ingredients?: string[];
+  allergens?: string[];
+  tags?: string[];
+  isVeg?: boolean;
+  isHalal?: boolean;
+  menuItems?: StoreItemLike[];
+}
+
+interface StoreItemLike {
+  _id?: string;
+  itemId?: string;
+  type?: string;
+  name?: string;
+  details?: StoreItemDetailsLike;
+}
+
 const CreateItem: React.FC = () => {
   const { t } = useTranslation();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
@@ -16,7 +38,6 @@ const CreateItem: React.FC = () => {
   // path. They stay in the store for whoever wires the real mutations.
   const { items } = useMenuStore();
   const searchParams = new URLSearchParams(searchStr);
-  const categoryId = searchParams.get('categoryId') || 'uncategorized';
   const itemId = searchParams.get('itemId');
 
   const [name, setName] = useState('');
@@ -24,10 +45,10 @@ const CreateItem: React.FC = () => {
   const [price, setPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
-  const [images, setImages] = useState<string[]>([]);
+  const [images] = useState<string[]>([]);
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [isAvailable, setIsAvailable] = useState(true);
-  const [availability, setAvailability] = useState('');
+  const [availability] = useState('');
   const [allergens, setAllergens] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [isVeg, setIsVeg] = useState(false);
@@ -35,33 +56,36 @@ const CreateItem: React.FC = () => {
 
   React.useEffect(() => {
     if (!itemId) return;
-    let found: any = items.find((i: any) => i._id === itemId || i.itemId === itemId);
+    let found: StoreItemLike | undefined = items.find(
+      (i) => (i as StoreItemLike)._id === itemId || (i as StoreItemLike).itemId === itemId
+    ) as StoreItemLike | undefined;
     if (!found) {
       for (const cat of items) {
-        if ((cat as any).type === 'category' && (cat as any).details?.menuItems) {
-          found = (cat as any).details.menuItems.find(
-            (i: any) => i._id === itemId || i.itemId === itemId
+        const candidate = cat as StoreItemLike;
+        if (candidate.type === 'category' && candidate.details?.menuItems) {
+          found = candidate.details.menuItems.find(
+            (i) => i._id === itemId || i.itemId === itemId
           );
           if (found) break;
         }
       }
     }
     if (found) {
-      const details = found.details || found;
-      setName(details.name || found.name || '');
-      setDescription(details.description || '');
-      if (details.price !== undefined) {
+      const details = found.details;
+      setName(details?.name || found.name || '');
+      setDescription(details?.description || '');
+      if (details?.price !== undefined) {
         setPrice(String(Number(details.price)));
       }
-      if (details.salePrice) {
+      if (details?.salePrice) {
         setSalePrice(String(Number(details.salePrice)));
       }
-      if (details.isAvailable !== undefined) setIsAvailable(Boolean(details.isAvailable));
-      if (details.ingredients) setIngredients(details.ingredients);
-      if (details.allergens) setAllergens(details.allergens);
-      if (details.tags) setTags(details.tags);
-      if (details.isVeg !== undefined) setIsVeg(Boolean(details.isVeg));
-      if (details.isHalal !== undefined) setIsHalal(Boolean(details.isHalal));
+      if (details?.isAvailable !== undefined) setIsAvailable(Boolean(details.isAvailable));
+      if (details?.ingredients) setIngredients(details.ingredients);
+      if (details?.allergens) setAllergens(details.allergens);
+      if (details?.tags) setTags(details.tags);
+      if (details?.isVeg !== undefined) setIsVeg(Boolean(details.isVeg));
+      if (details?.isHalal !== undefined) setIsHalal(Boolean(details.isHalal));
     }
   }, [itemId, items]);
 

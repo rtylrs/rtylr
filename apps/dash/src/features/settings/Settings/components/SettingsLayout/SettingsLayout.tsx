@@ -29,7 +29,7 @@ type NavGroup = {
 type NavItem = {
   label: string;
   path: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
 };
 
 const addonSettingsItems: Array<NavItem & { addonId: string }> = [
@@ -148,7 +148,7 @@ const SettingsLayout: React.FC = () => {
                         fontWeight: isActive ? 500 : undefined,
                       }}
                     >
-                      <Icon size={14} {...({ className: 'shrink-0' } as any)} />
+                      <Icon size={14} className="shrink-0" />
                       {label}
                     </Link>
                   );

@@ -21,11 +21,9 @@ import {
   Users,
   Grid3x3,
   Store,
-  MessageSquare,
   Search,
   Sparkles,
   Menu,
-  X,
   Globe,
   Check,
   ChevronDown,
@@ -57,6 +55,7 @@ import { isAddonEnabled, useAddons } from '../shared/hooks/queries/useAddons';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/dashCaretContext';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { licenseClient } from '../shared/lib/clients';
 
 interface NavItem {
@@ -115,7 +114,7 @@ const routeKeys: Record<string, { key: string; fallback: string }> = {
   '/settings/addons': { key: 'addons', fallback: 'Addons' },
 };
 
-function getPageTitle(pathname: string, t: (key: string, options?: any) => string): string {
+function getPageTitle(pathname: string, t: TFunction<'common', undefined>): string {
   const matchEntry = routeKeys[pathname]
     ? routeKeys[pathname]
     : Object.keys(routeKeys).find((key) => pathname.startsWith(key) && key !== '/')
@@ -439,7 +438,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   }));
   const userEmail = user?.email || null;
   const userName = user?.fullName || 'User';
-  const businessName = user?.businessName || 'My Business';
   const isConsoleAdmin = user?.isConsoleAdmin === true;
 
   const caretSystemContext = React.useMemo(
