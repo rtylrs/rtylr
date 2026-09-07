@@ -15,7 +15,7 @@ MUTATION = re.compile(r"\b(?:Post|Put|Patch|Delete)\s*\(")
 # protocol-specific request or response. Ordinary JSON mutations must use a
 # Register*WithValidation helper instead.
 ALLOWED_RAW_MUTATIONS = {
-    "internal/modules/careers/internal/routes/routes.go": ("handlers.ApplyHandler",),
+    "internal/modules/careers/internal/api/routes.go": ("ApplyHandler",),
     "internal/modules/echo/module.go": ("streamHandler.ServeHTTP",),
     "internal/modules/hr_reports/internal/routes/routes.go": ("handler.ServeHTTP",),
     "internal/modules/pos_orders/internal/routes/routes.go": (

@@ -6,9 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/careers/internal/api"
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
-	"github.com/voxire/onion/internal/modules/careers/internal/routes"
-	"github.com/voxire/onion/internal/modules/careers/internal/routes/handlers"
 )
 
 type Module struct {
@@ -24,7 +23,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.CareersService)
+	api.RegisterRoutes(ctx, router, m.CareersService)
 }
 
 // InvalidateActiveCareers busts the cached public careers catalogue.
@@ -39,13 +38,13 @@ func (m *Module) GetAnonymousRoutes() []string {
 	// routes back the candidate-facing careers sites — they resolve the
 	// tenant from the URL slug so auth isn't needed.
 	anon := []string{}
-	anon = append(anon, handlers.CareersRoutes()...)
-	anon = append(anon, handlers.ApplyRoutes()...)
-	anon = append(anon, handlers.GetPublicBrandingRoutes()...)
-	anon = append(anon, handlers.ListPublicCareersRoutes()...)
-	anon = append(anon, handlers.GetPublicCareerRoutes()...)
-	anon = append(anon, handlers.SubmitApplicationRoutes()...)
-	anon = append(anon, handlers.ResumeUploadURLRoutes()...)
-	anon = append(anon, handlers.PublicOGRoutes()...)
+	anon = append(anon, api.CareersRoutes()...)
+	anon = append(anon, api.ApplyRoutes()...)
+	anon = append(anon, api.GetPublicBrandingRoutes()...)
+	anon = append(anon, api.ListPublicCareersRoutes()...)
+	anon = append(anon, api.GetPublicCareerRoutes()...)
+	anon = append(anon, api.SubmitApplicationRoutes()...)
+	anon = append(anon, api.ResumeUploadURLRoutes()...)
+	anon = append(anon, api.PublicOGRoutes()...)
 	return anon
 }
