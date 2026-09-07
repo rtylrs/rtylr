@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/cdn"
 	"github.com/voxire/onion/internal/modules/accounts"
 	"github.com/voxire/onion/internal/modules/activity"
 	"github.com/voxire/onion/internal/modules/addons"
@@ -142,7 +143,6 @@ import (
 	"github.com/voxire/onion/internal/modules/warehouses"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/websitelead"
-	"github.com/voxire/onion/internal/cdn"
 	"github.com/voxire/onion/internal/modules/workspaces"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
