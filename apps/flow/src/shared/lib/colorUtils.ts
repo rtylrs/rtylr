@@ -36,7 +36,14 @@ export function blendHex(a: string, b: string, ratio: number): string {
   return `#${[r, g, bl].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
-/** Returns a pastel (lightened) version of the hex color. */
+/**
+ * A pastel (lightened) version of the hex colour.
+ *
+ * The `#ffffff` is an operand of the blend, not a surface colour, so it stays a
+ * literal: `blendHex` parses both arguments as hex and a `var()` would not
+ * parse. Checked while closing out rtylr#1073 rather than left as an
+ * unexplained hardcoded hex.
+ */
 export function toPastel(hex: string): string {
   return blendHex(hex, '#ffffff', 0.6);
 }

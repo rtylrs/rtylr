@@ -87,7 +87,7 @@ export const TaskContextMenu: React.FC<{
     minWidth: 160,
     background: 'var(--flow-card)',
     border: '1px solid var(--flow-border)',
-    borderRadius: 8,
+    borderRadius: 'var(--radius-md)',
     // --flow-shadow is the popover and modal lift, and it is theme-aware. The
     // literal here was a heavy black drop that stayed heavy in light mode.
     boxShadow: 'var(--flow-shadow)',

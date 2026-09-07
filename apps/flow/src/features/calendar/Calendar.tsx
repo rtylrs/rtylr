@@ -205,7 +205,7 @@ const Calendar: React.FC = () => {
                     className="text-meta font-semibold h-5 w-5 flex items-center justify-center rounded-full"
                     style={{
                       background: isToday ? ACCENT_VAR : 'transparent',
-                      color: isToday ? '#0a0a0a' : 'var(--flow-text-muted)',
+                      color: isToday ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
                     }}
                   >
                     {c.date.getDate()}
@@ -389,7 +389,7 @@ const Calendar: React.FC = () => {
                   onClick={submitCreate}
                   disabled={!newTitle.trim() || createTask.isPending}
                   className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
-                  style={{ background: ACCENT_VAR, color: '#0a0a0a' }}
+                  style={{ background: ACCENT_VAR, color: 'var(--flow-on-accent)' }}
                 >
                   {createTask.isPending ? t('flow.calendar.creating') : t('flow.calendar.create')}
                 </button>

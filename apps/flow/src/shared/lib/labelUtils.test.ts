@@ -1,13 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import {
-  findLabelById,
-  resolveLabels,
-  sortLabelsAlpha,
-  isColorDark,
-  labelTextColor,
-  filterLabels,
-} from './labelUtils';
+import { findLabelById, resolveLabels, sortLabelsAlpha, filterLabels } from './labelUtils';
 import type { Label } from '../stores/flowStore';
 
 function makeLabel(overrides: Partial<Label>): Label {
@@ -64,34 +57,6 @@ describe('sortLabelsAlpha', () => {
     const original = [...labels];
     sortLabelsAlpha(labels);
     expect(labels).toEqual(original);
-  });
-});
-
-describe('isColorDark', () => {
-  it('returns true for black', () => {
-    expect(isColorDark('#000000')).toBe(true);
-  });
-
-  it('returns false for white', () => {
-    expect(isColorDark('#ffffff')).toBe(false);
-  });
-
-  it('returns true for dark red', () => {
-    expect(isColorDark('#7f0000')).toBe(true);
-  });
-
-  it('returns false for yellow (bright color)', () => {
-    expect(isColorDark('#ffff00')).toBe(false);
-  });
-});
-
-describe('labelTextColor', () => {
-  it('returns white text for dark backgrounds', () => {
-    expect(labelTextColor('#000000')).toBe('#ffffff');
-  });
-
-  it('returns black text for light backgrounds', () => {
-    expect(labelTextColor('#ffffff')).toBe('#000000');
   });
 });
 

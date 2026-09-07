@@ -18,22 +18,6 @@ export function sortLabelsAlpha(labels: Label[]): Label[] {
   return [...labels].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** Returns true if a hex color is considered "dark" (useful for text contrast). */
-export function isColorDark(hex: string): boolean {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.slice(0, 2), 16);
-  const g = parseInt(clean.slice(2, 4), 16);
-  const b = parseInt(clean.slice(4, 6), 16);
-  // Standard luminance formula
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
-}
-
-/** Returns '#ffffff' or '#000000' depending on the background color for contrast. */
-export function labelTextColor(bgHex: string): '#ffffff' | '#000000' {
-  return isColorDark(bgHex) ? '#ffffff' : '#000000';
-}
-
 /** Filter labels whose name contains the search query (case-insensitive). */
 export function filterLabels(labels: Label[], query: string): Label[] {
   const q = query.trim().toLowerCase();
