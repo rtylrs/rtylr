@@ -388,7 +388,6 @@ interface BillingDetailResponse {
   billing: RawBillingDetailPayload | null;
 }
 
-
 interface SetSubscriptionRequest {
   planSlug: string;
 }
