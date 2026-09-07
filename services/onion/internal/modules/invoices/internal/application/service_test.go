@@ -883,3 +883,52 @@ func (m *mockRepo) CountInvoicesByCustomer(_ context.Context, _, _ int64) (int64
 	}
 	return 0, m.err
 }
+
+func TestApplyHeaderDiscount_RejectsOverDiscount(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		dtype string
+		value float64
+	}{
+		{"fixed exceeds subtotal", "fixed", 200},
+		{"percentage over 100", "percentage", 150},
+		{"negative fixed", "fixed", -10},
+		{"negative percentage", "percentage", -5},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := applyHeaderDiscount(150, tc.dtype, tc.value); !errors.Is(err, domain.ErrDiscountExceedsTotal) {
+				t.Fatalf("error = %v, want ErrDiscountExceedsTotal", err)
+			}
+		})
+	}
+}
+
+func TestApplyHeaderDiscount_AcceptsBoundary(t *testing.T) {
+	amount, err := applyHeaderDiscount(150, "fixed", 150)
+	if err != nil || !almostEqualAmount(amount, 150) {
+		t.Fatalf("amount = %f, err = %v, want 150, nil", amount, err)
+	}
+	amount, err = applyHeaderDiscount(150, "percentage", 100)
+	if err != nil || !almostEqualAmount(amount, 150) {
+		t.Fatalf("amount = %f, err = %v, want 150, nil", amount, err)
+	}
+}
+
+func TestCreateInvoice_RejectsOverDiscount(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+	_, err := s.CreateInvoice(context.Background(), 1, domain.InvoiceInput{
+		IssueDate:     "2024-06-15",
+		DueDate:       "2024-06-20",
+		DiscountValue: 200,
+		Items: []domain.InvoiceItemInput{
+			{Quantity: 1, UnitPrice: 150},
+		},
+	})
+	if !errors.Is(err, domain.ErrDiscountExceedsTotal) {
+		t.Fatalf("error = %v, want ErrDiscountExceedsTotal", err)
+	}
+	if repo.created != nil {
+		t.Error("over-discounted invoice reached the repository")
+	}
+}

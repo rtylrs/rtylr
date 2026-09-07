@@ -7,9 +7,10 @@ import (
 )
 
 var (
-	ErrInvoiceNotFound    = errors.New("invoice not found")
-	ErrInvoiceNotDraft    = errors.New("invoice is not in draft status")
-	ErrInvalidInvoiceDate = errors.New("due date must be on or after issue date")
+	ErrInvoiceNotFound      = errors.New("invoice not found")
+	ErrInvoiceNotDraft      = errors.New("invoice is not in draft status")
+	ErrInvalidInvoiceDate   = errors.New("due date must be on or after issue date")
+	ErrDiscountExceedsTotal = errors.New("discount must not exceed the invoice subtotal")
 )
 
 type Invoice struct {

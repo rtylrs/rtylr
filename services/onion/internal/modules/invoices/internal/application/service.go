@@ -149,6 +149,26 @@ func (s *Service) GetInvoice(ctx context.Context, businessID, invoiceID int64) (
 	return inv, nil
 }
 
+// applyHeaderDiscount resolves a header discount against the subtotal shared
+// by the create and update paths. Discounts that would drive the invoice
+// below zero are rejected instead of persisting negative totals.
+func applyHeaderDiscount(subtotal float64, discountType string, discountValue float64) (float64, error) {
+	var discountAmount float64
+	switch discountType {
+	case "percentage":
+		if discountValue < 0 || discountValue > 100 {
+			return 0, domain.ErrDiscountExceedsTotal
+		}
+		discountAmount = subtotal * (discountValue / 100)
+	default:
+		if discountValue < 0 || discountValue > subtotal {
+			return 0, domain.ErrDiscountExceedsTotal
+		}
+		discountAmount = discountValue
+	}
+	return discountAmount, nil
+}
+
 func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input domain.InvoiceInput) (*domain.Invoice, error) {
 	defer invalidateInvoicesScope(ctx, businessID)
 
@@ -232,11 +252,9 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 		discountType = "fixed"
 	}
 
-	switch discountType {
-	case "percentage":
-		discountAmount = subtotal * (input.DiscountValue / 100)
-	default:
-		discountAmount = input.DiscountValue
+	discountAmount, err = applyHeaderDiscount(subtotal, discountType, input.DiscountValue)
+	if err != nil {
+		return nil, err
 	}
 
 	afterDiscount := subtotal - discountAmount
@@ -362,13 +380,9 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 		discountType = "fixed"
 	}
 
-	var discountAmount float64
-
-	switch discountType {
-	case "percentage":
-		discountAmount = subtotal * (input.DiscountValue / 100)
-	default:
-		discountAmount = input.DiscountValue
+	discountAmount, err := applyHeaderDiscount(subtotal, discountType, input.DiscountValue)
+	if err != nil {
+		return nil, err
 	}
 
 	afterDiscount := subtotal - discountAmount
