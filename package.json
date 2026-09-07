@@ -5,7 +5,7 @@
   "scripts": {
     "build": "./scripts/check-packages-ref.sh && pnpm typecheck && turbo build",
     "dev": "turbo dev",
-    "test": "vitest run --reporter=default --reporter=json --outputFile.json=.vitest-report.json",
+    "test": "./scripts/test-with-file-check.sh",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
