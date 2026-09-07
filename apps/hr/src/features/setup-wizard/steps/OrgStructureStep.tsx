@@ -79,7 +79,7 @@ const OrgStructureStep = ({
             type="button"
             onClick={addDepartment}
             className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium"
-            style={{ background: 'var(--accent)', color: '#fff' }}
+            style={{ background: 'var(--accent)', color: 'var(--hr-on-accent)' }}
             aria-label={t('setup.orgStructure.addDepartment')}
           >
             <Plus size={14} />

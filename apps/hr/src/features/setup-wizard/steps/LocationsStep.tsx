@@ -150,7 +150,7 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
                   type="button"
                   onClick={addLocation}
                   className="mt-6 flex shrink-0 items-center gap-1 rounded-lg px-4 py-2.5 text-sm font-medium"
-                  style={{ background: 'var(--accent)', color: '#fff' }}
+                  style={{ background: 'var(--accent)', color: 'var(--hr-on-accent)' }}
                   aria-label={t('setup.locations.addLocation')}
                 >
                   <Plus size={14} />

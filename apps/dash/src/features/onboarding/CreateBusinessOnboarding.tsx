@@ -126,7 +126,11 @@ const CreateBusinessOnboarding: React.FC = (): React.JSX.Element => {
             type="submit"
             disabled={!canSubmit}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
-            style={{ background: '#4583C4', color: '#fff', minHeight: '44px' }}
+            style={{
+              background: 'var(--accent)',
+              color: 'var(--dash-on-accent)',
+              minHeight: '44px',
+            }}
           >
             {onboard.isPending && <Loader2 size={15} className="animate-spin" />}
             {onboard.isPending ? t('onboarding.creating') : t('onboarding.createButton')}

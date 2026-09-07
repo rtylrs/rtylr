@@ -25,7 +25,11 @@
   --hr-status-active: #10b981;
   --hr-status-inactive: #6b7280;
   --hr-error: #ef4444;
-  --hr-on-accent: #ffffff;
+  /* Text on an --accent fill. Was #ffffff, which measures 4.23:1 on #8b5cf6 and
+     fails AA. Near-black is what deriveOnAccent returns for this accent, so the
+     static value matches what the provider computes and nothing shifts on
+     hydration. */
+  --hr-on-accent: #0a0a0a; /* 4.68:1 on #8b5cf6 */
 
   /* Shift / roster palette */
   --hr-shift-purple: #8b5cf6;

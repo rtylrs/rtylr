@@ -909,7 +909,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                     }
                   }}
                   className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
-                  style={{ background: '#4583C4', color: '#fff' }}
+                  style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
                 >
                   {singleStep === 2
                     ? t('team.inviteUser.activateStepButton')
@@ -920,7 +920,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                   type="submit"
                   disabled={invite.isPending}
                   className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
-                  style={{ background: '#4583C4', color: '#fff' }}
+                  style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
                 >
                   <Send size={14} />
                   {authMethod === 'invite'
@@ -1023,7 +1023,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 disabled={bulkInvite.isPending || parsedEmails.length === 0}
                 onClick={submitBulk}
                 className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
-                style={{ background: '#4583C4', color: '#fff' }}
+                style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
               >
                 <Send size={14} />
                 {bulkInvite.isPending

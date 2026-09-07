@@ -177,4 +177,74 @@ describe('the accent tint is paired with its own foreground', () => {
 
     expect(missing, 'a var() on an undeclared property silently inherits').toEqual([]);
   });
+
+  it('gives text on an accent fill a foreground that passes AA', () => {
+    // The second defect the declaration test turned up. dash painted text on an
+    // --accent fill with var(--accent-contrast, #fff): a property no stylesheet
+    // declares, so it always took the white fallback, at 3.96:1 on #4583c4.
+    // insights had the same white under the name --accent-fg, and HR's
+    // --hr-on-accent was white too, at 4.23:1.
+    //
+    // Checked by value, not by name, because the name is not reliable: flow's
+    // --accent-fg is the accent used AS a foreground, while insights had used
+    // --accent-fg for text ON the fill. --<app>-on-accent is the name that says
+    // which it means.
+    const failures: string[] = [];
+
+    for (const app of APPS) {
+      const cssPath = path.join(ROOT, 'apps', app, 'src', 'globals.css');
+      if (!fs.existsSync(cssPath)) continue;
+      const css = fs.readFileSync(cssPath, 'utf8');
+
+      const accent = /^\s*--accent:\s*(#[0-9a-f]{6})\s*;/im.exec(css)?.[1];
+      if (!accent) continue;
+
+      for (const m of css.matchAll(/^\s*(--[a-z-]*on-accent):\s*(#[0-9a-f]{6})\s*;/gim)) {
+        const ratio = contrastRatio(m[2], accent);
+        if (ratio < 4.5) {
+          failures.push(`${app}: ${m[1]} ${m[2]} on ${accent} is ${ratio.toFixed(2)}:1`);
+        }
+      }
+    }
+
+    expect(failures, 'text on an accent fill must clear 4.5:1').toEqual([]);
+  });
+
+  it('leaves no accent fill painted with a literal foreground', () => {
+    // Both shapes of the fill. The second one matters because the first sweep
+    // for this defect only looked for background: var(--accent) and so missed
+    // every fill painted with the accent's literal hex, which is how five more
+    // sites in dash stayed hidden.
+    const accents: Record<string, string> = {};
+    for (const app of APPS) {
+      const cssPath = path.join(ROOT, 'apps', app, 'src', 'globals.css');
+      if (!fs.existsSync(cssPath)) continue;
+      const hex = /^\s*--accent:\s*(#[0-9a-f]{6})\s*;/im.exec(
+        fs.readFileSync(cssPath, 'utf8')
+      )?.[1];
+      if (hex) accents[app] = hex.toLowerCase();
+    }
+
+    const offenders: string[] = [];
+    for (const [app, accent] of Object.entries(accents)) {
+      for (const file of sourceFiles(path.join(ROOT, 'apps', app, 'src'))) {
+        const lines = fs.readFileSync(file, 'utf8').split('\n');
+        lines.forEach((line, i) => {
+          if (isComment(line)) return;
+          const onFill =
+            /background:\s*'?var\(--accent\)/.test(line) ||
+            new RegExp(`background:[^,\n]*'${accent}'`, 'i').test(line);
+          if (!onFill) return;
+          const window = lines.slice(i, i + 3).join('\n');
+          if (/color:\s*'?#[0-9a-fA-F]{3,6}'?/.test(window)) {
+            offenders.push(`${path.relative(ROOT, file)}:${i + 1} (hardcoded hex)`);
+          } else if (/color:\s*[^,\n]*var\(\s*--[a-z0-9-]+\s*,/.test(window)) {
+            offenders.push(`${path.relative(ROOT, file)}:${i + 1} (var with literal fallback)`);
+          }
+        });
+      }
+    }
+
+    expect(offenders, 'use var(--<app>-on-accent) on an accent fill').toEqual([]);
+  });
 });

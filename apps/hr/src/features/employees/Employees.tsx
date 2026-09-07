@@ -73,7 +73,7 @@ const Employees = (): React.JSX.Element => {
             type="button"
             onClick={() => navigate({ to: '/employees/new' })}
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
-            style={{ background: 'var(--accent)', color: '#fff' }}
+            style={{ background: 'var(--accent)', color: 'var(--hr-on-accent)' }}
           >
             <Plus size={14} />
             {t('employees.addNew')}
