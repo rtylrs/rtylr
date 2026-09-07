@@ -82,6 +82,33 @@ export function withAlpha(color: string, percent: number): string {
   return `color-mix(in srgb, ${color} ${percent}%, transparent)`;
 }
 
+/**
+ * The readable foreground for a colour sitting on a tint of itself.
+ *
+ * `withAlpha(c, 10..20)` with `color: c` reads well and fails AA: across ten
+ * label and project colours in both modes, the raw colour failed **16 of 20**
+ * pairings at 10% and 17 of 20 at 13%, the worst being Flow's teal at
+ * **1.92:1** in light mode (rtylr#1246).
+ *
+ * A single mode-independent value cannot fix it. The two mode tints sit on
+ * opposite sides of the scale, a near-white tint in light and a near-black one
+ * in dark, so anything contrasting with one is close to the other; deriving one
+ * value against both grounds returns a mid-tone clearing neither, around 3.0:1
+ * for every colour tried, black and white included.
+ *
+ * So the mode has to enter the calculation, and mixing toward `--flow-text`
+ * lets CSS supply it rather than JavaScript reading the theme.
+ *
+ * The 50% is measured, not judged by eye. Across Flow's palette in both modes
+ * at every alpha the chips use, 50% clears all 120 pairings with the worst at
+ * 5.38:1, yellow `#eab308` in light mode at 20%. At 60% that same pairing drops
+ * to 4.14:1 and fails, so this is not a comfort margin but the difference
+ * between passing and not. `onTint.test.ts` pins both halves.
+ */
+export function onTint(color: string): string {
+  return `color-mix(in srgb, ${color} 50%, var(--flow-text))`;
+}
+
 /** Returns a color from the palette by index, wrapping around. */
 export function paletteColor(index: number): ProjectColor {
   return PROJECT_COLORS[index % PROJECT_COLORS.length];
