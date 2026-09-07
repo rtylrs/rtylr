@@ -220,8 +220,11 @@ const ProjectCalendar: React.FC = () => {
                             dir="auto"
                             className="text-meta px-1.5 py-0.5 rounded-sm truncate"
                             style={{
-                              background: withAlpha(tone, 13),
-                              color: onTint(tone),
+                              // See Calendar: the tone is set once and read back,
+                              // which also makes it observable in tests.
+                              ['--tone' as string]: tone,
+                              background: withAlpha('var(--tone)', 13),
+                              color: onTint('var(--tone)'),
                               cursor: 'pointer',
                             }}
                             title={t.title}

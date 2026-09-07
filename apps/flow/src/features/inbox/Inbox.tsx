@@ -72,12 +72,13 @@ const NotificationRow: React.FC<{
       <span
         className="h-8 w-8 rounded-full flex items-center justify-center text-meta font-bold shrink-0 mt-0.5"
         style={{
+          // See Calendar: the tone is set once and read back, which also makes it
+          // observable in tests.
+          ...(notification.projectColor ? { ['--tone' as string]: notification.projectColor } : {}),
           background: notification.projectColor
-            ? withAlpha(notification.projectColor, 13)
+            ? withAlpha('var(--tone)', 13)
             : 'var(--accent-muted)',
-          color: notification.projectColor
-            ? onTint(notification.projectColor)
-            : 'var(--accent-on-muted)',
+          color: notification.projectColor ? onTint('var(--tone)') : 'var(--accent-on-muted)',
         }}
       >
         {notification.actorInitials || '?'}
