@@ -46,7 +46,7 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
   admin: { icon: <Crown size={10} />, color: 'var(--flow-warn-fg)' },
   member: { icon: <Shield size={10} />, color: 'var(--accent)' },
-  viewer: { icon: <Eye size={10} />, color: '#8b5cf6' },
+  viewer: { icon: <Eye size={10} />, color: 'var(--flow-neutral-fg)' },
 };
 
 const ProjectSettings: React.FC = () => {
@@ -520,7 +520,7 @@ const ProjectSettings: React.FC = () => {
                   )}
                 </div>
                 {confirmTransfer && (
-                  <p className="text-meta mt-1.5" style={{ color: '#f97316' }}>
+                  <p className="text-meta mt-1.5" style={{ color: 'var(--flow-warn-fg)' }}>
                     {t('flow.projectSettings.transferConfirmHint')}
                   </p>
                 )}
