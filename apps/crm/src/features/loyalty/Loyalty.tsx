@@ -14,7 +14,10 @@ import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const ACCENT = '#3b82f6';
 
-const TIER_ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
+const TIER_ICON_MAP: Record<
+  string,
+  React.ComponentType<{ size?: number; style?: React.CSSProperties }>
+> = {
   Bronze: Award,
   Silver: Star,
   Gold: Trophy,
