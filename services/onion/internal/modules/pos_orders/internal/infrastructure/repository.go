@@ -1028,17 +1028,19 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 			}
 		}
 
-		itemsTotal, totalErr := qtx.GetOrderItemsTotal(ctx, newID)
+		itemsTotal, totalErr := qtx.GetActiveOrderItemsTotal(ctx, newID)
 		if totalErr != nil {
 			txErr = totalErr
 			return nil, totalErr
 		}
 
-		itemsTotalDecimal := nullableDecimal(itemsTotal)
-		recalcErr := qtx.UpdateOrderTotals(ctx, sqlc.UpdateOrderTotalsParams{
-			Subtotal: itemsTotalDecimal,
-			Total:    itemsTotalDecimal,
-			ID:       newID,
+		itemsSubtotal := nullableDecimal(itemsTotal.Subtotal)
+		itemsTaxAmount := nullableDecimal(itemsTotal.TaxAmount)
+		recalcErr := qtx.UpdateOrderTotal(ctx, sqlc.UpdateOrderTotalParams{
+			Subtotal:   itemsSubtotal,
+			TaxAmount:  itemsTaxAmount,
+			ID:         newID,
+			BusinessID: businessID,
 		})
 		if recalcErr != nil {
 			txErr = recalcErr

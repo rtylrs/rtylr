@@ -735,3 +735,59 @@ func TestCreateOrder_UsesServerPriceInsteadOfClientPrice(t *testing.T) {
 		t.Fatalf("stored item pricing = %+v, want unit price 15 and tax 10", order.Items)
 	}
 }
+
+func TestSplitOrder_SplitsSubtotalAndTax(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	productID := insertTestProduct(ctx, t, db, "OrderSplit", 10.00)
+
+	orderNum := fmt.Sprintf("TEST-ORD-%d", 9101)
+	id, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101, orderNum, domain.OrderInput{
+		SessionID: 3201,
+		Type:      domain.OrderTypeTakeaway,
+		Items: []domain.OrderItemInput{
+			{MenuItemID: productID, Quantity: 1, UnitPrice: 10, TaxRate: 10},
+			{MenuItemID: productID, Quantity: 1, UnitPrice: 20},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CreateOrder: %v", err)
+	}
+
+	order, err := repo.GetOrder(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetOrder: %v", err)
+	}
+	if len(order.Items) != 2 {
+		t.Fatalf("expected 2 items, got %d", len(order.Items))
+	}
+
+	newIDs, err := repo.SplitOrder(ctx, testutil.OwnerID, id, [][]int64{{order.Items[0].ID}})
+	if err != nil {
+		t.Fatalf("SplitOrder: %v", err)
+	}
+	if len(newIDs) != 1 {
+		t.Fatalf("expected 1 split order, got %d", len(newIDs))
+	}
+	t.Cleanup(func() {
+		for _, oid := range append([]int64{id}, newIDs...) {
+			_, _ = db.ExecContext(ctx, `DELETE FROM pos_order_items WHERE order_id = ?`, oid)
+			_, _ = db.ExecContext(ctx, `DELETE FROM pos_orders WHERE id = ?`, oid)
+		}
+	})
+
+	child, err := repo.GetOrder(ctx, testutil.OwnerID, newIDs[0])
+	if err != nil {
+		t.Fatalf("GetOrder split child: %v", err)
+	}
+	if child.Subtotal != 10 {
+		t.Errorf("expected child subtotal=10, got %.2f", child.Subtotal)
+	}
+	if child.TaxAmount != 1 {
+		t.Errorf("expected child tax=1, got %.2f", child.TaxAmount)
+	}
+	if child.Total != 11 {
+		t.Errorf("expected child total=11, got %.2f", child.Total)
+	}
+}
