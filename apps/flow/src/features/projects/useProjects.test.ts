@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -54,7 +54,7 @@ describe('useProjects (remote mode)', () => {
   // exists.
   it('fetches the business projects without a workspace argument', async () => {
     const data = [{ id: 'p-1', name: 'Project Alpha' }];
-    (flowApi.getProjects as any).mockResolvedValue(data);
+    (flowApi.getProjects as unknown as Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useProjects(), {
       wrapper: createWrapper(),
     });
@@ -64,7 +64,7 @@ describe('useProjects (remote mode)', () => {
   });
 
   it('starts in loading state', () => {
-    (flowApi.getProjects as any).mockReturnValue(new Promise(() => {}));
+    (flowApi.getProjects as unknown as Mock).mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useProjects(), {
       wrapper: createWrapper(),
     });
@@ -78,7 +78,7 @@ describe('useCreateProject', () => {
   });
 
   it('calls createProject service method', async () => {
-    (flowApi.createProject as any).mockResolvedValue({ id: 'p-new' });
+    (flowApi.createProject as unknown as Mock).mockResolvedValue({ id: 'p-new' });
     const { result } = renderHook(() => useCreateProject(), {
       wrapper: createWrapper(),
     });
@@ -91,7 +91,7 @@ describe('useCreateProject', () => {
   // hook's parameter type used to omit description, so it had nowhere to send
   // it (#1060).
   it('passes the description and visibility straight through', async () => {
-    (flowApi.createProject as any).mockResolvedValue({ id: 'p-new' });
+    (flowApi.createProject as unknown as Mock).mockResolvedValue({ id: 'p-new' });
     const { result } = renderHook(() => useCreateProject(), {
       wrapper: createWrapper(),
     });
@@ -120,7 +120,7 @@ describe('useUpdateProject', () => {
   });
 
   it('calls updateProject with id and data', async () => {
-    (flowApi.updateProject as any).mockResolvedValue({});
+    (flowApi.updateProject as unknown as Mock).mockResolvedValue({});
     const { result } = renderHook(() => useUpdateProject(), {
       wrapper: createWrapper(),
     });
@@ -135,7 +135,7 @@ describe('useArchiveProject', () => {
   });
 
   it('calls archiveProject with id', async () => {
-    (flowApi.archiveProject as any).mockResolvedValue({ ok: true });
+    (flowApi.archiveProject as unknown as Mock).mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useArchiveProject(), {
       wrapper: createWrapper(),
     });
@@ -148,7 +148,7 @@ describe('useArchiveProject', () => {
   // because the server stamps purge_at from the business's retention setting -
   // which is why the confirmation carries it rather than the pre-archive dialog.
   it('states the scheduled deletion date in the confirmation', async () => {
-    (flowApi.archiveProject as any).mockResolvedValue({
+    (flowApi.archiveProject as unknown as Mock).mockResolvedValue({
       project: { id: 'p-2', purgeAt: '2026-09-23T00:00:00Z' },
     });
     const { result } = renderHook(() => useArchiveProject(), {
@@ -163,7 +163,7 @@ describe('useArchiveProject', () => {
   // The response previously typed away the project, so a build that still does
   // must not print "undefined" at the user. Undated message, no crash.
   it('falls back to the undated message when no purge date comes back', async () => {
-    (flowApi.archiveProject as any).mockResolvedValue({ project: { id: 'p-2' } });
+    (flowApi.archiveProject as unknown as Mock).mockResolvedValue({ project: { id: 'p-2' } });
     const { result } = renderHook(() => useArchiveProject(), {
       wrapper: createWrapper(),
     });

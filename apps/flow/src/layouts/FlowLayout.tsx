@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import TrialBanner from '../shared/components/TrialBanner';
-import { Link, useLocation, useNavigate, useParams, useRouterState } from '@tanstack/react-router';
+import { Link, useLocation, useParams, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Inbox,
@@ -235,7 +235,6 @@ interface FlowLayoutProps {
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const navigate = useNavigate();
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const { workspaceId, projectId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
@@ -274,7 +273,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     activeWorkspaceId,
     setActiveWorkspace,
     setProjects,
-    members,
     setMembers,
     tasks,
     setCommandBarOpen,
@@ -287,11 +285,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const { data: businessName } = useFlowBusinessName();
   const { data: realtimeBusinessId } = useFlowBusinessId();
-
-  // The workspace layer is gone. Realtime and the Caret route context still
-  // take a workspace argument, so this stays as one empty constant rather than
-  // threading the removal through those signatures here.
-  const currentWorkspaceId = '';
 
   const canCreateProject = canFlowPermission(
     authUser?.role,
@@ -536,7 +529,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     [
       activeProject,
       activeWorkspace.name,
-      currentWorkspaceId,
       flowPageTitle,
       inQuietHours,
       location.pathname,
@@ -544,6 +536,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       myIssuesCount,
       todayFocusCount,
       sidebarProjects,
+      t,
     ]
   );
 

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -47,14 +47,14 @@ const createWrapper = () => {
 describe('useCycles (remote mode)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
+    (useFlowStore as unknown as Mock).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
   // Cycles are project-scoped on v2, so the id is the project's and there is no
   // store fallback. These two used to cover a workspace fallback and an
   // explicit override of it.
   it("asks for the given project's cycles", async () => {
-    (flowApi.getCycles as any).mockResolvedValue([{ id: 'c-1' }]);
+    (flowApi.getCycles as unknown as Mock).mockResolvedValue([{ id: 'c-1' }]);
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useCycles('p-1'), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -71,7 +71,7 @@ describe('useCycles (remote mode)', () => {
 
   it('unwraps the enveloped { cycles: [...] } shape', async () => {
     const cycles = [{ id: 'c-2', name: 'Sprint 1' }];
-    (flowApi.getCycles as any).mockResolvedValue({ cycles });
+    (flowApi.getCycles as unknown as Mock).mockResolvedValue({ cycles });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useCycles('p-1'), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -82,13 +82,13 @@ describe('useCycles (remote mode)', () => {
 describe('useCreateCycle', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
+    (useFlowStore as unknown as Mock).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
   // Creating a cycle carries the project through untouched; nothing is stamped
   // on from a store any more.
   it('sends the payload through untouched and invalidates cycles', async () => {
-    (flowApi.createCycle as any).mockResolvedValue({ id: 'c-new' });
+    (flowApi.createCycle as unknown as Mock).mockResolvedValue({ id: 'c-new' });
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateCycle(), { wrapper });
@@ -98,7 +98,7 @@ describe('useCreateCycle', () => {
   });
 
   it('shows an error toast and does not invalidate when the create call fails', async () => {
-    (flowApi.createCycle as any).mockRejectedValue(new Error('boom'));
+    (flowApi.createCycle as unknown as Mock).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateCycle(), { wrapper });
@@ -116,7 +116,7 @@ describe('useUpdateCycle', () => {
   });
 
   it('calls updateCycle with id and data and invalidates cycles on success', async () => {
-    (flowApi.updateCycle as any).mockResolvedValue({});
+    (flowApi.updateCycle as unknown as Mock).mockResolvedValue({});
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateCycle(), { wrapper });
@@ -126,7 +126,7 @@ describe('useUpdateCycle', () => {
   });
 
   it('shows an error toast and does not invalidate when the update call fails', async () => {
-    (flowApi.updateCycle as any).mockRejectedValue(new Error('boom'));
+    (flowApi.updateCycle as unknown as Mock).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateCycle(), { wrapper });
