@@ -137,7 +137,6 @@ export const useSwitchBusiness = () =>
       }),
   });
 
-
 // Live availability check for the onboarding screen (business names are globally unique).
 export const useBusinessExists = (name: string) =>
   useQuery({

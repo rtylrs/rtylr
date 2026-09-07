@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import {
-  Globe,
-  Copy,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  ShieldCheck,
-  AlertCircle,
-} from 'lucide-react';
+import { Globe, Copy, Check, ChevronDown, ChevronUp, ShieldCheck, AlertCircle } from 'lucide-react';
 import {
   Card,
   CardContent,

@@ -63,9 +63,7 @@ const CreateItem: React.FC = () => {
       for (const cat of items) {
         const candidate = cat as StoreItemLike;
         if (candidate.type === 'category' && candidate.details?.menuItems) {
-          found = candidate.details.menuItems.find(
-            (i) => i._id === itemId || i.itemId === itemId
-          );
+          found = candidate.details.menuItems.find((i) => i._id === itemId || i.itemId === itemId);
           if (found) break;
         }
       }
