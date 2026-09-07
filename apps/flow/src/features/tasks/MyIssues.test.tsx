@@ -38,6 +38,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   myIssuesData.data = [];
   myIssuesData.isLoading = false;
+  // The query-failure flags belong here, not in one describe's own hook.
+  // They were reset inside the failure describe only, so `--sequence.shuffle`
+  // could run a failure test before an empty-state test and the empty state
+  // rendered the failed state instead (#1194).
+  myIssuesData.isError = false;
+  myIssuesData.isPaused = false;
+  myIssuesData.failureCount = 0;
 });
 
 describe('MyIssues empty state', () => {

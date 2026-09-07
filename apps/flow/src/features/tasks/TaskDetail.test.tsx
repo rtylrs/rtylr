@@ -151,6 +151,12 @@ beforeEach(() => {
   updateTaskMutate.mockClear();
   useLabelsSpy.mockReturnValue({ data: [] });
   useCurrentProjectSpy.mockReturnValue({ project: undefined, isLoading: false });
+  // The query-failure flags belong here, not in one describe's own hook. They
+  // were reset inside the failure describe only, so `--sequence.shuffle` could
+  // run a failure test before another and leave this stuck (#1194).
+  taskDetailData.isError = false;
+  taskDetailData.isPaused = false;
+  taskDetailData.failureCount = 0;
   useFlowStore.setState({
     activeWorkspaceId: 'ws-active',
     workspaces: [{ id: 'ws-active', name: 'Active workspace', color: '#000' }],
