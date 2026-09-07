@@ -1,3 +1,4 @@
+import { daysUntil } from './dateUtils';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -18,9 +19,19 @@ export function getInitials(name?: string | null): string {
 export function formatDate(date: string): string {
   if (!date || String(date).trim() === '') return '-';
   const d = new Date(date);
-  const now = new Date();
-  const diff = d.getTime() - now.getTime();
-  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+  // Calendar days apart, not a millisecond gap rounded up.
+  //
+  // The old arithmetic subtracted a local `new Date()` from a bare YYYY-MM-DD,
+  // which parses as UTC midnight, so the two sides were in different frames.
+  // At UTC+3 a task due *today*, read at 02:00, came out one day in the future
+  // and the board labelled it "Tomorrow". That is the symptom the design
+  // review reported and attributed to `todayIso`; #1192 fixed that helper,
+  // while this formatter kept its own broken sum.
+  //
+  // `daysUntil` compares two ISO days through the same frame, so the answer is
+  // a whole number of calendar days and does not depend on the hour.
+  const days = daysUntil(date);
 
   if (days === 0) return 'Today';
   if (days === 1) return 'Tomorrow';
