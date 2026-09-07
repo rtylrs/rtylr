@@ -334,7 +334,7 @@ const Businesses: React.FC = () => {
                       className={cn(
                         'group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border p-4 transition-all duration-150',
                         !isCurrent &&
-                          'cursor-pointer hover:border-[var(--dash-border-hover)] hover:bg-[var(--dash-hover)]'
+                          'cursor-pointer hover:border-[var(--accent-border)] hover:bg-[var(--dash-hover)]'
                       )}
                       style={{
                         background: isCurrent ? 'rgba(69,131,196,0.05)' : undefined,
