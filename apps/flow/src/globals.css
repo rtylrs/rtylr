@@ -175,6 +175,19 @@
    * the rest of this family occupies (danger 6.19, locked 7.59, warn 7.90)
    * rather than being picked to clear the threshold and no more. */
   --flow-info-fg: #6aa5ff;
+  /* The muted tone: backlog, todo, low and no priority, a completed cycle, a
+   * milestone in planning, and the health fallback. Those shipped as three
+   * separate greys, #6b7280, #9ca3af and #4b5563, and five of the six
+   * mode-and-ground combinations were under 4.5:1: todo measured 2.31:1 in
+   * light and cancelled 2.39:1 in dark. No single hex can serve both grounds.
+   *
+   * One token rather than three, decided deliberately. Colour was carrying a
+   * backlog-versus-todo distinction that three mid-greys cannot convey, and
+   * the status name sits beside the dot in the list, the board and the card.
+   *
+   * 6.88:1 on the worst of the three dark grounds, inside the band the rest of
+   * this family occupies. */
+  --flow-neutral-fg: #9ba0a8;
 
   --flow-status-draft: var(--flow-text-muted);
   --flow-status-draft-bg: rgba(255, 255, 255, 0.06);
@@ -215,6 +228,8 @@
   /* See the dark-mode note. 5.31:1 on white and on --flow-bg, inside this
    * family's light band (warn 5.01, danger 5.40, locked 6.06). */
   --flow-info-fg: #2a63bb;
+  /* See the dark-mode note. 5.33:1 on white and on --flow-bg. */
+  --flow-neutral-fg: #5f6570;
 
   --flow-status-draft: var(--flow-text-muted);
   --flow-status-draft-bg: rgba(0, 0, 0, 0.05);

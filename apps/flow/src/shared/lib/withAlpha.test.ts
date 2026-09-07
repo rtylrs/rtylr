@@ -98,6 +98,9 @@ describe('Flow assigns tones from tokens, not raw hex', () => {
     ['green', '#22c55e', '--flow-status-approved'],
     ['blue', '#3b82f6', '--flow-info-fg'],
     ['amber', '#f59e0b', '--flow-warn-fg'],
+    ['grey 6b7280', '#6b7280', '--flow-neutral-fg'],
+    ['grey 9ca3af', '#9ca3af', '--flow-neutral-fg'],
+    ['grey 4b5563', '#4b5563', '--flow-neutral-fg'],
   ])('leaves no %s as a semantic value', (_name, hex, token) => {
     const offenders: string[] = [];
     for (const file of sourceFiles(SRC)) {
@@ -111,18 +114,21 @@ describe('Flow assigns tones from tokens, not raw hex', () => {
   // Each of these carries a literal hex chosen per mode, so a tone added to one
   // block only resolves to nothing in the other. An unresolved var() paints the
   // browser default rather than failing, so nothing catches it but a reader.
-  it.each(['--flow-info-fg', '--flow-warn-fg', '--flow-danger-fg', '--flow-locked-fg'])(
-    'declares %s in both modes',
-    (token) => {
-      const css = fs.readFileSync(path.join(SRC, 'globals.css'), 'utf8');
-      const declaredUnder = (mode: string) =>
-        css
-          .split(/:root\[data-theme='/)
-          .filter((block) => block.startsWith(`${mode}'`))
-          .some((block) => block.includes(`${token}:`));
+  it.each([
+    '--flow-info-fg',
+    '--flow-warn-fg',
+    '--flow-danger-fg',
+    '--flow-locked-fg',
+    '--flow-neutral-fg',
+  ])('declares %s in both modes', (token) => {
+    const css = fs.readFileSync(path.join(SRC, 'globals.css'), 'utf8');
+    const declaredUnder = (mode: string) =>
+      css
+        .split(/:root\[data-theme='/)
+        .filter((block) => block.startsWith(`${mode}'`))
+        .some((block) => block.includes(`${token}:`));
 
-      expect(declaredUnder('dark'), `${token} is missing from dark`).toBe(true);
-      expect(declaredUnder('light'), `${token} is missing from light`).toBe(true);
-    }
-  );
+    expect(declaredUnder('dark'), `${token} is missing from dark`).toBe(true);
+    expect(declaredUnder('light'), `${token} is missing from light`).toBe(true);
+  });
 });

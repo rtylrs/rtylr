@@ -29,7 +29,7 @@ export function projectHealthColor(health: Project['health']): string {
     at_risk: 'var(--flow-warn-fg)',
     off_track: 'var(--flow-danger-fg)',
   };
-  return colors[health] ?? '#6b7280';
+  return colors[health] ?? 'var(--flow-neutral-fg)';
 }
 
 /** Infer health from completion percent: on_track >= 75, at_risk >= 40, else off_track. */
