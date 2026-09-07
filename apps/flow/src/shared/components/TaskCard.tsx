@@ -10,7 +10,7 @@ import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
-import { withAlpha } from '../lib/colorUtils';
+import { withAlpha, onTint } from '../lib/colorUtils';
 
 interface TaskCardProps {
   task: Task;
@@ -110,7 +110,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   background: task.statusColor
                     ? withAlpha(task.statusColor, 13)
                     : 'var(--accent-muted)',
-                  color: task.statusColor ?? 'var(--accent-on-muted)',
+                  color: task.statusColor ? onTint(task.statusColor) : 'var(--accent-on-muted)',
                 }}
                 title={task.statusName}
               >
