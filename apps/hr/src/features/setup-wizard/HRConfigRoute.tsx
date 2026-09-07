@@ -36,7 +36,7 @@ function ConfigLoadError({
       <button
         type="button"
         className="min-h-[44px] rounded-lg px-4 py-2 text-sm font-medium"
-        style={{ backgroundColor: 'var(--accent)', color: 'var(--hr-card-bg)' }}
+        style={{ backgroundColor: 'var(--accent)', color: 'var(--hr-on-accent)' }}
         disabled={isRetrying}
         onClick={onRetry}
       >

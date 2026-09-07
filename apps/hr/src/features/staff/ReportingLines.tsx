@@ -109,7 +109,7 @@ const ReportingLines: React.FC = () => {
                     type="button"
                     onClick={() => setEditingId(person.id)}
                     className="h-11 min-w-[44px] rounded-lg px-3 text-sm font-medium"
-                    style={{ color: 'var(--hr-primary)' }}
+                    style={{ color: 'var(--accent-fg)' }}
                     aria-label={t('staff.reportingLines.changeLabel', { name: person.name })}
                   >
                     {t('staff.reportingLines.change')}

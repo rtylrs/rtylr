@@ -54,7 +54,7 @@ const SupplierBillHistory: React.FC<SupplierBillHistoryProps> = ({ supplier }) =
               <span
                 style={{
                   fontWeight: bill.status === 'unpaid' ? 600 : 400,
-                  color: bill.status === 'overdue' ? 'var(--finance-danger)' : undefined,
+                  color: bill.status === 'overdue' ? 'var(--erp-danger)' : undefined,
                 }}
               >
                 {bill.status}

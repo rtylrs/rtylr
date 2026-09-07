@@ -138,7 +138,7 @@ const CreateBanner = (): React.JSX.Element => {
               disabled
               aria-describedby={UNAVAILABLE_ID}
               className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50"
-              style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+              style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
             >
               {isSubmitting ? 'Uploading...' : 'Create Banner'}
             </button>

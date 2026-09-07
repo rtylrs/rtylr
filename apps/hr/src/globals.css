@@ -57,6 +57,11 @@
      #8b5cf6 measures 3.80:1 on the muted card and 3.98:1 on the muted surface
      (rtylr#1217). Measured against both grounds, worst case first. */
   --accent-on-muted: #a885f8; /* dark, 5.65:1 on card, 5.92:1 on surface */
+  /* The accent used AS a foreground, on any HR surface. The accent itself cannot
+     do this job: #8b5cf6 measures 4.27:1 on the card and 3.85:1 on the light bg.
+     Same role as flow's --accent-fg, kept above the 4.6 the derivation targets
+     so it is not sitting on its own minimum. */
+  --accent-fg: #9e77f7; /* dark, 5.55:1 worst across bg, surface and card */
   --hr-bg: #0a0a0a;
   --hr-surface: #111111;
   --hr-card: #161616;
@@ -77,6 +82,7 @@
   /* The light half of the same pair. Kept for the reason given in the dark
      block above; light is the worse mode, at 3.35:1 unfixed. */
   --accent-on-muted: #5b2fc9; /* light, 6.16:1 on card, 6.70:1 on surface */
+  --accent-fg: #6f34f4; /* light, 5.50:1 worst across bg and surface */
   --hr-bg: #f4f4f5;
   --hr-surface: #ffffff;
   --hr-card: #ffffff;

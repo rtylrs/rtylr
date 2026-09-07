@@ -96,7 +96,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
           height: '24px',
           borderRadius: '6px',
           background: 'rgba(59,130,246,0.15)',
-          color: 'var(--hub-accent, #3b82f6)',
+          color: 'var(--accent-fg)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

@@ -72,7 +72,7 @@ const RoleCard = ({
             className="ms-2 rounded px-1.5 py-0.5 text-xs"
             style={{
               background: role.isSystem ? 'var(--hr-hover)' : 'var(--accent)',
-              color: role.isSystem ? 'var(--hr-text-dim)' : 'var(--hr-card-bg)',
+              color: role.isSystem ? 'var(--hr-text-dim)' : 'var(--hr-on-accent)',
             }}
           >
             {role.isSystem
