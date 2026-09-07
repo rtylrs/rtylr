@@ -5,7 +5,7 @@ import { useFlowStore, type Project, type Milestone } from '../../shared/stores/
 import { useProjects } from '../projects/useProjects';
 import { useMilestones } from '../milestones/useMilestones';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 
 function parseDate(d: string): number {
   return new Date(d).getTime();
@@ -119,7 +119,10 @@ const Timeline: React.FC = () => {
                       border: `1px solid ${withAlpha(p.color, 40)}`,
                     }}
                   >
-                    <span className="text-meta font-semibold truncate" style={{ color: p.color }}>
+                    <span
+                      className="text-meta font-semibold truncate"
+                      style={{ color: onTint(p.color) }}
+                    >
                       {p.progress}%
                     </span>
                   </div>
