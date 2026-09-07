@@ -7,9 +7,22 @@ const mutateSpy = vi.fn();
 // The mutation resolves with the { project } envelope the contract returns.
 // Mocking a bare project here hid a real bug: the component read .id off the
 // envelope and got undefined, and only the typecheck caught it.
-const createProjectSpy = vi.fn((_vars: unknown, opts?: { onSuccess?: (p: unknown) => void }) =>
-  opts?.onSuccess?.({ project: { id: 'p-new', name: 'Ras Beirut refit' } })
-);
+type CreateProjectOpts = { onSuccess?: (p: unknown) => void; onError?: (e: Error) => void };
+
+/**
+ * The default: the create succeeds and hands back the envelope shape.
+ *
+ * Held separately so `beforeEach` can restore it. One test below swaps in an
+ * onError implementation, and `mockClear()` resets calls but **not** the
+ * implementation, so under `--sequence.shuffle` that error behaviour leaked
+ * into whichever test ran next and the create silently never succeeded
+ * (#1194).
+ */
+const createProjectSucceeds = (_vars: unknown, opts?: CreateProjectOpts): void => {
+  opts?.onSuccess?.({ project: { id: 'p-new', name: 'Ras Beirut refit' } });
+};
+
+const createProjectSpy = vi.fn(createProjectSucceeds);
 
 const projectsState = vi.hoisted(() => ({
   data: [{ id: 'p-1', name: 'Website Redesign' }] as Array<{ id: string; name: string }>,
@@ -167,7 +180,11 @@ describe('Milestones show no progress until a task can be attached (#1064)', () 
 
 describe('Milestones inline project creation', () => {
   beforeEach(() => {
-    createProjectSpy.mockClear();
+    // mockReset would drop the implementation entirely, so restore the
+    // default explicitly rather than relying on the order tests happen to run
+    // in.
+    createProjectSpy.mockReset();
+    createProjectSpy.mockImplementation(createProjectSucceeds);
     createProjectState.isPending = false;
     projectsState.data = [{ id: 'p-1', name: 'Website Redesign' }];
     accessState.canCreate = true;
