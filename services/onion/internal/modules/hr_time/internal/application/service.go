@@ -136,13 +136,21 @@ func (s *Service) periodLocked(ctx context.Context, businessID, employeeID int64
 	return ts != nil && ts.Status == "locked", nil
 }
 
-func (s *Service) ListTimeEntries(ctx context.Context, businessID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
+func normalizeListTimeEntriesParams(params domain.ListTimeEntriesParams) domain.ListTimeEntriesParams {
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
+	if params.Offset < 0 {
+		params.Offset = 0
+	}
+	return params
+}
+
+func (s *Service) ListTimeEntries(ctx context.Context, businessID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
+	params = normalizeListTimeEntriesParams(params)
 	type lr struct {
 		Items []domain.TimeEntryRecord
 		Total int64

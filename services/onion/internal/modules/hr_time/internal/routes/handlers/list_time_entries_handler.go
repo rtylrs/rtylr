@@ -93,6 +93,9 @@ func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntries
 	if req.Limit > 100 {
 		req.Limit = 100
 	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
 
 	entries, total, err := h.Service.ListTimeEntries(ctx, businessID, domain.ListTimeEntriesParams{
 		EmployeeID: req.EmployeeID,

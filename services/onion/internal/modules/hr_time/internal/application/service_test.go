@@ -45,3 +45,18 @@ func TestPreviousWeekRange(t *testing.T) {
 		t.Fatalf("expected end 2026-06-21, got %s", end)
 	}
 }
+
+func TestNormalizeListTimeEntriesParams(t *testing.T) {
+	got := normalizeListTimeEntriesParams(domain.ListTimeEntriesParams{Limit: 0, Offset: -5})
+	if got.Limit != 20 || got.Offset != 0 {
+		t.Errorf("got limit=%d offset=%d, want 20,0", got.Limit, got.Offset)
+	}
+	got = normalizeListTimeEntriesParams(domain.ListTimeEntriesParams{Limit: 500, Offset: 10})
+	if got.Limit != 100 || got.Offset != 10 {
+		t.Errorf("got limit=%d offset=%d, want 100,10", got.Limit, got.Offset)
+	}
+	got = normalizeListTimeEntriesParams(domain.ListTimeEntriesParams{Limit: 50, Offset: 0})
+	if got.Limit != 50 || got.Offset != 0 {
+		t.Errorf("got limit=%d offset=%d, want 50,0", got.Limit, got.Offset)
+	}
+}
