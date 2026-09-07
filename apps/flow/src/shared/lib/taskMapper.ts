@@ -1,5 +1,6 @@
 import type { Task } from '../stores/flowStore';
 import type { ApiTask } from '../services/flowApi';
+import { getInitials } from './utils';
 
 function normalizePriority(
   priority: ApiTask['priority'] | 'none' | null | undefined
@@ -48,7 +49,13 @@ export function apiTaskToTask(t: ApiTask): Task {
     status: t.status,
     priority: normalizePriority(t.priority),
     assignee,
-    assigneeInitials: t.assigneeInitials ?? '',
+    // Derived from the name that is actually rendered, not read from the wire
+    // independently. `assignee` above prefers the newer `assigneeName` while
+    // this field only ever carried the legacy one, so a task could show "FO"
+    // beside "Mohammad Al-Homsi": two sources for one fact, disagreeing
+    // (#1097, D-040). The wire value is still the fallback for an unnamed
+    // assignee, where there is no name to derive anything from.
+    assigneeInitials: assignee ? getInitials(assignee) : (t.assigneeInitials ?? ''),
     assigneeId: t.assigneeId != null ? String(t.assigneeId) : '',
     dueDate: t.dueDate ?? '',
     startDate: (t as { startDate?: string }).startDate,

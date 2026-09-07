@@ -129,3 +129,55 @@ describe('apiTaskToTask', () => {
     expect(out.archived).toBe(false);
   });
 });
+
+describe('assignee initials cannot disagree with the assignee name (#1097 D-040)', () => {
+  it('derives them from the name the row actually shows', () => {
+    // The wire carried two sources for one fact: `assignee` prefers the newer
+    // assigneeName, while assigneeInitials only ever carried the legacy one.
+    // A task detail showed "FO" beside "Mohammad Al-Homsi".
+    const task = apiTaskToTask({
+      id: '1',
+      projectId: '1',
+      workspaceId: '1',
+      title: 'Anything',
+      status: 'todo',
+      priority: 'medium',
+      assignee: 'Fatima Osman',
+      assigneeName: 'Mohammad Al-Homsi',
+      assigneeInitials: 'FO',
+    } as unknown as Parameters<typeof apiTaskToTask>[0]);
+
+    expect(task.assignee).toBe('Mohammad Al-Homsi');
+    expect(task.assigneeInitials).toBe('MA');
+  });
+
+  it('still uses the legacy field when there is no name to derive from', () => {
+    const task = apiTaskToTask({
+      id: '2',
+      projectId: '1',
+      workspaceId: '1',
+      title: 'Anything',
+      status: 'todo',
+      priority: 'medium',
+      assignee: '',
+      assigneeInitials: 'ZZ',
+    } as unknown as Parameters<typeof apiTaskToTask>[0]);
+
+    expect(task.assigneeInitials).toBe('ZZ');
+  });
+
+  it('agrees with the legacy field when the two sources already matched', () => {
+    const task = apiTaskToTask({
+      id: '3',
+      projectId: '1',
+      workspaceId: '1',
+      title: 'Anything',
+      status: 'todo',
+      priority: 'medium',
+      assignee: 'Fatima Osman',
+      assigneeInitials: 'FO',
+    } as unknown as Parameters<typeof apiTaskToTask>[0]);
+
+    expect(task.assigneeInitials).toBe('FO');
+  });
+});
