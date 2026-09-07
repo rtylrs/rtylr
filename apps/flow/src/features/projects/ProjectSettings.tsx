@@ -44,7 +44,7 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
-  admin: { icon: <Crown size={10} />, color: '#f59e0b' },
+  admin: { icon: <Crown size={10} />, color: 'var(--flow-warn-fg)' },
   member: { icon: <Shield size={10} />, color: 'var(--accent)' },
   viewer: { icon: <Eye size={10} />, color: '#8b5cf6' },
 };

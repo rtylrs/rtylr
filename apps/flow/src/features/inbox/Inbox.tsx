@@ -27,7 +27,7 @@ type FilterType = 'all' | 'unread' | 'assigned';
 
 const TYPE_ICONS: Record<ApiNotification['type'], React.ReactNode> = {
   assigned: <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />,
-  mention: <AtSign size={14} style={{ color: '#f59e0b' }} />,
+  mention: <AtSign size={14} style={{ color: 'var(--flow-warn-fg)' }} />,
   comment: <MessageSquare size={14} style={{ color: 'var(--flow-info-fg)' }} />,
   status_change: <Circle size={14} style={{ color: 'var(--flow-status-approved)' }} />,
   due_soon: <Bell size={14} style={{ color: 'var(--flow-danger-fg)' }} />,

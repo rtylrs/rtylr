@@ -30,7 +30,7 @@ const HEALTH: Record<string, { color: string; labelKey: string }> = {
     color: 'var(--flow-status-approved)',
     labelKey: 'flow.projectOverview.health.onTrack',
   },
-  at_risk: { color: '#f59e0b', labelKey: 'flow.milestones.status.atRisk' },
+  at_risk: { color: 'var(--flow-warn-fg)', labelKey: 'flow.milestones.status.atRisk' },
   off_track: { color: 'var(--flow-danger-fg)', labelKey: 'flow.projectOverview.health.offTrack' },
 };
 
