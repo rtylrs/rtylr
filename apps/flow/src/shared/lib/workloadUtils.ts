@@ -16,8 +16,8 @@ export function loadTier(utilizationPercent: number): 'over' | 'near' | 'ok' {
 /** CSS color for a load tier. */
 export function loadTierColor(tier: 'over' | 'near' | 'ok'): string {
   const colors: Record<'over' | 'near' | 'ok', string> = {
-    over: '#ef4444',
-    near: '#f59e0b',
+    over: 'var(--flow-danger-fg)',
+    near: 'var(--flow-warn-fg)',
     ok: 'var(--flow-status-approved)',
   };
   return colors[tier];

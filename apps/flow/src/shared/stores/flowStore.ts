@@ -529,13 +529,13 @@ export const STATUS_COLORS: Record<Task['status'], string> = {
   backlog: '#6b7280',
   todo: '#9ca3af',
   in_progress: 'var(--flow-info-fg)',
-  in_review: '#f59e0b',
+  in_review: 'var(--flow-warn-fg)',
   done: 'var(--flow-status-approved)',
-  cancelled: '#ef4444',
+  cancelled: 'var(--flow-danger-fg)',
 };
 
 export const PRIORITY_COLORS: Record<Task['priority'], string> = {
-  urgent: '#ef4444',
+  urgent: 'var(--flow-danger-fg)',
   high: '#f97316',
   medium: 'var(--flow-info-fg)',
   low: '#6b7280',

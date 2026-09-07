@@ -87,7 +87,7 @@ const Insights: React.FC = () => {
             label={t('common.insights.kpi.cycleTime')}
             value={`${data.cycleTime}d`}
             hint={t('common.insights.kpi.cycleTimeHint')}
-            color="#f59e0b"
+            color="var(--flow-warn-fg)"
           />
           <Kpi
             icon={BarChart3}
