@@ -20,6 +20,22 @@ console.error = (...args: unknown[]) => {
   originalConsoleError(...args);
 };
 
+/**
+ * No unit test reaches the network.
+ *
+ * #1204 stopped the suite fetching https://api.voxire.com by pointing the API
+ * base at a refused port. That fixed the real problem, a request still in
+ * flight when happy-dom tore the window down, but it left the refusal itself
+ * surfacing as an unhandled `ECONNREFUSED` in the run output. Failing before a
+ * socket is opened is quieter, faster, and says what to do about it.
+ *
+ * A test that needs `fetch` mocks it, which overrides this.
+ */
+globalThis.fetch = (() =>
+  Promise.reject(
+    new Error('Network access is disabled in tests. Mock fetch in the test that needs it.')
+  )) as unknown as typeof fetch;
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();
