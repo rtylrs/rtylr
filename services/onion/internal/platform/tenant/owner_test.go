@@ -43,3 +43,20 @@ func TestBusinessAccessQueryChecksActiveBusinessMembership(t *testing.T) {
 		}
 	}
 }
+
+func TestBusinessAccessQueryRecognizesNormalizedAndLegacyMembership(t *testing.T) {
+	query := strings.ToLower(businessAccessQuery)
+
+	for _, expected := range []string{
+		"from authorization_business_members abm",
+		"abm.user_id = ?",
+		"abm.status = 'active'",
+		"from user_app_permissions uap",
+		"uap.user_id = ?",
+		"uap.is_active = true",
+	} {
+		if !strings.Contains(query, expected) {
+			t.Errorf("business access query missing %q", expected)
+		}
+	}
+}

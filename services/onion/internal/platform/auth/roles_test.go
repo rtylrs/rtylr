@@ -46,6 +46,20 @@ func TestHasAnyAppScopeFailsClosedForNormalizedAssignments(t *testing.T) {
 	}
 }
 
+func TestHasAnyAppScopeFailsClosedForUnscopedNormalizedFlowAssignments(t *testing.T) {
+	user := &AuthUser{EffectiveAccess: &authorization.EffectiveAccess{
+		AuthorizationVersion: 1,
+		Apps: []authorization.EffectiveAppAccess{{
+			AppID:     authorization.AppFlow,
+			Licensed:  true,
+			HasAccess: true,
+		}},
+	}}
+	if HasAnyAppScope(user, authorization.AppFlow) {
+		t.Fatal("normalized Flow assignment without a resource scope must fail closed")
+	}
+}
+
 func TestHasAnyAppScopePreservesLegacyMigrationShape(t *testing.T) {
 	user := &AuthUser{EffectiveAccess: &authorization.EffectiveAccess{
 		Apps: []authorization.EffectiveAppAccess{{

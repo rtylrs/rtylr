@@ -31,6 +31,20 @@ WHERE b.id = ?
       WHERE uba.user_id = ?
         AND uba.business_id = b.id
     )
+    OR EXISTS (
+      SELECT 1
+      FROM authorization_business_members abm
+      WHERE abm.user_id = ?
+        AND abm.business_id = b.id
+        AND abm.status = 'active'
+    )
+    OR EXISTS (
+      SELECT 1
+      FROM user_app_permissions uap
+      WHERE uap.user_id = ?
+        AND uap.business_id = b.id
+        AND uap.is_active = TRUE
+    )
   )
 LIMIT 1`
 
@@ -115,6 +129,8 @@ func resolveBusinessID(ctx context.Context, db *sql.DB, businessID, fallbackUser
 		dbclient.WithTag(ctx, dbclient.TagMain),
 		businessAccessQuery,
 		resolvedBusinessID,
+		fallbackUserID,
+		fallbackUserID,
 		fallbackUserID,
 		fallbackUserID,
 	).Scan(&authorized)
