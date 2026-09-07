@@ -11,8 +11,6 @@ import {
   parseIsoDate,
 } from './dateUtils';
 
-const baseDate = new Date('2024-06-15T12:00:00Z');
-
 describe('startOfDay', () => {
   it('returns midnight for a given date', () => {
     const d = startOfDay(new Date('2024-06-15T15:30:00'));

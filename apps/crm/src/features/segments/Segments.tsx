@@ -38,7 +38,7 @@ interface Segment {
   name: string;
   description: string;
   customerCount: number;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   color: string;
   rules: string[];
   trend: string;
@@ -378,7 +378,7 @@ function SegmentCard({
               flexShrink: 0,
             }}
           >
-            <Icon size={17} {...({ style: { color: segment.color } } as any)} />
+            <Icon size={17} style={{ color: segment.color }} />
           </div>
           <div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
@@ -508,7 +508,7 @@ const Segments: React.FC = () => {
   // resource that already covers this asset, consistent with customer deletion being
   // gated at operator-tier (`crm:customers:manage`) rather than walled off to admin.
   const canDeleteSegment = canCrmPermission(role, 'crm:segments');
-  const { data: fetchedSegments, isLoading } = useListSegments();
+  const { data: fetchedSegments } = useListSegments();
   const removeSegment = useDeleteSegment();
   const createSegment = useCreateSegment();
   const [builderOpen, setBuilderOpen] = useState(false);

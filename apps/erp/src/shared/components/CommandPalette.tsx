@@ -48,10 +48,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const { data: productResult } = useProducts();
   const { data: supplierResult } = useSuppliers();
-  const products = productResult?.products ?? [];
-  const suppliers = supplierResult?.suppliers ?? [];
+  const products = useMemo(() => productResult?.products ?? [], [productResult]);
+  const suppliers = useMemo(() => supplierResult?.suppliers ?? [], [supplierResult]);
   const { data: ordersResult } = usePurchaseOrders();
-  const orders = ordersResult?.purchaseOrders ?? [];
+  const orders = useMemo(() => ordersResult?.purchaseOrders ?? [], [ordersResult]);
   const supplierNameById = useMemo(
     () => new Map(suppliers.map((supplier) => [supplier.id, supplier.name])),
     [suppliers]

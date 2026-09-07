@@ -4,11 +4,6 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
-  Send,
-  MousePointerClick,
-  MailOpen,
-  UserMinus,
-  DollarSign,
   Mail,
   FileQuestion,
 } from 'lucide-react';

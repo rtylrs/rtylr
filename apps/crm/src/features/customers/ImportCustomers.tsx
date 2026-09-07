@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { Upload, FileText, Check } from 'lucide-react';
+import { Upload, Check } from 'lucide-react';
 import { useImportCustomerRows } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, PageHeader, Select } from '../../shared/components/ui';
 

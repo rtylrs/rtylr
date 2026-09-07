@@ -15,7 +15,7 @@ const AMBER = 'var(--erp-accent)';
 const Valuation: React.FC = () => {
   const { t } = useTranslation('erp');
   const { data, isLoading, refetch } = useValuation();
-  const items = data?.items ?? [];
+  const items = useMemo(() => data?.items ?? [], [data]);
   const totalCost = useMemo(
     () => items.reduce((sum, item) => sum + (item.totalCost ?? 0), 0),
     [items]

@@ -116,7 +116,7 @@ const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: strin
   Cancelled: { bg: 'rgba(239,68,68,0.12)', text: '#ef4444', dot: '#ef4444' },
 };
 
-const channelIcon: Record<Channel, React.ComponentType<{ size?: number }>> = {
+const channelIcon: Record<Channel, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
   Email: Mail,
   SMS: MessageSquare,
   Push: Bell,
@@ -240,7 +240,7 @@ function CampaignCard({
           >
             <ChannelIcon
               size={16}
-              {...({ style: { color: channelColor[campaign.channel] } } as any)}
+              style={{ color: channelColor[campaign.channel] }}
             />
           </div>
           <div style={{ minWidth: 0 }}>

@@ -79,7 +79,7 @@ export interface TimelineEntry {
   title: string;
   description?: string;
   at: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 export interface Segment {
@@ -384,26 +384,6 @@ function toCustomerMutationPayload(data: CustomerMutationInput): CustomerMutatio
 interface ImportCustomersPayload {
   customers: Record<string, unknown>[];
   dedupe?: boolean;
-}
-
-interface LoyaltyPointsPayload {
-  customerId: number;
-  points: number;
-  description?: string;
-}
-
-interface LoyaltyConfigPayload {
-  pointsPerDollar?: number;
-  pointsValue?: number;
-  isActive?: boolean;
-}
-
-function toLoyaltyConfigPayload(config: Partial<LoyaltyConfig>): LoyaltyConfigPayload {
-  return {
-    pointsPerDollar: config.pointsPerDollar,
-    pointsValue: config.redemptionRate,
-    isActive: config.programEnabled,
-  };
 }
 
 interface SegmentMutationPayload {
