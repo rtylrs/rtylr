@@ -165,7 +165,11 @@ const ProjectSettings: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-6 max-w-2xl space-y-6">
+      {/* 640px, per S-11. max-w-2xl is 672, and there is no Tailwind step at
+          640, so the value is written out. The empty space to the right of a
+          capped form is the point of capping it: a 1440px-wide text input is
+          harder to read, not easier. */}
+      <div className="p-6 max-w-[640px] space-y-6">
         {/* ── General ── */}
         {tab === 'general' && (
           <>
@@ -175,6 +179,7 @@ const ProjectSettings: React.FC = () => {
                 reason={t('flow.projectSettings.generalGateReason')}
               />
             )}
+            <SectionHeading>{t('flow.projectSettings.detailsSection')}</SectionHeading>
             <Field label={t('common.name')}>
               <input
                 value={name}
@@ -688,6 +693,23 @@ const ProjectSettings: React.FC = () => {
     </div>
   );
 };
+
+/**
+ * A section heading inside a settings tab.
+ *
+ * Name, Description and Visibility were three bare fields in a row with
+ * nothing saying where one concern ended and the next began (#1088). Visibility
+ * already carries its own `legend`, so it is its own section; this gives the
+ * two text fields above it one too.
+ */
+const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <h2
+    className="text-meta font-semibold uppercase tracking-wider"
+    style={{ color: 'var(--flow-text-muted)' }}
+  >
+    {children}
+  </h2>
+);
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div>
