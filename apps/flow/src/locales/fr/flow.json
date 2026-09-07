@@ -992,5 +992,8 @@
     "description": "Le lien est peut-être ancien, ou l'élément a été supprimé. Rien n'a été perdu.",
     "cta": "Aller à mes tâches"
   },
-  "projectNotFound": "Projet introuvable. Le lien est peut-être ancien, ou il a été supprimé."
+  "projectNotFound": "Projet introuvable. Le lien est peut-être ancien, ou il a été supprimé.",
+  "labels": {
+    "removeLabel": "Supprimer {{name}}"
+  }
 }
