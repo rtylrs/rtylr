@@ -164,3 +164,32 @@ func TestApplyDiscount_RejectsNegativeValue(t *testing.T) {
 		t.Error("expected error for negative discount value")
 	}
 }
+
+func TestPaginateOrders_ClampsPageSize(t *testing.T) {
+	limit, offset := paginateOrders(0, 0)
+	if limit != 50 || offset != 0 {
+		t.Errorf("got limit=%d offset=%d, want 50,0", limit, offset)
+	}
+	limit, _ = paginateOrders(1, 10000)
+	if limit != 500 {
+		t.Errorf("got limit=%d, want 500", limit)
+	}
+}
+
+func TestPaginateOrders_CapsRunawayOffset(t *testing.T) {
+	_, offset := paginateOrders(1_000_000, 200)
+	if offset != 10000 {
+		t.Errorf("got offset=%d, want capped 10000", offset)
+	}
+	_, offset = paginateOrders(9223372036854775807, 200)
+	if offset < 0 || offset > 10000 {
+		t.Errorf("got offset=%d, want within [0,10000]", offset)
+	}
+}
+
+func TestPaginateOrders_NormalPaging(t *testing.T) {
+	limit, offset := paginateOrders(3, 50)
+	if limit != 50 || offset != 100 {
+		t.Errorf("got limit=%d offset=%d, want 50,100", limit, offset)
+	}
+}

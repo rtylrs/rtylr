@@ -20,6 +20,7 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/paddle"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
@@ -210,17 +211,15 @@ func (s *Service) ListOrders(ctx context.Context, ownerID, sessionID int64, stat
 	return orders, err
 }
 
+var ordersPagePolicy = pagination.Policy{
+	DefaultPageSize: 50,
+	MaxPageSize:     500,
+	MaxOffset:       10000,
+}
+
 func paginateOrders(page, pageSize int64) (int, int) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 50
-	}
-	if pageSize > 500 {
-		pageSize = 500
-	}
-	return int(pageSize), int((page - 1) * pageSize)
+	normalized := ordersPagePolicy.Normalize(page, pageSize)
+	return int(normalized.Size), int(normalized.Offset)
 }
 
 func (s *Service) ListOrdersPage(ctx context.Context, ownerID, sessionID int64, status, dateFrom, dateTo, search string, page, pageSize int64) ([]domain.Order, int64, bool, error) {
