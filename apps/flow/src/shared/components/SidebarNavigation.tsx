@@ -547,9 +547,18 @@ const SidebarGroup: React.FC<{
                   style={{ color: project.color }}
                 />
                 <span className="relative min-w-0 flex-1 truncate font-medium">{project.name}</span>
-                <span className="relative text-meta" style={{ color: 'var(--flow-text-dim)' }}>
-                  {(project.taskCount ?? 0) - (project.completedCount ?? 0)}
-                </span>
+                {(project.taskCount ?? 0) - (project.completedCount ?? 0) > 0 && (
+                  <span
+                    // Hidden at zero, and tabular so the column does not shift
+                    // as digits change. A finished project showed a bare "0",
+                    // which reads as a count worth noting rather than as
+                    // nothing left to do (#1097, D-058 and G-T5).
+                    className="relative text-meta tabular-nums"
+                    style={{ color: 'var(--flow-text-dim)' }}
+                  >
+                    {(project.taskCount ?? 0) - (project.completedCount ?? 0)}
+                  </span>
+                )}
               </Link>
             );
           })}
