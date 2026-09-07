@@ -497,13 +497,14 @@
   },
   "presence": {
     "heading": "Qui est présent aujourd'hui",
-    "onLeave": "En congé",
-    "notStarted": "Pas commencé",
-    "noResults": "Personne à afficher pour l'instant.",
-    "loadFailedTitle": "Impossible de charger qui est présent aujourd'hui",
     "loadFailedDescription": "Réessayez. Si l'échec persiste, demandez à un administrateur si votre rôle peut voir les présences du jour.",
+    "loadFailedTitle": "Impossible de charger qui est présent aujourd'hui",
+    "noResults": "Personne à afficher pour l'instant.",
+    "notStarted": "Pas commencé",
+    "onLeave": "En congé",
+    "refreshCta": "Actualiser",
     "retryCta": "Réessayer",
-    "refreshCta": "Actualiser"
+    "working": "Au travail"
   },
   "directory": {
     "heading": "Annuaire",

@@ -493,13 +493,14 @@
   },
   "presence": {
     "heading": "Who's in today",
-    "onLeave": "On leave",
-    "notStarted": "Not started",
-    "noResults": "No one to show yet.",
-    "loadFailedTitle": "Couldn't load who's in today",
     "loadFailedDescription": "Try again. If it keeps failing, ask an admin whether your role can see who is in today.",
+    "loadFailedTitle": "Couldn't load who's in today",
+    "noResults": "No one to show yet.",
+    "notStarted": "Not started",
+    "onLeave": "On leave",
+    "refreshCta": "Refresh",
     "retryCta": "Retry",
-    "refreshCta": "Refresh"
+    "working": "Working"
   },
   "directory": {
     "heading": "Directory",

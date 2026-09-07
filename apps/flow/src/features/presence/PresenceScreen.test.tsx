@@ -101,3 +101,79 @@ describe('PresenceScreen', () => {
     expect(screen.getByText('flow.presence.loadFailedTitle')).toBeInTheDocument();
   });
 });
+
+describe('PresenceScreen grouping (#1094)', () => {
+  const withPresence = (presence: Record<string, unknown>[]): void => {
+    presenceState.value = {
+      data: { date: '2027-05-10', presence },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    };
+  };
+
+  const person = (id: string, status: string, first = 'A', last = 'B') => ({
+    employeeId: id,
+    userId: id,
+    firstName: first,
+    lastName: last,
+    status,
+  });
+
+  it('groups people under working, on leave and not started', () => {
+    withPresence([
+      person('1', 'onsite', 'Jane', 'Doe'),
+      person('2', 'on_leave', 'Sam', 'Lee'),
+      person('3', 'not_started', 'Alex', 'Kim'),
+    ]);
+    render(<PresenceScreen />);
+
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent ?? '');
+    expect(headings.some((h) => h.includes('flow.presence.working'))).toBe(true);
+    expect(headings.some((h) => h.includes('flow.presence.onLeave'))).toBe(true);
+    expect(headings.some((h) => h.includes('flow.presence.notStarted'))).toBe(true);
+  });
+
+  it('counts the people in each group', () => {
+    withPresence([
+      person('1', 'onsite', 'Jane', 'Doe'),
+      person('2', 'remote', 'Ravi', 'Shah'),
+      person('3', 'on_leave', 'Sam', 'Lee'),
+    ]);
+    render(<PresenceScreen />);
+
+    const working = screen
+      .getAllByRole('heading', { level: 2 })
+      .find((h) => (h.textContent ?? '').includes('flow.presence.working'));
+    expect(working?.textContent).toContain('2');
+  });
+
+  it('leaves out a group nobody is in, rather than showing an empty heading', () => {
+    // An empty "On leave" heading reads as a section that failed to load.
+    withPresence([person('1', 'onsite', 'Jane', 'Doe')]);
+    render(<PresenceScreen />);
+
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent ?? '');
+    expect(headings.some((h) => h.includes('flow.presence.onLeave'))).toBe(false);
+  });
+
+  it('keeps a row badge only where the status varies within the group', () => {
+    // Under "On leave" the badge repeated the heading word for word on every
+    // row; under "Working" it is what tells onsite from remote.
+    withPresence([person('1', 'remote', 'Ravi', 'Shah'), person('2', 'on_leave', 'Sam', 'Lee')]);
+    render(<PresenceScreen />);
+
+    expect(screen.getByText('flow.time.mode.remote')).toBeInTheDocument();
+    // Once, as the heading, not twice.
+    expect(screen.getAllByText(/flow\.presence\.onLeave/)).toHaveLength(1);
+  });
+
+  it('draws a glyph beside every group heading', () => {
+    // S-22 wants the status carried by more than colour and position.
+    withPresence([person('1', 'onsite', 'Jane', 'Doe')]);
+    const { container } = render(<PresenceScreen />);
+    const heading = screen.getAllByRole('heading', { level: 2 })[0];
+    expect(heading.querySelector('svg'), 'heading has no glyph').toBeTruthy();
+    expect(container.querySelectorAll('svg').length).toBeGreaterThan(0);
+  });
+});

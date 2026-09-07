@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, AlertCircle } from 'lucide-react';
+import { Users, AlertCircle, Building2, House, Shuffle, Palmtree, Circle } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { Avatar, EmptyState } from '@voxire/ui';
 import { CardSkeleton } from '../../shared/components/Skeleton';
@@ -21,6 +21,30 @@ const statusTone: Record<string, string> = {
   on_leave: 'var(--flow-text-muted)',
   not_started: 'var(--flow-text-muted)',
 };
+
+/**
+ * A glyph per status, so the badge is not carrying its meaning in colour and
+ * position alone (S-22). The text was already there, so this is scannability
+ * rather than an accessibility fix.
+ */
+const statusGlyph: Record<string, React.ComponentType<{ size?: number }>> = {
+  onsite: Building2,
+  remote: House,
+  hybrid: Shuffle,
+  on_leave: Palmtree,
+  not_started: Circle,
+};
+
+/**
+ * Three groups, in the order someone scanning the screen cares about: who is
+ * working, who is away, and who has not started. The flat list made a team of
+ * any size a wall of names (S-22).
+ */
+const GROUPS = [
+  { id: 'working', labelKey: 'flow.presence.working', statuses: ['onsite', 'remote', 'hybrid'] },
+  { id: 'on_leave', labelKey: 'flow.presence.onLeave', statuses: ['on_leave'] },
+  { id: 'not_started', labelKey: 'flow.presence.notStarted', statuses: ['not_started'] },
+] as const;
 
 /**
  * Business-wide presence, backed by /flow/presence/today - gated
@@ -72,32 +96,65 @@ const PresenceScreen = (): React.JSX.Element => {
         )}
 
         {!isLoading && !isError && data && data.presence.length > 0 && (
-          <ul className="space-y-1.5">
-            {data.presence.map((entry: PresenceEntry) => {
-              const fullName = `${entry.firstName ?? ''} ${entry.lastName ?? ''}`.trim();
+          <div className="space-y-5">
+            {GROUPS.map((group) => {
+              const entries = data.presence.filter((entry: PresenceEntry) =>
+                (group.statuses as readonly string[]).includes(entry.status)
+              );
+              // A group with nobody in it is not news. An empty "On leave"
+              // heading reads as a section that failed to load.
+              if (entries.length === 0) return null;
+
+              // The per-row badge only earns its place where the status varies
+              // inside the group. Under "On leave" it repeated the heading
+              // word for word on every row.
+              const showRowStatus = group.statuses.length > 1;
+              const GroupGlyph = statusGlyph[group.statuses[0]] ?? Circle;
+
               return (
-                <li
-                  key={entry.employeeId}
-                  className="flex items-center gap-3 rounded-md p-2"
-                  style={{ background: 'var(--flow-hover)' }}
-                >
-                  <Avatar initials={initials(fullName)} size="sm" />
-                  <span
-                    className="min-w-0 flex-1 text-body font-medium"
-                    style={{ color: 'var(--flow-text)' }}
+                <section key={group.id}>
+                  <h2
+                    className="mb-1.5 flex items-center gap-1.5 text-meta font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--flow-text-muted)' }}
                   >
-                    {fullName}
-                  </span>
-                  <span
-                    className="rounded-sm px-1.5 py-0.5 text-meta font-semibold"
-                    style={{ color: statusTone[entry.status] ?? 'var(--accent-fg)' }}
-                  >
-                    {statusLabel(entry.status)}
-                  </span>
-                </li>
+                    <GroupGlyph size={12} />
+                    {t(group.labelKey)}
+                    <span className="font-normal tabular-nums">{entries.length}</span>
+                  </h2>
+                  <ul className="space-y-1.5">
+                    {entries.map((entry: PresenceEntry) => {
+                      const fullName = `${entry.firstName ?? ''} ${entry.lastName ?? ''}`.trim();
+                      const Glyph = statusGlyph[entry.status] ?? Circle;
+                      return (
+                        <li
+                          key={entry.employeeId}
+                          className="flex items-center gap-3 rounded-md p-2"
+                          style={{ background: 'var(--flow-hover)' }}
+                        >
+                          <Avatar initials={initials(fullName)} size="sm" />
+                          <span
+                            className="min-w-0 flex-1 text-body font-medium"
+                            style={{ color: 'var(--flow-text)' }}
+                          >
+                            {fullName}
+                          </span>
+                          {showRowStatus && (
+                            <span
+                              className="flex shrink-0 items-center gap-1 rounded-sm px-1.5 py-0.5 text-meta font-semibold"
+                              style={{ color: statusTone[entry.status] ?? 'var(--accent-fg)' }}
+                            >
+                              <Glyph size={12} />
+                              {statusLabel(entry.status)}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
               );
             })}
-          </ul>
+          </div>
         )}
       </div>
     </>

@@ -509,13 +509,14 @@
   },
   "presence": {
     "heading": "من موجود اليوم",
-    "onLeave": "في إجازة",
-    "notStarted": "لم يبدأ بعد",
-    "noResults": "لا يوجد أحد لعرضه بعد.",
-    "loadFailedTitle": "تعذّر تحميل من موجود اليوم",
     "loadFailedDescription": "حاول مرة أخرى. إذا استمر الفشل، اسأل مسؤولاً إن كان دورك يسمح برؤية الحضور اليوم.",
+    "loadFailedTitle": "تعذّر تحميل من موجود اليوم",
+    "noResults": "لا يوجد أحد لعرضه بعد.",
+    "notStarted": "لم يبدأ بعد",
+    "onLeave": "في إجازة",
+    "refreshCta": "تحديث",
     "retryCta": "إعادة المحاولة",
-    "refreshCta": "تحديث"
+    "working": "يعمل"
   },
   "directory": {
     "heading": "دليل الموظفين",
