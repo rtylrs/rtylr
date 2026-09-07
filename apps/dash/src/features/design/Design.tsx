@@ -656,8 +656,8 @@ const Design: React.FC = () => {
               style={{
                 padding: '6px 14px',
                 borderRadius: 7,
-                background: saved ? 'rgba(69,131,196,0.15)' : '#4583C4',
-                color: saved ? '#4583C4' : '#fff',
+                background: saved ? 'var(--accent-muted)' : 'var(--accent)',
+                color: saved ? 'var(--accent-on-muted)' : 'var(--dash-on-accent)',
                 fontSize: 13,
                 fontWeight: 600,
                 border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',

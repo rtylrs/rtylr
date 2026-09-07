@@ -195,7 +195,7 @@ const Integrations: React.FC = () => {
                         type="button"
                         onClick={() => connect.mutate(i.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                        style={{ background: '#4583C4', color: '#fff' }}
+                        style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
                       >
                         Connect
                       </button>
