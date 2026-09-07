@@ -534,6 +534,11 @@ export const flowApi = {
         // uses. Sending '' 400s with "description is required".
         description: data.description ?? '-',
         icon: DEFAULT_PROJECT_ICON,
+        // A literal, deliberately, and it must stay one: this value is
+        // PERSISTED, so a CSS var() would be stored as the string
+        // "var(--flow-...)" and read back as a colour no browser can paint.
+        // #6366f1 is the last entry of PROJECT_COLORS, the palette the picker
+        // offers, so the default is a colour the user could have chosen.
         color: data.color ?? '#6366f1',
         // visibility is optional in the contract and empty already means
         // private, but sending it explicitly keeps the default visible at the
@@ -558,6 +563,11 @@ export const flowApi = {
           name: data.name ?? '-',
           description: data.description ?? '-',
           icon: data.icon ?? DEFAULT_PROJECT_ICON,
+          // A literal, deliberately, and it must stay one: this value is
+          // PERSISTED, so a CSS var() would be stored as the string
+          // "var(--flow-...)" and read back as a colour no browser can paint.
+          // #6366f1 is the last entry of PROJECT_COLORS, the palette the picker
+          // offers, so the default is a colour the user could have chosen.
           color: data.color ?? '#6366f1',
           status: data.status ?? 'active',
           startDate: data.startDate ?? '',

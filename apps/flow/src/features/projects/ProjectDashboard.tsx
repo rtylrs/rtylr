@@ -6,6 +6,7 @@ import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { STATUS_COLORS, useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
+import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
@@ -153,15 +154,8 @@ const ProjectDashboard: React.FC = () => {
                 style={{ background: 'var(--flow-hover)' }}
               >
                 {(
-                  [
-                    ['done', 'var(--flow-status-approved)'],
-                    ['in_progress', STATUS_COLORS.in_progress],
-                    ['in_review', '#a855f7'],
-                    ['todo', 'var(--flow-text-dim)'],
-                    ['cancelled', 'var(--flow-danger-fg)'],
-                    ['backlog', 'var(--flow-border)'],
-                  ] as const
-                ).map(([status, color]) => {
+                  ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
+                ).map((status) => {
                   const n = stats.statusCounts[status] ?? 0;
                   if (!n) return null;
                   return (
@@ -169,7 +163,7 @@ const ProjectDashboard: React.FC = () => {
                       key={status}
                       style={{
                         width: `${(n / stats.total) * 100}%`,
-                        background: color,
+                        background: STATUS_COLORS[status],
                       }}
                       title={`${status}: ${n}`}
                     />
@@ -178,22 +172,18 @@ const ProjectDashboard: React.FC = () => {
               </div>
               <div className="flex flex-wrap gap-3 mt-3 text-meta">
                 {(
-                  [
-                    ['done', 'var(--flow-status-approved)', 'Done'],
-                    ['in_progress', STATUS_COLORS.in_progress, 'In progress'],
-                    ['in_review', '#a855f7', 'In review'],
-                    ['todo', 'var(--flow-text-dim)', 'To do'],
-                    ['cancelled', 'var(--flow-danger-fg)', 'Cancelled'],
-                    ['backlog', 'var(--flow-border)', 'Backlog'],
-                  ] as const
-                ).map(([status, color, label]) => (
+                  ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
+                ).map((status) => (
                   <span
                     key={status}
                     className="flex items-center gap-1.5"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
-                    <span className="h-2 w-2 rounded-full" style={{ background: color }} />
-                    {label}
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ background: STATUS_COLORS[status] }}
+                    />
+                    {t(STATUS_LABEL_KEYS[status])}
                     <span style={{ color: 'var(--flow-text-dim)' }}>
                       ({stats.statusCounts[status] ?? 0})
                     </span>
