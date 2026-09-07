@@ -97,6 +97,7 @@ describe('Flow assigns tones from tokens, not raw hex', () => {
   it.each([
     ['green', '#22c55e', '--flow-status-approved'],
     ['blue', '#3b82f6', '--flow-info-fg'],
+    ['amber', '#f59e0b', '--flow-warn-fg'],
   ])('leaves no %s as a semantic value', (_name, hex, token) => {
     const offenders: string[] = [];
     for (const file of sourceFiles(SRC)) {

@@ -91,8 +91,12 @@ describe('loadTier', () => {
 // ---------------------------------------------------------------------------
 
 describe('loadTierColor', () => {
-  it('returns red for over', () => {
-    expect(loadTierColor('over')).toMatch(/^#[0-9a-f]{6}$/i);
+  it('returns a usable colour value for over', () => {
+    // Not "is it a hex literal". That was the shape of the old assertion, and
+    // it is exactly the constraint #1073 removes: these tones are tokens now,
+    // so they can hold a different value per mode. What matters is that the
+    // function yields something CSS can paint.
+    expect(loadTierColor('over')).toMatch(/^(#[0-9a-f]{3,8}|var\(--[\w-]+\)|rgba?\()/i);
   });
 
   it('returns different colors for each tier', () => {
