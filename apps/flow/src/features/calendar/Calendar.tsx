@@ -11,7 +11,7 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 
 const ACCENT_VAR = 'var(--accent)';
 
@@ -249,7 +249,7 @@ const Calendar: React.FC = () => {
                         className="w-full text-left px-1.5 py-0.5 rounded-sm text-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
                         style={{
                           background: tone ? withAlpha(tone, 13) : 'var(--flow-card)',
-                          color: tone ?? 'var(--flow-text)',
+                          color: tone ? onTint(tone) : 'var(--flow-text)',
                         }}
                       >
                         <PriorityIcon priority={t.priority} size={9} />
