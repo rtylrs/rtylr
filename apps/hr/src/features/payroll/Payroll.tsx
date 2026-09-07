@@ -107,7 +107,7 @@ const Payroll = (): React.JSX.Element => {
               label: t('payroll.stats.totalGross'),
               value: formatCurrency(totalGross, settings?.currency),
               icon: DollarSign,
-              color: 'var(--accent)',
+              color: 'var(--accent-on-muted)',
               bg: 'var(--accent-muted)',
             },
             {
