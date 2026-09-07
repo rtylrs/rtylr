@@ -1,11 +1,14 @@
 package pos_orders
 
 import (
+	"context"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 )
 
 func TestParseListOrdersToolInput(t *testing.T) {
@@ -255,5 +258,45 @@ func TestValidateRefundableOrderRejectsAlreadyRefunded(t *testing.T) {
 	}, 5)
 	if err == nil || !strings.Contains(err.Error(), "already refunded") {
 		t.Fatalf("error = %v, want already-refunded validation", err)
+	}
+}
+
+func toolUserWithoutPOSGrants() *authPkg.AuthUser {
+	return &authPkg.AuthUser{
+		BusinessID: 9,
+		UserID:     7,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:       authorization.AppPOS,
+				Licensed:    true,
+				HasAccess:   true,
+				Permissions: []string{"pos:menu:view"},
+			}},
+		},
+	}
+}
+
+func TestCaretToolsDenyWithoutPOSPermission(t *testing.T) {
+	m := &Module{}
+	ctx := authPkg.WithAuthUser(context.Background(), toolUserWithoutPOSGrants())
+
+	if _, err := m.executeListOrdersTool(ctx, map[string]any{}); err == nil ||
+		!strings.Contains(err.Error(), "permission denied") {
+		t.Fatalf("list orders without grant returned %v, want permission denied", err)
+	}
+	if _, err := m.executeGetOrderTool(ctx, map[string]any{"order_id": 1}); err == nil ||
+		!strings.Contains(err.Error(), "permission denied") {
+		t.Fatalf("get order without grant returned %v, want permission denied", err)
+	}
+	if _, err := m.executeRefundOrderTool(ctx, map[string]any{"order_id": 1, "amount": 5}); err == nil ||
+		!strings.Contains(err.Error(), "permission denied") {
+		t.Fatalf("refund without grant returned %v, want permission denied", err)
+	}
+}
+
+func TestCaretToolsDenyUnauthenticated(t *testing.T) {
+	m := &Module{}
+	if _, err := m.executeListOrdersTool(context.Background(), map[string]any{}); err == nil {
+		t.Fatal("expected authentication error without user")
 	}
 }

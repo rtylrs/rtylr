@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -41,6 +42,16 @@ type refundOrderToolInput struct {
 	Reason  string
 }
 
+// requirePOSToolPermission enforces the same POS grant check as the HTTP
+// handlers so the Caret tool surface cannot bypass route authorization.
+func requirePOSToolPermission(authUser *authPkg.AuthUser, permission string) error {
+	if !authPkg.HasAppPermission(authUser, authorization.AppPOS, permission) ||
+		!authPkg.HasAnyAppScope(authUser, authorization.AppPOS) {
+		return errors.New("permission denied")
+	}
+	return nil
+}
+
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
 	switch name {
 	case listOrdersToolName:
@@ -61,6 +72,9 @@ func (m *Module) executeListOrdersTool(ctx context.Context, input map[string]any
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
+	}
+	if err := requirePOSToolPermission(authUser, "pos:orders:view"); err != nil {
+		return nil, err
 	}
 
 	parsed, err := parseListOrdersToolInput(input)
@@ -112,6 +126,9 @@ func (m *Module) executeGetOrderTool(ctx context.Context, input map[string]any) 
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
 	}
+	if err := requirePOSToolPermission(authUser, "pos:orders:view"); err != nil {
+		return nil, err
+	}
 
 	orderID, err := parseGetOrderToolInput(input)
 	if err != nil {
@@ -145,6 +162,9 @@ func (m *Module) executeRefundOrderTool(ctx context.Context, input map[string]an
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
+	}
+	if err := requirePOSToolPermission(authUser, "pos:orders:refund"); err != nil {
+		return nil, err
 	}
 
 	parsed, err := parseRefundOrderToolInput(input)
