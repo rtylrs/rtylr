@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -215,5 +216,42 @@ func TestTeam_GetBusinessByID_ReturnsName(t *testing.T) {
 	}
 	if ownerID != testutil.OwnerID {
 		t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, ownerID)
+	}
+}
+
+func TestTeam_MarkInviteTokenUsed_IsSingleUse(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	token := "single-use-invite-token"
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
+	})
+	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, token, time.Now().Add(1*time.Hour)); err != nil {
+		t.Fatalf("CreateInviteToken: %v", err)
+	}
+
+	if err := repo.MarkInviteTokenUsed(ctx, token); err != nil {
+		t.Fatalf("first MarkInviteTokenUsed: %v", err)
+	}
+	if err := repo.MarkInviteTokenUsed(ctx, token); !errors.Is(err, domain.ErrTokenAlreadyUsed) {
+		t.Fatalf("second MarkInviteTokenUsed error = %v, want ErrTokenAlreadyUsed", err)
+	}
+}
+
+func TestTeam_MarkInviteTokenUsed_RejectsExpired(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	token := "expired-invite-token"
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
+	})
+	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, token, time.Now().Add(-1*time.Hour)); err != nil {
+		t.Fatalf("CreateInviteToken: %v", err)
+	}
+
+	if err := repo.MarkInviteTokenUsed(ctx, token); !errors.Is(err, domain.ErrTokenAlreadyUsed) {
+		t.Fatalf("MarkInviteTokenUsed on expired token error = %v, want ErrTokenAlreadyUsed", err)
 	}
 }

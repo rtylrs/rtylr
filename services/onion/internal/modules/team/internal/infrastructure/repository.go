@@ -1109,7 +1109,20 @@ func (r *Repository) GetInviteToken(ctx context.Context, token string) (int64, i
 }
 
 func (r *Repository) MarkInviteTokenUsed(ctx context.Context, token string) error {
-	return r.queries.MarkInviteTokenUsed(ctx, token)
+	// Atomic single-use claim: only an unused, unexpired token is marked, so
+	// concurrent accepts cannot both succeed.
+	res, err := r.queries.ConsumeInviteToken(ctx, token)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrTokenAlreadyUsed
+	}
+	return nil
 }
 
 func (r *Repository) SetPassword(ctx context.Context, userID int64, passwordHash string) error {

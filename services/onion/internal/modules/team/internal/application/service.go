@@ -528,11 +528,13 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 		return 0, err
 	}
 
-	if err := s.repo.SetPassword(ctx, userID, hash); err != nil {
+	// Claim the token before writing anything: a concurrent accept loses the
+	// atomic consume and never reaches the password write below.
+	if err := s.repo.MarkInviteTokenUsed(ctx, token); err != nil {
 		return 0, err
 	}
 
-	if err := s.repo.MarkInviteTokenUsed(ctx, token); err != nil {
+	if err := s.repo.SetPassword(ctx, userID, hash); err != nil {
 		return 0, err
 	}
 	if businessID, businessErr := s.repo.GetBusinessIDByOwnerID(ctx, ownerID); businessErr == nil {
