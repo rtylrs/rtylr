@@ -774,8 +774,24 @@ export const flowApi = {
 
   // -- Time Logs ----------------------------------------------------------
 
+  // durationMinutes is an int64, and OneKit puts an int64 on the wire as a
+  // STRING. The interface above declares `number`, so TypeScript believed the
+  // lie and `logs.reduce((sum, l) => sum + l.durationMinutes, 0)` concatenated
+  // instead of adding: four entries of 2:00, 1:00, 2:15 and 1:30 rendered as
+  // "20100226:30 of 40:00" and "50250566% of estimate", with the bar full and
+  // an "Over estimate" badge (#1079).
+  //
+  // Coerced here rather than at the one call site that summed it, so the type
+  // becomes true for every consumer instead of for one of them.
   getTimeLogs: (taskId: string) =>
-    flowResult<{ timeLogs: ApiTimeLog[] }>(() => taskV2.getTimeLogs({ taskId })),
+    flowResult<{ timeLogs: ApiTimeLog[] }>(() => taskV2.getTimeLogs({ taskId })).map(
+      (response) => ({
+        timeLogs: (response.timeLogs ?? []).map((log) => ({
+          ...log,
+          durationMinutes: Number(log.durationMinutes),
+        })),
+      })
+    ),
 
   logTime: (data: { task_id: number; duration_minutes: number; description?: string }) =>
     flowResult<{ time_log_id: number; message: string }>(() =>
