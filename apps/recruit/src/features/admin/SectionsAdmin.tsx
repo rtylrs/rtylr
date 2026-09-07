@@ -385,6 +385,9 @@ const SectionEditor: React.FC<{
     } catch {
       setItems([]);
     }
+    // Sync-on-select: re-running when the section fields change would wipe
+    // in-progress edits, so this intentionally re-syncs on id change alone.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section.id]);
 
   function save() {

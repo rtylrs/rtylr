@@ -84,6 +84,10 @@ const NewInvoice: React.FC = () => {
       setNotes(sourceInvoice.notes ?? settings.invoiceNotes);
       setDiscount(sourceInvoice.discount ?? 0);
     }
+    // Clone prefill only: re-running on the derived defaults (today/due)
+    // or settings would wipe in-progress edits, so this intentionally
+    // syncs from the clone source alone.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceInvoice]);
 
   useEffect(() => {

@@ -69,7 +69,8 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) =
               careers.map((c) => (
                 <Link
                   key={c.id}
-                  to={`/${customization.slug}/${c.slug}` as any}
+                  to="/$slug/$careerSlug"
+                  params={{ slug: customization.slug, careerSlug: c.slug }}
                   className="group flex items-center justify-between border-b py-8 transition hover:pl-4"
                   style={{ borderColor: 'var(--recruit-border)' }}
                 >

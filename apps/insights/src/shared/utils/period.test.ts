@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { resolvePeriod, periodLabel, ALL_PERIODS } from './period';
 
 const FIXED_NOW = new Date('2026-05-15T12:00:00Z');

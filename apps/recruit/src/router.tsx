@@ -10,7 +10,6 @@ import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { AppGuard } from '@voxire/auth';
 import { CookieBanner } from '@voxire/consent';
 import { ErrorBoundary } from '@voxire/ui';
-import { unwrap } from '@voxire/api';
 import { userClient } from './shared/lib/clients';
 
 import RootLanding from './features/public/RootLanding';

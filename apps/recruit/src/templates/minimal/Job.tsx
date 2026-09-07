@@ -13,7 +13,8 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
       <Header customization={customization} compact />
       <main className="mx-auto max-w-3xl px-6 py-12">
         <Link
-          to={`/${slug}` as any}
+          to="/$slug"
+          params={{ slug }}
           className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >
@@ -84,7 +85,8 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
         )}
 
         <Link
-          to={`/${slug}/${career.slug}/apply` as any}
+          to="/$slug/$careerSlug/apply"
+          params={{ slug, careerSlug: career.slug }}
           className="mt-12 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           style={{ background: 'var(--recruit-accent)' }}
         >

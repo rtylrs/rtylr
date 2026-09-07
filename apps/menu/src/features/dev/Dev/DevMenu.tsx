@@ -364,8 +364,6 @@ const DevMenu: React.FC = () => {
     },
   });
 
-  const patchCfg = (partial: Partial<MenuLayoutConfig>) =>
-    setCfg((prev) => ({ ...prev, ...partial }));
   const patchHeader = (partial: Partial<MenuLayoutConfig['header']>) =>
     setCfg((prev) => ({ ...prev, header: { ...prev.header, ...partial } }));
   const patchNav = (partial: Partial<MenuLayoutConfig['nav']>) =>

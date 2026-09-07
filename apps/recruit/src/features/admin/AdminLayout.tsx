@@ -36,27 +36,27 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
     );
   }
 
-  const navItems = [
+  const navItems: { to: AdminPath; icon: React.ReactNode; label: string; visible: boolean }[] = [
     {
-      to: '/admin/careers',
+      to: '/admin/careers' as AdminPath,
       icon: <Briefcase className="h-4 w-4" />,
       label: 'Careers',
       visible: canRecruit('recruit:jobs:view') || canRecruit('recruit:jobs:manage'),
     },
     {
-      to: '/admin/submissions',
+      to: '/admin/submissions' as AdminPath,
       icon: <Inbox className="h-4 w-4" />,
       label: 'Submissions',
       visible: canRecruit('recruit:candidates:view'),
     },
     {
-      to: '/admin/sections',
+      to: '/admin/sections' as AdminPath,
       icon: <LayoutGrid className="h-4 w-4" />,
       label: 'Page sections',
       visible: canRecruit('recruit:jobs:manage'),
     },
     {
-      to: '/admin/customization',
+      to: '/admin/customization' as AdminPath,
       icon: <Palette className="h-4 w-4" />,
       label: 'Page branding',
       visible: canRecruit('recruit:jobs:manage'),
@@ -157,8 +157,10 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
   );
 };
 
+type AdminPath = '/admin/careers' | '/admin/submissions' | '/admin/sections' | '/admin/customization';
+
 const AdminLink: React.FC<{
-  to: string;
+  to: AdminPath;
   icon: React.ReactNode;
   label: string;
   onClick?: () => void;
@@ -167,7 +169,7 @@ const AdminLink: React.FC<{
   const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
   return (
     <Link
-      to={to as any}
+      to={to}
       onClick={onClick}
       className={`flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition ${
         isActive ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'
