@@ -710,7 +710,7 @@ const TaskDetail: React.FC = () => {
             style={{
               margin: '-6px 0 8px',
               padding: '6px 10px',
-              borderRadius: 8,
+              borderRadius: 'var(--radius-md)',
               background: 'var(--flow-status-pending-bg)',
               color: 'var(--flow-text)',
               fontSize: 'var(--text-meta)',
