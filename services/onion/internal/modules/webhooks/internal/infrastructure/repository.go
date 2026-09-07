@@ -73,6 +73,9 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, url,
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, webhookID int64) error {
+	if !r.WebhookExistsInBusiness(ctx, businessID, webhookID) {
+		return domain.ErrWebhookNotFound
+	}
 	err := r.queries.DeleteWebhook(ctx, sqlc.DeleteWebhookParams{
 		ID:         webhookID,
 		BusinessID: businessID,
@@ -99,6 +102,9 @@ func (r *Repository) Get(ctx context.Context, businessID, webhookID int64) (doma
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) error {
+	if !r.WebhookExistsInBusiness(ctx, businessID, webhookID) {
+		return domain.ErrWebhookNotFound
+	}
 	eventsJSON, err := json.Marshal(events)
 	if err != nil {
 		return err

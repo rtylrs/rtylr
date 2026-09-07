@@ -2,8 +2,10 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
 	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -371,5 +373,24 @@ func TestWebhooks_Create_ManyEvents(t *testing.T) {
 		if w.ID == id && len(w.Events) != len(events) {
 			t.Errorf("expected %d events, got %d", len(events), len(w.Events))
 		}
+	}
+}
+
+func TestWebhooks_Delete_UnknownIDReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	err := repo.Delete(context.Background(), testutil.OwnerID, 9223372036854775806)
+	if !errors.Is(err, domain.ErrWebhookNotFound) {
+		t.Fatalf("Delete unknown id error = %v, want ErrWebhookNotFound", err)
+	}
+}
+
+func TestWebhooks_Update_UnknownIDReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	err := repo.Update(context.Background(), testutil.OwnerID, 9223372036854775806,
+		"https://example.com/hook", []string{"order.created"}, true)
+	if !errors.Is(err, domain.ErrWebhookNotFound) {
+		t.Fatalf("Update unknown id error = %v, want ErrWebhookNotFound", err)
 	}
 }
