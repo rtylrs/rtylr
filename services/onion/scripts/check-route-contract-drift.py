@@ -69,10 +69,10 @@ def parse_handler_routes(path: Path) -> dict[str, list[str]]:
 
 
 def parse_registered_hr_routes() -> set[tuple[str, str]]:
-    routes_path = ROOT / "internal/modules/hr_time/internal/routes/routes.go"
+    routes_path = ROOT / "internal/modules/hr_time/internal/api/routes.go"
     text = routes_path.read_text(encoding="utf-8")
     handlers = {}
-    for handler_path in routes_path.parent.joinpath("handlers").glob("*.go"):
+    for handler_path in routes_path.parent.glob("*.go"):
         if handler_path.name.endswith("_test.go"):
             continue
         handlers.update(parse_handler_routes(handler_path))
@@ -80,7 +80,7 @@ def parse_registered_hr_routes() -> set[tuple[str, str]]:
     registration_pattern = re.compile(
         r"serverHttp\.Register(?P<method>GET|POST|PUT|PATCH|DELETE)"
         r"(?:WithValidation)?\[[^\]]+\]\(\s*ctx,\s*router,\s*"
-        r"handlers\.(?P<handler>\w+)Routes\(\)",
+        r"(?:handlers\.|api\.)?(?P<handler>\w+)Routes\(\)",
         re.DOTALL,
     )
     registered = set()
