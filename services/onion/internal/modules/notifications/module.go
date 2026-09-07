@@ -8,9 +8,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/notifications/internal/api"
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
-	"github.com/voxire/onion/internal/modules/notifications/internal/routes"
-	"github.com/voxire/onion/internal/modules/notifications/internal/routes/handlers"
 	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
 )
 
@@ -26,7 +25,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubnotificationv1.RegisterNotificationServiceServer(
-		handlers.NewNotificationAPI(m.service),
+		api.NewNotificationAPI(m.service),
 		hubnotificationv1.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register hub notification service: %w", err))
@@ -34,7 +33,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
