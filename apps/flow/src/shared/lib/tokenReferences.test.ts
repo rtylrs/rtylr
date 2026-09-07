@@ -26,7 +26,9 @@ const SHARED_THEME = path.resolve(SRC, '../../../packages/tailwind-config/theme.
  * declared in a stylesheet, so a static scan cannot see them. Every use in the
  * app supplies a fallback for the pre-hydration frame.
  */
-const RUNTIME_TOKENS = new Set(['--flow-r', '--flow-u', '--pane-u']);
+// --tone is set on each tinted element's own inline style, so one value feeds
+// both the tint and the foreground derived from it (rtylr#1249).
+const RUNTIME_TOKENS = new Set(['--flow-r', '--flow-u', '--pane-u', '--tone']);
 
 function declaredTokens(): Set<string> {
   const declared = new Set<string>();

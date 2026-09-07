@@ -10,7 +10,7 @@ import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
-import { withAlpha } from '../lib/colorUtils';
+import { withAlpha, onTint } from '../lib/colorUtils';
 
 interface TaskCardProps {
   task: Task;
@@ -107,10 +107,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               <span
                 className="min-w-0 max-w-[7rem] shrink-0 truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
                 style={{
+                  // See Calendar: the tone is set once and read back, which also
+                  // makes it observable in tests.
+                  ...(task.statusColor ? { ['--tone' as string]: task.statusColor } : {}),
                   background: task.statusColor
-                    ? withAlpha(task.statusColor, 13)
+                    ? withAlpha('var(--tone)', 13)
                     : 'var(--accent-muted)',
-                  color: task.statusColor ?? 'var(--accent-on-muted)',
+                  color: task.statusColor ? onTint('var(--tone)') : 'var(--accent-on-muted)',
                 }}
                 title={task.statusName}
               >

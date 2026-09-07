@@ -9,7 +9,7 @@ import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 /**
@@ -220,8 +220,11 @@ const ProjectCalendar: React.FC = () => {
                             dir="auto"
                             className="text-meta px-1.5 py-0.5 rounded-sm truncate"
                             style={{
-                              background: withAlpha(tone, 13),
-                              color: tone,
+                              // See Calendar: the tone is set once and read back,
+                              // which also makes it observable in tests.
+                              ['--tone' as string]: tone,
+                              background: withAlpha('var(--tone)', 13),
+                              color: onTint('var(--tone)'),
                               cursor: 'pointer',
                             }}
                             title={t.title}

@@ -25,11 +25,12 @@ import { contrastRatio, compositeOver } from '@voxire/utils';
 const ROOT = __dirname;
 
 /**
- * Set on an ancestor's inline style rather than in a stylesheet, so a scan of
+ * Set on an element's own inline style rather than in a stylesheet, so a scan of
  * globals.css cannot see them. --pane-u is assigned in AppearancePreview itself,
- * a few lines above the rules that read it.
+ * a few lines above the rules that read it, and --tone is set per tinted element
+ * so that one value feeds both the tint and its foreground (rtylr#1249).
  */
-const RUNTIME_TOKENS = new Set(['--flow-r', '--flow-u', '--pane-u']);
+const RUNTIME_TOKENS = new Set(['--flow-r', '--flow-u', '--pane-u', '--tone']);
 const APPS = fs
   .readdirSync(path.join(ROOT, 'apps'), { withFileTypes: true })
   .filter((e) => e.isDirectory() && fs.existsSync(path.join(ROOT, 'apps', e.name, 'src')))

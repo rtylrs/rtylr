@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { contrastRatio, compositeOver } from '@voxire/utils';
+import fs from 'node:fs';
+import path from 'node:path';
 import { onTint, PROJECT_COLORS } from './colorUtils';
 
 /**
@@ -93,5 +95,52 @@ describe('the foreground for a colour on its own tint', () => {
     // 60% at 4.61:1, but that used ten colours and did not include this one.
     const at60 = pairings(0.6).map((p) => contrastRatio(p.fg, p.tint));
     expect(Math.min(...at60), '60% of the colour fails AA').toBeLessThan(4.5);
+  });
+
+  it('leaves no source painting a colour on a tint of itself', () => {
+    // Written because sweeping for this by hand missed sites twice. The first
+    // pass matched only `color: <x>.color` and walked past both calendars, which
+    // hold the value in a `tone` variable; 7 sites were fixed and 6 were left.
+    //
+    // The shape is a withAlpha() background whose first argument is used, bare,
+    // as the foreground within the same style object. A fallback beside it is
+    // fine: `color: x ? onTint(x) : 'var(--accent-on-muted)'` is the fixed form,
+    // and the token half was already correct from rtylr#1241.
+    const SRC = path.resolve(__dirname, '../..');
+    const offenders: string[] = [];
+
+    const walk = (dir: string): string[] =>
+      fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const full = path.join(dir, e.name);
+        if (e.isDirectory()) {
+          return e.name === 'node_modules' || e.name === 'locales' ? [] : walk(full);
+        }
+        return /\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name) ? [full] : [];
+      });
+
+    for (const file of walk(SRC)) {
+      const lines = fs.readFileSync(file, 'utf8').split('\n');
+      lines.forEach((line, i) => {
+        const call = /withAlpha\(\s*([A-Za-z_$][\w$.?[\]' ]*?)\s*,/.exec(line);
+        if (!call) return;
+        const expr = call[1].trim();
+        // Wide enough to reach a foreground set on a child element rather than
+        // in the same style object: Timeline's bar is tinted on one line and its
+        // label coloured five lines later, which an i+5 window missed.
+        const window = lines.slice(Math.max(0, i - 4), i + 10).join('\n');
+        if (window.includes('onTint(')) return;
+        // `color: <expr>` with nothing between, i.e. the raw colour as text.
+        const bare = new RegExp(
+          `color:\\s*${expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*[,}?]`
+        );
+        if (bare.test(window)) {
+          offenders.push(
+            `${path.relative(SRC, file)}:${i + 1} (withAlpha(${expr}) with bare ${expr})`
+          );
+        }
+      });
+    }
+
+    expect(offenders, 'wrap the foreground in onTint()').toEqual([]);
   });
 });
