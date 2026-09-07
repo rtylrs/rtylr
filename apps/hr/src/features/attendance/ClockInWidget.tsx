@@ -283,7 +283,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         );
       }
     },
-    [pinMode, pendingNewPin, clockIn, setPin, t]
+    [pinMode, pendingNewPin, clockIn, setPin, t, userId]
   );
 
   /* ── GPS flow ─────────────────────────────────────────────── */
@@ -326,7 +326,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }, [clockIn, t]);
+  }, [clockIn, t, userId]);
 
   return (
     <>

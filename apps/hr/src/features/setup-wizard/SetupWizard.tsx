@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -47,7 +47,7 @@ const SetupWizard = (): React.JSX.Element => {
   const { currentStepIndex, setCurrentStepIndex } = useHRSetupStore();
   const [showNewEmployee, setShowNewEmployee] = useState(false);
 
-  const steps = data?.steps ?? [];
+  const steps = useMemo(() => data?.steps ?? [], [data]);
   // `GET /hr/setup/status` returns the config alongside the step list, so the
   // authoritative completion marker is already in this response - no second
   // request needed to agree with HRConfigRoute.

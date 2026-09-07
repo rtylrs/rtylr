@@ -190,7 +190,7 @@ const Employees = (): React.JSX.Element => {
                               transform: `translateY(${virtualRow.start}px)`,
                               borderTop: '1px solid var(--hr-border)',
                             }}
-                            onClick={() => navigate({ to: `/employees/${emp.id}` as any })}
+                            onClick={() => navigate({ to: '/employees/$id', params: { id: String(emp.id) } })}
                             onMouseEnter={(e) => {
                               (e.currentTarget as HTMLDivElement).style.background =
                                 'var(--hr-hover)';

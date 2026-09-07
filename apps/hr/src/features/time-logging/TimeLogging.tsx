@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { Plus, Clock, Trash2, Pencil } from 'lucide-react';
+import { Plus, Clock, Trash2 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useListTimeEntries, useDeleteTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
 import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
@@ -68,7 +68,7 @@ const TimeLogging = (): React.JSX.Element => {
     setFormOpen(true);
   }, []);
 
-  const entries = data?.entries ?? [];
+  const entries = useMemo(() => data?.entries ?? [], [data]);
   const grouped = useMemo(() => groupByDate(entries), [entries]);
   const totalMinutes = entries.reduce((sum, e) => sum + (e.durationMinutes ?? 0), 0);
 

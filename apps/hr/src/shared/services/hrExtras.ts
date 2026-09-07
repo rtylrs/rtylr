@@ -397,7 +397,7 @@ export const hrExtras = {
 
   // Breaks
   listBreaks: () => hrTransport.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }),
-  startBreak: (staffId: number, staffName: string, type: BreakLog['type']) =>
+  startBreak: (staffId: number, _staffName: string, _type: BreakLog['type']) =>
     hrTransport.post<BreakLog>('/hr/staff/clock-in', {
       staffId,
     }),

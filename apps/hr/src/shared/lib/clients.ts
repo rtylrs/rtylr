@@ -1,8 +1,6 @@
 import { createOneKitClient, createRestRouteClient } from '@voxire/api';
 import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
-import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
-import { ShiftServiceClient } from '@voxire/voxie/hr/shift/v1/client';
 
 type HrRequestConfig = {
   params?: unknown;

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
-import { CheckCircle, XCircle, Clock, Users } from 'lucide-react';
+import { CheckCircle, XCircle, Users } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import {
   useListTimesheets,

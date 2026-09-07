@@ -3,10 +3,10 @@ import { ResultAsync } from 'neverthrow';
 
 vi.mock('../lib/clients', () => ({
   hrTransport: {
-    get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}) as any)),
-    post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    delete: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
+    get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}))),
+    post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}))),
+    put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}))),
+    delete: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}))),
   },
 }));
 

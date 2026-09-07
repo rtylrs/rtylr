@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -42,7 +42,7 @@ describe('useHRDashboard', () => {
         pendingApprovals: 1,
       },
     };
-    (hrApi.getDashboard as any).mockResolvedValue(data);
+    (hrApi.getDashboard as unknown as Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useHRDashboard(), {
       wrapper: createWrapper(),
     });
@@ -51,7 +51,7 @@ describe('useHRDashboard', () => {
   });
 
   it('starts in loading state', () => {
-    (hrApi.getDashboard as any).mockReturnValue(new Promise(() => {}));
+    (hrApi.getDashboard as unknown as Mock).mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useHRDashboard(), {
       wrapper: createWrapper(),
     });
@@ -59,7 +59,7 @@ describe('useHRDashboard', () => {
   });
 
   it('handles error state', async () => {
-    (hrApi.getDashboard as any).mockRejectedValue(new Error('Server error'));
+    (hrApi.getDashboard as unknown as Mock).mockRejectedValue(new Error('Server error'));
     const { result } = renderHook(() => useHRDashboard(), {
       wrapper: createWrapper(),
     });
