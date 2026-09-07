@@ -875,7 +875,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           background:
                             newProjectVisibility === vis ? 'var(--accent)' : 'var(--flow-input-bg)',
                           color:
-                            newProjectVisibility === vis ? '#0a0a0a' : 'var(--flow-text-muted)',
+                            newProjectVisibility === vis
+                              ? 'var(--flow-on-accent)'
+                              : 'var(--flow-text-muted)',
                           border: '1px solid var(--flow-border-control)',
                         }}
                       >
