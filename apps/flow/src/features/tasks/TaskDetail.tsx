@@ -464,6 +464,7 @@ const TaskDetail: React.FC = () => {
           <div className="max-w-3xl mx-auto px-4 py-6 sm:px-8 sm:py-8">
             {/* Title */}
             <input
+              aria-label={t('flow.taskDetail.taskTitle')}
               value={task.title}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
               disabled={!canEdit}
@@ -600,6 +601,7 @@ const TaskDetail: React.FC = () => {
       >
         <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
           <select
+            aria-label={t('flow.taskDetail.status')}
             value={task.status}
             onChange={(e) => {
               const next = e.target.value as Task['status'];
@@ -636,6 +638,7 @@ const TaskDetail: React.FC = () => {
         {projectStatuses.length > 0 && (
           <DetailField icon={Layers} label={t('flow.status.settingsTitle')}>
             <select
+              aria-label={t('flow.status.settingsTitle')}
               value={task.statusId ?? ''}
               onChange={(e) => {
                 setTaskStatus.mutate({ taskId: task.id, statusId: e.target.value || '0' });
@@ -658,6 +661,7 @@ const TaskDetail: React.FC = () => {
 
         <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
           <select
+            aria-label={t('flow.taskDetail.priority')}
             value={task.priority}
             onChange={(e) => updateTask(task.id, { priority: e.target.value as Task['priority'] })}
             disabled={!canEdit}
@@ -676,6 +680,7 @@ const TaskDetail: React.FC = () => {
           <div className="flex items-center gap-2">
             <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
             <select
+              aria-label={t('flow.taskDetail.assignee')}
               value={task.assigneeId}
               onChange={(e) => {
                 const m = members.find((m) => m.id === e.target.value);
@@ -850,6 +855,7 @@ const TaskDetail: React.FC = () => {
         {projectSections.length > 0 && (
           <DetailField icon={LayoutList} label={t('flow.taskDetail.section')}>
             <select
+              aria-label={t('flow.taskDetail.section')}
               value={task.sectionId ?? ''}
               onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
               disabled={!canEdit}
@@ -870,6 +876,7 @@ const TaskDetail: React.FC = () => {
           <DetailField key={def.id} icon={ListChecks} label={def.name}>
             {def.type === 'dropdown' ? (
               <select
+                aria-label={def.name}
                 value={String(task.customFieldValues?.[def.id] ?? '')}
                 onChange={(e) =>
                   updateTask(task.id, {
@@ -892,6 +899,7 @@ const TaskDetail: React.FC = () => {
               </select>
             ) : def.type === 'number' ? (
               <input
+                aria-label={def.name}
                 type="number"
                 value={task.customFieldValues?.[def.id] ?? ''}
                 onChange={(e) =>
@@ -908,6 +916,7 @@ const TaskDetail: React.FC = () => {
               />
             ) : (
               <input
+                aria-label={def.name}
                 value={String(task.customFieldValues?.[def.id] ?? '')}
                 onChange={(e) =>
                   updateTask(task.id, {
@@ -956,6 +965,7 @@ const TaskDetail: React.FC = () => {
             {dependencyCandidates.length > 0 && canEdit && (
               <div className="flex gap-1 pt-1">
                 <select
+                  aria-label={t('flow.taskDetail.addDependency')}
                   value={depId}
                   onChange={(e) => setDepId(e.target.value)}
                   className="bg-transparent text-meta flex-1 min-w-0 rounded-sm px-1"
