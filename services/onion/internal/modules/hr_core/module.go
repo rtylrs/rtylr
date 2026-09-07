@@ -13,7 +13,6 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
-	"github.com/voxire/onion/internal/modules/hr_core/internal/routes"
 	workschedulev1 "github.com/voxire/voxie/gen/go/hr/work_schedule/v1"
 )
 
@@ -158,7 +157,7 @@ func (m *Module) RegisterAPI(mux *nethttp.ServeMux) {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
