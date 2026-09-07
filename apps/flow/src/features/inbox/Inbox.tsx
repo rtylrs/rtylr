@@ -21,7 +21,7 @@ import {
 import type { ApiNotification } from '../../shared/services/flowApi';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 
 type FilterType = 'all' | 'unread' | 'assigned';
 
@@ -75,7 +75,9 @@ const NotificationRow: React.FC<{
           background: notification.projectColor
             ? withAlpha(notification.projectColor, 13)
             : 'var(--accent-muted)',
-          color: notification.projectColor || 'var(--accent-on-muted)',
+          color: notification.projectColor
+            ? onTint(notification.projectColor)
+            : 'var(--accent-on-muted)',
         }}
       >
         {notification.actorInitials || '?'}
