@@ -1,3 +1,35 @@
+/**
+ * happy-dom and color-mix
+ *
+ * The suite runs on happy-dom, whose CSSStyleDeclaration **silently discards any
+ * `color-mix()` value assigned through the style property**, which is the path
+ * React uses. `withAlpha` produces exactly that form and Flow calls it 31 times,
+ * so every tint in the app is absent from the DOM in this environment. Nothing
+ * warns; the declaration simply is not there.
+ *
+ * Measured (rtylr#1249):
+ *
+ *   value                                     setAttribute   el.style.x
+ *   #112233                                   kept           kept
+ *   color-mix(in srgb, #112233 13%, …)        kept           DROPPED
+ *   color-mix(… var(--flow-text))             kept           DROPPED
+ *   var(--flow-text)                          kept           kept
+ *
+ * jsdom keeps all four. So a test that needs to see a tint, or a foreground
+ * derived from one, opens with:
+ *
+ *   // @vitest-environment jsdom
+ *
+ * `Calendar.test.tsx`, `ProjectCalendar.test.tsx` and `TaskCard.test.tsx` do.
+ *
+ * Why this is worth a comment rather than a footnote: the missing declaration
+ * does not make a test fail, it makes an assertion vacuous. Calendar's tint test
+ * asserted a hex appeared in the style string and passed for two months on a
+ * *sibling* `color: #112233` declaration, which was itself the accessibility
+ * defect fixed in rtylr#1246. Removing the defect broke the test, and the break
+ * looked like a regression.
+ */
+
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';

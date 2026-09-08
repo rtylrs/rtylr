@@ -1,3 +1,11 @@
+// @vitest-environment jsdom
+//
+// jsdom rather than the suite default. happy-dom silently discards any
+// color-mix() assigned through the style property, which is the path React uses,
+// so a tint is simply absent from the DOM there (rtylr#1249). The tint
+// assertions below passed under happy-dom only because the same element also
+// carried the raw colour as a plain hex, which was the defect fixed in
+// rtylr#1246.
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -222,8 +230,15 @@ describe('Calendar pills carry their project (#1087)', () => {
 
     const alpha = screen.getByText('From Alpha').closest('button');
     const beta = screen.getByText('From Beta').closest('button');
-    expect(alpha?.getAttribute('style')).toContain('112233');
-    expect(beta?.getAttribute('style')).toContain('445566');
+    // The tone, which is what carries the information.
+    expect(alpha?.style.getPropertyValue('--tone')).toBe('#112233');
+    expect(beta?.style.getPropertyValue('--tone')).toBe('#445566');
+    // And that the tone is actually spent on a tint. This is the half that was
+    // never verified: under happy-dom the background was absent, and the old
+    // assertion passed on a sibling `color: #112233` that was itself the bug.
+    expect(alpha?.style.background).toBe('color-mix(in srgb, var(--tone) 13%, transparent)');
+    expect(alpha?.style.color).toBe('color-mix(in srgb, var(--tone) 50%, var(--flow-text))');
+    expect(alpha?.style.color).not.toContain('112233');
   });
 
   it('falls back to the card surface when the project is not in the store', () => {

@@ -1,3 +1,11 @@
+// @vitest-environment jsdom
+//
+// jsdom rather than the suite default. happy-dom silently discards any
+// color-mix() assigned through the style property, which is the path React uses,
+// so a tint is simply absent from the DOM there (rtylr#1249). The tint
+// assertions below passed under happy-dom only because the same element also
+// carried the raw colour as a plain hex, which was the defect fixed in
+// rtylr#1246.
 // @vitest-environment happy-dom
 import React from 'react';
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
@@ -152,8 +160,13 @@ describe('ProjectCalendar pills carry status (#1087)', () => {
     const doing = screen.getByTitle('Doing');
     const finished = screen.getByTitle('Finished');
     expect(doing.getAttribute('style')).not.toBe(finished.getAttribute('style'));
-    expect(doing.getAttribute('style')).toContain('flow-info-fg');
-    expect(finished.getAttribute('style')).toContain('flow-status-approved');
+    expect(doing.style.getPropertyValue('--tone')).toContain('flow-info-fg');
+    expect(finished.style.getPropertyValue('--tone')).toContain('flow-status-approved');
+    // And that the tone is spent on a tint with a derived foreground. Under
+    // happy-dom both declarations were absent, so the assertions above were the
+    // only thing this test ever saw.
+    expect(doing.style.background).toBe('color-mix(in srgb, var(--tone) 13%, transparent)');
+    expect(doing.style.color).toBe('color-mix(in srgb, var(--tone) 50%, var(--flow-text))');
   });
 
   it('lets a right-to-left title decide its own truncation end', () => {
