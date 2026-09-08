@@ -684,7 +684,8 @@
     "create": "إنشاء",
     "creating": "جارٍ الإنشاء…",
     "prevMonthLabel": "الشهر السابق",
-    "nextMonthLabel": "الشهر التالي"
+    "nextMonthLabel": "الشهر التالي",
+    "agendaEmpty": "لا مهام مستحقة هذا الشهر."
   },
   "milestones": {
     "heading": "المعالم",
