@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { dueState } from '../lib/dateUtils';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Task, useFlowStore } from '../stores/flowStore';
@@ -30,7 +31,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
   const project = projects.find((p) => p.id === task.projectId);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
-  const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
+  const due = dueState(task.dueDate);
 
   // Shared by mouse click and Enter/Space keydown so the row opens the task
   // (or toggles selection with a modifier held) the same way for both input
@@ -165,7 +166,17 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         {task.dueDate && (
           <span
             className="text-meta shrink-0 w-[64px] text-right"
-            style={{ color: overdue ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)' }}
+            style={{
+              // Three states, not two, and none of them --flow-text-dim: that
+              // token measures 2.35:1 in both modes and globals.css says in as
+              // many words that it never carries text (rtylr#1077).
+              color:
+                due === 'late'
+                  ? 'var(--flow-danger-fg)'
+                  : due === 'today'
+                    ? 'var(--flow-warn-fg)'
+                    : 'var(--flow-text-muted)',
+            }}
           >
             {formatDate(task.dueDate)}
           </span>
