@@ -753,10 +753,11 @@
   },
   "myIssues": {
     "buckets": {
-      "recentlyAssigned": "Recently assigned",
+      "late": "Late",
       "today": "Today",
-      "upcoming": "Upcoming",
-      "later": "Later"
+      "thisWeek": "This week",
+      "later": "Later",
+      "noDate": "No date"
     },
     "emptyCta": "Add your first task",
     "emptyDescription": "Nothing is on your plate right now.",
