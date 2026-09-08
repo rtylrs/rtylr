@@ -67,8 +67,27 @@ screen under test never renders:
 | `flow-guards.spec.ts`       | 1 of 4 failed    |
 | `menu-public.spec.ts`       | passed (no auth) |
 
-That is why the reference capture lives on the **public** menu: a capture placed
-on an authenticated screen would have shipped exercising nothing.
+That is why the reference capture lived on the **public** menu at first.
+
+**Corrected 2026-09-08.** An authenticated capture does work. `flow-my-tasks-screenshots.spec.ts`
+produces both shots of `/my-issues`, a screen behind the guard, and
+`flow-sidebar-fold.spec.ts` already had `@screenshots` tests passing on an
+authenticated Flow screen. The difference is not the guard: it is priming the
+`token` cookie on `localhost` **and** stubbing `hub/user/v1/users/me`, which
+`flow-task-detail.spec.ts` and `flow-inbox-views.spec.ts` both do. The table
+above stands for the specs it names, which do not prime that cookie; it does not
+generalise to "authenticated screens cannot be captured".
+
+Worth stating because that generalisation is how the original
+"cannot be delivered" got written, and this page exists to stop exactly that.
+
+**One trap when you do it.** The v2 wire is snake_case and the generated client
+drops fields it does not recognise, so a camelCase payload arrives as tasks with
+every optional field empty. On My tasks that put all six fixtures in "No date",
+the one section that starts collapsed, and the capture showed a single closed
+section while looking perfectly plausible. **Assert content before you capture**,
+so a stub that silently lost half its payload fails the test rather than shipping
+as evidence.
 
 Two plausible causes were tested and **ruled out**, so nobody repeats them:
 
