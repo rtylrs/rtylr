@@ -97,7 +97,7 @@ describe('MyIssues time buckets (#1035)', () => {
     return d.toISOString();
   };
 
-  it('groups by time bucket, with overdue folded into Today', () => {
+  it('gives overdue work its own section above the rest', () => {
     myIssuesData.data = [
       { id: '1', title: 'Overdue thing', status: 'todo', dueDate: iso(-15) },
       { id: '2', title: 'Due today', status: 'todo', dueDate: iso(0) },
@@ -107,24 +107,83 @@ describe('MyIssues time buckets (#1035)', () => {
 
     render(<MyIssues />);
 
+    // Late is its own section now. It used to be folded into Today, which is
+    // what left a fifteen-day-overdue task with no promotion of any kind.
+    expect(screen.getByText('flow.myIssues.buckets.late')).toBeInTheDocument();
     expect(screen.getByText('flow.myIssues.buckets.today')).toBeInTheDocument();
-    expect(screen.getByText('flow.myIssues.buckets.upcoming')).toBeInTheDocument();
+    expect(screen.getByText('flow.myIssues.buckets.thisWeek')).toBeInTheDocument();
     expect(screen.getByText('flow.myIssues.buckets.later')).toBeInTheDocument();
-    // The overdue task is the point: it used to sit third in a To Do column
-    // with no promotion of any kind.
     expect(screen.getByText('Overdue thing')).toBeInTheDocument();
     expect(screen.getByText('Due today')).toBeInTheDocument();
   });
 
-  it('puts a recently assigned task with no due date in its own bucket', () => {
+  it('puts Late first, before Today', () => {
+    myIssuesData.data = [
+      { id: '2', title: 'Due today', status: 'todo', dueDate: iso(0) },
+      { id: '1', title: 'Overdue thing', status: 'todo', dueDate: iso(-15) },
+    ];
+
+    render(<MyIssues />);
+
+    const headings = screen.getAllByRole('button', { expanded: true }).map((b) => b.textContent);
+    const late = headings.findIndex((h) => h?.includes('buckets.late'));
+    const today = headings.findIndex((h) => h?.includes('buckets.today'));
+    expect(late).toBeGreaterThanOrEqual(0);
+    expect(late).toBeLessThan(today);
+  });
+
+  it('buckets a task with no due date by that fact', () => {
     myIssuesData.data = [
       { id: '5', title: 'No date, just assigned', status: 'todo', dueDate: '', createdAt: iso(-1) },
     ];
 
     render(<MyIssues />);
 
-    expect(screen.getByText('flow.myIssues.buckets.recentlyAssigned')).toBeInTheDocument();
-    expect(screen.getByText('No date, just assigned')).toBeInTheDocument();
+    expect(screen.getByText('flow.myIssues.buckets.noDate')).toBeInTheDocument();
+  });
+
+  it('opens Late and Today expanded, so overdue work needs no interaction', () => {
+    myIssuesData.data = [
+      { id: '1', title: 'Overdue thing', status: 'todo', dueDate: iso(-15) },
+      { id: '5', title: 'No date', status: 'todo', dueDate: '' },
+    ];
+
+    render(<MyIssues />);
+
+    const late = screen.getAllByRole('button').find((b) => b.textContent?.includes('buckets.late'));
+    expect(late).toHaveAttribute('aria-expanded', 'true');
+    // The panel itself, via aria-controls, rather than `toBeVisible`: the
+    // section is a motion.section with initial opacity 0, and jest-dom counts
+    // that as not visible even though a browser animates it straight in.
+    const latePanel = document.getElementById(late!.getAttribute('aria-controls')!);
+    expect(latePanel).not.toHaveAttribute('hidden');
+    expect(latePanel!.textContent).toContain('Overdue thing');
+
+    // No date is the one bucket with no claim on attention, so it starts closed.
+    const noDate = screen
+      .getAllByRole('button')
+      .find((b) => b.textContent?.includes('buckets.noDate'));
+    expect(noDate).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('collapses and reopens a section from its heading', () => {
+    myIssuesData.data = [{ id: '1', title: 'Overdue thing', status: 'todo', dueDate: iso(-15) }];
+
+    render(<MyIssues />);
+
+    const heading = screen
+      .getAllByRole('button')
+      .find((b) => b.textContent?.includes('buckets.late'))!;
+    const panel = document.getElementById(heading.getAttribute('aria-controls')!)!;
+    expect(panel).not.toHaveAttribute('hidden');
+
+    fireEvent.click(heading);
+    expect(heading).toHaveAttribute('aria-expanded', 'false');
+    expect(panel).toHaveAttribute('hidden');
+
+    fireEvent.click(heading);
+    expect(heading).toHaveAttribute('aria-expanded', 'true');
+    expect(panel).not.toHaveAttribute('hidden');
   });
 
   it('renders no heading for an empty bucket', () => {
@@ -134,7 +193,7 @@ describe('MyIssues time buckets (#1035)', () => {
 
     expect(screen.getByText('flow.myIssues.buckets.today')).toBeInTheDocument();
     expect(screen.queryByText('flow.myIssues.buckets.later')).not.toBeInTheDocument();
-    expect(screen.queryByText('flow.myIssues.buckets.upcoming')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.myIssues.buckets.thisWeek')).not.toBeInTheDocument();
   });
 
   it('leaves finished work out of the buckets', () => {
