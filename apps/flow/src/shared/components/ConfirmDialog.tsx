@@ -112,7 +112,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             disabled={disabled}
             onClick={onConfirm}
             className="px-3 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40"
-            style={{ background: '#ef4444', color: '#fff' }}
+            style={{ background: 'var(--flow-danger-fill)', color: 'var(--flow-danger-on-fill)' }}
           >
             {pending ? t('flow.confirm.working') : confirmLabel}
           </button>
