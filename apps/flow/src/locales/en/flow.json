@@ -664,7 +664,8 @@
     "create": "Create",
     "creating": "Creating…",
     "prevMonthLabel": "Previous month",
-    "nextMonthLabel": "Next month"
+    "nextMonthLabel": "Next month",
+    "agendaEmpty": "No tasks due this month."
   },
   "milestones": {
     "heading": "Milestones",

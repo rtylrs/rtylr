@@ -669,7 +669,8 @@
     "create": "Créer",
     "creating": "Création…",
     "prevMonthLabel": "Mois précédent",
-    "nextMonthLabel": "Mois suivant"
+    "nextMonthLabel": "Mois suivant",
+    "agendaEmpty": "Aucune tâche à échéance ce mois-ci."
   },
   "milestones": {
     "heading": "Jalons",

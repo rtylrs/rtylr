@@ -33,6 +33,7 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import { installMatchMedia } from './viewport';
 
 // Enable React 19 act environment for testing-library
 // @ts-expect-error - IS_REACT_ACT_ENVIRONMENT global
@@ -73,20 +74,21 @@ afterEach(() => {
   cleanup();
 });
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+/**
+ * `matchMedia` is shimmed, and the shim evaluates.
+ *
+ * It has to exist: jsdom 29 does not implement `matchMedia` at all, and calling
+ * it throws. happy-dom 20 does implement it. The shim used to report
+ * `matches: false` for **every** query, which made every responsive branch in
+ * the app untestable, since a component choosing a layout from a media query
+ * always rendered its no-match side and nothing could tell that apart from the
+ * viewport genuinely being narrow.
+ *
+ * The replacement evaluates `min-width` and `max-width` and leaves everything
+ * else false, so `(prefers-color-scheme: dark)` behaves as it did.
+ * `test/viewport.ts` has the measurements and `setViewportWidth`.
+ */
+installMatchMedia();
 
 // jsdom/happy-dom implement no layout, so Element.prototype.scrollIntoView is
 // absent - stub it so components that scroll a ref into view (e.g. an empty
