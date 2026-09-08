@@ -761,10 +761,11 @@
   },
   "myIssues": {
     "buckets": {
-      "recentlyAssigned": "Récemment assigné",
+      "late": "En retard",
       "today": "Aujourd'hui",
-      "upcoming": "À venir",
-      "later": "Plus tard"
+      "thisWeek": "Cette semaine",
+      "later": "Plus tard",
+      "noDate": "Sans date"
     },
     "emptyCta": "Ajouter votre première tâche",
     "emptyDescription": "Rien ne vous attend pour le moment.",
