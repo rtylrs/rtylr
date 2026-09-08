@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { Task } from '../stores/flowStore';
 
@@ -85,5 +85,47 @@ describe('TaskRow labels (#1039)', () => {
     expect(screen.getByText('label-3')).toBeInTheDocument();
     expect(screen.queryByText('label-4')).not.toBeInTheDocument();
     expect(screen.getByText('+2')).toBeInTheDocument();
+  });
+});
+
+describe('TaskRow due date colour (#1077)', () => {
+  const at = (iso: string): void => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(iso));
+  };
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const dateEl = (dueDate: string): HTMLElement => {
+    render(<TaskRow task={{ ...baseTask, dueDate, status: 'todo' }} />);
+    // Both the due date and the task identifier carry a 64px column, and the
+    // identifier comes first in the DOM, so the right-aligned one is the date.
+    const el = document.querySelector('span.w-\\[64px\\].text-right');
+    expect(el, 'the due date cell').not.toBeNull();
+    return el as HTMLElement;
+  };
+
+  it('paints a late date with the danger tone', () => {
+    at('2026-05-02T12:00:00.000Z');
+    expect(dateEl('2026-05-01').style.color).toBe('var(--flow-danger-fg)');
+  });
+
+  it('paints a date due today with the warn tone, not danger', () => {
+    // The bug this test exists for: `new Date('2026-05-02') < new Date()` is
+    // true from 00:00 UTC, so a task due today was painted red for the whole
+    // working day at UTC+3.
+    at('2026-05-02T12:00:00.000Z');
+    expect(dateEl('2026-05-02').style.color).toBe('var(--flow-warn-fg)');
+  });
+
+  it('paints a future date with the muted tone, never the dim one', () => {
+    // --flow-text-dim measures 2.35:1 in both modes and globals.css says it
+    // never carries text. It was the colour of every non-overdue due date.
+    at('2026-05-02T12:00:00.000Z');
+    const el = dateEl('2026-06-01');
+    expect(el.style.color).toBe('var(--flow-text-muted)');
+    expect(el.style.color).not.toBe('var(--flow-text-dim)');
   });
 });

@@ -38,6 +38,48 @@ export function toLocalIso(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Where a due date sits relative to the reader's own today.
+ *
+ * `'late'` is strictly before today, `'today'` is today, `'future'` is after,
+ * and `'none'` is an absent or empty due date.
+ *
+ * Compared as strings, because a due date is a calendar day and not an instant.
+ * Three components computed this as `new Date(task.dueDate) < new Date()`, which
+ * parses a bare `YYYY-MM-DD` as **UTC midnight** and compares it to the current
+ * instant. Measured at UTC+3 for a task due today:
+ *
+ *   checked 00:30 local -> not overdue
+ *   checked 08:00 local -> OVERDUE
+ *   checked 23:00 local -> OVERDUE
+ *
+ * So a task due today was painted as late from 00:00 UTC onward, which is the
+ * whole working day in the product's home market (rtylr#1077). Further east it
+ * starts earlier still.
+ */
+export type DueState = 'late' | 'today' | 'future' | 'none';
+
+export function dueState(dueDate: string | null | undefined): DueState {
+  const due = dueDate ? dueDate.split('T')[0] : '';
+  if (due === '') return 'none';
+
+  const today = todayIso();
+  if (due < today) return 'late';
+  if (due === today) return 'today';
+  return 'future';
+}
+
+/**
+ * Whether a task should read as overdue: past its day and not finished.
+ *
+ * Kept beside `dueState` rather than left to each caller, because the three
+ * that hand-rolled it also each decided separately what "finished" meant.
+ */
+export function isOverdue(dueDate: string | null | undefined, status?: string): boolean {
+  if (status === 'done' || status === 'cancelled') return false;
+  return dueState(dueDate) === 'late';
+}
+
 /** Short day-of-week key, Sunday first to match `Date#getUTCDay()`'s own indexing. */
 export type DayKey = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
 

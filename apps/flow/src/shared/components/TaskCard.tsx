@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isOverdue } from '../lib/dateUtils';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Calendar, MessageSquare, Paperclip, GitBranch } from 'lucide-react';
@@ -54,7 +55,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const doneSubtasks = taskSubtasks.filter((s) => s.completed).length;
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
-  const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
+  const overdue = isOverdue(task.dueDate, task.status);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();

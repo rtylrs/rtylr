@@ -785,10 +785,11 @@
   },
   "myIssues": {
     "buckets": {
-      "recentlyAssigned": "المُسندة حديثًا",
+      "late": "متأخرة",
       "today": "اليوم",
-      "upcoming": "قادمة",
-      "later": "لاحقًا"
+      "thisWeek": "هذا الأسبوع",
+      "later": "لاحقًا",
+      "noDate": "بلا تاريخ"
     },
     "emptyCta": "أضف مهمتك الأولى",
     "emptyDescription": "لا يوجد شيء على عاتقك الآن.",
