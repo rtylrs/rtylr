@@ -10,6 +10,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  setViewportWidth,
+  resetViewport,
+  MOBILE_WIDTH,
+  DESKTOP_WIDTH,
+} from '../../../../../test/viewport';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -261,5 +267,62 @@ describe('Calendar pills carry their project (#1087)', () => {
     ];
     render(<Calendar />);
     expect(screen.getByText('مهمة طويلة جدا')).toHaveAttribute('dir', 'auto');
+  });
+});
+
+describe('Calendar at the 390px floor (#1215)', () => {
+  const today = new Date();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  /**
+   * The point of rtylr#1215, and the first test in this repo able to state it.
+   *
+   * `matchMedia` was mocked to report `matches: false` for every query, so any
+   * responsive branch rendered its no-match side and no assertion could tell
+   * that apart from the viewport genuinely being narrow. The shim now evaluates
+   * width features; `test/viewport.ts` has the measurements.
+   *
+   * A width has to be set before rendering: neither test DOM fires the media
+   * query `change` event, so a component only ever sees the width it mounted at.
+   */
+  afterEach(() => {
+    resetViewport();
+    tasksData.data = [];
+    storeProjects.value = [{ id: 'p-9', name: 'Web' }];
+  });
+
+  it('shows the month as a list, not a seven-column grid', () => {
+    setViewportWidth(MOBILE_WIDTH);
+    tasksData.data = [
+      { id: 't1', title: 'From Alpha', projectId: 'p-1', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+
+    // The agenda's day heading, which the grid has no equivalent of.
+    expect(screen.getAllByRole('heading', { level: 3 }).length).toBeGreaterThan(0);
+    // And the grid's weekday header row is gone rather than merely hidden.
+    expect(screen.queryByText('Sun')).toBeNull();
+  });
+
+  it('keeps the grid at desktop width', () => {
+    setViewportWidth(DESKTOP_WIDTH);
+    tasksData.data = [
+      { id: 't1', title: 'From Alpha', projectId: 'p-1', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+
+    expect(screen.getByText('Sun')).toBeInTheDocument();
+    expect(screen.queryAllByRole('heading', { level: 3 })).toHaveLength(0);
+  });
+
+  it('still reaches the task from the list', () => {
+    setViewportWidth(MOBILE_WIDTH);
+    tasksData.data = [
+      { id: 't1', title: 'From Alpha', projectId: 'p-1', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+
+    screen.getByText('From Alpha').closest('button')!.click();
+    expect(mockNavigate).toHaveBeenCalledWith({ to: '/task/t1' });
   });
 });
