@@ -161,11 +161,26 @@
    * pre-existing cohesion defect, not an accessibility one: 9.4:1 on --flow-bg. */
   --flow-focus-ring: rgba(100, 197, 185, 0.9);
 
-  /* Only the -fg variants exist on purpose. A separate fill token would need a
-   * light value too, and nothing consumes one: every surface here uses the
-   * foreground tone. */
+  /* The -fg tones double as fills, which is why no separate fill colour exists.
+   * Measured against both cards they are already well clear of the 3:1 a filled
+   * control needs to be distinguishable: danger 6.19:1 dark and 5.93:1 light,
+   * warn 7.90:1 and 5.50:1. A second red or amber would duplicate a value and
+   * make a destructive button a different red from destructive text.
+   *
+   * What they did lack is a foreground. Four buttons painted white on the danger
+   * tone at 3.76:1 and the trial banner painted white on the warn tone at
+   * 2.29:1 (rtylr#1234). The -fill aliases below exist so a call site says which
+   * side it means, the way --accent-fg and --flow-on-accent do; the earlier note
+   * here claimed nothing consumed a fill token, which stopped being true. */
   --flow-warn-fg: #d9a066;
   --flow-danger-fg: #e5776a;
+  --flow-danger-fill: var(--flow-danger-fg);
+  --flow-warn-fill: var(--flow-warn-fg);
+  /* Which extreme wins flips with the mode, so these are not one value. Exactly
+   * what deriveOnAccent returns for each tone: the better of near-black and
+   * near-white, measured rather than assumed. */
+  --flow-danger-on-fill: #0a0a0a; /* dark, 6.77:1 on #e5776a */
+  --flow-warn-on-fill: #0a0a0a; /* dark, 8.65:1 on #d9a066 */
   --flow-locked-fg: #a8a4c8;
   /* In progress, medium priority, an upcoming cycle and a completed milestone
    * all read as one informational blue. #3b82f6 carried them, which measured
@@ -233,6 +248,8 @@
 
   --flow-warn-fg: #8f5f14;
   --flow-danger-fg: #b4382a;
+  --flow-danger-on-fill: #ffffff; /* light, 5.93:1 on #b4382a */
+  --flow-warn-on-fill: #ffffff; /* light, 5.50:1 on #8f5f14 */
   --flow-locked-fg: #5b5591;
   /* See the dark-mode note. 5.31:1 on white and on --flow-bg, inside this
    * family's light band (warn 5.01, danger 5.40, locked 6.06). */

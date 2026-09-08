@@ -486,7 +486,10 @@ const ProjectSettings: React.FC = () => {
                         }}
                         disabled={transferOwnership.isPending || !canManageProject}
                         className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
-                        style={{ background: '#ef4444', color: '#fff' }}
+                        style={{
+                          background: 'var(--flow-danger-fill)',
+                          color: 'var(--flow-danger-on-fill)',
+                        }}
                       >
                         {transferOwnership.isPending
                           ? t('flow.projectSettings.transferring')
@@ -600,7 +603,10 @@ const ProjectSettings: React.FC = () => {
               <button
                 type="button"
                 className="px-3 py-1 rounded-sm text-meta font-semibold disabled:opacity-40"
-                style={{ background: '#ef4444', color: '#fff' }}
+                style={{
+                  background: 'var(--flow-danger-fill)',
+                  color: 'var(--flow-danger-on-fill)',
+                }}
                 disabled={archiveProject.isPending || !canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-delete-gate'}
                 onClick={() => {
@@ -680,7 +686,10 @@ const ProjectSettings: React.FC = () => {
                   });
                 }}
                 className="px-3 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40"
-                style={{ background: '#ef4444', color: '#fff' }}
+                style={{
+                  background: 'var(--flow-danger-fill)',
+                  color: 'var(--flow-danger-on-fill)',
+                }}
               >
                 {archiveProject.isPending
                   ? t('common.saving')

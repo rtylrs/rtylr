@@ -53,7 +53,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       <a
         href={`${resolveAppUrl('dash')}/settings/billing`}
         className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0"
-        style={{ background: 'var(--flow-warn-fg)', color: '#fff' }}
+        style={{ background: 'var(--flow-warn-fill)', color: 'var(--flow-warn-on-fill)' }}
       >
         <Zap size={11} />
         {t('flow.trialBanner.activate')}
