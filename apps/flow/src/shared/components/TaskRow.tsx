@@ -110,7 +110,14 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </button>
         <PriorityIcon priority={task.priority} />
         <span
-          className="text-meta font-mono w-[64px] shrink-0"
+          // Hidden below md. At 390px the row is priority glyph, identifier,
+          // status, title, due date and avatar, and the identifier's fixed 64px
+          // left the title showing "Chase…" and "Re: inv…". It repeats nothing
+          // the reader needs to pick a task out of a list, so it is the part
+          // that gives way (rtylr#1077). Measured on the captured 390px shot,
+          // not reasoned about: every unit test on this row passed while the
+          // screen was unusable.
+          className="text-meta font-mono w-[64px] shrink-0 hidden md:block"
           style={{ color: 'var(--flow-text-dim)' }}
         >
           {task.identifier}
