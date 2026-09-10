@@ -128,7 +128,7 @@ const Login: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Sign in · rtylr" />
+      <HelmetContainer title={t('auth.login.metaTitle')} />
       <LicenseBanner client={licenseClient} />
       <AuthShell
         title={title}
