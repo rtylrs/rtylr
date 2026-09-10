@@ -165,7 +165,8 @@
     "todo": "للتنفيذ",
     "waitingOn": "بانتظار",
     "waitingPlaceholder": "شخص، فريق، موافقة…",
-    "you": "أنت"
+    "you": "أنت",
+    "drawerLabel": "تفاصيل المهمة"
   },
   "time": {
     "add": {
