@@ -132,7 +132,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   if (step === 'login') {
     return (
       <AuthShell
-        title="Sign in to authorize"
+        title={t('auth.oauth.signInToAuthorize')}
         subtitle={`rtylr MCP is requesting access to your account`}
       >
         <form
@@ -189,11 +189,8 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Authorize · rtylr" />
-      <AuthShell
-        title="Authorize access"
-        subtitle="Review and confirm the permissions requested below"
-      >
+      <HelmetContainer title={t('auth.oauth.metaTitle')} />
+      <AuthShell title={t('auth.oauth.title')} subtitle={t('auth.oauth.subtitle')}>
         <div className="flex flex-col gap-6">
           {error && <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
@@ -228,7 +225,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
               onClick={handleDeny}
               className="w-full rounded-lg border border-[#e5e5e5] py-2.5 text-sm text-[#666] hover:text-[#333] transition-colors"
             >
-              Deny
+              {t('auth.oauth.deny')}
             </button>
           </div>
 
