@@ -10,13 +10,16 @@ import type { FontPairingId } from '../shared/lib/types';
  * Each pairing declares:
  *   - heading: the display-face family name, used in CSS.
  *   - body:    the supporting face used for paragraph text.
+ *   - fonts: the face names, shown to an admin beside a translated
+ *            descriptor. Typeface names are proper nouns, so they are not
+ *            translated and stay here rather than in a locale file.
  *   - googleFonts: the `family=...` query-string fragment that loads
  *                  both faces from fonts.googleapis.com. Combined with
  *                  the base URL in loadFontPairing().
  */
 interface FontPairing {
   id: FontPairingId;
-  label: string;
+  fonts: string;
   heading: string;
   body: string;
   googleFonts: string;
@@ -25,14 +28,14 @@ interface FontPairing {
 export const FONT_PAIRINGS: Record<Exclude<FontPairingId, ''>, FontPairing> = {
   default: {
     id: 'default',
-    label: 'Neutral (Plus Jakarta Sans)',
+    fonts: 'Plus Jakarta Sans',
     heading: '"Plus Jakarta Sans"',
     body: '"Plus Jakarta Sans"',
     googleFonts: 'family=Plus+Jakarta+Sans:wght@400;500;600;700',
   },
   'jakarta-fraunces': {
     id: 'jakarta-fraunces',
-    label: 'Modern serif (Fraunces + Plus Jakarta)',
+    fonts: 'Fraunces + Plus Jakarta',
     heading: '"Fraunces"',
     body: '"Plus Jakarta Sans"',
     googleFonts:
@@ -40,21 +43,21 @@ export const FONT_PAIRINGS: Record<Exclude<FontPairingId, ''>, FontPairing> = {
   },
   'space-grotesk-inter': {
     id: 'space-grotesk-inter',
-    label: 'Engineering (Space Grotesk + Inter)',
+    fonts: 'Space Grotesk + Inter',
     heading: '"Space Grotesk"',
     body: '"Inter"',
     googleFonts: 'family=Space+Grotesk:wght@500..700&family=Inter:wght@400;500',
   },
   'playfair-inter': {
     id: 'playfair-inter',
-    label: 'Editorial (Playfair + Inter)',
+    fonts: 'Playfair + Inter',
     heading: '"Playfair Display"',
     body: '"Inter"',
     googleFonts: 'family=Playfair+Display:wght@600..900&family=Inter:wght@400;500',
   },
   'dmserif-dmsans': {
     id: 'dmserif-dmsans',
-    label: 'Luxe (DM Serif + DM Sans)',
+    fonts: 'DM Serif + DM Sans',
     heading: '"DM Serif Display"',
     body: '"DM Sans"',
     googleFonts: 'family=DM+Serif+Display&family=DM+Sans:wght@400;500;600',
