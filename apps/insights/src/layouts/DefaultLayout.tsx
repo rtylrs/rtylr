@@ -372,7 +372,7 @@ const DefaultLayout: React.FC = () => {
                     }}
                   >
                     <SettingsIcon size={14} />
-                    Settings
+                    {t('nav.settings')}
                   </Link>
                   <div
                     className="my-1"
@@ -383,7 +383,7 @@ const DefaultLayout: React.FC = () => {
                     className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
                     style={{ color: 'var(--hub-text-dim)' }}
                   >
-                    Appearance
+                    {t('nav.appearance')}
                   </p>
                   <div className="flex gap-1 mb-2 px-1">
                     {(
