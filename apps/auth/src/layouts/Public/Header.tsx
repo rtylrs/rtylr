@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaChevronDown } from 'react-icons/fa';
 import { useNavigate } from '@tanstack/react-router';
 
@@ -7,6 +8,7 @@ import { selectLanguage } from '../../shared/services/i18next';
 import { getCookie } from '@voxire/auth';
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
   const [languageDropdown, setLanguageDropdown] = useState(false);
   const [language, setLanguage] = useState<string>('en');
   const navigate = useNavigate();
@@ -61,7 +63,7 @@ const Header: React.FC = () => {
         style={{ cursor: 'pointer' }}
         onClick={() => navigate({ to: '/' })}
         role="button"
-        aria-label="Go to home"
+        aria-label={t('auth.common.goToHome')}
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') navigate({ to: '/' });
@@ -91,7 +93,11 @@ const Header: React.FC = () => {
           />
         </div>
         {languageDropdown && (
-          <div className="languages-dropdown" role="listbox" aria-label="Select language">
+          <div
+            className="languages-dropdown"
+            role="listbox"
+            aria-label={t('auth.common.selectLanguage')}
+          >
             <span
               role="option"
               aria-selected={language === 'en'}
