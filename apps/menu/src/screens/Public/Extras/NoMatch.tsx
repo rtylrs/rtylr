@@ -15,9 +15,9 @@ const NoMatch = (): React.JSX.Element => {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <EmptyState
           icon={SearchX}
-          title={t('title')}
-          description={t('description')}
-          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+          title={t('notfound.title')}
+          description={t('notfound.description')}
+          action={{ label: t('notfound.goBack'), onClick: () => router.history.back() }}
         />
       </div>
     </>
