@@ -84,12 +84,22 @@ function sourceFiles(dir: string, into: string[]): string[] {
   return into;
 }
 
+/**
+ * A line that is only a comment. Documentation quotes keys as examples, and a
+ * quoted example is not a call site: `shared/services/i18next.ts` in several
+ * apps explains the convention with a `t('common.save')` that names no real
+ * key, and a test helper explains the defect it guards against the same way.
+ * Commented-out code is skipped for the same reason, since it does not run.
+ */
+const COMMENT_LINE = /^\s*(\/\/|\*|\/\*)/;
+
 /** Literal t() keys used under `srcDir`, mapped to their first `file:line`. */
 export function collectLiteralKeys(srcDir: string): Map<string, string> {
   const found = new Map<string, string>();
   for (const file of sourceFiles(srcDir, [])) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, index) => {
+      if (COMMENT_LINE.test(line)) return;
       for (const match of line.matchAll(LITERAL_KEY)) {
         const key = match[2];
         if (!found.has(key)) found.set(key, `${path.relative(srcDir, file)}:${index + 1}`);
