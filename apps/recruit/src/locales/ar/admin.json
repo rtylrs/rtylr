@@ -137,5 +137,81 @@
       "boolean": "أوافق"
     },
     "seedOption": "خيار {{number}}"
+  },
+  "sections": {
+    "metaTitle": "أقسام الصفحة · rtylr",
+    "heading": "أقسام الصفحة",
+    "hint": "كتل محتوى بين الواجهة وقائمة الوظائف. اسحب لإعادة الترتيب.",
+    "addSection": "إضافة قسم",
+    "loading": "جارٍ التحميل…",
+    "cancel": "إلغاء",
+    "pickKind": "اختر نوع القسم",
+    "added": "تمت إضافة القسم",
+    "addFailed": "تعذرت الإضافة",
+    "deleted": "تم حذف القسم",
+    "deleteFailed": "تعذر الحذف",
+    "saved": "تم حفظ القسم",
+    "saveFailed": "تعذر الحفظ",
+    "orderFailed": "تعذر حفظ الترتيب",
+    "toggleFailed": "تعذر التبديل",
+    "uploadFailed": "تعذر الإرفاق",
+    "confirmDelete": "حذف هذا القسم؟",
+    "delete": "حذف",
+    "sectionTitle": "عنوان القسم",
+    "sectionTitlePlaceholder": "مثال: لماذا ستحب العمل معنا",
+    "body": "النص",
+    "quote": "الاقتباس",
+    "attribution": "نسبة الاقتباس",
+    "attributionHint": "الاسم، المسمى",
+    "attributionPlaceholder": "سارة خالد، مهندسة أولى",
+    "photoUrl": "رابط الصورة",
+    "photoHint": "اختياري، مربعة أو عريضة",
+    "videoUrl": "رابط الفيديو",
+    "videoHint": "يوتيوب / فيميو / لووم أو فيديو مرفوع",
+    "buttonUrl": "رابط الزر",
+    "saveSection": "حفظ القسم",
+    "perks": "المزايا",
+    "addPerk": "إضافة ميزة",
+    "perkIconPlaceholder": "الأيقونة (اسم lucide)",
+    "perkLabelPlaceholder": "العنوان",
+    "perkBlurbPlaceholder": "وصف موجز",
+    "faqQuestionPlaceholder": "السؤال",
+    "addFaq": "إضافة سؤال وجواب",
+    "values": "القيم",
+    "addValue": "إضافة قيمة",
+    "valueLabelPlaceholder": "العنوان",
+    "valueBlurbPlaceholder": "وصف قصير",
+    "kind": {
+      "perks": {
+        "label": "المزايا",
+        "blurb": "شبكة أيقونات: التأمين الصحي، العمل عن بعد، ميزانية التعلم وغيرها."
+      },
+      "culture": {
+        "label": "الثقافة",
+        "blurb": "صورة ونص. كيف يعمل الفريق فعلًا."
+      },
+      "testimonial": {
+        "label": "شهادة",
+        "blurb": "اقتباس من أحد العاملين الحاليين مع نسبته إليه."
+      },
+      "video": {
+        "label": "فيديو",
+        "blurb": "رابط تضمين من يوتيوب أو فيميو أو لووم."
+      },
+      "faq": {
+        "label": "الأسئلة الشائعة",
+        "blurb": "قائمة أسئلة وأجوبة قابلة للتوسيع."
+      },
+      "values": {
+        "label": "القيم",
+        "blurb": "قائمة عنوان وسطر واحد. ما تمثله الشركة."
+      },
+      "cta": {
+        "label": "دعوة لإجراء",
+        "blurb": "عنوان وزر يشير إلى رابط خارجي."
+      }
+    },
+    "hideFromPublic": "إخفاء من الصفحة العامة",
+    "showOnPublic": "إظهار في الصفحة العامة"
   }
 }
