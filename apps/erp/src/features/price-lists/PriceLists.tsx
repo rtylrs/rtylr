@@ -90,12 +90,12 @@ const PriceLists: React.FC = () => {
       ) : lists.length === 0 ? (
         <EmptyState
           icon={Tags}
-          title={t('priceLists.empty.title')}
-          description={t('priceLists.empty.description')}
+          title={t('erp.priceLists.empty.title')}
+          description={t('erp.priceLists.empty.description')}
           action={
             canManagePriceLists
-              ? { label: t('priceLists.newPriceList'), onClick: () => setShowCreate(true) }
-              : { label: t('priceLists.refresh'), onClick: () => void refetch() }
+              ? { label: t('erp.priceLists.newPriceList'), onClick: () => setShowCreate(true) }
+              : { label: t('erp.priceLists.refresh'), onClick: () => void refetch() }
           }
         />
       ) : (
