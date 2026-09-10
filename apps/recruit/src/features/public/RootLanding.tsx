@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { resolveAppUrl, resolveAuthUrl } from '@voxire/config';
 import { ArrowRight } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
@@ -10,44 +11,47 @@ import { HelmetContainer } from '@voxire/components';
  * a tight marketing blurb rather than a 404 so crawlers get something
  * indexable.
  */
-const RootLanding: React.FC = (): React.JSX.Element => (
-  <>
-    <HelmetContainer title="Recruit · rtylr" />
-    <main
-      id="main-content"
-      className="flex min-h-screen flex-col items-center justify-center px-6 text-center"
-    >
-      <div className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--recruit-muted)' }}>
-        rtylr · recruit
-      </div>
-      <h1 className="mt-4 max-w-3xl text-5xl font-semibold leading-tight tracking-tight sm:text-6xl">
-        Hiring pages,
-        <br />
-        without the careers-site tax.
-      </h1>
-      <p className="mt-6 max-w-xl text-base" style={{ color: 'var(--recruit-muted)' }}>
-        Post roles, collect applications, and move candidates through your funnel - all from the
-        same account you run the rest of your business from.
-      </p>
-      <div className="mt-10 flex items-center gap-3">
-        <a
-          href={`${resolveAppUrl('landing')}/pricing`}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-          style={{ background: 'var(--recruit-accent)' }}
+const RootLanding: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <HelmetContainer title={t('public.landing.metaTitle')} />
+      <main
+        id="main-content"
+        className="flex min-h-screen flex-col items-center justify-center px-6 text-center"
+      >
+        <div
+          className="text-xs uppercase tracking-[0.3em]"
+          style={{ color: 'var(--recruit-muted)' }}
         >
-          See pricing
-          <ArrowRight className="h-4 w-4" />
-        </a>
-        <a
-          href={`${resolveAuthUrl()}?redirect=recruit`}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold"
-          style={{ borderColor: 'var(--recruit-border)' }}
-        >
-          Start free
-        </a>
-      </div>
-    </main>
-  </>
-);
+          rtylr · recruit
+        </div>
+        <h1 className="mt-4 max-w-3xl whitespace-pre-line text-5xl font-semibold leading-tight tracking-tight sm:text-6xl">
+          {t('public.landing.title')}
+        </h1>
+        <p className="mt-6 max-w-xl text-base" style={{ color: 'var(--recruit-muted)' }}>
+          {t('public.landing.body')}
+        </p>
+        <div className="mt-10 flex items-center gap-3">
+          <a
+            href={`${resolveAppUrl('landing')}/pricing`}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            style={{ background: 'var(--recruit-accent)' }}
+          >
+            {t('public.landing.pricing')}
+            <ArrowRight className="h-4 w-4" />
+          </a>
+          <a
+            href={`${resolveAuthUrl()}?redirect=recruit`}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold"
+            style={{ borderColor: 'var(--recruit-border)' }}
+          >
+            {t('public.landing.startFree')}
+          </a>
+        </div>
+      </main>
+    </>
+  );
+};
 
 export default RootLanding;
