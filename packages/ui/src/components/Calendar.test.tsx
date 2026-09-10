@@ -1,9 +1,23 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Calendar, toISODate, todayISODate } from '../index';
 
 describe('Calendar', () => {
+  // Today is ambient state, so pin it. Three deliberate choices here: only Date is
+  // faked, leaving timers real for React's scheduler; the pinned day is not the value
+  // under test, so today and selected stay two different cells; and the instant is
+  // built in local time, because the component derives today from local getters, so a
+  // UTC instant would land on the next day for anyone at UTC+13 or beyond.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 7, 20, 12, 0, 0));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('marks the passed-in value as selected', () => {
     render(<Calendar value="2026-08-16" onChange={vi.fn()} />);
     const selected = screen.getByRole('gridcell', { selected: true });
@@ -75,13 +89,15 @@ describe('Calendar', () => {
 
   it('marks today with aria-current without marking it selected', () => {
     render(<Calendar value="2026-08-16" onChange={vi.fn()} />);
-    const today = screen.getByRole('gridcell', {
-      name: new RegExp(
-        new Intl.DateTimeFormat(undefined, { dateStyle: 'full' }).format(new Date()),
-        'i'
-      ),
-    });
+    // Selected by aria-current, not by accessible name: cell names are built by
+    // formatting a UTC midnight Date in local time, so they read one day early at
+    // negative UTC offsets. That is a component bug, filed separately, and this test
+    // should not be pinned to it.
+    const today = screen.getByRole('gridcell', { current: 'date' });
+    expect(today).toHaveTextContent('20');
     expect(today).toHaveAttribute('aria-current', 'date');
+    expect(today).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByRole('gridcell', { selected: true })).toHaveTextContent('16');
   });
 });
 
