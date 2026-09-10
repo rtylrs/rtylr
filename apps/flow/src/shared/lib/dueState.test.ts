@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 import { contrastRatio, compositeOver } from '@voxire/utils';
 import { dueState, isOverdue } from './dateUtils';
 
@@ -94,5 +96,57 @@ describe('the tokens a due date is painted with', () => {
         `text-muted on the ${mode} card`
       ).toBeGreaterThanOrEqual(4.5);
     }
+  });
+});
+
+describe('nothing compares a stored day against the current instant', () => {
+  /**
+   * The source check the three earlier fixes did not have.
+   *
+   * `new Date(storedDay) < new Date()` parses a date-only string as UTC
+   * midnight and compares it to an instant, so a value due **today** reads as
+   * past from 00:00 UTC onward (rtylr#1077). Three components had it, and a
+   * fourth and fifth survived the sweep that fixed them: `DueDatePicker` because
+   * its variable is called `value` rather than `dueDate`, and `ProjectTimeline`
+   * because it parsed into a `Date` on one line and compared on another.
+   *
+   * A grep for the exact expression could not have found either. This looks for
+   * the shape instead: a comparison against a bare `new Date()`.
+   */
+  const SRC = path.resolve(__dirname, '../..');
+
+  const walk = (dir: string): string[] =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        return entry.name === 'node_modules' || entry.name === 'locales' ? [] : walk(full);
+      }
+      return /\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name) ? [full] : [];
+    });
+
+  it('leaves no comparison of a date against a bare new Date()', () => {
+    const offenders: string[] = [];
+
+    for (const file of walk(SRC)) {
+      const lines = fs.readFileSync(file, 'utf8').split('\n');
+      lines.forEach((line, i) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('*') || trimmed.startsWith('//')) return;
+        // `< new Date()` or `> new Date()`, whatever is on the left.
+        //
+        // The lookbehind excludes `=`, because an arrow function contains `>`
+        // and `useState(() => new Date())` matched without it. Same trap as the
+        // motion guard in rtylr#1257, where `onClick={(e) => …}` truncated a
+        // tag capture.
+        //
+        // `dateUtils` itself is allowed: it is where the correct comparison
+        // lives, and its own comments quote the wrong one.
+        if (!/(?<!=)[<>]=?\s*new Date\(\s*\)/.test(line)) return;
+        if (file.endsWith('dateUtils.ts')) return;
+        offenders.push(`${path.relative(SRC, file)}:${i + 1}`);
+      });
+    }
+
+    expect(offenders, 'use isOverdue or dueState, which compare stored days').toEqual([]);
   });
 });
