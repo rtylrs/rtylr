@@ -17,16 +17,23 @@ import { collectLiterals, formatLiterals } from './test/i18nLiterals';
  * finding. Each app joins as it is cleared, the way `ENFORCED_APPS` in
  * `i18n-key-resolution.test.ts` grew from two to nine.
  */
-const ENFORCED_APPS = ['flow', 'insights', 'recruit'] as const;
+const ENFORCED_APPS = ['auth', 'flow', 'insights', 'recruit'] as const;
 
 /**
  * Text that is deliberately not translated, per app.
  *
- * Three kinds belong here and nothing else: a format example, a physical
- * label such as a key cap, and a specimen that must stay in the script it
- * demonstrates. Anything else in this list is a defect being hidden.
+ * Four kinds belong here and nothing else: a format example, a physical label
+ * such as a key cap, a proper noun, and a specimen that must stay in the
+ * script it demonstrates. Anything else in this list is a defect being hidden.
  */
 const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
+  auth: [
+    // Written into document.body when the root element is missing, so React
+    // and i18next do not exist yet and there is nothing to translate with.
+    'The App Failed To Load',
+    // A person's name in a testimonial.
+    'Mohamad Homsi',
+  ],
   // A key cap. The user's keyboard says ESC whatever language they read.
   flow: ['ESC'],
   // A date format the user types into, not prose.
@@ -42,6 +49,7 @@ const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
  * already puts through `t()`.
  */
 const MINIMUM_KEYS: Record<(typeof ENFORCED_APPS)[number], number> = {
+  auth: 70,
   flow: 500,
   insights: 110,
   recruit: 250,

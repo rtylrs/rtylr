@@ -115,7 +115,7 @@ const VerifyEmail: React.FC = () => {
                 height={40}
                 onClick={() => navigate({ to: '/' })}
               >
-                Continue to sign in
+                {t('auth.verify.continueToSignIn')}
               </Button>
             </div>
           </>

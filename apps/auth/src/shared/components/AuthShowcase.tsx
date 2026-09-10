@@ -1,4 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 import Logo from './Logo';
 
@@ -11,6 +12,7 @@ interface Ripple {
 }
 
 const AuthShowcase: React.FC = () => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLElement>(null);
   const [ripples, setRipples] = useState<Ripple[]>([]);
 
@@ -192,16 +194,20 @@ const AuthShowcase: React.FC = () => {
         transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
       >
         <h1 className="text-[44px] xl:text-[56px] leading-[1.05] font-semibold tracking-tight text-white">
-          Your entire business,
-          <br />
-          <span
-            className="bg-clip-text text-transparent"
-            style={{
-              backgroundImage: 'linear-gradient(120deg, #6FCEEB 0%, #64C5B9 50%, #4583C4 100%)',
+          <Trans
+            i18nKey="auth.showcase.headline"
+            components={{
+              gradient: (
+                <span
+                  className="bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(120deg, #6FCEEB 0%, #64C5B9 50%, #4583C4 100%)',
+                  }}
+                />
+              ),
             }}
-          >
-            one platform.
-          </span>
+          />
         </h1>
         <p className="mt-6 text-base xl:text-lg text-white/65 max-w-lg leading-relaxed">
           POS, ERP, HR, CRM, Finance, Flow, and Insights. Everything you need to run your operation,
@@ -251,7 +257,7 @@ const AuthShowcase: React.FC = () => {
             </div>
             <div className="text-xs">
               <div className="text-white/90 font-medium">Mohamad Homsi</div>
-              <div className="text-white/50">Full Stack Engineer</div>
+              <div className="text-white/50">{t('auth.showcase.personRole')}</div>
             </div>
           </figcaption>
         </div>
