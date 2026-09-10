@@ -29,7 +29,31 @@ import path from 'node:path';
  */
 export async function captureForPR(page: Page, name: string): Promise<string> {
   await page.evaluate(async () => {
-    document.getAnimations().forEach((animation) => animation.finish());
+    // Settle animations so the capture is not a frame mid-transition.
+    //
+    // `finish()` throws `InvalidStateError` on an animation with an infinite
+    // effect end, and this app has one: the reconnecting indicator's spinner
+    // loops forever. One of those aborted the whole capture, and the failure
+    // surfaced as a Playwright evaluate error rather than as anything about
+    // screenshots, so the cause was not obvious from the message.
+    //
+    // A looping animation also cannot be "settled" in any meaningful sense, so
+    // it is paused at its current frame instead. The alternative is a capture
+    // that differs run to run by wherever the spinner happened to be.
+    for (const animation of document.getAnimations()) {
+      const timing = animation.effect?.getComputedTiming();
+      if (timing && timing.endTime === Infinity) {
+        animation.pause();
+        continue;
+      }
+      try {
+        animation.finish();
+      } catch {
+        // An animation can also be in a state where finishing is invalid, for
+        // instance already idle. Pausing is always safe.
+        animation.pause();
+      }
+    }
     await document.fonts.ready;
   });
 
