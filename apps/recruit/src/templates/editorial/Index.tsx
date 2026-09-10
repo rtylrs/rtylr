@@ -57,9 +57,9 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections
             {careers.length === 0 ? (
               <EmptyState
                 icon={Briefcase}
-                title={t('emptyStates.publicRolesNone')}
+                title={t('common.emptyStates.publicRolesNone')}
                 action={{
-                  label: t('emptyStates.checkAgain'),
+                  label: t('common.emptyStates.checkAgain'),
                   onClick: () => window.location.reload(),
                 }}
               />
