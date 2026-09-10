@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useOpenTask } from '../lib/useOpenTask';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -40,6 +41,7 @@ interface CommandItem {
 
 export const CommandBar: React.FC = () => {
   const { t } = useTranslation();
+  const openTask = useOpenTask();
   const navigate = useNavigate();
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen } = useFlowStore();
@@ -200,7 +202,7 @@ export const CommandBar: React.FC = () => {
       label: t.title,
       hint: t.identifier,
       icon: ListTodo,
-      action: () => navigate({ to: `/task/${t.id}` as string }),
+      action: () => openTask(String(t.id)),
       keywords: [t.identifier, t.projectName],
       group: 'task',
     }));
@@ -215,7 +217,17 @@ export const CommandBar: React.FC = () => {
       ? navItems
       : navItems.filter((item) => !previewOnly.has(item.id));
     return [...actionItems, ...reachableNavItems, ...projectItems, ...taskItems];
-  }, [tasks, projects, navigate, setQuickCreateOpen, query, searchResults, t, showPreviewRoutes]);
+  }, [
+    openTask,
+    tasks,
+    projects,
+    navigate,
+    setQuickCreateOpen,
+    query,
+    searchResults,
+    t,
+    showPreviewRoutes,
+  ]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;

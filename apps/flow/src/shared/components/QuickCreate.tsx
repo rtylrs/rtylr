@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useOpenTask } from '../lib/useOpenTask';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -55,7 +55,7 @@ function FieldRow({
 
 export const QuickCreate: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const openTask = useOpenTask();
   const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId } = useFlowStore();
   const user = useUserStore((s) => s.user);
   const createTaskMutation = useCreateTask();
@@ -122,7 +122,7 @@ export const QuickCreate: React.FC = () => {
         description: task.title,
       });
       setQuickCreateOpen(false);
-      navigate({ to: `/task/${taskId}` as string });
+      openTask(String(taskId));
     } catch {
       // error toast handled by mutation onError
     }

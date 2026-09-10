@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useOpenTask } from '../lib/useOpenTask';
 import { createPortal } from 'react-dom';
 import { useClickOutside } from '@voxire/utils';
-import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { ExternalLink, Trash2, Copy } from 'lucide-react';
 import { useDeleteTask } from '../../features/tasks/useTasks';
@@ -24,7 +24,7 @@ export const TaskContextMenu: React.FC<{
   onClose: () => void;
 }> = ({ menu, onClose }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const openTask = useOpenTask();
   const deleteTask = useDeleteTask();
   const canRemove = useCanDeleteResource(menu.projectId);
   const ref = useRef<HTMLDivElement>(null);
@@ -128,7 +128,7 @@ export const TaskContextMenu: React.FC<{
           onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
           onClick={() => {
-            navigate({ to: `/task/${menu.taskId}` as string });
+            openTask(String(menu.taskId));
             onClose();
           }}
         >

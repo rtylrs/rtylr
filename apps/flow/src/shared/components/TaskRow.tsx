@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { useOpenTask } from '../lib/useOpenTask';
 import { dueState } from '../lib/dateUtils';
-import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Task, useFlowStore } from '../stores/flowStore';
 import { useLabels } from '../../features/tasks/useLabels';
@@ -21,8 +21,8 @@ interface TaskRowProps {
 }
 
 export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
+  const openTask = useOpenTask();
   const { projects, toggleSelectTask } = useFlowStore();
   // See TaskCard: the store's `labels` is never populated, so this read from
   // the query is what makes the chips appear.
@@ -42,7 +42,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
       toggleSelectTask(task.id);
       onSelect?.(e);
     } else {
-      navigate({ to: `/task/${task.id}` as string });
+      openTask(String(task.id));
     }
   };
 

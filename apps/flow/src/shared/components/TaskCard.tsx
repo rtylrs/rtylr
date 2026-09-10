@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { useOpenTask } from '../lib/useOpenTask';
 import { dueState } from '../lib/dateUtils';
-import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Calendar, MessageSquare, Paperclip, GitBranch } from 'lucide-react';
 import { Task, useFlowStore } from '../stores/flowStore';
@@ -41,7 +41,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   controls,
   dimmed,
 }) => {
-  const navigate = useNavigate();
+  const openTask = useOpenTask();
   const { comments, attachments, subtasks, projects } = useFlowStore();
   // Labels come from the query, not the store. `setLabels` has no call site
   // anywhere in the app, so the store's `labels` was permanently [] and no
@@ -96,7 +96,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           if (e.metaKey || e.ctrlKey) {
             onSelect?.();
           } else {
-            navigate({ to: `/task/${task.id}` as string });
+            openTask(String(task.id));
           }
         }}
         onContextMenu={handleContextMenu}
