@@ -1,4 +1,5 @@
 import { unwrap } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { rest } from '../../lib/clients';
@@ -40,6 +41,7 @@ interface CreateCareerResponse {
 }
 
 export function useCreateCareer() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CareerBody) => {
@@ -47,27 +49,29 @@ export function useCreateCareer() {
       return unwrap(rest.post<CreateCareerResponse>('/recruit/careers', payload));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
-    onError: () => toast.error('Failed to create career'),
+    onError: () => toast.error(t('common.errors.createCareer')),
   });
 }
 
 export function useUpdateCareer() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CareerBody) =>
       unwrap(rest.put<{ message: string }>('/recruit/careers', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
-    onError: () => toast.error('Failed to update career'),
+    onError: () => toast.error(t('common.errors.updateCareer')),
   });
 }
 
 export function useDeleteCareer() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) =>
       unwrap(rest.delete<{ message: string }>('/recruit/careers', { data: { id } })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
-    onError: () => toast.error('Failed to delete career'),
+    onError: () => toast.error(t('common.errors.deleteCareer')),
   });
 }
 
@@ -110,12 +114,13 @@ interface CustomizationBody {
 }
 
 export function useUpsertCustomization() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CustomizationBody) =>
       unwrap(rest.put<{ message: string }>('/recruit/customization', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'customization'] }),
-    onError: () => toast.error('Failed to update customization'),
+    onError: () => toast.error(t('common.errors.updateCustomization')),
   });
 }
 
@@ -140,13 +145,14 @@ export function useAdminSubmissions(status?: string, limit: number = 20, offset:
 }
 
 export function useUpdateSubmissionStatus() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: { id: number; status: string }) =>
       unwrap(rest.put<{ message: string }>('/recruit/submissions/status', body)),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'submissions'], exact: false }),
-    onError: () => toast.error('Failed to update submission status'),
+    onError: () => toast.error(t('common.errors.updateSubmission')),
   });
 }
 
@@ -192,6 +198,7 @@ export interface SectionBody {
 }
 
 export function useCreateSection() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: SectionBody) => {
@@ -199,37 +206,40 @@ export function useCreateSection() {
       return unwrap(rest.post<{ section: Section }>('/recruit/sections', payload));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
-    onError: () => toast.error('Failed to create section'),
+    onError: () => toast.error(t('common.errors.createSection')),
   });
 }
 
 export function useUpdateSection() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: SectionBody) =>
       unwrap(rest.put<{ message: string }>('/recruit/sections', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
-    onError: () => toast.error('Failed to update section'),
+    onError: () => toast.error(t('common.errors.updateSection')),
   });
 }
 
 export function useDeleteSection() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) =>
       unwrap(rest.delete<{ message: string }>('/recruit/sections', { data: { id } })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
-    onError: () => toast.error('Failed to delete section'),
+    onError: () => toast.error(t('common.errors.deleteSection')),
   });
 }
 
 export function useReorderSections() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (orderedIds: number[]) =>
       unwrap(rest.put<{ message: string }>('/recruit/sections/reorder', { orderedIds })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
-    onError: () => toast.error('Failed to reorder sections'),
+    onError: () => toast.error(t('common.errors.reorderSections')),
   });
 }
 
@@ -264,6 +274,7 @@ export interface FormFieldBody {
 }
 
 export function useCreateFormField() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: FormFieldBody) => {
@@ -272,22 +283,24 @@ export function useCreateFormField() {
     },
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
-    onError: () => toast.error('Failed to create form field'),
+    onError: () => toast.error(t('common.errors.createField')),
   });
 }
 
 export function useUpdateFormField() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: FormFieldBody) =>
       unwrap(rest.put<{ message: string }>('/recruit/form-fields', body)),
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
-    onError: () => toast.error('Failed to update form field'),
+    onError: () => toast.error(t('common.errors.updateField')),
   });
 }
 
 export function useDeleteFormField() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: { id: number; careerId: number }) =>
@@ -296,6 +309,6 @@ export function useDeleteFormField() {
       ),
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
-    onError: () => toast.error('Failed to delete form field'),
+    onError: () => toast.error(t('common.errors.deleteField')),
   });
 }
