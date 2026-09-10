@@ -58,7 +58,9 @@ const Register: React.FC = (): React.JSX.Element => {
     const seq = ++emailCheckSeq.current;
     try {
       const { exists } = await checkEmailExists(email);
-      if (seq === emailCheckSeq.current) setEmailTaken(exists);
+      // Optional on the response. An answer that did not arrive is not a
+      // reason to tell the user their email is taken.
+      if (seq === emailCheckSeq.current) setEmailTaken(exists ?? false);
     } catch {
       // never block signup on a lookup failure
       if (seq === emailCheckSeq.current) setEmailTaken(false);

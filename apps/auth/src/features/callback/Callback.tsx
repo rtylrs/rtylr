@@ -39,7 +39,7 @@ const Callback: React.FC = (): React.JSX.Element => {
 
     const request: GoogleAuthRequest = {
       code,
-      businessName: businessName || null,
+      businessName: businessName || undefined,
     };
 
     googleAuthMutation.mutate(request, {

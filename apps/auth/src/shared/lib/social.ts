@@ -19,6 +19,9 @@ export async function startSocialLogin(
   businessName?: string
 ): Promise<void> {
   const { url } = await authClient.socialAuthorize({ provider });
+  // Optional on the response. Navigating to undefined would put the literal
+  // string in the address bar, so the caller's catch gets a real failure.
+  if (url === undefined || url === '') throw new Error('Social sign-in returned no redirect URL');
   if (redirectParam) sessionStorageSet(SOCIAL_AUTH_REDIRECT_KEY, redirectParam);
   if (businessName?.trim()) sessionStorageSet(SOCIAL_AUTH_BUSINESS_NAME_KEY, businessName.trim());
   window.location.href = url;
