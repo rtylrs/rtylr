@@ -50,19 +50,19 @@ const Checkout = (): React.JSX.Element => {
 
   const validate = (): boolean => {
     if (!name.trim()) {
-      setErrorMessage(t('nameRequired'));
+      setErrorMessage(t('checkout.nameRequired'));
       return false;
     }
     if (!phone.trim()) {
-      setErrorMessage(t('phoneRequired'));
+      setErrorMessage(t('checkout.phoneRequired'));
       return false;
     }
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setErrorMessage(t('emailInvalid'));
+      setErrorMessage(t('checkout.emailInvalid'));
       return false;
     }
     if (items.length === 0) {
-      setErrorMessage(t('emptyCart'));
+      setErrorMessage(t('checkout.emptyCart'));
       return false;
     }
     return true;
@@ -134,8 +134,8 @@ const Checkout = (): React.JSX.Element => {
         >
           <EmptyState
             icon={ShoppingCart}
-            title={t('emptyCart')}
-            action={{ label: t('backToMenu'), onClick: () => window.history.back() }}
+            title={t('checkout.emptyCart')}
+            action={{ label: t('checkout.backToMenu'), onClick: () => window.history.back() }}
           />
         </div>
       </>
