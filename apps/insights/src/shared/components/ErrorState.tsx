@@ -9,7 +9,7 @@ interface ErrorStateProps {
 
 const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => {
   const { t } = useTranslation();
-  const defaultMessage = t('insights.errors.generic', 'Something went wrong while loading data.');
+  const defaultMessage = t('insights.errors.generic');
 
   return (
     <div
@@ -28,7 +28,7 @@ const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => {
           className="text-xs px-4 py-2 min-h-[44px] rounded-lg font-medium"
           style={{ background: 'var(--hub-hover)', color: 'var(--hub-text)' }}
         >
-          {t('common.tryAgain', 'Try again')}
+          {t('common.tryAgain')}
         </button>
       )}
     </div>

@@ -61,7 +61,7 @@ const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
     return (
       <div className="flex items-center gap-1 mt-1">
         <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-          {formatPercent(0)} {t('insights.dashboard.vsPrior', 'vs prior')}
+          {formatPercent(0)} {t('insights.dashboard.vsPrior')}
         </span>
       </div>
     );
@@ -75,7 +75,7 @@ const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
         <ArrowDownRight size={12} style={{ color: 'var(--delta-down)' }} />
       )}
       <span className="text-xs" style={{ color: up ? 'var(--delta-up)' : 'var(--delta-down)' }}>
-        {formatPercent(deltaPct)} {t('insights.dashboard.vsPrior', 'vs prior')}
+        {formatPercent(deltaPct)} {t('insights.dashboard.vsPrior')}
       </span>
     </div>
   );

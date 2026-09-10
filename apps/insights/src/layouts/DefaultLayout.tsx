@@ -63,12 +63,12 @@ const DefaultLayout: React.FC = () => {
 
   const pageItems = useMemo<PageItem[]>(
     () => [
-      { label: t('nav.revenue', 'Revenue'), path: '/revenue', icon: TrendingUp },
-      { label: t('nav.customers', 'Customers'), path: '/customers', icon: Users },
-      { label: t('nav.products', 'Products'), path: '/products', icon: Package },
-      { label: t('nav.operations', 'Operations'), path: '/operations', icon: Briefcase },
-      { label: t('nav.financial', 'Financial'), path: '/financial', icon: DollarSign },
-      { label: t('nav.reports', 'Reports'), path: '/reports', icon: FileText },
+      { label: t('nav.revenue'), path: '/revenue', icon: TrendingUp },
+      { label: t('nav.customers'), path: '/customers', icon: Users },
+      { label: t('nav.products'), path: '/products', icon: Package },
+      { label: t('nav.operations'), path: '/operations', icon: Briefcase },
+      { label: t('nav.financial'), path: '/financial', icon: DollarSign },
+      { label: t('nav.reports'), path: '/reports', icon: FileText },
     ],
     [t]
   );
@@ -199,7 +199,7 @@ const DefaultLayout: React.FC = () => {
               onClick={() => setShowPagesMenu((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={showPagesMenu}
-              aria-label={t('nav.pages', 'Pages')}
+              aria-label={t('nav.pages')}
               className="flex items-center gap-1.5 min-h-[44px] px-3 rounded-lg text-xs font-medium transition-colors duration-150"
               style={{
                 color: 'var(--hub-text-muted)',
@@ -214,7 +214,7 @@ const DefaultLayout: React.FC = () => {
               }}
             >
               <LayoutGrid size={14} />
-              <span className="hidden sm:inline">{t('nav.pages', 'Pages')}</span>
+              <span className="hidden sm:inline">{t('nav.pages')}</span>
               <ChevronDown size={12} />
             </button>
 
@@ -271,7 +271,7 @@ const DefaultLayout: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
-            aria-label={t('nav.toggleTheme', 'Toggle theme')}
+            aria-label={t('nav.toggleTheme')}
             className="min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-muted)' }}
             onMouseEnter={(e) => {
@@ -430,7 +430,7 @@ const DefaultLayout: React.FC = () => {
                     }}
                   >
                     <LogOut size={14} />
-                    {t('auth.signOut', 'Sign out')}
+                    {t('nav.signOut')}
                   </button>
                 </motion.div>
               )}

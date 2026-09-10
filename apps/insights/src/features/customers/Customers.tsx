@@ -234,7 +234,10 @@ const Customers: React.FC = (): React.JSX.Element => {
                   {b.label}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(b.customerCount)} {t('insights.customers.customers', 'customers')}
+                  {t('insights.customers.customers', {
+                    count: b.customerCount,
+                    formatted: formatNumber(b.customerCount),
+                  })}
                 </span>
               </div>
             ))}
@@ -277,8 +280,7 @@ const Customers: React.FC = (): React.JSX.Element => {
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
                   {w.churnPct.toFixed(1)}%{' '}
                   <span style={{ color: 'var(--hub-text-muted)' }}>
-                    ({formatNumber(w.churnedCount)}{' '}
-                    {t('insights.customers.churnedCount', 'churned')})
+                    ({formatNumber(w.churnedCount)} {t('insights.customers.churnedCount')})
                   </span>
                 </span>
               </div>

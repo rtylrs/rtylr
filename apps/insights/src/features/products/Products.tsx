@@ -181,7 +181,10 @@ const Products: React.FC = (): React.JSX.Element => {
                   </span>
                 </div>
                 <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(p.unitsSold)} {t('insights.products.units', 'units')}
+                  {t('insights.products.units', {
+                    count: p.unitsSold,
+                    formatted: formatNumber(p.unitsSold),
+                  })}
                 </span>
                 <span
                   className="text-xs font-semibold text-right"
@@ -228,7 +231,10 @@ const Products: React.FC = (): React.JSX.Element => {
                   {b.label}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(b.productCount)} {t('insights.products.products', 'products')}
+                  {t('insights.products.products', {
+                    count: b.productCount,
+                    formatted: formatNumber(b.productCount),
+                  })}
                 </span>
               </div>
             ))}
@@ -269,7 +275,7 @@ const Products: React.FC = (): React.JSX.Element => {
                   {p.name}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(p.stockQuantity)} {t('insights.products.inStock', 'in stock')}
+                  {formatNumber(p.stockQuantity)} {t('insights.products.inStock')}
                 </span>
               </div>
             ))}
@@ -310,7 +316,10 @@ const Products: React.FC = (): React.JSX.Element => {
                   {c.categoryName}
                 </span>
                 <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(c.unitsSold)} {t('insights.products.units', 'units')}
+                  {t('insights.products.units', {
+                    count: c.unitsSold,
+                    formatted: formatNumber(c.unitsSold),
+                  })}
                 </span>
                 <span
                   className="text-xs font-semibold text-right"

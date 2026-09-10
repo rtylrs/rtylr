@@ -182,7 +182,7 @@ const Operations: React.FC = (): React.JSX.Element => {
               </p>
               <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
                 {utilization.scheduledHours.toFixed(1)} / {utilization.availableHours.toFixed(1)}{' '}
-                {t('insights.operations.hours', 'hours')}
+                {t('insights.operations.hours')}
               </p>
             </div>
           )}
@@ -210,25 +210,25 @@ const Operations: React.FC = (): React.JSX.Element => {
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.scheduled', 'Scheduled')}
+                  {t('insights.operations.scheduled')}
                 </span>
                 <span className="font-semibold">{formatNumber(shifts.scheduled)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.completed', 'Completed')}
+                  {t('insights.operations.completed')}
                 </span>
                 <span className="font-semibold">{formatNumber(shifts.completed)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.noShows', 'No-shows')}
+                  {t('insights.operations.noShows')}
                 </span>
                 <span className="font-semibold">{formatNumber(shifts.noShows)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.completion', 'Completion')}
+                  {t('insights.operations.completion')}
                 </span>
                 <span className="font-semibold">{shifts.completionRatePct.toFixed(1)}%</span>
               </div>
@@ -258,13 +258,13 @@ const Operations: React.FC = (): React.JSX.Element => {
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.pending', 'Pending')}
+                  {t('insights.operations.pending')}
                 </span>
                 <span className="font-semibold">{formatNumber(timeOff.pending)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.approved', 'Approved')}
+                  {t('insights.operations.approved')}
                 </span>
                 <span className="font-semibold">{formatNumber(timeOff.approved)}</span>
               </div>
