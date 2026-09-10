@@ -128,7 +128,9 @@
       "url": "Lien de portfolio",
       "boolean": "J'accepte"
     },
-    "seedOption": "Option {{number}}"
+    "seedOption": "Option {{number}}",
+    "confirmRemove": "Supprimer ce champ ?",
+    "remove": "Supprimer"
   },
   "sections": {
     "metaTitle": "Sections de la page · rtylr",
@@ -205,5 +207,102 @@
     },
     "hideFromPublic": "Masquer de la page publique",
     "showOnPublic": "Afficher sur la page publique"
+  },
+  "branding": {
+    "metaTitle": "Identité de la page · rtylr",
+    "heading": "Identité de la page",
+    "subtitle": "Ce que les candidats voient sur",
+    "slugPlaceholder": "votre-identifiant",
+    "preview": "Aperçu",
+    "saved": "Page carrières enregistrée",
+    "saveFailed": "Enregistrement impossible, vérifiez que l'identifiant est unique",
+    "uploadFailed": "Échec de l'envoi du fichier",
+    "paletteReset": "Palette réinitialisée aux valeurs de {{template}}",
+    "tabBrand": "Marque",
+    "tabPalette": "Palette",
+    "tabTypography": "Typographie",
+    "tabMedia": "Médias",
+    "tabSeo": "Référencement",
+    "slug": "Identifiant d'URL",
+    "slugHint": "a–z, 0–9, tirets",
+    "brandName": "Nom de la marque",
+    "tagline": "Accroche",
+    "about": "À propos",
+    "aboutHint": "Court paragraphe affiché sous l'en-tête",
+    "logoUrl": "URL du logo",
+    "upload": "Envoyer",
+    "uploading": "Envoi en cours…",
+    "headerHtml": "HTML d'en-tête personnalisé",
+    "headerHtmlHint": "Avancé : bande HTML brute au-dessus de l'en-tête de marque",
+    "resetPalette": "Réinitialiser aux valeurs du modèle",
+    "primary": "Couleur principale",
+    "accent": "Couleur d'accent",
+    "accentHint": "Couleur secondaire. Vide, la principale est utilisée",
+    "background": "Arrière-plan",
+    "backgroundHint": "Fond de la page",
+    "text": "Texte",
+    "mutedText": "Texte atténué",
+    "mutedTextHint": "Légendes, métadonnées",
+    "selected": "Sélectionné",
+    "searchAndSocial": "Recherche et réseaux sociaux",
+    "metaTitleField": "Titre méta",
+    "metaTitleHint": "Remplace le titre de l'onglet et celui des résultats de recherche",
+    "metaDescription": "Description méta",
+    "metaDescriptionHint": "1 à 2 phrases, moins de 160 caractères",
+    "legal": "Mentions légales",
+    "legalHint": "Liens affichés sur le formulaire de candidature. Utile pour le RGPD.",
+    "privacyUrl": "URL de la politique de confidentialité",
+    "termsUrl": "URL des conditions",
+    "analytics": "Statistiques",
+    "analyticsHint": "Chargé uniquement si un identifiant est renseigné. Laissez vide pour aucun suivi.",
+    "ga4": "Identifiant de mesure GA4",
+    "ga4Hint": "Commence par G-",
+    "metaPixel": "Identifiant Meta Pixel",
+    "metaPixelHint": "Numérique",
+    "emailNotifications": "Notifications par e-mail",
+    "notificationInbox": "Boîte de réception RH",
+    "notificationInboxHint": "Un alias d'équipe fonctionne mieux, par exemple jobs@acme.com",
+    "notifyMe": "M'envoyer un e-mail pour chaque nouvelle candidature",
+    "heroImageUrl": "URL de l'image d'en-tête",
+    "heroImageHint": "Affichée dans les modèles bold et editorial au-dessus de la liste des postes",
+    "heroPreview": "Aperçu de l'en-tête",
+    "faviconUrl": "URL du favicon",
+    "faviconHint": "Image carrée, 32 px minimum. Affichée dans les onglets du navigateur.",
+    "faviconPreview": "Aperçu du favicon",
+    "socialPreview": "Aperçu social",
+    "ogCard": "Carte de partage",
+    "ogHint": "Actualisée après l'enregistrement. C'est la carte utilisée par LinkedIn, Slack et iMessage.",
+    "save": "Enregistrer les modifications",
+    "saving": "Enregistrement…",
+    "template": {
+      "minimal": {
+        "name": "Minimal",
+        "blurb": "Liste sobre sur une colonne. Par défaut pour toute nouvelle page."
+      },
+      "editorial": {
+        "name": "Editorial",
+        "blurb": "En-tête façon magazine, titrage serif, espaces généreux."
+      },
+      "bold": {
+        "name": "Bold",
+        "blurb": "Bloc d'en-tête saturé, très grands caractères. Demande une couleur forte."
+      }
+    },
+    "fontPairing": {
+      "default": "Neutre",
+      "jakarta-fraunces": "Serif moderne",
+      "space-grotesk-inter": "Ingénierie",
+      "playfair-inter": "Éditorial",
+      "dmserif-dmsans": "Luxe"
+    },
+    "typographyHint": "Cinq associations sélectionnées. Les polices se chargent à la demande depuis Google Fonts, en choisir une ne bloque pas l'enregistrement.",
+    "previewCard": {
+      "careersEyebrow": "Carrières",
+      "headline": "Venez construire l'avenir du logiciel pour petites entreprises.",
+      "subline": "Télétravail d'abord · Salaire compétitif · Une équipe avec qui on aime travailler",
+      "role1": "Ingénieur front-end senior",
+      "role2": "Designer produit",
+      "role3": "Responsable croissance"
+    }
   }
 }
