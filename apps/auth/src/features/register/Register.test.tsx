@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 vi.mock('@tanstack/react-router', () => ({
@@ -9,11 +9,9 @@ vi.mock('@tanstack/react-router', () => ({
     React.createElement('a', { href: to }, children),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 const mockMutate = vi.fn();
 vi.mock('../../shared/hooks/useAuth', () => ({
@@ -49,6 +47,11 @@ vi.mock('../../shared/components/PasswordStrengthMeter', () => ({
 }));
 
 import Register from './Register';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('Register Feature Component', () => {
   beforeEach(() => {
