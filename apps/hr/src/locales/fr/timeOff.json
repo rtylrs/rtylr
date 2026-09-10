@@ -1,5 +1,19 @@
 {
   "emptyTitle": "Aucune demande de congé",
   "emptyDescription": "Les demandes apparaîtront ici une fois soumises.",
-  "submitFirstOne": "Soumettre la première"
+  "submitFirstOne": "Soumettre la première",
+  "pageTitle": "Nouvelle demande de congé",
+  "formTitle": "Demander un congé",
+  "formSubtitle": "Soumettez une nouvelle demande de congé pour examen",
+  "selectEmployee": "Sélectionner un employé",
+  "type": "Type",
+  "startDate": "Date de début",
+  "endDate": "Date de fin",
+  "reason": "Motif",
+  "reasonPlaceholder": "Motif bref de la demande",
+  "errorSelectEmployee": "Sélectionnez un employé",
+  "errorSelectRange": "Sélectionnez une période",
+  "errorEndBeforeStart": "La date de fin ne peut pas précéder la date de début",
+  "submitted": "Demande de congé envoyée",
+  "submitFailed": "Échec de l'envoi de la demande"
 }
