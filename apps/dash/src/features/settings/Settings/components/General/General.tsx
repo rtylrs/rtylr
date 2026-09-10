@@ -123,7 +123,7 @@ const General: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="General settings · rtylr" />
+      <HelmetContainer title={t('settings.general.pageTitle')} />
       <div className={cn('space-y-6', hasChanges && 'pb-24')}>
         <div>
           <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
@@ -138,16 +138,16 @@ const General: React.FC = () => {
           {/* Business Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Business details</CardTitle>
-              <CardDescription>Your store profile information</CardDescription>
+              <CardTitle>{t('settings.general.detailsTitle')}</CardTitle>
+              <CardDescription>{t('settings.general.detailsDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
               <div className="space-y-1.5">
-                <Label>Store name</Label>
+                <Label>{t('settings.general.storeName')}</Label>
                 <Input name="storeName" value={formData.storeName} onChange={handleInputChange} />
               </div>
               <div className="space-y-1.5">
-                <Label>Contact email</Label>
+                <Label>{t('settings.general.contactEmail')}</Label>
                 <Input
                   type="email"
                   name="contactEmail"
@@ -156,7 +156,7 @@ const General: React.FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Sender email</Label>
+                <Label>{t('settings.general.senderEmail')}</Label>
                 <Input
                   type="email"
                   name="senderEmail"
@@ -165,7 +165,7 @@ const General: React.FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Public slug</Label>
+                <Label>{t('settings.general.publicSlug')}</Label>
                 <div className="flex gap-2 items-center">
                   <span
                     className="text-xs whitespace-nowrap"
@@ -176,7 +176,7 @@ const General: React.FC = () => {
                   <Input
                     name="slug"
                     value={slug}
-                    placeholder="your-business"
+                    placeholder={t('settings.general.slugPlaceholder')}
                     onChange={(e) =>
                       setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
                     }
@@ -192,21 +192,24 @@ const General: React.FC = () => {
           {/* Business Address */}
           <Card>
             <CardHeader>
-              <CardTitle>Business address</CardTitle>
-              <CardDescription>Your physical business location</CardDescription>
+              <CardTitle>{t('settings.general.addressTitle')}</CardTitle>
+              <CardDescription>{t('settings.general.addressDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
               {[
-                { label: 'Company Name', name: 'companyName' },
-                { label: 'Website', name: 'website' },
-                { label: 'Telephone', name: 'telephone' },
-                { label: 'Maps URL', name: 'mapsUrl' },
-                { label: 'Address', name: 'address' },
-                { label: 'City', name: 'city' },
-                { label: 'Zipcode', name: 'zipcode' },
+                // Translation keys, not English. These labels sat in the data
+                // as literals, so they were invisible to a JSX-text sweep and
+                // rendered in English for every reader (rtylr#1266).
+                { labelKey: 'settings.general.companyName', name: 'companyName' },
+                { labelKey: 'settings.general.website', name: 'website' },
+                { labelKey: 'settings.general.telephone', name: 'telephone' },
+                { labelKey: 'settings.general.mapsUrl', name: 'mapsUrl' },
+                { labelKey: 'settings.general.address', name: 'address' },
+                { labelKey: 'settings.general.city', name: 'city' },
+                { labelKey: 'settings.general.zipcode', name: 'zipcode' },
               ].map((field) => (
                 <div key={field.name} className="space-y-1.5">
-                  <Label>{field.label}</Label>
+                  <Label>{t(field.labelKey)}</Label>
                   <Input
                     name={field.name}
                     value={formData[field.name as keyof BusinessFormData]}
@@ -215,7 +218,7 @@ const General: React.FC = () => {
                 </div>
               ))}
               <div className="space-y-1.5">
-                <Label>Country</Label>
+                <Label>{t('settings.general.country')}</Label>
                 <Input name="country" value={formData.country} onChange={handleInputChange} />
               </div>
             </CardContent>
