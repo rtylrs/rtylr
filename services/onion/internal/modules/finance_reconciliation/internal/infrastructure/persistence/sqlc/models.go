@@ -1690,6 +1690,7 @@ type EmailJob struct {
 	CreatedAt   time.Time       `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time       `db:"updated_at" json:"updated_at"`
 	JobID       sql.NullString  `db:"job_id" json:"job_id"`
+	DedupeKey   sql.NullString  `db:"dedupe_key" json:"dedupe_key"`
 }
 
 type FeatureFlag struct {

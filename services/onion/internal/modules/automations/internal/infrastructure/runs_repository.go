@@ -77,10 +77,10 @@ func (r *Repository) MarkRunDead(ctx context.Context, runID uint64, cause string
 	})
 }
 
-// RecoverAbandoned ends runs left executing by a worker that died, and reports
-// how many. They are dead-lettered rather than retried: an automation may have
-// already performed an action whose recipient cannot dedupe it, so an
-// abandoned run is surfaced for a human rather than repeated on a guess.
+// RecoverAbandoned requeues runs left executing by a worker that died, and
+// reports how many. Safe to retry because every effect an action performs
+// carries a key naming it, so a repeat is recognised and skipped rather than
+// sending a customer a second copy of something they already have.
 func (r *Repository) RecoverAbandoned(ctx context.Context, staleAfterSeconds int64) (int64, error) {
 	result, err := r.queries.RecoverAbandonedAutomationRuns(ctx, staleAfterSeconds)
 	if err != nil {

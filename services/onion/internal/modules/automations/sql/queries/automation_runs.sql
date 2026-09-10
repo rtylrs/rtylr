@@ -82,19 +82,22 @@ WHERE id = ? AND business_id = ?;
 -- between claiming a row and recording its outcome. Without this the row sits
 -- in 'running' forever and nothing ever looks at it again.
 --
--- It is dead-lettered rather than requeued, which is the opposite of what
--- RecoverAbandonedWebhookDeliveries does, and the asymmetry is deliberate. A
--- webhook subscriber is handed a delivery id and an event id and is expected to
--- dedupe; the recipient of an automation's email is not, and cannot. Re-running
--- an abandoned automation could send a customer a second copy of a message they
--- already have, so an abandoned run is surfaced for a human instead of being
--- retried on a guess about how far it got.
+-- Requeued, the same as an abandoned webhook delivery. These were previously
+-- dead-lettered instead, because re-running could send a customer a second
+-- copy of a message they already had and an email recipient has nothing to
+-- dedupe on. Every effect an action performs now carries a key naming it
+-- (email_jobs.dedupe_key), so a repeat is recognised and skipped and the run
+-- is simply tried again.
+--
+-- A run whose attempts are spent still goes to the dead letter, so recovery
+-- cannot hand a row back to the queue forever.
 --
 -- Ages off updated_at, which the claim sets explicitly.
 -- name: RecoverAbandonedAutomationRuns :execresult
 UPDATE automation_runs
-SET status = 'dead',
-    last_error = 'run was abandoned while executing and was not retried, because an action may already have been performed',
+SET status = IF(attempts >= max_attempts, 'dead', 'failed'),
+    next_attempt_at = NOW(),
+    last_error = 'run was abandoned while executing and has been requeued',
     updated_at = NOW()
 WHERE status = 'running'
   AND updated_at < DATE_SUB(NOW(), INTERVAL sqlc.arg('stale_after_seconds') SECOND);

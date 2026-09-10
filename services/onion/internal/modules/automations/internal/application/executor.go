@@ -102,9 +102,15 @@ func (e *Executor) ProcessDue(ctx context.Context) error {
 	return nil
 }
 
-// recoverAbandoned ends runs left in 'running' by a worker that died between
-// claiming a row and recording its outcome. Without it those rows are never
-// looked at again, because the due query only reads 'pending' and 'failed'.
+// recoverAbandoned requeues runs left in 'running' by a worker that died
+// between claiming a row and recording its outcome. Without it those rows are
+// never looked at again, because the due query only reads 'pending' and
+// 'failed'.
+//
+// These used to be dead-lettered, because re-running could send a customer a
+// second copy of a message they already had. Every effect an action performs
+// now carries a key naming it, so a repeat is recognised and skipped, and the
+// run can simply be tried again.
 //
 // Runs here at the start of every pass rather than as a separate job: it is a
 // single indexed UPDATE that matches nothing in normal operation, and tying it
@@ -121,7 +127,7 @@ func (e *Executor) recoverAbandoned(ctx context.Context) {
 	// Warn rather than info: a non-zero count means a worker died mid-run, and
 	// each one is an automation that did not finish.
 	if recovered > 0 {
-		logger.Ctx(ctx).Warn("automations: dead-lettered abandoned runs",
+		logger.Ctx(ctx).Warn("automations: requeued abandoned runs",
 			logger.Any("runs", recovered))
 	}
 }
@@ -198,8 +204,8 @@ func (e *Executor) execute(ctx context.Context, run domain.Run) error {
 		}
 	}
 
-	for _, action := range actions {
-		if err := e.perform(ctx, run, event, action); err != nil {
+	for index, action := range actions {
+		if err := e.perform(ctx, run, event, action, index); err != nil {
 			return err
 		}
 	}
@@ -269,10 +275,14 @@ func stringField(entry map[string]json.RawMessage, key string) string {
 }
 
 // perform carries out a single action.
-func (e *Executor) perform(ctx context.Context, run domain.Run, event domain.Event, action plannedAction) error {
+//
+// index identifies the action within its automation, and together with the run
+// id it names the effect so a repeat can be recognised. That is what makes an
+// abandoned run safe to retry.
+func (e *Executor) perform(ctx context.Context, run domain.Run, event domain.Event, action plannedAction, index int) error {
 	switch action.Type {
 	case domain.ActionSendEmail:
-		return e.sendEmail(ctx, run, event, action)
+		return e.sendEmail(ctx, run, event, action, index)
 	default:
 		// Unreachable: isExecutable gates this above. Kept so a new action
 		// added to the switch without a matching isExecutable entry fails
@@ -285,7 +295,7 @@ func (e *Executor) perform(ctx context.Context, run domain.Run, event domain.Eve
 //
 // The email is enqueued rather than sent, so this hands off to the existing
 // email worker and does not block the run on an SMTP round trip.
-func (e *Executor) sendEmail(ctx context.Context, run domain.Run, event domain.Event, action plannedAction) error {
+func (e *Executor) sendEmail(ctx context.Context, run domain.Run, event domain.Event, action plannedAction, index int) error {
 	customerID := payloadInt64(event.Payload, "customer_id")
 	if customerID <= 0 {
 		return permanent("send_email needs a customer and event %d has none", event.ID)
@@ -313,11 +323,18 @@ func (e *Executor) sendEmail(ctx context.Context, run domain.Run, event domain.E
 
 	// Escaped because both fields are operator-authored text stored as JSON,
 	// not markup, and they end up in an HTML body.
+	//
+	// The dedupe key names this exact effect: one action of one run. It is
+	// stable across retries because a recovered run keeps its id, so an
+	// abandoned run that had already queued this message enqueues nothing the
+	// second time. Without it a retry would send the customer a second copy,
+	// which is why abandoned runs used to be dead-lettered instead.
 	return emailqueue.Enqueue(ctx, e.db, emailqueue.Job{
-		To:      contact.Email,
-		Subject: subject,
-		HTML:    fmt.Sprintf("<p>%s</p>", html.EscapeString(body)),
-		Text:    body,
+		To:        contact.Email,
+		Subject:   subject,
+		HTML:      fmt.Sprintf("<p>%s</p>", html.EscapeString(body)),
+		Text:      body,
+		DedupeKey: fmt.Sprintf("automation_run:%d:action:%d", run.ID, index),
 	})
 }
 

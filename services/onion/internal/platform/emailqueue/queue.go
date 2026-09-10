@@ -30,6 +30,11 @@ type Job struct {
 	Text     string
 	From     string
 	ReplyTo  string
+	// DedupeKey makes the enqueue idempotent. Left empty, the message is
+	// queued unconditionally, which is what every existing caller wants. Set,
+	// a second enqueue under the same key is a no-op, so a producer that is
+	// retried does not send the recipient a second copy.
+	DedupeKey string
 }
 
 // nullStr wraps a string as a NULL-able column value (empty → NULL).
@@ -45,6 +50,23 @@ func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 	}
 	// Reset and invite mails carry live account-takeover links; the rendered
 	// body is encrypted at rest whenever EMAIL_ENCRYPTION_KEY is configured.
+	//
+	// A caller that can name the message enqueues idempotently instead, so a
+	// retry does not send a second copy. Everything else keeps a NULL key and
+	// is unaffected, since NULL does not collide in a unique index.
+	if job.DedupeKey != "" {
+		return sqlc.New(db).EnqueueJobWithDedupeKey(ctx, sqlc.EnqueueJobWithDedupeKeyParams{
+			Priority:  int8(priority),
+			ToEmail:   job.To,
+			Subject:   job.Subject,
+			Html:      sealHTML(job.HTML),
+			TextBody:  nullStr(job.Text),
+			FromEmail: nullStr(job.From),
+			ReplyTo:   nullStr(job.ReplyTo),
+			DedupeKey: nullStr(job.DedupeKey),
+		})
+	}
+
 	return sqlc.New(db).EnqueueJob(ctx, sqlc.EnqueueJobParams{
 		Priority:  int8(priority),
 		ToEmail:   job.To,

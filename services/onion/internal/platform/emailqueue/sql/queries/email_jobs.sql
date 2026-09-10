@@ -2,6 +2,22 @@
 INSERT INTO email_jobs (priority, to_email, subject, html, text_body, from_email, reply_to)
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
+-- Idempotent enqueue for a caller that can name the message.
+--
+-- ON DUPLICATE KEY UPDATE id = id against uk_email_jobs_dedupe makes a repeat
+-- a no-op rather than an error, which is what lets a retried producer, such as
+-- an automation run recovered after its worker died, run again without sending
+-- the recipient a second copy.
+--
+-- Separate statement rather than a nullable key on EnqueueJob: NULL does not
+-- collide in a unique index, so a single statement would silently stop
+-- deduplicating the moment a caller forgot to set one. Two statements make the
+-- choice explicit at the call site.
+-- name: EnqueueJobWithDedupeKey :exec
+INSERT INTO email_jobs (priority, to_email, subject, html, text_body, from_email, reply_to, dedupe_key)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE id = id;
+
 -- name: CountPendingJobs :one
 SELECT COUNT(*) FROM email_jobs
 WHERE status = 'pending' AND job_id IS NULL AND scheduled_at <= NOW();
