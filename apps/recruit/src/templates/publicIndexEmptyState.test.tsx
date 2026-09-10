@@ -72,9 +72,9 @@ describe.each(TEMPLATES)('$name public Index empty state', ({ Component }) => {
   it('shows the no-open-roles message with a check-again CTA', () => {
     render(<Component {...baseProps} />);
 
-    expect(screen.getByText('emptyStates.publicRolesNone')).toBeInTheDocument();
+    expect(screen.getByText('common.emptyStates.publicRolesNone')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.checkAgain' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.emptyStates.checkAgain' }));
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 });
