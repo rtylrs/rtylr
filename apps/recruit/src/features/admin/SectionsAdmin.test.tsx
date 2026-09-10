@@ -46,10 +46,10 @@ describe('SectionsAdmin empty state', () => {
   it('shows the empty message and opens the section-kind picker from its own CTA', () => {
     render(<SectionsAdmin />);
 
-    expect(screen.getByText('emptyStates.sectionsNone')).toBeInTheDocument();
+    expect(screen.getByText('common.emptyStates.sectionsNone')).toBeInTheDocument();
     expect(screen.queryByText('Pick a section kind')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.addSection' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.emptyStates.addSection' }));
 
     expect(screen.getByText('Pick a section kind')).toBeInTheDocument();
   });
