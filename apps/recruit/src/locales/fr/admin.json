@@ -1,0 +1,68 @@
+{
+  "accessDenied": {
+    "title": "Accès refusé",
+    "body": "Une permission Propriétaire ou Administrateur est requise pour accéder à l'administration du recrutement et aux données des candidats."
+  },
+  "nav": {
+    "mobileTitle": "Administration recrutement",
+    "title": "Recrutement",
+    "toggle": "Afficher le menu de navigation",
+    "signOut": "Se déconnecter",
+    "careers": "Postes",
+    "submissions": "Candidatures",
+    "sections": "Sections de la page",
+    "branding": "Identité de la page"
+  },
+  "careers": {
+    "metaTitle": "Postes · rtylr",
+    "heading": "Postes",
+    "viewPublic": "Voir la page publique",
+    "newRole": "Nouveau poste",
+    "loading": "Chargement…",
+    "colTitle": "Intitulé",
+    "colDepartment": "Service",
+    "colLocation": "Lieu",
+    "colStatus": "Statut",
+    "colActions": "Actions",
+    "published": "Publié",
+    "draft": "Brouillon",
+    "edit": "Modifier",
+    "archive": "Archiver",
+    "archived": "Poste archivé",
+    "archiveFailed": "Archivage impossible",
+    "updated": "Poste mis à jour",
+    "updateFailed": "Mise à jour impossible",
+    "created": "Poste créé",
+    "createFailed": "Création impossible",
+    "roleCount_one": "{{count}} poste",
+    "roleCount_other": "{{count}} postes",
+    "publishedCount": "{{count}} publié(s)"
+  },
+  "submissions": {
+    "metaTitle": "Candidatures · rtylr",
+    "heading": "Candidatures",
+    "all": "Toutes",
+    "loading": "Chargement…",
+    "resume": "CV",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "invalidResumeScheme": "Lien de CV invalide",
+    "openFailed": "Impossible d'ouvrir le CV",
+    "statusUpdated": "Statut mis à jour",
+    "statusFailed": "Mise à jour impossible",
+    "applicationCount_one": "{{count}} candidature",
+    "applicationCount_other": "{{count}} candidatures",
+    "inFilter": "dans « {{stage}} »",
+    "status": {
+      "new": "nouvelle",
+      "reviewed": "examinée",
+      "interviewing": "entretien",
+      "offered": "offre envoyée",
+      "hired": "recrutée",
+      "rejected": "refusée"
+    },
+    "page": "Page {{page}}",
+    "confirmUnhire": "Faire passer {{name}} de « {{from}} » à « {{to}} » ?",
+    "confirm": "Confirmer"
+  }
+}

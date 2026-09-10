@@ -19,12 +19,19 @@ import type { Submission } from '../../shared/lib/types';
  * the status dropdown on each row is enough to move a candidate
  * through the funnel.
  */
-const STATUSES = ['new', 'reviewed', 'interviewing', 'offered', 'hired', 'rejected'];
+// Exported so the locale suite can assert a label exists for every stage.
+// The labels are looked up with a runtime built key, which the key resolution
+// guard cannot see, so nothing else would catch a missing one.
+export const STATUSES = ['new', 'reviewed', 'interviewing', 'offered', 'hired', 'rejected'];
 
 const PAGE_SIZE = 20;
 
 const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
+  // A stage value is what the API stores, so it stays as it is and only its
+  // label is translated. One helper keeps the filter chips, the dropdown and
+  // the confirmation prompt from drifting apart.
+  const statusLabel = (status: string): string => t(`admin.submissions.status.${status}`);
   const [filter, setFilter] = useState<string>('');
   const [page, setPage] = useState<number>(0);
   const { data, isLoading, refetch } = useAdminSubmissions(filter, PAGE_SIZE, page * PAGE_SIZE);
@@ -38,21 +45,21 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Submissions · rtylr" />
+      <HelmetContainer title={t('admin.submissions.metaTitle')} />
       <div className="px-4 py-6 sm:px-10 sm:py-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Submissions</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('admin.submissions.heading')}</h1>
         <p className="mt-1 text-sm text-white/60">
-          {submissions.length} {submissions.length === 1 ? 'application' : 'applications'}
-          {filter && ` in "${filter}"`}
+          {t('admin.submissions.applicationCount', { count: submissions.length })}
+          {filter && ` ${t('admin.submissions.inFilter', { stage: statusLabel(filter) })}`}
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-2 text-sm">
           <FilterChip active={filter === ''} onClick={() => handleFilterChange('')}>
-            All
+            {t('admin.submissions.all')}
           </FilterChip>
           {STATUSES.map((s) => (
             <FilterChip key={s} active={filter === s} onClick={() => handleFilterChange(s)}>
-              {s}
+              {statusLabel(s)}
             </FilterChip>
           ))}
         </div>
@@ -65,7 +72,9 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
           }}
         >
           {isLoading ? (
-            <div className="p-10 text-center text-sm text-white/60">Loading…</div>
+            <div className="p-10 text-center text-sm text-white/60">
+              {t('admin.submissions.loading')}
+            </div>
           ) : submissions.length === 0 ? (
             <EmptyState
               icon={Inbox}
@@ -123,18 +132,18 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                                 const url = await fetchResumeURL(s.id);
                                 const parsed = new URL(url);
                                 if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-                                  toast.error('Invalid resume URL scheme');
+                                  toast.error(t('admin.submissions.invalidResumeScheme'));
                                   return;
                                 }
                                 window.open(url, '_blank', 'noopener,noreferrer');
                               } catch {
-                                toast.error("Couldn't open resume");
+                                toast.error(t('admin.submissions.openFailed'));
                               }
                             }}
                             className="inline-flex items-center gap-1 hover:text-white"
                           >
                             <FileText className="h-3 w-3" />
-                            Resume
+                            {t('admin.submissions.resume')}
                           </button>
                         )}
                       </div>
@@ -155,16 +164,22 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                         const newStatus = e.target.value;
                         if (s.status === 'hired' && newStatus !== 'hired') {
                           toast.warning(
-                            `Move ${s.candidateName} from "hired" back to "${newStatus}"?`,
+                            t('admin.submissions.confirmUnhire', {
+                              name: s.candidateName,
+                              from: statusLabel('hired'),
+                              to: statusLabel(newStatus),
+                            }),
                             {
                               action: {
-                                label: 'Confirm',
+                                label: t('admin.submissions.confirm'),
                                 onClick: () =>
                                   update.mutate(
                                     { id: s.id, status: newStatus },
                                     {
-                                      onSuccess: () => toast.success('Status updated'),
-                                      onError: () => toast.error("Couldn't update"),
+                                      onSuccess: () =>
+                                        toast.success(t('admin.submissions.statusUpdated')),
+                                      onError: () =>
+                                        toast.error(t('admin.submissions.statusFailed')),
                                     }
                                   ),
                               },
@@ -175,8 +190,8 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                         update.mutate(
                           { id: s.id, status: newStatus },
                           {
-                            onSuccess: () => toast.success('Status updated'),
-                            onError: () => toast.error("Couldn't update"),
+                            onSuccess: () => toast.success(t('admin.submissions.statusUpdated')),
+                            onError: () => toast.error(t('admin.submissions.statusFailed')),
                           }
                         );
                       }}
@@ -185,7 +200,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                     >
                       {STATUSES.map((opt) => (
                         <option key={opt} value={opt}>
-                          {opt}
+                          {statusLabel(opt)}
                         </option>
                       ))}
                     </select>
@@ -197,7 +212,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                   className="flex items-center justify-between border-t px-6 py-3 text-xs text-white/60"
                   style={{ borderColor: 'var(--recruit-admin-border)' }}
                 >
-                  <span>Page {page + 1}</span>
+                  <span>{t('admin.submissions.page', { page: page + 1 })}</span>
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -206,7 +221,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
                       style={{ borderColor: 'var(--recruit-admin-border)' }}
                     >
-                      Previous
+                      {t('admin.submissions.previous')}
                     </button>
                     <button
                       type="button"
@@ -215,7 +230,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
                       style={{ borderColor: 'var(--recruit-admin-border)' }}
                     >
-                      Next
+                      {t('admin.submissions.next')}
                     </button>
                   </div>
                 </div>

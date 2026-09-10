@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { STATUSES } from '../features/admin/SubmissionsAdmin';
+
 /**
  * Recruit ships en, ar and fr, so an English string that never reaches a
  * locale file is not latent: Arabic and French candidates read English on a
@@ -76,7 +78,14 @@ describe('recruit locales', () => {
     const en = entries('en');
     // A value may legitimately match English: a brand name, a URL, or a
     // string that is the same word in that language.
-    const SHARED = new Set(['public.notFound.metaTitle', 'public.landing.metaTitle']);
+    const SHARED = new Set([
+      // Carry the brand name, which is not translated.
+      'public.notFound.metaTitle',
+      'public.landing.metaTitle',
+      // Genuinely the same word in French, not an untranslated copy.
+      'admin.careers.colActions',
+      'admin.submissions.page',
+    ]);
     const copied: string[] = [];
     for (const lang of ['ar', 'fr'] as const) {
       for (const [key, value] of entries(lang)) {
@@ -86,6 +95,20 @@ describe('recruit locales', () => {
       }
     }
     expect(copied, 'these read as English to an ar or fr candidate').toEqual([]);
+  });
+
+  it('labels every submission stage in every language', () => {
+    // These labels are read with a runtime built key, `admin.submissions.
+    // status.${status}`, so keysResolve.test.ts skips them by design and a
+    // missing one would render as the dotted path on the stage filter.
+    const missing: string[] = [];
+    for (const lang of LANGS) {
+      const keys = entries(lang);
+      for (const status of STATUSES) {
+        if (!keys.has(`admin.submissions.status.${status}`)) missing.push(`${lang} ${status}`);
+      }
+    }
+    expect(missing, 'a stage with no label renders as its key').toEqual([]);
   });
 
   it('leaves no user-facing English literal on the public careers site', () => {
@@ -113,7 +136,7 @@ describe('recruit locales', () => {
             // candidate just as directly as one in JSX, and the JSX patterns
             // below cannot see it.
             const call =
-              /(?:toast\.(?:error|success|info)|setUploadError)\(\s*['"]([A-Z][^'"]{3,})['"]/.exec(
+              /(?:toast\.(?:error|success|info|warning|message)|setUploadError)\(\s*['"]([A-Z][^'"]{3,})['"]/.exec(
                 line
               );
             const inline = />\s*([A-Z][A-Za-z][^<>{}]*?)\s*</.exec(line);
