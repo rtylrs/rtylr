@@ -816,7 +816,8 @@
     "pageTitle": "Timeline · rtylr",
     "emptyTitle": "No tasks with due dates yet",
     "emptyDescription": "Add due dates to see the timeline.",
-    "goToBoardCta": "Go to Board"
+    "goToBoardCta": "Go to Board",
+    "taskColumn": "Task"
   },
   "projectDashboard": {
     "pageTitle": "Project dashboard · rtylr",
@@ -825,7 +826,13 @@
     "noTasksYet": "No tasks yet",
     "noTasksYetDescription": "Add a task to populate the dashboard.",
     "addTaskCta": "Add task",
-    "partialCost": "Some time has no rate on file"
+    "partialCost": "Some time has no rate on file",
+    "totalTasks": "Total tasks",
+    "done": "Done",
+    "inProgress": "In progress",
+    "overdue": "Overdue",
+    "labourCost": "Labour cost",
+    "percentComplete": "{{percent}}% complete"
   },
   "projectCalendar": {
     "pageTitle": "Calendar · rtylr"
@@ -991,5 +998,10 @@
   "projectNotFound": "Project not found. The link may be old, or it may have been deleted.",
   "labels": {
     "removeLabel": "Remove {{name}}"
+  },
+  "previewRoute": {
+    "title": "Preview route unavailable",
+    "body": "This Flow page is not enabled in the current environment. The route is still available when preview routes are enabled.",
+    "back": "Return to My Issues"
   }
 }
