@@ -18,6 +18,7 @@ import (
 	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
 	"github.com/voxire/onion/internal/modules/subscriptions"
 	"github.com/voxire/onion/internal/modules/voxhire"
+	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/workspaces"
 	platformcache "github.com/voxire/onion/internal/platform/cache"
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
@@ -120,6 +121,7 @@ func main() {
 
 type jobModules struct {
 	Automations       *automations.Module
+	Webhooks          *webhooks.Module
 	Accounts          *accounts.Module
 	HRCore            *hrcore.Module
 	HRLeave           *hrleave.Module
@@ -145,6 +147,7 @@ func initializeJobModules(ctx context.Context) *jobModules {
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
 	return &jobModules{
 		Automations:       automations.NewModule(ctx, db),
+		Webhooks:          webhooks.NewModule(ctx, db),
 		Accounts:          accountsModule,
 		HRCore:            hrCoreModule,
 		HRLeave:           hrLeaveModule,
