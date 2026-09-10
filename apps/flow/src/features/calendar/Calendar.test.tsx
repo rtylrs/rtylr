@@ -315,7 +315,7 @@ describe('Calendar at the 390px floor (#1215)', () => {
     expect(screen.queryAllByRole('heading', { level: 3 })).toHaveLength(0);
   });
 
-  it('still reaches the task from the list', () => {
+  it('opens the task over the list rather than replacing it', () => {
     setViewportWidth(MOBILE_WIDTH);
     tasksData.data = [
       { id: 't1', title: 'From Alpha', projectId: 'p-1', dueDate: iso, priority: 'medium' },
@@ -323,6 +323,18 @@ describe('Calendar at the 390px floor (#1215)', () => {
     render(<Calendar />);
 
     screen.getByText('From Alpha').closest('button')!.click();
-    expect(mockNavigate).toHaveBeenCalledWith({ to: '/task/t1' });
+
+    // `?openTask`, not `/task/t1`. The calendar stays mounted underneath and
+    // the drawer opens over it, so coming back does not re-fetch and re-scroll
+    // the month (rtylr#1079). `to: '.'` keeps the current route.
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
+    const call = mockNavigate.mock.calls[0][0] as {
+      to: string;
+      search: (previous: Record<string, unknown>) => Record<string, unknown>;
+    };
+    expect(call.to).toBe('.');
+    // The updater is a function, so that opening a task cannot discard the
+    // filters the screen underneath already has in its query string.
+    expect(call.search({ view: 'month' })).toEqual({ view: 'month', openTask: 't1' });
   });
 });

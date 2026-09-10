@@ -161,7 +161,8 @@
     "todo": "To Do",
     "waitingOn": "Waiting on",
     "waitingPlaceholder": "Person, team, approval…",
-    "you": "You"
+    "you": "You",
+    "drawerLabel": "Task detail"
   },
   "time": {
     "add": {

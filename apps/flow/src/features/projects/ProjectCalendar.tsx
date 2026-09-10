@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
+import { useParams } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@voxire/utils';
@@ -35,12 +36,12 @@ const WIDE = '(min-width: 768px)';
 
 const ProjectCalendar: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const openTask = useOpenTask();
   const isWide = useMediaQuery(WIDE);
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
 
-  const navigate = useNavigate();
   const {
     project,
     isLoading: projectLoading,
@@ -168,7 +169,7 @@ const ProjectCalendar: React.FC = () => {
             taskId={(task) => String(task.id)}
             taskTitle={(task) => task.title}
             taskTone={(task) => STATUS_COLORS[task.status]}
-            onOpen={(task) => navigate({ to: `/task/${task.id}` as string })}
+            onOpen={(task) => openTask(String(task.id))}
           />
         </div>
       )}
@@ -242,7 +243,7 @@ const ProjectCalendar: React.FC = () => {
                                 cursor: 'pointer',
                               }}
                               title={t.title}
-                              onClick={() => navigate({ to: `/task/${t.id}` as string })}
+                              onClick={() => openTask(String(t.id))}
                             >
                               {t.title}
                             </div>

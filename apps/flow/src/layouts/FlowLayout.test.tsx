@@ -46,11 +46,17 @@ vi.mock('@tanstack/react-router', () => ({
   useLocation: () => mocks.location,
   useNavigate: () => mocks.navigate,
   useParams: () => ({}),
+  // The layout reads `searchStr`; the TaskDrawer it renders reads `search`.
+  // Supplying only one of them made the drawer's selector throw on
+  // `state.location.search.openTask`, which surfaced as every test in this file
+  // failing rather than as anything about a drawer.
   useRouterState: ({
     select,
   }: {
-    select: (state: { location: { searchStr: string } }) => unknown;
-  }) => select({ location: { searchStr: '' } }),
+    select: (state: {
+      location: { searchStr: string; search: Record<string, unknown>; pathname: string };
+    }) => unknown;
+  }) => select({ location: { searchStr: '', search: {}, pathname: '/' } }),
 }));
 
 vi.mock('motion/react', () => {

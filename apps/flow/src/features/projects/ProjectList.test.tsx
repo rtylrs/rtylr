@@ -71,13 +71,20 @@ describe('ProjectList TaskRow more menu', () => {
     expect(screen.getByRole('menuitem', { name: 'common.delete' })).toBeInTheDocument();
   });
 
-  it('navigates to the task detail page when Open task is chosen', () => {
+  it('opens the task over the list when Open task is chosen', () => {
     renderRow();
 
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectList.moreOptions' }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'flow.taskMenu.openTask' }));
 
-    expect(mockNavigate).toHaveBeenCalledWith({ to: '/task/t1' });
+    // `?openTask`, not `/task/t1`: the list stays mounted and the drawer opens
+    // over it (rtylr#1079).
+    const call = mockNavigate.mock.calls[0][0] as {
+      to: string;
+      search: (previous: Record<string, unknown>) => Record<string, unknown>;
+    };
+    expect(call.to).toBe('.');
+    expect(call.search({})).toEqual({ openTask: 't1' });
   });
 });
 

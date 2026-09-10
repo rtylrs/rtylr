@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@voxire/utils';
@@ -36,10 +36,10 @@ interface CreateModal {
 
 const Calendar: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const openTask = useOpenTask();
   const isWide = useMediaQuery(WIDE);
   const { data: apiTasks = [] } = useTasks({});
   const tasks = apiTasks as ApiTask[];
-  const navigate = useNavigate();
   const { projects } = useFlowStore();
   const { data: labels = [] } = useLabels();
   const createTask = useCreateTask();
@@ -177,7 +177,7 @@ const Calendar: React.FC = () => {
             taskId={(task) => String(task.id)}
             taskTitle={(task) => task.title}
             taskTone={(task) => projectColorById.get(String(task.projectId))}
-            onOpen={(task) => navigate({ to: `/task/${task.id}` as string })}
+            onOpen={(task) => openTask(String(task.id))}
             leading={(task) => <PriorityIcon priority={task.priority} size={11} />}
           />
         </div>
@@ -259,7 +259,7 @@ const Calendar: React.FC = () => {
                           key={t.id}
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate({ to: `/task/${t.id}` as string });
+                            openTask(String(t.id));
                           }}
                           className="w-full text-left px-1.5 py-0.5 rounded-sm text-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
                           style={{
