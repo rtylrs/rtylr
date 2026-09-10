@@ -162,12 +162,15 @@ const StockTransfers: React.FC = () => {
           ) : transfers.length === 0 ? (
             <EmptyState
               icon={ArrowLeftRight}
-              title={t('stockTransfers.empty.title')}
-              description={t('stockTransfers.empty.description')}
+              title={t('erp.stockTransfers.empty.title')}
+              description={t('erp.stockTransfers.empty.description')}
               action={
                 canCreateTransfer
-                  ? { label: t('stockTransfers.newTransfer'), onClick: () => setShowCreate(true) }
-                  : { label: t('stockTransfers.refresh'), onClick: () => void refetch() }
+                  ? {
+                      label: t('erp.stockTransfers.newTransfer'),
+                      onClick: () => setShowCreate(true),
+                    }
+                  : { label: t('erp.stockTransfers.refresh'), onClick: () => void refetch() }
               }
             />
           ) : (
