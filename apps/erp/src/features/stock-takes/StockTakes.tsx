@@ -140,12 +140,12 @@ const StockTakes: React.FC = () => {
         ) : stockTakes.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
-            title={t('stockTakes.empty.title')}
-            description={t('stockTakes.empty.description')}
+            title={t('erp.stockTakes.empty.title')}
+            description={t('erp.stockTakes.empty.description')}
             action={
               canManageStockTakes
-                ? { label: t('stockTakes.newStockTake'), onClick: () => setShowCreate(true) }
-                : { label: t('stockTakes.refresh'), onClick: () => void refetch() }
+                ? { label: t('erp.stockTakes.newStockTake'), onClick: () => setShowCreate(true) }
+                : { label: t('erp.stockTakes.refresh'), onClick: () => void refetch() }
             }
           />
         ) : (
