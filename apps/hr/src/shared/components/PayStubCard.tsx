@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { DollarSign } from 'lucide-react';
 import { PayrollRow } from '../services/hrApi';
 import { Card, Pill, ACCENT } from './ui';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const PayStubCard: React.FC<Props> = ({ row, onPay, currency }) => {
+  const { t } = useTranslation();
   const { bg, fg } = paletteFor(row.id);
   const net = row.basePay + row.overtime - row.deductions;
   return (
@@ -42,23 +44,23 @@ const PayStubCard: React.FC<Props> = ({ row, onPay, currency }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 11 }}>
         <div>
-          <div style={{ color: 'var(--hr-text-muted)' }}>Hours</div>
+          <div style={{ color: 'var(--hr-text-muted)' }}>{t('payroll.stub.hours')}</div>
           <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>{row.hoursWorked}h</div>
         </div>
         <div>
-          <div style={{ color: 'var(--hr-text-muted)' }}>Base</div>
+          <div style={{ color: 'var(--hr-text-muted)' }}>{t('payroll.stub.base')}</div>
           <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>
             {formatCurrency(row.basePay, currency)}
           </div>
         </div>
         <div>
-          <div style={{ color: 'var(--hr-text-muted)' }}>Overtime</div>
+          <div style={{ color: 'var(--hr-text-muted)' }}>{t('payroll.stub.overtime')}</div>
           <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>
             {formatCurrency(row.overtime, currency)}
           </div>
         </div>
         <div>
-          <div style={{ color: 'var(--hr-text-muted)' }}>Deductions</div>
+          <div style={{ color: 'var(--hr-text-muted)' }}>{t('payroll.stub.deductions')}</div>
           <div style={{ fontWeight: 600, color: '#ef4444' }}>
             {formatCurrency(row.deductions, currency)}
           </div>
@@ -75,7 +77,9 @@ const PayStubCard: React.FC<Props> = ({ row, onPay, currency }) => {
         }}
       >
         <div>
-          <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>Net pay</div>
+          <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>
+            {t('payroll.stub.netPay')}
+          </div>
           <div style={{ fontSize: 15, fontWeight: 700, color: ACCENT }}>
             {formatCurrency(net, currency)}
           </div>
