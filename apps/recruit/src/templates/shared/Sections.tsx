@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cdnImageUrl } from '@voxire/config';
 import { ChevronDown } from 'lucide-react';
 
@@ -140,6 +141,7 @@ const TestimonialBlock: React.FC<{ section: Section }> = ({ section }) => (
 );
 
 const VideoBlock: React.FC<{ section: Section }> = ({ section }) => {
+  const { t } = useTranslation();
   if (!section.mediaUrl) return null;
   // Accept YouTube / Vimeo / Loom share URLs. Normalise to an embed
   // URL when possible; fall back to a plain link if the host isn't
@@ -168,7 +170,7 @@ const VideoBlock: React.FC<{ section: Section }> = ({ section }) => {
         </div>
       ) : (
         <a href={section.mediaUrl} className="underline" style={{ color: 'var(--recruit-accent)' }}>
-          Watch video
+          {t('public.sections.watchVideo')}
         </a>
       )}
     </section>
@@ -233,25 +235,31 @@ const ValuesBlock: React.FC<{ section: Section }> = ({ section }) => {
   );
 };
 
-const CtaBlock: React.FC<{ section: Section }> = ({ section }) => (
-  <section className="rounded-xl p-10 text-center" style={{ background: 'var(--recruit-accent)' }}>
-    {section.title && (
-      <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-        {section.title}
-      </h2>
-    )}
-    {section.body && <p className="mt-3 text-white/80">{section.body}</p>}
-    {section.mediaUrl && (
-      <a
-        href={section.mediaUrl}
-        className="mt-6 inline-flex items-center gap-2 rounded-md bg-white px-5 py-2.5 text-sm font-semibold"
-        style={{ color: 'var(--recruit-accent)' }}
-      >
-        Get in touch
-      </a>
-    )}
-  </section>
-);
+const CtaBlock: React.FC<{ section: Section }> = ({ section }) => {
+  const { t } = useTranslation();
+  return (
+    <section
+      className="rounded-xl p-10 text-center"
+      style={{ background: 'var(--recruit-accent)' }}
+    >
+      {section.title && (
+        <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          {section.title}
+        </h2>
+      )}
+      {section.body && <p className="mt-3 text-white/80">{section.body}</p>}
+      {section.mediaUrl && (
+        <a
+          href={section.mediaUrl}
+          className="mt-6 inline-flex items-center gap-2 rounded-md bg-white px-5 py-2.5 text-sm font-semibold"
+          style={{ color: 'var(--recruit-accent)' }}
+        >
+          {t('public.sections.getInTouch')}
+        </a>
+      )}
+    </section>
+  );
+};
 
 const FallbackBlock: React.FC<{ section: Section }> = ({ section }) => (
   <section>
