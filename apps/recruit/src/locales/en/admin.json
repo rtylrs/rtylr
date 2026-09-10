@@ -129,5 +129,81 @@
       "boolean": "I agree"
     },
     "seedOption": "Option {{number}}"
+  },
+  "sections": {
+    "metaTitle": "Page sections · rtylr",
+    "heading": "Page sections",
+    "hint": "Content blocks between the hero and the jobs list. Drag to reorder.",
+    "addSection": "Add section",
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "pickKind": "Pick a section kind",
+    "added": "Section added",
+    "addFailed": "Could not add",
+    "deleted": "Section deleted",
+    "deleteFailed": "Could not delete",
+    "saved": "Section saved",
+    "saveFailed": "Could not save",
+    "orderFailed": "Could not save order",
+    "toggleFailed": "Could not toggle",
+    "uploadFailed": "Upload failed",
+    "confirmDelete": "Delete this section?",
+    "delete": "Delete",
+    "sectionTitle": "Section title",
+    "sectionTitlePlaceholder": "e.g. Why you'll love it here",
+    "body": "Body",
+    "quote": "Quote",
+    "attribution": "Attribution",
+    "attributionHint": "Name, role",
+    "attributionPlaceholder": "Jamie Doe, Senior Engineer",
+    "photoUrl": "Photo URL",
+    "photoHint": "Optional, square or landscape",
+    "videoUrl": "Video URL",
+    "videoHint": "YouTube / Vimeo / Loom or uploaded video",
+    "buttonUrl": "Button URL",
+    "saveSection": "Save section",
+    "perks": "Perks",
+    "addPerk": "Add perk",
+    "perkIconPlaceholder": "icon (lucide name)",
+    "perkLabelPlaceholder": "label",
+    "perkBlurbPlaceholder": "blurb",
+    "faqQuestionPlaceholder": "Question",
+    "addFaq": "Add Q/A",
+    "values": "Values",
+    "addValue": "Add value",
+    "valueLabelPlaceholder": "label",
+    "valueBlurbPlaceholder": "short description",
+    "kind": {
+      "perks": {
+        "label": "Perks",
+        "blurb": "Icon grid, healthcare, remote, learning budget and the like."
+      },
+      "culture": {
+        "label": "Culture",
+        "blurb": "Photo and paragraph. How the team actually works."
+      },
+      "testimonial": {
+        "label": "Testimonial",
+        "blurb": "Quote from a current employee with attribution."
+      },
+      "video": {
+        "label": "Video",
+        "blurb": "YouTube / Vimeo / Loom embed URL."
+      },
+      "faq": {
+        "label": "FAQ",
+        "blurb": "Expandable Q/A list."
+      },
+      "values": {
+        "label": "Values",
+        "blurb": "Label and one-liner list. What the company stands for."
+      },
+      "cta": {
+        "label": "Call to action",
+        "blurb": "Heading and button pointing at an external URL."
+      }
+    },
+    "hideFromPublic": "Hide from public page",
+    "showOnPublic": "Show on public page"
   }
 }

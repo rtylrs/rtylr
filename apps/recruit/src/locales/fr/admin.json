@@ -129,5 +129,81 @@
       "boolean": "J'accepte"
     },
     "seedOption": "Option {{number}}"
+  },
+  "sections": {
+    "metaTitle": "Sections de la page · rtylr",
+    "heading": "Sections de la page",
+    "hint": "Blocs de contenu entre l'en-tête et la liste des postes. Glissez pour réordonner.",
+    "addSection": "Ajouter une section",
+    "loading": "Chargement…",
+    "cancel": "Annuler",
+    "pickKind": "Choisissez un type de section",
+    "added": "Section ajoutée",
+    "addFailed": "Ajout impossible",
+    "deleted": "Section supprimée",
+    "deleteFailed": "Suppression impossible",
+    "saved": "Section enregistrée",
+    "saveFailed": "Enregistrement impossible",
+    "orderFailed": "Enregistrement de l'ordre impossible",
+    "toggleFailed": "Changement impossible",
+    "uploadFailed": "Échec de l'envoi du fichier",
+    "confirmDelete": "Supprimer cette section ?",
+    "delete": "Supprimer",
+    "sectionTitle": "Titre de la section",
+    "sectionTitlePlaceholder": "ex. Pourquoi vous allez aimer travailler ici",
+    "body": "Texte",
+    "quote": "Citation",
+    "attribution": "Attribution",
+    "attributionHint": "Nom, fonction",
+    "attributionPlaceholder": "Camille Martin, ingénieure senior",
+    "photoUrl": "URL de la photo",
+    "photoHint": "Facultatif, carrée ou paysage",
+    "videoUrl": "URL de la vidéo",
+    "videoHint": "YouTube / Vimeo / Loom ou vidéo envoyée",
+    "buttonUrl": "URL du bouton",
+    "saveSection": "Enregistrer la section",
+    "perks": "Avantages",
+    "addPerk": "Ajouter un avantage",
+    "perkIconPlaceholder": "icône (nom lucide)",
+    "perkLabelPlaceholder": "intitulé",
+    "perkBlurbPlaceholder": "description brève",
+    "faqQuestionPlaceholder": "Question",
+    "addFaq": "Ajouter une question",
+    "values": "Valeurs",
+    "addValue": "Ajouter une valeur",
+    "valueLabelPlaceholder": "intitulé",
+    "valueBlurbPlaceholder": "description courte",
+    "kind": {
+      "perks": {
+        "label": "Avantages",
+        "blurb": "Grille d'icônes : mutuelle, télétravail, budget formation, etc."
+      },
+      "culture": {
+        "label": "Culture",
+        "blurb": "Photo et paragraphe. Comment l'équipe travaille vraiment."
+      },
+      "testimonial": {
+        "label": "Témoignage",
+        "blurb": "Citation d'un employé actuel, avec attribution."
+      },
+      "video": {
+        "label": "Vidéo",
+        "blurb": "URL d'intégration YouTube / Vimeo / Loom."
+      },
+      "faq": {
+        "label": "FAQ",
+        "blurb": "Liste de questions et réponses dépliables."
+      },
+      "values": {
+        "label": "Valeurs",
+        "blurb": "Liste intitulé et une ligne. Ce que défend l'entreprise."
+      },
+      "cta": {
+        "label": "Appel à l'action",
+        "blurb": "Titre et bouton pointant vers une URL externe."
+      }
+    },
+    "hideFromPublic": "Masquer de la page publique",
+    "showOnPublic": "Afficher sur la page publique"
   }
 }
