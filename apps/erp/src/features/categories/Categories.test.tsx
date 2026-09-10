@@ -1,15 +1,16 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Categories from './Categories';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useCategories: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -28,6 +29,10 @@ vi.mock('./useCategories', () => ({
   useUpdateCategory: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('Categories empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,12 +42,12 @@ describe('Categories empty state', () => {
   it('shows the illustration and empty copy, and focuses the new-category input on CTA click', () => {
     render(<Categories />);
 
-    const title = screen.getByText('categories.empty.title');
+    const title = screen.getByText('No categories yet');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('categories.empty.description')).toBeInTheDocument();
+    expect(screen.getByText('Create your first category to organize products')).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'categories.addCategory' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Add Category' }));
 
     expect(screen.getByPlaceholderText('New category name…')).toHaveFocus();
   });
@@ -55,6 +60,6 @@ describe('Categories empty state', () => {
 
     render(<Categories />);
 
-    expect(screen.queryByText('categories.empty.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('No categories yet')).not.toBeInTheDocument();
   });
 });
