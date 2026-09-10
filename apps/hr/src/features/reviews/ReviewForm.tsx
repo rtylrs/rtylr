@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ import RatingStars from '../../shared/components/RatingStars';
 import { todayIso } from '../../shared/lib/dateUtils';
 
 const ReviewForm: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const nav = useNavigate();
   const { data: staff = [] } = useStaff();
@@ -39,7 +41,7 @@ const ReviewForm: React.FC = () => {
     const who = staff.find((s) => s.id === staffId);
     const reviewer = staff.find((s) => s.id === reviewerId);
     if (!who || !reviewer) {
-      toast.error('Pick employee and reviewer');
+      toast.error(t('reviews.errorPickBoth'));
       return;
     }
     create.mutate(
@@ -59,7 +61,7 @@ const ReviewForm: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Review created');
+          toast.success(t('reviews.created'));
           nav({ to: '/reviews' });
         },
       }
@@ -68,10 +70,10 @@ const ReviewForm: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="New review · rtylr" />
+      <HelmetContainer title={t('reviews.pageTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 640 }}>
         <Breadcrumbs items={[{ label: 'Reviews', href: '/reviews' }, { label: 'New review' }]} />
-        <SectionHeader title="New Performance Review" subtitle="Rate goals, values, and skills" />
+        <SectionHeader title={t('reviews.formTitle')} subtitle={t('reviews.formSubtitle')} />
         <Card>
           <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div
@@ -82,9 +84,9 @@ const ReviewForm: React.FC = () => {
               }}
             >
               <div>
-                <Label>Employee</Label>
+                <Label>{t('reviews.employee')}</Label>
                 <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
-                  <option value={0}>Select</option>
+                  <option value={0}>{t('reviews.select')}</option>
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -93,9 +95,9 @@ const ReviewForm: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label>Reviewer</Label>
+                <Label>{t('reviews.reviewer')}</Label>
                 <Select value={reviewerId} onChange={(e) => setReviewerId(Number(e.target.value))}>
-                  <option value={0}>Select</option>
+                  <option value={0}>{t('reviews.select')}</option>
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -105,11 +107,11 @@ const ReviewForm: React.FC = () => {
               </div>
             </div>
             <div>
-              <Label>Period</Label>
+              <Label>{t('reviews.period')}</Label>
               <Input
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                placeholder="e.g. Q2 2026"
+                placeholder={t('reviews.periodPlaceholder')}
               />
             </div>
             <div
@@ -120,24 +122,24 @@ const ReviewForm: React.FC = () => {
               }}
             >
               <div>
-                <Label>Goals</Label>
+                <Label>{t('reviews.goals')}</Label>
                 <RatingStars value={goals} onChange={setGoals} />
               </div>
               <div>
-                <Label>Values</Label>
+                <Label>{t('reviews.values')}</Label>
                 <RatingStars value={values} onChange={setValues} />
               </div>
               <div>
-                <Label>Skills</Label>
+                <Label>{t('reviews.skills')}</Label>
                 <RatingStars value={skills} onChange={setSkills} />
               </div>
             </div>
             <div>
-              <Label>Notes</Label>
+              <Label>{t('reviews.notes')}</Label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Key feedback and next steps"
+                placeholder={t('reviews.notesPlaceholder')}
               />
             </div>
             <div
@@ -151,7 +153,7 @@ const ReviewForm: React.FC = () => {
                 justifyContent: 'space-between',
               }}
             >
-              <span style={{ color: 'var(--hr-text-muted)' }}>Overall rating</span>
+              <span style={{ color: 'var(--hr-text-muted)' }}>{t('reviews.overallRating')}</span>
               <RatingStars value={overall} readOnly />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
