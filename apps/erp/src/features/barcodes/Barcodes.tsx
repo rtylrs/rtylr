@@ -133,17 +133,17 @@ const Barcodes: React.FC = () => {
             >
               <EmptyState
                 icon={Printer}
-                title={t('barcodes.previewEmpty.title')}
-                description={t('barcodes.previewEmpty.description')}
+                title={t('erp.barcodes.previewEmpty.title')}
+                description={t('erp.barcodes.previewEmpty.description')}
                 size="compact"
                 action={
                   products.length > 0
                     ? {
-                        label: t('barcodes.selectFirst'),
+                        label: t('erp.barcodes.selectFirst'),
                         onClick: () => toggle(products[0]?.id ?? ''),
                       }
                     : {
-                        label: t('barcodes.goToProducts'),
+                        label: t('erp.barcodes.goToProducts'),
                         onClick: () => navigate({ to: '/products' }),
                       }
                 }
