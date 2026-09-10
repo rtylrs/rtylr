@@ -22,9 +22,15 @@ const ENFORCED_APPS = ['auth', 'flow', 'insights', 'recruit'] as const;
 /**
  * Text that is deliberately not translated, per app.
  *
- * Four kinds belong here and nothing else: a format example, a physical label
- * such as a key cap, a proper noun, and a specimen that must stay in the
- * script it demonstrates. Anything else in this list is a defect being hidden.
+ * Five kinds belong here and nothing else: a format example, a physical label
+ * such as a key cap, a proper noun, a specimen that must stay in the script it
+ * demonstrates, and a throw whose message no caller renders. Anything else in
+ * this list is a defect being hidden.
+ *
+ * That last one needs care, because it is the easiest to abuse: it holds only
+ * where the catch has been read and shows its own copy. The alternative is a
+ * message-less `throw new Error()`, which keeps the guard stricter and makes
+ * the stack the only clue about what went wrong.
  */
 const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
   auth: [
@@ -33,6 +39,10 @@ const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
     'The App Failed To Load',
     // A person's name in a testimonial.
     'Mohamad Homsi',
+    // Thrown by startSocialLogin when the provider returns no redirect URL.
+    // Login.tsx and Register.tsx both catch it and show their own translated
+    // message, so this text reaches a stack trace and nowhere else.
+    'Social sign-in returned no redirect URL',
   ],
   // A key cap. The user's keyboard says ESC whatever language they read.
   flow: ['ESC'],
