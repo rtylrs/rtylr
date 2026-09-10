@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
 	"github.com/voxire/onion/internal/modules/automations/internal/infrastructure"
@@ -26,6 +27,12 @@ const baseRetrySeconds = 60
 // maxRetrySeconds caps the backoff so a long-lived run does not drift to a
 // retry hours away.
 const maxRetrySeconds = 3600
+
+// abandonedAfter is how long a claimed run may sit before it is treated as
+// abandoned. Comfortably longer than any legitimate execution, which is a
+// handful of queries and an enqueue, so a slow run is never mistaken for a
+// dead worker.
+const abandonedAfter = 15 * time.Minute
 
 // errPermanent marks a failure that retrying cannot fix. Wrapping rather than
 // a sentinel value so the reason survives to last_error, where an operator
@@ -65,6 +72,8 @@ func NewExecutor(db *sql.DB) *Executor {
 // A run that fails is recorded against itself and the batch continues, so one
 // broken automation cannot stop every other tenant's from running.
 func (e *Executor) ProcessDue(ctx context.Context) error {
+	e.recoverAbandoned(ctx)
+
 	runs, err := e.repo.ListDueRuns(ctx, e.batchSize)
 	if err != nil {
 		return fmt.Errorf("listing due automation runs: %w", err)
@@ -91,6 +100,30 @@ func (e *Executor) ProcessDue(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+// recoverAbandoned ends runs left in 'running' by a worker that died between
+// claiming a row and recording its outcome. Without it those rows are never
+// looked at again, because the due query only reads 'pending' and 'failed'.
+//
+// Runs here at the start of every pass rather than as a separate job: it is a
+// single indexed UPDATE that matches nothing in normal operation, and tying it
+// to the same cadence means there is no second schedule to get wrong.
+//
+// A failure to recover does not stop the pass. The due runs are still worth
+// processing, and the abandoned ones will still be there next time.
+func (e *Executor) recoverAbandoned(ctx context.Context) {
+	recovered, err := e.repo.RecoverAbandoned(ctx, int64(abandonedAfter.Seconds()))
+	if err != nil {
+		logger.Ctx(ctx).Error("automations: could not recover abandoned runs", logger.Error(err))
+		return
+	}
+	// Warn rather than info: a non-zero count means a worker died mid-run, and
+	// each one is an automation that did not finish.
+	if recovered > 0 {
+		logger.Ctx(ctx).Warn("automations: dead-lettered abandoned runs",
+			logger.Any("runs", recovered))
+	}
 }
 
 // recordFailure routes a failure to a retry or to the dead letter, and never

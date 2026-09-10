@@ -77,6 +77,19 @@ func (r *Repository) MarkRunDead(ctx context.Context, runID uint64, cause string
 	})
 }
 
+// RecoverAbandoned ends runs left executing by a worker that died, and reports
+// how many. They are dead-lettered rather than retried: an automation may have
+// already performed an action whose recipient cannot dedupe it, so an
+// abandoned run is surfaced for a human rather than repeated on a guess.
+func (r *Repository) RecoverAbandoned(ctx context.Context, staleAfterSeconds int64) (int64, error) {
+	result, err := r.queries.RecoverAbandonedAutomationRuns(ctx, staleAfterSeconds)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to recover abandoned automation runs", logger.Error(err))
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 // GetAutomationForRun loads the automation a run belongs to, scoped by the
 // run's business as well as its id.
 func (r *Repository) GetAutomationForRun(ctx context.Context, automationID, businessID int64) (domain.Automation, error) {

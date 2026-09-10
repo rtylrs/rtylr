@@ -70,3 +70,26 @@ WHERE id = ? AND business_id = ?;
 UPDATE hub_webhooks
 SET last_triggered_at = NOW()
 WHERE id = ? AND business_id = ?;
+
+-- Requeues a delivery abandoned mid-flight, which happens when the worker dies
+-- between claiming a row and recording its outcome. Without this the row sits
+-- in 'delivering' forever and the subscriber never hears about that event.
+--
+-- Requeuing means a delivery already sent may be sent again, so this makes
+-- webhooks at-least-once. That is the documented contract for webhooks and the
+-- reason every delivery carries X-Rtylr-Delivery-Id and X-Rtylr-Event-Id: a
+-- subscriber is expected to dedupe on the event id. The automation queue is
+-- deliberately handled the other way round; see the note on
+-- RecoverAbandonedAutomationRuns.
+--
+-- Ages off updated_at, which the claim sets explicitly. The threshold must be
+-- comfortably longer than any legitimate send, which is bounded by the
+-- per-request timeout.
+-- name: RecoverAbandonedWebhookDeliveries :execresult
+UPDATE webhook_deliveries
+SET status = IF(attempts >= max_attempts, 'dead', 'failed'),
+    next_attempt_at = NOW(),
+    last_error = 'delivery was abandoned in flight and has been requeued',
+    updated_at = NOW()
+WHERE status = 'delivering'
+  AND updated_at < DATE_SUB(NOW(), INTERVAL sqlc.arg('stale_after_seconds') SECOND);

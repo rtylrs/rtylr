@@ -81,6 +81,19 @@ func (r *Repository) MarkDead(ctx context.Context, deliveryID uint64, cause stri
 	})
 }
 
+// RecoverAbandoned requeues deliveries left in flight by a worker that died,
+// and reports how many. Returns them to a retryable state, so a delivery that
+// had already reached the subscriber may reach it twice: webhooks are
+// at-least-once and every request carries the ids needed to dedupe.
+func (r *Repository) RecoverAbandoned(ctx context.Context, staleAfterSeconds int64) (int64, error) {
+	result, err := r.queries.RecoverAbandonedWebhookDeliveries(ctx, staleAfterSeconds)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to recover abandoned webhook deliveries", logger.Error(err))
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 // GetRegistrationForDelivery loads the subscriber, scoped by the delivery's
 // business as well as its id.
 func (r *Repository) GetRegistrationForDelivery(ctx context.Context, webhookID, businessID int64) (domain.Registration, error) {

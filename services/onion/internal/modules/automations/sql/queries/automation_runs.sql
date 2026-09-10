@@ -77,3 +77,24 @@ SELECT id,
        TRIM(CONCAT(first_name, ' ', COALESCE(last_name, ''))) AS full_name
 FROM crm_customers
 WHERE id = ? AND business_id = ?;
+
+-- Ends a run abandoned mid-execution, which happens when the worker dies
+-- between claiming a row and recording its outcome. Without this the row sits
+-- in 'running' forever and nothing ever looks at it again.
+--
+-- It is dead-lettered rather than requeued, which is the opposite of what
+-- RecoverAbandonedWebhookDeliveries does, and the asymmetry is deliberate. A
+-- webhook subscriber is handed a delivery id and an event id and is expected to
+-- dedupe; the recipient of an automation's email is not, and cannot. Re-running
+-- an abandoned automation could send a customer a second copy of a message they
+-- already have, so an abandoned run is surfaced for a human instead of being
+-- retried on a guess about how far it got.
+--
+-- Ages off updated_at, which the claim sets explicitly.
+-- name: RecoverAbandonedAutomationRuns :execresult
+UPDATE automation_runs
+SET status = 'dead',
+    last_error = 'run was abandoned while executing and was not retried, because an action may already have been performed',
+    updated_at = NOW()
+WHERE status = 'running'
+  AND updated_at < DATE_SUB(NOW(), INTERVAL sqlc.arg('stale_after_seconds') SECOND);

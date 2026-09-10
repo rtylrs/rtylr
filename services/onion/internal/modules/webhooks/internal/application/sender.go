@@ -30,6 +30,11 @@ const (
 	baseRetrySeconds = 60
 	maxRetrySeconds  = 3600
 
+	// abandonedAfter is how long a claimed delivery may sit before it is
+	// treated as abandoned. Far longer than requestTimeout, so a slow
+	// subscriber is never mistaken for a dead worker.
+	abandonedAfter = 15 * time.Minute
+
 	// errorSnippetLimit bounds how much of a failing response is read. The
 	// body is a subscriber's, so it is neither trusted nor stored whole.
 	errorSnippetLimit = 512
@@ -61,6 +66,8 @@ func NewSender(db *sql.DB) *Sender {
 // against that row rather than aborting the pass. One tenant's dead endpoint
 // therefore costs one timeout and holds up nobody else.
 func (s *Sender) ProcessDue(ctx context.Context) error {
+	s.recoverAbandoned(ctx)
+
 	deliveries, err := s.repo.ListDueDeliveries(ctx, s.batchSize)
 	if err != nil {
 		return fmt.Errorf("listing due webhook deliveries: %w", err)
@@ -86,6 +93,30 @@ func (s *Sender) ProcessDue(ctx context.Context) error {
 		s.deliver(ctx, delivery)
 	}
 	return nil
+}
+
+// recoverAbandoned requeues deliveries left in 'delivering' by a worker that
+// died between claiming a row and recording its outcome. Without it those rows
+// are never looked at again, because the due query only reads 'pending' and
+// 'failed', and the subscriber never hears about that event.
+//
+// Runs at the start of every pass rather than as a separate job: it is a
+// single indexed UPDATE that matches nothing in normal operation, and tying it
+// to the same cadence means there is no second schedule to get wrong.
+//
+// A failure to recover does not stop the pass.
+func (s *Sender) recoverAbandoned(ctx context.Context) {
+	recovered, err := s.repo.RecoverAbandoned(ctx, int64(abandonedAfter.Seconds()))
+	if err != nil {
+		logger.Ctx(ctx).Error("webhooks: could not recover abandoned deliveries", logger.Error(err))
+		return
+	}
+	// Warn rather than info: a non-zero count means a worker died mid-send, and
+	// each one may reach its subscriber twice.
+	if recovered > 0 {
+		logger.Ctx(ctx).Warn("webhooks: requeued abandoned deliveries",
+			logger.Any("deliveries", recovered))
+	}
 }
 
 // deliver sends one delivery and records the outcome.
