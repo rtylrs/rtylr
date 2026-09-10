@@ -5,6 +5,7 @@ import path from 'node:path';
 import { STATUSES } from '../features/admin/SubmissionsAdmin';
 import { EMPLOYMENT_TYPES, WORK_MODES } from '../features/admin/CareerEditor';
 import { KIND_ORDER } from '../features/admin/FormFieldsEditor';
+import { ORDERED_KINDS } from '../features/admin/SectionsAdmin';
 
 /**
  * Recruit ships en, ar and fr, so an English string that never reaches a
@@ -84,11 +85,17 @@ describe('recruit locales', () => {
       // Carry the brand name, which is not translated.
       'public.notFound.metaTitle',
       'public.landing.metaTitle',
-      // Genuinely the same word in French, not an untranslated copy.
+      // Genuinely the same word in French, not an untranslated copy. French
+      // shares a fair amount of vocabulary with English, so this list is
+      // expected to grow; loosening the rule instead would let real
+      // untranslated copy through.
       'admin.careers.colActions',
       'admin.submissions.page',
       'admin.questions.optionPlaceholder',
       'admin.questions.seedOption',
+      'admin.sections.attribution',
+      'admin.sections.faqQuestionPlaceholder',
+      'admin.sections.kind.culture.label',
     ]);
     const copied: string[] = [];
     for (const lang of ['ar', 'fr'] as const) {
@@ -126,6 +133,8 @@ describe('recruit locales', () => {
       // A seed label is stored and then read by the candidate, so a missing
       // one would persist a dotted path into the database.
       ...KIND_ORDER.map((k) => `admin.questions.defaultLabel.${k}`),
+      ...ORDERED_KINDS.map((k) => `admin.sections.kind.${k}.label`),
+      ...ORDERED_KINDS.map((k) => `admin.sections.kind.${k}.blurb`),
     ];
     const missing: string[] = [];
     for (const lang of LANGS) {
