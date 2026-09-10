@@ -162,7 +162,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Revenue · rtylr" />
+      <HelmetContainer title={t('insights.revenue.metaTitle')} />
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -263,7 +263,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
             action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
-          <div style={{ height: 220 }} aria-label="Revenue trend chart">
+          <div style={{ height: 220 }} aria-label={t('insights.charts.revenueTrend')}>
             <Line data={areaData} options={areaOptions} />
           </div>
         )}
@@ -287,7 +287,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
             action={{ label: t('common.refresh'), onClick: () => refetchByApp() }}
           />
         ) : (
-          <div style={{ height: 180 }} aria-label="Revenue by app chart">
+          <div style={{ height: 180 }} aria-label={t('insights.charts.revenueByApp')}>
             <Bar data={barData} options={barOptions} />
           </div>
         )}
