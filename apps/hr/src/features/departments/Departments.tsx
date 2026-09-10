@@ -19,7 +19,16 @@ import { useIsMobile } from '../../shared/components/ui';
 import { useUserStore } from '@voxire/auth';
 import { canViewCompensation } from '../../shared/lib/hrPermissions';
 
-const ACCENT = '#8b5cf6';
+/**
+ * The literal is deliberate here, and only here.
+ *
+ * `DEPT_COLORS` feeds `getDeptColor`, whose result is concatenated with a hex
+ * alpha suffix at the call site (`${color}18`). A `var(--accent)` cannot carry
+ * one, so a palette an app builds colours from by string concatenation has to
+ * hold real hex. Every *style* use of the accent below goes through the token
+ * instead (rtylr#1242).
+ */
+const ACCENT_HEX = '#8b5cf6';
 
 const DEPT_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Kitchen: ChefHat,
@@ -28,7 +37,7 @@ const DEPT_ICONS: Record<string, React.ComponentType<{ size?: number; className?
   Delivery: Truck,
 };
 
-const DEPT_COLORS = ['#f59e0b', '#10b981', ACCENT, '#3b82f6', '#ef4444', '#3b82f6'];
+const DEPT_COLORS = ['#f59e0b', '#10b981', ACCENT_HEX, '#3b82f6', '#ef4444', '#3b82f6'];
 
 function getDeptIcon(name: string) {
   return DEPT_ICONS[name] || Briefcase;
@@ -93,9 +102,13 @@ const Departments: React.FC = () => {
               gap: '8px',
               padding: '9px 16px',
               borderRadius: '8px',
-              background: ACCENT,
+              background: 'var(--accent)',
               border: 'none',
-              color: '#fff',
+              // White on #8b5cf6 measures 4.23:1 and fails AA. It was invisible
+              // to the accent-fill guard while the background was a hardcoded
+              // hex; tokenising the background is what exposed it (rtylr#1242,
+              // the same defect as rtylr#1234).
+              color: 'var(--hr-on-accent)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { withAlpha } from '../../shared/lib/colorUtils';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -235,8 +236,11 @@ const Cycles: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="rounded-xl p-6"
               style={{
-                background:
-                  'linear-gradient(135deg, var(--accent-muted) 0%, rgba(100,197,185,0.02) 100%)',
+                // Both stops follow the accent. The far stop was
+                // `rgba(100,197,185,0.02)`, the shipped teal written out, so a
+                // workspace on any other accent got a gradient that started in
+                // their colour and ended in Flow's (rtylr#1242).
+                background: `linear-gradient(135deg, var(--accent-muted) 0%, ${withAlpha('var(--accent)', 2)} 100%)`,
                 border: '1px solid var(--accent-border)',
               }}
             >

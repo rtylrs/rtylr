@@ -11,7 +11,8 @@ import { StaffMember } from '../../shared/services/hrApi';
 import { useStaff } from './useStaff';
 import { useIsMobile } from '../../shared/components/ui';
 
-const ACCENT = '#8b5cf6';
+/** The themed accent, so a workspace's own colour is used (rtylr#1242). */
+const ACCENT = 'var(--accent)';
 
 type EmploymentType = 'Full-time' | 'Part-time' | 'Contractor';
 type FilterTab = 'All' | EmploymentType;
