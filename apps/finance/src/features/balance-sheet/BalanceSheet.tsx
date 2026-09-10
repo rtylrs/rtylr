@@ -144,7 +144,7 @@ const BalanceSheet: React.FC = () => {
               ? [
                   ...data.assets,
                   {
-                    label: t('balanceSheet.inventory'),
+                    label: t('finance.balanceSheet.inventory'),
                     amount: inventory.totalValue,
                     type: 'asset',
                   },
