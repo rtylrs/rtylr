@@ -54,9 +54,9 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={SearchX}
-          title={t('businessNotFoundTitle')}
-          description={t('businessNotFoundDescription', { slug })}
-          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+          title={t('sluglanding.businessNotFoundTitle')}
+          description={t('sluglanding.businessNotFoundDescription', { slug })}
+          action={{ label: t('sluglanding.goBack'), onClick: () => router.history.back() }}
         />
       </div>
     );

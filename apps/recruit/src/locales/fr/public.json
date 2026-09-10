@@ -70,6 +70,7 @@
     "careersEyebrow": "Carrières",
     "heroTitle": "Un travail\nqui fait\nla différence.",
     "roleCount_one": "{{count}} poste",
+    "roleCount_many": "{{count}} de postes",
     "roleCount_other": "{{count}} postes"
   },
   "sections": {

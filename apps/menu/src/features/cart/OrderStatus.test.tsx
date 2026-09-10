@@ -1,10 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves,
+// which is how this suite passed while every string on screen was a dotted
+// path (rtylr#1269). The real locale files mean the copy below also proves the
+// lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -26,6 +28,11 @@ vi.mock('../../shared/lib/clients', () => ({
 }));
 
 import OrderStatus from './OrderStatus';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('OrderStatus not-found state', () => {
   beforeEach(() => {
@@ -39,14 +46,16 @@ describe('OrderStatus not-found state', () => {
 
     render(<OrderStatus />);
 
-    await waitFor(() => expect(screen.getByText('notFoundTitle')).toBeInTheDocument());
-    expect(screen.getByText('notFoundDescription')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Order not found')).toBeInTheDocument());
+    expect(
+      screen.getByText("We couldn't find an order matching this ID. Please check your order link.")
+    ).toBeInTheDocument();
 
     // The always-on "Order Another" CTA should not double up with the
     // EmptyState's own action once the order is confirmed not found.
     expect(screen.queryByText('Order Another')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'backToMenu' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to menu' }));
 
     expect(navigateSpy).toHaveBeenCalledWith({ to: '/' });
   });
@@ -74,7 +83,7 @@ describe('OrderStatus not-found state', () => {
 
     render(<OrderStatus />);
 
-    await waitFor(() => expect(screen.getByText('notFoundTitle')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Order not found')).toBeInTheDocument());
     expect(apiGet).not.toHaveBeenCalled();
   });
 });

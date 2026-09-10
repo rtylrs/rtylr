@@ -2,7 +2,9 @@ import { initI18n } from '@voxire/i18n';
 
 // Each file under locales/{lang}/*.json is auto-discovered.
 // The filename (without .json) becomes the i18next namespace key,
-// so t('common.save') maps to locales/{lang}/common.json → save.
+// so t('profile.save') maps to locales/{lang}/profile.json → save.
+// This was already documented here and every call site ignored it, which is
+// why all 24 of them rendered their own key on screen (rtylr#1269).
 const modules = import.meta.glob<{ default: Record<string, unknown> }>('../../locales/**/*.json', {
   eager: true,
 });

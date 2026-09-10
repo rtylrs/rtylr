@@ -69,9 +69,9 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={SearchX}
-          title={t('businessNotFoundTitle')}
-          description={t('businessNotFoundDescription')}
-          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+          title={t('locationmenu.businessNotFoundTitle')}
+          description={t('locationmenu.businessNotFoundDescription')}
+          action={{ label: t('locationmenu.goBack'), onClick: () => router.history.back() }}
         />
       </div>
     );
@@ -89,10 +89,10 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={MapPinOff}
-          title={t('locationNotFoundTitle')}
-          description={t('locationNotFoundDescription')}
+          title={t('locationmenu.locationNotFoundTitle')}
+          description={t('locationmenu.locationNotFoundDescription')}
           action={{
-            label: t('backToBusiness', { businessName: biz.business.name }),
+            label: t('locationmenu.backToBusiness', { businessName: biz.business.name }),
             onClick: () => void navigate({ to: '/$slug', params: { slug } }),
           }}
         />
@@ -126,10 +126,10 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={UtensilsCrossed}
-          title={t('noItemsTitle')}
-          description={t('noItemsDescription')}
+          title={t('locationmenu.noItemsTitle')}
+          description={t('locationmenu.noItemsDescription')}
           action={{
-            label: t('backToBusiness', { businessName: biz.business.name }),
+            label: t('locationmenu.backToBusiness', { businessName: biz.business.name }),
             onClick: () => void navigate({ to: '/$slug', params: { slug } }),
           }}
         />

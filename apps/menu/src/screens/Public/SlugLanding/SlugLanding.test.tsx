@@ -1,13 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, opts?: Record<string, unknown>) =>
-      opts ? `${key}:${JSON.stringify(opts)}` : key,
-  }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves,
+// which is how this suite passed while every string on screen was a dotted
+// path (rtylr#1269). The real locale files mean the copy below also proves the
+// lookup.
 
 vi.mock('@voxire/components', () => ({
   FullScreenLoader: () => null,
@@ -31,15 +30,22 @@ vi.mock('../Menu/Menu', () => ({
 }));
 
 import SlugLanding from './SlugLanding';
+import { initTestI18n } from '../../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('SlugLanding business-not-found state', () => {
   it('shows the shared EmptyState and goes back on the CTA', () => {
     render(<SlugLanding />);
 
-    expect(screen.getByText('businessNotFoundTitle')).toBeInTheDocument();
-    expect(screen.getByText(/businessNotFoundDescription/)).toBeInTheDocument();
+    expect(screen.getByText('Business not found')).toBeInTheDocument();
+    expect(
+      screen.getByText(/The link "\/no-such-business" doesn't match any active business/)
+    ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'goBack' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
 
     expect(backSpy).toHaveBeenCalledTimes(1);
   });

@@ -247,9 +247,9 @@ const OrderStatus = (): React.JSX.Element => {
         {notFound && (
           <EmptyState
             icon={PackageX}
-            title={t('notFoundTitle')}
-            description={t('notFoundDescription')}
-            action={{ label: t('backToMenu'), onClick: handleOrderAnother }}
+            title={t('orderstatus.notFoundTitle')}
+            description={t('orderstatus.notFoundDescription')}
+            action={{ label: t('orderstatus.backToMenu'), onClick: handleOrderAnother }}
           />
         )}
 

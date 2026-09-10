@@ -35,6 +35,7 @@
     "created": "Poste créé",
     "createFailed": "Création impossible",
     "roleCount_one": "{{count}} poste",
+    "roleCount_many": "{{count}} de postes",
     "roleCount_other": "{{count}} postes",
     "publishedCount": "{{count}} publié(s)"
   },
@@ -51,6 +52,7 @@
     "statusUpdated": "Statut mis à jour",
     "statusFailed": "Mise à jour impossible",
     "applicationCount_one": "{{count}} candidature",
+    "applicationCount_many": "{{count}} de candidatures",
     "applicationCount_other": "{{count}} candidatures",
     "inFilter": "dans « {{stage}} »",
     "status": {
