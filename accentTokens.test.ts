@@ -239,12 +239,40 @@ describe('the accent tint is paired with its own foreground', () => {
         const lines = fs.readFileSync(file, 'utf8').split('\n');
         lines.forEach((line, i) => {
           if (isComment(line)) return;
+          // Anywhere in the declaration, not immediately after the colon. A
+          // checkbox writes `background: selected ? 'var(--accent)' :
+          // 'transparent'`, and a pattern anchored to the colon walked past
+          // every conditional fill in the app.
+          //
+          // Third variation of the same mistake in this file: `project.color`
+          // against `project?.color` (rtylr#1250), a window too short by one
+          // element, and now a ternary. The lesson each time is that the shape
+          // of real code is wider than the shape of the example that prompted
+          // the check.
+          // The background's own value, stopping at the comma that ends the
+          // declaration. `[^;\n]*` ran to the end of the line instead, so a
+          // `background: 'rgba(...)', color: '#4583C4'` pair matched as an
+          // "accent fill" on the strength of the *foreground* later on the same
+          // line. It found 11 real defects that way, all of them accent tints
+          // rather than fills, so the answer was right and the reason was not.
+          const backgroundValue = /background:\s*([^,}\n]*)/.exec(line)?.[1] ?? '';
           const onFill =
-            /background:\s*'?var\(--accent\)/.test(line) ||
-            new RegExp(`background:[^,\n]*'${accent}'`, 'i').test(line);
+            /var\(--accent\)/.test(backgroundValue) ||
+            new RegExp(`'${accent}'`, 'i').test(backgroundValue);
           if (!onFill) return;
-          const window = lines.slice(i, i + 3).join('\n');
-          if (/color:\s*'?#[0-9a-fA-F]{3,6}'?/.test(window)) {
+          // Wide enough to reach a foreground set on a child element. An
+          // `i + 3` window missed three checked checkboxes whose tick sits four
+          // lines below the fill, past the closing `}}` and an aria-label. The
+          // same too-tight window hid Timeline's label in rtylr#1250, so this is
+          // the second time; widened once, deliberately, rather than by one line
+          // each time a case turns up.
+          const window = lines.slice(i, i + 10).join('\n');
+          // `color:` in a style object **or** `color=` as a prop. Three checked
+          // checkboxes painted their tick with `color="#0a0a0a"` on an
+          // accent-filled button, and the style-object pattern walked past all
+          // of them because a lucide icon takes its colour as a prop
+          // (rtylr#1073).
+          if (/color[:=]\s*['"]?#[0-9a-fA-F]{3,6}['"]?/.test(window)) {
             offenders.push(`${path.relative(ROOT, file)}:${i + 1} (hardcoded hex)`);
           } else if (/color:\s*[^,\n]*var\(\s*--[a-z0-9-]+\s*,/.test(window)) {
             offenders.push(`${path.relative(ROOT, file)}:${i + 1} (var with literal fallback)`);

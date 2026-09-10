@@ -106,7 +106,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
           }}
           aria-label={selected ? t('common.taskRow.deselectTask') : t('common.taskRow.selectTask')}
         >
-          {selected && <Check size={9} color="#0a0a0a" strokeWidth={3} />}
+          {selected && <Check size={9} color="var(--flow-on-accent)" strokeWidth={3} />}
         </button>
         <PriorityIcon priority={task.priority} />
         <span

@@ -288,7 +288,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
             initials={getInitials(member.name)}
             size="lg"
             className="shrink-0"
-            style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+            style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">

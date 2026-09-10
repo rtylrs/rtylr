@@ -118,7 +118,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
           borderColor: checked ? 'var(--accent)' : 'var(--flow-border)',
         }}
       >
-        {checked && <Check size={10} strokeWidth={3} color="#0a0a0a" />}
+        {checked && <Check size={10} strokeWidth={3} color="var(--flow-on-accent)" />}
       </button>
 
       {/* The same glyph the board uses for the same task. This was a 6px

@@ -66,7 +66,7 @@ const ICON_MAP: Record<
 };
 
 const COLOR_MAP: Record<string, { bg: string; color: string }> = {
-  menu: { bg: 'rgba(69,131,196,0.12)', color: '#4583C4' },
+  menu: { bg: 'var(--accent-muted)', color: 'var(--accent-on-muted)' },
   loyalty: { bg: 'rgba(239,68,68,0.12)', color: '#ef4444' },
   ai_chat: { bg: 'rgba(139,92,246,0.12)', color: '#8b5cf6' },
   analytics: { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
@@ -74,7 +74,7 @@ const COLOR_MAP: Record<string, { bg: string; color: string }> = {
   multi_language: { bg: 'rgba(16,185,129,0.12)', color: '#10b981' },
   store: { bg: 'rgba(20,184,166,0.12)', color: '#14b8a6' },
   book: { bg: 'rgba(14,165,233,0.12)', color: '#0ea5e9' },
-  support: { bg: 'rgba(69,131,196,0.12)', color: '#4583C4' },
+  support: { bg: 'var(--accent-muted)', color: 'var(--accent-on-muted)' },
   insights: { bg: 'rgba(99,102,241,0.12)', color: '#6366f1' },
   custom_domain: { bg: 'rgba(113,113,122,0.12)', color: '#71717a' },
   email_marketing: { bg: 'rgba(236,72,153,0.12)', color: '#ec4899' },
@@ -311,7 +311,10 @@ const Addons: React.FC = () => {
                       {isGranted && (
                         <span
                           className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                          style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                          style={{
+                            background: 'var(--accent-muted)',
+                            color: 'var(--accent-on-muted)',
+                          }}
                         >
                           Granted
                         </span>
