@@ -1,16 +1,17 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Valuation from './Valuation';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useValuation: vi.fn(),
   refetch: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -26,6 +27,10 @@ vi.mock('./useValuation', () => ({
   useValuation: mocks.useValuation,
 }));
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('Valuation empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,12 +44,14 @@ describe('Valuation empty state', () => {
   it('shows the illustration, empty copy, and refetches on CTA click', () => {
     render(<Valuation />);
 
-    const title = screen.getByText('valuation.empty.title');
+    const title = screen.getByText('No valuation data available');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('valuation.empty.description')).toBeInTheDocument();
+    expect(
+      screen.getByText('Valuation appears once inventory is tracked in a warehouse.')
+    ).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'valuation.refresh' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Refresh' }));
 
     expect(mocks.refetch).toHaveBeenCalledTimes(1);
   });
@@ -68,6 +75,6 @@ describe('Valuation empty state', () => {
 
     render(<Valuation />);
 
-    expect(screen.queryByText('valuation.empty.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('No valuation data available')).not.toBeInTheDocument();
   });
 });
