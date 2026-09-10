@@ -73,11 +73,22 @@ describe('Flow RTL layout', () => {
     const board = source('features/projects/ProjectBoard.tsx');
 
     expect(board).toContain('absolute end-0 top-full');
-    expect(board).toContain('me-1');
 
     expect(board).not.toContain('right-0');
     expect(board).not.toContain('text-left');
-    expect(board).not.toContain('mr-1');
+
+    // Was `expect(board).toContain('me-1')`, which pinned one utility on one
+    // element. That element is gone: the empty-column button it sat in became a
+    // sentence, and the add control beside it spaces with `gap`, which has no
+    // direction to get wrong. Asserting the presence of a specific logical
+    // utility fails when the code stops needing it, which is the wrong way
+    // round.
+    //
+    // The property is that no *physical* inline spacing appears at all, which is
+    // stronger than the old pair and cannot be satisfied by accident.
+    for (const physical of ['mr-', 'ml-', 'pr-', 'pl-']) {
+      expect(board, `physical spacing utility ${physical}`).not.toContain(physical);
+    }
   });
 
   it('keeps the task detail meta rail and its popover logical', () => {
