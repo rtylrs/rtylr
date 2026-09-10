@@ -1,10 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useMediaQuery } from '@voxire/utils';
-import TaskDetail from '../../features/tasks/TaskDetail';
+/**
+ * Lazy, for two reasons.
+ *
+ * Task detail is a large component with a wide dependency tree, and nothing
+ * needs it until a task is actually opened. The router already lazy-loads its
+ * route components for the same reason.
+ *
+ * It also keeps that tree out of the layout's own tests. Importing it eagerly
+ * made `FlowLayout.test.tsx` fail at module load on a missing `getCookie`
+ * export in its `@voxire/auth` mock, because the layout renders this drawer and
+ * the drawer reached all the way through to whatever task detail imports. A
+ * layout test should not have to mock task detail's dependencies to render a
+ * sidebar.
+ */
+const TaskDetail = React.lazy(() => import('../../features/tasks/TaskDetail'));
 
 /** Below this the drawer is a full-page overlay instead of a side panel. */
 const WIDE = '(min-width: 768px)';
@@ -100,7 +114,15 @@ export const TaskDrawer: React.FC = () => {
               </button>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <TaskDetail taskId={openTask} />
+              <Suspense
+                fallback={
+                  <p className="p-6 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
+                    {t('flow.taskDetail.loading')}
+                  </p>
+                }
+              >
+                <TaskDetail taskId={openTask} />
+              </Suspense>
             </div>
           </motion.aside>
         </>
