@@ -1,10 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves,
+// which is how this suite passed while every string on screen was a dotted
+// path (rtylr#1269). The real locale files mean the copy below also proves the
+// lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -21,6 +23,11 @@ vi.mock('../../shared/lib/clients', () => ({
 
 import { useCartStore } from '../../shared/stores/cartStore';
 import Checkout from './Checkout';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('Checkout empty cart', () => {
   beforeEach(() => {
@@ -32,9 +39,9 @@ describe('Checkout empty cart', () => {
 
     render(<Checkout />);
 
-    expect(screen.getByText('emptyCart')).toBeInTheDocument();
+    expect(screen.getByText('Your cart is empty')).toBeInTheDocument();
 
-    const backButton = screen.getByRole('button', { name: 'backToMenu' });
+    const backButton = screen.getByRole('button', { name: 'Back to Menu' });
     fireEvent.click(backButton);
 
     expect(backSpy).toHaveBeenCalledTimes(1);
