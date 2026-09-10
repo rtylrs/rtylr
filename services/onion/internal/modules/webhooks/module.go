@@ -10,14 +10,16 @@ import (
 )
 
 type Module struct {
-	service *application.Service
-	sender  *application.Sender
+	service  *application.Service
+	sender   *application.Sender
+	notifier *application.Notifier
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
-		service: application.NewService(ctx, db),
-		sender:  application.NewSender(db),
+		service:  application.NewService(ctx, db),
+		sender:   application.NewSender(db),
+		notifier: application.NewNotifier(db),
 	}
 }
 
@@ -33,4 +35,5 @@ func (m *Module) GetService() *application.Service {
 // worker concern: the API process serves registration CRUD and never sends.
 func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
 	jobs.Register(ctx, registry, m.sender)
+	jobs.RegisterNotifier(ctx, registry, m.notifier)
 }

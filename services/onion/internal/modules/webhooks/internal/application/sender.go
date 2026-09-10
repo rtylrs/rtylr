@@ -239,11 +239,11 @@ func (s *Sender) attempt(ctx context.Context, delivery domain.Delivery) (int, er
 // isInternalAddressRefusal recognises the transport's own refusal, so it is
 // classified as permanent rather than retried like a network blip.
 func isInternalAddressRefusal(err error) bool {
-	return err != nil && (containsAny(err.Error(),
+	return err != nil && containsAny(err.Error(),
 		"refusing to connect to internal address",
 		"refusing unresolved address",
 		"refusing unparseable address",
-		"redirects are not followed"))
+		"redirects are not followed")
 }
 
 func containsAny(haystack string, needles ...string) bool {

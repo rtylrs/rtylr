@@ -118,3 +118,41 @@ FROM webhook_deliveries d
 WHERE d.business_id = sqlc.arg('business_id')
   AND (sqlc.arg('webhook_id') = 0 OR d.webhook_id = sqlc.arg('webhook_id'))
   AND (sqlc.arg('status') = '' OR d.status = sqlc.arg('status'));
+
+-- Registrations that have dead-lettered something recently, one row each.
+--
+-- Grouped rather than one row per dead delivery: an endpoint that stops
+-- answering produces many, and the owner needs to hear that their endpoint is
+-- failing, not receive one message per lost event.
+--
+-- Bounded by how recently a delivery died, so a registration that failed
+-- months ago and was never fixed does not generate a notification forever.
+-- updated_at is when the row reached its final state.
+-- name: ListRegistrationsWithRecentDeadDeliveries :many
+SELECT d.business_id, d.webhook_id, w.url,
+       COUNT(*) AS dead_count,
+       MAX(d.updated_at) AS last_dead_at
+FROM webhook_deliveries d
+JOIN hub_webhooks w ON w.id = d.webhook_id AND w.business_id = d.business_id
+WHERE d.status = 'dead'
+  AND d.updated_at >= DATE_SUB(NOW(), INTERVAL sqlc.arg('within_hours') HOUR)
+GROUP BY d.business_id, d.webhook_id, w.url
+ORDER BY d.webhook_id ASC
+LIMIT ?;
+
+-- cross-schema read from users and shared — who to tell about a failing
+-- registration.
+--
+-- hub_webhooks.owner_id is the user who created the registration, so they are
+-- the person who set it up and the one who should hear it broke. Gated on an
+-- active authorization_business_members row for the registration's own
+-- business, so somebody who has since left is not sent a current tenant's
+-- failures.
+-- name: GetWebhookNotificationRecipient :one
+SELECT u.id, COALESCE(u.email, '') AS email, COALESCE(u.full_name, '') AS full_name
+FROM hub_webhooks w
+JOIN users u ON u.id = w.owner_id
+JOIN authorization_business_members m
+  ON m.user_id = u.id AND m.business_id = w.business_id AND m.status = 'active'
+WHERE w.id = ? AND w.business_id = ?
+LIMIT 1;

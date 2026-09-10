@@ -65,7 +65,8 @@ func TestTheDeliveryClientRefusesALoopbackDestination(t *testing.T) {
 
 	client := newDeliveryClient(2 * time.Second)
 	request, err := http.NewRequestWithContext(
-		context.Background(), http.MethodPost, server.URL, strings.NewReader("{}"))
+		context.Background(), http.MethodPost, server.URL, strings.NewReader("{}"),
+	)
 	if err != nil {
 		t.Fatalf("building request: %v", err)
 	}

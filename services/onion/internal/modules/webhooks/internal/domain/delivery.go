@@ -61,3 +61,21 @@ type DeliveryRecord struct {
 	DeliveredAt    *time.Time
 	CreatedAt      time.Time
 }
+
+// FailingRegistration is a registration that has dead-lettered deliveries
+// recently, summarised for one notification rather than one per lost event.
+type FailingRegistration struct {
+	BusinessID int64
+	WebhookID  int64
+	URL        string
+	DeadCount  int64
+	LastDeadAt time.Time
+}
+
+// NotificationRecipient is who to tell about a failing registration: the user
+// who created it, confirmed still an active member of its business.
+type NotificationRecipient struct {
+	UserID int64
+	Email  string
+	Name   string
+}

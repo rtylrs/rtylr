@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
 	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure/persistence/sqlc"
@@ -219,4 +220,72 @@ func (r *Repository) ListDeliveriesForBusiness(ctx context.Context, businessID i
 		out = append(out, record)
 	}
 	return out, total, nil
+}
+
+// ListFailingRegistrations returns registrations that dead-lettered something
+// within the window, one row each rather than one per lost event.
+func (r *Repository) ListFailingRegistrations(ctx context.Context, withinHours int64, limit int32) ([]domain.FailingRegistration, error) {
+	rows, err := r.queries.ListRegistrationsWithRecentDeadDeliveries(ctx, sqlc.ListRegistrationsWithRecentDeadDeliveriesParams{
+		WithinHours: withinHours,
+		Limit:       limit,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list registrations with dead deliveries", logger.Error(err))
+		return nil, err
+	}
+
+	out := make([]domain.FailingRegistration, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.FailingRegistration{
+			BusinessID: row.BusinessID,
+			WebhookID:  row.WebhookID,
+			URL:        row.Url,
+			DeadCount:  row.DeadCount,
+			LastDeadAt: asTime(row.LastDeadAt),
+		})
+	}
+	return out, nil
+}
+
+// GetNotificationRecipient resolves who to tell about a failing registration.
+//
+// sql.ErrNoRows means there is nobody to tell: the creator has left the
+// business, or their membership is no longer active. The caller logs that
+// rather than falling back to somebody who never asked for the message.
+func (r *Repository) GetNotificationRecipient(ctx context.Context, webhookID, businessID int64) (domain.NotificationRecipient, error) {
+	row, err := r.queries.GetWebhookNotificationRecipient(ctx, sqlc.GetWebhookNotificationRecipientParams{
+		ID:         webhookID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		return domain.NotificationRecipient{}, err
+	}
+	return domain.NotificationRecipient{
+		UserID: row.ID,
+		Email:  row.Email,
+		Name:   row.FullName,
+	}, nil
+}
+
+// asTime narrows an aggregate column sqlc types as interface{}.
+//
+// MAX(updated_at) has no single declared type, so the driver may hand back a
+// time.Time or the raw bytes depending on parseTime. An unrecognised shape
+// yields the zero time rather than failing the whole listing: the value only
+// decorates a notification, and losing it is not worth dropping the alert
+// that something is failing.
+func asTime(value any) time.Time {
+	switch typed := value.(type) {
+	case time.Time:
+		return typed
+	case []byte:
+		if parsed, err := time.Parse("2006-01-02 15:04:05", string(typed)); err == nil {
+			return parsed
+		}
+	case string:
+		if parsed, err := time.Parse("2006-01-02 15:04:05", typed); err == nil {
+			return parsed
+		}
+	}
+	return time.Time{}
 }
