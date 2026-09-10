@@ -28,9 +28,9 @@
     "tagFailed": "Failed to update tag",
     "notesSaved": "Notes saved",
     "notesFailed": "Failed to save notes",
-    "supportTicket": "support ticket",
-    "supportTickets": "support tickets",
-    "outstanding": "outstanding"
+    "outstanding": "{{amount}} outstanding",
+    "supportTickets_one": "{{count}} support ticket",
+    "supportTickets_other": "{{count}} support tickets"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
@@ -70,7 +70,10 @@
   "templates": {
     "empty": "No templates",
     "emptyDescription": "Create one to get started.",
-    "new": "New template"
+    "new": "New template",
+    "created": "Template created",
+    "updated": "Template updated",
+    "deleted": "Template deleted"
   },
   "campaigns": {
     "created": "Campaign created",

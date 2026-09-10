@@ -28,9 +28,13 @@
     "tagFailed": "Failed to update tag",
     "notesSaved": "Notes saved",
     "notesFailed": "Failed to save notes",
-    "supportTicket": "تذكرة دعم",
-    "supportTickets": "تذاكر دعم",
-    "outstanding": "مستحق"
+    "outstanding": "{{amount}} غير مسددة",
+    "supportTickets_zero": "لا تذاكر دعم",
+    "supportTickets_one": "تذكرة دعم واحدة",
+    "supportTickets_two": "تذكرتا دعم",
+    "supportTickets_few": "{{count}} تذاكر دعم",
+    "supportTickets_many": "{{count}} تذكرة دعم",
+    "supportTickets_other": "{{count}} تذكرة دعم"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
@@ -70,7 +74,10 @@
   "templates": {
     "empty": "لا توجد قوالب",
     "emptyDescription": "أنشئ قالبًا للبدء.",
-    "new": "قالب جديد"
+    "new": "قالب جديد",
+    "created": "تم إنشاء القالب",
+    "updated": "تم تحديث القالب",
+    "deleted": "تم حذف القالب"
   },
   "campaigns": {
     "created": "Campaign created",

@@ -320,10 +320,9 @@ const CustomerProfile: React.FC = () => {
                     fontSize: '12px',
                   }}
                 >
-                  {supportEngagement.totalTickets}{' '}
-                  {supportEngagement.totalTickets === 1
-                    ? t('customers.supportTicket')
-                    : t('customers.supportTickets')}
+                  {t('crm.customers.supportTickets', {
+                    count: supportEngagement.totalTickets,
+                  })}
                 </span>
               )}
               {balance && balance.totalOutstanding > 0 && (
@@ -336,7 +335,9 @@ const CustomerProfile: React.FC = () => {
                     fontSize: '12px',
                   }}
                 >
-                  {balance.totalOutstanding.toFixed(2)} {t('customers.outstanding')}
+                  {t('crm.customers.outstanding', {
+                    amount: balance.totalOutstanding.toFixed(2),
+                  })}
                 </span>
               )}
             </div>
