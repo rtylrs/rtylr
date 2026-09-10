@@ -43,7 +43,9 @@
     "approve": "Approuver le cycle",
     "exportCsv": "Exporter CSV",
     "notFound": "Cycle de paie introuvable",
-    "notFoundDescription": "Ce cycle de paie n’a pas pu être chargé."
+    "notFoundDescription": "Ce cycle de paie n’a pas pu être chargé.",
+    "postToJournal": "Passer au journal",
+    "posted": "Paie passée au journal financier"
   },
   "paySlip": {
     "title": "Fiche de paie",
@@ -79,12 +81,6 @@
     "enableBonuses": "Activer les primes",
     "saved": "Configuration de la paie enregistrée",
     "notConfiguredNotice": "La paie n'est pas encore configurée - remplissez le formulaire pour commencer"
-  },
-  "payroll": {
-    "runDetail": {
-      "postToJournal": "Passer au journal",
-      "posted": "Paie passée au journal financier"
-    }
   },
   "stub": {
     "hours": "Heures",
