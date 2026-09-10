@@ -825,7 +825,8 @@
     "pageTitle": "Chronologie · rtylr",
     "emptyTitle": "Aucune tâche avec date d'échéance",
     "emptyDescription": "Ajoutez des dates d'échéance pour voir la chronologie.",
-    "goToBoardCta": "Aller au tableau"
+    "goToBoardCta": "Aller au tableau",
+    "taskColumn": "Tâche"
   },
   "projectDashboard": {
     "pageTitle": "Tableau de bord du projet · rtylr",
@@ -834,7 +835,13 @@
     "noTasksYet": "Aucune tâche pour l'instant",
     "noTasksYetDescription": "Ajoutez une tâche pour remplir le tableau de bord.",
     "addTaskCta": "Ajouter une tâche",
-    "partialCost": "Certain temps n'a pas de tarif enregistré"
+    "partialCost": "Certain temps n'a pas de tarif enregistré",
+    "totalTasks": "Total des tâches",
+    "done": "Terminées",
+    "inProgress": "En cours",
+    "overdue": "En retard",
+    "labourCost": "Coût de main-d'œuvre",
+    "percentComplete": "{{percent}} % terminé"
   },
   "projectCalendar": {
     "pageTitle": "Calendrier · rtylr"
@@ -1001,5 +1008,10 @@
   "projectNotFound": "Projet introuvable. Le lien est peut-être ancien, ou il a été supprimé.",
   "labels": {
     "removeLabel": "Supprimer {{name}}"
+  },
+  "previewRoute": {
+    "title": "Route de prévisualisation indisponible",
+    "body": "Cette page n'est pas activée dans cet environnement. La route reste disponible lorsque les routes de prévisualisation sont activées.",
+    "back": "Retour à Mes tickets"
   }
 }
