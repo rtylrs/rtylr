@@ -287,13 +287,13 @@ const Bills: React.FC = () => {
             border: '1px solid var(--finance-info)',
           }}
           role="region"
-          aria-label={t('bills.receivedFromErp')}
+          aria-label={t('finance.bills.receivedFromErp')}
         >
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hub-text)' }}>
-            {t('bills.receivedFromErp')} ({receivedPos.length})
+            {t('finance.bills.receivedFromErp')} ({receivedPos.length})
           </div>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginTop: 2 }}>
-            {t('bills.receivedFromErpHint')}
+            {t('finance.bills.receivedFromErpHint')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 10 }}>
             {receivedPos.slice(0, 5).map((po) => (

@@ -27,13 +27,14 @@ import {
  * is added here: turning the guard on for an unmeasured app would fail the
  * suite rather than report a finding.
  */
-const ENFORCED_APPS = ['dash', 'erp', 'flow', 'recruit'] as const;
+const ENFORCED_APPS = ['dash', 'erp', 'finance', 'flow', 'recruit'] as const;
 
 // A floor per app, so a regex that silently stops matching cannot make this
 // suite pass by finding nothing to check.
 const MINIMUM_KEYS: Record<(typeof ENFORCED_APPS)[number], number> = {
   dash: 300,
   erp: 150,
+  finance: 90,
   flow: 500,
   recruit: 250,
 };

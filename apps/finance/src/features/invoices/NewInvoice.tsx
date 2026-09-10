@@ -328,7 +328,7 @@ const NewInvoice: React.FC = () => {
                     htmlFor="contract-prefill"
                     style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}
                   >
-                    {t('invoices.prefillFromContract')}
+                    {t('finance.invoices.prefillFromContract')}
                   </label>
                   <select
                     id="contract-prefill"
@@ -349,7 +349,7 @@ const NewInvoice: React.FC = () => {
                       minWidth: 220,
                     }}
                   >
-                    <option value="">{t('invoices.chooseContract')}</option>
+                    <option value="">{t('finance.invoices.chooseContract')}</option>
                     {signedContracts.map((c) => (
                       <option key={c.id} value={c.id}>
                         {`${c.plan ?? 'Contract'} — ${c.mrr ?? '0'}/mo${c.signedAt ? ` (${c.signedAt})` : ''}`}

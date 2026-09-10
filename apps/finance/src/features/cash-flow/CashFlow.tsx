@@ -24,17 +24,20 @@ const CashFlow: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title={`${t('cashFlow.title')} · rtylr`} />
+      <HelmetContainer title={`${t('finance.cashFlow.title')} · rtylr`} />
       <PageHeader
-        title={t('cashFlow.title')}
-        breadcrumbs={[{ label: t('cashFlow.reports') }, { label: t('cashFlow.title') }]}
+        title={t('finance.cashFlow.title')}
+        breadcrumbs={[
+          { label: t('finance.cashFlow.reports') },
+          { label: t('finance.cashFlow.title') },
+        ]}
         actions={<PeriodSelector period={period} onPeriodChange={setPeriod} />}
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-            {t('cashFlow.totalInflow')}
+            {t('finance.cashFlow.totalInflow')}
           </div>
           <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}>
             <MoneyDisplay amount={totalIn} />
@@ -42,7 +45,7 @@ const CashFlow: React.FC = () => {
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-            {t('cashFlow.totalOutflow')}
+            {t('finance.cashFlow.totalOutflow')}
           </div>
           <div
             style={{ fontSize: 22, fontWeight: 700, color: 'var(--finance-danger)', marginTop: 6 }}
@@ -52,7 +55,7 @@ const CashFlow: React.FC = () => {
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-            {t('cashFlow.netCashFlow')}
+            {t('finance.cashFlow.netCashFlow')}
           </div>
           <div
             style={{
