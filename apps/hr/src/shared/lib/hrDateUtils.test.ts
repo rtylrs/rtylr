@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   formatDate,
   daysBetween,
@@ -88,20 +88,66 @@ describe('isToday', () => {
 });
 
 describe('isFutureDate', () => {
-  it('returns true for far future date', () => {
-    expect(isFutureDate('2099-12-31')).toBe(true);
+  /**
+   * The clock is pinned and the dates are adjacent to it, because the previous
+   * version of these tests used `2000-01-01` and `2099-12-31`. Ninety-nine
+   * years apart, they passed under the broken implementation and the correct
+   * one alike, so they said nothing about the bug they were meant to cover
+   * (rtylr#1077).
+   *
+   * The interesting cases are all within a day of today: that is where a UTC
+   * midnight parsed from a local day lands on the wrong side of "now".
+   */
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // 08:00 in Beirut, so the local day and the UTC day agree and these
+    // assertions are about the rule rather than the offset.
+    vi.setSystemTime(new Date('2026-05-02T05:00:00.000Z'));
   });
-  it('returns false for past date', () => {
-    expect(isFutureDate('2000-01-01')).toBe(false);
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('is false for today', () => {
+    expect(isFutureDate('2026-05-02')).toBe(false);
+  });
+
+  it('is true for tomorrow', () => {
+    expect(isFutureDate('2026-05-03')).toBe(true);
+  });
+
+  it('is false for yesterday', () => {
+    expect(isFutureDate('2026-05-01')).toBe(false);
+  });
+
+  it('reads a timestamped value as the day it names', () => {
+    expect(isFutureDate('2026-05-03T00:00:00Z')).toBe(true);
+    expect(isFutureDate('2026-05-02T23:59:00Z')).toBe(false);
   });
 });
 
 describe('isPastDate', () => {
-  it('returns true for past date', () => {
-    expect(isPastDate('2000-01-01')).toBe(true);
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-02T05:00:00.000Z'));
   });
-  it('returns false for future date', () => {
-    expect(isPastDate('2099-12-31')).toBe(false);
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('is false for today, which is not past', () => {
+    // The defect. `new Date('2026-05-02') < new Date()` is true at this
+    // instant, so today read as past for the whole working day.
+    expect(new Date('2026-05-02') < new Date()).toBe(true);
+    expect(isPastDate('2026-05-02')).toBe(false);
+  });
+
+  it('is true for yesterday', () => {
+    expect(isPastDate('2026-05-01')).toBe(true);
+  });
+
+  it('is false for tomorrow', () => {
+    expect(isPastDate('2026-05-03')).toBe(false);
   });
 });
 
