@@ -130,9 +130,14 @@ describe('the foreground for a colour on its own tint', () => {
         const window = lines.slice(Math.max(0, i - 4), i + 10).join('\n');
         if (window.includes('onTint(')) return;
         // `color: <expr>` with nothing between, i.e. the raw colour as text.
-        const bare = new RegExp(
-          `color:\\s*${expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*[,}?]`
-        );
+        //
+        // A `.` in the tint's argument is allowed to appear as `?.` in the
+        // colour: TaskCard wrote `withAlpha(project.color, 13)` beside
+        // `color: project?.color`, and an exact-match pattern walked straight
+        // past it. Probed, because the first version of this guard did.
+        const escaped = expr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const loose = escaped.split('\\.').join('\\??\\.');
+        const bare = new RegExp(`color:\\s*${loose}\\s*[,}?]`);
         if (bare.test(window)) {
           offenders.push(
             `${path.relative(SRC, file)}:${i + 1} (withAlpha(${expr}) with bare ${expr})`

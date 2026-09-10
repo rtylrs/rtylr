@@ -618,7 +618,10 @@
       "later": "Plus tard",
       "noDueDate": "Sans échéance"
     },
-    "groupByLabel": "Grouper :"
+    "groupByLabel": "Grouper :",
+    "addTask": "Ajouter une tâche",
+    "emptyColumn": "Rien ici pour le moment.",
+    "emptyLane": "Aucune"
   },
   "views": {
     "addTooltip": "Nouvelle vue",

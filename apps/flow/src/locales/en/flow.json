@@ -614,7 +614,10 @@
       "later": "Later",
       "noDueDate": "No due date"
     },
-    "groupByLabel": "Group:"
+    "groupByLabel": "Group:",
+    "addTask": "Add task",
+    "emptyColumn": "Nothing here yet.",
+    "emptyLane": "None"
   },
   "views": {
     "addTooltip": "New view",

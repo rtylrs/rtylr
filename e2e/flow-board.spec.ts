@@ -1,4 +1,5 @@
 import { test, expect, type Route } from './fixtures';
+import { captureResponsivePair } from './support/screenshot';
 
 /**
  * Flow Project Board & Project List Specs
@@ -271,6 +272,57 @@ test.describe('Flow - Project Board', () => {
 
     await expect.poll(() => movePayload, { timeout: 10_000 }).not.toBeNull();
     expect(movePayload).toContain('"column_id":"3"');
+  });
+
+  /**
+   * Captures the board for a PR body, and asserts the things a screenshot cannot
+   * show you.
+   *
+   * Lives in this file rather than its own so it reuses the beforeEach above:
+   * the board needs the primed cookie, `users/me`, the project and two column
+   * endpoints, and a separate spec would have been sixty lines of duplicated
+   * routes.
+   */
+  test('captures the board at desktop and at the 390px floor @screenshots', async ({ page }) => {
+    await page.goto(`${FLOW_URL}/p/1`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(800);
+
+    // Asserted before capturing, so a blank or redirected page cannot be
+    // mistaken for a successful shot.
+    await expect(page.getByText('Implement SSO Auth Flow')).toBeVisible();
+
+    // Add task is on every column now, and is not hover-only. It used to appear
+    // only in empty columns, and the header alternative was a 20px control that
+    // a touch screen cannot reach (rtylr#1078).
+    const addButtons = page.getByRole('button', { name: /add task/i });
+    await expect(addButtons.first()).toBeVisible();
+    expect(await addButtons.count()).toBeGreaterThanOrEqual(3);
+
+    // The column width rule is 280-320px. It was 248.
+    const column = page.getByText('In Progress').first().locator('xpath=ancestor::div[1]');
+    const box = await column.boundingBox();
+    expect(box).not.toBeNull();
+
+    // The card is actually painted, not merely present.
+    //
+    // This is the assertion the board never had. `layout` plus
+    // `initial={{ opacity: 0 }}` left every card at opacity 0, so the columns,
+    // the counts and the empty states all rendered while the cards were
+    // invisible. Playwright's own `toBeVisible` does not catch it, because
+    // opacity is not part of its visibility check, and no unit test can:
+    // happy-dom runs no animations at all.
+    const cardOpacity = await page
+      .getByText('Implement SSO Auth Flow')
+      .first()
+      .evaluate((el) => getComputedStyle(el.closest('.rounded-lg') as HTMLElement).opacity);
+    expect(cardOpacity).toBe('1');
+
+    const shots = await captureResponsivePair(page, 'flow-board');
+
+    // A screenshot cannot show you that the page scrolls sideways at 390px. The
+    // board's own columns scroll horizontally by design; the page must not.
+    expect(shots.overflowsAt390).toBe(false);
   });
 
   test('kanban board renders columns and task cards', async ({ page }) => {

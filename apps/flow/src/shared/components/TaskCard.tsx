@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { isOverdue } from '../lib/dateUtils';
+import { dueState } from '../lib/dateUtils';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Calendar, MessageSquare, Paperclip, GitBranch } from 'lucide-react';
@@ -55,7 +55,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const doneSubtasks = taskSubtasks.filter((s) => s.completed).length;
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
-  const overdue = isOverdue(task.dueDate, task.status);
+  const due = dueState(task.dueDate);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,10 +72,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   return (
     <>
       <motion.div
+        // No entrance animation, and this is a bug fix rather than a taste
+        // change: `layout` together with `initial={{ opacity: 0 }}` left every
+        // card **stuck at opacity 0**. The layout animation latches the
+        // pre-animation opacity and never advances it, so the board rendered
+        // its columns, its counts and its empty states while the cards
+        // themselves were invisible until some later re-render, a hover for
+        // instance, shook them loose.
+        //
+        // Measured on a dev server and on a production build, in a focused
+        // Chromium with rAF running and no reduced-motion preference: opacity
+        // stayed 0 four seconds after load. Removing `layout` fixes it too, but
+        // `layout` is the animation that earns its keep, showing where a
+        // dragged card landed; the entrance fade is decoration that was never
+        // visible anyway (rtylr#1078).
         layout
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.18 }}
         onClick={(e) => {
           if (e.metaKey || e.ctrlKey) {
@@ -85,7 +96,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           }
         }}
         onContextMenu={handleContextMenu}
-        className={cn('rounded-lg cursor-pointer group relative', compact ? 'p-2.5' : 'p-3.5')}
+        // p-3 rather than p-3.5: the rule is 10-12px and 14px was outside it.
+        className={cn('rounded-lg cursor-pointer group relative', compact ? 'p-2.5' : 'p-3')}
         style={{
           opacity: dimmed ? 0.5 : undefined,
           background: 'var(--flow-card)',
@@ -122,13 +134,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               </span>
             )}
           </div>
-          <div className="flex shrink-0 items-center gap-0.5">{controls}</div>
+          {/* Hover, and focus-within so the keyboard path survives. The drag
+              handle is aria-hidden and pointer-only, but MoveToColumnMenu is
+              how a keyboard or single-pointer user moves a card, so it has to
+              come back on focus rather than only on hover (rtylr#1078). */}
+          <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+            {controls}
+          </div>
           {showProject && (project || task.projectName) && (
             <span
               className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-meta font-semibold"
               style={{
-                background: project?.color ? withAlpha(project.color, 13) : 'var(--accent-muted)',
-                color: project?.color ?? 'var(--accent-on-muted)',
+                // The optional chaining is why the rtylr#1246 sweep walked past
+                // this one: the guard matched `color: project.color` and the
+                // text here is `project?.color`.
+                ...(project?.color ? { ['--tone' as string]: project.color } : {}),
+                background: project?.color ? withAlpha('var(--tone)', 13) : 'var(--accent-muted)',
+                color: project?.color ? onTint('var(--tone)') : 'var(--accent-on-muted)',
               }}
               title={project?.name ?? task.projectName}
             >
@@ -139,8 +161,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
         {/* Title */}
         <p
-          className={cn('font-medium leading-snug mb-2', compact ? 'text-meta' : 'text-body')}
+          // Two lines, then an ellipsis. Unclamped, one long title made its card
+          // several times the height of its neighbours and pushed the rest of
+          // the column out of view (rtylr#1078, S-08). `title` carries the whole
+          // string for anyone who needs it.
+          className={cn(
+            'font-medium leading-snug mb-2 line-clamp-2',
+            compact ? 'text-meta' : 'text-body'
+          )}
           style={{ color: 'var(--flow-text)' }}
+          title={task.title}
         >
           {task.title}
         </p>
@@ -194,7 +224,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           {task.dueDate && (
             <span
               className="flex items-center gap-1 text-meta"
-              style={{ color: overdue ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)' }}
+              // The same three states as TaskRow. This card kept --flow-text-dim
+              // when the row was fixed, and that token measures 2.35:1 in both
+              // modes on a declaration that says it never carries text.
+              style={{
+                color:
+                  due === 'late'
+                    ? 'var(--flow-danger-fg)'
+                    : due === 'today'
+                      ? 'var(--flow-warn-fg)'
+                      : 'var(--flow-text-muted)',
+              }}
             >
               <Calendar size={10} />
               {formatDate(task.dueDate)}

@@ -630,7 +630,10 @@
       "later": "لاحقًا",
       "noDueDate": "بدون تاريخ استحقاق"
     },
-    "groupByLabel": "تجميع:"
+    "groupByLabel": "تجميع:",
+    "addTask": "إضافة مهمة",
+    "emptyColumn": "لا شيء هنا بعد.",
+    "emptyLane": "لا شيء"
   },
   "views": {
     "addTooltip": "عرض جديد",
