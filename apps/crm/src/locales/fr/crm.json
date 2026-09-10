@@ -28,9 +28,10 @@
     "tagFailed": "Failed to update tag",
     "notesSaved": "Notes saved",
     "notesFailed": "Failed to save notes",
-    "supportTicket": "ticket de support",
-    "supportTickets": "tickets de support",
-    "outstanding": "impayé"
+    "outstanding": "{{amount}} impayé",
+    "supportTickets_one": "{{count}} ticket de support",
+    "supportTickets_many": "{{count}} de tickets de support",
+    "supportTickets_other": "{{count}} tickets de support"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
@@ -70,7 +71,10 @@
   "templates": {
     "empty": "Aucun modèle",
     "emptyDescription": "Créez-en un pour commencer.",
-    "new": "Nouveau modèle"
+    "new": "Nouveau modèle",
+    "created": "Modèle créé",
+    "updated": "Modèle mis à jour",
+    "deleted": "Modèle supprimé"
   },
   "campaigns": {
     "created": "Campaign created",
