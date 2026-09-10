@@ -15,7 +15,8 @@
     },
     "emptyTitle": "No KPI data yet",
     "emptyDescription": "Metrics will appear here once your business starts generating activity.",
-    "vsPrior": "مقابل السابق"
+    "vsPrior": "مقابل السابق",
+    "metaTitle": "لوحة المعلومات · rtylr"
   },
   "revenue": {
     "title": "Revenue",
@@ -33,7 +34,8 @@
       "title": "لا يوجد توزيع للإيرادات حتى الآن",
       "description": "سيظهر التوزيع حسب التطبيق بعد ورود إيرادات من أكثر من تطبيق واحد."
     },
-    "vsPrevious": "مقابل السابق"
+    "vsPrevious": "مقابل السابق",
+    "metaTitle": "الإيرادات · rtylr"
   },
   "customers": {
     "title": "Customers",
@@ -64,7 +66,8 @@
     "customers_two": "عميلان",
     "customers_few": "{{formatted}} عملاء",
     "customers_many": "{{formatted}} عميلًا",
-    "customers_other": "{{formatted}} عميل"
+    "customers_other": "{{formatted}} عميل",
+    "metaTitle": "العملاء · rtylr"
   },
   "products": {
     "title": "Products",
@@ -106,7 +109,8 @@
     "products_two": "منتجان",
     "products_few": "{{formatted}} منتجات",
     "products_many": "{{formatted}} منتجًا",
-    "products_other": "{{formatted}} منتج"
+    "products_other": "{{formatted}} منتج",
+    "metaTitle": "المنتجات · rtylr"
   },
   "financial": {
     "title": "Financial",
@@ -130,7 +134,8 @@
     "invoices_two": "فاتورتان",
     "invoices_few": "{{formatted}} فواتير",
     "invoices_many": "{{formatted}} فاتورة",
-    "invoices_other": "{{formatted}} فاتورة"
+    "invoices_other": "{{formatted}} فاتورة",
+    "metaTitle": "المالية · rtylr"
   },
   "operations": {
     "title": "Operations",
@@ -166,7 +171,8 @@
     "noShows": "عدم حضور",
     "completion": "نسبة الإتمام",
     "pending": "قيد الانتظار",
-    "approved": "معتمد"
+    "approved": "معتمد",
+    "metaTitle": "العمليات · rtylr"
   },
   "reports": {
     "title": "Reports",
@@ -177,7 +183,8 @@
     "empty": {
       "title": "لا توجد قوالب تقارير حتى الآن",
       "description": "ستظهر قوالب التقارير هنا بعد توفرها لمساحة العمل هذه."
-    }
+    },
+    "metaTitle": "التقارير · rtylr"
   },
   "settings": {
     "title": "Insights Settings",
@@ -199,6 +206,13 @@
     },
     "saved": "Settings saved",
     "save": "حفظ الإعدادات",
-    "saving": "جارٍ الحفظ…"
+    "saving": "جارٍ الحفظ…",
+    "metaTitle": "الإعدادات · rtylr"
+  },
+  "charts": {
+    "revenueTrend": "مخطط اتجاه الإيرادات",
+    "revenueByApp": "مخطط الإيرادات حسب التطبيق",
+    "revenueSparkline": "مخطط مصغر للإيرادات",
+    "topCustomers": "مخطط أفضل العملاء"
   }
 }
