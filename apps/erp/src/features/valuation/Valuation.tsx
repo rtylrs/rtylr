@@ -102,10 +102,10 @@ const Valuation: React.FC = () => {
         {!isLoading && categories.length === 0 ? (
           <EmptyState
             icon={Boxes}
-            title={t('valuation.empty.title')}
-            description={t('valuation.empty.description')}
+            title={t('erp.valuation.empty.title')}
+            description={t('erp.valuation.empty.description')}
             size="compact"
-            action={{ label: t('valuation.refresh'), onClick: () => void refetch() }}
+            action={{ label: t('erp.valuation.refresh'), onClick: () => void refetch() }}
           />
         ) : (
           <div className="space-y-2">
