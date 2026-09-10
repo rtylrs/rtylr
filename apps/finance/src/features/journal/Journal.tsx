@@ -64,7 +64,7 @@ const Journal: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!memo.trim()) {
-      toast.error(t('memoRequired'));
+      toast.error(t('journal.memoRequired'));
       return;
     }
     if (Math.abs(totalDebits - totalCredits) > 0.01 || totalDebits === 0) {
@@ -75,7 +75,7 @@ const Journal: React.FC = () => {
     }
     const today = todayIso();
     if (date > today) {
-      toast.error(t('futureDate'));
+      toast.error(t('journal.futureDate'));
       return;
     }
     try {
@@ -90,7 +90,7 @@ const Journal: React.FC = () => {
           description: '',
         })),
       });
-      toast.success(t('created'));
+      toast.success(t('journal.created'));
       setShowCreate(false);
       setMemo('');
       setLines([
@@ -98,7 +98,7 @@ const Journal: React.FC = () => {
         { id: '2', accountName: '', accountId: 0, type: 'credit', amount: 0 },
       ]);
     } catch (error) {
-      toast.error(getOneKitErrorMessage(error, t('createFailed')));
+      toast.error(getOneKitErrorMessage(error, t('journal.createFailed')));
     }
   };
 
@@ -108,13 +108,13 @@ const Journal: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title={`${t('title')} · rtylr`} />
+      <HelmetContainer title={`${t('journal.title')} · rtylr`} />
       <PageHeader
-        title={t('title')}
+        title={t('journal.title')}
         subtitle={`${data.length} entries`}
         actions={
           <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
-            <Plus size={13} /> {t('newEntry')}
+            <Plus size={13} /> {t('journal.newEntry')}
           </button>
         }
       />
@@ -153,7 +153,7 @@ const Journal: React.FC = () => {
                       color: isBalanced ? 'var(--hub-text-dim)' : 'var(--finance-danger)',
                     }}
                   >
-                    {isBalanced ? t('balanced') : t('outOfBalance')}
+                    {isBalanced ? t('journal.balanced') : t('journal.outOfBalance')}
                   </div>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -168,7 +168,7 @@ const Journal: React.FC = () => {
                           padding: '6px 4px',
                         }}
                       >
-                        {t('account')}
+                        {t('journal.account')}
                       </th>
                       <th
                         style={{
@@ -179,7 +179,7 @@ const Journal: React.FC = () => {
                           padding: '6px 4px',
                         }}
                       >
-                        {t('debit')}
+                        {t('journal.debit')}
                       </th>
                       <th
                         style={{
@@ -190,7 +190,7 @@ const Journal: React.FC = () => {
                           padding: '6px 4px',
                         }}
                       >
-                        {t('credit')}
+                        {t('journal.credit')}
                       </th>
                     </tr>
                   </thead>
@@ -257,7 +257,7 @@ const Journal: React.FC = () => {
             }}
           >
             <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              {t('newJournalEntry')}
+              {t('journal.newJournalEntry')}
             </h3>
             <input
               style={inputStyle}
@@ -268,7 +268,7 @@ const Journal: React.FC = () => {
             />
             <input
               style={inputStyle}
-              placeholder={t('memoPlaceholder')}
+              placeholder={t('journal.memoPlaceholder')}
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
             />
@@ -370,7 +370,7 @@ const Journal: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button type="button" style={ghostBtn} onClick={() => setShowCreate(false)}>
-                {t('cancel')}
+                {t('journal.cancel')}
               </button>
               <button
                 type="button"
@@ -378,7 +378,7 @@ const Journal: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending}
               >
-                {createMut.isPending ? t('creating') : t('create')}
+                {createMut.isPending ? t('journal.creating') : t('journal.create')}
               </button>
             </div>
           </div>
