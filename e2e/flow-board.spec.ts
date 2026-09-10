@@ -283,6 +283,79 @@ test.describe('Flow - Project Board', () => {
    * endpoints, and a separate spec would have been sixty lines of duplicated
    * routes.
    */
+  test('opens a task as a drawer over the board, and closes it @screenshots', async ({ page }) => {
+    // The single-task endpoint, which the board itself never calls: it lists
+    // tasks. Without this the drawer opens correctly and sits on "Loading
+    // task…", which would have made the capture worthless while the
+    // assertions still passed.
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          task: {
+            id: '101',
+            project_id: '1',
+            owner_id: '1001',
+            title: 'Implement SSO Auth Flow',
+            description: 'Build SSO login screen and session handling.',
+            status: 'in_progress',
+            priority: 'urgent',
+            assignee_id: '1001',
+            assignee_name: 'Test Owner',
+            assignee_initials: 'TO',
+            due_date: '2026-09-30',
+            estimated_hours: 8,
+            archived: false,
+            labels: [],
+            identifier: 'AP-101',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          comments: [],
+          subtasks: [],
+          attachments: [],
+        }),
+      })
+    );
+
+    await page.goto(`${FLOW_URL}/p/1`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(800);
+
+    await page.getByText('Implement SSO Auth Flow').first().click();
+    await page.waitForTimeout(900);
+
+    // The drawer is open, and the board is still behind it. That is the whole
+    // point: opening a task used to replace the board (rtylr#1079).
+    const drawer = page.getByRole('dialog');
+    await expect(drawer).toBeVisible();
+    // Loaded, not merely mounted. Without the task endpoint stubbed the drawer
+    // opens and sits on "Loading task…", which every other assertion here
+    // would have accepted.
+    await expect(drawer.getByText('Build SSO login screen and session handling.')).toBeVisible();
+    await expect(page.getByText('Todo')).toBeVisible();
+
+    // And the open task is in the URL, so back closes it and a refresh keeps it.
+    //
+    // `%22101%22`, not `101`: the router JSON-stringifies search values, so a
+    // string id is quoted on the way out and parses back as a string on the way
+    // in. Ugly to read and exact to round-trip, which for an int64 id is the
+    // trade worth having.
+    expect(decodeURIComponent(page.url())).toContain('openTask="101"');
+
+    const shots = await captureResponsivePair(page, 'flow-task-drawer');
+    expect(shots.overflowsAt390).toBe(false);
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+    await expect(page.getByRole('dialog')).toBeHidden();
+    expect(page.url()).not.toContain('openTask');
+    // Closing the drawer must not throw away the board underneath.
+    await expect(page.getByText('Implement SSO Auth Flow')).toBeVisible();
+  });
+
   test('captures the board at desktop and at the 390px floor @screenshots', async ({ page }) => {
     await page.goto(`${FLOW_URL}/p/1`);
     await page.waitForLoadState('networkidle');
