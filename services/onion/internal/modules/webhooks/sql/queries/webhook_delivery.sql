@@ -93,3 +93,28 @@ SET status = IF(attempts >= max_attempts, 'dead', 'failed'),
     updated_at = NOW()
 WHERE status = 'delivering'
   AND updated_at < DATE_SUB(NOW(), INTERVAL sqlc.arg('stale_after_seconds') SECOND);
+
+-- The tenant-facing delivery listing. Scoped by business so a caller only ever
+-- sees their own registrations' deliveries, and joined to platform_events for
+-- the event type, which is what makes a row meaningful without a second call.
+--
+-- The two filters are optional and expressed the sqlc way: a zero webhook_id
+-- and an empty status mean "no filter" rather than "match nothing".
+-- name: ListWebhookDeliveriesForBusiness :many
+SELECT d.id, d.webhook_id, d.event_id, e.event_type, d.status,
+       d.attempts, d.max_attempts, d.response_status, d.last_error,
+       d.next_attempt_at, d.delivered_at, d.created_at
+FROM webhook_deliveries d
+JOIN platform_events e ON e.id = d.event_id
+WHERE d.business_id = sqlc.arg('business_id')
+  AND (sqlc.arg('webhook_id') = 0 OR d.webhook_id = sqlc.arg('webhook_id'))
+  AND (sqlc.arg('status') = '' OR d.status = sqlc.arg('status'))
+ORDER BY d.id DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountWebhookDeliveriesForBusiness :one
+SELECT COUNT(*)
+FROM webhook_deliveries d
+WHERE d.business_id = sqlc.arg('business_id')
+  AND (sqlc.arg('webhook_id') = 0 OR d.webhook_id = sqlc.arg('webhook_id'))
+  AND (sqlc.arg('status') = '' OR d.status = sqlc.arg('status'));

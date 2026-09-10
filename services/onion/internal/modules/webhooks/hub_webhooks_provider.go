@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/application"
+	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
 	"github.com/voxire/onion/internal/platform/hubdeveloper"
 )
 
@@ -66,4 +67,39 @@ func (p *hubWebhooksProvider) Update(ctx context.Context, businessID, webhookID 
 
 func (p *hubWebhooksProvider) Delete(ctx context.Context, businessID, webhookID int64) error {
 	return p.service.Delete(ctx, businessID, webhookID)
+}
+
+// ListDeliveries adapts the module's delivery listing to the platform port.
+func (p *hubWebhooksProvider) ListDeliveries(ctx context.Context, businessID int64, filter hubdeveloper.DeliveryFilter) ([]hubdeveloper.Delivery, int64, error) {
+	records, total, err := p.service.ListDeliveries(ctx, businessID, domain.DeliveryFilter{
+		WebhookID: filter.WebhookID,
+		Status:    filter.Status,
+		Limit:     filter.Limit,
+		Offset:    filter.Offset,
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	out := make([]hubdeveloper.Delivery, 0, len(records))
+	for _, record := range records {
+		out = append(out, hubdeveloper.Delivery{
+			// Narrowed from uint64. Both are auto-increment keys, so the
+			// range that would overflow is not reachable in practice, and the
+			// contract declares them int64.
+			ID:             int64(record.ID), // #nosec G115 -- auto-increment key, see above.
+			WebhookID:      record.WebhookID,
+			EventID:        int64(record.EventID), // #nosec G115 -- auto-increment key, see above.
+			EventType:      record.EventType,
+			Status:         record.Status,
+			Attempts:       record.Attempts,
+			MaxAttempts:    record.MaxAttempts,
+			ResponseStatus: record.ResponseStatus,
+			LastError:      record.LastError,
+			NextAttemptAt:  record.NextAttemptAt,
+			DeliveredAt:    record.DeliveredAt,
+			CreatedAt:      record.CreatedAt,
+		})
+	}
+	return out, total, nil
 }

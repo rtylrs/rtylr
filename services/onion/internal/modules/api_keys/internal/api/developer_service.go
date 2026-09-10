@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/hubdeveloper"
@@ -117,6 +118,76 @@ func (a *DeveloperAPI) ListWebhooks(ctx context.Context, _ *hubdeveloperv1.ListW
 	}
 
 	return &hubdeveloperv1.ListWebhooksResponse{Webhooks: payloads}, nil
+}
+
+// ListWebhookDeliveries returns delivery attempts for the caller's business.
+//
+// A registration whose endpoint has started failing is otherwise invisible to
+// its owner: deliveries retry, exhaust their attempts and are dead-lettered
+// with nothing surfacing. Filtering on status is what makes the dead ones
+// findable.
+//
+// Read-only. Replaying a dead delivery is a mutation with real effects on
+// somebody's endpoint and is deliberately not offered here.
+func (a *DeveloperAPI) ListWebhookDeliveries(ctx context.Context, req *hubdeveloperv1.ListWebhookDeliveriesRequest) (*hubdeveloperv1.ListWebhookDeliveriesResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil || !hasDeveloperPermission(device.User) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	page, limit, offset := resolveDeliveryPagination(req.GetPage(), req.GetLimit())
+
+	// The filters come straight from the caller and are narrowing only. The
+	// listing is scoped by businessID underneath, so a webhook_id belonging to
+	// another business simply matches nothing rather than reaching it.
+	deliveries, total, err := a.WebhooksService.ListDeliveries(ctx, businessID, hubdeveloper.DeliveryFilter{
+		WebhookID: req.GetWebhookId(),
+		Status:    req.GetStatus(),
+		Limit:     limit,
+		Offset:    offset,
+	})
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list webhook deliveries")
+	}
+
+	payloads := make([]*hubdeveloperv1.WebhookDelivery, 0, len(deliveries))
+	for _, d := range deliveries {
+		payloads = append(payloads, toProtoWebhookDelivery(d))
+	}
+
+	return &hubdeveloperv1.ListWebhookDeliveriesResponse{
+		Deliveries: payloads,
+		Pagination: buildDeliveryPagination(page, limit, total, len(payloads)),
+	}, nil
+}
+
+func toProtoWebhookDelivery(d hubdeveloper.Delivery) *hubdeveloperv1.WebhookDelivery {
+	out := &hubdeveloperv1.WebhookDelivery{
+		Id:          d.ID,
+		WebhookId:   d.WebhookID,
+		EventId:     d.EventID,
+		EventType:   d.EventType,
+		Status:      d.Status,
+		Attempts:    int32(d.Attempts),    // #nosec G115 -- bounded by max_attempts, a TINYINT.
+		MaxAttempts: int32(d.MaxAttempts), // #nosec G115 -- bounded by max_attempts, a TINYINT.
+		LastError:   d.LastError,
+		CreatedAt:   d.CreatedAt.UTC().Format(time.RFC3339),
+	}
+	// Zero rather than absent when the request never got a response, which the
+	// contract's field comment records.
+	out.ResponseStatus = int32(d.ResponseStatus) // #nosec G115 -- an HTTP status is three digits.
+	if d.NextAttemptAt != nil {
+		out.NextAttemptAt = d.NextAttemptAt.UTC().Format(time.RFC3339)
+	}
+	if d.DeliveredAt != nil {
+		out.DeliveredAt = d.DeliveredAt.UTC().Format(time.RFC3339)
+	}
+	return out
 }
 
 func (a *DeveloperAPI) CreateWebhook(ctx context.Context, req *hubdeveloperv1.CreateWebhookRequest) (*hubdeveloperv1.CreateWebhookResponse, error) {

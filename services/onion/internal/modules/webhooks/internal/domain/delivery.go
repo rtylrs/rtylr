@@ -33,3 +33,31 @@ type Event struct {
 	Payload     []byte
 	OccurredAt  time.Time
 }
+
+// DeliveryFilter narrows a delivery listing. A zero WebhookID and an empty
+// Status mean no filter rather than match nothing.
+type DeliveryFilter struct {
+	WebhookID int64
+	Status    string
+	Limit     int32
+	Offset    int64
+}
+
+// DeliveryRecord is a delivery attempt as the owner of the registration sees
+// it, with the event type resolved so a row means something on its own.
+type DeliveryRecord struct {
+	// ID and EventID are uint64 because both queue tables key on
+	// BIGINT UNSIGNED. They narrow to int64 at the contract boundary.
+	ID             uint64
+	WebhookID      int64
+	EventID        uint64
+	EventType      string
+	Status         string
+	Attempts       int
+	MaxAttempts    int
+	ResponseStatus int
+	LastError      string
+	NextAttemptAt  *time.Time
+	DeliveredAt    *time.Time
+	CreatedAt      time.Time
+}

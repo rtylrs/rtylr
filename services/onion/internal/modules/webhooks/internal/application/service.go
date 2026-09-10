@@ -25,6 +25,7 @@ type repository interface {
 	Get(ctx context.Context, businessID, webhookID int64) (domain.Webhook, error)
 	Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) error
 	Delete(ctx context.Context, businessID, webhookID int64) error
+	ListDeliveriesForBusiness(ctx context.Context, businessID int64, filter domain.DeliveryFilter) ([]domain.DeliveryRecord, int64, error)
 }
 
 type Service struct {
@@ -109,4 +110,14 @@ func generateSecret() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(b), nil
+}
+
+// ListDeliveries returns a page of delivery attempts for a business, most
+// recent first, with the total matching the same filter.
+//
+// Read-only. Seeing a dead delivery is the gap this closes; replaying one is a
+// mutation with real effects on somebody's endpoint and is deliberately not
+// offered here.
+func (s *Service) ListDeliveries(ctx context.Context, businessID int64, filter domain.DeliveryFilter) ([]domain.DeliveryRecord, int64, error) {
+	return s.repo.ListDeliveriesForBusiness(ctx, businessID, filter)
 }

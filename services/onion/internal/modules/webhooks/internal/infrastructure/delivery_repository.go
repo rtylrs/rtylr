@@ -156,3 +156,67 @@ func truncateCause(cause string) string {
 	}
 	return cause[:limit] + "..."
 }
+
+// ListDeliveriesForBusiness returns a page of delivery attempts for one
+// business, most recent first, with the total matching the same filter.
+//
+// Scoped by business in both statements, so a caller only ever sees the
+// deliveries of registrations they own.
+func (r *Repository) ListDeliveriesForBusiness(ctx context.Context, businessID int64, filter domain.DeliveryFilter) ([]domain.DeliveryRecord, int64, error) {
+	total, err := r.queries.CountWebhookDeliveriesForBusiness(ctx, sqlc.CountWebhookDeliveriesForBusinessParams{
+		BusinessID: businessID,
+		WebhookID:  filter.WebhookID,
+		Status:     sqlc.WebhookDeliveriesStatus(filter.Status),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count webhook deliveries", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListWebhookDeliveriesForBusiness(ctx, sqlc.ListWebhookDeliveriesForBusinessParams{
+		BusinessID: businessID,
+		WebhookID:  filter.WebhookID,
+		// An unrecognised status is not rejected here: it simply matches
+		// nothing, which is the right answer for a caller that asked for a
+		// status that does not exist.
+		Status: sqlc.WebhookDeliveriesStatus(filter.Status),
+		Limit:  filter.Limit,
+		Offset: int32(filter.Offset), // #nosec G115 -- bounded by the pagination limit the handler applies.
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list webhook deliveries", logger.Error(err))
+		return nil, 0, err
+	}
+
+	out := make([]domain.DeliveryRecord, 0, len(rows))
+	for _, row := range rows {
+		record := domain.DeliveryRecord{
+			ID:          row.ID,
+			WebhookID:   row.WebhookID,
+			EventID:     row.EventID,
+			EventType:   row.EventType,
+			Status:      string(row.Status),
+			Attempts:    int(row.Attempts),
+			MaxAttempts: int(row.MaxAttempts),
+			CreatedAt:   row.CreatedAt,
+		}
+		if row.ResponseStatus.Valid {
+			record.ResponseStatus = int(row.ResponseStatus.Int16)
+		}
+		if row.LastError.Valid {
+			record.LastError = row.LastError.String
+		}
+		if row.NextAttemptAt.IsZero() {
+			record.NextAttemptAt = nil
+		} else {
+			next := row.NextAttemptAt
+			record.NextAttemptAt = &next
+		}
+		if row.DeliveredAt.Valid {
+			delivered := row.DeliveredAt.Time
+			record.DeliveredAt = &delivered
+		}
+		out = append(out, record)
+	}
+	return out, total, nil
+}

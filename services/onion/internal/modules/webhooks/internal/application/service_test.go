@@ -11,13 +11,23 @@ import (
 type mockRepo struct {
 	listResult []domain.Webhook
 	listErr    error
-	createID   int64
-	createErr  error
-	getResult  domain.Webhook
-	getErr     error
-	updateErr  error
-	deleteErr  error
-	createGot  struct {
+	// Delivery listing, added with the dead-letter surface. deliveriesGot
+	// records the filter so a test can assert the service passes it through
+	// unchanged rather than quietly dropping a caller's narrowing.
+	deliveriesResult []domain.DeliveryRecord
+	deliveriesTotal  int64
+	deliveriesErr    error
+	deliveriesGot    struct {
+		businessID int64
+		filter     domain.DeliveryFilter
+	}
+	createID  int64
+	createErr error
+	getResult domain.Webhook
+	getErr    error
+	updateErr error
+	deleteErr error
+	createGot struct {
 		ownerID    int64
 		businessID int64
 		url        string
@@ -153,3 +163,48 @@ func TestDelete_RequiresWebhookID(t *testing.T) {
 		t.Fatalf("expected error for missing webhook id")
 	}
 }
+
+func (m *mockRepo) ListDeliveriesForBusiness(
+	_ context.Context, businessID int64, filter domain.DeliveryFilter,
+) ([]domain.DeliveryRecord, int64, error) {
+	m.deliveriesGot.businessID = businessID
+	m.deliveriesGot.filter = filter
+	return m.deliveriesResult, m.deliveriesTotal, m.deliveriesErr
+}
+
+// The service is a pass-through here, and that is the point worth pinning: the
+// business scope and the caller's filter must both reach the repository, since
+// the repository is where the tenant scope is enforced.
+func TestListDeliveriesPassesTheScopeAndFilterThrough(t *testing.T) {
+	m := &mockRepo{
+		deliveriesResult: []domain.DeliveryRecord{{ID: 7, Status: "dead"}},
+		deliveriesTotal:  1,
+	}
+	service := &Service{repo: m}
+
+	filter := domain.DeliveryFilter{WebhookID: 42, Status: "dead", Limit: 25, Offset: 50}
+	got, total, err := service.ListDeliveries(context.Background(), 9003, filter)
+	if err != nil {
+		t.Fatalf("ListDeliveries: %v", err)
+	}
+	if total != 1 || len(got) != 1 || got[0].ID != 7 {
+		t.Errorf("got %d rows (total %d), want the single record through unchanged", len(got), total)
+	}
+	if m.deliveriesGot.businessID != 9003 {
+		t.Errorf("business = %d, want 9003: the tenant scope did not reach the repository", m.deliveriesGot.businessID)
+	}
+	if m.deliveriesGot.filter != filter {
+		t.Errorf("filter = %+v, want %+v", m.deliveriesGot.filter, filter)
+	}
+}
+
+func TestListDeliveriesPropagatesAFailure(t *testing.T) {
+	m := &mockRepo{deliveriesErr: errListDeliveries}
+	service := &Service{repo: m}
+
+	if _, _, err := service.ListDeliveries(context.Background(), 9003, domain.DeliveryFilter{}); err == nil {
+		t.Fatal("a repository failure was swallowed")
+	}
+}
+
+var errListDeliveries = errors.New("listing failed")
