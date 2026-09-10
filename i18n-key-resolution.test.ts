@@ -22,20 +22,37 @@ import {
  * default, as most do, English renders correctly and only Arabic and French
  * are wrong. Where it passes none, the raw key paints to the user.
  *
- * Enforced apps are listed explicitly. The other apps have not been measured
- * against this rule, and each needs its own measurement and issue before it
- * is added here: turning the guard on for an unmeasured app would fail the
- * suite rather than report a finding.
+ * Enforced apps are listed explicitly, and every app is enforced except one.
+ *
+ * `menu` is the exception, and not because it is unmeasured: its keys all
+ * resolve since rtylr#1277. It fails the namespace-file parity assertion
+ * below, because `en` declares 15 locale files, `ar` 11 and `fr` 9, and ten of
+ * those 15 namespaces are read by nothing at all. Translating 126 strings into
+ * namespaces no call site reaches would satisfy this suite and deliver
+ * nothing, so the parity gap is being resolved first, in rtylr#1278.
  */
-const ENFORCED_APPS = ['dash', 'erp', 'finance', 'flow', 'insights', 'recruit'] as const;
+const ENFORCED_APPS = [
+  'auth',
+  'crm',
+  'dash',
+  'erp',
+  'finance',
+  'flow',
+  'hr',
+  'insights',
+  'recruit',
+] as const;
 
 // A floor per app, so a regex that silently stops matching cannot make this
 // suite pass by finding nothing to check.
 const MINIMUM_KEYS: Record<(typeof ENFORCED_APPS)[number], number> = {
+  auth: 40,
+  crm: 90,
   dash: 300,
   erp: 150,
   finance: 90,
   flow: 500,
+  hr: 700,
   insights: 110,
   recruit: 250,
 };
