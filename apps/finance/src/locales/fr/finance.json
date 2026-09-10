@@ -63,5 +63,10 @@
     "markedDone": "Boucle terminée : {{marked}} heures marquées facturées, {{skipped}} ignorées.",
     "billToPlaceholder": "Facturer à (nom du client)",
     "fallbackClient": "Heures facturables"
+  },
+  "balanceSheet": {
+    "inventory": "Stocks",
+    "inventoryHint": "Valeur des stocks en temps réel depuis l'ERP, affichée uniquement lorsque l'ERP est activé pour cette entreprise.",
+    "inventoryUnavailable": "ERP non connecté"
   }
 }
