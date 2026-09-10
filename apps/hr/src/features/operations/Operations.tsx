@@ -296,7 +296,7 @@ const Operations: React.FC = () => {
                 }}
               >
                 <div>
-                  <Label>Requester</Label>
+                  <Label>{t('operations.form.requester')}</Label>
                   <Select
                     value={swapForm.requesterId}
                     onChange={(e) =>
@@ -312,7 +312,7 @@ const Operations: React.FC = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label>Target</Label>
+                  <Label>{t('operations.form.target')}</Label>
                   <Select
                     value={swapForm.targetId}
                     onChange={(e) => setSwapForm({ ...swapForm, targetId: Number(e.target.value) })}
@@ -326,7 +326,7 @@ const Operations: React.FC = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label>Shift day</Label>
+                  <Label>{t('operations.form.shiftDay')}</Label>
                   <Input
                     type="date"
                     value={swapForm.shiftDay}
@@ -334,7 +334,7 @@ const Operations: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label>Reason</Label>
+                  <Label>{t('operations.form.reason')}</Label>
                   <Input
                     value={swapForm.reason}
                     onChange={(e) => setSwapForm({ ...swapForm, reason: e.target.value })}
