@@ -95,8 +95,8 @@ func (m *CreateLoyaltyTierRequest) Validate() error {
 		violations = append(violations, "min_points is required")
 	}
 	if m.MinPoints != nil {
-		if *m.MinPoints <= 0 {
-			violations = append(violations, "min_points must be greater than 0")
+		if *m.MinPoints < 0 {
+			violations = append(violations, "min_points must be greater than or equal to 0")
 		}
 	}
 	if m.DiscountPct == nil {
@@ -382,8 +382,8 @@ func (m *UpdateLoyaltyTierBody) Validate() error {
 		violations = append(violations, "min_points is required")
 	}
 	if m.MinPoints != nil {
-		if *m.MinPoints <= 0 {
-			violations = append(violations, "min_points must be greater than 0")
+		if *m.MinPoints < 0 {
+			violations = append(violations, "min_points must be greater than or equal to 0")
 		}
 	}
 	if m.DiscountPct == nil {

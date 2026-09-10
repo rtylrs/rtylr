@@ -61,7 +61,9 @@ message AwardPointsResponse {
 
 message CreateLoyaltyTierRequest {
   name: string @required
-  min_points: int64? @required @gt(0)
+  /// Points threshold at which this tier starts applying. Zero is valid and
+  /// means an entry tier every customer qualifies for from their first point.
+  min_points: int64? @required @gte(0)
   discount_pct: float64? @required @gt(0)
   perks: string @required
   sort_order: int64? @required @gt(0)
@@ -131,7 +133,9 @@ message UpdateLoyaltyConfigResponse {
 
 message UpdateLoyaltyTierBody {
   name: string @required
-  min_points: int64? @required @gt(0)
+  /// Points threshold at which this tier starts applying. Zero is valid and
+  /// means an entry tier every customer qualifies for from their first point.
+  min_points: int64? @required @gte(0)
   discount_pct: float64? @required @gt(0)
   perks: string @required
   sort_order: int64? @required @gt(0)

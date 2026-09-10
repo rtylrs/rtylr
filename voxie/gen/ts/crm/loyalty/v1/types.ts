@@ -300,7 +300,7 @@ if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) vi
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.minPoints !== undefined && v.minPoints !== null && !(typeof v.minPoints === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.minPoints))) violations.push("min_points has invalid type");
 if (!(v.minPoints !== undefined && v.minPoints !== null)) violations.push("min_points is required");
-if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) > 0)) violations.push("min_points violates @gt");
+if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) >= 0)) violations.push("min_points violates @gte");
 if (v.discountPct !== undefined && v.discountPct !== null && !(typeof v.discountPct === "number" && Number.isFinite(v.discountPct))) violations.push("discount_pct has invalid type");
 if (!(v.discountPct !== undefined && v.discountPct !== null)) violations.push("discount_pct is required");
 if (v.discountPct !== undefined && v.discountPct !== null && !(Number(v.discountPct) > 0)) violations.push("discount_pct violates @gt");
@@ -707,7 +707,7 @@ if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) vi
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.minPoints !== undefined && v.minPoints !== null && !(typeof v.minPoints === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.minPoints))) violations.push("min_points has invalid type");
 if (!(v.minPoints !== undefined && v.minPoints !== null)) violations.push("min_points is required");
-if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) > 0)) violations.push("min_points violates @gt");
+if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) >= 0)) violations.push("min_points violates @gte");
 if (v.discountPct !== undefined && v.discountPct !== null && !(typeof v.discountPct === "number" && Number.isFinite(v.discountPct))) violations.push("discount_pct has invalid type");
 if (!(v.discountPct !== undefined && v.discountPct !== null)) violations.push("discount_pct is required");
 if (v.discountPct !== undefined && v.discountPct !== null && !(Number(v.discountPct) > 0)) violations.push("discount_pct violates @gt");
