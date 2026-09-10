@@ -196,7 +196,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
             <div className="flex items-center gap-1 mt-1">
               {deltaPct === 0 ? (
                 <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                  {formatPercent(0)} {t('insights.revenue.vsPrevious', 'vs previous')}
+                  {formatPercent(0)} {t('insights.revenue.vsPrevious')}
                 </span>
               ) : (
                 <>
@@ -209,7 +209,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
                     className="text-xs"
                     style={{ color: deltaUp ? 'var(--delta-up)' : 'var(--delta-down)' }}
                   >
-                    {formatPercent(deltaPct)} {t('insights.revenue.vsPrevious', 'vs previous')}
+                    {formatPercent(deltaPct)} {t('insights.revenue.vsPrevious')}
                   </span>
                 </>
               )}
