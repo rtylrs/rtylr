@@ -85,5 +85,12 @@
       "postToJournal": "Passer au journal",
       "posted": "Paie passée au journal financier"
     }
+  },
+  "stub": {
+    "hours": "Heures",
+    "base": "Base",
+    "overtime": "Heures supplémentaires",
+    "deductions": "Retenues",
+    "netPay": "Net à payer"
   }
 }

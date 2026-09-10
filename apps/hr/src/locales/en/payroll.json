@@ -85,5 +85,12 @@
       "postToJournal": "Post to journal",
       "posted": "Payroll posted to the finance journal"
     }
+  },
+  "stub": {
+    "hours": "Hours",
+    "base": "Base",
+    "overtime": "Overtime",
+    "deductions": "Deductions",
+    "netPay": "Net pay"
   }
 }

@@ -91,7 +91,9 @@ const Training: React.FC = () => {
               <SectionHeader title="Employee progress" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
                 {progress.length === 0 ? (
-                  <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No enrollments yet.</p>
+                  <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                    {t('training.noEnrollments')}
+                  </p>
                 ) : (
                   progress.map((p) => (
                     <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { useCreateLeaveType } from '../../shared/hooks/queries/useLeave';
 import { Button, Card, Input, Label, SectionHeader } from '../../shared/components/ui';
 
 const LeavePolicySettings = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const createLeaveType = useCreateLeaveType();
   const [name, setName] = useState('');
   const [maxCarryoverDays, setMaxCarryoverDays] = useState(0);
@@ -37,25 +39,22 @@ const LeavePolicySettings = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Leave policy settings · rtylr" />
+      <HelmetContainer title={t('leave.policies.pageTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 560 }}>
-        <SectionHeader
-          title="Leave policies"
-          subtitle="Create the leave types employees can request."
-        />
+        <SectionHeader title={t('leave.policies.title')} subtitle={t('leave.policies.subtitle')} />
         <Card>
           <form onSubmit={save} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <Label>Name</Label>
+              <Label>{t('common.name')}</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Annual Leave"
+                placeholder={t('leave.policies.namePlaceholder')}
                 required
               />
             </div>
             <div>
-              <Label>Maximum carryover days</Label>
+              <Label>{t('leave.policies.maxCarryover')}</Label>
               <Input
                 type="number"
                 min={1}
@@ -65,7 +64,7 @@ const LeavePolicySettings = (): React.JSX.Element => {
               />
             </div>
             <div>
-              <Label>Minimum notice days</Label>
+              <Label>{t('leave.policies.minNotice')}</Label>
               <Input
                 type="number"
                 min={1}

@@ -53,5 +53,13 @@
     "location": "Emplacement",
     "emptyTitle": "Aucun congé planifié",
     "emptyDescription": "Les congés approuvés apparaîtront sur le calendrier."
+  },
+  "policies": {
+    "pageTitle": "Paramètres des congés",
+    "title": "Politiques de congés",
+    "subtitle": "Créez les types de congés que les employés peuvent demander.",
+    "namePlaceholder": "Congé annuel",
+    "maxCarryover": "Jours de report maximum",
+    "minNotice": "Jours de préavis minimum"
   }
 }

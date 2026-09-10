@@ -5,6 +5,32 @@
   "oneOnOnes": {
     "emptyTitle": "Aucun entretien individuel programmé",
     "emptyDescription": "Les managers verront ici les entretiens individuels à venir.",
-    "schedule": "Programmer un entretien individuel"
-  }
+    "schedule": "Programmer un entretien individuel",
+    "pageTitle": "Entretiens individuels",
+    "title": "Entretiens individuels",
+    "subtitle": "Conversations planifiées entre manager et collaborateur",
+    "manager": "Manager",
+    "report": "Collaborateur",
+    "when": "Quand",
+    "duration": "Durée (min)",
+    "topics": "Sujets (séparés par des virgules)",
+    "topicsPlaceholder": "ex. Objectifs de carrière, Blocages, Retours",
+    "errorCompleteAll": "Complétez tous les champs"
+  },
+  "pageTitle": "Nouvelle évaluation",
+  "formTitle": "Nouvelle évaluation de performance",
+  "formSubtitle": "Évaluez les objectifs, les valeurs et les compétences",
+  "employee": "Employé",
+  "reviewer": "Évaluateur",
+  "select": "Sélectionner",
+  "period": "Période",
+  "periodPlaceholder": "ex. T2 2026",
+  "goals": "Objectifs",
+  "values": "Valeurs",
+  "skills": "Compétences",
+  "notes": "Notes",
+  "notesPlaceholder": "Retours clés et prochaines étapes",
+  "overallRating": "Évaluation globale",
+  "errorPickBoth": "Choisissez un employé et un évaluateur",
+  "created": "Évaluation créée"
 }

@@ -1,5 +1,19 @@
 {
   "emptyTitle": "لا توجد طلبات إجازة",
   "emptyDescription": "ستظهر الطلبات هنا بعد إرسالها.",
-  "submitFirstOne": "أرسل الطلب الأول"
+  "submitFirstOne": "أرسل الطلب الأول",
+  "pageTitle": "طلب إجازة جديد",
+  "formTitle": "طلب إجازة",
+  "formSubtitle": "أرسل طلب إجازة جديدًا للمراجعة",
+  "selectEmployee": "اختر موظفًا",
+  "type": "النوع",
+  "startDate": "تاريخ البداية",
+  "endDate": "تاريخ النهاية",
+  "reason": "السبب",
+  "reasonPlaceholder": "سبب موجز للطلب",
+  "errorSelectEmployee": "اختر موظفًا",
+  "errorSelectRange": "اختر نطاقًا زمنيًا",
+  "errorEndBeforeStart": "لا يمكن أن يكون تاريخ النهاية قبل تاريخ البداية",
+  "submitted": "تم إرسال طلب الإجازة",
+  "submitFailed": "فشل إرسال الطلب"
 }

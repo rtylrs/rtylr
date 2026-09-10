@@ -28,5 +28,11 @@
   "emptyBreaksDescription": "Démarrez une pause pour suivre le temps.",
   "startLunchBreak": "Démarrer la pause déjeuner",
   "emptyOvertimeTitle": "Aucune alerte d'heures supplémentaires",
-  "emptyOvertimeDescription": "Tout le monde respecte les limites de la politique."
+  "emptyOvertimeDescription": "Tout le monde respecte les limites de la politique.",
+  "form": {
+    "requester": "Demandeur",
+    "target": "Cible",
+    "shiftDay": "Jour de service",
+    "reason": "Motif"
+  }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trophy } from 'lucide-react';
 import { Card } from './ui';
 import { useAnniversaries } from '../hooks/useHrExtras';
@@ -12,6 +13,7 @@ function daysUntil(monthDay: string) {
 }
 
 const AnniversaryWidget: React.FC = () => {
+  const { t } = useTranslation();
   const { data } = useAnniversaries();
   const upcoming = (data ?? [])
     .map((a) => ({ ...a, days: daysUntil(a.date) }))
@@ -36,7 +38,9 @@ const AnniversaryWidget: React.FC = () => {
         </h3>
       </div>
       {upcoming.length === 0 ? (
-        <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>Nothing upcoming.</p>
+        <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+          {t('dashboard.nothingUpcoming')}
+        </p>
       ) : (
         <ul
           style={{

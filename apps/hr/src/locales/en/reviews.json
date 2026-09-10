@@ -5,6 +5,32 @@
   "oneOnOnes": {
     "emptyTitle": "No 1-on-1s scheduled",
     "emptyDescription": "Managers will see upcoming 1-on-1s here.",
-    "schedule": "Schedule 1-on-1"
-  }
+    "schedule": "Schedule 1-on-1",
+    "pageTitle": "1-on-1s",
+    "title": "1-on-1s",
+    "subtitle": "Scheduled manager-report conversations",
+    "manager": "Manager",
+    "report": "Report",
+    "when": "When",
+    "duration": "Duration (min)",
+    "topics": "Topics (comma separated)",
+    "topicsPlaceholder": "e.g. Career goals, Blockers, Feedback",
+    "errorCompleteAll": "Complete all fields"
+  },
+  "pageTitle": "New review",
+  "formTitle": "New performance review",
+  "formSubtitle": "Rate goals, values, and skills",
+  "employee": "Employee",
+  "reviewer": "Reviewer",
+  "select": "Select",
+  "period": "Period",
+  "periodPlaceholder": "e.g. Q2 2026",
+  "goals": "Goals",
+  "values": "Values",
+  "skills": "Skills",
+  "notes": "Notes",
+  "notesPlaceholder": "Key feedback and next steps",
+  "overallRating": "Overall rating",
+  "errorPickBoth": "Pick an employee and a reviewer",
+  "created": "Review created"
 }

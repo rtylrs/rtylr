@@ -28,5 +28,11 @@
   "emptyBreaksDescription": "ابدأ استراحة لتتبع الوقت.",
   "startLunchBreak": "بدء استراحة الغداء",
   "emptyOvertimeTitle": "لا توجد تنبيهات عمل إضافي",
-  "emptyOvertimeDescription": "الجميع ضمن حدود السياسة."
+  "emptyOvertimeDescription": "الجميع ضمن حدود السياسة.",
+  "form": {
+    "requester": "مقدّم الطلب",
+    "target": "الهدف",
+    "shiftDay": "يوم الدوام",
+    "reason": "السبب"
+  }
 }

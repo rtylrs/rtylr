@@ -14,7 +14,8 @@
     "all": "Toutes",
     "pending": "En attente",
     "approved": "Approuvée",
-    "rejected": "Rejetée"
+    "rejected": "Rejetée",
+    "cancelled": "Annulée"
   },
   "form": {
     "title": "Nouvelle demande d'heures supplémentaires",

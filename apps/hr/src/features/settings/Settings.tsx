@@ -64,7 +64,7 @@ const Settings: React.FC = () => {
             style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
           >
             <div>
-              <Label>Work week starts on</Label>
+              <Label>{t('setup.hrSettings.workWeekStart')}</Label>
               <Select
                 value={form.workWeekStart}
                 onChange={(e) =>
@@ -76,7 +76,7 @@ const Settings: React.FC = () => {
               </Select>
             </div>
             <div>
-              <Label>Weekly hours</Label>
+              <Label>{t('setup.hrSettings.weeklyHours')}</Label>
               <Input
                 type="number"
                 value={form.weeklyHours}
@@ -84,7 +84,7 @@ const Settings: React.FC = () => {
               />
             </div>
             <div>
-              <Label>Overtime after (hrs/week)</Label>
+              <Label>{t('setup.hrSettings.overtimeAfter')}</Label>
               <Input
                 type="number"
                 value={form.overtimeAfterHours}
@@ -92,7 +92,7 @@ const Settings: React.FC = () => {
               />
             </div>
             <div>
-              <Label>PTO policy (days/year)</Label>
+              <Label>{t('setup.hrSettings.ptoPolicy')}</Label>
               <Input
                 type="number"
                 value={form.ptoPolicyDays}
@@ -100,7 +100,7 @@ const Settings: React.FC = () => {
               />
             </div>
             <div>
-              <Label>Currency</Label>
+              <Label>{t('setup.hrSettings.currency')}</Label>
               <Select
                 value={form.currency}
                 onChange={(e) =>
@@ -113,7 +113,7 @@ const Settings: React.FC = () => {
               </Select>
             </div>
             <div>
-              <Label>Industry</Label>
+              <Label>{t('setup.hrSettings.industry')}</Label>
               <Select
                 value={form.industry ?? ''}
                 onChange={(e) => setForm({ ...form, industry: e.target.value })}

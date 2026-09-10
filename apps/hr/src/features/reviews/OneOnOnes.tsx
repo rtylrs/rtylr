@@ -39,7 +39,7 @@ const OneOnOnes: React.FC = () => {
     const manager = staff.find((s) => s.id === form.managerId);
     const report = staff.find((s) => s.id === form.reportId);
     if (!manager || !report || !form.scheduledAt) {
-      toast.error('Complete all fields');
+      toast.error(t('reviews.oneOnOnes.errorCompleteAll'));
       return;
     }
     create.mutate(
@@ -68,11 +68,11 @@ const OneOnOnes: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="1-on-1s · rtylr" />
+      <HelmetContainer title={t('reviews.oneOnOnes.pageTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
-          title="1-on-1s"
-          subtitle="Scheduled manager-report conversations"
+          title={t('reviews.oneOnOnes.title')}
+          subtitle={t('reviews.oneOnOnes.subtitle')}
           right={
             <Button variant="primary" icon={<Plus size={13} />} onClick={() => setOpen(true)}>
               Schedule 1-on-1
@@ -158,7 +158,7 @@ const OneOnOnes: React.FC = () => {
           </div>
         )}
 
-        <Modal open={open} onClose={() => setOpen(false)} title="Schedule 1-on-1">
+        <Modal open={open} onClose={() => setOpen(false)} title={t('reviews.oneOnOnes.schedule')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div
               style={{
@@ -168,7 +168,7 @@ const OneOnOnes: React.FC = () => {
               }}
             >
               <div>
-                <Label>Manager</Label>
+                <Label>{t('reviews.oneOnOnes.manager')}</Label>
                 <Select
                   value={form.managerId}
                   onChange={(e) => setForm({ ...form, managerId: Number(e.target.value) })}
@@ -182,7 +182,7 @@ const OneOnOnes: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label>Report</Label>
+                <Label>{t('reviews.oneOnOnes.report')}</Label>
                 <Select
                   value={form.reportId}
                   onChange={(e) => setForm({ ...form, reportId: Number(e.target.value) })}
@@ -197,7 +197,7 @@ const OneOnOnes: React.FC = () => {
               </div>
             </div>
             <div>
-              <Label>When</Label>
+              <Label>{t('reviews.oneOnOnes.when')}</Label>
               <Input
                 type="datetime-local"
                 value={form.scheduledAt}
@@ -205,7 +205,7 @@ const OneOnOnes: React.FC = () => {
               />
             </div>
             <div>
-              <Label>Duration (min)</Label>
+              <Label>{t('reviews.oneOnOnes.duration')}</Label>
               <Input
                 type="number"
                 value={form.duration}
@@ -213,11 +213,11 @@ const OneOnOnes: React.FC = () => {
               />
             </div>
             <div>
-              <Label>Topics (comma separated)</Label>
+              <Label>{t('reviews.oneOnOnes.topics')}</Label>
               <Textarea
                 value={form.topics}
                 onChange={(e) => setForm({ ...form, topics: e.target.value })}
-                placeholder="e.g. Career goals, Blockers, Feedback"
+                placeholder={t('reviews.oneOnOnes.topicsPlaceholder')}
               />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

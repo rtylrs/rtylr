@@ -68,8 +68,14 @@
     "description": "Voici les rôles par défaut avec lesquels votre entreprise commence.",
     "previewNotice": "Vous pourrez personnaliser précisément ce que chaque rôle peut faire à tout moment depuis Paramètres → Rôles et permissions, une fois la configuration terminée.",
     "defaultRoles": {
-      "employee": { "name": "Employé", "description": "Employé standard avec accès de base" },
-      "manager": { "name": "Manager", "description": "Manager d'équipe avec droits d'approbation" },
+      "employee": {
+        "name": "Employé",
+        "description": "Employé standard avec accès de base"
+      },
+      "manager": {
+        "name": "Manager",
+        "description": "Manager d'équipe avec droits d'approbation"
+      },
       "hrAdmin": {
         "name": "Administrateur RH",
         "description": "Accès complet à l'administration RH"
@@ -78,7 +84,10 @@
         "name": "Responsable paie/finance",
         "description": "Opérations de paie et de finance"
       },
-      "executive": { "name": "Direction", "description": "Supervision au niveau de la direction" }
+      "executive": {
+        "name": "Direction",
+        "description": "Supervision au niveau de la direction"
+      }
     }
   },
   "payrollConfig": {
@@ -111,5 +120,13 @@
     "csvComingSoon": "Import CSV bientôt disponible",
     "noEmployees": "Aucun employé ajouté. Ajoutez votre premier employé pour continuer.",
     "noEmployeesHint": "Aucun employé ajouté pour l'instant. Vous pouvez les ajouter ici ou depuis la section Personnel après la configuration."
+  },
+  "hrSettings": {
+    "workWeekStart": "La semaine de travail commence le",
+    "weeklyHours": "Heures hebdomadaires",
+    "overtimeAfter": "Heures supplémentaires au-delà de (h/semaine)",
+    "ptoPolicy": "Politique de congés (jours/an)",
+    "currency": "Devise",
+    "industry": "Secteur"
   }
 }
