@@ -112,7 +112,7 @@ const ProjectTimeline: React.FC = () => {
                 borderRight: '1px solid var(--flow-border)',
               }}
             >
-              Task
+              {t('flow.projectTimeline.taskColumn')}
             </div>
             {days.map((d, i) => (
               <div

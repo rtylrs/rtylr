@@ -1,11 +1,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import PreviewRouteUnavailable from './PreviewRouteUnavailable';
+import { initTestI18n } from '../testing/i18n';
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to }: React.PropsWithChildren<{ to: string }>) => <a href={to}>{children}</a>,
 }));
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('PreviewRouteUnavailable', () => {
   it('explains why a deep link is unavailable and keeps a useful escape route', () => {

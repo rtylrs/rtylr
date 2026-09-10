@@ -67,7 +67,7 @@ const Settings: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-3xl"
     >
-      <HelmetContainer title="Settings · rtylr" />
+      <HelmetContainer title={t('insights.settings.metaTitle')} />
       <motion.div variants={itemVariants}>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.settings.title')}

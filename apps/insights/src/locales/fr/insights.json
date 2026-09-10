@@ -15,7 +15,8 @@
     },
     "emptyTitle": "No KPI data yet",
     "emptyDescription": "Metrics will appear here once your business starts generating activity.",
-    "vsPrior": "vs période précédente"
+    "vsPrior": "vs période précédente",
+    "metaTitle": "Tableau de bord · rtylr"
   },
   "revenue": {
     "title": "Revenue",
@@ -33,7 +34,8 @@
       "title": "Aucune répartition des revenus pour l’instant",
       "description": "Une répartition par application s’affichera une fois que les revenus proviendront de plusieurs applications."
     },
-    "vsPrevious": "vs précédent"
+    "vsPrevious": "vs précédent",
+    "metaTitle": "Chiffre d'affaires · rtylr"
   },
   "customers": {
     "title": "Customers",
@@ -61,7 +63,8 @@
     "churnedCount": "perdus",
     "customers_one": "{{formatted}} client",
     "customers_many": "{{formatted}} de clients",
-    "customers_other": "{{formatted}} clients"
+    "customers_other": "{{formatted}} clients",
+    "metaTitle": "Clients · rtylr"
   },
   "products": {
     "title": "Products",
@@ -97,7 +100,8 @@
     "units_other": "{{formatted}} unités",
     "products_one": "{{formatted}} produit",
     "products_many": "{{formatted}} de produits",
-    "products_other": "{{formatted}} produits"
+    "products_other": "{{formatted}} produits",
+    "metaTitle": "Produits · rtylr"
   },
   "financial": {
     "title": "Financial",
@@ -118,7 +122,8 @@
     },
     "invoices_one": "{{formatted}} facture",
     "invoices_many": "{{formatted}} de factures",
-    "invoices_other": "{{formatted}} factures"
+    "invoices_other": "{{formatted}} factures",
+    "metaTitle": "Finances · rtylr"
   },
   "operations": {
     "title": "Operations",
@@ -154,7 +159,8 @@
     "noShows": "Absences",
     "completion": "Taux de réalisation",
     "pending": "En attente",
-    "approved": "Approuvé"
+    "approved": "Approuvé",
+    "metaTitle": "Opérations · rtylr"
   },
   "reports": {
     "title": "Reports",
@@ -165,7 +171,8 @@
     "empty": {
       "title": "Aucun modèle de rapport pour l’instant",
       "description": "Les modèles de rapport apparaîtront ici une fois disponibles pour cet espace de travail."
-    }
+    },
+    "metaTitle": "Rapports · rtylr"
   },
   "settings": {
     "title": "Insights Settings",
@@ -187,6 +194,13 @@
     },
     "saved": "Settings saved",
     "save": "Enregistrer les paramètres",
-    "saving": "Enregistrement…"
+    "saving": "Enregistrement…",
+    "metaTitle": "Paramètres · rtylr"
+  },
+  "charts": {
+    "revenueTrend": "Graphique de l'évolution du chiffre d'affaires",
+    "revenueByApp": "Graphique du chiffre d'affaires par application",
+    "revenueSparkline": "Courbe du chiffre d'affaires",
+    "topCustomers": "Graphique des meilleurs clients"
   }
 }

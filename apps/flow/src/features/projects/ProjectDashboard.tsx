@@ -111,18 +111,30 @@ const ProjectDashboard: React.FC = () => {
       <div className="flex-1 overflow-auto p-5 space-y-5 max-w-5xl w-full mx-auto">
         {/* Stat tiles */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatTile label="Total tasks" value={stats.total} tint={project.color} />
           <StatTile
-            label="Done"
+            label={t('flow.projectDashboard.totalTasks')}
+            value={stats.total}
+            tint={project.color}
+          />
+          <StatTile
+            label={t('flow.projectDashboard.done')}
             value={stats.done}
             tint="var(--flow-status-approved)"
-            hint={`${progress}% complete`}
+            hint={t('flow.projectDashboard.percentComplete', { percent: progress })}
           />
-          <StatTile label="In progress" value={stats.inProgress} tint={STATUS_COLORS.in_progress} />
-          <StatTile label="Overdue" value={stats.overdue} tint="var(--flow-danger-fg)" />
+          <StatTile
+            label={t('flow.projectDashboard.inProgress')}
+            value={stats.inProgress}
+            tint={STATUS_COLORS.in_progress}
+          />
+          <StatTile
+            label={t('flow.projectDashboard.overdue')}
+            value={stats.overdue}
+            tint="var(--flow-danger-fg)"
+          />
           {labourCost && Number(labourCost.costMinorUnits ?? 0) > 0 && (
             <StatTile
-              label="Labour cost"
+              label={t('flow.projectDashboard.labourCost')}
               value={Number(labourCost.costMinorUnits ?? 0) / 100}
               tint={STATUS_COLORS.in_progress}
               hint={

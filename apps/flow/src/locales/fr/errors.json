@@ -1,5 +1,6 @@
 {
   "generic": "Une erreur est survenue. Veuillez réessayer.",
   "notFound": "Introuvable",
-  "unauthorized": "Vous n'êtes pas autorisé à accéder à cette ressource"
+  "unauthorized": "Vous n'êtes pas autorisé à accéder à cette ressource",
+  "noWorkDay": "Impossible d'ouvrir une journée de travail pour la saisie."
 }

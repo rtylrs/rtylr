@@ -113,7 +113,7 @@ const Customers: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Customers · rtylr" />
+      <HelmetContainer title={t('insights.customers.metaTitle')} />
       <motion.div variants={itemVariants}>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.title')}
@@ -194,7 +194,7 @@ const Customers: React.FC = (): React.JSX.Element => {
         ) : (
           <div
             style={{ height: Math.max(180, topList.length * 36) }}
-            aria-label="Top customers chart"
+            aria-label={t('insights.charts.topCustomers')}
           >
             <Bar data={topCustomersBarData} options={topCustomersBarOptions} />
           </div>

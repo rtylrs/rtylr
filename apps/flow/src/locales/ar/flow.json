@@ -852,7 +852,8 @@
     "pageTitle": "الخط الزمني · rtylr",
     "emptyTitle": "لا توجد مهام بتاريخ استحقاق بعد",
     "emptyDescription": "أضف تواريخ استحقاق لعرض الخط الزمني.",
-    "goToBoardCta": "الانتقال إلى اللوحة"
+    "goToBoardCta": "الانتقال إلى اللوحة",
+    "taskColumn": "المهمة"
   },
   "projectDashboard": {
     "pageTitle": "لوحة معلومات المشروع · rtylr",
@@ -861,7 +862,13 @@
     "noTasksYet": "لا توجد مهام بعد",
     "noTasksYetDescription": "أضف مهمة لملء لوحة المعلومات.",
     "addTaskCta": "إضافة مهمة",
-    "partialCost": "بعض الوقت ليس له سعر محدد"
+    "partialCost": "بعض الوقت ليس له سعر محدد",
+    "totalTasks": "إجمالي المهام",
+    "done": "منجزة",
+    "inProgress": "قيد التنفيذ",
+    "overdue": "متأخرة",
+    "labourCost": "تكلفة العمل",
+    "percentComplete": "{{percent}}% مكتمل"
   },
   "projectCalendar": {
     "pageTitle": "التقويم · rtylr"
@@ -1031,5 +1038,10 @@
   "projectNotFound": "المشروع غير موجود. قد يكون الرابط قديماً، أو ربما حُذف.",
   "labels": {
     "removeLabel": "إزالة {{name}}"
+  },
+  "previewRoute": {
+    "title": "مسار المعاينة غير متاح",
+    "body": "هذه الصفحة غير مفعّلة في هذه البيئة. يبقى المسار متاحًا عند تفعيل مسارات المعاينة.",
+    "back": "العودة إلى مهامي"
   }
 }

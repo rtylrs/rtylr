@@ -45,7 +45,7 @@ const Reports: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Reports · rtylr" />
+      <HelmetContainer title={t('insights.reports.metaTitle')} />
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.reports.title')}
