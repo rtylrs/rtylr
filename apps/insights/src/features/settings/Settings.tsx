@@ -161,12 +161,10 @@ const Settings: React.FC = (): React.JSX.Element => {
           disabled={updateSettings.isPending || settingsLoading}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px] disabled:opacity-50"
           style={{ background: 'var(--accent)', color: 'var(--hub-on-accent)' }}
-          aria-label={t('insights.settings.save', 'Save settings')}
+          aria-label={t('insights.settings.save')}
         >
           {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
-          {updateSettings.isPending
-            ? t('insights.settings.saving', 'Saving…')
-            : t('insights.settings.save', 'Save settings')}
+          {updateSettings.isPending ? t('insights.settings.saving') : t('insights.settings.save')}
         </button>
       </motion.div>
 
