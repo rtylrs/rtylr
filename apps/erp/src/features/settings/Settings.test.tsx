@@ -1,7 +1,8 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Settings from './Settings';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   role: 'admin' as string,
@@ -9,9 +10,9 @@ const mocks = vi.hoisted(() => ({
   refetch: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -64,6 +65,10 @@ function openTeamTab(): void {
   fireEvent.click(screen.getByRole('button', { name: 'Team' }));
 }
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('Settings team empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -75,11 +80,11 @@ describe('Settings team empty state', () => {
     render(<Settings />);
     openTeamTab();
 
-    const title = screen.getByText('settings.team.empty.title');
+    const title = screen.getByText('No team members yet.');
     expect(title).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'settings.team.invite' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Invite member' }));
 
     expect(screen.getByText('Invite someone to ERP')).toBeInTheDocument();
     expect(mocks.refetch).not.toHaveBeenCalled();
@@ -90,14 +95,14 @@ describe('Settings team empty state', () => {
     render(<Settings />);
     openTeamTab();
 
-    const title = screen.getByText('settings.team.empty.title');
+    const title = screen.getByText('No team members yet.');
     const emptyState = title.parentElement as HTMLElement;
 
     expect(
-      within(emptyState).queryByRole('button', { name: 'settings.team.invite' })
+      within(emptyState).queryByRole('button', { name: 'Invite member' })
     ).not.toBeInTheDocument();
 
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'settings.team.refresh' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Refresh' }));
 
     expect(mocks.refetch).toHaveBeenCalledTimes(1);
   });
@@ -113,6 +118,6 @@ describe('Settings team empty state', () => {
     render(<Settings />);
     openTeamTab();
 
-    expect(screen.queryByText('settings.team.empty.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('No team members yet.')).not.toBeInTheDocument();
   });
 });

@@ -1,15 +1,16 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Products from './Products';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useProducts: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -64,6 +65,10 @@ vi.mock('../../shared/components/QuickAddProductModal', () => ({
     open ? <div data-testid="quick-add-modal-open" /> : null,
 }));
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('Products empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -76,12 +81,14 @@ describe('Products empty state', () => {
   it('shows the illustration and empty copy, and opens the create modal on CTA click', () => {
     render(<Products />);
 
-    const title = screen.getByText('erp.products.empty.title');
+    const title = screen.getByText('No products found');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('erp.products.empty.description')).toBeInTheDocument();
+    expect(
+      screen.getByText('Try adjusting your filters or create your first product.')
+    ).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'erp.products.create' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Create Product' }));
 
     expect(screen.getByTestId('quick-add-modal-open')).toBeInTheDocument();
   });
@@ -98,6 +105,6 @@ describe('Products empty state', () => {
 
     render(<Products />);
 
-    expect(screen.queryByText('erp.products.empty.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('No products found')).not.toBeInTheDocument();
   });
 });

@@ -71,9 +71,9 @@ const Reorder: React.FC = () => {
         ) : suggestions.length === 0 ? (
           <EmptyState
             icon={CheckCircle2}
-            title={t('reorder.empty.title')}
-            description={t('reorder.empty.description')}
-            action={{ label: t('reorder.refresh'), onClick: () => void refetch() }}
+            title={t('erp.reorder.empty.title')}
+            description={t('erp.reorder.empty.description')}
+            action={{ label: t('erp.reorder.refresh'), onClick: () => void refetch() }}
           />
         ) : (
           suggestions.map((s) => {

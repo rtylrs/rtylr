@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   role: 'operator' as string | null,
@@ -9,9 +9,9 @@ const mocks = vi.hoisted(() => ({
   product: undefined as Record<string, unknown> | undefined,
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ id: 'p1' }),
@@ -75,6 +75,11 @@ vi.mock('../categories/useCategories', () => ({ useCategories: () => ({ data: []
 vi.mock('../brands/useBrands', () => ({ useBrands: () => ({ data: [] }) }));
 
 import ProductDetail from './ProductDetail';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('ProductDetail permission gating', () => {
   beforeEach(() => {
@@ -119,14 +124,14 @@ describe('ProductDetail not-found empty state', () => {
     mocks.product = undefined;
     render(<ProductDetail />);
 
-    const title = screen.getByText('erp.products.detail.notFound');
+    const title = screen.getByText('Product not found');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('erp.products.detail.notFoundDescription')).toBeInTheDocument();
+    expect(
+      screen.getByText('The product you are looking for does not exist or has been deleted.')
+    ).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(
-      within(emptyState).getByRole('button', { name: 'erp.products.detail.backToInventory' })
-    );
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Back to Inventory' }));
 
     expect(mocks.navigate).toHaveBeenCalledWith({ to: '/inventory' });
   });

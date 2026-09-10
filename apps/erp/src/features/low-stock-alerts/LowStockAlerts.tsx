@@ -37,10 +37,10 @@ const LowStockAlerts: React.FC = () => {
       ) : items.length === 0 ? (
         <EmptyState
           icon={CheckCircle2}
-          title={t('lowStockAlerts.empty.title')}
-          description={t('lowStockAlerts.empty.description')}
+          title={t('erp.lowStockAlerts.empty.title')}
+          description={t('erp.lowStockAlerts.empty.description')}
           action={{
-            label: t('lowStockAlerts.viewInventory'),
+            label: t('erp.lowStockAlerts.viewInventory'),
             onClick: () => navigate({ to: '/inventory' }),
           }}
         />

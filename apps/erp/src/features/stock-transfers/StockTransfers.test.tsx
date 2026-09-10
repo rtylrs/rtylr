@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import StockTransfers from './StockTransfers';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   createTransfer: vi.fn(),
@@ -8,9 +9,9 @@ const mocks = vi.hoisted(() => ({
   refetch: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -49,6 +50,10 @@ vi.mock('../products/useProducts', () => ({
   }),
 }));
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('StockTransfers', () => {
   beforeEach(() => {
     mocks.createTransfer.mockReset();
@@ -67,7 +72,8 @@ describe('StockTransfers', () => {
   it('submits the selected product and positive quantity instead of an empty draft', async () => {
     render(<StockTransfers />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'New Transfer' }));
+    const [headerAction] = screen.getAllByRole('button', { name: 'New Transfer' });
+    fireEvent.click(headerAction);
     const selects = screen.getAllByRole('combobox');
     fireEvent.change(selects[0], { target: { value: '1' } });
     fireEvent.change(selects[1], { target: { value: '2' } });
@@ -96,12 +102,12 @@ describe('StockTransfers empty state', () => {
     mocks.role = 'admin';
     render(<StockTransfers />);
 
-    const title = screen.getByText('stockTransfers.empty.title');
+    const title = screen.getByText('No transfers');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('stockTransfers.empty.description')).toBeInTheDocument();
+    expect(screen.getByText('Create your first stock transfer')).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'stockTransfers.newTransfer' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'New Transfer' }));
 
     expect(screen.getByText('New Stock Transfer')).toBeInTheDocument();
     expect(mocks.refetch).not.toHaveBeenCalled();
@@ -111,14 +117,14 @@ describe('StockTransfers empty state', () => {
     mocks.role = 'operator';
     render(<StockTransfers />);
 
-    const title = screen.getByText('stockTransfers.empty.title');
+    const title = screen.getByText('No transfers');
     const emptyState = title.parentElement as HTMLElement;
 
     expect(
-      within(emptyState).queryByRole('button', { name: 'stockTransfers.newTransfer' })
+      within(emptyState).queryByRole('button', { name: 'New Transfer' })
     ).not.toBeInTheDocument();
 
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'stockTransfers.refresh' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Refresh' }));
 
     expect(mocks.refetch).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('New Stock Transfer')).not.toBeInTheDocument();

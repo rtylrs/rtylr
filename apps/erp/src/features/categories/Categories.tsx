@@ -92,10 +92,10 @@ const Categories: React.FC = () => {
         ) : categories.length === 0 ? (
           <EmptyState
             icon={Folder}
-            title={t('categories.empty.title')}
-            description={t('categories.empty.description')}
+            title={t('erp.categories.empty.title')}
+            description={t('erp.categories.empty.description')}
             action={{
-              label: t('categories.addCategory'),
+              label: t('erp.categories.addCategory'),
               onClick: () => newNameInputRef.current?.focus(),
             }}
           />

@@ -1,16 +1,17 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Warehouses from './Warehouses';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useWarehouses: vi.fn(),
   createMutateAsync: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -28,6 +29,10 @@ vi.mock('./useWarehouses', () => ({
   useDeleteWarehouse: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('Warehouses empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,14 +42,16 @@ describe('Warehouses empty state', () => {
   it('shows the illustration and empty copy, and opens the create form on CTA click', () => {
     render(<Warehouses />);
 
-    const title = screen.getByText('warehouses.empty.title');
+    const title = screen.getByText('No warehouses');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('warehouses.empty.description')).toBeInTheDocument();
+    expect(
+      screen.getByText('Create your first warehouse to track stock locations')
+    ).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'warehouses.new' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'New Warehouse' }));
 
-    expect(screen.getByPlaceholderText('warehouses.fields.name')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Warehouse name')).toBeInTheDocument();
   });
 
   it('does not show the empty state when warehouses exist', () => {
@@ -55,6 +62,6 @@ describe('Warehouses empty state', () => {
 
     render(<Warehouses />);
 
-    expect(screen.queryByText('warehouses.empty.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('No warehouses')).not.toBeInTheDocument();
   });
 });

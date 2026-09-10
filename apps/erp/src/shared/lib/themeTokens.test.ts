@@ -9,6 +9,21 @@ const fixedOutputFiles = new Set([
 ]);
 const rawColorPattern = /#[0-9a-f]{3,8}\b|rgba?\s*\(/gi;
 
+/**
+ * A line that is only a comment. A colour that does not render is not a raw
+ * colour, and more to the point an issue reference is shaped exactly like a
+ * short hex: `#1269` and `#988` both match the pattern above, so before this
+ * every mention of an issue number in an erp comment failed this test.
+ */
+const commentLine = /^\s*(\/\/|\*|\/\*)/;
+
+function withoutComments(source: string): string {
+  return source
+    .split('\n')
+    .filter((line) => !commentLine.test(line))
+    .join('\n');
+}
+
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const relativePath = entry.name;
@@ -40,7 +55,7 @@ describe('ERP theme tokens', () => {
       .flatMap((root) => sourceFiles(join(sourceRoot, root)))
       .filter((file) => !fixedOutputFiles.has(file.slice(`${sourceRoot}/`.length)))
       .flatMap((file) => {
-        const source = readFileSync(file, 'utf8');
+        const source = withoutComments(readFileSync(file, 'utf8'));
         return source.match(rawColorPattern)
           ? [`${file}: ${source.match(rawColorPattern)?.join(', ')}`]
           : [];

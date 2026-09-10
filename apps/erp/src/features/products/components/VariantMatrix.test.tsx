@@ -1,15 +1,16 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import VariantMatrix from './VariantMatrix';
+import { initTestI18n } from '../../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useVariants: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('../useVariants', () => ({
   parseVariantAttributes: () => ({}),
@@ -18,6 +19,10 @@ vi.mock('../useVariants', () => ({
   useUpdateVariant: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteVariant: () => ({ mutate: vi.fn(), isPending: false }),
 }));
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('VariantMatrix empty state', () => {
   beforeEach(() => {
@@ -28,16 +33,16 @@ describe('VariantMatrix empty state', () => {
   it('shows the illustration and empty copy, and adds an option group on CTA click', () => {
     render(<VariantMatrix productId="p1" productSku="SKU-1" baseSalePrice={10} />);
 
-    const title = screen.getByText('erp.products.variants.empty');
+    const title = screen.getByText('No variants yet. Add an option below to generate them.');
     expect(title).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(
-      within(emptyState).getByRole('button', { name: 'erp.products.variants.addOption' })
-    );
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Add option' }));
 
-    expect(screen.getByPlaceholderText('erp.products.variants.optionName')).toBeInTheDocument();
-    expect(screen.queryByText('erp.products.variants.empty')).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Option name (e.g. Size, Color)')).toBeInTheDocument();
+    expect(
+      screen.queryByText('No variants yet. Add an option below to generate them.')
+    ).not.toBeInTheDocument();
   });
 
   it('does not show the empty state when variants exist', () => {
@@ -47,6 +52,8 @@ describe('VariantMatrix empty state', () => {
 
     render(<VariantMatrix productId="p1" productSku="SKU-1" baseSalePrice={10} />);
 
-    expect(screen.queryByText('erp.products.variants.empty')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('No variants yet. Add an option below to generate them.')
+    ).not.toBeInTheDocument();
   });
 });
