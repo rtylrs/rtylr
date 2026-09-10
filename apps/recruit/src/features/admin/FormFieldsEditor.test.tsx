@@ -37,9 +37,9 @@ describe('FormFieldsEditor empty state', () => {
   it('shows the empty message and creates a default short-text question from its CTA', () => {
     render(<FormFieldsEditor careerId={42} />);
 
-    expect(screen.getByText('emptyStates.questionsNone')).toBeInTheDocument();
+    expect(screen.getByText('common.emptyStates.questionsNone')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.addQuestion' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.emptyStates.addQuestion' }));
 
     expect(createMutate).toHaveBeenCalledTimes(1);
     const [body] = createMutate.mock.calls[0];
