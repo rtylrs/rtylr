@@ -75,12 +75,12 @@ func (x *GetUserSettingsResponse) GetSidebarPreferences() string {
 }
 
 type UpdateUserSettingsRequest struct {
-	TaskAssigned       bool    `json:"task_assigned,omitempty"`
-	TaskComments       bool    `json:"task_comments,omitempty"`
-	Mentions           bool    `json:"mentions,omitempty"`
-	StatusChanges      bool    `json:"status_changes,omitempty"`
-	WeeklyDigest       bool    `json:"weekly_digest,omitempty"`
-	EmailNotifications bool    `json:"email_notifications,omitempty"`
+	TaskAssigned       *bool   `json:"task_assigned,omitempty"`
+	TaskComments       *bool   `json:"task_comments,omitempty"`
+	Mentions           *bool   `json:"mentions,omitempty"`
+	StatusChanges      *bool   `json:"status_changes,omitempty"`
+	WeeklyDigest       *bool   `json:"weekly_digest,omitempty"`
+	EmailNotifications *bool   `json:"email_notifications,omitempty"`
 	SidebarPreferences *string `json:"sidebar_preferences,omitempty"`
 }
 
@@ -89,7 +89,11 @@ func (x *UpdateUserSettingsRequest) GetTaskAssigned() bool {
 		var zero bool
 		return zero
 	}
-	return x.TaskAssigned
+	if x.TaskAssigned == nil {
+		var zero bool
+		return zero
+	}
+	return *x.TaskAssigned
 }
 
 func (x *UpdateUserSettingsRequest) GetTaskComments() bool {
@@ -97,7 +101,11 @@ func (x *UpdateUserSettingsRequest) GetTaskComments() bool {
 		var zero bool
 		return zero
 	}
-	return x.TaskComments
+	if x.TaskComments == nil {
+		var zero bool
+		return zero
+	}
+	return *x.TaskComments
 }
 
 func (x *UpdateUserSettingsRequest) GetMentions() bool {
@@ -105,7 +113,11 @@ func (x *UpdateUserSettingsRequest) GetMentions() bool {
 		var zero bool
 		return zero
 	}
-	return x.Mentions
+	if x.Mentions == nil {
+		var zero bool
+		return zero
+	}
+	return *x.Mentions
 }
 
 func (x *UpdateUserSettingsRequest) GetStatusChanges() bool {
@@ -113,7 +125,11 @@ func (x *UpdateUserSettingsRequest) GetStatusChanges() bool {
 		var zero bool
 		return zero
 	}
-	return x.StatusChanges
+	if x.StatusChanges == nil {
+		var zero bool
+		return zero
+	}
+	return *x.StatusChanges
 }
 
 func (x *UpdateUserSettingsRequest) GetWeeklyDigest() bool {
@@ -121,7 +137,11 @@ func (x *UpdateUserSettingsRequest) GetWeeklyDigest() bool {
 		var zero bool
 		return zero
 	}
-	return x.WeeklyDigest
+	if x.WeeklyDigest == nil {
+		var zero bool
+		return zero
+	}
+	return *x.WeeklyDigest
 }
 
 func (x *UpdateUserSettingsRequest) GetEmailNotifications() bool {
@@ -129,7 +149,11 @@ func (x *UpdateUserSettingsRequest) GetEmailNotifications() bool {
 		var zero bool
 		return zero
 	}
-	return x.EmailNotifications
+	if x.EmailNotifications == nil {
+		var zero bool
+		return zero
+	}
+	return *x.EmailNotifications
 }
 
 func (x *UpdateUserSettingsRequest) GetSidebarPreferences() string {
