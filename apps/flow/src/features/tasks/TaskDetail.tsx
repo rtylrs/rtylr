@@ -21,7 +21,6 @@ import {
   LayoutList,
   Link2,
   ListChecks,
-  Layers,
   Gauge,
   Hourglass,
   Pin,
@@ -468,7 +467,9 @@ const TaskDetail: React.FC = () => {
               value={task.title}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
               disabled={!canEdit}
-              className="w-full bg-transparent font-bold mb-4 text-xl sm:text-2xl disabled:opacity-70"
+              // 20px at every width. S-12 asks for 20px; `sm:text-2xl` took it
+              // to 24 on desktop, and the review measured 30px before that.
+              className="w-full bg-transparent font-bold mb-4 text-xl disabled:opacity-70"
               style={{
                 color: 'var(--flow-text)',
               }}
@@ -633,10 +634,19 @@ const TaskDetail: React.FC = () => {
               </option>
             ))}
           </select>
-        </DetailField>
 
-        {projectStatuses.length > 0 && (
-          <DetailField icon={Layers} label={t('flow.status.settingsTitle')}>
+          {/* One STATUS row, with the project's own statuses inside it.
+              These were two adjacent rows reading `STATUS: In Progress` and
+              `STATUSES: No custom status`, which is one concept presented as
+              two and a label that differed from its neighbour by a letter
+              (rtylr#1079, S-12).
+
+              Still two controls, because they are two fields with two
+              mutations: the built-in status drives the board column, the
+              project's own is a label on top of it. Each keeps its own
+              accessible name, so a screen reader announces which is which
+              rather than hearing one group called "status" twice. */}
+          {projectStatuses.length > 0 && (
             <select
               aria-label={t('flow.status.settingsTitle')}
               value={task.statusId ?? ''}
@@ -644,8 +654,8 @@ const TaskDetail: React.FC = () => {
                 setTaskStatus.mutate({ taskId: task.id, statusId: e.target.value || '0' });
               }}
               disabled={!canEdit}
-              className="bg-transparent text-meta w-full disabled:opacity-70"
-              style={{ color: 'var(--flow-text)' }}
+              className="mt-1.5 w-full bg-transparent text-meta disabled:opacity-70"
+              style={{ color: 'var(--flow-text-muted)' }}
             >
               <option value="" style={{ background: 'var(--flow-card)' }}>
                 {t('flow.status.none')}
@@ -656,8 +666,8 @@ const TaskDetail: React.FC = () => {
                 </option>
               ))}
             </select>
-          </DetailField>
-        )}
+          )}
+        </DetailField>
 
         <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
           <select
@@ -737,7 +747,11 @@ const TaskDetail: React.FC = () => {
         <DetailField icon={Clock} label={t('flow.taskDetail.estimate')}>
           <input
             type="number"
-            value={task.estimate || ''}
+            // The resolved value, the same one TimePanel is given. This read
+            // `task.estimate` alone, so whenever the API sent `estimatedHours`
+            // the field showed only its "hours" placeholder while the panel
+            // beside it said "of 40:00" (rtylr#1079).
+            value={estimatedHours ?? ''}
             onChange={(e) => updateTask(task.id, { estimate: Number(e.target.value) })}
             placeholder={t('flow.taskDetail.hours')}
             disabled={!canEdit}
