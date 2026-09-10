@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
+import { useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -156,10 +157,17 @@ function activityIcon(action: string): React.ComponentType<{ size?: number }> {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-const TaskDetail: React.FC = () => {
+/**
+ * `taskId` overrides the route param, so the same component serves the
+ * standalone `/task/$id` page and the drawer that opens over a list
+ * (rtylr#1079). The drawer knows which task it is showing; the page reads it
+ * from the URL.
+ */
+const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { t } = useTranslation();
-  const { id } = useParams({ strict: false });
-  const navigate = useNavigate();
+  const openTask = useOpenTask();
+  const { id: routeId } = useParams({ strict: false });
+  const id = taskId ?? routeId;
   useTaskRealtime(id);
   const taskQuery = useTask(id);
   const { data: taskData, isLoading } = taskQuery;
@@ -954,7 +962,7 @@ const TaskDetail: React.FC = () => {
               <div key={dt.id} className="flex items-center justify-between gap-1">
                 <button
                   type="button"
-                  onClick={() => navigate({ to: `/task/${dt.id}` as string })}
+                  onClick={() => openTask(String(dt.id))}
                   className="text-meta text-start truncate flex-1 hover:underline"
                   style={{ color: 'var(--accent)' }}
                 >
