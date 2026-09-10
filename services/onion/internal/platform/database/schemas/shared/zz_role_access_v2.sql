@@ -1,0 +1,354 @@
+-- Role and Access Control V2.
+--
+-- This migration is additive. Legacy user_app_permissions, user_groups, and
+-- hub_roles remain readable during the migration window. The normalized tables
+-- below are the source of truth for new writes and effective-access reads.
+
+CREATE TABLE IF NOT EXISTS authorization_permission_catalog (
+    permission_key VARCHAR(128) NOT NULL PRIMARY KEY,
+    app_id VARCHAR(32) NOT NULL,
+    action VARCHAR(32) NOT NULL,
+    is_sensitive BOOLEAN NOT NULL DEFAULT FALSE,
+    is_high_risk BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_auth_permission_app (app_id)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_roles (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL DEFAULT 0 COMMENT '0 means a global system role',
+    app_id VARCHAR(32) NOT NULL DEFAULT 'dash',
+    role_key VARCHAR(96) NOT NULL,
+    display_name VARCHAR(128) NOT NULL,
+    description TEXT NULL,
+    scope_rules JSON NULL,
+    level INT NOT NULL DEFAULT 0,
+    parent_role_id BIGINT NULL,
+    assignment_mode ENUM('many','one','primary_plus_addons') NOT NULL DEFAULT 'many',
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
+    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    lifecycle ENUM('draft','active','archived','replaced') NOT NULL DEFAULT 'active',
+    version BIGINT NOT NULL DEFAULT 1,
+    created_by BIGINT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_auth_role_scope_key (business_id, app_id, role_key),
+    INDEX idx_auth_roles_business_app (business_id, app_id),
+    INDEX idx_auth_roles_parent (parent_role_id)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_role_permissions (
+    role_id BIGINT NOT NULL,
+    permission_key VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (role_id, permission_key),
+    INDEX idx_auth_role_permissions_key (permission_key)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_business_members (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    dash_role_id BIGINT NULL,
+    dash_role_key VARCHAR(64) NOT NULL DEFAULT 'member',
+    status ENUM('pending','active','suspended','revoked') NOT NULL DEFAULT 'active',
+    authorization_version BIGINT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_auth_member_business_user (business_id, user_id),
+    INDEX idx_auth_member_user (user_id),
+    INDEX idx_auth_member_status (business_id, status)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_license_assignments (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    user_id BIGINT NULL,
+    group_id BIGINT NULL,
+    app_id VARCHAR(32) NOT NULL,
+    source ENUM('explicit','dash_default','group','system') NOT NULL DEFAULT 'explicit',
+    status ENUM('pending','active','revoked','archived') NOT NULL DEFAULT 'active',
+    granted_by BIGINT NULL,
+    granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    revoked_by BIGINT NULL,
+    revoked_at TIMESTAMP NULL,
+    INDEX idx_auth_license_user (business_id, user_id, status),
+    INDEX idx_auth_license_group (business_id, group_id, status),
+    INDEX idx_auth_license_app (business_id, app_id, status)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_role_assignments (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    user_id BIGINT NULL,
+    group_id BIGINT NULL,
+    app_id VARCHAR(32) NOT NULL,
+    role_id BIGINT NOT NULL,
+    source ENUM('explicit','dash_default','group','system') NOT NULL DEFAULT 'explicit',
+    status ENUM('pending','active','revoked','archived') NOT NULL DEFAULT 'active',
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    granted_by BIGINT NULL,
+    granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    revoked_by BIGINT NULL,
+    revoked_at TIMESTAMP NULL,
+    INDEX idx_auth_role_assignment_user (business_id, user_id, app_id, status),
+    INDEX idx_auth_role_assignment_group (business_id, group_id, app_id, status),
+    INDEX idx_auth_role_assignment_role (role_id, status)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_role_assignment_scopes (
+    assignment_id BIGINT NOT NULL,
+    scope_type VARCHAR(32) NOT NULL,
+    scope_id VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (assignment_id, scope_type, scope_id),
+    INDEX idx_auth_assignment_scope (scope_type, scope_id)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_dash_app_defaults (
+    dash_role_id BIGINT NOT NULL,
+    app_id VARCHAR(32) NOT NULL,
+    default_role_id BIGINT NULL,
+    default_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (dash_role_id, app_id)
+);
+
+CREATE TABLE IF NOT EXISTS authorization_audit_events (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    actor_user_id BIGINT NULL,
+    target_user_id BIGINT NULL,
+    target_group_id BIGINT NULL,
+    action VARCHAR(96) NOT NULL,
+    app_id VARCHAR(32) NULL,
+    role_id BIGINT NULL,
+    before_json JSON NULL,
+    after_json JSON NULL,
+    reason TEXT NULL,
+    approval_ref VARCHAR(128) NULL,
+    request_id VARCHAR(128) NULL,
+    correlation_id VARCHAR(128) NULL,
+    source_client ENUM('dash','pos','mobile','app','api') NOT NULL DEFAULT 'api',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_auth_audit_business_time (business_id, created_at),
+    INDEX idx_auth_audit_target (business_id, target_user_id, created_at),
+    INDEX idx_auth_audit_action (business_id, action, created_at)
+);
+
+INSERT INTO authorization_permission_catalog
+    (permission_key, app_id, action, is_sensitive, is_high_risk)
+VALUES
+    ('hub:dashboard:view', 'dash', 'view', FALSE, FALSE),
+    ('hub:team:view', 'dash', 'view', FALSE, FALSE),
+    ('hub:team:invite', 'dash', 'invite', FALSE, FALSE),
+    ('hub:team:edit', 'dash', 'edit', FALSE, FALSE),
+    ('hub:team:deactivate', 'dash', 'deactivate', FALSE, TRUE),
+    ('hub:roles:view', 'dash', 'view', FALSE, FALSE),
+    ('hub:roles:create', 'dash', 'create', FALSE, TRUE),
+    ('hub:roles:edit', 'dash', 'edit', FALSE, TRUE),
+    ('hub:roles:archive', 'dash', 'archive', FALSE, TRUE),
+    ('hub:licenses:manage', 'dash', 'manage', FALSE, TRUE),
+    ('hub:groups:manage', 'dash', 'manage', FALSE, FALSE),
+    ('hub:hierarchy:manage', 'dash', 'manage', FALSE, TRUE),
+    ('hub:audit:view', 'dash', 'view', FALSE, FALSE),
+    ('hub:security:manage', 'dash', 'manage', TRUE, TRUE),
+    ('hub:api_keys:manage', 'dash', 'manage', TRUE, TRUE),
+    ('pos:orders:view', 'pos', 'view', FALSE, FALSE),
+    ('pos:orders:create', 'pos', 'create', FALSE, FALSE),
+    ('pos:orders:void', 'pos', 'void', FALSE, TRUE),
+    ('pos:orders:void:approve', 'pos', 'approve', FALSE, TRUE),
+    ('pos:orders:refund', 'pos', 'refund', FALSE, TRUE),
+    ('pos:orders:refund:approve', 'pos', 'approve', FALSE, TRUE),
+    ('pos:orders:void:override', 'pos', 'override', FALSE, TRUE),
+    ('pos:orders:refund:override', 'pos', 'override', FALSE, TRUE),
+    ('pos:orders:discount', 'pos', 'edit', FALSE, FALSE),
+    ('pos:cash:view', 'pos', 'view', FALSE, FALSE),
+    ('pos:cash:drop', 'pos', 'create', FALSE, TRUE),
+    ('pos:cash:pickup', 'pos', 'create', FALSE, TRUE),
+    ('pos:cash:approve', 'pos', 'approve', FALSE, TRUE),
+    ('pos:employees:manage', 'pos', 'manage', FALSE, TRUE),
+    ('pos:terminals:manage', 'pos', 'manage', FALSE, TRUE),
+    ('pos:reports:view', 'pos', 'view', FALSE, FALSE),
+    ('erp:products:view', 'erp', 'view', FALSE, FALSE),
+    ('erp:products:create', 'erp', 'create', FALSE, FALSE),
+    ('erp:products:edit', 'erp', 'edit', FALSE, FALSE),
+    ('erp:products:delete', 'erp', 'delete', FALSE, TRUE),
+    ('erp:inventory:view', 'erp', 'view', FALSE, FALSE),
+    ('erp:inventory:adjust', 'erp', 'edit', FALSE, TRUE),
+    ('erp:inventory:transfer', 'erp', 'edit', FALSE, TRUE),
+    ('erp:inventory:approve', 'erp', 'approve', FALSE, TRUE),
+    ('erp:warehouses:manage', 'erp', 'manage', FALSE, TRUE),
+    ('erp:purchasing:view', 'erp', 'view', FALSE, FALSE),
+    ('erp:purchasing:create', 'erp', 'create', FALSE, FALSE),
+    ('erp:purchasing:approve', 'erp', 'approve', FALSE, TRUE),
+    ('finance:invoices:view', 'finance', 'view', FALSE, FALSE),
+    ('finance:invoices:create', 'finance', 'create', FALSE, FALSE),
+    ('finance:invoices:send', 'finance', 'send', FALSE, FALSE),
+    ('finance:expenses:view', 'finance', 'view', FALSE, FALSE),
+    ('finance:expenses:create', 'finance', 'create', FALSE, FALSE),
+    ('finance:expenses:approve', 'finance', 'approve', FALSE, TRUE),
+    ('finance:bank_feeds:view', 'finance', 'view', TRUE, FALSE),
+    ('finance:bank_feeds:sensitive_view', 'finance', 'sensitive.view', TRUE, TRUE),
+    ('finance:reconciliation:manage', 'finance', 'manage', FALSE, TRUE),
+    ('finance:reports:view', 'finance', 'view', FALSE, FALSE),
+    ('finance:reports:export', 'finance', 'export', FALSE, FALSE),
+    ('finance:tax:configure', 'finance', 'configure', TRUE, TRUE),
+    ('crm:customers:view', 'crm', 'view', FALSE, FALSE),
+    ('crm:customers:create', 'crm', 'create', FALSE, FALSE),
+    ('crm:customers:edit', 'crm', 'edit', FALSE, FALSE),
+    ('crm:customers:delete', 'crm', 'delete', FALSE, TRUE),
+    ('crm:customers:export', 'crm', 'export', TRUE, TRUE),
+    ('crm:campaigns:view', 'crm', 'view', FALSE, FALSE),
+    ('crm:campaigns:create', 'crm', 'create', FALSE, FALSE),
+    ('crm:campaigns:send', 'crm', 'send', FALSE, FALSE),
+    ('crm:loyalty:manage', 'crm', 'manage', FALSE, TRUE),
+    ('crm:automations:manage', 'crm', 'manage', FALSE, TRUE),
+    ('hr:employees:view', 'hr', 'view', FALSE, FALSE),
+    ('hr:employees:manage', 'hr', 'manage', FALSE, TRUE),
+    ('hr:employees:sensitive_view', 'hr', 'sensitive.view', TRUE, TRUE),
+    ('hr:time_off:request', 'hr', 'create', FALSE, FALSE),
+    ('hr:time_off:approve', 'hr', 'approve', FALSE, TRUE),
+    ('hr:schedules:manage', 'hr', 'manage', FALSE, FALSE),
+    ('hr:payroll:view', 'hr', 'view', TRUE, FALSE),
+    ('hr:payroll:manage', 'hr', 'manage', TRUE, TRUE),
+    ('hr:payroll:execute', 'hr', 'execute', TRUE, TRUE),
+    ('hr:roles:manage', 'hr', 'manage', FALSE, TRUE),
+    ('flow:projects:view', 'flow', 'view', FALSE, FALSE),
+    ('flow:projects:create', 'flow', 'create', FALSE, FALSE),
+    ('flow:projects:edit', 'flow', 'edit', FALSE, FALSE),
+    ('flow:projects:assign', 'flow', 'assign', FALSE, TRUE),
+    ('flow:tasks:view', 'flow', 'view', FALSE, FALSE),
+    ('flow:tasks:create', 'flow', 'create', FALSE, FALSE),
+    ('flow:tasks:edit', 'flow', 'edit', FALSE, FALSE),
+    ('flow:tasks:assign', 'flow', 'assign', FALSE, TRUE),
+    ('flow:team:manage', 'flow', 'manage', FALSE, TRUE),
+    ('flow:managers:manage', 'flow', 'manage', FALSE, TRUE),
+    ('flow:settings:manage', 'flow', 'manage', FALSE, TRUE),
+    ('insights:dashboard:view', 'insights', 'view', FALSE, FALSE),
+    ('insights:financial:view', 'insights', 'view', TRUE, FALSE),
+    ('insights:customers:view', 'insights', 'view', TRUE, FALSE),
+    ('insights:reports:create', 'insights', 'create', FALSE, FALSE),
+    ('insights:reports:share', 'insights', 'share', FALSE, FALSE),
+    ('insights:reports:export', 'insights', 'export', FALSE, FALSE),
+    ('menu:menus:view', 'menu', 'view', FALSE, FALSE),
+    ('menu:menus:edit', 'menu', 'edit', FALSE, FALSE),
+    ('menu:branding:edit', 'menu', 'edit', FALSE, FALSE),
+    ('menu:orders:view', 'menu', 'view', FALSE, FALSE),
+    ('menu:analytics:view', 'menu', 'view', FALSE, FALSE),
+    ('recruit:jobs:view', 'recruit', 'view', FALSE, FALSE),
+    ('recruit:jobs:manage', 'recruit', 'manage', FALSE, TRUE),
+    ('recruit:jobs:publish', 'recruit', 'publish', FALSE, TRUE),
+    ('recruit:candidates:view', 'recruit', 'view', FALSE, FALSE),
+    ('recruit:candidates:edit', 'recruit', 'edit', FALSE, FALSE),
+    ('recruit:candidates:sensitive_view', 'recruit', 'sensitive.view', TRUE, TRUE),
+    ('recruit:candidates:export', 'recruit', 'export', TRUE, TRUE)
+ON DUPLICATE KEY UPDATE
+    app_id = VALUES(app_id),
+    action = VALUES(action),
+    is_sensitive = VALUES(is_sensitive),
+    is_high_risk = VALUES(is_high_risk);
+
+INSERT INTO authorization_roles
+    (business_id, app_id, role_key, display_name, description, level, assignment_mode, is_system)
+VALUES
+    (0, 'dash', 'dash.owner', 'Owner', 'Full tenant control.', 100, 'one', TRUE),
+    (0, 'dash', 'dash.admin', 'Admin', 'Administrative tenant control.', 90, 'one', TRUE),
+    (0, 'dash', 'dash.manager', 'Manager', 'Team and operational management.', 60, 'one', TRUE),
+    (0, 'dash', 'dash.member', 'Member', 'Standard team membership.', 40, 'one', TRUE),
+    (0, 'dash', 'dash.viewer', 'Viewer', 'Read-only tenant membership.', 10, 'one', TRUE),
+    (0, 'pos', 'pos.viewer', 'POS Viewer', 'Read POS records.', 10, 'one', TRUE),
+    (0, 'pos', 'pos.cashier', 'Cashier', 'Sell and manage assigned POS sessions.', 20, 'primary_plus_addons', TRUE),
+    (0, 'pos', 'pos.senior_cashier', 'Senior Cashier', 'Cashier permissions plus approved exceptions.', 40, 'primary_plus_addons', TRUE),
+    (0, 'pos', 'pos.location_manager', 'Location Manager', 'Manage POS operations for a location.', 70, 'one', TRUE),
+    (0, 'pos', 'pos.admin', 'POS Admin', 'Full POS administration.', 90, 'one', TRUE),
+    (0, 'erp', 'erp.viewer', 'ERP Viewer', 'Read ERP records.', 10, 'one', TRUE),
+    (0, 'erp', 'erp.manager', 'ERP Manager', 'Manage ERP operations.', 60, 'one', TRUE),
+    (0, 'erp', 'erp.admin', 'ERP Admin', 'Full ERP administration.', 90, 'one', TRUE),
+    (0, 'hr', 'hr.viewer', 'HR Viewer', 'Read HR records.', 10, 'one', TRUE),
+    (0, 'hr', 'hr.employee', 'Employee', 'View self-service HR records.', 10, 'one', TRUE),
+    (0, 'hr', 'hr.manager', 'HR Manager', 'Manage HR records.', 60, 'one', TRUE),
+    (0, 'hr', 'hr.admin', 'HR Admin', 'Full HR administration.', 90, 'one', TRUE),
+    (0, 'crm', 'crm.viewer', 'CRM Viewer', 'Read CRM records.', 10, 'one', TRUE),
+    (0, 'crm', 'crm.manager', 'CRM Manager', 'Manage CRM operations.', 60, 'one', TRUE),
+    (0, 'crm', 'crm.admin', 'CRM Admin', 'Full CRM administration.', 90, 'one', TRUE),
+    (0, 'finance', 'finance.viewer', 'Finance Viewer', 'Read finance records.', 10, 'one', TRUE),
+    (0, 'finance', 'finance.manager', 'Finance Manager', 'Manage finance operations.', 60, 'one', TRUE),
+    (0, 'finance', 'finance.admin', 'Finance Admin', 'Full finance administration.', 90, 'one', TRUE),
+    (0, 'flow', 'flow.viewer', 'Flow Viewer', 'Read Flow workspaces.', 10, 'one', TRUE),
+    (0, 'flow', 'flow.contributor', 'Flow Contributor', 'Create and edit assigned work.', 30, 'primary_plus_addons', TRUE),
+    (0, 'flow', 'flow.team_leader', 'Flow Team Leader', 'Lead assigned Flow teams.', 50, 'one', TRUE),
+    (0, 'flow', 'flow.manager', 'Flow Manager', 'Manage Flow projects and teams.', 70, 'one', TRUE),
+    (0, 'flow', 'flow.admin', 'Flow Admin', 'Full Flow administration.', 90, 'one', TRUE),
+    (0, 'insights', 'insights.viewer', 'Insights Viewer', 'Read Insights dashboards.', 10, 'one', TRUE),
+    (0, 'insights', 'insights.analyst', 'Insights Analyst', 'Create and share Insights reports.', 50, 'one', TRUE),
+    (0, 'insights', 'insights.admin', 'Insights Admin', 'Full Insights administration.', 90, 'one', TRUE),
+    (0, 'menu', 'menu.viewer', 'Menu Viewer', 'Read menus and orders.', 10, 'one', TRUE),
+    (0, 'menu', 'menu.editor', 'Menu Editor', 'Edit menus and branding.', 40, 'one', TRUE),
+    (0, 'menu', 'menu.manager', 'Menu Manager', 'Manage menus and analytics.', 70, 'one', TRUE),
+    (0, 'menu', 'menu.admin', 'Menu Admin', 'Full Menu administration.', 90, 'one', TRUE),
+    (0, 'recruit', 'recruit.viewer', 'Recruit Viewer', 'Read recruiting records.', 10, 'one', TRUE),
+    (0, 'recruit', 'recruit.recruiter', 'Recruiter', 'Manage recruiting workflows.', 60, 'one', TRUE),
+    (0, 'recruit', 'recruit.manager', 'Recruit Manager', 'Manage recruiting operations.', 75, 'one', TRUE),
+    (0, 'recruit', 'recruit.admin', 'Recruit Admin', 'Full Recruit administration.', 90, 'one', TRUE)
+ON DUPLICATE KEY UPDATE
+    display_name = VALUES(display_name),
+    description = VALUES(description),
+    level = VALUES(level),
+    assignment_mode = VALUES(assignment_mode),
+    is_system = TRUE,
+    is_archived = FALSE,
+    lifecycle = 'active';
+
+INSERT INTO authorization_role_permissions (role_id, permission_key)
+SELECT r.id, p.permission_key
+FROM authorization_roles r
+JOIN authorization_permission_catalog p
+WHERE r.business_id = 0
+  AND r.app_id = 'dash'
+  AND r.role_key IN ('dash.owner', 'dash.admin')
+ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);
+
+INSERT INTO authorization_role_permissions (role_id, permission_key)
+SELECT r.id, p.permission_key
+FROM authorization_roles r
+JOIN authorization_permission_catalog p ON p.app_id = r.app_id
+WHERE r.business_id = 0
+  AND r.role_key LIKE CONCAT(r.app_id, '.admin')
+ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);
+
+INSERT INTO authorization_role_permissions (role_id, permission_key)
+SELECT r.id, p.permission_key
+FROM authorization_roles r
+JOIN authorization_permission_catalog p ON p.app_id = r.app_id
+WHERE r.business_id = 0
+  AND r.role_key IN (
+      'pos.location_manager', 'erp.manager', 'hr.manager', 'crm.manager',
+      'finance.manager', 'flow.manager', 'flow.team_leader',
+      'insights.analyst', 'menu.manager', 'recruit.manager'
+  )
+  AND p.action IN ('view', 'create', 'edit', 'send', 'share', 'export')
+ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);
+
+INSERT INTO authorization_role_permissions (role_id, permission_key)
+SELECT r.id, p.permission_key
+FROM authorization_roles r
+JOIN authorization_permission_catalog p ON p.app_id = r.app_id
+WHERE r.business_id = 0
+  AND r.role_key IN ('pos.cashier', 'flow.contributor', 'recruit.recruiter')
+  AND p.action IN ('view', 'create', 'edit')
+ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);
+
+INSERT INTO authorization_role_permissions (role_id, permission_key)
+SELECT r.id, p.permission_key
+FROM authorization_roles r
+JOIN authorization_permission_catalog p ON p.app_id = r.app_id
+WHERE r.business_id = 0
+  AND r.role_key IN (
+      'pos.senior_cashier', 'pos.viewer', 'erp.viewer', 'hr.employee',
+      'hr.viewer', 'crm.viewer', 'finance.viewer', 'flow.viewer', 'insights.viewer',
+      'menu.viewer', 'recruit.viewer'
+  )
+  AND p.action = 'view'
+  AND p.is_sensitive = FALSE
+ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);

@@ -305,6 +305,7 @@ CREATE TABLE IF NOT EXISTS flow_user_settings (
     status_changes BOOLEAN DEFAULT FALSE,
     weekly_digest BOOLEAN DEFAULT TRUE,
     email_notifications BOOLEAN DEFAULT FALSE,
+    sidebar_preferences_json TEXT DEFAULT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 

@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     business_id BIGINT NULL,
     email VARCHAR(320) UNIQUE NOT NULL,
+    username VARCHAR(64) NULL UNIQUE,
     password_hash VARCHAR(512) NOT NULL,
     full_name VARCHAR(255) NULL,
     signup_ip_address VARCHAR(45) NULL,
