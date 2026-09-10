@@ -14,7 +14,8 @@
       "margin": "Gross Margin"
     },
     "emptyTitle": "No KPI data yet",
-    "emptyDescription": "Metrics will appear here once your business starts generating activity."
+    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "vsPrior": "vs prior"
   },
   "revenue": {
     "title": "Revenue",
@@ -31,7 +32,8 @@
     "emptyByApp": {
       "title": "No revenue breakdown yet",
       "description": "A breakdown by app will appear once revenue comes in from more than one app."
-    }
+    },
+    "vsPrevious": "vs previous"
   },
   "customers": {
     "title": "Customers",
@@ -55,7 +57,10 @@
     "emptyChurn": {
       "title": "No churn data yet",
       "description": "Churn rates will appear once there is enough customer history to measure retention."
-    }
+    },
+    "churnedCount": "churned",
+    "customers_one": "{{formatted}} customer",
+    "customers_other": "{{formatted}} customers"
   },
   "products": {
     "title": "Products",
@@ -84,7 +89,12 @@
     "emptyCategoryMix": {
       "title": "No category data yet",
       "description": "A breakdown by category will appear once products are assigned to categories and sold."
-    }
+    },
+    "inStock": "in stock",
+    "units_one": "{{formatted}} unit",
+    "units_other": "{{formatted}} units",
+    "products_one": "{{formatted}} product",
+    "products_other": "{{formatted}} products"
   },
   "financial": {
     "title": "Financial",
@@ -102,7 +112,9 @@
     "emptyCashFlow": {
       "title": "No cash flow data yet",
       "description": "Cash flow will appear here once inflows and outflows are recorded."
-    }
+    },
+    "invoices_one": "{{formatted}} invoice",
+    "invoices_other": "{{formatted}} invoices"
   },
   "operations": {
     "title": "Operations",
@@ -131,7 +143,14 @@
     "emptyTimeOff": {
       "title": "No time-off data yet",
       "description": "Time-off requests will appear here once staff submit them."
-    }
+    },
+    "hours": "hours",
+    "scheduled": "Scheduled",
+    "completed": "Completed",
+    "noShows": "No-shows",
+    "completion": "Completion",
+    "pending": "Pending",
+    "approved": "Approved"
   },
   "reports": {
     "title": "Reports",
@@ -162,6 +181,8 @@
         "description": "Reports you schedule for recurring delivery will appear here."
       }
     },
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "save": "Save settings",
+    "saving": "Saving…"
   }
 }
