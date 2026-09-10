@@ -48,10 +48,12 @@ describe('SubmissionsAdmin empty state', () => {
   it('shows the true-empty message and a refresh CTA when no filter is active', () => {
     render(<SubmissionsAdmin />);
 
-    expect(screen.getByText('emptyStates.submissionsNone')).toBeInTheDocument();
-    expect(screen.queryByText('emptyStates.submissionsNoneFiltered')).not.toBeInTheDocument();
+    expect(screen.getByText('common.emptyStates.submissionsNone')).toBeInTheDocument();
+    expect(
+      screen.queryByText('common.emptyStates.submissionsNoneFiltered')
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.refresh' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.emptyStates.refresh' }));
     expect(submissionsRefetch).toHaveBeenCalledTimes(1);
   });
 
@@ -60,14 +62,14 @@ describe('SubmissionsAdmin empty state', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'reviewed' }));
 
-    expect(screen.getByText('emptyStates.submissionsNoneFiltered')).toBeInTheDocument();
-    expect(screen.queryByText('emptyStates.submissionsNone')).not.toBeInTheDocument();
+    expect(screen.getByText('common.emptyStates.submissionsNoneFiltered')).toBeInTheDocument();
+    expect(screen.queryByText('common.emptyStates.submissionsNone')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.clearFilter' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.emptyStates.clearFilter' }));
 
     // Clearing the filter flips the empty state back to the
     // unfiltered message - proving the CTA calls the real filter
     // reset handler rather than just being decorative.
-    expect(screen.getByText('emptyStates.submissionsNone')).toBeInTheDocument();
+    expect(screen.getByText('common.emptyStates.submissionsNone')).toBeInTheDocument();
   });
 });
