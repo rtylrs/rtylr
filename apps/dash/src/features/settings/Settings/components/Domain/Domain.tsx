@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Globe, Copy, Check, ChevronDown, ChevronUp, ShieldCheck, AlertCircle } from 'lucide-react';
 import {
@@ -23,6 +24,7 @@ import { toast } from 'sonner';
 const DOMAIN_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/;
 
 const Domain: React.FC = () => {
+  const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
   const websiteData = useConfigStore((s) => s.websiteData) as
     | { slug?: string; domain?: string; customDomain?: string }
@@ -63,7 +65,7 @@ const Domain: React.FC = () => {
   const handleConnectDomain = () => {
     const domain = customDomainInput.trim().toLowerCase();
     if (!domain || !DOMAIN_REGEX.test(domain)) {
-      toast.error('Please enter a valid domain (e.g. menu.yourbrand.com)');
+      toast.error(t('settings.domain.invalid'));
       return;
     }
     updateBusiness.mutate(
@@ -72,7 +74,7 @@ const Domain: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Custom domain saved. DNS propagation may take up to 24 hours.');
+          toast.success(t('settings.domain.saved'));
         },
       }
     );
@@ -80,7 +82,7 @@ const Domain: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Domain · rtylr" />
+      <HelmetContainer title={t('settings.domain.pageTitle')} />
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -95,13 +97,13 @@ const Domain: React.FC = () => {
         {/* Section 1, Your menu URL */}
         <Card>
           <CardHeader>
-            <CardTitle>Your menu URL</CardTitle>
+            <CardTitle>{t('settings.domain.menuUrlTitle')}</CardTitle>
             <CardDescription>
               This is the default public URL for your menu, always available.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <Label className="mb-1.5 block">Menu link</Label>
+            <Label className="mb-1.5 block">{t('settings.domain.menuLink')}</Label>
             <div className="flex items-center gap-2">
               <div className="flex-1 relative">
                 <Globe
@@ -135,8 +137,8 @@ const Domain: React.FC = () => {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
-                  <CardTitle>Custom Domain</CardTitle>
-                  <CardDescription>Point your own domain at your rtylr menu.</CardDescription>
+                  <CardTitle>{t('settings.domain.customTitle')}</CardTitle>
+                  <CardDescription>{t('settings.domain.customDescription')}</CardDescription>
                 </div>
                 <Badge variant={isConfigured ? 'default' : 'outline'}>
                   {isConfigured ? 'Configured' : 'Not configured'}
@@ -146,11 +148,11 @@ const Domain: React.FC = () => {
             <CardContent className="pt-0 space-y-4">
               {/* Domain input + connect button */}
               <div className="space-y-1.5">
-                <Label htmlFor="custom-domain">Domain</Label>
+                <Label htmlFor="custom-domain">{t('settings.domain.domainLabel')}</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="custom-domain"
-                    placeholder="menu.mybusiness.com"
+                    placeholder={t('settings.domain.domainPlaceholder')}
                     value={customDomainInput}
                     onChange={(e) => setCustomDomainInput(e.target.value)}
                     className="flex-1"
@@ -175,7 +177,7 @@ const Domain: React.FC = () => {
                   className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text)' }}
                 >
-                  <span>DNS Setup Instructions</span>
+                  <span>{t('settings.domain.dnsTitle')}</span>
                   {dnsOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                 </button>
 
@@ -249,7 +251,7 @@ const Domain: React.FC = () => {
                       }}
                     >
                       <AlertCircle size={13} className="shrink-0 mt-0.5 text-amber-500" />
-                      <span>DNS changes can take up to 48 hours to propagate.</span>
+                      <span>{t('settings.domain.dnsPropagation')}</span>
                     </div>
                   </div>
                 )}
