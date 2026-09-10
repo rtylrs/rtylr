@@ -43,7 +43,7 @@ const ResetPassword: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Reset password · rtylr" />
+      <HelmetContainer title={t('auth.reset.metaTitle')} />
       <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
         <div className="w-full max-w-sm">
           <div className="flex justify-center mb-8">
