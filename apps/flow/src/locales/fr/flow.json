@@ -162,7 +162,8 @@
     "todo": "À faire",
     "waitingOn": "En attente de",
     "waitingPlaceholder": "Personne, équipe, approbation…",
-    "you": "Vous"
+    "you": "Vous",
+    "drawerLabel": "Détail de la tâche"
   },
   "time": {
     "add": {
