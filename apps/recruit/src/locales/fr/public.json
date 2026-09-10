@@ -1,0 +1,41 @@
+{
+  "errors": {
+    "careersPage": "Impossible de charger la page carrières",
+    "jobDetails": "Impossible de charger les détails du poste",
+    "refreshHint": "Veuillez actualiser la page.",
+    "retry": "Réessayer"
+  },
+  "notFound": {
+    "metaTitle": "Introuvable · rtylr",
+    "eyebrow": "404 · Introuvable",
+    "title": "Cette page carrières n'est pas en ligne.",
+    "body": "Vérifiez le lien, ou retournez au site principal.",
+    "back": "Retour à rtylr"
+  },
+  "landing": {
+    "metaTitle": "Recrutement · rtylr",
+    "title": "Des pages carrières,\nsans les frais d'un site dédié.",
+    "body": "Publiez des postes, recevez les candidatures et faites avancer les candidats dans votre processus, depuis le compte qui vous sert déjà à gérer le reste de votre activité.",
+    "pricing": "Voir les tarifs",
+    "startFree": "Commencer gratuitement"
+  },
+  "job": {
+    "allRoles": "Tous les postes",
+    "requirements": "Profil recherché",
+    "lookingFor": "Ce que nous recherchons",
+    "compensation": "Rémunération",
+    "apply": "Postuler à ce poste"
+  },
+  "index": {
+    "openPositions": "Postes ouverts",
+    "openRoles": "Postes ouverts",
+    "careersEyebrow": "Carrières",
+    "heroTitle": "Un travail\nqui fait\nla différence.",
+    "roleCount_one": "{{count}} poste",
+    "roleCount_other": "{{count}} postes"
+  },
+  "sections": {
+    "watchVideo": "Voir la vidéo",
+    "getInTouch": "Nous contacter"
+  }
+}
