@@ -118,9 +118,9 @@ const Variants: React.FC = () => {
         ) : variants.length === 0 ? (
           <EmptyState
             icon={Layers}
-            title={t('variants.empty.title')}
-            description={t('variants.empty.description')}
-            action={{ label: t('variants.addVariant'), onClick: () => setShowCreate(true) }}
+            title={t('erp.variants.empty.title')}
+            description={t('erp.variants.empty.description')}
+            action={{ label: t('erp.variants.addVariant'), onClick: () => setShowCreate(true) }}
           />
         ) : (
           variants.map((v, i) => {
