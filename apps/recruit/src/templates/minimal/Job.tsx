@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, MapPin, Briefcase, Clock, Award } from 'lucide-react';
 
 import Header from '../shared/Header';
@@ -8,6 +9,7 @@ import { cleanMojibake } from '../../shared/lib/sanitize';
 import SemanticContent from '../../shared/components/SemanticContent';
 
 const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen">
       <Header customization={customization} compact />
@@ -19,7 +21,7 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
           style={{ color: 'var(--recruit-muted)' }}
         >
           <ArrowLeft className="h-4 w-4" />
-          All roles
+          {t('public.job.allRoles')}
         </Link>
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -66,7 +68,9 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
 
         {career.requirements && (
           <section className="mt-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wider">Requirements</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider">
+              {t('public.job.requirements')}
+            </h2>
             <div className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--recruit-fg)' }}>
               <SemanticContent content={career.requirements} />
             </div>
@@ -75,7 +79,9 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
 
         {(career.salaryMin > 0 || career.salaryMax > 0) && (
           <section className="mt-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wider">Compensation</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider">
+              {t('public.job.compensation')}
+            </h2>
             <div className="mt-2 text-sm">
               {career.salaryCurrency || '$'}
               {career.salaryMin.toLocaleString()}
@@ -90,7 +96,7 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
           className="mt-12 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           style={{ background: 'var(--recruit-accent)' }}
         >
-          Apply for this role
+          {t('public.job.apply')}
         </Link>
       </main>
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 
 import Header from '../shared/Header';
@@ -8,6 +9,7 @@ import { cleanMojibake } from '../../shared/lib/sanitize';
 import SemanticContent from '../../shared/components/SemanticContent';
 
 const EditorialJob: React.FC<JobProps> = ({ career, customization, slug }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-white">
       <Header customization={customization} compact />
@@ -19,7 +21,7 @@ const EditorialJob: React.FC<JobProps> = ({ career, customization, slug }) => {
           style={{ color: 'var(--recruit-muted)' }}
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          All roles
+          {t('public.job.allRoles')}
         </Link>
 
         <div
@@ -48,7 +50,7 @@ const EditorialJob: React.FC<JobProps> = ({ career, customization, slug }) => {
 
         {career.requirements && (
           <section className="mt-12 border-t pt-8" style={{ borderColor: 'var(--recruit-border)' }}>
-            <h2 className="font-display text-2xl font-semibold">What we're looking for</h2>
+            <h2 className="font-display text-2xl font-semibold">{t('public.job.lookingFor')}</h2>
             <div className="mt-4 text-base leading-relaxed" style={{ color: 'var(--recruit-fg)' }}>
               <SemanticContent content={career.requirements} />
             </div>
@@ -62,7 +64,7 @@ const EditorialJob: React.FC<JobProps> = ({ career, customization, slug }) => {
             className="inline-flex min-h-[44px] items-center justify-center gap-2 border-2 px-8 py-4 text-sm font-semibold uppercase tracking-wider transition hover:bg-[var(--recruit-accent)] hover:text-white"
             style={{ borderColor: 'var(--recruit-accent)', color: 'var(--recruit-accent)' }}
           >
-            Apply for this role
+            {t('public.job.apply')}
           </Link>
         </div>
       </main>

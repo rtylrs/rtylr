@@ -1,0 +1,45 @@
+{
+  "errors": {
+    "careersPage": "تعذر تحميل صفحة الوظائف",
+    "jobDetails": "تعذر تحميل تفاصيل الوظيفة",
+    "refreshHint": "يرجى تحديث الصفحة والمحاولة مرة أخرى.",
+    "retry": "إعادة المحاولة"
+  },
+  "notFound": {
+    "metaTitle": "غير موجود · rtylr",
+    "eyebrow": "غير موجود · 404",
+    "title": "صفحة الوظائف هذه غير متاحة.",
+    "body": "تحقق من الرابط، أو عد إلى الموقع الرئيسي.",
+    "back": "العودة إلى rtylr"
+  },
+  "landing": {
+    "metaTitle": "التوظيف · rtylr",
+    "title": "صفحات توظيف\nبلا تكاليف موقع وظائف.",
+    "body": "انشر الوظائف، واجمع الطلبات، وتابع المرشحين في مسار التوظيف، كل ذلك من الحساب نفسه الذي تدير به بقية أعمالك.",
+    "pricing": "عرض الأسعار",
+    "startFree": "ابدأ مجانًا"
+  },
+  "job": {
+    "allRoles": "جميع الوظائف",
+    "requirements": "المتطلبات",
+    "lookingFor": "ما نبحث عنه",
+    "compensation": "الراتب",
+    "apply": "التقديم على هذه الوظيفة"
+  },
+  "index": {
+    "openPositions": "الوظائف المتاحة",
+    "openRoles": "الوظائف المتاحة",
+    "careersEyebrow": "الوظائف",
+    "heroTitle": "عمل\nيصنع\nالفرق.",
+    "roleCount_zero": "لا وظائف",
+    "roleCount_one": "وظيفة واحدة",
+    "roleCount_two": "وظيفتان",
+    "roleCount_few": "{{count}} وظائف",
+    "roleCount_many": "{{count}} وظيفة",
+    "roleCount_other": "{{count}} وظيفة"
+  },
+  "sections": {
+    "watchVideo": "مشاهدة الفيديو",
+    "getInTouch": "تواصل معنا"
+  }
+}

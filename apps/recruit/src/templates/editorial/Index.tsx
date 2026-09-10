@@ -51,7 +51,7 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections
 
         <section className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Open roles
+            {t('public.index.openRoles')}
           </h2>
           <div className="mt-10 divide-y" style={{ borderColor: 'var(--recruit-border)' }}>
             {careers.length === 0 ? (

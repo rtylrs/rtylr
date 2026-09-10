@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 
 import Header from '../shared/Header';
@@ -8,6 +9,7 @@ import { cleanMojibake } from '../../shared/lib/sanitize';
 import SemanticContent from '../../shared/components/SemanticContent';
 
 const BoldJob: React.FC<JobProps> = ({ career, customization, slug }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-white">
       <Header customization={customization} compact />
@@ -20,7 +22,7 @@ const BoldJob: React.FC<JobProps> = ({ career, customization, slug }) => {
             className="inline-flex min-h-[44px] items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80 hover:text-white"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            All roles
+            {t('public.job.allRoles')}
           </Link>
           <h1 className="mt-6 text-5xl font-black leading-[1.05] tracking-tight sm:text-7xl">
             {cleanMojibake(career.title)}
@@ -42,7 +44,7 @@ const BoldJob: React.FC<JobProps> = ({ career, customization, slug }) => {
 
         {career.requirements && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold">Requirements</h2>
+            <h2 className="text-2xl font-bold">{t('public.job.requirements')}</h2>
             <div className="mt-4 text-base leading-relaxed" style={{ color: 'var(--recruit-fg)' }}>
               <SemanticContent content={career.requirements} />
             </div>

@@ -1,0 +1,41 @@
+{
+  "errors": {
+    "careersPage": "Failed to load careers page",
+    "jobDetails": "Failed to load job details",
+    "refreshHint": "Please try refreshing the page.",
+    "retry": "Retry"
+  },
+  "notFound": {
+    "metaTitle": "Not found · rtylr",
+    "eyebrow": "404 · Not found",
+    "title": "This careers page isn't live.",
+    "body": "Double-check the link, or head back to the main site.",
+    "back": "Back to rtylr"
+  },
+  "landing": {
+    "metaTitle": "Recruit · rtylr",
+    "title": "Hiring pages,\nwithout the careers-site tax.",
+    "body": "Post roles, collect applications, and move candidates through your funnel, all from the same account you run the rest of your business from.",
+    "pricing": "See pricing",
+    "startFree": "Start free"
+  },
+  "job": {
+    "allRoles": "All roles",
+    "requirements": "Requirements",
+    "lookingFor": "What we're looking for",
+    "compensation": "Compensation",
+    "apply": "Apply for this role"
+  },
+  "index": {
+    "openPositions": "Open positions",
+    "openRoles": "Open roles",
+    "careersEyebrow": "Careers",
+    "heroTitle": "Work\nthat moves\nthe needle.",
+    "roleCount_one": "{{count}} role",
+    "roleCount_other": "{{count}} roles"
+  },
+  "sections": {
+    "watchVideo": "Watch video",
+    "getInTouch": "Get in touch"
+  }
+}

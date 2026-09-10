@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 import { usePublicCareer } from '../../shared/hooks/queries/usePublic';
 import { applyBrand, resolveJob } from '../../templates/resolver';
@@ -17,6 +18,7 @@ const CareerDetail: React.FC = (): React.JSX.Element => {
     slug?: string;
     careerSlug?: string;
   };
+  const { t } = useTranslation();
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
 
   useEffect(() => {
@@ -44,14 +46,14 @@ const CareerDetail: React.FC = (): React.JSX.Element => {
   if (error && !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white p-6 text-center">
-        <h2 className="text-lg font-semibold text-gray-900">Failed to load job details</h2>
-        <p className="text-sm text-gray-500">Please try refreshing the page.</p>
+        <h2 className="text-lg font-semibold text-gray-900">{t('public.errors.jobDetails')}</h2>
+        <p className="text-sm text-gray-500">{t('public.errors.refreshHint')}</p>
         <button
           type="button"
           onClick={() => window.location.reload()}
           className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
         >
-          Retry
+          {t('public.errors.retry')}
         </button>
       </div>
     );
