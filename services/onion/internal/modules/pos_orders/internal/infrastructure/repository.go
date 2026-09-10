@@ -15,6 +15,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/eventbus"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
 	"github.com/voxire/onion/internal/platform/sqlutil"
@@ -381,6 +382,36 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 				logger.Any("table_id", input.TableID), logger.Any("business_id", businessID))
 			return 0, domain.ErrTableNotFound
 		}
+	}
+
+	// Recorded inside this transaction, so the order and the fact that it
+	// happened commit together. Publishing after the commit would lose the
+	// event on a crash between the two; publishing before would announce an
+	// order that never existed.
+	//
+	// The payload carries identity only. Money is deliberately absent: the
+	// totals in scope here are float64 (onion#1183) and putting one on the
+	// wire would mint a new float64 money field into a contract that
+	// subscribers depend on. A consumer that needs the value reads
+	// pos_orders.total, which is DECIMAL.
+	payload := map[string]any{
+		"order_id":     orderID,
+		"order_number": orderNumber,
+		"order_type":   string(input.Type),
+		"item_count":   len(input.Items),
+	}
+	if input.CustomerID > 0 {
+		payload["customer_id"] = input.CustomerID
+	}
+	if err = eventbus.Publish(ctx, tx, eventbus.Event{
+		BusinessID:  businessID,
+		Type:        eventbus.TypeOrderCreated,
+		SubjectType: eventbus.SubjectOrder,
+		SubjectID:   orderID,
+		Payload:     payload,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to record the order_created event", logger.Error(err))
+		return 0, err
 	}
 
 	if err = tx.Commit(); err != nil {

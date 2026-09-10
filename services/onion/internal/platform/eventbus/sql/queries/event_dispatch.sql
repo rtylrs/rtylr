@@ -52,3 +52,13 @@ ON DUPLICATE KEY UPDATE id = id;
 UPDATE platform_events
 SET dispatched_at = NOW()
 WHERE id = ? AND dispatched_at IS NULL;
+
+-- Written by a producer inside its own transaction, so an event is never
+-- recorded for a domain change that rolled back and never omitted for one that
+-- committed. ON DUPLICATE KEY UPDATE id = id makes a retried producer a no-op
+-- against the (business_id, dedupe_key) unique key rather than an error.
+-- name: InsertEvent :exec
+INSERT INTO platform_events
+    (business_id, event_type, subject_type, subject_id, payload, dedupe_key)
+VALUES (?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE id = id;

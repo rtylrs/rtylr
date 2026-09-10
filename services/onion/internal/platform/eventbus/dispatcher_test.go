@@ -52,8 +52,13 @@ func TestDispatchBatchFansOutToSubscribedTargetsOnly(t *testing.T) {
 	exec(`INSERT INTO hub_webhooks (id, owner_id, business_id, url, events, secret, is_active)
 	      VALUES (880014, ?, ?, 'https://example.test/foreign', JSON_ARRAY('order_created'), 's', TRUE)`, ownerID, otherTenant)
 
+	// Seeded with the constant rather than a literal, so a drift between
+	// eventbus.TypeOrderCreated and the automations module's TriggerOrderCreated
+	// shows up here. They cannot share a constant: the trigger lives under
+	// internal/modules/automations/internal, which a platform package may not
+	// import.
 	exec(`INSERT INTO crm_automations (id, owner_id, business_id, name, trigger_type, is_active)
-	      VALUES (880021, ?, ?, 'welcome', 'order_created', TRUE)`, ownerID, tenant)
+	      VALUES (880021, ?, ?, 'welcome', ?, TRUE)`, ownerID, tenant, eventbus.TypeOrderCreated)
 	exec(`INSERT INTO crm_automations (id, owner_id, business_id, name, trigger_type, is_active)
 	      VALUES (880022, ?, ?, 'birthday', 'date_birthday', TRUE)`, ownerID, tenant)
 	exec(`INSERT INTO crm_automations (id, owner_id, business_id, name, trigger_type, is_active)

@@ -25,6 +25,7 @@ import (
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/emailqueue"
+	"github.com/voxire/onion/internal/platform/eventbus"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/probe"
@@ -77,6 +78,8 @@ func main() {
 
 	modules := initializeJobModules(ctx)
 	platformjobs.AutoRegister(ctx, modules)
+	// Not a module, so it registers itself rather than through AutoRegister.
+	eventbus.RegisterJobs(platformjobs.DefaultRegistry(), eventbus.NewDispatcher(dbclient.Pool()))
 	logger.Ctx(ctx).Info("worker jobs registered", logger.Any("jobs", platformjobs.Names()))
 
 	scheduler := platformjobs.NewScheduler(
