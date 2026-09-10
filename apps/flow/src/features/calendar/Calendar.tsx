@@ -203,14 +203,17 @@ const Calendar: React.FC = () => {
                 <motion.div
                   key={i}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  // The out-of-month dimming rides on `animate` rather than
+                  // sitting in `style` beside it. A style opacity pins the value
+                  // and the animation stops running; on TaskCard the same
+                  // conflict left every board card invisible (rtylr#1078). Here
+                  // the style always resolved to a number, so the cells showed
+                  // and only the entrance was dead.
+                  animate={{ opacity: c.inMonth ? 1 : 0.4 }}
                   transition={{ duration: 0.1, delay: i * 0.002 }}
                   onClick={() => openCreate(c.date, c.inMonth)}
                   className="min-h-[100px] p-1.5 cursor-pointer group"
-                  style={{
-                    background: 'var(--flow-bg)',
-                    opacity: c.inMonth ? 1 : 0.4,
-                  }}
+                  style={{ background: 'var(--flow-bg)' }}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span

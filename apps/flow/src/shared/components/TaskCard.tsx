@@ -72,21 +72,25 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   return (
     <>
       <motion.div
-        // No entrance animation, and this is a bug fix rather than a taste
-        // change: `layout` together with `initial={{ opacity: 0 }}` left every
-        // card **stuck at opacity 0**. The layout animation latches the
-        // pre-animation opacity and never advances it, so the board rendered
-        // its columns, its counts and its empty states while the cards
-        // themselves were invisible until some later re-render, a hover for
-        // instance, shook them loose.
+        // `dimmed` goes through motion's own `animate`, not through `style`.
         //
-        // Measured on a dev server and on a production build, in a focused
-        // Chromium with rAF running and no reduced-motion preference: opacity
-        // stayed 0 four seconds after load. Removing `layout` fixes it too, but
-        // `layout` is the animation that earns its keep, showing where a
-        // dragged card landed; the entrance fade is decoration that was never
-        // visible anyway (rtylr#1078).
+        // This card used to set `style={{ opacity: dimmed ? 0.5 : undefined }}`
+        // beside an animated `opacity`, and the two fought. React writes
+        // `opacity: undefined` into the same style object motion is animating,
+        // which pins the value at whatever `initial` set, so **every card on
+        // the board stayed at opacity 0** and the columns, counts and empty
+        // states rendered around invisible cards until some later re-render
+        // shook them loose (rtylr#1078).
+        //
+        // Measured in headless and headed Chromium, on a dev server and a
+        // production build: opacity 0 four seconds after load, rAF running,
+        // `getAnimations()` empty. The inbox row has the same `layout` plus
+        // opacity-0 `initial` and animates correctly, which is what ruled the
+        // combination out as the cause and pointed at the competing style.
         layout
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: dimmed ? 0.5 : 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.18 }}
         onClick={(e) => {
           if (e.metaKey || e.ctrlKey) {
@@ -99,7 +103,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         // p-3 rather than p-3.5: the rule is 10-12px and 14px was outside it.
         className={cn('rounded-lg cursor-pointer group relative', compact ? 'p-2.5' : 'p-3')}
         style={{
-          opacity: dimmed ? 0.5 : undefined,
           background: 'var(--flow-card)',
           border: selected ? '1px solid var(--accent)' : '1px solid var(--flow-border)',
           boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : 'var(--flow-shadow-card)',
