@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 import type { RecruitCareer } from '../../shared/lib/types';
@@ -31,7 +32,23 @@ interface Props {
  * parent decides whether the payload is a create or an update based on
  * whether `career` was passed in.
  */
+// The value is what the API stores, so it is fixed; only the label is
+// translated. Exported so the locale suite can assert a label exists for each.
+export const EMPLOYMENT_TYPES = [
+  { value: 'Full-time', key: 'fullTime' },
+  { value: 'Part-time', key: 'partTime' },
+  { value: 'Contract', key: 'contract' },
+  { value: 'Internship', key: 'internship' },
+] as const;
+
+export const WORK_MODES = [
+  { value: 'Remote', key: 'remote' },
+  { value: 'Hybrid', key: 'hybrid' },
+  { value: 'Onsite', key: 'onsite' },
+] as const;
+
 const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(career?.title ?? '');
   const [slug, setSlug] = useState(career?.slug ?? '');
   const [department, setDepartment] = useState(career?.department ?? '');
@@ -90,7 +107,9 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
             background: 'var(--recruit-admin-surface)',
           }}
         >
-          <h2 className="text-lg font-semibold">{career ? 'Edit role' : 'New role'}</h2>
+          <h2 className="text-lg font-semibold">
+            {career ? t('admin.careerEditor.editTitle') : t('admin.careerEditor.newTitle')}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -102,60 +121,66 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
 
         <div className="flex-1 space-y-5 px-6 py-6">
           <Row>
-            <Field label="Title" required>
+            <Field label={t('admin.careerEditor.title')} required>
               <Input value={title} onChange={setTitle} required />
             </Field>
-            <Field label="URL slug" hint="Auto-generated from title if left empty">
+            <Field label={t('admin.careerEditor.slug')} hint={t('admin.careerEditor.slugHint')}>
               <Input value={slug} onChange={setSlug} />
             </Field>
           </Row>
 
           <Row>
-            <Field label="Department">
+            <Field label={t('admin.careerEditor.department')}>
               <Input value={department} onChange={setDepartment} />
             </Field>
-            <Field label="Location">
+            <Field label={t('admin.careerEditor.location')}>
               <Input value={location} onChange={setLocation} />
             </Field>
           </Row>
 
           <Row>
-            <Field label="Employment type">
+            <Field label={t('admin.careerEditor.employmentTypeLabel')}>
               <Select
                 value={employmentType}
                 onChange={setEmploymentType}
-                options={['Full-time', 'Part-time', 'Contract', 'Internship']}
+                options={EMPLOYMENT_TYPES.map((o) => ({
+                  value: o.value,
+                  label: t(`admin.careerEditor.employmentType.${o.key}`),
+                }))}
               />
             </Field>
-            <Field label="Work mode">
+            <Field label={t('admin.careerEditor.workModeLabel')}>
               <Select
                 value={workMode}
                 onChange={setWorkMode}
-                options={['Remote', 'Hybrid', 'Onsite']}
+                options={WORK_MODES.map((o) => ({
+                  value: o.value,
+                  label: t(`admin.careerEditor.workMode.${o.key}`),
+                }))}
               />
             </Field>
           </Row>
 
-          <Field label="Seniority">
+          <Field label={t('admin.careerEditor.seniority')}>
             <Input value={seniority} onChange={setSeniority} />
           </Field>
 
-          <Field label="Role description" required>
+          <Field label={t('admin.careerEditor.description')} required>
             <Textarea value={details} onChange={setDetails} rows={8} required />
           </Field>
 
-          <Field label="Requirements">
+          <Field label={t('admin.careerEditor.requirements')}>
             <Textarea value={requirements} onChange={setRequirements} rows={5} />
           </Field>
 
           <div className="grid grid-cols-3 gap-4">
-            <Field label="Salary min">
+            <Field label={t('admin.careerEditor.salaryMin')}>
               <Input value={salaryMin} onChange={setSalaryMin} type="number" />
             </Field>
-            <Field label="Salary max">
+            <Field label={t('admin.careerEditor.salaryMax')}>
               <Input value={salaryMax} onChange={setSalaryMax} type="number" />
             </Field>
-            <Field label="Currency">
+            <Field label={t('admin.careerEditor.currency')}>
               <Input value={salaryCurrency} onChange={setSalaryCurrency} />
             </Field>
           </div>
@@ -167,7 +192,7 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
               onChange={(e) => setIsPublished(e.target.checked)}
               className="h-4 w-4"
             />
-            <span className="text-sm">Publish this role to the careers page</span>
+            <span className="text-sm">{t('admin.careerEditor.publish')}</span>
           </label>
 
           {/* Custom application questions - only editable after the
@@ -189,13 +214,13 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
             onClick={onClose}
             className="rounded-md px-4 py-2 text-sm hover:bg-white/5"
           >
-            Cancel
+            {t('admin.careerEditor.cancel')}
           </button>
           <button
             type="submit"
             className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
           >
-            {career ? 'Save changes' : 'Create role'}
+            {career ? t('admin.careerEditor.save') : t('admin.careerEditor.create')}
           </button>
         </div>
       </form>
@@ -260,7 +285,7 @@ const Textarea: React.FC<{
 const Select: React.FC<{
   value: string;
   onChange: (v: string) => void;
-  options: string[];
+  options: { value: string; label: string }[];
 }> = ({ value, onChange, options }) => (
   <select
     value={value}
@@ -269,8 +294,8 @@ const Select: React.FC<{
     style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   >
     {options.map((o) => (
-      <option key={o} value={o}>
-        {o}
+      <option key={o.value} value={o.value}>
+        {o.label}
       </option>
     ))}
   </select>
