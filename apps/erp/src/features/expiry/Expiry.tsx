@@ -54,9 +54,9 @@ const Expiry: React.FC = () => {
         ) : sorted.length === 0 ? (
           <EmptyState
             icon={CalendarX}
-            title={t('expiry.empty.title')}
-            description={t('expiry.empty.description')}
-            action={{ label: t('expiry.refresh'), onClick: () => void refetch() }}
+            title={t('erp.expiry.empty.title')}
+            description={t('erp.expiry.empty.description')}
+            action={{ label: t('erp.expiry.refresh'), onClick: () => void refetch() }}
           />
         ) : (
           sorted.map((item, i) => {
