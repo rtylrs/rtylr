@@ -53,5 +53,13 @@
     "location": "Location",
     "emptyTitle": "No leave scheduled",
     "emptyDescription": "Approved leave will appear on the calendar."
+  },
+  "policies": {
+    "pageTitle": "Leave policy settings",
+    "title": "Leave policies",
+    "subtitle": "Create the leave types employees can request.",
+    "namePlaceholder": "Annual leave",
+    "maxCarryover": "Maximum carryover days",
+    "minNotice": "Minimum notice days"
   }
 }

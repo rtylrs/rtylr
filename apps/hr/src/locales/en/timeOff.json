@@ -1,5 +1,19 @@
 {
   "emptyTitle": "No time off requests",
   "emptyDescription": "Requests will appear here once they're submitted.",
-  "submitFirstOne": "Submit the first one"
+  "submitFirstOne": "Submit the first one",
+  "pageTitle": "New time off request",
+  "formTitle": "Request time off",
+  "formSubtitle": "Submit a new PTO request for review",
+  "selectEmployee": "Select employee",
+  "type": "Type",
+  "startDate": "Start date",
+  "endDate": "End date",
+  "reason": "Reason",
+  "reasonPlaceholder": "Brief reason for request",
+  "errorSelectEmployee": "Select an employee",
+  "errorSelectRange": "Select a date range",
+  "errorEndBeforeStart": "End date cannot be before start date",
+  "submitted": "Time off request submitted",
+  "submitFailed": "Failed to submit the request"
 }

@@ -28,5 +28,11 @@
   "emptyBreaksDescription": "Start a break to track time.",
   "startLunchBreak": "Start lunch break",
   "emptyOvertimeTitle": "No overtime alerts",
-  "emptyOvertimeDescription": "Everyone is within policy limits."
+  "emptyOvertimeDescription": "Everyone is within policy limits.",
+  "form": {
+    "requester": "Requester",
+    "target": "Target",
+    "shiftDay": "Shift day",
+    "reason": "Reason"
+  }
 }
