@@ -1,0 +1,68 @@
+{
+  "accessDenied": {
+    "title": "Access Denied",
+    "body": "Owner or Admin permission is required to access Recruit administration and candidate data."
+  },
+  "nav": {
+    "mobileTitle": "Recruit Admin",
+    "title": "Recruit",
+    "toggle": "Toggle navigation menu",
+    "signOut": "Sign out",
+    "careers": "Careers",
+    "submissions": "Submissions",
+    "sections": "Page sections",
+    "branding": "Page branding"
+  },
+  "careers": {
+    "metaTitle": "Careers · rtylr",
+    "heading": "Careers",
+    "viewPublic": "View public page",
+    "newRole": "New role",
+    "loading": "Loading…",
+    "colTitle": "Title",
+    "colDepartment": "Department",
+    "colLocation": "Location",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "published": "Published",
+    "draft": "Draft",
+    "edit": "Edit",
+    "archive": "Archive",
+    "archived": "Role archived",
+    "archiveFailed": "Could not archive",
+    "updated": "Role updated",
+    "updateFailed": "Could not update",
+    "created": "Role created",
+    "createFailed": "Could not create",
+    "roleCount_one": "{{count}} role",
+    "roleCount_other": "{{count}} roles",
+    "publishedCount": "{{count}} published"
+  },
+  "submissions": {
+    "metaTitle": "Submissions · rtylr",
+    "heading": "Submissions",
+    "all": "All",
+    "loading": "Loading…",
+    "resume": "Resume",
+    "previous": "Previous",
+    "next": "Next",
+    "invalidResumeScheme": "Invalid resume URL scheme",
+    "openFailed": "Could not open resume",
+    "statusUpdated": "Status updated",
+    "statusFailed": "Could not update",
+    "applicationCount_one": "{{count}} application",
+    "applicationCount_other": "{{count}} applications",
+    "inFilter": "in “{{stage}}”",
+    "status": {
+      "new": "new",
+      "reviewed": "reviewed",
+      "interviewing": "interviewing",
+      "offered": "offered",
+      "hired": "hired",
+      "rejected": "rejected"
+    },
+    "page": "Page {{page}}",
+    "confirmUnhire": "Move {{name}} from “{{from}}” back to “{{to}}”?",
+    "confirm": "Confirm"
+  }
+}
