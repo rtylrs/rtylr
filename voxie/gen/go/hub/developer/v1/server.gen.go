@@ -240,6 +240,7 @@ type DeveloperServiceServer interface {
 	CreateWebhook(ctx context.Context, req *CreateWebhookRequest) (*CreateWebhookResponse, error)
 	UpdateWebhook(ctx context.Context, req *UpdateWebhookRequest) (*UpdateWebhookResponse, error)
 	DeleteWebhook(ctx context.Context, req *DeleteWebhookRequest) (*DeleteWebhookResponse, error)
+	ListWebhookDeliveries(ctx context.Context, req *ListWebhookDeliveriesRequest) (*ListWebhookDeliveriesResponse, error)
 }
 
 func RegisterDeveloperServiceServer(first any, rest ...any) error {
@@ -426,5 +427,52 @@ func RegisterDeveloperServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "DeveloperService", Method: "deleteWebhook", HTTPMethod: "DELETE", Route: "/hub/developer/v1/webhooks/{id}", AuthSchemes: nil}))
+	mux.Handle("GET /hub/developer/v1/webhooks/deliveries", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListWebhookDeliveriesRequest)
+		if values := r.URL.Query()["webhook_id"]; len(values) > 0 {
+			value := values[0]
+			parsedWebhookId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter webhook_id: "+err.Error())
+				return
+			}
+			req.WebhookId = parsedWebhookId
+		}
+		if values := r.URL.Query()["status"]; len(values) > 0 {
+			value := values[0]
+			req.Status = value
+		}
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
+		}
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListWebhookDeliveries(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "DeveloperService", Method: "listWebhookDeliveries", HTTPMethod: "GET", Route: "/hub/developer/v1/webhooks/deliveries", AuthSchemes: nil}))
 	return nil
 }

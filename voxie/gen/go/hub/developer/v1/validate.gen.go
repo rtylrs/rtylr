@@ -136,6 +136,49 @@ func (m *ListApiKeysResponse) Validate() error {
 	return nil
 }
 
+func (m *WebhookDelivery) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWebhookDeliveriesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWebhookDeliveriesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Deliveries {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "deliveries: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListWebhooksRequest) Validate() error {
 	if m == nil {
 		return nil

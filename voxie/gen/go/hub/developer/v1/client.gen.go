@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -312,6 +313,48 @@ func (c *DeveloperServiceClient) DeleteWebhook(ctx context.Context, req *DeleteW
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(DeleteWebhookResponse)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *DeveloperServiceClient) ListWebhookDeliveries(ctx context.Context, req *ListWebhookDeliveriesRequest) (*ListWebhookDeliveriesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hub/developer/v1/webhooks/deliveries"
+	query := url.Values{}
+	query.Set("webhook_id", strconv.FormatInt(int64(req.WebhookId), 10))
+	query.Set("status", req.Status)
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(ListWebhookDeliveriesResponse)
 	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

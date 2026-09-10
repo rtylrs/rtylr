@@ -22,4 +22,15 @@ service DeveloperService {
 
   /// Removes a webhook by ID.
   deleteWebhook(DeleteWebhookRequest) -> DeleteWebhookResponse @delete("/webhooks/{id}")
+
+  /// Returns delivery attempts for the business's webhooks, most recent first.
+  ///
+  /// A registration whose endpoint has started failing is otherwise invisible
+  /// to the tenant who owns it: deliveries retry, exhaust their attempts and
+  /// are dead-lettered with nothing surfacing. Filter on status to find those.
+  ///
+  /// Literal path segment rather than a parameter, so it does not collide with
+  /// the /webhooks/{id} routes above. Adding a GET /webhooks/{id} later would
+  /// make this ambiguous.
+  listWebhookDeliveries(ListWebhookDeliveriesRequest) -> ListWebhookDeliveriesResponse @get("/webhooks/deliveries")
 }

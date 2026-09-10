@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -413,6 +414,255 @@ func (x *ListApiKeysResponse) GetKeys() []*ApiKey {
 		return zero
 	}
 	return x.Keys
+}
+
+type WebhookDelivery struct {
+	Id             int64  `json:"id,omitempty"`
+	WebhookId      int64  `json:"webhook_id,omitempty"`
+	EventId        int64  `json:"event_id,omitempty"`
+	EventType      string `json:"event_type,omitempty"`
+	Status         string `json:"status,omitempty"`
+	Attempts       int32  `json:"attempts,omitempty"`
+	MaxAttempts    int32  `json:"max_attempts,omitempty"`
+	ResponseStatus int32  `json:"response_status,omitempty"`
+	LastError      string `json:"last_error,omitempty"`
+	NextAttemptAt  string `json:"next_attempt_at,omitempty"`
+	DeliveredAt    string `json:"delivered_at,omitempty"`
+	CreatedAt      string `json:"created_at,omitempty"`
+}
+
+func (m *WebhookDelivery) MarshalJSON() ([]byte, error) {
+	type alias WebhookDelivery
+	aux := struct {
+		*alias
+		Id        string `json:"id,omitempty"`
+		WebhookId string `json:"webhook_id,omitempty"`
+		EventId   string `json:"event_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.WebhookId = strconv.FormatInt(m.WebhookId, 10)
+	aux.EventId = strconv.FormatInt(m.EventId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *WebhookDelivery) UnmarshalJSON(data []byte) error {
+	type alias WebhookDelivery
+	aux := struct {
+		*alias
+		Id        string `json:"id,omitempty"`
+		WebhookId string `json:"webhook_id,omitempty"`
+		EventId   string `json:"event_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.WebhookId != "" {
+		v, err := strconv.ParseInt(aux.WebhookId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.WebhookId = v
+	}
+	if aux.EventId != "" {
+		v, err := strconv.ParseInt(aux.EventId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EventId = v
+	}
+	return nil
+}
+
+func (x *WebhookDelivery) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *WebhookDelivery) GetWebhookId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WebhookId
+}
+
+func (x *WebhookDelivery) GetEventId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EventId
+}
+
+func (x *WebhookDelivery) GetEventType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EventType
+}
+
+func (x *WebhookDelivery) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *WebhookDelivery) GetAttempts() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Attempts
+}
+
+func (x *WebhookDelivery) GetMaxAttempts() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MaxAttempts
+}
+
+func (x *WebhookDelivery) GetResponseStatus() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.ResponseStatus
+}
+
+func (x *WebhookDelivery) GetLastError() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastError
+}
+
+func (x *WebhookDelivery) GetNextAttemptAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextAttemptAt
+}
+
+func (x *WebhookDelivery) GetDeliveredAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DeliveredAt
+}
+
+func (x *WebhookDelivery) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+type ListWebhookDeliveriesRequest struct {
+	WebhookId int64  `json:"webhook_id,omitempty"`
+	Status    string `json:"status,omitempty"`
+	Page      int32  `json:"page,omitempty"`
+	Limit     int32  `json:"limit,omitempty"`
+}
+
+func (m *ListWebhookDeliveriesRequest) MarshalJSON() ([]byte, error) {
+	type alias ListWebhookDeliveriesRequest
+	aux := struct {
+		*alias
+		WebhookId string `json:"webhook_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.WebhookId = strconv.FormatInt(m.WebhookId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListWebhookDeliveriesRequest) UnmarshalJSON(data []byte) error {
+	type alias ListWebhookDeliveriesRequest
+	aux := struct {
+		*alias
+		WebhookId string `json:"webhook_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.WebhookId != "" {
+		v, err := strconv.ParseInt(aux.WebhookId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.WebhookId = v
+	}
+	return nil
+}
+
+func (x *ListWebhookDeliveriesRequest) GetWebhookId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WebhookId
+}
+
+func (x *ListWebhookDeliveriesRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ListWebhookDeliveriesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListWebhookDeliveriesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+type ListWebhookDeliveriesResponse struct {
+	Deliveries []*WebhookDelivery                       `json:"deliveries,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *ListWebhookDeliveriesResponse) GetDeliveries() []*WebhookDelivery {
+	if x == nil {
+		var zero []*WebhookDelivery
+		return zero
+	}
+	return x.Deliveries
+}
+
+func (x *ListWebhookDeliveriesResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type ListWebhooksRequest struct {
