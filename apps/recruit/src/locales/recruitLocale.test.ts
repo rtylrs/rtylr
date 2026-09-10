@@ -6,6 +6,7 @@ import { STATUSES } from '../features/admin/SubmissionsAdmin';
 import { EMPLOYMENT_TYPES, WORK_MODES } from '../features/admin/CareerEditor';
 import { KIND_ORDER } from '../features/admin/FormFieldsEditor';
 import { ORDERED_KINDS } from '../features/admin/SectionsAdmin';
+import { TEMPLATES } from '../features/admin/CustomizationAdmin';
 
 /**
  * Recruit ships en, ar and fr, so an English string that never reaches a
@@ -96,6 +97,14 @@ describe('recruit locales', () => {
       'admin.sections.attribution',
       'admin.sections.faqQuestionPlaceholder',
       'admin.sections.kind.culture.label',
+      'admin.branding.tabPalette',
+      'admin.branding.fontPairing.dmserif-dmsans',
+      // The three templates are named things, referred to by those names in
+      // other copy ("shown in the bold and editorial templates"), so they read
+      // the same in every language, like a product name.
+      'admin.branding.template.minimal.name',
+      'admin.branding.template.editorial.name',
+      'admin.branding.template.bold.name',
     ]);
     const copied: string[] = [];
     for (const lang of ['ar', 'fr'] as const) {
@@ -135,6 +144,8 @@ describe('recruit locales', () => {
       ...KIND_ORDER.map((k) => `admin.questions.defaultLabel.${k}`),
       ...ORDERED_KINDS.map((k) => `admin.sections.kind.${k}.label`),
       ...ORDERED_KINDS.map((k) => `admin.sections.kind.${k}.blurb`),
+      ...TEMPLATES.map((tpl) => `admin.branding.template.${tpl.id}.name`),
+      ...TEMPLATES.map((tpl) => `admin.branding.template.${tpl.id}.blurb`),
     ];
     const missing: string[] = [];
     for (const lang of LANGS) {
@@ -144,10 +155,16 @@ describe('recruit locales', () => {
     expect(missing, 'an option with no label renders as its key').toEqual([]);
   });
 
-  it('leaves no user-facing English literal on the public careers site', () => {
-    // Scoped to what candidates see. The admin screens still carry literals,
-    // tracked separately in rtylr#1266; widen this list as each one lands.
-    const DIRS = ['features/public', 'templates'];
+  it('leaves no user-facing English literal anywhere in the app', () => {
+    // Both the candidate-facing site and the admin screens.
+    const DIRS = ['features/public', 'templates', 'features/admin'];
+    /**
+     * The font-pairing picker renders a pangram in the pairing's own faces so
+     * the admin can see the typeface. Those are Latin faces, so translated
+     * sample text would render through a fallback and misrepresent the very
+     * thing being previewed. It stays literal on purpose.
+     */
+    const SPECIMEN = ['The quick brown fox', 'jumps over the lazy dog.'];
     const TEXT = /^[A-Z][A-Za-z0-9 ,.'’!?&:/-]*$/;
     const literals: string[] = [];
 
@@ -187,7 +204,8 @@ describe('recruit locales', () => {
             const standalone =
               TEXT.test(s) && s.length > 2 && /[>{}]$/.test(prev) && next.startsWith('<');
             const found = call?.[1] ?? inline?.[1] ?? (standalone ? s : undefined);
-            if (found !== undefined) literals.push(`${path.relative(SRC, full)}:${i + 1} ${found}`);
+            if (found === undefined || SPECIMEN.includes(found)) return;
+            literals.push(`${path.relative(SRC, full)}:${i + 1} ${found}`);
           });
         }
       };

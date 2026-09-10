@@ -128,7 +128,9 @@
       "url": "Portfolio URL",
       "boolean": "I agree"
     },
-    "seedOption": "Option {{number}}"
+    "seedOption": "Option {{number}}",
+    "confirmRemove": "Remove this field?",
+    "remove": "Remove"
   },
   "sections": {
     "metaTitle": "Page sections · rtylr",
@@ -205,5 +207,102 @@
     },
     "hideFromPublic": "Hide from public page",
     "showOnPublic": "Show on public page"
+  },
+  "branding": {
+    "metaTitle": "Page branding · rtylr",
+    "heading": "Page branding",
+    "subtitle": "What candidates see at",
+    "slugPlaceholder": "your-slug",
+    "preview": "Preview",
+    "saved": "Careers page saved",
+    "saveFailed": "Could not save, check your slug is unique",
+    "uploadFailed": "Upload failed",
+    "paletteReset": "Palette reset to {{template}} defaults",
+    "tabBrand": "Brand",
+    "tabPalette": "Palette",
+    "tabTypography": "Typography",
+    "tabMedia": "Media",
+    "tabSeo": "SEO",
+    "slug": "URL slug",
+    "slugHint": "a–z, 0–9, dashes",
+    "brandName": "Brand name",
+    "tagline": "Tagline",
+    "about": "About",
+    "aboutHint": "Short paragraph shown under the hero",
+    "logoUrl": "Logo URL",
+    "upload": "Upload",
+    "uploading": "Uploading…",
+    "headerHtml": "Custom header HTML",
+    "headerHtmlHint": "Advanced, raw HTML strip above the brand header",
+    "resetPalette": "Reset to template defaults",
+    "primary": "Primary",
+    "accent": "Accent",
+    "accentHint": "Secondary highlight. Empty falls back to Primary",
+    "background": "Background",
+    "backgroundHint": "Page canvas",
+    "text": "Text",
+    "mutedText": "Muted text",
+    "mutedTextHint": "Captions, metadata",
+    "selected": "Selected",
+    "searchAndSocial": "Search & social",
+    "metaTitleField": "Meta title",
+    "metaTitleHint": "Overrides browser tab and search result title",
+    "metaDescription": "Meta description",
+    "metaDescriptionHint": "1–2 sentences, under 160 chars",
+    "legal": "Legal",
+    "legalHint": "Links shown on the apply form. Useful for GDPR / EEO disclosures.",
+    "privacyUrl": "Privacy policy URL",
+    "termsUrl": "Terms URL",
+    "analytics": "Analytics",
+    "analyticsHint": "Only loaded when an ID is set. Leave blank to ship zero tracking.",
+    "ga4": "GA4 measurement ID",
+    "ga4Hint": "Starts with G-",
+    "metaPixel": "Meta Pixel ID",
+    "metaPixelHint": "Numeric",
+    "emailNotifications": "Email notifications",
+    "notificationInbox": "HR notification inbox",
+    "notificationInboxHint": "Team alias works best, for example jobs@acme.com",
+    "notifyMe": "Send me email notifications for new applications",
+    "heroImageUrl": "Hero image URL",
+    "heroImageHint": "Shown in the bold and editorial templates above the job list",
+    "heroPreview": "Hero preview",
+    "faviconUrl": "Favicon URL",
+    "faviconHint": "Square image, at least 32px. Shown in browser tabs.",
+    "faviconPreview": "Favicon preview",
+    "socialPreview": "Social preview",
+    "ogCard": "OG card",
+    "ogHint": "Refreshes after you save. This is the card LinkedIn, Slack and iMessage use.",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "template": {
+      "minimal": {
+        "name": "Minimal",
+        "blurb": "Calm single-column list. Default for every new page."
+      },
+      "editorial": {
+        "name": "Editorial",
+        "blurb": "Magazine-style hero, serif display, generous whitespace."
+      },
+      "bold": {
+        "name": "Bold",
+        "blurb": "Saturated hero block, oversized type. Needs a strong colour."
+      }
+    },
+    "fontPairing": {
+      "default": "Neutral",
+      "jakarta-fraunces": "Modern serif",
+      "space-grotesk-inter": "Engineering",
+      "playfair-inter": "Editorial",
+      "dmserif-dmsans": "Luxe"
+    },
+    "typographyHint": "Five curated pairings. Fonts load on demand from Google Fonts, so picking one does not block the save.",
+    "previewCard": {
+      "careersEyebrow": "Careers",
+      "headline": "Come build the future of small-business software.",
+      "subline": "Remote-first · Competitive pay · Team you actually want to work with",
+      "role1": "Senior Frontend Engineer",
+      "role2": "Product Designer",
+      "role3": "Growth Manager"
+    }
   }
 }

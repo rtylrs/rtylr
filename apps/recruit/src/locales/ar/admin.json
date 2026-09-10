@@ -136,7 +136,9 @@
       "url": "رابط أعمالك",
       "boolean": "أوافق"
     },
-    "seedOption": "خيار {{number}}"
+    "seedOption": "خيار {{number}}",
+    "confirmRemove": "حذف هذا الحقل؟",
+    "remove": "حذف"
   },
   "sections": {
     "metaTitle": "أقسام الصفحة · rtylr",
@@ -213,5 +215,102 @@
     },
     "hideFromPublic": "إخفاء من الصفحة العامة",
     "showOnPublic": "إظهار في الصفحة العامة"
+  },
+  "branding": {
+    "metaTitle": "هوية الصفحة · rtylr",
+    "heading": "هوية الصفحة",
+    "subtitle": "ما يراه المرشحون على",
+    "slugPlaceholder": "الرابط-المختصر",
+    "preview": "معاينة",
+    "saved": "تم حفظ صفحة الوظائف",
+    "saveFailed": "تعذر الحفظ، تأكد أن الرابط المختصر غير مستخدم",
+    "uploadFailed": "تعذر الإرفاق",
+    "paletteReset": "تمت إعادة الألوان إلى إعدادات {{template}}",
+    "tabBrand": "الهوية",
+    "tabPalette": "الألوان",
+    "tabTypography": "الخطوط",
+    "tabMedia": "الوسائط",
+    "tabSeo": "تحسين الظهور",
+    "slug": "الرابط المختصر",
+    "slugHint": "حروف إنجليزية صغيرة وأرقام وشرطات",
+    "brandName": "اسم العلامة",
+    "tagline": "العبارة التعريفية",
+    "about": "نبذة",
+    "aboutHint": "فقرة قصيرة تظهر تحت الواجهة",
+    "logoUrl": "رابط الشعار",
+    "upload": "إرفاق",
+    "uploading": "جارٍ الإرفاق…",
+    "headerHtml": "HTML مخصص للترويسة",
+    "headerHtmlHint": "للمتقدمين: شريط HTML خام أعلى ترويسة العلامة",
+    "resetPalette": "إعادة إلى إعدادات القالب",
+    "primary": "اللون الأساسي",
+    "accent": "اللون المميز",
+    "accentHint": "لون ثانوي. إذا تُرك فارغًا يُستخدم الأساسي",
+    "background": "الخلفية",
+    "backgroundHint": "خلفية الصفحة",
+    "text": "النص",
+    "mutedText": "النص الباهت",
+    "mutedTextHint": "التعليقات والبيانات الوصفية",
+    "selected": "مختار",
+    "searchAndSocial": "البحث والشبكات الاجتماعية",
+    "metaTitleField": "عنوان الصفحة",
+    "metaTitleHint": "يحل محل عنوان التبويب ونتائج البحث",
+    "metaDescription": "وصف الصفحة",
+    "metaDescriptionHint": "جملة أو جملتان، أقل من 160 حرفًا",
+    "legal": "الشؤون القانونية",
+    "legalHint": "روابط تظهر في نموذج التقديم. مفيدة لإفصاحات حماية البيانات وتكافؤ الفرص.",
+    "privacyUrl": "رابط سياسة الخصوصية",
+    "termsUrl": "رابط الشروط",
+    "analytics": "التحليلات",
+    "analyticsHint": "تُحمّل فقط عند إضافة معرّف. اتركها فارغة لعدم التتبع إطلاقًا.",
+    "ga4": "معرّف قياس GA4",
+    "ga4Hint": "يبدأ بـ G-",
+    "metaPixel": "معرّف Meta Pixel",
+    "metaPixelHint": "أرقام فقط",
+    "emailNotifications": "إشعارات البريد",
+    "notificationInbox": "بريد إشعارات الموارد البشرية",
+    "notificationInboxHint": "يُفضل بريد جماعي، مثل jobs@acme.com",
+    "notifyMe": "أرسل لي إشعارات بريد عند وصول طلبات جديدة",
+    "heroImageUrl": "رابط صورة الواجهة",
+    "heroImageHint": "تظهر في قالبي bold و editorial أعلى قائمة الوظائف",
+    "heroPreview": "معاينة الواجهة",
+    "faviconUrl": "رابط أيقونة الموقع",
+    "faviconHint": "صورة مربعة، 32 بكسل على الأقل. تظهر في تبويب المتصفح.",
+    "faviconPreview": "معاينة الأيقونة",
+    "socialPreview": "معاينة المشاركة",
+    "ogCard": "بطاقة المشاركة",
+    "ogHint": "تُحدّث بعد الحفظ. هذه البطاقة التي تستخدمها لينكدإن وسلاك وiMessage.",
+    "save": "حفظ التغييرات",
+    "saving": "جارٍ الحفظ…",
+    "template": {
+      "minimal": {
+        "name": "بسيط",
+        "blurb": "قائمة هادئة بعمود واحد. الافتراضي لكل صفحة جديدة."
+      },
+      "editorial": {
+        "name": "تحريري",
+        "blurb": "واجهة بأسلوب المجلات، خط مذيّل، مساحات واسعة."
+      },
+      "bold": {
+        "name": "جسور",
+        "blurb": "كتلة واجهة بلون مشبع وخط كبير. يحتاج لونًا قويًا."
+      }
+    },
+    "fontPairing": {
+      "default": "محايد",
+      "jakarta-fraunces": "مذيّل حديث",
+      "space-grotesk-inter": "هندسي",
+      "playfair-inter": "تحريري",
+      "dmserif-dmsans": "فخم"
+    },
+    "typographyHint": "خمس مجموعات مختارة. تُحمّل الخطوط عند الحاجة من Google Fonts، فاختيار إحداها لا يعطل الحفظ.",
+    "previewCard": {
+      "careersEyebrow": "الوظائف",
+      "headline": "انضم إلينا لبناء مستقبل برمجيات الأعمال الصغيرة.",
+      "subline": "العمل عن بعد أولًا · رواتب منافسة · فريق تستمتع بالعمل معه",
+      "role1": "مهندس واجهات أمامية أول",
+      "role2": "مصمم منتجات",
+      "role3": "مدير نمو"
+    }
   }
 }

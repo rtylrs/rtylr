@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
 import { uploadAsset } from '@voxire/api';
@@ -33,22 +34,12 @@ import { FONT_PAIRINGS } from '../../templates/fonts';
  * regardless of which tab is open.
  */
 
-const TEMPLATES: { id: TemplateId; name: string; blurb: string }[] = [
-  {
-    id: 'minimal',
-    name: 'Minimal',
-    blurb: 'Calm single-column list. Default for every new page.',
-  },
-  {
-    id: 'editorial',
-    name: 'Editorial',
-    blurb: 'Magazine-style hero, serif display, generous whitespace.',
-  },
-  {
-    id: 'bold',
-    name: 'Bold',
-    blurb: 'Saturated hero block, oversized type. Needs a strong color.',
-  },
+// Exported so the locale suite can assert a name and a blurb exist for every
+// template. Both are looked up with a runtime built key.
+export const TEMPLATES: { id: TemplateId }[] = [
+  { id: 'minimal' },
+  { id: 'editorial' },
+  { id: 'bold' },
 ];
 
 // TEMPLATE_DEFAULTS mirrors the defaults in templates/resolver.tsx so
@@ -81,6 +72,7 @@ const TEMPLATE_DEFAULTS: Record<TemplateId, Record<string, string>> = {
 type Tab = 'brand' | 'palette' | 'typography' | 'media' | 'seo';
 
 const CustomizationAdmin: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const { data } = useAdminCustomization();
   const save = useUpsertCustomization();
 
@@ -135,7 +127,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
         setHeroImageUrl(uploaded.url);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Upload failed');
+      toast.error(err instanceof Error ? err.message : t('admin.branding.uploadFailed'));
     } finally {
       setUploadingField(null);
       if (field === 'logo' && logoInputRef.current) logoInputRef.current.value = '';
@@ -201,8 +193,8 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
         emailNotifications,
       },
       {
-        onSuccess: () => toast.success('Careers page saved'),
-        onError: () => toast.error("Couldn't save - check your slug is unique"),
+        onSuccess: () => toast.success(t('admin.branding.saved')),
+        onError: () => toast.error(t('admin.branding.saveFailed')),
       }
     );
   };
@@ -214,12 +206,12 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
     setBgColor(d.bg);
     setTextColor(d.fg);
     setMutedTextColor(d.muted);
-    toast.success(`Palette reset to ${template} defaults`);
+    toast.success(t('admin.branding.paletteReset', { template }));
   }
 
   return (
     <>
-      <HelmetContainer title="Page branding · rtylr" />
+      <HelmetContainer title={t('admin.branding.metaTitle')} />
       <div className="flex min-h-screen flex-col">
         {/* Header - title + preview link. Stays pinned above the tabs. */}
         <div
@@ -231,10 +223,12 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
         >
           <div className="flex items-baseline justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">Page branding</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {t('admin.branding.heading')}
+              </h1>
               <p className="mt-1 text-sm text-white/60">
-                What candidates see at {APP_URLS.recruit}/
-                <span className="text-white">{slug || 'your-slug'}</span>
+                {t('admin.branding.subtitle')} {APP_URLS.recruit}/
+                <span className="text-white">{slug || t('admin.branding.slugPlaceholder')}</span>
               </p>
             </div>
             {slug && (
@@ -245,7 +239,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                 className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm hover:bg-white/5"
               >
                 <ExternalLink className="h-4 w-4" />
-                Preview
+                {t('admin.branding.preview')}
               </a>
             )}
           </div>
@@ -254,28 +248,28 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
             behind each. */}
           <div className="mt-6 flex gap-1 text-sm">
             <TabButton active={tab === 'brand'} onClick={() => setTab('brand')} icon={<Layout />}>
-              Brand
+              {t('admin.branding.tabBrand')}
             </TabButton>
             <TabButton
               active={tab === 'palette'}
               onClick={() => setTab('palette')}
               icon={<Palette />}
             >
-              Palette
+              {t('admin.branding.tabPalette')}
             </TabButton>
             <TabButton
               active={tab === 'typography'}
               onClick={() => setTab('typography')}
               icon={<Type />}
             >
-              Typography
+              {t('admin.branding.tabTypography')}
             </TabButton>
             <TabButton
               active={tab === 'media'}
               onClick={() => setTab('media')}
               icon={<ImageIcon />}
             >
-              Media
+              {t('admin.branding.tabMedia')}
             </TabButton>
             <TabButton active={tab === 'seo'} onClick={() => setTab('seo')} icon={<Search />}>
               SEO &amp; legal
@@ -288,20 +282,24 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
             {tab === 'brand' && (
               <Section maxWidth={640}>
                 <Row>
-                  <Field label="URL slug" required hint="a–z, 0–9, dashes">
+                  <Field
+                    label={t('admin.branding.slug')}
+                    required
+                    hint={t('admin.branding.slugHint')}
+                  >
                     <Input value={slug} onChange={setSlug} required />
                   </Field>
-                  <Field label="Brand name" required>
+                  <Field label={t('admin.branding.brandName')} required>
                     <Input value={brandName} onChange={setBrandName} required />
                   </Field>
                 </Row>
-                <Field label="Tagline">
+                <Field label={t('admin.branding.tagline')}>
                   <Input value={tagline} onChange={setTagline} />
                 </Field>
-                <Field label="About" hint="Short paragraph shown under the hero">
+                <Field label={t('admin.branding.about')} hint={t('admin.branding.aboutHint')}>
                   <Textarea value={aboutBlurb} onChange={setAboutBlurb} rows={4} />
                 </Field>
-                <Field label="Logo URL">
+                <Field label={t('admin.branding.logoUrl')}>
                   <div className="flex gap-2">
                     <Input value={logoUrl} onChange={setLogoUrl} type="url" />
                     <button
@@ -311,7 +309,9 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 text-sm font-semibold text-white/80 hover:bg-white/5 disabled:opacity-60"
                     >
                       <Upload size={14} />
-                      {uploadingField === 'logo' ? 'Uploading...' : 'Upload'}
+                      {uploadingField === 'logo'
+                        ? t('admin.branding.uploading')
+                        : t('admin.branding.upload')}
                     </button>
                     <input
                       ref={logoInputRef}
@@ -325,8 +325,8 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   </div>
                 </Field>
                 <Field
-                  label="Custom header HTML"
-                  hint="Advanced - raw HTML strip above the brand header"
+                  label={t('admin.branding.headerHtml')}
+                  hint={t('admin.branding.headerHtmlHint')}
                 >
                   <Textarea value={headerHtml} onChange={setHeaderHtml} rows={3} />
                 </Field>
@@ -346,55 +346,67 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                     className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:bg-white/5"
                   >
                     <RotateCcw className="h-3 w-3" />
-                    Reset to template defaults
+                    {t('admin.branding.resetPalette')}
                   </button>
                 </div>
 
                 <div className="mt-6 grid grid-cols-3 gap-3">
-                  {TEMPLATES.map((t) => (
+                  {TEMPLATES.map((tpl) => (
                     <button
-                      key={t.id}
+                      key={tpl.id}
                       type="button"
-                      onClick={() => setTemplate(t.id)}
+                      onClick={() => setTemplate(tpl.id)}
                       className="block rounded-lg border p-4 text-left transition"
                       style={{
                         borderColor:
-                          template === t.id
+                          template === tpl.id
                             ? 'var(--recruit-admin-selected-border)'
                             : 'var(--recruit-admin-border)',
                         background:
-                          template === t.id
+                          template === tpl.id
                             ? 'rgba(255,255,255,0.06)'
                             : 'var(--recruit-admin-surface)',
                       }}
                     >
-                      <div className="font-semibold">{t.name}</div>
-                      <div className="mt-1 text-xs text-white/60">{t.blurb}</div>
+                      <div className="font-semibold">
+                        {t(`admin.branding.template.${tpl.id}.name`)}
+                      </div>
+                      <div className="mt-1 text-xs text-white/60">
+                        {t(`admin.branding.template.${tpl.id}.blurb`)}
+                      </div>
                     </button>
                   ))}
                 </div>
 
                 <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
                   <div className="space-y-4">
-                    <ColorField label="Primary" value={primaryColor} onChange={setPrimaryColor} />
                     <ColorField
-                      label="Accent"
+                      label={t('admin.branding.primary')}
+                      value={primaryColor}
+                      onChange={setPrimaryColor}
+                    />
+                    <ColorField
+                      label={t('admin.branding.accent')}
                       value={accentColor}
                       onChange={setAccentColor}
-                      hint="Secondary highlight. Empty → falls back to Primary"
+                      hint={t('admin.branding.accentHint')}
                     />
                     <ColorField
-                      label="Background"
+                      label={t('admin.branding.background')}
                       value={bgColor}
                       onChange={setBgColor}
-                      hint="Page canvas"
+                      hint={t('admin.branding.backgroundHint')}
                     />
-                    <ColorField label="Text" value={textColor} onChange={setTextColor} />
                     <ColorField
-                      label="Muted text"
+                      label={t('admin.branding.text')}
+                      value={textColor}
+                      onChange={setTextColor}
+                    />
+                    <ColorField
+                      label={t('admin.branding.mutedText')}
                       value={mutedTextColor}
                       onChange={setMutedTextColor}
-                      hint="Captions, metadata"
+                      hint={t('admin.branding.mutedTextHint')}
                     />
                   </div>
 
@@ -414,10 +426,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
 
             {tab === 'typography' && (
               <Section maxWidth={720}>
-                <p className="text-sm text-white/60">
-                  Five curated pairings. Fonts load on demand from Google Fonts - picking one
-                  doesn't block the save.
-                </p>
+                <p className="text-sm text-white/60">{t('admin.branding.typographyHint')}</p>
                 <div className="mt-6 space-y-3">
                   {Object.values(FONT_PAIRINGS).map((p) => (
                     <button
@@ -439,7 +448,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-xs uppercase tracking-wider text-white/50">
-                            {p.label}
+                            {t(`admin.branding.fontPairing.${p.id}`)} ({p.fonts})
                           </div>
                           <div className="mt-2 text-3xl" style={{ fontFamily: p.heading }}>
                             The quick brown fox
@@ -453,7 +462,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                         </div>
                         {fontPairing === p.id && (
                           <div className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-black">
-                            Selected
+                            {t('admin.branding.selected')}
                           </div>
                         )}
                       </div>
@@ -466,30 +475,34 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
             {tab === 'seo' && (
               <Section maxWidth={640}>
                 <div>
-                  <div className="text-sm font-semibold">Search &amp; social</div>
+                  <div className="text-sm font-semibold">{t('admin.branding.searchAndSocial')}</div>
                   <div className="text-xs text-white/50">
                     Override the defaults that LinkedIn, Google, and Twitter show. Blank fields fall
                     back to your brand name + tagline.
                   </div>
                 </div>
-                <Field label="Meta title" hint="Overrides browser tab + search result title">
+                <Field
+                  label={t('admin.branding.metaTitleField')}
+                  hint={t('admin.branding.metaTitleHint')}
+                >
                   <Input value={metaTitle} onChange={setMetaTitle} />
                 </Field>
-                <Field label="Meta description" hint="1–2 sentences, under 160 chars">
+                <Field
+                  label={t('admin.branding.metaDescription')}
+                  hint={t('admin.branding.metaDescriptionHint')}
+                >
                   <Textarea value={metaDescription} onChange={setMetaDescription} rows={3} />
                 </Field>
 
                 <div className="pt-4">
-                  <div className="text-sm font-semibold">Legal</div>
-                  <div className="text-xs text-white/50">
-                    Links shown on the apply form. Useful for GDPR / EEO disclosures.
-                  </div>
+                  <div className="text-sm font-semibold">{t('admin.branding.legal')}</div>
+                  <div className="text-xs text-white/50">{t('admin.branding.legalHint')}</div>
                 </div>
                 <Row>
-                  <Field label="Privacy policy URL">
+                  <Field label={t('admin.branding.privacyUrl')}>
                     <Input value={privacyUrl} onChange={setPrivacyUrl} type="url" />
                   </Field>
-                  <Field label="Terms URL">
+                  <Field label={t('admin.branding.termsUrl')}>
                     <Input value={termsUrl} onChange={setTermsUrl} type="url" />
                   </Field>
                 </Row>
@@ -504,30 +517,33 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                 </label>
 
                 <div className="pt-4">
-                  <div className="text-sm font-semibold">Analytics</div>
-                  <div className="text-xs text-white/50">
-                    Only loaded when an ID is set. Leave blank to ship zero tracking.
-                  </div>
+                  <div className="text-sm font-semibold">{t('admin.branding.analytics')}</div>
+                  <div className="text-xs text-white/50">{t('admin.branding.analyticsHint')}</div>
                 </div>
                 <Row>
-                  <Field label="GA4 measurement ID" hint="Starts with G-">
+                  <Field label={t('admin.branding.ga4')} hint={t('admin.branding.ga4Hint')}>
                     <Input value={gaMeasurementId} onChange={setGaMeasurementId} />
                   </Field>
-                  <Field label="Meta Pixel ID" hint="Numeric">
+                  <Field
+                    label={t('admin.branding.metaPixel')}
+                    hint={t('admin.branding.metaPixelHint')}
+                  >
                     <Input value={metaPixelId} onChange={setMetaPixelId} />
                   </Field>
                 </Row>
 
                 <div className="pt-4">
-                  <div className="text-sm font-semibold">Email notifications</div>
+                  <div className="text-sm font-semibold">
+                    {t('admin.branding.emailNotifications')}
+                  </div>
                   <div className="text-xs text-white/50">
                     Candidates always get a confirmation when they apply. You get a "new
                     application" ping at the address below, if set.
                   </div>
                 </div>
                 <Field
-                  label="HR notification inbox"
-                  hint="Team alias works best (e.g. jobs@acme.com)"
+                  label={t('admin.branding.notificationInbox')}
+                  hint={t('admin.branding.notificationInboxHint')}
                 >
                   <Input value={notificationEmail} onChange={setNotificationEmail} type="email" />
                 </Field>
@@ -538,7 +554,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                     onChange={(e) => setEmailNotifications(e.target.checked)}
                     className="h-4 w-4"
                   />
-                  Send me email notifications for new applications
+                  {t('admin.branding.notifyMe')}
                 </label>
               </Section>
             )}
@@ -546,8 +562,8 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
             {tab === 'media' && (
               <Section maxWidth={640}>
                 <Field
-                  label="Hero image URL"
-                  hint="Shown in the bold / editorial templates above the job list"
+                  label={t('admin.branding.heroImageUrl')}
+                  hint={t('admin.branding.heroImageHint')}
                 >
                   <div className="flex gap-2">
                     <Input value={heroImageUrl} onChange={setHeroImageUrl} type="url" />
@@ -558,7 +574,9 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 text-sm font-semibold text-white/80 hover:bg-white/5 disabled:opacity-60"
                     >
                       <Upload size={14} />
-                      {uploadingField === 'hero' ? 'Uploading...' : 'Upload'}
+                      {uploadingField === 'hero'
+                        ? t('admin.branding.uploading')
+                        : t('admin.branding.upload')}
                     </button>
                     <input
                       ref={heroInputRef}
@@ -573,19 +591,22 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   {heroImageUrl && (
                     <img
                       src={cdnImageUrl(heroImageUrl)}
-                      alt="Hero preview"
+                      alt={t('admin.branding.heroPreview')}
                       className="mt-3 h-40 w-full rounded-md object-cover"
                       style={{ background: 'var(--recruit-admin-border)' }}
                     />
                   )}
                 </Field>
 
-                <Field label="Favicon URL" hint="Square image, ≥32px. Shown in browser tabs.">
+                <Field
+                  label={t('admin.branding.faviconUrl')}
+                  hint={t('admin.branding.faviconHint')}
+                >
                   <Input value={faviconUrl} onChange={setFaviconUrl} type="url" />
                   {faviconUrl && (
                     <img
                       src={cdnImageUrl(faviconUrl)}
-                      alt="Favicon preview"
+                      alt={t('admin.branding.faviconPreview')}
                       className="mt-3 h-10 w-10 rounded"
                       style={{ background: 'var(--recruit-admin-border)' }}
                     />
@@ -598,18 +619,16 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                 {slug && (
                   <div className="mt-6">
                     <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/70">
-                      Social preview
+                      {t('admin.branding.socialPreview')}
                     </div>
                     <img
                       key={`${brandName}-${tagline}-${primaryColor}`}
                       src={`${APP_URLS.api}/recruit/public/og?slug=${slug}&_=${Date.now()}`}
-                      alt="OG card"
+                      alt={t('admin.branding.ogCard')}
                       className="w-full rounded-md border"
                       style={{ borderColor: 'var(--recruit-admin-border)' }}
                     />
-                    <p className="mt-1.5 text-xs text-white/40">
-                      Refreshes after you save. This is the card LinkedIn, Slack, and iMessage use.
-                    </p>
+                    <p className="mt-1.5 text-xs text-white/40">{t('admin.branding.ogHint')}</p>
                   </div>
                 )}
               </Section>
@@ -628,7 +647,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
               disabled={save.isPending}
               className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-50"
             >
-              {save.isPending ? 'Saving…' : 'Save changes'}
+              {save.isPending ? t('admin.branding.saving') : t('admin.branding.save')}
             </button>
           </div>
         </form>
@@ -752,36 +771,49 @@ const PalettePreview: React.FC<{
   fg: string;
   muted: string;
   brandName: string;
-}> = ({ primary, accent, bg, fg, muted, brandName }) => (
-  <div
-    className="rounded-lg border p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
-    style={{ borderColor: 'var(--recruit-admin-border)', background: bg }}
-  >
-    <div className="text-[10px] uppercase tracking-[0.3em]" style={{ color: accent }}>
-      Careers · {brandName}
-    </div>
+}> = ({ primary, accent, bg, fg, muted, brandName }) => {
+  const { t } = useTranslation();
+  // Sample content, translated for the same reason the rest of the screen is:
+  // an admin judging their colours should read it in their own language.
+  const roles = [
+    t('admin.branding.previewCard.role1'),
+    t('admin.branding.previewCard.role2'),
+    t('admin.branding.previewCard.role3'),
+  ];
+  return (
     <div
-      className="mt-3 text-2xl font-semibold leading-tight"
-      style={{ color: fg, fontFamily: 'var(--recruit-font-display)' }}
+      className="rounded-lg border p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+      style={{ borderColor: 'var(--recruit-admin-border)', background: bg }}
     >
-      Come build the future of small-business software.
+      <div className="text-[10px] uppercase tracking-[0.3em]" style={{ color: accent }}>
+        {t('admin.branding.previewCard.careersEyebrow')} · {brandName}
+      </div>
+      <div
+        className="mt-3 text-2xl font-semibold leading-tight"
+        style={{ color: fg, fontFamily: 'var(--recruit-font-display)' }}
+      >
+        {t('admin.branding.previewCard.headline')}
+      </div>
+      <div className="mt-2 text-sm" style={{ color: muted }}>
+        {t('admin.branding.previewCard.subline')}
+      </div>
+      <div className="mt-4 space-y-1.5">
+        {roles.map((role) => (
+          <div
+            key={role}
+            className="flex items-center justify-between rounded-md px-3 py-2 text-xs"
+            style={{ background: 'rgba(0,0,0,0.04)', color: fg }}
+          >
+            <span>{role}</span>
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full"
+              style={{ background: primary }}
+            />
+          </div>
+        ))}
+      </div>
     </div>
-    <div className="mt-2 text-sm" style={{ color: muted }}>
-      Remote-first · Competitive pay · Team you actually want to work with
-    </div>
-    <div className="mt-4 space-y-1.5">
-      {['Senior Frontend Engineer', 'Product Designer', 'Growth Manager'].map((role) => (
-        <div
-          key={role}
-          className="flex items-center justify-between rounded-md px-3 py-2 text-xs"
-          style={{ background: 'rgba(0,0,0,0.04)', color: fg }}
-        >
-          <span>{role}</span>
-          <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: primary }} />
-        </div>
-      ))}
-    </div>
-  </div>
-);
+  );
+};
 
 export default CustomizationAdmin;
