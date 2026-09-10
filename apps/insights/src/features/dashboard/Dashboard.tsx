@@ -148,7 +148,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl mx-auto"
     >
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={t('insights.dashboard.metaTitle')} />
       <motion.div variants={itemVariants}>
         <CaretAskBar />
       </motion.div>
@@ -198,7 +198,10 @@ const Dashboard: React.FC = (): React.JSX.Element => {
                 </p>
                 <DeltaBadge deltaPct={stat.deltaPct} />
                 {stat.sparkline && revenueSparkPoints.length > 1 && (
-                  <div style={{ height: 44, marginTop: 12 }} aria-label="Revenue sparkline">
+                  <div
+                    style={{ height: 44, marginTop: 12 }}
+                    aria-label={t('insights.charts.revenueSparkline')}
+                  >
                     <Bar data={sparklineData} options={sparklineOptions} />
                   </div>
                 )}
