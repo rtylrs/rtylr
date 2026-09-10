@@ -104,7 +104,11 @@ const Departments: React.FC = () => {
               borderRadius: '8px',
               background: 'var(--accent)',
               border: 'none',
-              color: '#fff',
+              // White on #8b5cf6 measures 4.23:1 and fails AA. It was invisible
+              // to the accent-fill guard while the background was a hardcoded
+              // hex; tokenising the background is what exposed it (rtylr#1242,
+              // the same defect as rtylr#1234).
+              color: 'var(--hr-on-accent)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
