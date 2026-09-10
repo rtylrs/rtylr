@@ -203,7 +203,7 @@ const Register: React.FC = (): React.JSX.Element => {
             />
             {emailError && <p className="text-xs text-red-500">{emailError}</p>}
             {!emailError && emailTaken && (
-              <p className="text-xs text-red-500">An account with this email already exists.</p>
+              <p className="text-xs text-red-500">{t('auth.register.emailTaken')}</p>
             )}
           </div>
 

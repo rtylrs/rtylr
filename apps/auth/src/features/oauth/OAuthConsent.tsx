@@ -200,7 +200,9 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
           <div className="rounded-xl border border-[#e5e5e5] overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-3 bg-[#f9f9f9] border-b border-[#e5e5e5]">
               <Shield size={16} className="text-[#4583C4] shrink-0" />
-              <span className="text-sm font-medium text-[#333]">Permissions requested</span>
+              <span className="text-sm font-medium text-[#333]">
+                {t('auth.oauth.permissionsRequested')}
+              </span>
             </div>
             <ul className="divide-y divide-[#f0f0f0]">
               {scopes.map((scope) => (
