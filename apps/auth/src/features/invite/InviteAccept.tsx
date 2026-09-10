@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { Button, HelmetContainer } from '@voxire/components';
@@ -15,6 +16,7 @@ const invitationsClient = createOneKitClient(InvitationsServiceClient, 'auth');
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 const InviteAccept: React.FC = () => {
+  const { t } = useTranslation();
   const { token } = useParams({ strict: false });
   const navigate = useNavigate();
 
@@ -77,7 +79,7 @@ const InviteAccept: React.FC = () => {
   // Loading state
   if (valid === null) {
     return (
-      <AuthShell title="Verifying invitation..." subtitle="Please wait.">
+      <AuthShell title={t('auth.invite.verifying')} subtitle={t('auth.invite.pleaseWait')}>
         <div className="flex justify-center py-8">
           <div className="h-6 w-6 border-2 border-[#4583C4] border-t-transparent rounded-full animate-spin" />
         </div>
@@ -89,8 +91,8 @@ const InviteAccept: React.FC = () => {
   if (valid === false) {
     return (
       <AuthShell
-        title="Invalid invitation"
-        subtitle="This invitation link is invalid or has expired."
+        title={t('auth.invite.invalidTitle')}
+        subtitle={t('auth.invite.invalidBody')}
         footer={
           <p className="text-sm text-[#666]">
             <button
@@ -98,7 +100,7 @@ const InviteAccept: React.FC = () => {
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
               onClick={() => navigate({ to: '/' })}
             >
-              Go to sign in
+              {t('auth.common.goToSignIn')}
             </button>
           </p>
         }
@@ -108,9 +110,7 @@ const InviteAccept: React.FC = () => {
           role="alert"
         >
           <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-          <p className="text-xs text-red-600 leading-relaxed">
-            Ask your team admin to send a new invitation.
-          </p>
+          <p className="text-xs text-red-600 leading-relaxed">{t('auth.invite.askAdmin')}</p>
         </div>
       </AuthShell>
     );
@@ -126,8 +126,8 @@ const InviteAccept: React.FC = () => {
   if (success) {
     return (
       <AuthShell
-        title="You're all set!"
-        subtitle="Your password has been set. You can now sign in."
+        title={t('auth.invite.allSet')}
+        subtitle={t('auth.invite.passwordSet')}
         footer={
           <Button
             variant="primary"
@@ -136,7 +136,7 @@ const InviteAccept: React.FC = () => {
             height={40}
             onClick={() => (window.location.href = signInHref)}
           >
-            Sign in
+            {t('auth.common.signIn')}
           </Button>
         }
       >
@@ -152,9 +152,9 @@ const InviteAccept: React.FC = () => {
   // Set password form
   return (
     <>
-      <HelmetContainer title="Accept invite · rtylr" />
+      <HelmetContainer title={t('auth.invite.metaTitle')} />
       <AuthShell
-        title="Set your password"
+        title={t('auth.invite.setPasswordTitle')}
         subtitle={`You've been invited to join rtylr${apps.length > 0 ? ` (${apps.join(', ')})` : ''}${email ? ` as ${email}` : ''}.`}
       >
         <form
@@ -167,13 +167,13 @@ const InviteAccept: React.FC = () => {
           {/* Password */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="invite-password" className="text-sm font-medium text-[#111]">
-              Password
+              {t('auth.common.password')}
             </label>
             <div className="relative">
               <input
                 id="invite-password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="At least 8 characters"
+                placeholder={t('auth.common.atLeastEight')}
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -195,13 +195,13 @@ const InviteAccept: React.FC = () => {
           {/* Confirm password */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="invite-confirm" className="text-sm font-medium text-[#111]">
-              Confirm password
+              {t('auth.common.confirmPassword')}
             </label>
             <div className="relative">
               <input
                 id="invite-confirm"
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Repeat password"
+                placeholder={t('auth.common.repeatPassword')}
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -239,7 +239,7 @@ const InviteAccept: React.FC = () => {
             loading={loading}
             height={40}
           >
-            Set password and join
+            {t('auth.invite.submitJoin')}
           </Button>
         </form>
       </AuthShell>
