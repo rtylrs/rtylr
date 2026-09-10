@@ -67,8 +67,10 @@ const ResetPasswordConfirm: React.FC = () => {
             <Logo variant="dark" className="h-8 w-auto select-none" />
           </div>
 
-          <h2 className="text-xl font-semibold text-[#111] mb-1">Set a new password</h2>
-          <p className="text-sm text-[#666] mb-6">Choose a strong password for your account.</p>
+          <h2 className="text-xl font-semibold text-[#111] mb-1">
+            {t('auth.reset.newPasswordTitle')}
+          </h2>
+          <p className="text-sm text-[#666] mb-6">{t('auth.reset.newPasswordSubtitle')}</p>
 
           {done ? (
             <div className="flex flex-col gap-4">
@@ -131,7 +133,9 @@ const ResetPasswordConfirm: React.FC = () => {
                   required
                   className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
                 />
-                {mismatch && <p className="text-xs text-red-500">Passwords do not match</p>}
+                {mismatch && (
+                  <p className="text-xs text-red-500">{t('auth.reset.passwordsDoNotMatch')}</p>
+                )}
               </div>
 
               {error && (
