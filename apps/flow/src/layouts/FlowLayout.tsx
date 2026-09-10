@@ -29,6 +29,7 @@ import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
 import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
+import TaskDrawer from '../shared/components/TaskDrawer';
 import GateNotice from '../shared/components/GateNotice';
 import ModeToggle from '../shared/components/ModeToggle';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
@@ -1025,6 +1026,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         <CommandBar />
         <QuickCreate />
         <BulkEditBar />
+        {/* Task detail over the list rather than instead of it (rtylr#1079).
+            It reads `?openTask` from the router itself, so no route has to
+            thread it down, and it renders nothing when the param is absent. */}
+        <TaskDrawer />
       </div>
     </AppearanceProvider>
   );
