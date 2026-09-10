@@ -1,4 +1,5 @@
 import { test, expect, type Route } from './fixtures';
+import { captureResponsivePair } from './support/screenshot';
 
 /**
  * Flow Task Detail E2E Specs
@@ -218,6 +219,38 @@ test.describe('Flow - Task Detail', () => {
         body: JSON.stringify({ members: [{ id: '1001', name: 'Test Owner', initials: 'TO' }] }),
       })
     );
+  });
+
+  /**
+   * Captures task detail for a PR body, and asserts what a screenshot cannot.
+   *
+   * In this file rather than its own so it reuses the beforeEach above: task
+   * detail needs the primed cookie, `users/me`, and both the v1 and v2 task
+   * endpoints.
+   */
+  test('captures task detail at desktop and at the 390px floor @screenshots', async ({ page }) => {
+    await page.goto(`${FLOW_URL}/task/101`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(800);
+
+    // Asserted before capturing, so a blank or redirected page cannot pass as a
+    // successful shot.
+    // The title is an editable input, so its value is not text content: the
+    // existing test above matches on the attribute for the same reason.
+    await expect(page.locator('input[value="Implement SSO Auth Flow"]')).toBeVisible();
+
+    // One STATUS row, not two. These were adjacent rows reading `STATUS` and
+    // `STATUSES`, one concept as two, with labels a letter apart (rtylr#1079).
+    const statusLabels = page.getByText(/^STATUS(ES)?$/i);
+    expect(await statusLabels.count()).toBe(1);
+
+    // The time total. This read `20100226:30 of 40:00` because durationMinutes
+    // arrives as a string and the sum concatenated it (rtylr#1226).
+    const body = await page.locator('body').innerText();
+    expect(body).not.toMatch(/\d{7,}:\d\d/);
+
+    const shots = await captureResponsivePair(page, 'flow-task-detail');
+    expect(shots.overflowsAt390).toBe(false);
   });
 
   test('task detail renders task title, comments, subtasks', async ({ page }) => {
