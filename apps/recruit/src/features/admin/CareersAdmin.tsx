@@ -86,8 +86,11 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
           ) : careers.length === 0 ? (
             <EmptyState
               icon={Briefcase}
-              title={t('emptyStates.rolesNone')}
-              action={{ label: t('emptyStates.createRole'), onClick: () => setCreating(true) }}
+              title={t('common.emptyStates.rolesNone')}
+              action={{
+                label: t('common.emptyStates.createRole'),
+                onClick: () => setCreating(true),
+              }}
             />
           ) : (
             <table className="w-full">

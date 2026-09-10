@@ -198,8 +198,8 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
           ) : localOrder.length === 0 ? (
             <EmptyState
               icon={LayoutPanelTop}
-              title={t('emptyStates.sectionsNone')}
-              action={{ label: t('emptyStates.addSection'), onClick: () => setAdding(true) }}
+              title={t('common.emptyStates.sectionsNone')}
+              action={{ label: t('common.emptyStates.addSection'), onClick: () => setAdding(true) }}
             />
           ) : (
             <ul>

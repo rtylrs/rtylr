@@ -70,12 +70,17 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
             <EmptyState
               icon={Inbox}
               title={
-                filter ? t('emptyStates.submissionsNoneFiltered') : t('emptyStates.submissionsNone')
+                filter
+                  ? t('common.emptyStates.submissionsNoneFiltered')
+                  : t('common.emptyStates.submissionsNone')
               }
               action={
                 filter
-                  ? { label: t('emptyStates.clearFilter'), onClick: () => handleFilterChange('') }
-                  : { label: t('emptyStates.refresh'), onClick: () => void refetch() }
+                  ? {
+                      label: t('common.emptyStates.clearFilter'),
+                      onClick: () => handleFilterChange(''),
+                    }
+                  : { label: t('common.emptyStates.refresh'), onClick: () => void refetch() }
               }
             />
           ) : (

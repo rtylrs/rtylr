@@ -41,9 +41,9 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
             <div className="rounded-lg border" style={{ borderColor: 'var(--recruit-border)' }}>
               <EmptyState
                 icon={Briefcase}
-                title={t('emptyStates.publicRolesNone')}
+                title={t('common.emptyStates.publicRolesNone')}
                 action={{
-                  label: t('emptyStates.checkAgain'),
+                  label: t('common.emptyStates.checkAgain'),
                   onClick: () => window.location.reload(),
                 }}
               />
