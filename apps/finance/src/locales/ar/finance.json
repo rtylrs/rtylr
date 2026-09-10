@@ -63,5 +63,10 @@
     "markedDone": "اكتملت الدورة: تم تعليم {{marked}} كمنفوترة، وتجاوز {{skipped}}.",
     "billToPlaceholder": "الفاتورة إلى (اسم العميل)",
     "fallbackClient": "ساعات قابلة للفوترة"
+  },
+  "balanceSheet": {
+    "inventory": "المخزون",
+    "inventoryHint": "قيمة المخزون الحالية من نظام تخطيط الموارد، وتظهر فقط عند تمكينه لهذا العمل.",
+    "inventoryUnavailable": "نظام تخطيط الموارد غير متصل"
   }
 }
