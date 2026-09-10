@@ -92,12 +92,6 @@ describe('recruit locales', () => {
     // Scoped to what candidates see. The admin screens still carry literals,
     // tracked separately in rtylr#1266; widen this list as each one lands.
     const DIRS = ['features/public', 'templates'];
-    // ApplyPage is deliberately still open. Its consent sentence wraps two
-    // optional inline links around interpolated text, which no key in this
-    // repo currently expresses: no app uses react-i18next's <Trans>. Listing
-    // the file here keeps this assertion honest rather than passing while
-    // English is still on screen. Remove the entry with that work.
-    const PENDING = ['features/public/ApplyPage.tsx'];
     const TEXT = /^[A-Z][A-Za-z0-9 ,.'’!?&:/-]*$/;
     const literals: string[] = [];
 
@@ -110,12 +104,18 @@ describe('recruit locales', () => {
             continue;
           }
           if (!/\.tsx$/.test(entry.name) || /\.test\.tsx$/.test(entry.name)) continue;
-          if (PENDING.includes(path.relative(SRC, full))) continue;
           const lines = fs.readFileSync(full, 'utf8').split('\n');
           lines.forEach((line, i) => {
             const s = line.trim();
             if (s.startsWith('//') || s.startsWith('*') || s.startsWith('/*')) return;
             if (line.includes('t(')) return;
+            // A string handed to a toast or an error setter reaches the
+            // candidate just as directly as one in JSX, and the JSX patterns
+            // below cannot see it.
+            const call =
+              /(?:toast\.(?:error|success|info)|setUploadError)\(\s*['"]([A-Z][^'"]{3,})['"]/.exec(
+                line
+              );
             const inline = />\s*([A-Z][A-Za-z][^<>{}]*?)\s*</.exec(line);
             const prev =
               lines
@@ -130,8 +130,8 @@ describe('recruit locales', () => {
                 ?.trim() ?? '';
             const standalone =
               TEXT.test(s) && s.length > 2 && /[>{}]$/.test(prev) && next.startsWith('<');
-            if (inline) literals.push(`${path.relative(SRC, full)}:${i + 1} ${inline[1]}`);
-            else if (standalone) literals.push(`${path.relative(SRC, full)}:${i + 1} ${s}`);
+            const found = call?.[1] ?? inline?.[1] ?? (standalone ? s : undefined);
+            if (found !== undefined) literals.push(`${path.relative(SRC, full)}:${i + 1} ${found}`);
           });
         }
       };
