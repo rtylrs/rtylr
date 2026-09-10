@@ -85,9 +85,9 @@ const Brands: React.FC = () => {
       ) : brands.length === 0 ? (
         <EmptyState
           icon={Tag}
-          title={t('brands.empty.title')}
-          description={t('brands.empty.description')}
-          action={{ label: t('brands.newBrand'), onClick: () => setShowCreate(true) }}
+          title={t('erp.brands.empty.title')}
+          description={t('erp.brands.empty.description')}
+          action={{ label: t('erp.brands.newBrand'), onClick: () => setShowCreate(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
