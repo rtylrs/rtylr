@@ -118,8 +118,8 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
         <div className="mb-4">
           <EmptyState
             icon={HelpCircle}
-            title={t('emptyStates.questionsNone')}
-            action={{ label: t('emptyStates.addQuestion'), onClick: addDefaultQuestion }}
+            title={t('common.emptyStates.questionsNone')}
+            action={{ label: t('common.emptyStates.addQuestion'), onClick: addDefaultQuestion }}
             size="compact"
           />
         </div>
