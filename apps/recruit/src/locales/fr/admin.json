@@ -64,5 +64,70 @@
     "page": "Page {{page}}",
     "confirmUnhire": "Faire passer {{name}} de « {{from}} » à « {{to}} » ?",
     "confirm": "Confirmer"
+  },
+  "careerEditor": {
+    "editTitle": "Modifier le poste",
+    "newTitle": "Nouveau poste",
+    "title": "Intitulé",
+    "slug": "Identifiant d'URL",
+    "slugHint": "Généré depuis l'intitulé s'il est laissé vide",
+    "department": "Service",
+    "location": "Lieu",
+    "employmentTypeLabel": "Type de contrat",
+    "workModeLabel": "Mode de travail",
+    "seniority": "Niveau",
+    "description": "Description du poste",
+    "requirements": "Profil recherché",
+    "salaryMin": "Salaire min",
+    "salaryMax": "Salaire max",
+    "currency": "Devise",
+    "publish": "Publier ce poste sur la page carrières",
+    "cancel": "Annuler",
+    "save": "Enregistrer les modifications",
+    "create": "Créer le poste",
+    "employmentType": {
+      "fullTime": "Temps plein",
+      "partTime": "Temps partiel",
+      "contract": "Freelance",
+      "internship": "Stage"
+    },
+    "workMode": {
+      "remote": "À distance",
+      "hybrid": "Hybride",
+      "onsite": "Sur site"
+    }
+  },
+  "questions": {
+    "heading": "Questions personnalisées",
+    "hint": "Posées après les champs nom, e-mail et CV du formulaire de candidature.",
+    "loading": "Chargement…",
+    "added": "{{kind}} ajouté",
+    "addFailed": "Ajout impossible",
+    "saved": "Question enregistrée",
+    "saveFailed": "Enregistrement impossible",
+    "removed": "Question supprimée",
+    "deleteFailed": "Suppression impossible",
+    "labelPlaceholder": "Intitulé de la question",
+    "required": "Obligatoire",
+    "placeholderPlaceholder": "Texte indicatif (facultatif)",
+    "addOption": "Ajouter une option",
+    "optionPlaceholder": "Option {{number}}",
+    "kind": {
+      "short_text": "Texte court",
+      "long_text": "Texte long",
+      "single_select": "Liste déroulante",
+      "multi_select": "Choix multiple",
+      "url": "URL",
+      "boolean": "Case à cocher"
+    },
+    "defaultLabel": {
+      "short_text": "Nouvelle question",
+      "long_text": "Dites-nous en plus",
+      "single_select": "Choisissez une option",
+      "multi_select": "Choisissez tout ce qui s'applique",
+      "url": "Lien de portfolio",
+      "boolean": "J'accepte"
+    },
+    "seedOption": "Option {{number}}"
   }
 }
