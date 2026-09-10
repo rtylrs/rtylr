@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { todayIso, addDays } from '../../shared/lib/dateUtils';
+import { isExpired as isDocumentExpired } from '../../shared/lib/documentUtils';
 import { useTranslation } from 'react-i18next';
 import { FileText, Upload, AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
@@ -23,15 +25,26 @@ const DOCUMENT_TYPES = ['id_card', 'contract', 'certificate', 'visa', 'other'] a
 
 const EXPIRY_WARNING_DAYS = 14;
 
+/**
+ * Both compare whole days, and both delegate rather than re-deriving.
+ *
+ * The local `isExpired` was `new Date(expiryDate).getTime() < Date.now()`,
+ * which flags a document expiring **today** as already expired from 00:00 UTC:
+ * red for the whole of its last valid day (rtylr#1077). `documentUtils` has the
+ * same function, so this was also a second copy of it.
+ *
+ * `isExpiringSoon` counted a millisecond gap, which makes "within 14 days"
+ * depend on the hour: a document expiring in 14 days at 09:00 was inside the
+ * window at 10:00 and outside it at 08:00.
+ */
 function isExpiringSoon(expiryDate: string | undefined): boolean {
   if (!expiryDate) return false;
-  const diff = new Date(expiryDate).getTime() - Date.now();
-  return diff > 0 && diff < EXPIRY_WARNING_DAYS * 24 * 60 * 60 * 1000;
+  const day = expiryDate.split('T')[0];
+  return day >= todayIso() && day <= addDays(todayIso(), EXPIRY_WARNING_DAYS);
 }
 
 function isExpired(expiryDate: string | undefined): boolean {
-  if (!expiryDate) return false;
-  return new Date(expiryDate).getTime() < Date.now();
+  return expiryDate ? isDocumentExpired(expiryDate) : false;
 }
 
 interface Props {

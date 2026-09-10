@@ -49,12 +49,25 @@ export function isToday(dateIso: string): boolean {
   return dateIso === todayIso();
 }
 
+/**
+ * Whether `dateIso` is after today, where the reader is standing.
+ *
+ * Compared as strings. `new Date('2026-09-08')` is **UTC midnight**, and
+ * comparing that to the current instant answers a different question: west of
+ * Greenwich it called tomorrow "not future" for the last hours of the evening,
+ * and `isPastDate` called **today** past from 00:00 UTC onward, which at UTC+3
+ * is the whole working day (rtylr#1077, the same defect as Flow's).
+ *
+ * `YYYY-MM-DD` sorts lexicographically in date order, so `<` and `>` are the
+ * whole comparison and no parsing is needed.
+ */
 export function isFutureDate(dateIso: string): boolean {
-  return new Date(dateIso) > new Date();
+  return dateIso.split('T')[0] > todayIso();
 }
 
+/** Whether `dateIso` is before today. Today itself is not past. */
 export function isPastDate(dateIso: string): boolean {
-  return new Date(dateIso) < new Date();
+  return dateIso.split('T')[0] < todayIso();
 }
 
 export function yearsOld(birthDateIso: string): number {
