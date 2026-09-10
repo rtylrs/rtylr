@@ -463,12 +463,12 @@ const TeamTab: React.FC = () => {
       ) : members.length === 0 ? (
         <EmptyState
           icon={Users}
-          title={t('settings.team.empty.title')}
+          title={t('erp.settings.team.empty.title')}
           size="compact"
           action={
             canInviteMember
-              ? { label: t('settings.team.invite'), onClick: () => setShowInvite(true) }
-              : { label: t('settings.team.refresh'), onClick: () => void refetch() }
+              ? { label: t('erp.settings.team.invite'), onClick: () => setShowInvite(true) }
+              : { label: t('erp.settings.team.refresh'), onClick: () => void refetch() }
           }
         />
       ) : (
