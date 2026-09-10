@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isOverdue } from '../lib/dateUtils';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarGrid, todayISODate } from '@voxire/ui';
@@ -14,7 +15,12 @@ interface DueDatePickerProps {
 export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, disabled }) => {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
-  const overdue = value && new Date(value) < new Date();
+  // `isOverdue`, not `new Date(value) < new Date()`. A date-only string parses
+  // as UTC midnight, so a date due **today** compared against the current
+  // instant reads as past from 00:00 UTC, which is the whole working day at
+  // UTC+3 (rtylr#1077). Three components had this; this was a fourth, missed
+  // because the earlier sweep matched on the variable being named `dueDate`.
+  const overdue = isOverdue(value);
 
   const quickOptions = [
     { label: t('common.datePicker.today'), days: 0 },
