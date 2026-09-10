@@ -1,4 +1,5 @@
 import { unwrap } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { rest } from '../../lib/clients';
@@ -66,10 +67,11 @@ interface SubmitApplicationResponse {
 }
 
 export function useSubmitApplication() {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (body: SubmitApplicationBody) =>
       unwrap(rest.post<SubmitApplicationResponse>('/recruit/public/apply', body)),
-    onError: () => toast.error('Failed to apply'),
+    onError: () => toast.error(t('common.errors.apply')),
   });
 }
 
