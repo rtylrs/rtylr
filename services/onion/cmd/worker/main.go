@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/voxire/onion/internal/modules/accounts"
+	"github.com/voxire/onion/internal/modules/automations"
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	hrleave "github.com/voxire/onion/internal/modules/hr_leave"
 	hrovertime "github.com/voxire/onion/internal/modules/hr_overtime"
@@ -118,6 +119,7 @@ func main() {
 }
 
 type jobModules struct {
+	Automations       *automations.Module
 	Accounts          *accounts.Module
 	HRCore            *hrcore.Module
 	HRLeave           *hrleave.Module
@@ -142,6 +144,7 @@ func initializeJobModules(ctx context.Context) *jobModules {
 	workspacesModule := workspaces.NewModule(ctx, db, hrCoreModule, hrLeaveModule)
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
 	return &jobModules{
+		Automations:       automations.NewModule(ctx, db),
 		Accounts:          accountsModule,
 		HRCore:            hrCoreModule,
 		HRLeave:           hrLeaveModule,
