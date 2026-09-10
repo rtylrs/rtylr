@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { STATUSES } from '../features/admin/SubmissionsAdmin';
+import { EMPLOYMENT_TYPES, WORK_MODES } from '../features/admin/CareerEditor';
+import { KIND_ORDER } from '../features/admin/FormFieldsEditor';
 
 /**
  * Recruit ships en, ar and fr, so an English string that never reaches a
@@ -85,6 +87,8 @@ describe('recruit locales', () => {
       // Genuinely the same word in French, not an untranslated copy.
       'admin.careers.colActions',
       'admin.submissions.page',
+      'admin.questions.optionPlaceholder',
+      'admin.questions.seedOption',
     ]);
     const copied: string[] = [];
     for (const lang of ['ar', 'fr'] as const) {
@@ -109,6 +113,26 @@ describe('recruit locales', () => {
       }
     }
     expect(missing, 'a stage with no label renders as its key').toEqual([]);
+  });
+
+  it('labels every option read with a runtime built key', () => {
+    // Each of these is looked up as `${prefix}.${value}`, which
+    // keysResolve.test.ts skips by design, so a missing one would render as
+    // its dotted path in a dropdown with nothing failing.
+    const expected = [
+      ...EMPLOYMENT_TYPES.map((o) => `admin.careerEditor.employmentType.${o.key}`),
+      ...WORK_MODES.map((o) => `admin.careerEditor.workMode.${o.key}`),
+      ...KIND_ORDER.map((k) => `admin.questions.kind.${k}`),
+      // A seed label is stored and then read by the candidate, so a missing
+      // one would persist a dotted path into the database.
+      ...KIND_ORDER.map((k) => `admin.questions.defaultLabel.${k}`),
+    ];
+    const missing: string[] = [];
+    for (const lang of LANGS) {
+      const keys = entries(lang);
+      for (const key of expected) if (!keys.has(key)) missing.push(`${lang} ${key}`);
+    }
+    expect(missing, 'an option with no label renders as its key').toEqual([]);
   });
 
   it('leaves no user-facing English literal on the public careers site', () => {

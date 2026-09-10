@@ -64,5 +64,70 @@
     "page": "Page {{page}}",
     "confirmUnhire": "Move {{name}} from “{{from}}” back to “{{to}}”?",
     "confirm": "Confirm"
+  },
+  "careerEditor": {
+    "editTitle": "Edit role",
+    "newTitle": "New role",
+    "title": "Title",
+    "slug": "URL slug",
+    "slugHint": "Auto-generated from title if left empty",
+    "department": "Department",
+    "location": "Location",
+    "employmentTypeLabel": "Employment type",
+    "workModeLabel": "Work mode",
+    "seniority": "Seniority",
+    "description": "Role description",
+    "requirements": "Requirements",
+    "salaryMin": "Salary min",
+    "salaryMax": "Salary max",
+    "currency": "Currency",
+    "publish": "Publish this role to the careers page",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "create": "Create role",
+    "employmentType": {
+      "fullTime": "Full-time",
+      "partTime": "Part-time",
+      "contract": "Contract",
+      "internship": "Internship"
+    },
+    "workMode": {
+      "remote": "Remote",
+      "hybrid": "Hybrid",
+      "onsite": "Onsite"
+    }
+  },
+  "questions": {
+    "heading": "Custom questions",
+    "hint": "Asked after the default name / email / resume block on the apply form.",
+    "loading": "Loading…",
+    "added": "{{kind}} added",
+    "addFailed": "Could not add",
+    "saved": "Question saved",
+    "saveFailed": "Could not save",
+    "removed": "Question removed",
+    "deleteFailed": "Could not delete",
+    "labelPlaceholder": "Question label",
+    "required": "Required",
+    "placeholderPlaceholder": "Placeholder (optional)",
+    "addOption": "Add option",
+    "optionPlaceholder": "Option {{number}}",
+    "kind": {
+      "short_text": "Short text",
+      "long_text": "Long text",
+      "single_select": "Dropdown",
+      "multi_select": "Multi-choice",
+      "url": "URL",
+      "boolean": "Checkbox"
+    },
+    "defaultLabel": {
+      "short_text": "New question",
+      "long_text": "Tell us more",
+      "single_select": "Pick one",
+      "multi_select": "Pick all that apply",
+      "url": "Portfolio URL",
+      "boolean": "I agree"
+    },
+    "seedOption": "Option {{number}}"
   }
 }

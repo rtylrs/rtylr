@@ -72,5 +72,70 @@
     "page": "صفحة {{page}}",
     "confirmUnhire": "نقل {{name}} من “{{from}}” إلى “{{to}}”؟",
     "confirm": "تأكيد"
+  },
+  "careerEditor": {
+    "editTitle": "تعديل الوظيفة",
+    "newTitle": "وظيفة جديدة",
+    "title": "المسمى",
+    "slug": "الرابط المختصر",
+    "slugHint": "يُنشأ من المسمى إذا تُرك فارغًا",
+    "department": "القسم",
+    "location": "الموقع",
+    "employmentTypeLabel": "نوع التوظيف",
+    "workModeLabel": "نمط العمل",
+    "seniority": "المستوى",
+    "description": "وصف الوظيفة",
+    "requirements": "المتطلبات",
+    "salaryMin": "أدنى راتب",
+    "salaryMax": "أعلى راتب",
+    "currency": "العملة",
+    "publish": "نشر هذه الوظيفة على صفحة الوظائف",
+    "cancel": "إلغاء",
+    "save": "حفظ التغييرات",
+    "create": "إنشاء الوظيفة",
+    "employmentType": {
+      "fullTime": "دوام كامل",
+      "partTime": "دوام جزئي",
+      "contract": "بعقد",
+      "internship": "تدريب"
+    },
+    "workMode": {
+      "remote": "عن بعد",
+      "hybrid": "هجين",
+      "onsite": "من المكتب"
+    }
+  },
+  "questions": {
+    "heading": "أسئلة مخصصة",
+    "hint": "تُطرح بعد حقول الاسم والبريد والسيرة الذاتية في نموذج التقديم.",
+    "loading": "جارٍ التحميل…",
+    "added": "تمت إضافة {{kind}}",
+    "addFailed": "تعذرت الإضافة",
+    "saved": "تم حفظ السؤال",
+    "saveFailed": "تعذر الحفظ",
+    "removed": "تم حذف السؤال",
+    "deleteFailed": "تعذر الحذف",
+    "labelPlaceholder": "نص السؤال",
+    "required": "مطلوب",
+    "placeholderPlaceholder": "نص توضيحي (اختياري)",
+    "addOption": "إضافة خيار",
+    "optionPlaceholder": "خيار {{number}}",
+    "kind": {
+      "short_text": "نص قصير",
+      "long_text": "نص طويل",
+      "single_select": "قائمة منسدلة",
+      "multi_select": "اختيار متعدد",
+      "url": "رابط",
+      "boolean": "مربع اختيار"
+    },
+    "defaultLabel": {
+      "short_text": "سؤال جديد",
+      "long_text": "أخبرنا المزيد",
+      "single_select": "اختر واحدًا",
+      "multi_select": "اختر كل ما ينطبق",
+      "url": "رابط أعمالك",
+      "boolean": "أوافق"
+    },
+    "seedOption": "خيار {{number}}"
   }
 }
