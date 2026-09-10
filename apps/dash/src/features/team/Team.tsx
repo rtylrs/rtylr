@@ -226,7 +226,7 @@ const Team: React.FC = (): React.JSX.Element => {
                 <div className="flex items-center gap-2">
                   <span
                     className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold uppercase shrink-0"
-                    style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                   >
                     {(req.requesterName || req.requesterEmail).charAt(0)}
                   </span>
@@ -247,7 +247,7 @@ const Team: React.FC = (): React.JSX.Element => {
                     approveAccessRequest.mutate({ id: req.id, userId: req.userId, app: req.app })
                   }
                   className="text-[11px] px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
-                  style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                  style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                 >
                   {approveAccessRequest.isPending ? '...' : 'Grant'}
                 </button>
@@ -385,7 +385,10 @@ const Team: React.FC = (): React.JSX.Element => {
                         <div className="col-span-3 flex items-center gap-3 min-w-0">
                           <div
                             className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                            style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                            style={{
+                              background: 'var(--accent-muted)',
+                              color: 'var(--accent-on-muted)',
+                            }}
                           >
                             {(m.name || m.email || '?').charAt(0).toUpperCase()}
                           </div>

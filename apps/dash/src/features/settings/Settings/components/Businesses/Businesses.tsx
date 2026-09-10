@@ -258,7 +258,7 @@ const Businesses: React.FC = () => {
           <div className="flex items-center gap-3.5">
             <div
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-              style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+              style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
             >
               <Building2 size={22} />
             </div>
@@ -386,7 +386,10 @@ const Businesses: React.FC = () => {
                             {isCurrent && (
                               <span
                                 className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                                style={{
+                                  background: 'var(--accent-muted)',
+                                  color: 'var(--accent-on-muted)',
+                                }}
                               >
                                 <Check size={12} />
                                 {t('businesses.current')}

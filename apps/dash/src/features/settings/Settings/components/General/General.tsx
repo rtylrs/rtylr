@@ -244,7 +244,7 @@ const General: React.FC = () => {
                 <div className="flex min-w-0 items-center gap-2">
                   <span
                     className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                    style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                   >
                     <Check size={13} />
                   </span>
