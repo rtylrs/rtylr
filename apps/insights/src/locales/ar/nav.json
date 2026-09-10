@@ -4,5 +4,13 @@
   "reports": "التقارير",
   "overview": "نظرة عامة",
   "performance": "الأداء",
-  "settings": "الإعدادات"
+  "settings": "الإعدادات",
+  "revenue": "الإيرادات",
+  "customers": "العملاء",
+  "products": "المنتجات",
+  "operations": "العمليات",
+  "financial": "المالية",
+  "pages": "الصفحات",
+  "toggleTheme": "تبديل المظهر",
+  "signOut": "تسجيل الخروج"
 }
