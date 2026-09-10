@@ -67,5 +67,6 @@
     "noData": "لا تتوفر بيانات.",
     "dragToReorder": "اسحب لإعادة الترتيب",
     "errorFallback": "الأداة غير متاحة"
-  }
+  },
+  "nothingUpcoming": "لا شيء قادم."
 }
