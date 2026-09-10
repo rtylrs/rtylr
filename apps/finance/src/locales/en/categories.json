@@ -1,5 +1,7 @@
 {
   "emptyTitle": "No categories yet",
   "emptyDescription": "Create categories to organize expenses and set budgets.",
-  "emptyCta": "New Category"
+  "emptyCta": "New Category",
+  "updated": "Category updated",
+  "deleted": "Category deleted"
 }
