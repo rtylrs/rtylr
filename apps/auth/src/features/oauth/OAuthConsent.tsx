@@ -106,7 +106,10 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
       },
       {
         onSuccess: (data) => {
-          if (!isAllowedOAuthRedirect(data.redirectUrl)) {
+          // The field is optional on the response. Without this the check
+          // below would be handed undefined and, if it passed, the browser
+          // would navigate to the string "undefined".
+          if (data.redirectUrl === undefined || !isAllowedOAuthRedirect(data.redirectUrl)) {
             setError('Redirect URI is not on an allowed domain.');
             return;
           }
