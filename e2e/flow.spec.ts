@@ -445,9 +445,17 @@ test.describe('Flow - project list', () => {
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // Both project names must appear somewhere in the rendered output.
-    // Use toBeAttached rather than toBeVisible - the cards animate in from
-    // opacity:0 and headless Chrome may not run Framer Motion transitions,
-    // so visibility checks would be flaky even though the DOM is correct.
+    //
+    // `toBeAttached` rather than `toBeVisible`, but not for the reason this
+    // comment used to give. It said headless Chrome may not run Framer Motion
+    // transitions and the DOM is therefore correct. That premise was wrong:
+    // measured in **headed** Chromium as well, a motion element whose `style`
+    // sets `opacity` beside an animated one stays pinned, and on the board that
+    // left every card at opacity 0 in a real browser window (rtylr#1078).
+    //
+    // ProjectList does not have that conflict, so its rows do animate in, and
+    // `toBeAttached` here is simply the cheaper assertion rather than a
+    // workaround. `motionOpacity.test.ts` guards the conflict itself.
     await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 10_000 });
     await expect(page.getByText('Beta Project').first()).toBeAttached({ timeout: 10_000 });
   });
