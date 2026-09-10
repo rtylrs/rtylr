@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import Logo from '../../shared/components/Logo';
@@ -48,7 +49,7 @@ const EmailVerification = () => {
 
   return (
     <>
-      <HelmetContainer title="Verify email · rtylr" />
+      <HelmetContainer title={t('auth.verify.metaTitle')} />
       <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
         <div className="w-full max-w-sm text-center">
           {/* Logo */}
