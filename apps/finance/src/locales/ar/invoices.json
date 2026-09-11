@@ -9,5 +9,54 @@
   "markPaidFailed": "تعذّر تسجيل {{id}} كمدفوعة",
   "emptyTitle": "لا توجد فواتير حتى الآن",
   "emptyDescription": "أنشئ فاتورتك الأولى لبدء إصدار الفواتير للعملاء.",
-  "emptyCta": "فاتورة جديدة"
+  "emptyCta": "فاتورة جديدة",
+  "detail": {
+    "title": "الفاتورة",
+    "cloning": "جارٍ نسخ الفاتورة",
+    "summary": "الملخص",
+    "totalInvoiced": "إجمالي الفواتير",
+    "paid": "المدفوع",
+    "balanceDue": "المبلغ المستحق",
+    "history": "السجل",
+    "client": "العميل",
+    "void": "إلغاء الفاتورة"
+  },
+  "new": {
+    "title": "فاتورة جديدة",
+    "selectClientFirst": "اختر عميلًا أولًا",
+    "client": "العميل",
+    "number": "رقم الفاتورة",
+    "issued": "تاريخ الإصدار",
+    "due": "تاريخ الاستحقاق",
+    "discount": "الخصم",
+    "notes": "ملاحظات",
+    "saveDraft": "حفظ كمسودة",
+    "saveAndSend": "حفظ وإرسال"
+  },
+  "preview": {
+    "heading": "فاتورة",
+    "billTo": "إلى",
+    "description": "الوصف",
+    "qty": "الكمية",
+    "price": "السعر",
+    "total": "الإجمالي",
+    "subtotal": "المجموع الفرعي",
+    "tax": "الضريبة",
+    "discount": "الخصم",
+    "notes": "ملاحظات:"
+  },
+  "list": {
+    "title": "الفواتير",
+    "recurring": "متكررة",
+    "pdf": "PDF"
+  },
+  "notFound": "الفاتورة غير موجودة",
+  "createdNotReturned": "تم إنشاء الفاتورة ولم تُعَد",
+  "updatedNotReturned": "تم تحديث الفاتورة ولم تُعَد",
+  "lineItem": {
+    "remove": "حذف السطر"
+  },
+  "send": {
+    "notice": "ستُرسل هذه الفاتورة إلى المستلم المحدد لها."
+  }
 }
