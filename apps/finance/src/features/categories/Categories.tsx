@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { CheckCircle, Edit2, Plus, Tag, Trash2 } from 'lucide-react';
@@ -103,7 +104,7 @@ const Categories: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Expense categories · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.expenseCategories'))} />
       <PageHeader
         title="Expense Categories"
         subtitle={`${data.length} categories`}
