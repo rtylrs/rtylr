@@ -9,5 +9,54 @@
   "markPaidFailed": "Failed to mark {{id}} paid",
   "emptyTitle": "No invoices yet",
   "emptyDescription": "Create your first invoice to start billing clients.",
-  "emptyCta": "New Invoice"
+  "emptyCta": "New Invoice",
+  "detail": {
+    "title": "Invoice",
+    "cloning": "Cloning invoice",
+    "summary": "Summary",
+    "totalInvoiced": "Total invoiced",
+    "paid": "Paid",
+    "balanceDue": "Balance due",
+    "history": "History",
+    "client": "Client",
+    "void": "Void invoice"
+  },
+  "new": {
+    "title": "New Invoice",
+    "selectClientFirst": "Select a client first",
+    "client": "Client",
+    "number": "Invoice #",
+    "issued": "Issued",
+    "due": "Due",
+    "discount": "Discount",
+    "notes": "Notes",
+    "saveDraft": "Save as Draft",
+    "saveAndSend": "Save & Send"
+  },
+  "preview": {
+    "heading": "INVOICE",
+    "billTo": "Bill To",
+    "description": "Description",
+    "qty": "Qty",
+    "price": "Price",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "discount": "Discount",
+    "notes": "Notes:"
+  },
+  "list": {
+    "title": "Invoices",
+    "recurring": "Recurring",
+    "pdf": "PDF"
+  },
+  "notFound": "Invoice not found",
+  "createdNotReturned": "Invoice created but not returned",
+  "updatedNotReturned": "Invoice updated but not returned",
+  "lineItem": {
+    "remove": "Remove line"
+  },
+  "send": {
+    "notice": "This invoice will be sent to the recipient configured for it."
+  }
 }
