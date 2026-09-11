@@ -26,7 +26,8 @@
     "conflictsWarning": "بعض التعيينات بها تعارضات في الجدولة.",
     "cannotPublishConflicts": "قم بحل جميع تعارضات الجدولة قبل نشر الجدول.",
     "emptyTitle": "لا توجد بيانات جدول",
-    "emptyDescription": "أضف موظفين إلى هذا الموقع لبناء الجدول."
+    "emptyDescription": "أضف موظفين إلى هذا الموقع لبناء الجدول.",
+    "published": "تم نشر الجدول"
   },
   "schedule": {
     "fillAllFields": "أكمل جميع الحقول",
