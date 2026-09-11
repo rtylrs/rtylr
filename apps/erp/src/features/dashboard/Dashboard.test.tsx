@@ -1,8 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import Dashboard from './Dashboard';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({
@@ -159,6 +164,10 @@ function renderDashboard() {
     </QueryClientProvider>
   );
 }
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('Dashboard layout', () => {
   it('uses the full content width on large screens', () => {
