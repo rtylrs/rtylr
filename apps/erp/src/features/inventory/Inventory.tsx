@@ -127,7 +127,7 @@ const Inventory: React.FC = () => {
         />
         <input
           type="text"
-          placeholder="Search products…"
+          placeholder={t('erp.products.searchPlaceholder')}
           value={search}
           onChange={(e) => {
             setPage(1);

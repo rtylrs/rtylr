@@ -110,15 +110,47 @@
       "generateBtn": "إنشاء {{count}} جديد",
       "preview": "متغيرات جديدة لإنشائها",
       "createAll": "إنشاء {{count}} متغير",
-      "creating": "جارٍ الإنشاء…"
-    }
+      "creating": "جارٍ الإنشاء…",
+      "createFailedOne": "تعذر إنشاء المتغير",
+      "updateFailed": "تعذر تحديث المتغير",
+      "deleteFailed": "تعذر حذف المتغير"
+    },
+    "updateFailed": "تعذر تحديث المنتج",
+    "deleteFailed": "تعذر حذف المنتج",
+    "barcodeLookupFailed": "تعذر البحث عن الباركود",
+    "searchPlaceholder": "ابحث عن المنتجات…",
+    "category": "الفئة",
+    "brand": "العلامة التجارية",
+    "allCategories": "كل الفئات",
+    "allStatuses": "كل الحالات",
+    "status": {
+      "inStock": "متوفر",
+      "lowStock": "مخزون منخفض",
+      "outOfStock": "غير متوفر"
+    },
+    "costPrice": "سعر التكلفة",
+    "salePrice": "سعر البيع",
+    "margin": "هامش الربح",
+    "noStockHistory": "لا توجد بيانات لسجل المخزون بعد.",
+    "noSalesHistory": "لا توجد بيانات لسجل المبيعات بعد.",
+    "barcode": "الباركود",
+    "leadTime": "مهلة التوريد",
+    "reorderPoint": "نقطة إعادة الطلب",
+    "unit": "الوحدة",
+    "unitsCount_zero": "لا توجد وحدات",
+    "unitsCount_one": "وحدة واحدة",
+    "unitsCount_two": "وحدتان",
+    "unitsCount_few": "{{count}} وحدات",
+    "unitsCount_many": "{{count}} وحدة",
+    "unitsCount_other": "{{count}} وحدة"
   },
   "inventory": {
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
     "empty": "No products found.",
-    "clearSearch": "مسح البحث"
+    "clearSearch": "مسح البحث",
+    "adjustFailed": "تعذر تعديل المخزون"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -181,7 +213,10 @@
       "created": "تم إنشاء المستودع",
       "createFailed": "فشل إنشاء المستودع",
       "deleted": "تم حذف المستودع"
-    }
+    },
+    "createFailed": "تعذر إنشاء المستودع",
+    "updateFailed": "تعذر تحديث المستودع",
+    "deleteFailed": "تعذر حذف المستودع"
   },
   "receiving": {
     "title": "استلام البضائع",
@@ -388,5 +423,44 @@
     },
     "refresh": "تحديث"
   },
-  "supplierBills": "{{count}} فاتورة"
+  "supplierBills": "{{count}} فاتورة",
+  "purchasing": {
+    "supplierAndPoRequired": "المورد ورقم أمر الشراء مطلوبان",
+    "itemRequired": "مطلوب عنصر واحد على الأقل بمنتج وكمية",
+    "draftCreated": "تم إنشاء مسودة أمر الشراء",
+    "createFailed": "تعذر إنشاء أمر الشراء",
+    "statusUpdateFailed": "تعذر تحديث حالة أمر الشراء",
+    "approveFailed": "تعذر اعتماد أمر الشراء",
+    "newOrder": "أمر جديد",
+    "approve": "اعتماد",
+    "send": "إرسال",
+    "newPurchaseOrder": "أمر شراء جديد",
+    "cost": "التكلفة"
+  },
+  "dashboard": {
+    "totalProducts": "إجمالي المنتجات",
+    "lowStockItems": "عناصر منخفضة المخزون",
+    "pendingOrders": "أوامر معلقة",
+    "totalSuppliers": "إجمالي الموردين",
+    "inventoryOverview": "نظرة عامة على المخزون",
+    "newProduct": "منتج جديد",
+    "inventoryValue": "قيمة المخزون",
+    "topItems": "أفضل 5 عناصر",
+    "noProducts": "لا توجد منتجات بعد",
+    "topCategories": "أهم الفئات",
+    "noCategories": "لا توجد فئات بعد",
+    "recentActivity": "النشاط الأخير",
+    "noRecentActivity": "لا يوجد نشاط حديث",
+    "lowStockAlert": "تنبيه انخفاض المخزون",
+    "noLowStockItems": "لا توجد عناصر منخفضة المخزون",
+    "recentPurchaseOrders": "أوامر الشراء الأخيرة",
+    "noPurchaseOrders": "لا توجد أوامر شراء بعد",
+    "criticalCount_zero": "لا توجد حالات حرجة",
+    "criticalCount_one": "حالة حرجة واحدة",
+    "criticalCount_two": "حالتان حرجتان",
+    "criticalCount_few": "{{count}} حالات حرجة",
+    "criticalCount_many": "{{count}} حالة حرجة",
+    "criticalCount_other": "{{count}} حالة حرجة",
+    "needsReview": "بحاجة إلى مراجعة"
+  }
 }
