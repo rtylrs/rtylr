@@ -27,5 +27,9 @@
     "checklistTemplates": "قوالب قوائم المراجعة",
     "reviewCycleDetail": "دورة التقييم",
     "rolesPermissions": "الأدوار والصلاحيات"
+  },
+  "openCommandPalette": "فتح لوحة الأوامر",
+  "commandPalette": {
+    "placeholder": "ابحث عن الأشخاص والصفحات والإجراءات"
   }
 }
