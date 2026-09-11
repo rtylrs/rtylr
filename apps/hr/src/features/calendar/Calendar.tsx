@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useTimeOff } from '../../shared/hooks/useHrExtras';
@@ -21,6 +23,7 @@ function dayStr(date: Date) {
 }
 
 const CalendarScreen: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const [view, setView] = useState(new Date());
   const { data: timeOff = [] } = useTimeOff();
@@ -44,7 +47,7 @@ const CalendarScreen: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Calendar · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.calendar'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title="Time Off Calendar"
