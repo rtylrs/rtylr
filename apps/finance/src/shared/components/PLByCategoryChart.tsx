@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import MoneyDisplay from './MoneyDisplay';
 
 interface CategoryRow {
@@ -12,10 +13,8 @@ interface PLByCategoryChartProps {
   title?: string;
 }
 
-const PLByCategoryChart: React.FC<PLByCategoryChartProps> = ({
-  data,
-  title = 'Expenses by Category',
-}) => {
+const PLByCategoryChart: React.FC<PLByCategoryChartProps> = ({ data, title }) => {
+  const { t } = useTranslation();
   const max = Math.max(...data.map((d) => d.amount), 1);
   return (
     <div>
@@ -28,7 +27,7 @@ const PLByCategoryChart: React.FC<PLByCategoryChartProps> = ({
           marginBottom: 12,
         }}
       >
-        {title}
+        {title ?? t('finance.plChart.title')}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {data.map((row) => {
