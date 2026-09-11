@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import MoneyDisplay from './MoneyDisplay';
 import type { LineItem } from './LineItemRow';
 import type { Client } from './ClientSelect';
@@ -23,6 +24,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   notes,
   discount = 0,
 }) => {
+  const { t } = useTranslation();
   const settings = useSettings();
   const subtotal = items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
   const tax = items.reduce((s, it) => s + it.quantity * it.unitPrice * (it.taxRate / 100), 0);
@@ -64,7 +66,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               color: 'var(--finance-invoice-text)',
             }}
           >
-            INVOICE
+            {t('invoices.preview.heading')}
           </div>
           <div style={{ fontSize: 12, color: 'var(--finance-invoice-muted)' }}>
             #{invoiceNumber}
@@ -83,7 +85,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               marginBottom: 4,
             }}
           >
-            Bill To
+            {t('invoices.preview.billTo')}
           </div>
           <div style={{ fontSize: 13, fontWeight: 600 }}>
             {client?.name ?? 'No client selected'}
@@ -112,7 +114,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 color: 'var(--finance-invoice-muted)',
               }}
             >
-              Description
+              {t('invoices.preview.description')}
             </th>
             <th
               style={{
@@ -123,7 +125,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 color: 'var(--finance-invoice-muted)',
               }}
             >
-              Qty
+              {t('invoices.preview.qty')}
             </th>
             <th
               style={{
@@ -134,7 +136,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 color: 'var(--finance-invoice-muted)',
               }}
             >
-              Price
+              {t('invoices.preview.price')}
             </th>
             <th
               style={{
@@ -145,7 +147,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 color: 'var(--finance-invoice-muted)',
               }}
             >
-              Total
+              {t('invoices.preview.total')}
             </th>
           </tr>
         </thead>
@@ -175,7 +177,9 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               fontSize: 12,
             }}
           >
-            <span style={{ color: 'var(--finance-invoice-muted)' }}>Subtotal</span>
+            <span style={{ color: 'var(--finance-invoice-muted)' }}>
+              {t('invoices.preview.subtotal')}
+            </span>
             <MoneyDisplay amount={subtotal} />
           </div>
           <div
@@ -186,7 +190,9 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               fontSize: 12,
             }}
           >
-            <span style={{ color: 'var(--finance-invoice-muted)' }}>Tax</span>
+            <span style={{ color: 'var(--finance-invoice-muted)' }}>
+              {t('invoices.preview.tax')}
+            </span>
             <MoneyDisplay amount={tax} />
           </div>
           {discount > 0 && (
@@ -199,7 +205,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 color: 'var(--finance-invoice-tax)',
               }}
             >
-              <span>Discount</span>
+              <span>{t('invoices.preview.discount')}</span>
               <span>
                 -<MoneyDisplay amount={discount} />
               </span>
@@ -216,7 +222,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               marginTop: 6,
             }}
           >
-            <span>Total</span>
+            <span>{t('invoices.preview.total')}</span>
             <MoneyDisplay amount={total} />
           </div>
         </div>
@@ -233,7 +239,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             color: 'var(--finance-invoice-footer-text)',
           }}
         >
-          <strong>Notes:</strong> {notes}
+          <strong>{t('invoices.preview.notes')}</strong> {notes}
         </div>
       )}
     </div>
