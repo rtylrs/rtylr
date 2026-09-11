@@ -105,7 +105,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
       { staffId: assignModal.staffId, shiftId: selectedShiftId, date: assignModal.date },
       {
         onSuccess: () => setAssignModal({ open: false, staffId: 0, date: '' }),
-        onError: () => toast.error('Failed to assign shift'),
+        onError: () => toast.error(t('errors.assignShift')),
       }
     );
   };
@@ -116,8 +116,8 @@ const RosterBuilderInner = (): React.JSX.Element => {
       return;
     }
     publishMutation.mutate(weekStart, {
-      onSuccess: () => toast.success('Roster published'),
-      onError: () => toast.error('Failed to publish roster'),
+      onSuccess: () => toast.success(t('shifts.roster.published')),
+      onError: () => toast.error(t('errors.publishRoster')),
     });
   };
 
