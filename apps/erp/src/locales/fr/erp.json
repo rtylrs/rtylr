@@ -124,7 +124,20 @@
     "title": "Suppliers",
     "add": "Add Supplier",
     "comingSoon": "Supplier management is coming soon.",
-    "scorecards": "Scorecards"
+    "scorecards": "Scorecards",
+    "requiredFields": "Le nom du fournisseur, l'e-mail, la ville et le pays sont obligatoires",
+    "created": "Fournisseur créé",
+    "createFailed": "Échec de la création du fournisseur",
+    "newSupplier": "Nouveau fournisseur",
+    "activeCount_one": "{{count}} fournisseur actif",
+    "activeCount_many": "{{count}} de fournisseurs actifs",
+    "activeCount_other": "{{count}} fournisseurs actifs",
+    "companyName": "Raison sociale",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "city": "Ville",
+    "country": "Pays",
+    "address": "Adresse"
   },
   "common": {
     "cancel": "Cancel",
@@ -195,7 +208,12 @@
       "title": "Aucune suggestion",
       "description": "Tous les niveaux de stock sont sains"
     },
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "subtitle": "Recommandations basées sur la vitesse des ventes et les délais fournisseurs",
+    "avgDaily": "Moy. / jour",
+    "suggested": "Suggéré",
+    "lead": "Délai",
+    "confidence": "Confiance"
   },
   "variants": {
     "empty": {
@@ -253,7 +271,9 @@
       "title": "Aucun article arrivant à expiration",
       "description": "Aucun lot avec des dates d'expiration suivies"
     },
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "expiryColumn": "Péremption",
+    "daysLeft": "Jours restants"
   },
   "stockTransfers": {
     "empty": {
@@ -261,7 +281,21 @@
       "description": "Créez votre premier transfert de stock"
     },
     "newTransfer": "Nouveau transfert",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "warehousesRequired": "Les entrepôts source et destination sont obligatoires",
+    "warehousesMustDiffer": "La source et la destination doivent être différentes",
+    "itemRequired": "Au moins un article avec un produit et une quantité positive est requis",
+    "draftCreated": "Brouillon de transfert créé",
+    "createFailed": "Échec de la création du transfert",
+    "subtitle": "Déplacer le stock entre les entrepôts",
+    "idColumn": "ID",
+    "from": "De",
+    "to": "Vers",
+    "items": "Articles",
+    "created": "Créé le",
+    "fromWarehouse": "Depuis l'entrepôt…",
+    "toWarehouse": "Vers l'entrepôt…",
+    "newTransferTitle": "Nouveau transfert de stock"
   },
   "lowStockAlerts": {
     "empty": {
@@ -276,7 +310,21 @@
       "description": "Lancez un comptage pour détecter les écarts"
     },
     "newStockTake": "Nouvel inventaire",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "warehouseRequired": "L'entrepôt est obligatoire",
+    "stillLoading": "L'inventaire est encore en cours de chargement",
+    "created": "Inventaire créé",
+    "createFailed": "Échec de la création de l'inventaire",
+    "completed": "Inventaire terminé",
+    "completeFailed": "Échec de la clôture de l'inventaire",
+    "complete": "Terminer",
+    "subtitle": "Comptages périodiques et rapports d'écarts",
+    "completeAria": "Terminer l'inventaire",
+    "variance": "ÉCART",
+    "selectWarehouse": "Choisir un entrepôt…",
+    "uncountedWarning_one": "{{count}} article non compté. Terminer quand même ?",
+    "uncountedWarning_many": "{{count}} d'articles non comptés. Terminer quand même ?",
+    "uncountedWarning_other": "{{count}} articles non comptés. Terminer quand même ?"
   },
   "categories": {
     "empty": {
