@@ -110,15 +110,44 @@
       "generateBtn": "Générer {{count}} nouvelles",
       "preview": "Nouvelles variantes à créer",
       "createAll": "Créer {{count}} variantes",
-      "creating": "Création…"
-    }
+      "creating": "Création…",
+      "createFailedOne": "Échec de la création de la variante",
+      "updateFailed": "Échec de la mise à jour de la variante",
+      "deleteFailed": "Échec de la suppression de la variante"
+    },
+    "updateFailed": "Échec de la mise à jour du produit",
+    "deleteFailed": "Échec de la suppression du produit",
+    "barcodeLookupFailed": "Échec de la recherche du code-barres",
+    "searchPlaceholder": "Rechercher des produits…",
+    "category": "Catégorie",
+    "brand": "Marque",
+    "allCategories": "Toutes les catégories",
+    "allStatuses": "Tous les statuts",
+    "status": {
+      "inStock": "En stock",
+      "lowStock": "Stock bas",
+      "outOfStock": "Rupture de stock"
+    },
+    "costPrice": "Prix de revient",
+    "salePrice": "Prix de vente",
+    "margin": "Marge",
+    "noStockHistory": "Aucune donnée d'historique de stock pour l'instant.",
+    "noSalesHistory": "Aucune donnée d'historique des ventes pour l'instant.",
+    "barcode": "CODE-BARRES",
+    "leadTime": "Délai",
+    "reorderPoint": "Point de commande",
+    "unit": "Unité",
+    "unitsCount_one": "{{count}} unité",
+    "unitsCount_many": "{{count}} d'unités",
+    "unitsCount_other": "{{count}} unités"
   },
   "inventory": {
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
     "empty": "No products found.",
-    "clearSearch": "Effacer la recherche"
+    "clearSearch": "Effacer la recherche",
+    "adjustFailed": "Échec de l'ajustement du stock"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -178,7 +207,10 @@
       "created": "Entrepôt créé",
       "createFailed": "Échec de la création de l'entrepôt",
       "deleted": "Entrepôt supprimé"
-    }
+    },
+    "createFailed": "Échec de la création de l'entrepôt",
+    "updateFailed": "Échec de la mise à jour de l'entrepôt",
+    "deleteFailed": "Échec de la suppression de l'entrepôt"
   },
   "receiving": {
     "title": "Réception des marchandises",
@@ -376,5 +408,41 @@
     },
     "refresh": "Actualiser"
   },
-  "supplierBills": "{{count}} facture(s)"
+  "supplierBills": "{{count}} facture(s)",
+  "purchasing": {
+    "supplierAndPoRequired": "Le fournisseur et le numéro de commande sont obligatoires",
+    "itemRequired": "Au moins un article avec un produit et une quantité est requis",
+    "draftCreated": "Brouillon de bon de commande créé",
+    "createFailed": "Échec de la création du bon de commande",
+    "statusUpdateFailed": "Échec de la mise à jour du statut du bon de commande",
+    "approveFailed": "Échec de l'approbation du bon de commande",
+    "newOrder": "Nouvelle commande",
+    "approve": "Approuver",
+    "send": "Envoyer",
+    "newPurchaseOrder": "Nouveau bon de commande",
+    "cost": "Coût"
+  },
+  "dashboard": {
+    "totalProducts": "Total des produits",
+    "lowStockItems": "Articles en stock bas",
+    "pendingOrders": "Commandes en attente",
+    "totalSuppliers": "Total des fournisseurs",
+    "inventoryOverview": "Vue d'ensemble du stock",
+    "newProduct": "Nouveau produit",
+    "inventoryValue": "Valeur du stock",
+    "topItems": "Top 5 des articles",
+    "noProducts": "Aucun produit pour l'instant",
+    "topCategories": "Principales catégories",
+    "noCategories": "Aucune catégorie pour l'instant",
+    "recentActivity": "Activité récente",
+    "noRecentActivity": "Aucune activité récente",
+    "lowStockAlert": "Alerte de stock bas",
+    "noLowStockItems": "Aucun article en stock bas",
+    "recentPurchaseOrders": "Bons de commande récents",
+    "noPurchaseOrders": "Aucun bon de commande pour l'instant",
+    "criticalCount_one": "{{count}} critique",
+    "criticalCount_many": "{{count}} de critiques",
+    "criticalCount_other": "{{count}} critiques",
+    "needsReview": "à examiner"
+  }
 }
