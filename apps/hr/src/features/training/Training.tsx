@@ -24,7 +24,7 @@ const Training: React.FC = () => {
     <>
       <HelmetContainer title={pageTitle(t('nav.training'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader title="Training" subtitle="Courses, completion tracking, certificates" />
+        <SectionHeader title={t('training.page.title')} subtitle={t('training.page.subtitle')} />
 
         {isLoading ? (
           <Skeleton height={240} />
@@ -63,7 +63,7 @@ const Training: React.FC = () => {
                       </div>
                       <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
                         <Pill color={CATEGORY_COLORS[c.category] ?? ACCENT}>{c.category}</Pill>
-                        {c.required && <Pill color="#ef4444">Required</Pill>}
+                        {c.required && <Pill color="#ef4444">{t('training.page.required')}</Pill>}
                       </div>
                     </div>
                   </div>
@@ -89,7 +89,7 @@ const Training: React.FC = () => {
             </div>
 
             <Card>
-              <SectionHeader title="Employee progress" />
+              <SectionHeader title={t('training.page.employeeProgress')} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
                 {progress.length === 0 ? (
                   <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
