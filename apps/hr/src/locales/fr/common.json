@@ -42,5 +42,20 @@
     "JPY": "yen japonais",
     "AUD": "dollar australien",
     "CAD": "dollar canadien"
+  },
+  "pageTitles": {
+    "employeeDetail": "Détail de l'employé",
+    "newEmployee": "Nouvel employé",
+    "leaveRequest": "Demande de congé",
+    "checklistTemplates": "Modèles de check-list",
+    "onboardingManagement": "Gestion de l'intégration",
+    "paySlip": "Bulletin de paie",
+    "payrollRun": "Cycle de paie",
+    "reviewCycle": "Cycle d'évaluation",
+    "payrollConfiguration": "Configuration de la paie",
+    "setupWizard": "Assistant de configuration",
+    "employeeProfile": "Profil de l'employé",
+    "timesheetDetail": "Détail de la feuille de temps",
+    "timesheetApprovals": "Validation des feuilles de temps"
   }
 }
