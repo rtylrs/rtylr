@@ -18,6 +18,9 @@ import {
 } from '../../shared/components/ui';
 import { HrSettings } from '../../shared/services/hrExtras';
 
+// The code is what gets stored; only the name is translated.
+const SETTINGS_CURRENCIES = ['USD', 'EUR', 'GBP'] as const;
+
 const Settings: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
@@ -48,16 +51,16 @@ const Settings: React.FC = () => {
   }
 
   const save = () => {
-    update.mutate(form, { onSuccess: () => toast.success('Settings saved') });
+    update.mutate(form, { onSuccess: () => toast.success(t('setup.hrSettings.saved')) });
   };
 
   return (
     <>
-      <HelmetContainer title="HR settings · rtylr" />
+      <HelmetContainer title={t('setup.hrSettings.metaTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720 }}>
         <SectionHeader
-          title="HR Settings"
-          subtitle="Work week, overtime, PTO policy, and currency"
+          title={t('setup.hrSettings.pageTitle')}
+          subtitle={t('setup.hrSettings.subtitle')}
         />
         <Card>
           <div
@@ -71,8 +74,8 @@ const Settings: React.FC = () => {
                   setForm({ ...form, workWeekStart: e.target.value as HrSettings['workWeekStart'] })
                 }
               >
-                <option value="Monday">Monday</option>
-                <option value="Sunday">Sunday</option>
+                <option value="Monday">{t('setup.hrSettings.monday')}</option>
+                <option value="Sunday">{t('setup.hrSettings.sunday')}</option>
               </Select>
             </div>
             <div>
@@ -107,9 +110,11 @@ const Settings: React.FC = () => {
                   setForm({ ...form, currency: e.target.value as HrSettings['currency'] })
                 }
               >
-                <option value="USD">USD - US Dollar</option>
-                <option value="EUR">EUR - Euro</option>
-                <option value="GBP">GBP - Pound</option>
+                {SETTINGS_CURRENCIES.map((code) => (
+                  <option key={code} value={code}>
+                    {code}, {t(`common.currencies.${code}`)}
+                  </option>
+                ))}
               </Select>
             </div>
             <div>
@@ -129,7 +134,7 @@ const Settings: React.FC = () => {
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
             <Button variant="primary" onClick={save}>
-              Save settings
+              {t('setup.hrSettings.save')}
             </Button>
           </div>
         </Card>
