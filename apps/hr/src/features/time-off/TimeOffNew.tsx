@@ -122,7 +122,7 @@ const TimeOffNew: React.FC = () => {
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <Link to="/time-off">
                 <Button type="button" variant="ghost">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </Link>
               <Button type="submit" variant="primary" disabled={submit.isPending}>
