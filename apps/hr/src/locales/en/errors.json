@@ -20,5 +20,13 @@
   "createSwap": "Failed to create swap request",
   "startBreak": "Failed to start break",
   "endBreak": "Failed to end break",
-  "saveSettings": "Failed to save settings"
+  "saveSettings": "Failed to save settings",
+  "createDepartment": "Failed to create department",
+  "updateDepartment": "Failed to update department",
+  "createReviewCycle": "Failed to create review cycle",
+  "shareReview": "Failed to share review",
+  "assignShift": "Failed to assign shift",
+  "publishRoster": "Failed to publish roster",
+  "createShift": "Failed to create shift",
+  "updateShift": "Failed to update shift"
 }
