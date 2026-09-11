@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { X } from 'lucide-react';
 
@@ -12,6 +13,7 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 480, footer }) => {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   const titleId = useId();
@@ -120,7 +122,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
           </h2>
           <button
             type="button"
-            aria-label="Close dialog"
+            aria-label={t('common.closeDialog')}
             onClick={onClose}
             style={{
               background: 'none',
