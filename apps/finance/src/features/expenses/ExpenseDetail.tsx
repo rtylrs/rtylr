@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useParams } from '@tanstack/react-router';
 import { useUserStore } from '@voxire/auth';
@@ -30,6 +32,7 @@ const statusStyle: Record<string, React.CSSProperties> = {
 };
 
 const ExpenseDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams({ strict: false });
   const { data: expense, isLoading } = useExpenseById(id);
   const { data: categories = [] } = useExpenseCategories();
@@ -68,7 +71,7 @@ const ExpenseDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Expense detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.expenseDetail'))} />
       <PageHeader
         title={`Expense ${expense.id}`}
         subtitle={
