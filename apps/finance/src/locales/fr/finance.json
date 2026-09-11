@@ -68,5 +68,23 @@
     "inventory": "Stocks",
     "inventoryHint": "Valeur des stocks en temps réel depuis l'ERP, affichée uniquement lorsque l'ERP est activé pour cette entreprise.",
     "inventoryUnavailable": "ERP non connecté"
+  },
+  "profitLoss": {
+    "title": "Compte de résultat",
+    "exportAria": "Exporter le compte de résultat en CSV",
+    "export": "Exporter",
+    "closeFiscalYear": "Clôturer l'exercice",
+    "statement": "Compte de résultat",
+    "revenue": "Produits",
+    "grossRevenue": "Produits bruts",
+    "cogs": "Coût des ventes",
+    "directCosts": "Coûts directs",
+    "operatingExpenses": "Charges d'exploitation",
+    "totalOperatingExpenses": "Total des charges d'exploitation",
+    "totalOperating": "Total d'exploitation",
+    "expensesByCategory": "Charges par catégorie",
+    "categoryUnavailable": "La répartition par catégorie n'est pas encore disponible.",
+    "lockingComingSoon": "Le verrouillage des périodes arrive bientôt",
+    "closeYear": "Clôturer l'exercice"
   }
 }
