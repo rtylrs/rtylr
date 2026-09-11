@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -75,7 +76,7 @@ const Payroll = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Payroll · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.payroll'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('payroll.title')}
