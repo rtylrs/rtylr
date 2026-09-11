@@ -30,7 +30,8 @@ import {
 } from 'lucide-react';
 import { useShortcuts } from '../shared/components/ShortcutsProvider';
 import { useForesightLinks } from '@voxire/utils';
-import { getPageTitle, routeLabels } from '../shared/lib/routeLabels';
+import { pageTitleKey, routeLabels } from '../shared/lib/routeLabels';
+import { useTranslation } from 'react-i18next';
 import { createOneKitClient } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
@@ -63,21 +64,21 @@ function useAddonEnabled(addonId: string): boolean {
 }
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { label: 'Customers', path: '/customers', icon: Users },
-  { label: 'Loyalty', path: '/loyalty', icon: Gift },
-  { label: 'Campaigns', path: '/campaigns', icon: Megaphone },
-  { label: 'Segments', path: '/segments', icon: PieChart },
-  { label: 'Automations', path: '/automations', icon: Zap },
-  { label: 'Templates', path: '/templates', icon: FileText },
-  { label: 'Feedback', path: '/feedback', icon: MessageSquare },
-  { label: 'Settings', path: '/settings', icon: SettingsIcon },
+  { labelKey: routeLabels['/'].nav, path: '/', icon: LayoutDashboard },
+  { labelKey: routeLabels['/customers'].nav, path: '/customers', icon: Users },
+  { labelKey: routeLabels['/loyalty'].nav, path: '/loyalty', icon: Gift },
+  { labelKey: routeLabels['/campaigns'].nav, path: '/campaigns', icon: Megaphone },
+  { labelKey: routeLabels['/segments'].nav, path: '/segments', icon: PieChart },
+  { labelKey: routeLabels['/automations'].nav, path: '/automations', icon: Zap },
+  { labelKey: routeLabels['/templates'].nav, path: '/templates', icon: FileText },
+  { labelKey: routeLabels['/feedback'].nav, path: '/feedback', icon: MessageSquare },
+  { labelKey: routeLabels['/settings'].nav, path: '/settings', icon: SettingsIcon },
 ];
 
 type Theme = 'light' | 'dark' | 'system';
@@ -98,7 +99,8 @@ function applyTheme(theme: Theme) {
   writeLocalStorage('crm-theme', theme);
 }
 
-const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
+const SidebarNavItem: React.FC<NavItem> = ({ labelKey, path, icon: Icon }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
@@ -138,7 +140,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
         />
       )}
       <Icon size={15} />
-      <span style={{ position: 'relative', flex: 1 }}>{label}</span>
+      <span style={{ position: 'relative', flex: 1 }}>{t(labelKey)}</span>
       {isActive && (
         <span
           style={{
@@ -156,6 +158,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 };
 
 const DefaultLayout: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const { openPalette } = useShortcuts();
@@ -193,7 +196,13 @@ const DefaultLayout: React.FC = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const pageTitle = getPageTitle(location.pathname);
+  const pageTitle = t(pageTitleKey(location.pathname));
+  // Caret describes the current route to the assistant, so it wants the
+  // reader's language rather than the key or the English behind it.
+  const translatedRouteLabels = React.useMemo(
+    () => Object.fromEntries(Object.entries(routeLabels).map(([p, l]) => [p, t(l.title)])),
+    [t]
+  );
   const caretPageContext = React.useMemo(
     () =>
       buildCaretRouteContext({
@@ -202,9 +211,9 @@ const DefaultLayout: React.FC = () => {
         pathname: location.pathname,
         search,
         page: pageTitle,
-        routeLabels,
+        routeLabels: translatedRouteLabels,
       }),
-    [location.pathname, search, pageTitle]
+    [location.pathname, search, pageTitle, translatedRouteLabels]
   );
 
   useEffect(() => {
@@ -343,9 +352,21 @@ const DefaultLayout: React.FC = () => {
                 >
                   Sales
                 </p>
-                <SidebarNavItem label="Pipeline" path="/sales" icon={TrendingUp} />
-                <SidebarNavItem label="Leads" path="/sales/leads" icon={Users} />
-                <SidebarNavItem label="Contracts" path="/sales/contracts" icon={FileText} />
+                <SidebarNavItem
+                  labelKey={routeLabels['/sales'].nav}
+                  path="/sales"
+                  icon={TrendingUp}
+                />
+                <SidebarNavItem
+                  labelKey={routeLabels['/sales/leads'].nav}
+                  path="/sales/leads"
+                  icon={Users}
+                />
+                <SidebarNavItem
+                  labelKey={routeLabels['/sales/contracts'].nav}
+                  path="/sales/contracts"
+                  icon={FileText}
+                />
               </>
             )}
           </nav>
