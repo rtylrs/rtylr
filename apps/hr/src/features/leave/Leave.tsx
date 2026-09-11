@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -51,7 +52,7 @@ const Leave = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Leave · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.leave'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('leave.title')}
