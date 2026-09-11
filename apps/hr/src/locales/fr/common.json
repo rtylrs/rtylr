@@ -31,5 +31,16 @@
   "dateRangeFrom": "Date de début",
   "dateRangeTo": "à",
   "refresh": "Actualiser",
-  "clearFilters": "Effacer les filtres"
+  "clearFilters": "Effacer les filtres",
+  "currencies": {
+    "USD": "dollar américain",
+    "EUR": "euro",
+    "GBP": "livre sterling",
+    "AED": "dirham des Émirats",
+    "SAR": "riyal saoudien",
+    "LBP": "livre libanaise",
+    "JPY": "yen japonais",
+    "AUD": "dollar australien",
+    "CAD": "dollar canadien"
+  }
 }
