@@ -19,5 +19,7 @@
   "accepted": "Devis accepté",
   "view": "Voir",
   "prev": "Précédent",
-  "next": "Suivant"
+  "next": "Suivant",
+  "createdToast": "Devis créé",
+  "convertedToast": "Devis converti en facture"
 }
