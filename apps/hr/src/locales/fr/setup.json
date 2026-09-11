@@ -127,6 +127,13 @@
     "overtimeAfter": "Heures supplémentaires au-delà de (h/semaine)",
     "ptoPolicy": "Politique de congés (jours/an)",
     "currency": "Devise",
-    "industry": "Secteur"
+    "industry": "Secteur",
+    "saved": "Paramètres enregistrés",
+    "metaTitle": "Paramètres RH · rtylr",
+    "pageTitle": "Paramètres RH",
+    "subtitle": "Semaine de travail, heures supplémentaires, congés et devise",
+    "monday": "Lundi",
+    "sunday": "Dimanche",
+    "save": "Enregistrer les paramètres"
   }
 }
