@@ -3,5 +3,14 @@
   "emptyDescription": "Create categories to organize expenses and set budgets.",
   "emptyCta": "New Category",
   "updated": "Category updated",
-  "deleted": "Category deleted"
+  "deleted": "Category deleted",
+  "title": "Expense Categories",
+  "edit": "Edit Category",
+  "delete": "Delete Category",
+  "newTitle": "New Expense Category",
+  "editTitle": "Edit Expense Category",
+  "deleteTitle": "Delete Expense Category",
+  "name": "Name",
+  "color": "Color",
+  "monthlyBudget": "Monthly Budget"
 }
