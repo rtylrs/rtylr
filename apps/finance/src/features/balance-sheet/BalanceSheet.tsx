@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -102,7 +103,7 @@ const BalanceSheet: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Balance sheet · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.balanceSheet'))} />
       <PageHeader
         title="Balance Sheet"
         subtitle={`As of ${asOfDate}`}
