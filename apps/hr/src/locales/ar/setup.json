@@ -61,7 +61,8 @@
     "locationName": "اسم الموقع",
     "locationAddress": "العنوان",
     "locationTimezone": "المنطقة الزمنية",
-    "noLocations": "لم تتم إضافة مواقع بعد"
+    "noLocations": "لم تتم إضافة مواقع بعد",
+    "required": "اسم الموقع والعنوان مطلوبان"
   },
   "rolesPermissions": {
     "title": "الأدوار والصلاحيات",
@@ -135,5 +136,9 @@
     "monday": "الإثنين",
     "sunday": "الأحد",
     "save": "حفظ الإعدادات"
+  },
+  "progress": "تقدم الإعداد",
+  "org": {
+    "departmentNameRequired": "اسم القسم مطلوب"
   }
 }
