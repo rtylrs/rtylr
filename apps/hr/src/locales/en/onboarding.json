@@ -6,5 +6,6 @@
   "tasksDone": "{{done}} of {{total}} tasks done",
   "markedComplete": "Marked complete",
   "markedIncomplete": "Marked incomplete",
-  "due": "Due {{date}}"
+  "due": "Due {{date}}",
+  "templateNameRequired": "Template name is required"
 }
