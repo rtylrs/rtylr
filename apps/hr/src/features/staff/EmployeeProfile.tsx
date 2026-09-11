@@ -80,7 +80,7 @@ const EmployeeProfile: React.FC = () => {
     <>
       <HelmetContainer title={pageTitle(t('common.pageTitles.employeeProfile'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <Breadcrumbs items={[{ label: 'Staff', href: '/staff' }, { label: staff.name }]} />
+        <Breadcrumbs items={[{ label: t('nav.staff'), href: '/staff' }, { label: staff.name }]} />
 
         {/* Hero */}
         <Card
