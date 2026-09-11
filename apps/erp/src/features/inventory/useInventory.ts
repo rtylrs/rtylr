@@ -1,6 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { InventoryServiceClient } from '@voxire/voxie/erp/inventory/v1/client';
 import type {
   AdjustInventoryRequest,
@@ -37,12 +38,13 @@ export function useLowStock() {
 }
 
 export function useAdjustInventory() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<AdjustInventoryResponse, Error, AdjustInventoryInput>({
     mutationFn: (data) => inventoryClient.adjustInventory(data),
     onSuccess: () => {
       invalidateStockDerivedQueries(qc);
     },
-    onError: () => toast.error('Failed to adjust inventory'),
+    onError: () => toast.error(t('erp.inventory.adjustFailed')),
   });
 }
