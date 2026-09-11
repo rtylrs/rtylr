@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import {
@@ -185,6 +187,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
 };
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { data: dashData, isLoading: loading } = useFinanceDashboard();
 
   const expensesMtd = dashData?.totalExpensesMtd ?? 0;
@@ -239,7 +242,7 @@ const Dashboard: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
     >
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.dashboard'))} />
       {/* Overdue alert */}
       {overdueInvoices.length > 0 && (
         <div
