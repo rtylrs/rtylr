@@ -146,7 +146,7 @@ const Expenses: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hub-text)' }}>
-            Expenses
+            {t('expenses.title')}
           </h2>
           <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
             Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
@@ -168,17 +168,17 @@ const Expenses: React.FC = () => {
             fontWeight: 600,
             cursor: 'pointer',
           }}
-          aria-label="Add new expense"
+          aria-label={t('expenses.addAria')}
         >
           <Plus size={15} />
-          Add Expense
+          {t('expenses.add')}
         </button>
       </div>
 
       {/* Category breakdown */}
       <div style={cardStyle}>
         <h3 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
-          Breakdown by Category
+          {t('expenses.breakdown')}
         </h3>
         <CategoryBar expenses={expenses} categoryName={categoryName} />
       </div>
@@ -306,7 +306,7 @@ const Expenses: React.FC = () => {
                   color: 'var(--hub-text-muted)',
                 }}
               >
-                Monthly Total
+                {t('expenses.monthlyTotal')}
               </td>
               <td
                 style={{
@@ -338,7 +338,7 @@ const Expenses: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Prev
+              {t('common.prev')}
             </button>
             <button
               type="button"
@@ -347,7 +347,7 @@ const Expenses: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Next
+              {t('common.next')}
             </button>
           </div>
         </div>
