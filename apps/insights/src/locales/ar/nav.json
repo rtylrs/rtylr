@@ -13,5 +13,10 @@
   "pages": "الصفحات",
   "toggleTheme": "تبديل المظهر",
   "signOut": "تسجيل الخروج",
-  "appearance": "المظهر"
+  "appearance": "المظهر",
+  "theme": {
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "حسب النظام"
+  }
 }
