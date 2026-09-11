@@ -45,6 +45,8 @@
     "end": "Fin",
     "color": "Couleur",
     "cancel": "Annuler",
-    "saveShift": "Enregistrer le poste"
+    "saveShift": "Enregistrer le poste",
+    "confirmDelete": "Supprimer le poste de {{name}} ?",
+    "standardName": "Standard"
   }
 }
