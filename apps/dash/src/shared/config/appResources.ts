@@ -1,91 +1,101 @@
+import { APP_NAMES } from './appNames';
+
 export type PermissionLevel = 'none' | 'viewer' | 'editor';
 
 export interface AppSection {
-  key: string; // e.g. 'erp.products'
-  label: string;
+  /**
+   * The stored permission identifier, e.g. 'erp.products'.
+   *
+   * This is a value, not a label: it is what a saved permission row holds, so
+   * it must not change when the wording does.
+   */
+  key: string;
+  /** i18n key for the name shown beside the permission control. */
+  labelKey: string;
 }
 
 export interface AppDef {
   id: string;
-  label: string;
+  /** i18n key for the app's name. */
+  labelKey: string;
   sections: AppSection[];
 }
 
 export const APP_RESOURCES: AppDef[] = [
   {
     id: 'erp',
-    label: 'ERP',
+    labelKey: APP_NAMES.erp.short,
     sections: [
-      { key: 'erp.products', label: 'Products' },
-      { key: 'erp.inventory', label: 'Inventory & Stock' },
-      { key: 'erp.purchase-orders', label: 'Purchase Orders' },
-      { key: 'erp.suppliers', label: 'Suppliers' },
-      { key: 'erp.price-lists', label: 'Price Lists' },
+      { key: 'erp.products', labelKey: 'appNames.sections.erp.products' },
+      { key: 'erp.inventory', labelKey: 'appNames.sections.erp.inventory' },
+      { key: 'erp.purchase-orders', labelKey: 'appNames.sections.erp.purchase-orders' },
+      { key: 'erp.suppliers', labelKey: 'appNames.sections.erp.suppliers' },
+      { key: 'erp.price-lists', labelKey: 'appNames.sections.erp.price-lists' },
     ],
   },
   {
     id: 'crm',
-    label: 'CRM',
+    labelKey: APP_NAMES.crm.short,
     sections: [
-      { key: 'crm.customers', label: 'Customers' },
-      { key: 'crm.loyalty', label: 'Loyalty Program' },
-      { key: 'crm.campaigns', label: 'Campaigns' },
-      { key: 'crm.segments', label: 'Segments' },
-      { key: 'crm.automations', label: 'Automations' },
+      { key: 'crm.customers', labelKey: 'appNames.sections.crm.customers' },
+      { key: 'crm.loyalty', labelKey: 'appNames.sections.crm.loyalty' },
+      { key: 'crm.campaigns', labelKey: 'appNames.sections.crm.campaigns' },
+      { key: 'crm.segments', labelKey: 'appNames.sections.crm.segments' },
+      { key: 'crm.automations', labelKey: 'appNames.sections.crm.automations' },
     ],
   },
   {
     id: 'finance',
-    label: 'Finance',
+    labelKey: APP_NAMES.finance.short,
     sections: [
-      { key: 'finance.invoices', label: 'Invoices' },
-      { key: 'finance.expenses', label: 'Expenses' },
-      { key: 'finance.bills', label: 'Bills' },
-      { key: 'finance.quotes', label: 'Quotes' },
-      { key: 'finance.reports', label: 'Reports (P&L, Balance Sheet)' },
+      { key: 'finance.invoices', labelKey: 'appNames.sections.finance.invoices' },
+      { key: 'finance.expenses', labelKey: 'appNames.sections.finance.expenses' },
+      { key: 'finance.bills', labelKey: 'appNames.sections.finance.bills' },
+      { key: 'finance.quotes', labelKey: 'appNames.sections.finance.quotes' },
+      { key: 'finance.reports', labelKey: 'appNames.sections.finance.reports' },
     ],
   },
   {
     id: 'hr',
-    label: 'HR',
+    labelKey: APP_NAMES.hr.short,
     sections: [
-      { key: 'hr.staff', label: 'Staff' },
-      { key: 'hr.shifts', label: 'Shifts' },
-      { key: 'hr.payroll', label: 'Payroll' },
-      { key: 'hr.leave', label: 'Leave Management' },
+      { key: 'hr.staff', labelKey: 'appNames.sections.hr.staff' },
+      { key: 'hr.shifts', labelKey: 'appNames.sections.hr.shifts' },
+      { key: 'hr.payroll', labelKey: 'appNames.sections.hr.payroll' },
+      { key: 'hr.leave', labelKey: 'appNames.sections.hr.leave' },
     ],
   },
   {
     id: 'pos',
-    label: 'POS',
+    labelKey: APP_NAMES.pos.short,
     sections: [
-      { key: 'pos.orders', label: 'Orders' },
-      { key: 'pos.menu', label: 'Menu' },
-      { key: 'pos.reports', label: 'Reports' },
-      { key: 'pos.kds', label: 'Kitchen Display' },
+      { key: 'pos.orders', labelKey: 'appNames.sections.pos.orders' },
+      { key: 'pos.menu', labelKey: 'appNames.sections.pos.menu' },
+      { key: 'pos.reports', labelKey: 'appNames.sections.pos.reports' },
+      { key: 'pos.kds', labelKey: 'appNames.sections.pos.kds' },
     ],
   },
   {
     id: 'flow',
-    label: 'Flow',
+    labelKey: APP_NAMES.flow.short,
     sections: [
-      { key: 'flow.projects', label: 'Projects' },
-      { key: 'flow.inbox', label: 'Inbox' },
+      { key: 'flow.projects', labelKey: 'appNames.sections.flow.projects' },
+      { key: 'flow.inbox', labelKey: 'appNames.sections.flow.inbox' },
     ],
   },
   {
     id: 'dash',
-    label: 'Account Home',
-    sections: [{ key: 'dash.overview', label: 'Overview' }],
+    labelKey: 'appNames.accountHome',
+    sections: [{ key: 'dash.overview', labelKey: 'appNames.sections.dash.overview' }],
   },
   {
     id: 'insights',
-    label: 'Insights',
+    labelKey: APP_NAMES.insights.short,
     sections: [
-      { key: 'insights.revenue', label: 'Revenue' },
-      { key: 'insights.customers', label: 'Customers' },
-      { key: 'insights.products', label: 'Products' },
-      { key: 'insights.operations', label: 'Operations' },
+      { key: 'insights.revenue', labelKey: 'appNames.sections.insights.revenue' },
+      { key: 'insights.customers', labelKey: 'appNames.sections.insights.customers' },
+      { key: 'insights.products', labelKey: 'appNames.sections.insights.products' },
+      { key: 'insights.operations', labelKey: 'appNames.sections.insights.operations' },
     ],
   },
 ];
