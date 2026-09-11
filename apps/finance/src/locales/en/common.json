@@ -51,5 +51,8 @@
     "notifications": "Notifications"
   },
   "closeDialog": "Close dialog",
-  "loadingLabel": "Loading"
+  "loadingLabel": "Loading",
+  "confirmLabel": "Confirm",
+  "closeYear": "Close year",
+  "new": "New"
 }
