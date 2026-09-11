@@ -1,4 +1,5 @@
 import { unwrap } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { toast } from 'sonner';
@@ -17,19 +18,21 @@ export function useShifts(params?: { day?: string; staffId?: number }) {
 }
 
 export function useCreateShift() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateShiftInput) => unwrap(hrApi.createShift(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['shifts'] }),
-    onError: () => toast.error('Failed to create shift'),
+    onError: () => toast.error(t('errors.createShift')),
   });
 }
 
 export function useUpdateShift() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdateShiftInput) => unwrap(hrApi.updateShift(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['shifts'] }),
-    onError: () => toast.error('Failed to update shift'),
+    onError: () => toast.error(t('errors.updateShift')),
   });
 }
