@@ -45,7 +45,7 @@ const Journal: React.FC = () => {
 
   const removeLine = (id: string): void => {
     if (lines.length <= 2) {
-      toast.error('Journal entry requires at least two lines');
+      toast.error(t('journal.twoLinesRequired'));
       return;
     }
     setLines((prev) => prev.filter((l) => l.id !== id));
@@ -277,7 +277,7 @@ const Journal: React.FC = () => {
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text)' }}>
-                  Entry Lines
+                  {t('journal.entryLines')}
                 </span>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
@@ -317,7 +317,7 @@ const Journal: React.FC = () => {
                   </span>
                   <input
                     style={{ ...inputStyle, flex: 2 }}
-                    placeholder="Account name"
+                    placeholder={t('journal.accountName')}
                     value={l.accountName}
                     onChange={(e) => updateLine(l.id, 'accountName', e.target.value)}
                   />
@@ -326,7 +326,7 @@ const Journal: React.FC = () => {
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="Amount"
+                    placeholder={t('common.amount')}
                     value={l.amount || ''}
                     onChange={(e) => updateLine(l.id, 'amount', parseFloat(e.target.value) || 0)}
                   />
@@ -402,7 +402,7 @@ const Journal: React.FC = () => {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
             >
-              Prev
+              {t('common.prev')}
             </button>
             <button
               type="button"
@@ -410,7 +410,7 @@ const Journal: React.FC = () => {
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}
             >
-              Next
+              {t('common.next')}
             </button>
           </div>
         </div>
