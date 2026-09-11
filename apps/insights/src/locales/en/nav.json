@@ -13,5 +13,10 @@
   "pages": "Pages",
   "toggleTheme": "Toggle theme",
   "signOut": "Sign out",
-  "appearance": "Appearance"
+  "appearance": "Appearance",
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
 }
