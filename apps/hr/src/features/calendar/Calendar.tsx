@@ -50,8 +50,8 @@ const CalendarScreen: React.FC = () => {
       <HelmetContainer title={pageTitle(t('nav.calendar'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
-          title="Time Off Calendar"
-          subtitle="Approved absences across the team"
+          title={t('timeOff.calendar.title')}
+          subtitle={t('timeOff.calendar.subtitle')}
           right={
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <Button
