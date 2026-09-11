@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
 import { cdnImageUrl } from '@voxire/config';
 import { Upload, FileImage, X } from 'lucide-react';
@@ -9,6 +10,7 @@ interface ReceiptUploadProps {
 }
 
 const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
+  const { t } = useTranslation();
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,14 +71,14 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
         <>
           <Upload size={28} style={{ color: 'var(--finance-accent)', marginBottom: 10 }} />
           <div style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 600 }}>
-            Uploading receipt...
+            {t('expenses.uploadingReceipt')}
           </div>
         </>
       ) : value ? (
         <div style={{ position: 'relative' }}>
           <img
             src={cdnImageUrl(value)}
-            alt="Receipt"
+            alt={t('common.receipt')}
             style={{ maxHeight: 180, maxWidth: '100%', borderRadius: 8 }}
           />
           <button
@@ -108,10 +110,10 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
         <>
           <Upload size={28} style={{ color: 'var(--hub-text-dim)', marginBottom: 10 }} />
           <div style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 600 }}>
-            Drop a receipt or click to upload
+            {t('expenses.dropReceipt')}
           </div>
           <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', marginTop: 6 }}>
-            PNG, JPG up to 10MB
+            {t('expenses.receiptFormats')}
           </div>
         </>
       )}
