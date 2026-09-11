@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Target } from 'lucide-react';
@@ -149,7 +150,7 @@ const GoalsList = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Goals · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.goals'))} />
       <div>
         <SectionHeader
           title={t('performance.goals.title')}
