@@ -1,7 +1,8 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import DefaultLayout from './DefaultLayout';
+import { initTestI18n } from '../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -74,6 +75,12 @@ vi.mock('motion/react', () => {
     AnimatePresence: ({ children }: React.PropsWithChildren) => <>{children}</>,
     motion: { div: Motion, main: Motion, span: Motion },
   };
+});
+
+// i18next is not mocked here: the real locale files mean an assertion
+// written in English also proves the key resolves (rtylr#1269).
+beforeAll(async () => {
+  await initTestI18n('en');
 });
 
 describe('Finance mobile navigation', () => {
