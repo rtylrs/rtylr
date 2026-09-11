@@ -27,5 +27,9 @@
     "checklistTemplates": "Checklist Templates",
     "reviewCycleDetail": "Review Cycle",
     "rolesPermissions": "Roles & Permissions"
+  },
+  "openCommandPalette": "Open command palette",
+  "commandPalette": {
+    "placeholder": "Search people, pages, actions"
   }
 }

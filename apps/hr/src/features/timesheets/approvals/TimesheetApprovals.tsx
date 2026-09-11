@@ -48,8 +48,8 @@ const TimesheetApprovals = (): React.JSX.Element => {
     approveMutation.mutate(
       { timesheetId, approved: true },
       {
-        onSuccess: () => toast.success('Timesheet approved'),
-        onError: () => toast.error('Failed to approve timesheet'),
+        onSuccess: () => toast.success(t('timesheets.approved')),
+        onError: () => toast.error(t('errors.approveTimesheet')),
       }
     );
   };

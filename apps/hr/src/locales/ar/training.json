@@ -1,5 +1,11 @@
 {
   "emptyTitle": "لا توجد دورات تدريبية",
   "emptyDescription": "أضف الدورات التي يحتاج الموظفون إلى إتمامها.",
-  "noEnrollments": "لا تسجيلات بعد."
+  "noEnrollments": "لا تسجيلات بعد.",
+  "page": {
+    "title": "التدريب",
+    "required": "إلزامي",
+    "employeeProgress": "تقدم الموظفين",
+    "subtitle": "الدورات، تتبع الإتمام، الشهادات"
+  }
 }

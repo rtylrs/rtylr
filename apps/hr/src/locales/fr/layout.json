@@ -27,5 +27,9 @@
     "checklistTemplates": "Modèles de listes",
     "reviewCycleDetail": "Cycle d'évaluation",
     "rolesPermissions": "Rôles et permissions"
+  },
+  "openCommandPalette": "Ouvrir la palette de commandes",
+  "commandPalette": {
+    "placeholder": "Rechercher des personnes, des pages, des actions"
   }
 }

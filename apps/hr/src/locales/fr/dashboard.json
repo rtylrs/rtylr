@@ -68,5 +68,8 @@
     "dragToReorder": "Glisser pour réorganiser",
     "errorFallback": "Widget indisponible"
   },
-  "nothingUpcoming": "Rien à venir."
+  "nothingUpcoming": "Rien à venir.",
+  "workAnniversaries": "Anniversaires d'ancienneté",
+  "upcomingBirthdays": "Anniversaires à venir",
+  "noBirthdays": "Aucun anniversaire sur cette période."
 }

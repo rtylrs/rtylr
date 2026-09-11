@@ -15,5 +15,16 @@
   "errorSelectRange": "Select a date range",
   "errorEndBeforeStart": "End date cannot be before start date",
   "submitted": "Time off request submitted",
-  "submitFailed": "Failed to submit the request"
+  "submitFailed": "Failed to submit the request",
+  "calendar": {
+    "title": "Time Off Calendar",
+    "subtitle": "Approved absences across the team"
+  },
+  "page": {
+    "title": "Time Off",
+    "subtitle": "Review pending requests and track approved absences",
+    "newRequest": "New request",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  }
 }

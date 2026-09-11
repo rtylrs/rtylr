@@ -61,7 +61,8 @@
     "locationName": "Nom de l'emplacement",
     "locationAddress": "Adresse",
     "locationTimezone": "Fuseau horaire",
-    "noLocations": "Aucun emplacement ajouté"
+    "noLocations": "Aucun emplacement ajouté",
+    "required": "Le nom et l'adresse du site sont obligatoires"
   },
   "rolesPermissions": {
     "title": "Rôles et permissions",
@@ -135,5 +136,9 @@
     "monday": "Lundi",
     "sunday": "Dimanche",
     "save": "Enregistrer les paramètres"
+  },
+  "progress": "Progression de la configuration",
+  "org": {
+    "departmentNameRequired": "Le nom du service est obligatoire"
   }
 }

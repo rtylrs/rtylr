@@ -301,7 +301,9 @@ const Staff: React.FC = () => {
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>Dept:</span>
+                        <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
+                          {t('staff.deptPrefix')}
+                        </span>
                         <span
                           style={{
                             fontSize: '12px',

@@ -61,7 +61,8 @@
     "locationName": "Location name",
     "locationAddress": "Address",
     "locationTimezone": "Timezone",
-    "noLocations": "No locations added yet"
+    "noLocations": "No locations added yet",
+    "required": "Location name and address are required"
   },
   "rolesPermissions": {
     "title": "Roles & Permissions",
@@ -135,5 +136,9 @@
     "monday": "Monday",
     "sunday": "Sunday",
     "save": "Save settings"
+  },
+  "progress": "Setup progress",
+  "org": {
+    "departmentNameRequired": "Department name is required"
   }
 }

@@ -61,5 +61,14 @@
     "namePlaceholder": "إجازة سنوية",
     "maxCarryover": "أقصى أيام مُدوَّرة",
     "minNotice": "أدنى أيام إشعار"
-  }
+  },
+  "policiesUnavailableTitle": "تعذر تحميل سياسات الإجازات",
+  "policiesUnavailableBody": "تعذر الوصول إلى خدمة سياسات الإجازات. حاول مرة أخرى.",
+  "configurePolicies": "إعداد سياسات الإجازات",
+  "policy": {
+    "nameAndLimitsRequired": "أدخل اسمًا وحدودًا موجبة للسياسة",
+    "paidLeave": "إجازة مدفوعة",
+    "requiresApproval": "تتطلب موافقة المدير"
+  },
+  "policyCreated": "تم إنشاء سياسة الإجازة"
 }

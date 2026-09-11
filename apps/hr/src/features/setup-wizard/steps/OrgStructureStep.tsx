@@ -28,7 +28,7 @@ const OrgStructureStep = ({
   const addDepartment = (): void => {
     const trimmed = newName.trim();
     if (!trimmed) {
-      toast.error('Department name is required');
+      toast.error(t('setup.org.departmentNameRequired'));
       return;
     }
     setDepartments((prev) => [...prev, { name: trimmed }]);

@@ -34,7 +34,7 @@ const AnniversaryWidget: React.FC = () => {
           <Trophy size={14} />
         </span>
         <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-          Work anniversaries
+          {t('dashboard.workAnniversaries')}
         </h3>
       </div>
       {upcoming.length === 0 ? (

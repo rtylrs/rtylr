@@ -20,5 +20,13 @@
   "createSwap": "تعذر إنشاء طلب التبديل",
   "startBreak": "تعذر بدء الاستراحة",
   "endBreak": "تعذر إنهاء الاستراحة",
-  "saveSettings": "تعذر حفظ الإعدادات"
+  "saveSettings": "تعذر حفظ الإعدادات",
+  "createDepartment": "تعذر إنشاء القسم",
+  "updateDepartment": "تعذر تحديث القسم",
+  "createReviewCycle": "تعذر إنشاء دورة التقييم",
+  "shareReview": "تعذرت مشاركة التقييم",
+  "assignShift": "تعذر إسناد المناوبة",
+  "publishRoster": "تعذر نشر الجدول",
+  "createShift": "تعذر إنشاء المناوبة",
+  "updateShift": "تعذر تحديث المناوبة"
 }

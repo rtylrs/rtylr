@@ -5,7 +5,7 @@
   "oneOnOnes": {
     "emptyTitle": "No 1-on-1s scheduled",
     "emptyDescription": "Managers will see upcoming 1-on-1s here.",
-    "schedule": "Schedule 1-on-1",
+    "schedule": "Schedule",
     "pageTitle": "1-on-1s",
     "title": "1-on-1s",
     "subtitle": "Scheduled manager-report conversations",
@@ -15,7 +15,8 @@
     "duration": "Duration (min)",
     "topics": "Topics (comma separated)",
     "topicsPlaceholder": "e.g. Career goals, Blockers, Feedback",
-    "errorCompleteAll": "Complete all fields"
+    "errorCompleteAll": "Complete all fields",
+    "scheduleTitle": "Schedule 1-on-1"
   },
   "pageTitle": "New review",
   "formTitle": "New performance review",
@@ -41,5 +42,8 @@
     "goals": "Goals",
     "values": "Values",
     "skills": "Skills"
+  },
+  "form": {
+    "submit": "Submit review"
   }
 }

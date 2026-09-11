@@ -6,5 +6,6 @@
   "tasksDone": "{{done}} sur {{total}} tâches terminées",
   "markedComplete": "Marqué comme terminé",
   "markedIncomplete": "Marqué comme non terminé",
-  "due": "Échéance {{date}}"
+  "due": "Échéance {{date}}",
+  "templateNameRequired": "Le nom du modèle est obligatoire"
 }

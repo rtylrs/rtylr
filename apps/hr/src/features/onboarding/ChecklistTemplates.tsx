@@ -34,7 +34,7 @@ const ChecklistTemplates = (): React.JSX.Element => {
 
   const handleCreate = (): void => {
     if (!name.trim()) {
-      toast.error('Template name is required');
+      toast.error(t('onboarding.templateNameRequired'));
       return;
     }
     createTemplate.mutate(

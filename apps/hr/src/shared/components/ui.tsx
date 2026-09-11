@@ -366,23 +366,26 @@ export const ConfirmDialog: React.FC<{
   variant = 'primary',
   onConfirm,
   onCancel,
-}) => (
-  <Modal open={open} onClose={onCancel} title={title} width={380}>
-    {description && (
-      <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--hr-text-muted)' }}>
-        {description}
-      </p>
-    )}
-    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-      <Button variant="ghost" onClick={onCancel}>
-        Cancel
-      </Button>
-      <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
-        {confirmLabel}
-      </Button>
-    </div>
-  </Modal>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Modal open={open} onClose={onCancel} title={title} width={380}>
+      {description && (
+        <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--hr-text-muted)' }}>
+          {description}
+        </p>
+      )}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <Button variant="ghost" onClick={onCancel}>
+          {t('common.cancel')}
+        </Button>
+        <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
+          {confirmLabel}
+        </Button>
+      </div>
+    </Modal>
+  );
+};
 
 /* ── Breadcrumbs ── */
 export const Breadcrumbs: React.FC<{ items: Array<{ label: string; href?: string }> }> = ({

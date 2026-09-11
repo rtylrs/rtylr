@@ -17,7 +17,7 @@ const LeavePolicySettings = (): React.JSX.Element => {
   const save = (event: React.FormEvent): void => {
     event.preventDefault();
     if (!name.trim() || maxCarryoverDays < 1 || minNoticeDays < 1) {
-      toast.error('Enter a name and positive policy limits');
+      toast.error(t('leave.policy.nameAndLimitsRequired'));
       return;
     }
     createLeaveType.mutate(
@@ -79,7 +79,7 @@ const LeavePolicySettings = (): React.JSX.Element => {
                 checked={isPaid}
                 onChange={(e) => setIsPaid(e.target.checked)}
               />{' '}
-              Paid leave
+              {t('leave.policy.paidLeave')}
             </label>
             <label>
               <input
@@ -87,7 +87,7 @@ const LeavePolicySettings = (): React.JSX.Element => {
                 checked={requiresApproval}
                 onChange={(e) => setRequiresApproval(e.target.checked)}
               />{' '}
-              Requires manager approval
+              {t('leave.policy.requiresApproval')}
             </label>
             <Button type="submit" variant="primary" disabled={createLeaveType.isPending}>
               {createLeaveType.isPending ? 'Creating…' : 'Create leave policy'}

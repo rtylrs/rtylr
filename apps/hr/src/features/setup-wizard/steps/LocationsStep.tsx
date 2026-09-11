@@ -38,7 +38,7 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
     const name = newName.trim();
     const address = newAddress.trim();
     if (!name || !address) {
-      toast.error('Location name and address are required');
+      toast.error(t('setup.locations.required'));
       return;
     }
     setLocations((prev) => [...prev, { name, address, timezone: newTimezone || undefined }]);

@@ -59,7 +59,7 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
           setReviewTypes([]);
           onClose();
         },
-        onError: () => toast.error('Failed to create review cycle'),
+        onError: () => toast.error(t('errors.createReviewCycle')),
       }
     );
   };

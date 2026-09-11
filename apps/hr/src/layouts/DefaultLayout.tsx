@@ -947,7 +947,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
               }
-              aria-label="Open command palette"
+              aria-label={t('layout.openCommandPalette')}
             >
               <Search size={12} />
               {!isMobile && 'Search'}

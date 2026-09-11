@@ -75,7 +75,7 @@ const OneOnOnes: React.FC = () => {
           subtitle={t('reviews.oneOnOnes.subtitle')}
           right={
             <Button variant="primary" icon={<Plus size={13} />} onClick={() => setOpen(true)}>
-              Schedule 1-on-1
+              {t('reviews.oneOnOnes.scheduleTitle')}
             </Button>
           }
         />
@@ -173,7 +173,7 @@ const OneOnOnes: React.FC = () => {
                   value={form.managerId}
                   onChange={(e) => setForm({ ...form, managerId: Number(e.target.value) })}
                 >
-                  <option value={0}>Select</option>
+                  <option value={0}>{t('common.select')}</option>
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -187,7 +187,7 @@ const OneOnOnes: React.FC = () => {
                   value={form.reportId}
                   onChange={(e) => setForm({ ...form, reportId: Number(e.target.value) })}
                 >
-                  <option value={0}>Select</option>
+                  <option value={0}>{t('common.select')}</option>
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -222,10 +222,10 @@ const OneOnOnes: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <Button variant="ghost" onClick={() => setOpen(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button variant="primary" onClick={onCreate}>
-                Schedule
+                {t('reviews.oneOnOnes.schedule')}
               </Button>
             </div>
           </div>

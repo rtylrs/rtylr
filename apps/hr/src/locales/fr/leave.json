@@ -61,5 +61,14 @@
     "namePlaceholder": "Congé annuel",
     "maxCarryover": "Jours de report maximum",
     "minNotice": "Jours de préavis minimum"
-  }
+  },
+  "policiesUnavailableTitle": "Impossible de charger les politiques de congés",
+  "policiesUnavailableBody": "Le service des politiques de congés est injoignable. Réessayez.",
+  "configurePolicies": "Configurer les politiques de congés",
+  "policy": {
+    "nameAndLimitsRequired": "Saisissez un nom et des limites positives",
+    "paidLeave": "Congé payé",
+    "requiresApproval": "Nécessite l'accord du responsable"
+  },
+  "policyCreated": "Politique de congés créée"
 }

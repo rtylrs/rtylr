@@ -15,5 +15,16 @@
   "errorSelectRange": "Sélectionnez une période",
   "errorEndBeforeStart": "La date de fin ne peut pas précéder la date de début",
   "submitted": "Demande de congé envoyée",
-  "submitFailed": "Échec de l'envoi de la demande"
+  "submitFailed": "Échec de l'envoi de la demande",
+  "calendar": {
+    "title": "Calendrier des congés",
+    "subtitle": "Absences approuvées dans l'équipe"
+  },
+  "page": {
+    "title": "Congés",
+    "subtitle": "Examinez les demandes en attente et suivez les absences approuvées",
+    "newRequest": "Nouvelle demande",
+    "approved": "Approuvée",
+    "rejected": "Refusée"
+  }
 }
