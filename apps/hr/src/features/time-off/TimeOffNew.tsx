@@ -63,7 +63,12 @@ const TimeOffNew: React.FC = () => {
     <>
       <HelmetContainer title={t('timeOff.pageTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600 }}>
-        <Breadcrumbs items={[{ label: 'Time Off', href: '/time-off' }, { label: 'New request' }]} />
+        <Breadcrumbs
+          items={[
+            { label: t('nav.timeOff'), href: '/time-off' },
+            { label: t('timeOff.page.newRequest') },
+          ]}
+        />
         <SectionHeader title={t('timeOff.formTitle')} subtitle={t('timeOff.formSubtitle')} />
         <Card>
           <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
