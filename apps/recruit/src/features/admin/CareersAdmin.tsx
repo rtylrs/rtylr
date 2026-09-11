@@ -152,7 +152,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                                 : `Archive "${c.title}"?`;
                             toast.warning(message, {
                               action: {
-                                label: 'Archive',
+                                label: t('admin.careers.archive'),
                                 onClick: () =>
                                   del.mutate(c.id, {
                                     onSuccess: () => toast.success(t('admin.careers.archived')),

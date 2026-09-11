@@ -45,6 +45,8 @@
     "end": "النهاية",
     "color": "اللون",
     "cancel": "إلغاء",
-    "saveShift": "حفظ المناوبة"
+    "saveShift": "حفظ المناوبة",
+    "confirmDelete": "حذف مناوبة {{name}}؟",
+    "standardName": "قياسي"
   }
 }

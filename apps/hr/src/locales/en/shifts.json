@@ -45,6 +45,8 @@
     "end": "End",
     "color": "Color",
     "cancel": "Cancel",
-    "saveShift": "Save shift"
+    "saveShift": "Save shift",
+    "confirmDelete": "Delete shift for {{name}}?",
+    "standardName": "Standard"
   }
 }

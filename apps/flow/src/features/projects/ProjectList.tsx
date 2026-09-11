@@ -300,13 +300,14 @@ const ProjectList: React.FC = () => {
     const blocks: { id: string; title: string; tasks: Task[] }[] = projectSections.map((sec) => ({
       id: sec.id,
       title: sec.name,
-      tasks: projectTasks.filter((t) => t.sectionId === sec.id),
+      tasks: projectTasks.filter((task) => task.sectionId === sec.id),
     }));
     const inSection = new Set(projectSections.map((s) => s.id));
-    const loose = projectTasks.filter((t) => !t.sectionId || !inSection.has(t.sectionId));
-    if (loose.length) blocks.push({ id: '_unsectioned', title: 'Other', tasks: loose });
+    const loose = projectTasks.filter((task) => !task.sectionId || !inSection.has(task.sectionId));
+    if (loose.length)
+      blocks.push({ id: '_unsectioned', title: t('flow.projectList.otherSection'), tasks: loose });
     return blocks;
-  }, [projectSections, projectTasks]);
+  }, [projectSections, projectTasks, t]);
 
   if (projectLoading && !project) {
     return (

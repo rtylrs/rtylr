@@ -197,7 +197,7 @@ const Dashboard: React.FC = () => {
 
   const statsItems: StatCardProps[] = [
     {
-      label: 'Total Revenue (MTD)',
+      label: t('finance.dashboard.totalRevenueMtd'),
       value: loading ? '…' : fmt(revenueMtd),
       change: dashData?.totalRevenueMtdChange ?? '+0%',
       up: true,
@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-accent)',
     },
     {
-      label: 'Total Expenses (MTD)',
+      label: t('finance.dashboard.totalExpensesMtd'),
       value: loading ? '…' : fmt(expensesMtd),
       change: dashData?.totalExpensesMtdChange ?? '+0%',
       up: false,
@@ -213,7 +213,7 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-danger)',
     },
     {
-      label: 'Net Profit (MTD)',
+      label: t('finance.dashboard.netProfitMtd'),
       value: loading ? '…' : fmt(netProfitMtd),
       change: dashData?.netProfitChange ?? '+0%',
       up: true,
@@ -221,7 +221,7 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-accent)',
     },
     {
-      label: 'Outstanding Invoices',
+      label: t('finance.dashboard.outstandingInvoices'),
       value: loading ? '…' : fmt(dashData?.totalReceivable ?? 0),
       change: dashData?.outstandingInvoicesCount
         ? `${dashData.outstandingInvoicesCount} invoices`

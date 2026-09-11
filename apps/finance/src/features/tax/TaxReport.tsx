@@ -39,7 +39,7 @@ const TaxReport: React.FC = () => {
       <HelmetContainer title={pageTitle(t('common.pageTitles.taxSummary'))} />
       <PageHeader
         title={t('tax.report.title')}
-        breadcrumbs={[{ label: 'Reports' }, { label: 'Tax' }]}
+        breadcrumbs={[{ label: t('nav.reports') }, { label: t('nav.tax') }]}
         actions={
           <button type="button" style={ghostBtn} disabled title={t('tax.report.exportSoon')}>
             <Download size={13} /> Export

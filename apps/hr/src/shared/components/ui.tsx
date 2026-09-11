@@ -358,15 +358,7 @@ export const ConfirmDialog: React.FC<{
   variant?: 'danger' | 'primary';
   onConfirm: () => void;
   onCancel: () => void;
-}> = ({
-  open,
-  title,
-  description,
-  confirmLabel = 'Confirm',
-  variant = 'primary',
-  onConfirm,
-  onCancel,
-}) => {
+}> = ({ open, title, description, confirmLabel, variant = 'primary', onConfirm, onCancel }) => {
   const { t } = useTranslation();
   return (
     <Modal open={open} onClose={onCancel} title={title} width={380}>
@@ -380,7 +372,7 @@ export const ConfirmDialog: React.FC<{
           {t('common.cancel')}
         </Button>
         <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
-          {confirmLabel}
+          {confirmLabel ?? t('common.confirm')}
         </Button>
       </div>
     </Modal>

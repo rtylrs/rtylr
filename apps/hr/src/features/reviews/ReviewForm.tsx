@@ -72,7 +72,12 @@ const ReviewForm: React.FC = () => {
     <>
       <HelmetContainer title={t('reviews.pageTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 640 }}>
-        <Breadcrumbs items={[{ label: 'Reviews', href: '/reviews' }, { label: 'New review' }]} />
+        <Breadcrumbs
+          items={[
+            { label: t('nav.reviews'), href: '/reviews' },
+            { label: t('reviews.page.newReview') },
+          ]}
+        />
         <SectionHeader title={t('reviews.formTitle')} subtitle={t('reviews.formSubtitle')} />
         <Card>
           <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

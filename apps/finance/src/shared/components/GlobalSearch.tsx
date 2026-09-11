@@ -26,56 +26,134 @@ interface Result {
   group: string;
 }
 
-const PAGES: Result[] = [
-  { id: 'p-dashboard', label: 'Dashboard', to: '/', icon: LayoutDashboard, group: 'Pages' },
-  { id: 'p-invoices', label: 'Invoices', to: '/invoices', icon: FileText, group: 'Pages' },
+const PAGE_KEYS: {
+  id: string;
+  labelKey: string;
+  to: string;
+  icon: Result['icon'];
+  groupKey: string;
+}[] = [
+  {
+    id: 'p-dashboard',
+    labelKey: 'nav.dashboard',
+    to: '/',
+    icon: LayoutDashboard,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-invoices',
+    labelKey: 'nav.invoices',
+    to: '/invoices',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
   {
     id: 'p-new-invoice',
-    label: 'New invoice',
+    labelKey: 'nav.newInvoice',
     to: '/invoices/new',
     icon: FileText,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
   {
     id: 'p-recurring',
-    label: 'Recurring invoices',
+    labelKey: 'nav.recurringInvoices',
     to: '/invoices/recurring',
     icon: FileText,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
-  { id: 'p-quotes', label: 'Quotes', to: '/quotes', icon: FileText, group: 'Pages' },
-  { id: 'p-expenses', label: 'Expenses', to: '/expenses', icon: Receipt, group: 'Pages' },
-  { id: 'p-new-expense', label: 'New expense', to: '/expenses/new', icon: Receipt, group: 'Pages' },
+  {
+    id: 'p-quotes',
+    labelKey: 'nav.quotes',
+    to: '/quotes',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-expenses',
+    labelKey: 'nav.expenses',
+    to: '/expenses',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-new-expense',
+    labelKey: 'nav.newExpense',
+    to: '/expenses/new',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
   {
     id: 'p-categories',
-    label: 'Expense categories',
+    labelKey: 'nav.expenseCategories',
     to: '/categories',
     icon: Receipt,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
-  { id: 'p-bills', label: 'Bills', to: '/bills', icon: Receipt, group: 'Pages' },
-  { id: 'p-bank', label: 'Bank feeds', to: '/bank', icon: Receipt, group: 'Pages' },
-  { id: 'p-reconcile', label: 'Reconcile', to: '/reconcile', icon: Receipt, group: 'Pages' },
-  { id: 'p-pl', label: 'Profit & Loss', to: '/pl', icon: TrendingUp, group: 'Pages' },
+  {
+    id: 'p-bills',
+    labelKey: 'nav.bills',
+    to: '/bills',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-bank',
+    labelKey: 'nav.bankFeeds',
+    to: '/bank',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-reconcile',
+    labelKey: 'nav.reconcile',
+    to: '/reconcile',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  { id: 'p-pl', labelKey: 'nav.pl', to: '/pl', icon: TrendingUp, groupKey: 'nav.groups.pages' },
   {
     id: 'p-balance',
-    label: 'Balance sheet',
+    labelKey: 'nav.balanceSheet',
     to: '/reports/balance-sheet',
     icon: TrendingUp,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
   {
     id: 'p-cashflow',
-    label: 'Cash flow',
+    labelKey: 'nav.cashFlow',
     to: '/reports/cash-flow',
     icon: TrendingUp,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
-  { id: 'p-tax', label: 'Tax', to: '/tax', icon: Calculator, group: 'Pages' },
-  { id: 'p-taxreport', label: 'Tax summary', to: '/reports/tax', icon: Calculator, group: 'Pages' },
-  { id: 'p-journal', label: 'Journal', to: '/journal', icon: FileText, group: 'Pages' },
-  { id: 'p-accounts', label: 'Chart of accounts', to: '/accounts', icon: FileText, group: 'Pages' },
-  { id: 'p-settings', label: 'Settings', to: '/settings', icon: FileText, group: 'Pages' },
+  { id: 'p-tax', labelKey: 'nav.tax', to: '/tax', icon: Calculator, groupKey: 'nav.groups.pages' },
+  {
+    id: 'p-taxreport',
+    labelKey: 'nav.taxSummary',
+    to: '/reports/tax',
+    icon: Calculator,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-journal',
+    labelKey: 'nav.journal',
+    to: '/journal',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-accounts',
+    labelKey: 'nav.chartOfAccounts',
+    to: '/accounts',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-settings',
+    labelKey: 'nav.settings',
+    to: '/settings',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
 ];
 
 interface GlobalSearchProps {
@@ -102,7 +180,13 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
 
   const results = useMemo(() => {
     const q = query.toLowerCase();
-    const pages = PAGES.filter((p) => p.label.toLowerCase().includes(q));
+    const pages: Result[] = PAGE_KEYS.map((p) => ({
+      id: p.id,
+      label: t(p.labelKey),
+      to: p.to,
+      icon: p.icon,
+      group: t(p.groupKey),
+    })).filter((p) => p.label.toLowerCase().includes(q));
     const clientResults: Result[] = clients
       .filter((c) => c.name.toLowerCase().includes(q))
       .map((c) => ({
@@ -114,7 +198,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
         group: 'Clients',
       }));
     return [...pages, ...clientResults].slice(0, 12);
-  }, [query, clients]);
+  }, [query, clients, t]);
 
   useEffect(() => {
     setIndex(0);

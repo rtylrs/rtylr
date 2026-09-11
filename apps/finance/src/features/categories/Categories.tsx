@@ -375,8 +375,8 @@ const Categories: React.FC = () => {
       <ConfirmDialog
         open={deletingCategoryId != null}
         title={t('categories.deleteTitle')}
-        message="Are you sure you want to delete this category? Any existing expenses in this category will become uncategorized."
-        confirmLabel="Delete"
+        message={t('categories.deleteConfirm')}
+        confirmLabel={t('common.delete')}
         destructive
         onConfirm={handleDelete}
         onClose={() => setDeletingCategoryId(null)}

@@ -51,5 +51,8 @@
     "notifications": "Notifications"
   },
   "closeDialog": "Fermer la boîte de dialogue",
-  "loadingLabel": "Chargement"
+  "loadingLabel": "Chargement",
+  "confirmLabel": "Confirmer",
+  "closeYear": "Clôturer l'exercice",
+  "new": "Nouveau"
 }

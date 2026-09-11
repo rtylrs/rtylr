@@ -43,5 +43,9 @@
     "invite": "Inviter un membre",
     "required": "L'e-mail et le nom complet sont obligatoires",
     "invited": "Invitation envoyée"
+  },
+  "tabs": {
+    "general": "Général",
+    "team": "Équipe"
   }
 }

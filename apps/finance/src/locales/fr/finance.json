@@ -78,7 +78,13 @@
     "totalAssets": "Total de l'actif",
     "totalLiabilities": "Total du passif",
     "totalEquity": "Total des capitaux propres",
-    "check": "Contrôle"
+    "check": "Contrôle",
+    "rows": {
+      "cash": "Trésorerie",
+      "receivable": "Créances clients",
+      "payable": "Dettes fournisseurs",
+      "equity": "Capitaux propres"
+    }
   },
   "profitLoss": {
     "title": "Compte de résultat",
@@ -96,13 +102,21 @@
     "expensesByCategory": "Charges par catégorie",
     "categoryUnavailable": "La répartition par catégorie n'est pas encore disponible.",
     "lockingComingSoon": "Le verrouillage des périodes arrive bientôt",
-    "closeYear": "Clôturer l'exercice"
+    "closeYear": "Clôturer l'exercice",
+    "grossProfit": "Marge brute",
+    "netProfit": "Résultat net",
+    "netMargin": "Marge nette",
+    "closeYearConfirm": "Cela verrouillera toutes les écritures de l'exercice en cours. Tout ajustement demandera une nouvelle période. Continuer ?"
   },
   "dashboard": {
     "revenue": "Produits",
     "expenses": "Dépenses",
     "revenueVsExpenses": "Produits et dépenses",
-    "recentTransactions": "Transactions récentes"
+    "recentTransactions": "Transactions récentes",
+    "totalRevenueMtd": "Produits du mois",
+    "totalExpensesMtd": "Dépenses du mois",
+    "netProfitMtd": "Résultat net du mois",
+    "outstandingInvoices": "Factures en attente"
   },
   "overdue": {
     "title": "Factures en retard",
@@ -112,7 +126,14 @@
     "title": "Relances de paiement",
     "description": "E-mails envoyés automatiquement aux clients à l'approche de l'échéance ou après.",
     "comingSoon": "La planification des relances arrivera dans une prochaine mise à jour",
-    "save": "Enregistrer la planification"
+    "save": "Enregistrer la planification",
+    "onDueDate": "À l'échéance",
+    "beforeDue_one": "{{count}} jour avant l'échéance",
+    "beforeDue_many": "{{count}} de jours avant l'échéance",
+    "beforeDue_other": "{{count}} jours avant l'échéance",
+    "overdue_one": "{{count}} jour de retard",
+    "overdue_many": "{{count}} de jours de retard",
+    "overdue_other": "{{count}} jours de retard"
   },
   "trial": {
     "addPayment": "Ajoutez un moyen de paiement pour conserver vos données.",
@@ -134,5 +155,14 @@
   "team": {
     "invited": "Invitation envoyée",
     "removed": "Membre retiré"
+  },
+  "kpi": {
+    "receivable": "Créances",
+    "expensesMtd": "Dépenses du mois",
+    "netProfitMtd": "Résultat net du mois",
+    "overdue": "En retard"
+  },
+  "plChart": {
+    "title": "Charges par catégorie"
   }
 }

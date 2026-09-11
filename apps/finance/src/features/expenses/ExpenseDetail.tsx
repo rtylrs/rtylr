@@ -56,7 +56,7 @@ const ExpenseDetail: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <PageHeader
           title={t('expenses.detailTitle')}
-          breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: id ?? '' }]}
+          breadcrumbs={[{ label: t('nav.expenses'), to: '/expenses' }, { label: id ?? '' }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
@@ -91,7 +91,7 @@ const ExpenseDetail: React.FC = () => {
             <MoneyDisplay amount={expense.amount} />
           </span>
         }
-        breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: expense.id }]}
+        breadcrumbs={[{ label: t('nav.expenses'), to: '/expenses' }, { label: expense.id }]}
         actions={
           canApproveExpense ? (
             <>

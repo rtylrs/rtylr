@@ -20,5 +20,7 @@
     "collected": "TVA collectée",
     "owed": "TVA due",
     "periodsToFile": "Périodes à déclarer"
-  }
+  },
+  "collected": "TVA collectée",
+  "owed": "TVA due"
 }

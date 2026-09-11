@@ -191,15 +191,19 @@ const Schedule: React.FC = () => {
                         key={sh.id}
                         shift={sh}
                         onClick={() => {
-                          toast.warning(`Delete shift for ${sh.staffName}?`, {
-                            action: {
-                              label: 'Delete',
-                              onClick: () =>
-                                del.mutate(sh.id, {
-                                  onSuccess: () => toast.success(t('shifts.schedule.shiftRemoved')),
-                                }),
-                            },
-                          });
+                          toast.warning(
+                            t('shifts.schedule.confirmDelete', { name: sh.staffName }),
+                            {
+                              action: {
+                                label: t('common.delete'),
+                                onClick: () =>
+                                  del.mutate(sh.id, {
+                                    onSuccess: () =>
+                                      toast.success(t('shifts.schedule.shiftRemoved')),
+                                  }),
+                              },
+                            }
+                          );
                         }}
                       />
                     ))}

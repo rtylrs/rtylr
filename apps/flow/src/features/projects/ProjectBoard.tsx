@@ -535,7 +535,7 @@ const ProjectBoard: React.FC = () => {
             will need to be moved manually first or they will become orphaned.
           </>
         }
-        confirmLabel="Delete column"
+        confirmLabel={t('flow.board.deleteColumn')}
         pending={deleteColumn.isPending}
         onConfirm={() => {
           if (!pendingDeleteColumn) return;

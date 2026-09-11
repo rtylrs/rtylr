@@ -40,7 +40,7 @@ const InvoiceDetail: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <PageHeader
           title={t('invoices.detail.title')}
-          breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: id ?? '' }]}
+          breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: id ?? '' }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow count={4} />
@@ -70,7 +70,7 @@ const InvoiceDetail: React.FC = () => {
             <PaymentBadge status={paymentStatus} /> <MoneyDisplay amount={invoice.amount} /> total
           </span>
         }
-        breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: invoice.id }]}
+        breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: invoice.id }]}
         actions={
           <>
             <button type="button" style={ghostBtn} onClick={() => window.print()}>

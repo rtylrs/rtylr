@@ -388,9 +388,9 @@ const DefaultLayout: React.FC = () => {
                   <div className="flex gap-1 mb-2 px-1">
                     {(
                       [
-                        { value: 'light' as Theme, icon: Sun, label: 'Light' },
-                        { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-                        { value: 'system' as Theme, icon: Monitor, label: 'System' },
+                        { value: 'light' as Theme, icon: Sun, label: t('nav.theme.light') },
+                        { value: 'dark' as Theme, icon: Moon, label: t('nav.theme.dark') },
+                        { value: 'system' as Theme, icon: Monitor, label: t('nav.theme.system') },
                       ] as const
                     ).map(({ value, icon: Icon, label }) => (
                       <button
