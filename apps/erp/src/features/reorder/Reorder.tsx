@@ -25,8 +25,8 @@ const Reorder: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t(routeLabels['/reorder'].title))} />
       <PageHeader
-        title="Reorder Suggestions"
-        description="Smart recommendations based on sales velocity and lead times"
+        title={t(routeLabels['/reorder'].title)}
+        description={t('erp.reorder.subtitle')}
       />
 
       <div
@@ -61,12 +61,12 @@ const Reorder: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <span>Product</span>
-          <span>Stock</span>
-          <span>Avg Daily</span>
-          <span>Suggested</span>
-          <span>Lead</span>
-          <span>Confidence</span>
+          <span>{t('common.product')}</span>
+          <span>{t('common.stock')}</span>
+          <span>{t('erp.reorder.avgDaily')}</span>
+          <span>{t('erp.reorder.suggested')}</span>
+          <span>{t('erp.reorder.lead')}</span>
+          <span>{t('erp.reorder.confidence')}</span>
         </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
