@@ -39,16 +39,16 @@ const Variants: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newProductId.trim()) {
-      toast.error('Product ID is required');
+      toast.error(t('erp.variants.productIdRequired'));
       return;
     }
     if (!newName.trim()) {
-      toast.error('Variant name is required');
+      toast.error(t('erp.variants.nameRequired'));
       return;
     }
     const price = parseFloat(newPrice) || 0;
     if (price < 0) {
-      toast.error('Price cannot be negative');
+      toast.error(t('erp.variants.priceNegative'));
       return;
     }
     try {
@@ -63,14 +63,14 @@ const Variants: React.FC = () => {
         attributes: '{}',
         isActive: true,
       });
-      toast.success('Variant created');
+      toast.success(t('erp.variants.created'));
       setShowCreate(false);
       setNewProductId('');
       setNewName('');
       setNewSku('');
       setNewPrice('');
     } catch {
-      toast.error('Failed to create variant');
+      toast.error(t('erp.variants.createFailed'));
     }
   };
 
@@ -82,8 +82,8 @@ const Variants: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t(routeLabels['/variants'].title))} />
       <PageHeader
-        title="Product Variants"
-        description="Individual SKUs for sizes, colors, flavors and more"
+        title={t(routeLabels['/variants'].title)}
+        description={t('erp.variants.subtitle')}
         actions={
           <button
             type="button"
@@ -108,12 +108,12 @@ const Variants: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <span>Variant</span>
-          <span>SKU</span>
-          <span>Attributes</span>
-          <span>Stock</span>
-          <span>Price</span>
-          <span>Status</span>
+          <span>{t('erp.products.variants.variant')}</span>
+          <span>{t('erp.products.variants.sku')}</span>
+          <span>{t('erp.variants.attributes')}</span>
+          <span>{t('erp.products.variants.stock')}</span>
+          <span>{t('common.price')}</span>
+          <span>{t('common.status')}</span>
         </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
@@ -179,24 +179,24 @@ const Variants: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Variant
+              {t('erp.variants.newVariant')}
             </h3>
             <input
               value={newProductId}
               onChange={(e) => setNewProductId(e.target.value)}
-              placeholder="Product ID"
+              placeholder={t('erp.variants.productIdPlaceholder')}
               style={inputStyle}
             />
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Variant name (e.g. Large / Red)"
+              placeholder={t('erp.variants.namePlaceholder')}
               style={inputStyle}
             />
             <input
               value={newSku}
               onChange={(e) => setNewSku(e.target.value)}
-              placeholder="SKU (optional)"
+              placeholder={t('erp.variants.skuPlaceholder')}
               style={inputStyle}
             />
             <input
@@ -205,7 +205,7 @@ const Variants: React.FC = () => {
               step="0.01"
               value={newPrice}
               onChange={(e) => setNewPrice(e.target.value)}
-              placeholder="Price"
+              placeholder={t('common.price')}
               style={inputStyle}
             />
             <div className="flex gap-2 justify-end">
@@ -215,7 +215,7 @@ const Variants: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
