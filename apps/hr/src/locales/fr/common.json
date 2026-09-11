@@ -57,5 +57,7 @@
     "employeeProfile": "Profil de l'employé",
     "timesheetDetail": "Détail de la feuille de temps",
     "timesheetApprovals": "Validation des feuilles de temps"
-  }
+  },
+  "select": "Sélectionner",
+  "noMatches": "Aucune correspondance"
 }
