@@ -17,6 +17,11 @@ import {
 } from 'lucide-react';
 import { useListCustomers } from '../hooks/queries/useCustomers';
 import { CustomerAvatar } from './crm';
+import { useTranslation } from 'react-i18next';
+import { routeLabels } from '../lib/routeLabels';
+
+/** The one group whose rows render as customer avatars rather than icons. */
+const CUSTOMERS_GROUP = 'nav.groups.customers';
 
 interface CommandItem {
   id: string;
@@ -31,6 +36,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   open,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
@@ -48,130 +54,130 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
     const base: CommandItem[] = [
       {
         id: 'nav-dash',
-        label: 'Dashboard',
+        label: t(routeLabels['/'].title),
         icon: LayoutDashboard,
         action: () => navigate({ to: '/' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-cust',
-        label: 'Customers',
+        label: t(routeLabels['/customers'].title),
         icon: Users,
         action: () => navigate({ to: '/customers' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-loyalty',
-        label: 'Loyalty',
+        label: t(routeLabels['/loyalty'].title),
         icon: Gift,
         action: () => navigate({ to: '/loyalty' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-camp',
-        label: 'Campaigns',
+        label: t(routeLabels['/campaigns'].title),
         icon: Megaphone,
         action: () => navigate({ to: '/campaigns' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-seg',
-        label: 'Segments',
+        label: t(routeLabels['/segments'].title),
         icon: PieChart,
         action: () => navigate({ to: '/segments' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-auto',
-        label: 'Automations',
+        label: t(routeLabels['/automations'].title),
         icon: Zap,
         action: () => navigate({ to: '/automations' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-tmpl',
-        label: 'Templates',
+        label: t(routeLabels['/templates'].title),
         icon: FileText,
         action: () => navigate({ to: '/templates' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-fb',
-        label: 'Feedback & NPS',
+        label: t(routeLabels['/feedback'].title),
         icon: MessageSquare,
         action: () => navigate({ to: '/feedback' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'nav-set',
-        label: 'Settings',
+        label: t(routeLabels['/settings'].title),
         icon: SettingsIcon,
         action: () => navigate({ to: '/settings' }),
-        group: 'Navigate',
+        group: 'nav.groups.navigate',
       },
       {
         id: 'new-cust',
-        label: 'New customer',
+        label: t(routeLabels['/customers/new'].title),
         icon: Plus,
         action: () => navigate({ to: '/customers/new' }),
-        group: 'Create',
+        group: 'nav.groups.create',
         hint: 'n',
       },
       {
         id: 'new-seg',
-        label: 'New segment',
+        label: t(routeLabels['/segments/new'].title),
         icon: Plus,
         action: () => navigate({ to: '/segments/new' }),
-        group: 'Create',
+        group: 'nav.groups.create',
       },
       {
         id: 'new-camp-email',
-        label: 'New email campaign',
+        label: t(routeLabels['/campaigns/email'].title),
         icon: Plus,
         action: () => navigate({ to: '/campaigns/email' }),
-        group: 'Create',
+        group: 'nav.groups.create',
       },
       {
         id: 'new-camp-sms',
-        label: 'New SMS campaign',
+        label: t(routeLabels['/campaigns/sms'].title),
         icon: Plus,
         action: () => navigate({ to: '/campaigns/sms' }),
-        group: 'Create',
+        group: 'nav.groups.create',
       },
       {
         id: 'new-auto',
-        label: 'New automation',
+        label: t(routeLabels['/automations/new'].title),
         icon: Plus,
         action: () => navigate({ to: '/automations/new' }),
-        group: 'Create',
+        group: 'nav.groups.create',
       },
       {
         id: 'import',
-        label: 'Import customers from CSV',
+        label: t('nav.actions.importCustomersCsv'),
         icon: Plus,
         action: () => navigate({ to: '/customers/import' }),
-        group: 'Create',
+        group: 'nav.groups.create',
       },
       {
         id: 'loyalty-members',
-        label: 'Loyalty members',
+        label: t(routeLabels['/loyalty/members'].title),
         icon: Award,
         action: () => navigate({ to: '/loyalty/members' }),
-        group: 'Loyalty',
+        group: 'nav.groups.loyalty',
       },
       {
         id: 'loyalty-rewards',
-        label: 'Loyalty rewards catalog',
+        label: t('nav.actions.loyaltyRewardsCatalog'),
         icon: Gift,
         action: () => navigate({ to: '/loyalty/rewards' }),
-        group: 'Loyalty',
+        group: 'nav.groups.loyalty',
       },
       {
         id: 'loyalty-tiers',
-        label: 'Loyalty tiers',
+        label: t(routeLabels['/loyalty/tiers'].title),
         icon: Award,
         action: () => navigate({ to: '/loyalty/tiers' }),
-        group: 'Loyalty',
+        group: 'nav.groups.loyalty',
       },
     ];
     const customerItems: CommandItem[] = customers.slice(0, 20).map((c) => ({
@@ -179,10 +185,10 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
       label: c.name,
       hint: c.email,
       action: () => navigate({ to: `/customers/${c.id}` }),
-      group: 'Customers',
+      group: CUSTOMERS_GROUP,
     }));
     return [...base, ...customerItems];
-  }, [navigate, customers]);
+  }, [navigate, customers, t]);
 
   const filtered = useMemo(() => {
     if (!query) return items;
@@ -331,12 +337,12 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                       letterSpacing: '0.08em',
                     }}
                   >
-                    {group}
+                    {t(group)}
                   </div>
                   {groupItems.map((item) => {
                     const idx = filtered.indexOf(item);
                     const active = idx === cursor;
-                    const isCustomer = item.group === 'Customers';
+                    const isCustomer = item.group === CUSTOMERS_GROUP;
                     const Icon = item.icon;
                     return (
                       <button
