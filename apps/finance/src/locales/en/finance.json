@@ -62,7 +62,13 @@
     "totalAssets": "Total Assets",
     "totalLiabilities": "Total Liabilities",
     "totalEquity": "Total Equity",
-    "check": "Check"
+    "check": "Check",
+    "rows": {
+      "cash": "Cash",
+      "receivable": "Accounts Receivable",
+      "payable": "Accounts Payable",
+      "equity": "Equity"
+    }
   },
   "unbilled": {
     "region": "Unbilled billable time",
@@ -90,13 +96,21 @@
     "expensesByCategory": "Expenses by Category",
     "categoryUnavailable": "Category breakdown not available yet.",
     "lockingComingSoon": "Fiscal year period locking is coming soon",
-    "closeYear": "Close fiscal year"
+    "closeYear": "Close fiscal year",
+    "grossProfit": "Gross Profit",
+    "netProfit": "Net Profit",
+    "netMargin": "Net Margin",
+    "closeYearConfirm": "This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
   },
   "dashboard": {
     "revenue": "Revenue",
     "expenses": "Expenses",
     "revenueVsExpenses": "Revenue vs Expenses",
-    "recentTransactions": "Recent Transactions"
+    "recentTransactions": "Recent Transactions",
+    "totalRevenueMtd": "Total Revenue (MTD)",
+    "totalExpensesMtd": "Total Expenses (MTD)",
+    "netProfitMtd": "Net Profit (MTD)",
+    "outstandingInvoices": "Outstanding Invoices"
   },
   "overdue": {
     "title": "Overdue Invoices",
@@ -106,7 +120,12 @@
     "title": "Payment Reminders",
     "description": "Automated emails sent to clients when invoices are approaching or past their due date.",
     "comingSoon": "Reminder schedule coming in a future update",
-    "save": "Save schedule"
+    "save": "Save schedule",
+    "onDueDate": "On due date",
+    "beforeDue_one": "{{count}} day before due",
+    "beforeDue_other": "{{count}} days before due",
+    "overdue_one": "{{count}} day overdue",
+    "overdue_other": "{{count}} days overdue"
   },
   "trial": {
     "addPayment": "Add a payment method to keep your data.",
@@ -128,5 +147,14 @@
   "team": {
     "invited": "Invitation sent",
     "removed": "Member removed"
+  },
+  "kpi": {
+    "receivable": "Receivable",
+    "expensesMtd": "Expenses MTD",
+    "netProfitMtd": "Net Profit MTD",
+    "overdue": "Overdue"
+  },
+  "plChart": {
+    "title": "Expenses by Category"
   }
 }
