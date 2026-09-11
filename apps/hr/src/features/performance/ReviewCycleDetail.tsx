@@ -62,12 +62,12 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
       shareMutation.mutate(
         { reviewId },
         {
-          onSuccess: () => toast.success('Review shared with employee'),
-          onError: () => toast.error('Failed to share review'),
+          onSuccess: () => toast.success(t('performance.reviewShared')),
+          onError: () => toast.error(t('errors.shareReview')),
         }
       );
     },
-    [shareMutation]
+    [shareMutation, t]
   );
 
   const canShare = useCallback(
