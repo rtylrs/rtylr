@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle, FileSignature } from 'lucide-react';
@@ -183,7 +184,7 @@ const Quotes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Quotes & estimates · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.quotes'))} />
       <PageHeader
         title="Quotes & Estimates"
         subtitle={
