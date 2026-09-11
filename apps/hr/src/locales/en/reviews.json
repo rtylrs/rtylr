@@ -32,5 +32,14 @@
   "notesPlaceholder": "Key feedback and next steps",
   "overallRating": "Overall rating",
   "errorPickBoth": "Pick an employee and a reviewer",
-  "created": "Review created"
+  "created": "Review created",
+  "page": {
+    "metaTitle": "Performance reviews · rtylr",
+    "title": "Performance Reviews",
+    "subtitle": "Track review cycles and ratings",
+    "newReview": "New review",
+    "goals": "Goals",
+    "values": "Values",
+    "skills": "Skills"
+  }
 }
