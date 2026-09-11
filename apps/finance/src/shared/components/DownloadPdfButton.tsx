@@ -8,10 +8,7 @@ interface DownloadPdfButtonProps {
   label?: string;
 }
 
-const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({
-  invoiceId: _invoiceId,
-  label = 'Download PDF',
-}) => {
+const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({ invoiceId: _invoiceId, label }) => {
   const { t } = useTranslation();
   return (
     <button
@@ -22,7 +19,7 @@ const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({
       title={t('finance.pdf.comingSoon')}
     >
       <Download size={13} />
-      {label}
+      {label ?? t('finance.pdf.download')}
     </button>
   );
 };
