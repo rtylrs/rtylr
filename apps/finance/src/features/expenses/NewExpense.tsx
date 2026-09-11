@@ -64,7 +64,7 @@ const NewExpense: React.FC = () => {
       <HelmetContainer title={pageTitle(t('common.pageTitles.submitExpense'))} />
       <PageHeader
         title={t('expenses.submitTitle')}
-        breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: 'New' }]}
+        breadcrumbs={[{ label: t('nav.expenses'), to: '/expenses' }, { label: t('common.new') }]}
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
