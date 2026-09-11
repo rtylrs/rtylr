@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
@@ -124,6 +126,7 @@ const PERIOD_PARAMS: Record<Period, string> = {
 };
 
 const ProfitLoss: React.FC = () => {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<Period>('This Month');
   const [showClose, setShowClose] = useState(false);
   const currency = useSettings((s) => s.currency);
@@ -181,7 +184,7 @@ const ProfitLoss: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Profit & loss · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.pl'))} />
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
