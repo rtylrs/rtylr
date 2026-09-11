@@ -1,4 +1,5 @@
 import React, { useRef, useCallback } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -413,9 +414,10 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
 };
 
 const PayrollRunDetail = (): React.JSX.Element => {
+  const { t } = useTranslation();
   return (
     <>
-      <HelmetContainer title="Payroll run · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.payrollRun'))} />
       <ErrorBoundary>
         <PayrollRunDetailContent />
       </ErrorBoundary>
