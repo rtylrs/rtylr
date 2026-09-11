@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Cake } from 'lucide-react';
 import { Card, ACCENT } from './ui';
 import { useBirthdays } from '../hooks/useHrExtras';
@@ -12,6 +13,7 @@ function daysUntil(monthDay: string) {
 }
 
 const BirthdayWidget: React.FC = () => {
+  const { t } = useTranslation();
   const { data } = useBirthdays();
   const upcoming = (data ?? [])
     .map((b) => ({ ...b, days: daysUntil(b.date) }))
@@ -25,12 +27,12 @@ const BirthdayWidget: React.FC = () => {
           <Cake size={14} />
         </span>
         <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-          Upcoming birthdays
+          {t('dashboard.upcomingBirthdays')}
         </h3>
       </div>
       {upcoming.length === 0 ? (
         <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
-          No birthdays in view.
+          {t('dashboard.noBirthdays')}
         </p>
       ) : (
         <ul
