@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Link2, CheckCheck } from 'lucide-react';
@@ -19,6 +21,7 @@ interface Candidate {
 }
 
 const Reconcile: React.FC = () => {
+  const { t } = useTranslation();
   const { data: transactions = [] } = useBankTransactions();
   const { data: invoicesResp } = useListInvoices({ page: 1, pageSize: 200, status: 'sent' });
   const candidates: Candidate[] = (invoicesResp?.invoices ?? []).map((inv) => ({
@@ -75,7 +78,7 @@ const Reconcile: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Reconciliation · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.reconciliation'))} />
       <PageHeader
         title="Reconciliation"
         subtitle={`${unmatched.length} transactions awaiting match`}
