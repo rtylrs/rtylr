@@ -26,7 +26,8 @@
     "conflictsWarning": "Some assignments have scheduling conflicts.",
     "cannotPublishConflicts": "Resolve all scheduling conflicts before publishing the roster.",
     "emptyTitle": "No roster data",
-    "emptyDescription": "Add employees to this location to build the roster."
+    "emptyDescription": "Add employees to this location to build the roster.",
+    "published": "Roster published"
   },
   "schedule": {
     "fillAllFields": "Fill all fields",
