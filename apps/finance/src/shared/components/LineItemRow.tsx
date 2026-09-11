@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import MoneyDisplay from './MoneyDisplay';
@@ -21,6 +22,7 @@ interface LineItemRowProps {
 }
 
 const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, disabled }) => {
+  const { t } = useTranslation();
   const subtotal = roundMoney(item.quantity * item.unitPrice);
   const breakdown = computeTaxBreakdown({ subtotal, taxRate: item.taxRate });
   const total = breakdown.total;
@@ -31,7 +33,7 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
         <input
           value={item.description}
           onChange={(e) => onChange({ ...item, description: e.target.value })}
-          placeholder="Description"
+          placeholder={t('common.description')}
           disabled={disabled}
           style={inputStyle}
         />
@@ -92,7 +94,7 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
             color: 'var(--finance-danger)',
             padding: 4,
           }}
-          title="Remove line"
+          title={t('invoices.lineItem.remove')}
         >
           <Trash2 size={14} />
         </button>
