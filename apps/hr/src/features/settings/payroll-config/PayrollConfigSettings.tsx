@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { pageTitle } from '../../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -77,7 +78,7 @@ const PayrollConfigSettings = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Payroll configuration · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.payrollConfiguration'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 640 }}>
         <SectionHeader title={t('payroll.config.title')} subtitle={t('payroll.config.subtitle')} />
 
