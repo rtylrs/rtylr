@@ -539,10 +539,18 @@ const ProjectSettings: React.FC = () => {
               {
                 icon: MessageSquare,
                 name: 'Slack',
-                description: 'Post project updates to #flow-updates',
+                description: t('flow.projectSettings.integrations.slack'),
               },
-              { icon: GitBranch, name: 'GitHub', description: 'Link PRs to tasks automatically' },
-              { icon: Mail, name: 'Email', description: 'Send daily digests to members' },
+              {
+                icon: GitBranch,
+                name: 'GitHub',
+                description: t('flow.projectSettings.integrations.github'),
+              },
+              {
+                icon: Mail,
+                name: 'Email',
+                description: t('flow.projectSettings.integrations.email'),
+              },
             ].map(({ icon: Icon, name, description }) => (
               <div
                 key={name}
