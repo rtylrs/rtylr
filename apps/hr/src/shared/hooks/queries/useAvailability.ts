@@ -22,10 +22,10 @@ const staffClient = createOneKitClient(StaffServiceClient, 'hr');
  * `hr.shift.v1` declares these as `@get("/availability")` and
  * `@post("/availability")`, which onekit generates as `/hr/shift/v1/availability`.
  * onion does not serve that path for this service: `hr_shifts` hand-registers its
- * routes (`/hr/shifts`, `/hr/shifts/roster/publish`), unlike `time_off` and
- * `staff`, which mount their generated servers and therefore do serve versioned
- * paths. So the generated `ShiftServiceClient` cannot be used here the way
- * `useTimeOff` uses `TimeOffServiceClient`.
+ * routes (`/hr/shifts`, `/hr/shifts/roster/publish`), unlike `staff`, which
+ * mounts its generated server and therefore does serve versioned paths. So the
+ * generated `ShiftServiceClient` cannot be used here the way `useStaff` uses
+ * `StaffServiceClient`.
  *
  * Which of the two onion picks for availability is not yet decided, so the path
  * lives here alone and is the single line to change once the backend lands.
