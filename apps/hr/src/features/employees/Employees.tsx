@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +64,7 @@ const Employees = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Employees · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.employees'))} />
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
