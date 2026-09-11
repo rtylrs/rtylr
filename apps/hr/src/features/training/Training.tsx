@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { GraduationCap, Clock, Layers, Award } from 'lucide-react';
@@ -21,7 +22,7 @@ const Training: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Training · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.training'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader title="Training" subtitle="Courses, completion tracking, certificates" />
 
