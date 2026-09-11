@@ -83,7 +83,7 @@ const BalanceSheet: React.FC = () => {
       <div>
         <PageHeader
           title={t('finance.balanceSheet.title')}
-          breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
+          breadcrumbs={[{ label: t('nav.reports') }, { label: t('nav.balanceSheet') }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
@@ -107,7 +107,7 @@ const BalanceSheet: React.FC = () => {
       <PageHeader
         title={t('finance.balanceSheet.title')}
         subtitle={`As of ${asOfDate}`}
-        breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
+        breadcrumbs={[{ label: t('nav.reports') }, { label: t('nav.balanceSheet') }]}
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <label style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>
