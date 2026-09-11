@@ -61,5 +61,14 @@
     "namePlaceholder": "Annual leave",
     "maxCarryover": "Maximum carryover days",
     "minNotice": "Minimum notice days"
-  }
+  },
+  "policiesUnavailableTitle": "Unable to load leave policies",
+  "policiesUnavailableBody": "The leave policy service could not be reached. Try again.",
+  "configurePolicies": "Configure leave policies",
+  "policy": {
+    "nameAndLimitsRequired": "Enter a name and positive policy limits",
+    "paidLeave": "Paid leave",
+    "requiresApproval": "Requires manager approval"
+  },
+  "policyCreated": "Leave policy created"
 }
