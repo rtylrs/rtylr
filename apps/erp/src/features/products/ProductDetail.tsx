@@ -29,6 +29,7 @@ import { formatCurrency } from '../../shared/lib/format';
 import { useCategories } from '../categories/useCategories';
 import { useBrands } from '../brands/useBrands';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -144,7 +145,7 @@ const ProductDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Product detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.titles.productDetail'))} />
       <Breadcrumbs
         items={[{ label: 'Inventory', to: '/inventory' }, { label: product.name ?? '' }]}
       />
