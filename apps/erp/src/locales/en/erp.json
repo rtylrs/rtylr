@@ -110,15 +110,43 @@
       "generateBtn": "Generate {{count}} new",
       "preview": "New variants to create",
       "createAll": "Create {{count}} variants",
-      "creating": "Creating…"
-    }
+      "creating": "Creating…",
+      "createFailedOne": "Failed to create variant",
+      "updateFailed": "Failed to update variant",
+      "deleteFailed": "Failed to delete variant"
+    },
+    "updateFailed": "Failed to update product",
+    "deleteFailed": "Failed to delete product",
+    "barcodeLookupFailed": "Failed to look up barcode",
+    "searchPlaceholder": "Search products…",
+    "category": "Category",
+    "brand": "Brand",
+    "allCategories": "All categories",
+    "allStatuses": "All statuses",
+    "status": {
+      "inStock": "In Stock",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "costPrice": "Cost Price",
+    "salePrice": "Sale Price",
+    "margin": "Margin",
+    "noStockHistory": "No stock history data yet.",
+    "noSalesHistory": "No sales history data yet.",
+    "barcode": "BARCODE",
+    "leadTime": "Lead Time",
+    "reorderPoint": "Reorder Point",
+    "unit": "Unit",
+    "unitsCount_one": "{{count}} unit",
+    "unitsCount_other": "{{count}} units"
   },
   "inventory": {
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
     "empty": "No products found.",
-    "clearSearch": "Clear Search"
+    "clearSearch": "Clear Search",
+    "adjustFailed": "Failed to adjust inventory"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -177,7 +205,10 @@
       "created": "Warehouse created",
       "createFailed": "Failed to create warehouse",
       "deleted": "Warehouse deleted"
-    }
+    },
+    "createFailed": "Failed to create warehouse",
+    "updateFailed": "Failed to update warehouse",
+    "deleteFailed": "Failed to delete warehouse"
   },
   "receiving": {
     "title": "Goods Receiving",
@@ -372,5 +403,40 @@
     },
     "refresh": "Refresh"
   },
-  "supplierBills": "{{count}} bill(s)"
+  "supplierBills": "{{count}} bill(s)",
+  "purchasing": {
+    "supplierAndPoRequired": "Supplier and PO number are required",
+    "itemRequired": "At least one item with a product and quantity is required",
+    "draftCreated": "Purchase order draft created",
+    "createFailed": "Failed to create purchase order",
+    "statusUpdateFailed": "Failed to update purchase order status",
+    "approveFailed": "Failed to approve purchase order",
+    "newOrder": "New Order",
+    "approve": "Approve",
+    "send": "Send",
+    "newPurchaseOrder": "New Purchase Order",
+    "cost": "Cost"
+  },
+  "dashboard": {
+    "totalProducts": "Total Products",
+    "lowStockItems": "Low Stock Items",
+    "pendingOrders": "Pending Orders",
+    "totalSuppliers": "Total Suppliers",
+    "inventoryOverview": "Inventory Overview",
+    "newProduct": "New Product",
+    "inventoryValue": "Inventory Value",
+    "topItems": "Top 5 Items",
+    "noProducts": "No products yet",
+    "topCategories": "Top Categories",
+    "noCategories": "No categories yet",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity",
+    "lowStockAlert": "Low Stock Alert",
+    "noLowStockItems": "No low stock items",
+    "recentPurchaseOrders": "Recent Purchase Orders",
+    "noPurchaseOrders": "No purchase orders yet",
+    "criticalCount_one": "{{count}} critical",
+    "criticalCount_other": "{{count}} critical",
+    "needsReview": "needs review"
+  }
 }
