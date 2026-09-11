@@ -5,7 +5,7 @@
   "total": "Total",
   "submit": "Soumettre la feuille",
   "submitted": "Feuille de temps soumise pour approbation",
-  "approved": "Feuille de temps approuvée",
+  "approved": "Feuille de temps validée",
   "rejected": "Feuille de temps rejetée",
   "rejectionReason": "Motif du rejet",
   "noReasonProvided": "Aucun motif fourni",
