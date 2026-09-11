@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { useLowStock } from '../inventory/useInventory';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -22,7 +24,7 @@ const LowStockAlerts: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Low stock alerts · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/alerts'].title))} />
       <PageHeader
         title="Low Stock Alerts"
         description={`${items.length} items below minimum stock levels`}
