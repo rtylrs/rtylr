@@ -40,7 +40,7 @@ const PriceLists: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
-      toast.error('Price list name is required');
+      toast.error(t('erp.priceLists.nameRequired'));
       return;
     }
     try {
@@ -49,13 +49,13 @@ const PriceLists: React.FC = () => {
         currency: newCurrency.trim(),
         isDefault: newIsDefault,
       });
-      toast.success('Price list created');
+      toast.success(t('erp.priceLists.created'));
       setShowCreate(false);
       setNewName('');
       setNewCurrency('USD');
       setNewIsDefault(false);
     } catch {
-      toast.error('Failed to create price list');
+      toast.error(t('erp.priceLists.createFailed'));
     }
   };
 
@@ -67,8 +67,8 @@ const PriceLists: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t(routeLabels['/price-lists'].title))} />
       <PageHeader
-        title="Price Lists"
-        description="Currency-based pricing strategies"
+        title={t(routeLabels['/price-lists'].title)}
+        description={t('erp.priceLists.subtitle')}
         actions={
           canManagePriceLists && (
             <button
@@ -163,18 +163,18 @@ const PriceLists: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Price List
+              {t('erp.priceLists.newPriceList')}
             </h3>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Name"
+              placeholder={t('common.name')}
               style={inputStyle}
             />
             <input
               value={newCurrency}
               onChange={(e) => setNewCurrency(e.target.value)}
-              placeholder="Currency (e.g. USD)"
+              placeholder={t('erp.priceLists.currencyPlaceholder')}
               style={inputStyle}
             />
             <label
@@ -186,7 +186,7 @@ const PriceLists: React.FC = () => {
                 checked={newIsDefault}
                 onChange={(e) => setNewIsDefault(e.target.checked)}
               />
-              Set as default price list
+              {t('erp.priceLists.setDefault')}
             </label>
             <div className="flex gap-2 justify-end">
               <button
@@ -195,7 +195,7 @@ const PriceLists: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"

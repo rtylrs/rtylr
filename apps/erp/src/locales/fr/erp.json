@@ -202,7 +202,18 @@
       "title": "Aucune variante",
       "description": "Ajoutez des variantes pour différencier vos produits"
     },
-    "addVariant": "Ajouter une variante"
+    "addVariant": "Ajouter une variante",
+    "productIdRequired": "L'identifiant du produit est obligatoire",
+    "nameRequired": "Le nom de la variante est obligatoire",
+    "priceNegative": "Le prix ne peut pas être négatif",
+    "created": "Variante créée",
+    "createFailed": "Échec de la création de la variante",
+    "subtitle": "Des références distinctes pour les tailles, couleurs, parfums et plus",
+    "newVariant": "Nouvelle variante",
+    "productIdPlaceholder": "Identifiant du produit",
+    "namePlaceholder": "Nom de la variante (par ex. Grand / Rouge)",
+    "skuPlaceholder": "Référence (facultatif)",
+    "attributes": "Attributs"
   },
   "priceLists": {
     "empty": {
@@ -210,14 +221,32 @@
       "description": "Créez votre première liste de prix pour activer la tarification par palier"
     },
     "newPriceList": "Nouvelle liste de prix",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "nameRequired": "Le nom de la liste de prix est obligatoire",
+    "created": "Liste de prix créée",
+    "createFailed": "Échec de la création de la liste de prix",
+    "subtitle": "Stratégies tarifaires par devise",
+    "currencyPlaceholder": "Devise (par ex. USD)",
+    "setDefault": "Définir comme liste de prix par défaut"
   },
   "brands": {
     "empty": {
       "title": "Pas encore de marques",
       "description": "Ajoutez votre première marque pour regrouper les produits."
     },
-    "newBrand": "Nouvelle marque"
+    "newBrand": "Nouvelle marque",
+    "nameRequired": "Le nom de la marque est obligatoire",
+    "created": "Marque créée",
+    "createFailed": "Échec de la création de la marque",
+    "countAcrossCatalog_one": "{{count}} marque dans votre catalogue",
+    "countAcrossCatalog_many": "{{count}} de marques dans votre catalogue",
+    "countAcrossCatalog_other": "{{count}} marques dans votre catalogue",
+    "deleteAria": "Supprimer la marque",
+    "confirmDeleteTitle": "Supprimer la marque ?",
+    "confirmDeleteBody": "Les produits de cette marque ne seront pas supprimés, mais ils n'auront plus de marque.",
+    "deleted": "Marque supprimée",
+    "namePlaceholder": "Nom de la marque",
+    "descriptionPlaceholder": "Description (facultatif)"
   },
   "expiry": {
     "empty": {
@@ -254,7 +283,19 @@
       "title": "Pas encore de catégories",
       "description": "Créez votre première catégorie pour organiser les produits"
     },
-    "addCategory": "Ajouter une catégorie"
+    "addCategory": "Ajouter une catégorie",
+    "nameRequired": "Le nom de la catégorie est obligatoire",
+    "created": "Catégorie \"{{name}}\" créée",
+    "createFailed": "Échec de la création de la catégorie",
+    "subtitle": "Organiser les produits en catégories hiérarchiques",
+    "newNamePlaceholder": "Nom de la nouvelle catégorie…",
+    "saveAria": "Enregistrer la catégorie",
+    "cancelEditAria": "Annuler la modification",
+    "editAria": "Modifier la catégorie",
+    "confirmDeleteTitle": "Supprimer la catégorie ?",
+    "confirmDeleteBody": "Les produits de cette catégorie ne seront pas supprimés, mais ils n'auront plus de catégorie.",
+    "deleted": "Catégorie supprimée",
+    "updated": "Catégorie mise à jour"
   },
   "settings": {
     "team": {
@@ -271,7 +312,14 @@
       "description": "Choisissez un ou plusieurs produits dans la liste pour voir leurs étiquettes de codes-barres ici."
     },
     "selectFirst": "Sélectionner le premier produit",
-    "goToProducts": "Aller aux produits"
+    "goToProducts": "Aller aux produits",
+    "selectFirstToast": "Sélectionnez d'abord des produits",
+    "printing_one": "Impression de {{count}} étiquette",
+    "printing_many": "Impression de {{count}} d'étiquettes",
+    "printing_other": "Impression de {{count}} étiquettes",
+    "subtitle": "Sélectionnez les produits, choisissez le nombre de copies et imprimez",
+    "copies": "COPIES",
+    "products": "PRODUITS"
   },
   "valuation": {
     "empty": {

@@ -31,8 +31,17 @@ import path from 'node:path';
  */
 const INLINE = />\s*([A-Z][A-Za-z][^<>{}]*?)\s*</;
 
-/** A user-facing prop whose value is copy rather than a token. */
-const PROP = /(?:placeholder|title|label|aria-label|alt|hint)="([A-Z][^"]{2,})"/;
+/**
+ * A user-facing prop whose value is copy rather than a token.
+ *
+ * The alternatives are matched loosely on purpose: `subtitle="…"` is caught by
+ * `title`, and `metaDescription="…"` by `description`. What that does not
+ * reach is a name with a capital inside it, which is why `confirmLabel` and
+ * `cancelLabel` are listed even though `label` is already here. erp and crm
+ * between them had 10 confirm labels and 21 descriptions that no pattern saw.
+ */
+const PROP =
+  /(?:placeholder|title|label|aria-label|alt|hint|description|confirmLabel|cancelLabel)="([A-Z][^"]{2,})"/;
 
 /** A string handed to a toast or an error, which reaches the user directly. */
 const CALL =

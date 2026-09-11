@@ -202,7 +202,18 @@
       "title": "No variants",
       "description": "Add variants to differentiate your products"
     },
-    "addVariant": "Add Variant"
+    "addVariant": "Add Variant",
+    "productIdRequired": "Product ID is required",
+    "nameRequired": "Variant name is required",
+    "priceNegative": "Price cannot be negative",
+    "created": "Variant created",
+    "createFailed": "Failed to create variant",
+    "subtitle": "Individual SKUs for sizes, colors, flavors and more",
+    "newVariant": "New Variant",
+    "productIdPlaceholder": "Product ID",
+    "namePlaceholder": "Variant name (e.g. Large / Red)",
+    "skuPlaceholder": "SKU (optional)",
+    "attributes": "Attributes"
   },
   "priceLists": {
     "empty": {
@@ -210,14 +221,31 @@
       "description": "Create your first price list to enable tier pricing"
     },
     "newPriceList": "New Price List",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "nameRequired": "Price list name is required",
+    "created": "Price list created",
+    "createFailed": "Failed to create price list",
+    "subtitle": "Currency-based pricing strategies",
+    "currencyPlaceholder": "Currency (e.g. USD)",
+    "setDefault": "Set as default price list"
   },
   "brands": {
     "empty": {
       "title": "No brands yet",
       "description": "Add your first brand to group products."
     },
-    "newBrand": "New Brand"
+    "newBrand": "New Brand",
+    "nameRequired": "Brand name is required",
+    "created": "Brand created",
+    "createFailed": "Failed to create brand",
+    "countAcrossCatalog_one": "{{count}} brand across your catalog",
+    "countAcrossCatalog_other": "{{count}} brands across your catalog",
+    "deleteAria": "Delete brand",
+    "confirmDeleteTitle": "Delete brand?",
+    "confirmDeleteBody": "Products with this brand will not be deleted, but they will become unbranded.",
+    "deleted": "Brand deleted",
+    "namePlaceholder": "Brand name",
+    "descriptionPlaceholder": "Description (optional)"
   },
   "expiry": {
     "empty": {
@@ -254,7 +282,19 @@
       "title": "No categories yet",
       "description": "Create your first category to organize products"
     },
-    "addCategory": "Add Category"
+    "addCategory": "Add Category",
+    "nameRequired": "Category name is required",
+    "created": "Category \"{{name}}\" created",
+    "createFailed": "Failed to create category",
+    "subtitle": "Organize products into hierarchical categories",
+    "newNamePlaceholder": "New category name…",
+    "saveAria": "Save category",
+    "cancelEditAria": "Cancel edit",
+    "editAria": "Edit category",
+    "confirmDeleteTitle": "Delete category?",
+    "confirmDeleteBody": "Products in this category will not be deleted, but they will become uncategorized.",
+    "deleted": "Category deleted",
+    "updated": "Category updated"
   },
   "settings": {
     "team": {
@@ -271,7 +311,13 @@
       "description": "Choose one or more products from the list to see their barcode labels here."
     },
     "selectFirst": "Select First Product",
-    "goToProducts": "Go to Products"
+    "goToProducts": "Go to Products",
+    "selectFirstToast": "Select products first",
+    "printing_one": "Printing {{count}} label",
+    "printing_other": "Printing {{count}} labels",
+    "subtitle": "Select products, choose copy count, and print labels",
+    "copies": "COPIES",
+    "products": "PRODUCTS"
   },
   "valuation": {
     "empty": {
