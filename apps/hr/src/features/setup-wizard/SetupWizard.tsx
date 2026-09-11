@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -181,7 +182,7 @@ const SetupWizard = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Setup wizard · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.setupWizard'))} />
       <div>
         <div className="mb-6 text-center">
           <h1 className="text-xl font-bold" style={{ color: 'var(--hr-text)' }}>
