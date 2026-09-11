@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { motion } from 'motion/react';
 import type { Variants } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -406,7 +407,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.dashboard'))} />
       <motion.div
         variants={container}
         initial="hidden"
