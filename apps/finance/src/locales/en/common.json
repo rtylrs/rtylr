@@ -31,5 +31,25 @@
     "reconciliation": "Reconciliation",
     "recurringInvoices": "Recurring invoices",
     "taxSummary": "Tax summary"
-  }
+  },
+  "prev": "Prev",
+  "next": "Next",
+  "description": "Description",
+  "subtotal": "Subtotal",
+  "discount": "Discount",
+  "receipt": "Receipt",
+  "category": "Category",
+  "vendor": "Vendor",
+  "layout": {
+    "openNav": "Open navigation menu",
+    "primaryNav": "Primary navigation",
+    "closeNav": "Close navigation menu",
+    "search": "Search",
+    "shortcut": "Cmd K",
+    "appearance": "Appearance",
+    "signOut": "Sign out",
+    "notifications": "Notifications"
+  },
+  "closeDialog": "Close dialog",
+  "loadingLabel": "Loading"
 }

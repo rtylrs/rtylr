@@ -91,6 +91,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, change, up, icon: Ico
 );
 
 const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
+  const { t } = useTranslation();
   const chartH = 140;
   const barW = 28;
   const gap = 16;
@@ -167,7 +168,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
           opacity={0.85}
         />
         <text x={14} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
-          Revenue
+          {t('finance.dashboard.revenue')}
         </text>
         <rect
           x={60}
@@ -179,7 +180,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
           opacity={0.7}
         />
         <text x={74} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
-          Expenses
+          {t('finance.dashboard.expenses')}
         </text>
       </g>
     </svg>
@@ -308,7 +309,7 @@ const Dashboard: React.FC = () => {
                   color: 'var(--hub-text)',
                 }}
               >
-                Revenue vs Expenses
+                {t('finance.dashboard.revenueVsExpenses')}
               </h2>
               <BarChart barData={barData} />
             </div>
@@ -347,7 +348,7 @@ const Dashboard: React.FC = () => {
           <h2
             style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}
           >
-            Recent Transactions
+            {t('finance.dashboard.recentTransactions')}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {transactions.map((t, i) => (

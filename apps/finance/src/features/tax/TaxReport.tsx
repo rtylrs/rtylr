@@ -38,10 +38,10 @@ const TaxReport: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.taxSummary'))} />
       <PageHeader
-        title="Tax Summary"
+        title={t('tax.report.title')}
         breadcrumbs={[{ label: 'Reports' }, { label: 'Tax' }]}
         actions={
-          <button type="button" style={ghostBtn} disabled title="Export coming in a future update">
+          <button type="button" style={ghostBtn} disabled title={t('tax.report.exportSoon')}>
             <Download size={13} /> Export
           </button>
         }
@@ -49,13 +49,15 @@ const TaxReport: React.FC = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Tax collected</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            {t('tax.report.collected')}
+          </div>
           <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}>
             <MoneyDisplay amount={totalCollected} />
           </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Tax owed</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{t('tax.report.owed')}</div>
           <div
             style={{ fontSize: 22, fontWeight: 700, color: 'var(--finance-warning)', marginTop: 6 }}
           >
@@ -63,7 +65,9 @@ const TaxReport: React.FC = () => {
           </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Periods to file</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            {t('tax.report.periodsToFile')}
+          </div>
           <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)', marginTop: 6 }}>
             {toFile}
           </div>

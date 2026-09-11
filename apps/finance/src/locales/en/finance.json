@@ -42,7 +42,9 @@
     "totalInflow": "Total inflow",
     "totalOutflow": "Total outflow",
     "netCashFlow": "Net cash flow",
-    "reports": "Reports"
+    "reports": "Reports",
+    "inflow": "Inflow",
+    "outflow": "Outflow"
   },
   "bills": {
     "receivedFromErp": "Received from ERP, awaiting bills",
@@ -51,7 +53,16 @@
   "balanceSheet": {
     "inventory": "Inventory",
     "inventoryHint": "Live stock value from ERP; shown only when ERP is enabled for this business.",
-    "inventoryUnavailable": "ERP not connected"
+    "inventoryUnavailable": "ERP not connected",
+    "title": "Balance Sheet",
+    "asOf": "As of Date:",
+    "assets": "Assets",
+    "liabilities": "Liabilities",
+    "equity": "Equity",
+    "totalAssets": "Total Assets",
+    "totalLiabilities": "Total Liabilities",
+    "totalEquity": "Total Equity",
+    "check": "Check"
   },
   "unbilled": {
     "region": "Unbilled billable time",
@@ -80,5 +91,42 @@
     "categoryUnavailable": "Category breakdown not available yet.",
     "lockingComingSoon": "Fiscal year period locking is coming soon",
     "closeYear": "Close fiscal year"
+  },
+  "dashboard": {
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "revenueVsExpenses": "Revenue vs Expenses",
+    "recentTransactions": "Recent Transactions"
+  },
+  "overdue": {
+    "title": "Overdue Invoices",
+    "none": "No overdue invoices."
+  },
+  "reminders": {
+    "title": "Payment Reminders",
+    "description": "Automated emails sent to clients when invoices are approaching or past their due date.",
+    "comingSoon": "Reminder schedule coming in a future update",
+    "save": "Save schedule"
+  },
+  "trial": {
+    "addPayment": "Add a payment method to keep your data.",
+    "activate": "Activate plan",
+    "dismiss": "Dismiss"
+  },
+  "search": {
+    "placeholder": "Search invoices, expenses, clients, pages...",
+    "none": "No results"
+  },
+  "clients": {
+    "search": "Search clients",
+    "none": "No clients found"
+  },
+  "pdf": {
+    "download": "Download PDF",
+    "comingSoon": "PDF download coming in a future update"
+  },
+  "team": {
+    "invited": "Invitation sent",
+    "removed": "Member removed"
   }
 }

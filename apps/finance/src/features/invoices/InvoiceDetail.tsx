@@ -39,7 +39,7 @@ const InvoiceDetail: React.FC = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <PageHeader
-          title="Invoice"
+          title={t('invoices.detail.title')}
           breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: id ?? '' }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
@@ -82,7 +82,7 @@ const InvoiceDetail: React.FC = () => {
               style={ghostBtn}
               onClick={() => {
                 navigate({ to: `/invoices/new?clone=${invoice.id}` });
-                toast.success('Cloning invoice');
+                toast.success(t('invoices.detail.cloning'));
               }}
             >
               <Copy size={13} /> Clone
@@ -142,7 +142,7 @@ const InvoiceDetail: React.FC = () => {
                 marginBottom: 10,
               }}
             >
-              Summary
+              {t('invoices.detail.summary')}
             </div>
             <div
               style={{
@@ -153,7 +153,7 @@ const InvoiceDetail: React.FC = () => {
                 color: 'var(--hub-text-muted)',
               }}
             >
-              <span>Total invoiced</span>
+              <span>{t('invoices.detail.totalInvoiced')}</span>
               <MoneyDisplay amount={invoice.amount} />
             </div>
             <div
@@ -165,7 +165,7 @@ const InvoiceDetail: React.FC = () => {
                 color: 'var(--hub-text-muted)',
               }}
             >
-              <span>Paid</span>
+              <span>{t('invoices.detail.paid')}</span>
               <MoneyDisplay amount={invoice.paid} />
             </div>
             <div
@@ -179,7 +179,7 @@ const InvoiceDetail: React.FC = () => {
                 color: balanceDue > 0 ? ACCENT : 'var(--hub-text)',
               }}
             >
-              <span>Balance due</span>
+              <span>{t('invoices.detail.balanceDue')}</span>
               <MoneyDisplay amount={balanceDue} />
             </div>
           </div>
@@ -194,7 +194,7 @@ const InvoiceDetail: React.FC = () => {
                 marginBottom: 10,
               }}
             >
-              History
+              {t('invoices.detail.history')}
             </div>
             {invoice.history?.map((h, i) => (
               <div
@@ -222,7 +222,7 @@ const InvoiceDetail: React.FC = () => {
                 marginBottom: 10,
               }}
             >
-              Client
+              {t('invoices.detail.client')}
             </div>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
               {invoice.client}
@@ -256,7 +256,7 @@ const InvoiceDetail: React.FC = () => {
               toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoice.id}`)),
           })
         }
-        title="Void invoice"
+        title={t('invoices.detail.void')}
         message={`Are you sure you want to void ${invoice.id}? This cannot be undone.`}
         confirmLabel={deleteInvoice.isPending ? 'Voiding...' : 'Void'}
         destructive

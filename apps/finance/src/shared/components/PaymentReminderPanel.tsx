@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bell, BellRing } from 'lucide-react';
 import { cardStyle, ACCENT, ghostBtn } from '../lib/tokens';
 
@@ -11,6 +12,7 @@ const DEFAULT_SCHEDULE = [
 ];
 
 const PaymentReminderPanel: React.FC = () => {
+  const { t } = useTranslation();
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
 
   const toggle = (id: string) =>
@@ -21,11 +23,11 @@ const PaymentReminderPanel: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <Bell size={14} style={{ color: ACCENT }} />
         <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--hub-text)' }}>
-          Payment Reminders
+          {t('finance.reminders.title')}
         </h3>
       </div>
       <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginBottom: 14 }}>
-        Automated emails sent to clients when invoices are approaching or past their due date.
+        {t('finance.reminders.description')}
       </p>
       {schedule.map((r) => (
         <div
@@ -64,10 +66,10 @@ const PaymentReminderPanel: React.FC = () => {
         type="button"
         style={{ ...ghostBtn, marginTop: 14 }}
         disabled
-        title="Reminder schedule coming in a future update"
+        title={t('finance.reminders.comingSoon')}
         onClick={undefined}
       >
-        Save schedule
+        {t('finance.reminders.save')}
       </button>
     </div>
   );

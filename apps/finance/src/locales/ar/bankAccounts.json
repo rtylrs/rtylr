@@ -1,3 +1,23 @@
 {
-  "created": "تم إنشاء الحساب المصرفي"
+  "created": "تم إنشاء الحساب المصرفي",
+  "title": "حركات البنك",
+  "addAccount": "إضافة حساب بنكي",
+  "accountName": "اسم الحساب",
+  "bank": "البنك",
+  "typeLabel": "النوع",
+  "last4": "آخر 4 أرقام",
+  "openingBalance": "الرصيد الافتتاحي",
+  "currency": "العملة",
+  "type": {
+    "checking": "جاري",
+    "savings": "توفير",
+    "credit": "ائتمان"
+  },
+  "payment": {
+    "amountPositive": "يجب أن يكون المبلغ أكبر من صفر",
+    "dateAndReferenceRequired": "تاريخ السداد والمرجع مطلوبان",
+    "method": "طريقة السداد",
+    "reference": "المرجع",
+    "referencePlaceholder": "رقم العملية أو الإيصال"
+  }
 }

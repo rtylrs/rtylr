@@ -17,5 +17,8 @@
   "creditAccPlaceholder": "Nom du compte crédité",
   "cancel": "Annuler",
   "create": "Créer",
-  "creating": "Création en cours…"
+  "creating": "Création en cours…",
+  "twoLinesRequired": "Une écriture demande au moins deux lignes",
+  "entryLines": "Lignes de l'écriture",
+  "accountName": "Nom du compte"
 }

@@ -42,7 +42,9 @@
     "totalInflow": "Entrées totales",
     "totalOutflow": "Sorties totales",
     "netCashFlow": "Flux de trésorerie net",
-    "reports": "Rapports"
+    "reports": "Rapports",
+    "inflow": "Entrées",
+    "outflow": "Sorties"
   },
   "bills": {
     "receivedFromErp": "Reçues de l’ERP, en attente de factures",
@@ -67,7 +69,16 @@
   "balanceSheet": {
     "inventory": "Stocks",
     "inventoryHint": "Valeur des stocks en temps réel depuis l'ERP, affichée uniquement lorsque l'ERP est activé pour cette entreprise.",
-    "inventoryUnavailable": "ERP non connecté"
+    "inventoryUnavailable": "ERP non connecté",
+    "title": "Bilan",
+    "asOf": "À la date du :",
+    "assets": "Actif",
+    "liabilities": "Passif",
+    "equity": "Capitaux propres",
+    "totalAssets": "Total de l'actif",
+    "totalLiabilities": "Total du passif",
+    "totalEquity": "Total des capitaux propres",
+    "check": "Contrôle"
   },
   "profitLoss": {
     "title": "Compte de résultat",
@@ -86,5 +97,42 @@
     "categoryUnavailable": "La répartition par catégorie n'est pas encore disponible.",
     "lockingComingSoon": "Le verrouillage des périodes arrive bientôt",
     "closeYear": "Clôturer l'exercice"
+  },
+  "dashboard": {
+    "revenue": "Produits",
+    "expenses": "Dépenses",
+    "revenueVsExpenses": "Produits et dépenses",
+    "recentTransactions": "Transactions récentes"
+  },
+  "overdue": {
+    "title": "Factures en retard",
+    "none": "Aucune facture en retard."
+  },
+  "reminders": {
+    "title": "Relances de paiement",
+    "description": "E-mails envoyés automatiquement aux clients à l'approche de l'échéance ou après.",
+    "comingSoon": "La planification des relances arrivera dans une prochaine mise à jour",
+    "save": "Enregistrer la planification"
+  },
+  "trial": {
+    "addPayment": "Ajoutez un moyen de paiement pour conserver vos données.",
+    "activate": "Activer l'offre",
+    "dismiss": "Masquer"
+  },
+  "search": {
+    "placeholder": "Rechercher factures, dépenses, clients, pages...",
+    "none": "Aucun résultat"
+  },
+  "clients": {
+    "search": "Rechercher un client",
+    "none": "Aucun client trouvé"
+  },
+  "pdf": {
+    "download": "Télécharger le PDF",
+    "comingSoon": "Le téléchargement PDF arrivera dans une prochaine mise à jour"
+  },
+  "team": {
+    "invited": "Invitation envoyée",
+    "removed": "Membre retiré"
   }
 }

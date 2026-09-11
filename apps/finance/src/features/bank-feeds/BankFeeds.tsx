@@ -24,6 +24,9 @@ import {
 } from '../../shared/lib/tokens';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
 
+// The stored value is the account type; only its label is translated.
+const ACCOUNT_TYPES = ['checking', 'savings', 'credit'] as const;
+
 const iconFor: Record<
   string,
   React.ComponentType<{ size?: number; style?: React.CSSProperties }>
@@ -90,7 +93,7 @@ const BankFeeds: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.bankFeeds'))} />
       <PageHeader
-        title="Bank Feeds"
+        title={t('bankAccounts.title')}
         subtitle={
           <>
             {accounts.length} connected accounts <>&middot;</> <MoneyDisplay amount={total} /> total
@@ -272,7 +275,7 @@ const BankFeeds: React.FC = () => {
       <Modal
         open={showConnect && canManageAccounts}
         onClose={() => setShowConnect(false)}
-        title="Add Bank Account"
+        title={t('bankAccounts.addAccount')}
         footer={
           <>
             <button
@@ -281,7 +284,7 @@ const BankFeeds: React.FC = () => {
               onClick={() => setShowConnect(false)}
               disabled={createAccount.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -303,7 +306,7 @@ const BankFeeds: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="bank-account-name">
-              Account name
+              {t('bankAccounts.accountName')}
             </label>
             <input
               id="bank-account-name"
@@ -316,7 +319,7 @@ const BankFeeds: React.FC = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="bank-account-bank">
-              Bank
+              {t('bankAccounts.bank')}
             </label>
             <input
               id="bank-account-bank"
@@ -331,7 +334,7 @@ const BankFeeds: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={labelStyle} htmlFor="bank-account-type">
-                Type
+                {t('bankAccounts.typeLabel')}
               </label>
               <select
                 id="bank-account-type"
@@ -341,14 +344,16 @@ const BankFeeds: React.FC = () => {
                 }
                 style={inputStyle}
               >
-                <option value="checking">Checking</option>
-                <option value="savings">Savings</option>
-                <option value="credit">Credit</option>
+                {ACCOUNT_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {t(`bankAccounts.type.${type}`)}
+                  </option>
+                ))}
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={labelStyle} htmlFor="bank-account-last-four">
-                Last 4 digits
+                {t('bankAccounts.last4')}
               </label>
               <input
                 id="bank-account-last-four"
@@ -369,7 +374,7 @@ const BankFeeds: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={labelStyle} htmlFor="bank-account-balance">
-                Opening balance
+                {t('bankAccounts.openingBalance')}
               </label>
               <input
                 id="bank-account-balance"
@@ -385,7 +390,7 @@ const BankFeeds: React.FC = () => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={labelStyle} htmlFor="bank-account-currency">
-                Currency
+                {t('bankAccounts.currency')}
               </label>
               <input
                 id="bank-account-currency"

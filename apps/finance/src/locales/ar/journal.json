@@ -17,5 +17,8 @@
   "creditAccPlaceholder": "اسم الحساب الدائن",
   "cancel": "إلغاء",
   "create": "إنشاء",
-  "creating": "جاري الإنشاء…"
+  "creating": "جاري الإنشاء…",
+  "twoLinesRequired": "يتطلب قيد اليومية سطرين على الأقل",
+  "entryLines": "سطور القيد",
+  "accountName": "اسم الحساب"
 }

@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, Search } from 'lucide-react';
 import { unwrap } from '@voxire/api';
 import { listCrmCustomers } from '../lib/clients';
@@ -21,6 +22,7 @@ interface ClientSelectProps {
 }
 
 const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [clients, setClients] = useState<Client[]>([]);
@@ -92,7 +94,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search clients"
+              placeholder={t('finance.clients.search')}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -139,7 +141,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
                 color: 'var(--hub-text-dim)',
               }}
             >
-              No clients found
+              {t('finance.clients.none')}
             </div>
           )}
         </div>

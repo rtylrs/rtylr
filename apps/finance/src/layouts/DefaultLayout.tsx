@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { LicenseBanner } from '@voxire/components';
@@ -207,6 +208,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 };
 
 const DefaultLayout: React.FC = () => {
+  const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
@@ -334,7 +336,7 @@ const DefaultLayout: React.FC = () => {
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            aria-label="Open navigation menu"
+            aria-label={t('common.layout.openNav')}
             aria-expanded={sidebarOpen}
             aria-controls="finance-sidebar"
             className="flex h-11 w-11 items-center justify-center rounded-lg"
@@ -358,7 +360,7 @@ const DefaultLayout: React.FC = () => {
 
         <aside
           id="finance-sidebar"
-          aria-label="Primary navigation"
+          aria-label={t('common.layout.primaryNav')}
           className={[
             sidebarOpen ? 'fixed inset-y-0 start-0 z-50 flex' : 'hidden',
             'md:flex w-56 flex-col shrink-0 overflow-hidden',
@@ -393,7 +395,7 @@ const DefaultLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              aria-label="Close navigation menu"
+              aria-label={t('common.layout.closeNav')}
               className="flex h-11 w-11 items-center justify-center rounded-lg md:hidden"
               style={{ color: 'var(--hub-text-muted)' }}
             >
@@ -420,11 +422,11 @@ const DefaultLayout: React.FC = () => {
               }}
             >
               <SearchIcon size={12} />
-              <span>Search</span>
+              <span>{t('common.layout.search')}</span>
               <span
                 style={{ marginInlineStart: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}
               >
-                Cmd K
+                {t('common.layout.shortcut')}
               </span>
             </button>
           </div>
@@ -540,7 +542,7 @@ const DefaultLayout: React.FC = () => {
                       className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
                       style={{ color: 'var(--hub-text-dim)' }}
                     >
-                      Appearance
+                      {t('common.layout.appearance')}
                     </p>
                     <div className="flex gap-1 mb-2">
                       {(
@@ -590,7 +592,7 @@ const DefaultLayout: React.FC = () => {
                       }}
                     >
                       <LogOut size={14} />
-                      Sign out
+                      {t('common.layout.signOut')}
                     </button>
                   </motion.div>
                 )}
@@ -634,7 +636,7 @@ const DefaultLayout: React.FC = () => {
                 <button
                   type="button"
                   onClick={undefined}
-                  aria-label="Notifications"
+                  aria-label={t('common.layout.notifications')}
                   style={{
                     height: 28,
                     width: 28,

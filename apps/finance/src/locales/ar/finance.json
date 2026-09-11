@@ -42,7 +42,9 @@
     "totalInflow": "إجمالي التدفقات الداخلة",
     "totalOutflow": "إجمالي التدفقات الخارجة",
     "netCashFlow": "صافي التدفق النقدي",
-    "reports": "التقارير"
+    "reports": "التقارير",
+    "inflow": "الوارد",
+    "outflow": "الصادر"
   },
   "bills": {
     "receivedFromErp": "واردة من ERP بانتظار الفواتير",
@@ -67,7 +69,16 @@
   "balanceSheet": {
     "inventory": "المخزون",
     "inventoryHint": "قيمة المخزون الحالية من نظام تخطيط الموارد، وتظهر فقط عند تمكينه لهذا العمل.",
-    "inventoryUnavailable": "نظام تخطيط الموارد غير متصل"
+    "inventoryUnavailable": "نظام تخطيط الموارد غير متصل",
+    "title": "الميزانية العمومية",
+    "asOf": "حتى تاريخ:",
+    "assets": "الأصول",
+    "liabilities": "الالتزامات",
+    "equity": "حقوق الملكية",
+    "totalAssets": "إجمالي الأصول",
+    "totalLiabilities": "إجمالي الالتزامات",
+    "totalEquity": "إجمالي حقوق الملكية",
+    "check": "التحقق"
   },
   "profitLoss": {
     "title": "الأرباح والخسائر",
@@ -86,5 +97,42 @@
     "categoryUnavailable": "تفصيل الفئات غير متاح بعد.",
     "lockingComingSoon": "إقفال فترات السنة المالية قادم قريبًا",
     "closeYear": "إقفال السنة المالية"
+  },
+  "dashboard": {
+    "revenue": "الإيرادات",
+    "expenses": "المصروفات",
+    "revenueVsExpenses": "الإيرادات مقابل المصروفات",
+    "recentTransactions": "أحدث الحركات"
+  },
+  "overdue": {
+    "title": "الفواتير المتأخرة",
+    "none": "لا فواتير متأخرة."
+  },
+  "reminders": {
+    "title": "تذكيرات السداد",
+    "description": "رسائل تُرسل تلقائيًا إلى العملاء عند اقتراب موعد استحقاق الفاتورة أو تجاوزه.",
+    "comingSoon": "جدولة التذكيرات قادمة في تحديث لاحق",
+    "save": "حفظ الجدول"
+  },
+  "trial": {
+    "addPayment": "أضف وسيلة دفع للاحتفاظ ببياناتك.",
+    "activate": "تفعيل الخطة",
+    "dismiss": "إخفاء"
+  },
+  "search": {
+    "placeholder": "ابحث في الفواتير والمصروفات والعملاء والصفحات...",
+    "none": "لا نتائج"
+  },
+  "clients": {
+    "search": "ابحث عن عميل",
+    "none": "لا عملاء"
+  },
+  "pdf": {
+    "download": "تنزيل PDF",
+    "comingSoon": "تنزيل PDF قادم في تحديث لاحق"
+  },
+  "team": {
+    "invited": "تم إرسال الدعوة",
+    "removed": "تمت إزالة العضو"
   }
 }

@@ -82,7 +82,7 @@ const BalanceSheet: React.FC = () => {
     return (
       <div>
         <PageHeader
-          title="Balance Sheet"
+          title={t('finance.balanceSheet.title')}
           breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
@@ -105,13 +105,13 @@ const BalanceSheet: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.balanceSheet'))} />
       <PageHeader
-        title="Balance Sheet"
+        title={t('finance.balanceSheet.title')}
         subtitle={`As of ${asOfDate}`}
         breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <label style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>
-              As of Date:
+              {t('finance.balanceSheet.asOf')}
             </label>
             <input
               type="date"
@@ -139,7 +139,7 @@ const BalanceSheet: React.FC = () => {
         }}
       >
         <Section
-          title="Assets"
+          title={t('finance.balanceSheet.assets')}
           rows={
             inventory
               ? [
@@ -153,8 +153,8 @@ const BalanceSheet: React.FC = () => {
               : data.assets
           }
         />
-        <Section title="Liabilities" rows={data.liabilities} />
-        <Section title="Equity" rows={data.equity} />
+        <Section title={t('finance.balanceSheet.liabilities')} rows={data.liabilities} />
+        <Section title={t('finance.balanceSheet.equity')} rows={data.equity} />
       </div>
 
       <div
@@ -166,10 +166,22 @@ const BalanceSheet: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <Stat label="Total Assets" value={totalAssets} />
-        <Stat label="Total Liabilities" value={totalLiab} color="var(--finance-danger)" />
-        <Stat label="Total Equity" value={totalEquity} color="var(--finance-purple)" />
-        <Stat label="Check" value={totalAssets - (totalLiab + totalEquity)} color={ACCENT} />
+        <Stat label={t('finance.balanceSheet.totalAssets')} value={totalAssets} />
+        <Stat
+          label={t('finance.balanceSheet.totalLiabilities')}
+          value={totalLiab}
+          color="var(--finance-danger)"
+        />
+        <Stat
+          label={t('finance.balanceSheet.totalEquity')}
+          value={totalEquity}
+          color="var(--finance-purple)"
+        />
+        <Stat
+          label={t('finance.balanceSheet.check')}
+          value={totalAssets - (totalLiab + totalEquity)}
+          color={ACCENT}
+        />
       </div>
     </motion.div>
   );

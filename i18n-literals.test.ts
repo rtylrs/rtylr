@@ -17,7 +17,7 @@ import { collectLiterals, formatLiterals } from './test/i18nLiterals';
  * finding. Each app joins as it is cleared, the way `ENFORCED_APPS` in
  * `i18n-key-resolution.test.ts` grew from two to nine.
  */
-const ENFORCED_APPS = ['auth', 'flow', 'hr', 'insights', 'recruit'] as const;
+const ENFORCED_APPS = ['auth', 'finance', 'flow', 'hr', 'insights', 'recruit'] as const;
 
 /**
  * Text that is deliberately not translated, per app.
@@ -47,6 +47,8 @@ const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
   // A key cap. The user's keyboard says ESC whatever language they read.
   flow: ['ESC'],
   hr: ['ESC'],
+  // Nothing: finance has no string that should stay English.
+  finance: [],
   // A date format the user types into, not prose.
   insights: ['MM-DD'],
   // A pangram rendered in each pairing's own Latin faces, so translated
@@ -61,6 +63,7 @@ const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
  */
 const MINIMUM_KEYS: Record<(typeof ENFORCED_APPS)[number], number> = {
   auth: 70,
+  finance: 180,
   flow: 500,
   hr: 700,
   insights: 110,

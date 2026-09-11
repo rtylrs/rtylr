@@ -3,5 +3,18 @@
   "updated": "Facture récurrente mise à jour",
   "emptyTitle": "Aucune facture récurrente pour le moment",
   "emptyDescription": "Créez un abonnement pour facturer automatiquement vos clients selon un calendrier.",
-  "emptyCta": "Créer un abonnement"
+  "emptyCta": "Créer un abonnement",
+  "title": "Factures récurrentes",
+  "new": "Nouvelle facture récurrente",
+  "templateRequired": "Une facture modèle est obligatoire",
+  "templateInvoice": "Facture modèle",
+  "templatePlaceholder": "Choisir une facture modèle...",
+  "frequencyLabel": "Fréquence",
+  "nextInvoiceDate": "Date de la prochaine facture",
+  "frequency": {
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuelle",
+    "quarterly": "Trimestrielle",
+    "yearly": "Annuelle"
+  }
 }

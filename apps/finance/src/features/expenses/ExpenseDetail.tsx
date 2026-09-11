@@ -55,7 +55,7 @@ const ExpenseDetail: React.FC = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <PageHeader
-          title="Expense"
+          title={t('expenses.detailTitle')}
           breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: id ?? '' }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
@@ -123,13 +123,13 @@ const ExpenseDetail: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Field label="Date" value={expense.expenseDate} />
-            <Field label="Description" value={expense.description} />
-            <Field label="Category" value={categoryName} />
-            <Field label="Amount">
+            <Field label={t('common.date')} value={expense.expenseDate} />
+            <Field label={t('common.description')} value={expense.description} />
+            <Field label={t('common.category')} value={categoryName} />
+            <Field label={t('common.amount')}>
               <MoneyDisplay amount={expense.amount} />
             </Field>
-            <Field label="Vendor" value={expense.vendor ?? undefined} />
+            <Field label={t('common.vendor')} value={expense.vendor ?? undefined} />
             <div
               style={{
                 marginTop: 10,
@@ -154,7 +154,7 @@ const ExpenseDetail: React.FC = () => {
               marginBottom: 12,
             }}
           >
-            Receipt
+            {t('common.receipt')}
           </div>
           <ReceiptUpload value={receipt} onChange={setReceipt} />
         </div>

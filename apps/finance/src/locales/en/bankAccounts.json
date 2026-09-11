@@ -1,3 +1,23 @@
 {
-  "created": "Bank account created"
+  "created": "Bank account created",
+  "title": "Bank Feeds",
+  "addAccount": "Add Bank Account",
+  "accountName": "Account name",
+  "bank": "Bank",
+  "typeLabel": "Type",
+  "last4": "Last 4 digits",
+  "openingBalance": "Opening balance",
+  "currency": "Currency",
+  "type": {
+    "checking": "Checking",
+    "savings": "Savings",
+    "credit": "Credit"
+  },
+  "payment": {
+    "amountPositive": "Amount must be greater than zero",
+    "dateAndReferenceRequired": "Payment date and reference are required",
+    "method": "Method",
+    "reference": "Reference",
+    "referencePlaceholder": "Transaction ID or receipt number"
+  }
 }

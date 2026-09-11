@@ -31,5 +31,25 @@
     "reconciliation": "التسوية",
     "recurringInvoices": "الفواتير المتكررة",
     "taxSummary": "ملخص الضرائب"
-  }
+  },
+  "prev": "السابق",
+  "next": "التالي",
+  "description": "الوصف",
+  "subtotal": "المجموع الفرعي",
+  "discount": "الخصم",
+  "receipt": "الإيصال",
+  "category": "الفئة",
+  "vendor": "المورد",
+  "layout": {
+    "openNav": "فتح قائمة التنقل",
+    "primaryNav": "التنقل الرئيسي",
+    "closeNav": "إغلاق قائمة التنقل",
+    "search": "بحث",
+    "shortcut": "Cmd K",
+    "appearance": "المظهر",
+    "signOut": "تسجيل الخروج",
+    "notifications": "الإشعارات"
+  },
+  "closeDialog": "إغلاق النافذة",
+  "loadingLabel": "جارٍ التحميل"
 }

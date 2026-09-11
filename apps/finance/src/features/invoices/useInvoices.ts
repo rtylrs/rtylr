@@ -102,11 +102,12 @@ export function useInvoices(params: UseInvoicesParams = {}) {
 }
 
 export function useInvoiceDetail(id: string | undefined) {
+  const { t } = useTranslation();
   return useQuery<Invoice>({
     queryKey: ['invoice', id],
     queryFn: async (): Promise<Invoice> => {
       const res = await invoicesClient.getInvoice({ id: id ?? '' });
-      if (!res.invoice) throw new Error('Invoice not found');
+      if (!res.invoice) throw new Error(t('invoices.notFound'));
       return fromApiDetail(res.invoice);
     },
     enabled: !!id,
@@ -119,7 +120,7 @@ export function useCreateInvoice() {
   return useMutation({
     mutationFn: async (data: CreateInvoiceRequest): Promise<Invoice> => {
       const res = await invoicesClient.createInvoice(data);
-      if (!res.invoice) throw new Error('Invoice created but not returned');
+      if (!res.invoice) throw new Error(t('invoices.createdNotReturned'));
       return fromApiDetail(res.invoice);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
@@ -148,7 +149,7 @@ export function useUpdateInvoice() {
       data: UpdateInvoiceBody;
     }): Promise<Invoice> => {
       const res = await invoicesClient.updateInvoice({ id, body: data });
-      if (!res.invoice) throw new Error('Invoice updated but not returned');
+      if (!res.invoice) throw new Error(t('invoices.updatedNotReturned'));
       return fromApiDetail(res.invoice);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),

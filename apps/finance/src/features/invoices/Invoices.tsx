@@ -150,7 +150,7 @@ const Invoices: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('nav.invoices'))} />
       <PageHeader
-        title="Invoices"
+        title={t('invoices.list.title')}
         subtitle={
           <>
             {filtered.length} invoice{filtered.length !== 1 ? 's' : ''} <>&middot;</>{' '}
@@ -179,7 +179,7 @@ const Invoices: React.FC = () => {
               <Download size={13} /> Xero
             </button>
             <Link to="/invoices/recurring" style={{ ...ghostBtn, textDecoration: 'none' }}>
-              Recurring
+              {t('invoices.list.recurring')}
             </Link>
             <button
               type="button"
@@ -406,7 +406,7 @@ const Invoices: React.FC = () => {
                       >
                         <Eye size={12} /> View
                       </Link>
-                      <DownloadPdfButton invoiceId={inv.id} label="PDF" />
+                      <DownloadPdfButton invoiceId={inv.id} label={t('invoices.list.pdf')} />
                       {inv.status === 'Draft' && (
                         <button
                           type="button"
@@ -461,7 +461,7 @@ const Invoices: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Prev
+              {t('common.prev')}
             </button>
             <button
               type="button"
@@ -470,7 +470,7 @@ const Invoices: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Next
+              {t('common.next')}
             </button>
           </div>
         </div>

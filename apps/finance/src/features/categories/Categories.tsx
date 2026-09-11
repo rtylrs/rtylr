@@ -106,7 +106,7 @@ const Categories: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.expenseCategories'))} />
       <PageHeader
-        title="Expense Categories"
+        title={t('categories.title')}
         subtitle={`${data.length} categories`}
         actions={
           <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
@@ -168,7 +168,7 @@ const Categories: React.FC = () => {
                       type="button"
                       onClick={() => startEdit(c)}
                       className="p-1 rounded hover:bg-white/10 text-white/60 hover:text-white transition"
-                      title="Edit Category"
+                      title={t('categories.edit')}
                       aria-label={`Edit ${c.name}`}
                     >
                       <Edit2 size={13} />
@@ -177,7 +177,7 @@ const Categories: React.FC = () => {
                       type="button"
                       onClick={() => setDeletingCategoryId(c.id)}
                       className="p-1 rounded hover:bg-red-500/10 text-white/60 hover:text-red-400 transition"
-                      title="Delete Category"
+                      title={t('categories.delete')}
                       aria-label={`Delete ${c.name}`}
                     >
                       <Trash2 size={13} />
@@ -233,7 +233,7 @@ const Categories: React.FC = () => {
       <Modal
         open={showCreate}
         onClose={() => setShowCreate(false)}
-        title="New Expense Category"
+        title={t('categories.newTitle')}
         footer={
           <>
             <button
@@ -242,7 +242,7 @@ const Categories: React.FC = () => {
               onClick={() => setShowCreate(false)}
               disabled={createCategory.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -259,7 +259,7 @@ const Categories: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="expense-category-name">
-              Name
+              {t('categories.name')}
             </label>
             <input
               id="expense-category-name"
@@ -287,7 +287,7 @@ const Categories: React.FC = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="expense-category-color">
-              Color
+              {t('categories.color')}
             </label>
             <input
               id="expense-category-color"
@@ -304,7 +304,7 @@ const Categories: React.FC = () => {
       <Modal
         open={Boolean(editingCategory)}
         onClose={() => setEditingCategory(null)}
-        title="Edit Expense Category"
+        title={t('categories.editTitle')}
         footer={
           <>
             <button
@@ -313,7 +313,7 @@ const Categories: React.FC = () => {
               onClick={() => setEditingCategory(null)}
               disabled={updateCategory.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -330,7 +330,7 @@ const Categories: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="edit-category-name">
-              Name
+              {t('categories.name')}
             </label>
             <input
               id="edit-category-name"
@@ -343,7 +343,7 @@ const Categories: React.FC = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="edit-category-budget">
-              Monthly Budget
+              {t('categories.monthlyBudget')}
             </label>
             <input
               id="edit-category-budget"
@@ -358,7 +358,7 @@ const Categories: React.FC = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="edit-category-color">
-              Color
+              {t('categories.color')}
             </label>
             <input
               id="edit-category-color"
@@ -374,7 +374,7 @@ const Categories: React.FC = () => {
       {/* Delete Confirmation */}
       <ConfirmDialog
         open={deletingCategoryId != null}
-        title="Delete Expense Category"
+        title={t('categories.deleteTitle')}
         message="Are you sure you want to delete this category? Any existing expenses in this category will become uncategorized."
         confirmLabel="Delete"
         destructive
