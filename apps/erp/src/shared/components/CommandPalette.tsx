@@ -5,6 +5,8 @@ import { useProducts } from '../../features/products/useProducts';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
 import { usePurchaseOrders } from '../../features/purchasing/usePurchaseOrders';
 import { useDialogFocus } from '../hooks/useDialogFocus';
+import { useTranslation } from 'react-i18next';
+import { routeLabels } from '../lib/routeLabels';
 
 interface CommandPaletteProps {
   open: boolean;
@@ -19,28 +21,41 @@ interface Result {
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
 }
 
-const NAV_ITEMS: Result[] = [
-  { type: 'nav', label: 'Dashboard', to: '/', icon: LayoutDashboard },
-  { type: 'nav', label: 'Inventory', to: '/inventory', icon: Package },
-  { type: 'nav', label: 'Categories', to: '/categories', icon: Package },
-  { type: 'nav', label: 'Brands', to: '/brands', icon: Package },
-  { type: 'nav', label: 'Warehouses', to: '/warehouses', icon: Package },
-  { type: 'nav', label: 'Stock Transfers', to: '/transfers', icon: Package },
-  { type: 'nav', label: 'Stock Takes', to: '/stock-takes', icon: Package },
-  { type: 'nav', label: 'Low Stock Alerts', to: '/alerts', icon: Package },
-  { type: 'nav', label: 'Goods Receiving', to: '/receiving', icon: Package },
-  { type: 'nav', label: 'Reorder Suggestions', to: '/reorder', icon: Package },
-  { type: 'nav', label: 'Price Lists', to: '/price-lists', icon: Package },
-  { type: 'nav', label: 'Product Variants', to: '/variants', icon: Package },
-  { type: 'nav', label: 'Barcode Generator', to: '/barcodes', icon: Package },
-  { type: 'nav', label: 'Expiry Tracking', to: '/expiry', icon: Package },
-  { type: 'nav', label: 'Inventory Valuation', to: '/valuation', icon: Package },
-  { type: 'nav', label: 'Purchasing', to: '/purchasing', icon: ShoppingCart },
-  { type: 'nav', label: 'Suppliers', to: '/suppliers', icon: Users },
-  { type: 'nav', label: 'Settings', to: '/settings', icon: Package },
+/**
+ * The palette lists every route by its full name, the same vocabulary the page
+ * title uses. Labels are keys here and are translated where the list is built,
+ * because the query filters on what the reader sees: matching the key would
+ * search English no matter the language.
+ */
+interface NavEntry {
+  labelKey: string;
+  to: string;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+}
+
+const NAV_ITEMS: readonly NavEntry[] = [
+  { labelKey: routeLabels['/'].title, to: '/', icon: LayoutDashboard },
+  { labelKey: routeLabels['/inventory'].title, to: '/inventory', icon: Package },
+  { labelKey: routeLabels['/categories'].title, to: '/categories', icon: Package },
+  { labelKey: routeLabels['/brands'].title, to: '/brands', icon: Package },
+  { labelKey: routeLabels['/warehouses'].title, to: '/warehouses', icon: Package },
+  { labelKey: routeLabels['/transfers'].title, to: '/transfers', icon: Package },
+  { labelKey: routeLabels['/stock-takes'].title, to: '/stock-takes', icon: Package },
+  { labelKey: routeLabels['/alerts'].title, to: '/alerts', icon: Package },
+  { labelKey: routeLabels['/receiving'].title, to: '/receiving', icon: Package },
+  { labelKey: routeLabels['/reorder'].title, to: '/reorder', icon: Package },
+  { labelKey: routeLabels['/price-lists'].title, to: '/price-lists', icon: Package },
+  { labelKey: routeLabels['/variants'].title, to: '/variants', icon: Package },
+  { labelKey: routeLabels['/barcodes'].title, to: '/barcodes', icon: Package },
+  { labelKey: routeLabels['/expiry'].title, to: '/expiry', icon: Package },
+  { labelKey: routeLabels['/valuation'].title, to: '/valuation', icon: Package },
+  { labelKey: routeLabels['/purchasing'].title, to: '/purchasing', icon: ShoppingCart },
+  { labelKey: routeLabels['/suppliers'].title, to: '/suppliers', icon: Users },
+  { labelKey: routeLabels['/settings'].title, to: '/settings', icon: Package },
 ];
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const nav = useNavigate();
   const titleId = useId();
   const dialogRef = useDialogFocus<HTMLDivElement>({ open, onClose });
@@ -61,9 +76,22 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
     if (!open) setQ('');
   }, [open]);
 
+  // Translated once, because both the empty query and the filtered query
+  // need the reader's language: filtering on the key would search English.
+  const navEntries = useMemo<Result[]>(
+    () =>
+      NAV_ITEMS.map((n) => ({
+        type: 'nav' as const,
+        label: t(n.labelKey),
+        to: n.to,
+        icon: n.icon,
+      })),
+    [t]
+  );
+
   const results = useMemo<Result[]>(() => {
     const qq = q.toLowerCase().trim();
-    if (!qq) return NAV_ITEMS.slice(0, 8);
+    if (!qq) return navEntries.slice(0, 8);
 
     const productResults: Result[] = products
       .filter(
@@ -103,13 +131,12 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
         icon: ShoppingCart,
       }));
 
-    const navResults: Result[] = NAV_ITEMS.filter((n) => n.label.toLowerCase().includes(qq)).slice(
-      0,
-      4
-    );
+    const navResults: Result[] = navEntries
+      .filter((n) => n.label.toLowerCase().includes(qq))
+      .slice(0, 4);
 
     return [...productResults, ...supplierResults, ...orderResults, ...navResults];
-  }, [q, products, suppliers, orders, supplierNameById]);
+  }, [q, products, suppliers, orders, supplierNameById, navEntries]);
 
   useEffect(() => {
     setActiveIdx(0);
