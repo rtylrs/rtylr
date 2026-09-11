@@ -31,34 +31,71 @@ import {
 import { isAddonEnabled, useAddons } from '../../shared/hooks/queries/useAddons';
 import { buildAppRoleAssignments, dashRoleToLegacyRole } from './authorizationDraft';
 import { useCustomRoles } from '../../shared/hooks/queries/usePermissions';
+import { APP_NAMES } from '../../shared/config/appNames';
 
 const ALL_APPS = [
-  { key: 'pos', label: 'POS', desc: 'Point of sale', icon: MonitorSpeaker, color: '#4583C4' },
-  { key: 'erp', label: 'ERP', desc: 'Inventory and supply', icon: Package, color: '#10b981' },
-  { key: 'hr', label: 'HR', desc: 'Staff and payroll', icon: UserCheck, color: '#f59e0b' },
-  { key: 'crm', label: 'CRM', desc: 'Customers and loyalty', icon: UsersIcon, color: '#8b5cf6' },
+  {
+    key: 'pos',
+    labelKey: APP_NAMES.pos.short,
+    descKey: 'appNames.desc.pos',
+    icon: MonitorSpeaker,
+    color: 'var(--app-pos)',
+  },
+  {
+    key: 'erp',
+    labelKey: APP_NAMES.erp.short,
+    descKey: 'appNames.desc.erp',
+    icon: Package,
+    color: 'var(--app-erp)',
+  },
+  {
+    key: 'hr',
+    labelKey: APP_NAMES.hr.short,
+    descKey: 'appNames.desc.hr',
+    icon: UserCheck,
+    color: 'var(--app-hr)',
+  },
+  {
+    key: 'crm',
+    labelKey: APP_NAMES.crm.short,
+    descKey: 'appNames.desc.crm',
+    icon: UsersIcon,
+    color: 'var(--app-crm)',
+  },
   {
     key: 'finance',
-    label: 'Finance',
-    desc: 'Invoices and expenses',
+    labelKey: APP_NAMES.finance.short,
+    descKey: 'appNames.desc.finance',
     icon: CreditCard,
-    color: '#ef4444',
+    color: 'var(--app-finance)',
   },
-  { key: 'flow', label: 'Flow', desc: 'Projects and tasks', icon: Layers, color: '#64C5B9' },
+  {
+    key: 'flow',
+    labelKey: APP_NAMES.flow.short,
+    descKey: 'appNames.desc.flow',
+    icon: Layers,
+    color: 'var(--app-flow)',
+  },
   {
     key: 'insights',
-    label: 'Insights',
-    desc: 'Reports and analytics',
+    labelKey: APP_NAMES.insights.short,
+    descKey: 'appNames.desc.insights',
     icon: BarChart3,
-    color: '#ec4899',
+    color: 'var(--app-insights)',
   },
-  { key: 'menu', label: 'Menu', desc: 'Menus and ordering', icon: Utensils, color: '#f97316' },
+  {
+    key: 'menu',
+    labelKey: APP_NAMES.menu.short,
+    descKey: 'appNames.desc.menu',
+    icon: Utensils,
+    color: 'var(--app-menu)',
+  },
   {
     key: 'recruit',
-    label: 'Recruit',
-    desc: 'Jobs and candidates',
+    labelKey: APP_NAMES.recruit.short,
+    descKey: 'appNames.desc.recruit',
     icon: BriefcaseBusiness,
-    color: '#06b6d4',
+    color: 'var(--app-recruit)',
   },
 ];
 
@@ -372,10 +409,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               className="text-xs font-semibold"
               style={{ color: checked ? app.color : 'var(--dash-text-muted)' }}
             >
-              {app.label}
+              {t(app.labelKey)}
             </span>
             <span className="text-[10px]" style={{ color: 'var(--dash-text-dim)' }}>
-              {app.desc}
+              {t(app.descKey)}
             </span>
           </button>
         );
