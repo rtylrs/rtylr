@@ -45,13 +45,13 @@ type TabId = 'general' | 'team';
 
 interface Tab {
   id: TabId;
-  label: string;
+  labelKey: string;
   icon: React.ComponentType<{ size?: number }>;
 }
 
 const TABS: Tab[] = [
-  { id: 'general', label: 'General', icon: Settings2 },
-  { id: 'team', label: 'Team', icon: Users },
+  { id: 'general', labelKey: 'settings.tabs.general', icon: Settings2 },
+  { id: 'team', labelKey: 'settings.tabs.team', icon: Users },
 ];
 
 // ── General Tab ───────────────────────────────────────────────────────────────
@@ -572,7 +572,7 @@ const Settings: React.FC = () => {
               }}
             >
               <Icon size={14} />
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           );
         })}
