@@ -14,5 +14,13 @@
     "description": "الوصف",
     "descriptionPlaceholder": "ما هي مهام هذا القسم؟",
     "submit": "إنشاء القسم"
+  },
+  "page": {
+    "metaTitle": "الأقسام · rtylr",
+    "title": "الأقسام",
+    "head": "مدير القسم",
+    "teamSize": "حجم الفريق",
+    "avgSalary": "متوسط الراتب",
+    "shareOfWorkforce": "النسبة من إجمالي الموظفين"
   }
 }
