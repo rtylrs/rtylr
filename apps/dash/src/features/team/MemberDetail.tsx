@@ -56,6 +56,7 @@ import type { GroupSummary } from '../../shared/hooks/queries/useGroups';
 import { groupsClient, permissionClient } from '../../shared/lib/clients';
 import { customRoleSchema } from '../../shared/schemas/permissions';
 import { useUserStore } from '../../shared/stores/userStore';
+import { APP_NAMES } from '../../shared/config/appNames';
 import {
   buildAppRoleAssignments,
   dashRoleToLegacyRole,
@@ -63,15 +64,30 @@ import {
 } from './authorizationDraft';
 
 const ALL_APPS = [
-  { key: 'pos', label: 'POS', icon: MonitorSpeaker, color: '#4583C4' },
-  { key: 'erp', label: 'ERP', icon: Package, color: '#10b981' },
-  { key: 'hr', label: 'HR', icon: UserCheck, color: '#f59e0b' },
-  { key: 'crm', label: 'CRM', icon: Users, color: '#8b5cf6' },
-  { key: 'finance', label: 'Finance', icon: CreditCard, color: '#ef4444' },
-  { key: 'flow', label: 'Flow', icon: Layers, color: '#64C5B9' },
-  { key: 'insights', label: 'Insights', icon: BarChart3, color: '#ec4899' },
-  { key: 'menu', label: 'Menu', icon: Utensils, color: '#f97316' },
-  { key: 'recruit', label: 'Recruit', icon: BriefcaseBusiness, color: '#06b6d4' },
+  { key: 'pos', labelKey: APP_NAMES.pos.short, icon: MonitorSpeaker, color: 'var(--app-pos)' },
+  { key: 'erp', labelKey: APP_NAMES.erp.short, icon: Package, color: 'var(--app-erp)' },
+  { key: 'hr', labelKey: APP_NAMES.hr.short, icon: UserCheck, color: 'var(--app-hr)' },
+  { key: 'crm', labelKey: APP_NAMES.crm.short, icon: Users, color: 'var(--app-crm)' },
+  {
+    key: 'finance',
+    labelKey: APP_NAMES.finance.short,
+    icon: CreditCard,
+    color: 'var(--app-finance)',
+  },
+  { key: 'flow', labelKey: APP_NAMES.flow.short, icon: Layers, color: 'var(--app-flow)' },
+  {
+    key: 'insights',
+    labelKey: APP_NAMES.insights.short,
+    icon: BarChart3,
+    color: 'var(--app-insights)',
+  },
+  { key: 'menu', labelKey: APP_NAMES.menu.short, icon: Utensils, color: 'var(--app-menu)' },
+  {
+    key: 'recruit',
+    labelKey: APP_NAMES.recruit.short,
+    icon: BriefcaseBusiness,
+    color: 'var(--app-recruit)',
+  },
 ];
 
 const ROLES = [
@@ -385,7 +401,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     }}
                   >
                     <Icon size={15} style={{ color: app.color }} />
-                    <span className="text-xs font-semibold">{app.label}</span>
+                    <span className="text-xs font-semibold">{t(app.labelKey)}</span>
                   </button>
                 );
               })}
