@@ -14,5 +14,13 @@
     "description": "Description",
     "descriptionPlaceholder": "Que fait ce département ?",
     "submit": "Créer le département"
+  },
+  "page": {
+    "metaTitle": "Services · rtylr",
+    "title": "Services",
+    "head": "Responsable du service",
+    "teamSize": "Taille de l'équipe",
+    "avgSalary": "Salaire moyen",
+    "shareOfWorkforce": "Part de l'effectif total"
   }
 }
