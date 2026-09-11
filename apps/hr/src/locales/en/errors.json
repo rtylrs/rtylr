@@ -3,5 +3,22 @@
   "notFound": "Not found",
   "unauthorized": "You don't have access to this resource.",
   "calendarFailed": "Calendar failed to load. Please refresh.",
-  "hrSettingsLoadFailed": "Unable to load HR settings"
+  "hrSettingsLoadFailed": "Unable to load HR settings",
+  "submitTimeOff": "Failed to submit time off request",
+  "updateTimeOff": "Failed to update time off request",
+  "saveShift": "Failed to save shift",
+  "deleteShift": "Failed to delete shift",
+  "publishSchedule": "Failed to publish schedule",
+  "approveTimesheet": "Failed to approve timesheet",
+  "createReview": "Failed to create review",
+  "scheduleOneOnOne": "Failed to schedule 1:1",
+  "updateOnboardingTask": "Failed to update onboarding task",
+  "updateOffboardingTask": "Failed to update offboarding task",
+  "uploadDocument": "Failed to upload document",
+  "deleteDocument": "Failed to delete document",
+  "resolveSwap": "Failed to resolve swap request",
+  "createSwap": "Failed to create swap request",
+  "startBreak": "Failed to start break",
+  "endBreak": "Failed to end break",
+  "saveSettings": "Failed to save settings"
 }
