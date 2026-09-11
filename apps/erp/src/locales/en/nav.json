@@ -31,6 +31,8 @@
     "receiving": "Goods Receiving",
     "expiry": "Expiry Tracking",
     "reorder": "Reorder Suggestions",
-    "valuation": "Inventory Valuation"
-  }
+    "valuation": "Inventory Valuation",
+    "productDetail": "Product detail"
+  },
+  "products": "Products"
 }
