@@ -1,6 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { PurchaseOrderServiceClient } from '@voxire/voxie/erp/purchase_order/v1/client';
 import type {
   ApprovePurchaseOrderResponse,
@@ -61,28 +62,31 @@ export function useAllPurchaseOrders() {
 }
 
 export function useCreatePurchaseOrder() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<CreatePurchaseOrderResponse, Error, CreatePurchaseOrderRequest>({
     mutationFn: (data) => purchaseOrderClient.createPurchaseOrder(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
-    onError: () => toast.error('Failed to create purchase order'),
+    onError: () => toast.error(t('erp.purchasing.createFailed')),
   });
 }
 
 export function useUpdatePurchaseOrderStatus() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<UpdatePurchaseOrderStatusResponse, Error, UpdatePurchaseOrderStatusRequest>({
     mutationFn: (data) => purchaseOrderClient.updatePurchaseOrderStatus(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
-    onError: () => toast.error('Failed to update purchase order status'),
+    onError: () => toast.error(t('erp.purchasing.statusUpdateFailed')),
   });
 }
 
 export function useApprovePurchaseOrder() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<ApprovePurchaseOrderResponse, Error, string>({
     mutationFn: (id) => purchaseOrderClient.approvePurchaseOrder({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
-    onError: () => toast.error('Failed to approve purchase order'),
+    onError: () => toast.error(t('erp.purchasing.approveFailed')),
   });
 }
