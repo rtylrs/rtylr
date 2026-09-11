@@ -159,13 +159,13 @@ const Tax: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
         {[
           {
-            label: 'Tax Collected',
+            label: t('tax.collected'),
             value: taxCollected,
             color: 'var(--finance-accent)',
             note: 'From invoices',
           },
           {
-            label: 'Tax Owed',
+            label: t('tax.owed'),
             value: taxOwed,
             color: 'var(--finance-warning)',
             note: 'Net payable',
