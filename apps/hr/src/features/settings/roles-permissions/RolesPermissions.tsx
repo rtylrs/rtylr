@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import {
@@ -194,7 +195,7 @@ const RolesPermissions = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Roles & Permissions · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.rolesPermissions'))} />
       <div className="flex flex-col gap-4">
         <SectionHeader
           title={t('rolesPermissions.title')}
