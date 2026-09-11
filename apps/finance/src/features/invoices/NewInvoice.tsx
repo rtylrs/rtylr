@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -216,7 +217,7 @@ const NewInvoice: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="New invoice · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.newInvoice'))} />
       <PageHeader
         title="New Invoice"
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'New' }]}

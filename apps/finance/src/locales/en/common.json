@@ -18,5 +18,18 @@
   "currency": "Currency",
   "saving": "Saving…",
   "creating": "Creating…",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "pageTitles": {
+    "balanceSheet": "Balance sheet",
+    "bankFeeds": "Bank feeds",
+    "expenseCategories": "Expense categories",
+    "expenseDetail": "Expense detail",
+    "submitExpense": "Submit expense",
+    "invoiceDetail": "Invoice detail",
+    "newInvoice": "New invoice",
+    "quotes": "Quotes & estimates",
+    "reconciliation": "Reconciliation",
+    "recurringInvoices": "Recurring invoices",
+    "taxSummary": "Tax summary"
+  }
 }

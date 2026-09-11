@@ -18,5 +18,18 @@
   "currency": "Devise",
   "saving": "Enregistrement…",
   "creating": "Création…",
-  "refresh": "Actualiser"
+  "refresh": "Actualiser",
+  "pageTitles": {
+    "balanceSheet": "Bilan",
+    "bankFeeds": "Flux bancaires",
+    "expenseCategories": "Catégories de dépenses",
+    "expenseDetail": "Détail de la dépense",
+    "submitExpense": "Soumettre une dépense",
+    "invoiceDetail": "Détail de la facture",
+    "newInvoice": "Nouvelle facture",
+    "quotes": "Devis et estimations",
+    "reconciliation": "Rapprochement",
+    "recurringInvoices": "Factures récurrentes",
+    "taxSummary": "Récapitulatif fiscal"
+  }
 }

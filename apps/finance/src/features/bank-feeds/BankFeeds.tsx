@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
@@ -32,6 +34,7 @@ const iconFor: Record<
 };
 
 const BankFeeds: React.FC = () => {
+  const { t } = useTranslation();
   const { data: accounts = [], isLoading } = useBankAccounts();
   const createAccount = useCreateBankAccount();
   const [selected, setSelected] = useState<string | undefined>();
@@ -85,7 +88,7 @@ const BankFeeds: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Bank feeds · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.bankFeeds'))} />
       <PageHeader
         title="Bank Feeds"
         subtitle={

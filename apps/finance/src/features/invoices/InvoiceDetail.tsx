@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useUserStore } from '@voxire/auth';
@@ -22,6 +24,7 @@ import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens
 import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const InvoiceDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = routeApi.useParams();
   const navigate = useNavigate();
   const { data: invoice, isLoading } = useInvoiceDetail(id);
@@ -59,7 +62,7 @@ const InvoiceDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Invoice detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.invoiceDetail'))} />
       <PageHeader
         title={`Invoice ${invoice.id}`}
         subtitle={

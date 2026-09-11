@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -115,6 +117,7 @@ const CategoryBar: React.FC<{ expenses: Expense[]; categoryName: CategoryNameLoo
 };
 
 const Expenses: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const { data, isLoading: loading } = useExpenses({ page });
@@ -138,7 +141,7 @@ const Expenses: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Expenses · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.expenses'))} />
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>

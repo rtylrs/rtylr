@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
 import { useUserStore } from '@voxire/auth';
@@ -56,6 +57,7 @@ const TABS: Tab[] = [
 // ── General Tab ───────────────────────────────────────────────────────────────
 
 const GeneralTab: React.FC = () => {
+  const { t } = useTranslation();
   const settings = useSettings();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -76,14 +78,14 @@ const GeneralTab: React.FC = () => {
 
   const handleReset = (): void => {
     settings.reset();
-    toast.success('Settings reset');
+    toast.success(t('settings.reset'));
   };
 
   const handleSave = (): void => {
     try {
       // Settings are persisted locally via Zustand persist middleware on every setSetting call.
       // This button confirms the current state is intentionally saved.
-      toast.success('Settings saved');
+      toast.success(t('settings.saved'));
     } catch (error) {
       toast.error(getOneKitErrorMessage(error, 'Failed to save settings'));
     }
@@ -101,22 +103,22 @@ const GeneralTab: React.FC = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <Card title="Company">
-          <Field label="Company name">
+        <Card title={t('settings.company.heading')}>
+          <Field label={t('settings.company.name')}>
             <input
               value={settings.companyName}
               onChange={(e) => settings.setSetting('companyName', e.target.value)}
               style={inputStyle}
             />
           </Field>
-          <Field label="Billing email">
+          <Field label={t('settings.company.billingEmail')}>
             <input
               value={settings.companyEmail}
               onChange={(e) => settings.setSetting('companyEmail', e.target.value)}
               style={inputStyle}
             />
           </Field>
-          <Field label="Brand color">
+          <Field label={t('settings.company.brandColor')}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <input
                 type="color"
@@ -137,7 +139,7 @@ const GeneralTab: React.FC = () => {
               />
             </div>
           </Field>
-          <Field label="Logo URL">
+          <Field label={t('settings.company.logoUrl')}>
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 value={settings.logoUrl}
@@ -150,7 +152,7 @@ const GeneralTab: React.FC = () => {
                 style={{ ...ghostBtn, padding: '8px 12px' }}
                 disabled={uploadingLogo}
                 onClick={() => logoInputRef.current?.click()}
-                aria-label="Upload logo"
+                aria-label={t('settings.company.uploadLogo')}
               >
                 <ImageIcon size={13} />
               </button>
@@ -167,15 +169,15 @@ const GeneralTab: React.FC = () => {
           </Field>
         </Card>
 
-        <Card title="Invoicing">
-          <Field label="Invoice prefix">
+        <Card title={t('settings.invoicing.heading')}>
+          <Field label={t('settings.invoicing.prefix')}>
             <input
               value={settings.invoicePrefix}
               onChange={(e) => settings.setSetting('invoicePrefix', e.target.value)}
               style={inputStyle}
             />
           </Field>
-          <Field label="Default tax rate (%)">
+          <Field label={t('settings.invoicing.defaultTaxRate')}>
             <input
               type="number"
               step="0.1"
@@ -187,7 +189,7 @@ const GeneralTab: React.FC = () => {
               style={inputStyle}
             />
           </Field>
-          <Field label="Late fee (%)">
+          <Field label={t('settings.invoicing.lateFee')}>
             <input
               type="number"
               step="0.1"
@@ -199,7 +201,7 @@ const GeneralTab: React.FC = () => {
               style={inputStyle}
             />
           </Field>
-          <Field label="Grace period (days)">
+          <Field label={t('settings.invoicing.gracePeriod')}>
             <input
               type="number"
               value={settings.lateFeeGraceDays}
@@ -210,7 +212,7 @@ const GeneralTab: React.FC = () => {
               style={inputStyle}
             />
           </Field>
-          <Field label="Default notes">
+          <Field label={t('settings.invoicing.defaultNotes')}>
             <textarea
               value={settings.invoiceNotes}
               onChange={(e) => settings.setSetting('invoiceNotes', e.target.value)}
@@ -220,8 +222,8 @@ const GeneralTab: React.FC = () => {
           </Field>
         </Card>
 
-        <Card title="Accounting">
-          <Field label="Currency">
+        <Card title={t('settings.accounting.heading')}>
+          <Field label={t('settings.accounting.currency')}>
             <select
               value={settings.currency}
               onChange={(e) => settings.setSetting('currency', e.target.value as Currency)}
@@ -234,7 +236,7 @@ const GeneralTab: React.FC = () => {
               ))}
             </select>
           </Field>
-          <Field label="Fiscal year start">
+          <Field label={t('settings.accounting.fiscalYearStart')}>
             <select
               value={settings.fiscalYearStartMonth}
               onChange={(e) =>
@@ -251,12 +253,12 @@ const GeneralTab: React.FC = () => {
           </Field>
         </Card>
 
-        <Card title="Shortcuts">
+        <Card title={t('settings.shortcuts.heading')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <ShortcutRow label="Global search" keys={['cmd', 'k']} />
-            <ShortcutRow label="New invoice" keys={['n']} />
-            <ShortcutRow label="New expense" keys={['e']} />
-            <ShortcutRow label="Focus search" keys={['/']} />
+            <ShortcutRow label={t('settings.shortcuts.globalSearch')} keys={['cmd', 'k']} />
+            <ShortcutRow label={t('settings.shortcuts.newInvoice')} keys={['n']} />
+            <ShortcutRow label={t('settings.shortcuts.newExpense')} keys={['e']} />
+            <ShortcutRow label={t('settings.shortcuts.focusSearch')} keys={['/']} />
           </div>
         </Card>
       </div>
@@ -283,7 +285,7 @@ const TeamTab: React.FC = () => {
   const handleInvite = (): void => {
     if (!canInviteMember) return;
     if (!email.trim() || !fullName.trim()) {
-      toast.error('Email and full name are required');
+      toast.error(t('settings.team.required'));
       return;
     }
     invite.mutate(
@@ -293,7 +295,7 @@ const TeamTab: React.FC = () => {
           setEmail('');
           setFullName('');
           setShowInvite(false);
-          toast.success('Invitation sent');
+          toast.success(t('settings.team.invited'));
         },
         onError: (error) => {
           toast.error(getOneKitErrorMessage(error, 'Failed to send invitation'));
@@ -306,10 +308,10 @@ const TeamTab: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 600 }}>
       <div>
         <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--hub-text)', marginBottom: 4 }}>
-          Team
+          {t('settings.team.heading')}
         </div>
         <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-          People who have access to Finance.
+          {t('settings.team.description')}
         </div>
       </div>
 
@@ -318,19 +320,19 @@ const TeamTab: React.FC = () => {
           style={{ ...cardStyle, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}
         >
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-            Invite someone to Finance
+            {t('settings.team.inviteTitle')}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label="Full name">
+            <Field label={t('settings.team.fullName')}>
               <input
                 type="text"
-                placeholder="Jane Smith"
+                placeholder={t('settings.team.namePlaceholder')}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 style={inputStyle}
               />
             </Field>
-            <Field label="Email">
+            <Field label={t('settings.team.email')}>
               <input
                 type="email"
                 placeholder="jane@company.com"
@@ -376,7 +378,7 @@ const TeamTab: React.FC = () => {
               {invite.isPending ? 'Sending…' : 'Send invite'}
             </button>
             <button type="button" onClick={() => setShowInvite(false)} style={ghostBtn}>
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -385,7 +387,7 @@ const TeamTab: React.FC = () => {
           <div>
             <button type="button" onClick={() => setShowInvite(true)} style={primaryBtn}>
               <UserPlus size={13} />
-              Invite member
+              {t('settings.team.invite')}
             </button>
           </div>
         )
@@ -525,6 +527,7 @@ const TeamTab: React.FC = () => {
 // ── Main Settings Component ───────────────────────────────────────────────────
 
 const Settings: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabId>('general');
 
   return (
@@ -533,8 +536,8 @@ const Settings: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Settings · rtylr" />
-      <PageHeader title="Settings" />
+      <HelmetContainer title={pageTitle(t('nav.settings'))} />
+      <PageHeader title={t('settings.title')} />
 
       {/* Tab bar */}
       <div

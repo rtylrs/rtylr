@@ -18,5 +18,18 @@
   "currency": "العملة",
   "saving": "جارٍ الحفظ…",
   "creating": "جارٍ الإنشاء…",
-  "refresh": "تحديث"
+  "refresh": "تحديث",
+  "pageTitles": {
+    "balanceSheet": "الميزانية العمومية",
+    "bankFeeds": "حركات البنك",
+    "expenseCategories": "فئات المصروفات",
+    "expenseDetail": "تفاصيل المصروف",
+    "submitExpense": "تقديم مصروف",
+    "invoiceDetail": "تفاصيل الفاتورة",
+    "newInvoice": "فاتورة جديدة",
+    "quotes": "عروض الأسعار",
+    "reconciliation": "التسوية",
+    "recurringInvoices": "الفواتير المتكررة",
+    "taxSummary": "ملخص الضرائب"
+  }
 }

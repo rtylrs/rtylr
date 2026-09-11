@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { FileSpreadsheet, Download, Landmark } from 'lucide-react';
@@ -35,7 +36,7 @@ const TaxReport: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Tax summary · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.taxSummary'))} />
       <PageHeader
         title="Tax Summary"
         breadcrumbs={[{ label: 'Reports' }, { label: 'Tax' }]}
