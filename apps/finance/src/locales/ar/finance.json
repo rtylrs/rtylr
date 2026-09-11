@@ -68,5 +68,23 @@
     "inventory": "المخزون",
     "inventoryHint": "قيمة المخزون الحالية من نظام تخطيط الموارد، وتظهر فقط عند تمكينه لهذا العمل.",
     "inventoryUnavailable": "نظام تخطيط الموارد غير متصل"
+  },
+  "profitLoss": {
+    "title": "الأرباح والخسائر",
+    "exportAria": "تصدير الأرباح والخسائر بصيغة CSV",
+    "export": "تصدير",
+    "closeFiscalYear": "إقفال السنة المالية",
+    "statement": "قائمة الأرباح والخسائر",
+    "revenue": "الإيرادات",
+    "grossRevenue": "إجمالي الإيرادات",
+    "cogs": "تكلفة البضاعة المباعة",
+    "directCosts": "التكاليف المباشرة",
+    "operatingExpenses": "المصروفات التشغيلية",
+    "totalOperatingExpenses": "إجمالي المصروفات التشغيلية",
+    "totalOperating": "إجمالي التشغيل",
+    "expensesByCategory": "المصروفات حسب الفئة",
+    "categoryUnavailable": "تفصيل الفئات غير متاح بعد.",
+    "lockingComingSoon": "إقفال فترات السنة المالية قادم قريبًا",
+    "closeYear": "إقفال السنة المالية"
   }
 }

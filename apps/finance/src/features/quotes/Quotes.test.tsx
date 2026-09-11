@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Quotes from './Quotes';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const quote = {
   id: 'Q-100',
@@ -25,9 +26,9 @@ vi.mock('motion/react', () => ({
   },
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
@@ -52,6 +53,10 @@ vi.mock('../../shared/components/Modal', () => ({
     open ? <div role="dialog">{title}</div> : null,
 }));
 vi.mock('../../shared/components/CurrencyInput', () => ({ default: () => null }));
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('Quotes table', () => {
   beforeEach(() => {
@@ -79,7 +84,9 @@ describe('Quotes empty state', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'quotes.emptyCta' }));
+    const newQuoteButtons = screen.getAllByRole('button', { name: 'New Quote' });
+    expect(newQuoteButtons).toHaveLength(2);
+    fireEvent.click(newQuoteButtons[1]);
 
     expect(screen.getByRole('dialog')).toHaveTextContent('New Quote');
   });
