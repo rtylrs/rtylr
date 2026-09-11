@@ -322,7 +322,7 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 		Subtotal:      sql.NullString{String: sqlutil.FloatToDecimal(subtotal), Valid: true},
 		TaxAmount:     sql.NullString{String: sqlutil.FloatToDecimal(taxAmount), Valid: true},
 		Total:         sql.NullString{String: sqlutil.FloatToDecimal(total), Valid: true},
-		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: input.PaymentMethod != ""},
+		PaymentMethod: nullPaymentMethod(input.PaymentMethod),
 		Notes:         sqlutil.NullString(input.Notes),
 		KitchenNotes:  sqlutil.NullString(input.KitchenNotes),
 	})
@@ -645,7 +645,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 	now := time.Now().UTC()
 
 	markResult, err := qtx.MarkOrderPaid(ctx, sqlc.MarkOrderPaidParams{
-		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: true},
+		PaymentMethod: nullPaymentMethod(input.PaymentMethod),
 		AmountPaid:    sql.NullString{String: sqlutil.FloatToDecimal(input.AmountPaid), Valid: true},
 		ChangeDue:     sql.NullString{String: sqlutil.FloatToDecimal(changeDue), Valid: true},
 		PaidAt:        sql.NullTime{Time: now, Valid: true},
@@ -1034,7 +1034,7 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 			Subtotal:      sql.NullString{String: "0", Valid: true},
 			TaxAmount:     sql.NullString{String: "0", Valid: true},
 			Total:         sql.NullString{String: "0", Valid: true},
-			PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(order.PaymentMethod), Valid: true},
+			PaymentMethod: nullPaymentMethod(order.PaymentMethod),
 			Notes:         sqlutil.NullString(order.Notes),
 			KitchenNotes:  sqlutil.NullString(order.KitchenNotes),
 		})

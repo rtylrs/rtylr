@@ -754,6 +754,14 @@ func TestSplitOrder_SplitsSubtotalAndTax(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateOrder: %v", err)
 	}
+	// Registered as soon as the row exists, not after the split. The previous
+	// cleanup sat below SplitOrder, so a failure there skipped it and left
+	// TEST-ORD-9101 behind; the next run then collided on the order number and
+	// reported a duplicate key from CreateOrder, hiding the real error (#1185).
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, `DELETE FROM pos_order_items WHERE order_id = ?`, id)
+		_, _ = db.ExecContext(ctx, `DELETE FROM pos_orders WHERE id = ?`, id)
+	})
 
 	order, err := repo.GetOrder(ctx, testutil.OwnerID, id)
 	if err != nil {
@@ -771,7 +779,7 @@ func TestSplitOrder_SplitsSubtotalAndTax(t *testing.T) {
 		t.Fatalf("expected 1 split order, got %d", len(newIDs))
 	}
 	t.Cleanup(func() {
-		for _, oid := range append([]int64{id}, newIDs...) {
+		for _, oid := range newIDs {
 			_, _ = db.ExecContext(ctx, `DELETE FROM pos_order_items WHERE order_id = ?`, oid)
 			_, _ = db.ExecContext(ctx, `DELETE FROM pos_orders WHERE id = ?`, oid)
 		}
