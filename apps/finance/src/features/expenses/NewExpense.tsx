@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -14,6 +16,7 @@ import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../s
 import { todayIso } from '../../shared/lib/date';
 
 const NewExpense: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: categories = [] } = useExpenseCategories();
   const [receipt, setReceipt] = useState<string | null>(null);
@@ -58,7 +61,7 @@ const NewExpense: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Submit expense · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.submitExpense'))} />
       <PageHeader
         title="Submit Expense"
         breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: 'New' }]}
