@@ -100,7 +100,8 @@ const Dashboard: React.FC = () => {
 
   const stats = [
     {
-      label: 'Total Products',
+      id: 'totalProducts',
+      label: t('erp.dashboard.totalProducts'),
       value: dashboardStats?.totalProducts ?? 0,
       icon: Package,
       change: '',
@@ -108,23 +109,26 @@ const Dashboard: React.FC = () => {
       to: '/inventory',
     },
     {
-      label: 'Low Stock Items',
+      id: 'lowStockItems',
+      label: t('erp.dashboard.lowStockItems'),
       value: dashboardStats?.lowStockCount ?? 0,
       icon: AlertTriangle,
-      change: `${criticalLowStockCount} critical`,
+      change: t('erp.dashboard.criticalCount', { count: criticalLowStockCount }),
       changePositive: false,
       to: '/alerts',
     },
     {
-      label: 'Pending Orders',
+      id: 'pendingOrders',
+      label: t('erp.dashboard.pendingOrders'),
       value: dashboardStats?.pendingOrders ?? 0,
       icon: ShoppingCart,
-      change: 'needs review',
+      change: t('erp.dashboard.needsReview'),
       changePositive: true,
       to: '/purchasing',
     },
     {
-      label: 'Total Suppliers',
+      id: 'totalSuppliers',
+      label: t('erp.dashboard.totalSuppliers'),
       value: dashboardStats?.totalSuppliers ?? 0,
       icon: Users,
       change: '',
@@ -153,7 +157,7 @@ const Dashboard: React.FC = () => {
       >
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Inventory Overview
+            {t('erp.dashboard.inventoryOverview')}
           </h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
             {today}
@@ -170,7 +174,7 @@ const Dashboard: React.FC = () => {
           }}
         >
           <PackagePlus size={14} />
-          New Product
+          {t('erp.dashboard.newProduct')}
         </button>
       </motion.div>
 
@@ -182,7 +186,7 @@ const Dashboard: React.FC = () => {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div key={stat.label} variants={itemVariants} className="h-full">
+            <motion.div key={stat.id} variants={itemVariants} className="h-full">
               <Link
                 to={stat.to}
                 className={`${CARD_CLASS} justify-between transition-all`}
@@ -230,7 +234,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2">
             <TrendingUp size={14} style={{ color: 'var(--erp-success)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Inventory Value
+              {t('erp.dashboard.inventoryValue')}
             </h3>
           </div>
           <div className="mt-auto">
@@ -247,7 +251,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 mb-3">
             <Package size={14} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Top 5 Items
+              {t('erp.dashboard.topItems')}
             </h3>
           </div>
           <div className={`${SCROLL_AREA_CLASS} space-y-1.5`}>
@@ -266,7 +270,7 @@ const Dashboard: React.FC = () => {
             ))}
             {!productsData.length && (
               <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                No products yet
+                {t('erp.dashboard.noProducts')}
               </p>
             )}
           </div>
@@ -276,7 +280,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 mb-3">
             <Tags size={14} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Top Categories
+              {t('erp.dashboard.topCategories')}
             </h3>
           </div>
           <div className={`${SCROLL_AREA_CLASS} space-y-1.5`}>
@@ -298,7 +302,7 @@ const Dashboard: React.FC = () => {
             ))}
             {!topCategories.length && (
               <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                No categories yet
+                {t('erp.dashboard.noCategories')}
               </p>
             )}
           </div>
@@ -308,7 +312,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 mb-3">
             <Activity size={14} style={{ color: 'var(--erp-info)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Recent Activity
+              {t('erp.dashboard.recentActivity')}
             </h3>
           </div>
           <div className={`${SCROLL_AREA_CLASS} space-y-2`}>
@@ -337,7 +341,7 @@ const Dashboard: React.FC = () => {
             })}
             {!activityData.length && (
               <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                No recent activity
+                {t('erp.dashboard.noRecentActivity')}
               </p>
             )}
           </div>
@@ -347,7 +351,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 mb-3">
             <TrendingDown size={15} style={{ color: 'var(--erp-danger)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Low Stock Alert
+              {t('erp.dashboard.lowStockAlert')}
             </h3>
             <span
               className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
@@ -391,7 +395,7 @@ const Dashboard: React.FC = () => {
                 ))}
             {!isLoading && !lowStockItems.length && (
               <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                No low stock items
+                {t('erp.dashboard.noLowStockItems')}
               </p>
             )}
           </div>
@@ -401,7 +405,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 mb-3">
             <Clock size={15} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Recent Purchase Orders
+              {t('erp.dashboard.recentPurchaseOrders')}
             </h3>
           </div>
           <div className={`${SCROLL_AREA_CLASS} space-y-1`}>
@@ -449,7 +453,7 @@ const Dashboard: React.FC = () => {
                 })}
             {!isLoading && !recentOrders.length && (
               <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                No purchase orders yet
+                {t('erp.dashboard.noPurchaseOrders')}
               </p>
             )}
           </div>
