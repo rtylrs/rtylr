@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -30,7 +31,7 @@ const TimeOff: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Time off · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.timeOff'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title="Time Off"
