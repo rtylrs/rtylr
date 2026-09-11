@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, Search } from 'lucide-react';
 import { useDepartments } from '../../features/departments/useDepartments';
 
@@ -13,6 +14,7 @@ const DepartmentSelect: React.FC<Props> = ({
   onChange,
   placeholder = 'Select department',
 }) => {
+  const { t } = useTranslation();
   const { data } = useDepartments();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -78,7 +80,7 @@ const DepartmentSelect: React.FC<Props> = ({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
+              placeholder={t('common.search')}
               style={{
                 border: 'none',
                 outline: 'none',
@@ -98,7 +100,7 @@ const DepartmentSelect: React.FC<Props> = ({
                 fontSize: 12,
               }}
             >
-              No matches
+              {t('common.noMatches')}
             </div>
           )}
           {options.map((d: { id: number; name: string }) => (
