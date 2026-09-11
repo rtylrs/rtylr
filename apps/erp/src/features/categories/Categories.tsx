@@ -14,6 +14,8 @@ import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -49,7 +51,7 @@ const Categories: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Categories · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/categories'].title))} />
       <PageHeader title="Categories" description="Organize products into hierarchical categories" />
 
       <div
