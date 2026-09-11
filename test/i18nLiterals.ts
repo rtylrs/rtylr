@@ -38,6 +38,26 @@ const PROP = /(?:placeholder|title|label|aria-label|alt|hint)="([A-Z][^"]{2,})"/
 const CALL =
   /(?:toast\.(?:error|success|info|warning|message)|new Error)\(\s*['"]([A-Z][^'"]{3,})['"]/;
 
+/**
+ * Copy inside a data object, which no sweep of the markup can see.
+ *
+ * Recruit had four of these: nav item labels, per-kind metadata twice over, and
+ * a template list. finance had a `frequencyLabel` map holding the same four
+ * words its `<option>` elements spelled out again. The property name is what
+ * makes this safe to match: `label`, `title` and friends carry copy, where a
+ * bare string in an object is as likely to be an id, a path or a CSS value.
+ */
+const OBJECT_VALUE =
+  /(?:^|[\s{,(])(?:label|title|name|blurb|description|placeholder|hint|text|message|subtitle|heading|caption)\s*:\s*['"]([A-Z][^'"]{2,})['"]/;
+
+/**
+ * A default for a destructured parameter, which renders whenever a caller
+ * omits it. hr had `placeholder = 'Select department'` and
+ * `confirmLabel = 'Confirm'`, both invisible to every pattern above.
+ */
+const PARAM_DEFAULT =
+  /(?:^|[\s{,])(?:label|title|placeholder|confirmLabel|cancelLabel|text|message|heading|caption)\s*=\s*['"]([A-Z][^'"]{2,})['"]/;
+
 /** A line holding nothing but prose, between two tags. */
 const TEXT_LINE = /^[A-Z][A-Za-z0-9 ,.'’!?&:/-]*$/;
 
@@ -103,7 +123,15 @@ export function collectLiterals(srcDir: string, allowed: readonly string[] = [])
         if (/[>{}]$/.test(prev) && next.startsWith('<')) standalone = trimmed;
       }
 
-      const text = call?.[1] ?? prop?.[1] ?? inline?.[1] ?? standalone;
+      const objectValue = OBJECT_VALUE.exec(line);
+      const paramDefault = PARAM_DEFAULT.exec(line);
+      const text =
+        call?.[1] ??
+        prop?.[1] ??
+        objectValue?.[1] ??
+        paramDefault?.[1] ??
+        inline?.[1] ??
+        standalone;
       if (text === null || text === undefined || exempt.has(text)) return;
       found.push({ file: path.relative(srcDir, file), line: index + 1, text });
     });
