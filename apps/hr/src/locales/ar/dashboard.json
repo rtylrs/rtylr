@@ -68,5 +68,8 @@
     "dragToReorder": "اسحب لإعادة الترتيب",
     "errorFallback": "الأداة غير متاحة"
   },
-  "nothingUpcoming": "لا شيء قادم."
+  "nothingUpcoming": "لا شيء قادم.",
+  "workAnniversaries": "ذكرى الالتحاق بالعمل",
+  "upcomingBirthdays": "أعياد ميلاد قادمة",
+  "noBirthdays": "لا أعياد ميلاد في هذه الفترة."
 }
