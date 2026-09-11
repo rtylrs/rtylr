@@ -88,10 +88,10 @@ const Tax: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hub-text)' }}>
-            Tax
+            {t('tax.title')}
           </h2>
           <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
-            VAT / Sales tax summary and filing periods
+            {t('tax.subtitle')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -113,7 +113,7 @@ const Tax: React.FC = () => {
               }}
             >
               <Settings size={14} />
-              Tax Rates
+              {t('tax.rates')}
             </button>
           )}
           <button
@@ -147,10 +147,10 @@ const Tax: React.FC = () => {
                 })),
               ])
             }
-            aria-label="Export tax summary for accountant"
+            aria-label={t('tax.exportAria')}
           >
             <Download size={14} />
-            Export for Accountant
+            {t('tax.exportForAccountant')}
           </button>
         </div>
       </div>
@@ -259,7 +259,7 @@ const Tax: React.FC = () => {
           <h3
             style={{ margin: '0 0 14px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}
           >
-            Tax Rate Configuration
+            {t('tax.rateConfiguration')}
           </h3>
           {editableRates.length === 0 && (
             <EmptyState
@@ -341,14 +341,14 @@ const Tax: React.FC = () => {
             onClick={async () => {
               const invalid = editableRates.find((r) => isNaN(r.rate) || r.rate < 0);
               if (invalid) {
-                toast.error('Tax rates must be valid non-negative numbers');
+                toast.error(t('tax.ratesInvalid'));
                 return;
               }
               try {
                 for (const r of editableRates) {
                   await saveRates.mutateAsync(r);
                 }
-                toast.success('Tax rates saved');
+                toast.success(t('tax.ratesSaved'));
                 setShowConfig(false);
               } catch (error) {
                 toast.error(getOneKitErrorMessage(error, 'Failed to save tax rates'));
@@ -379,7 +379,7 @@ const Tax: React.FC = () => {
           }}
         >
           <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
-            Filing Periods
+            {t('tax.filingPeriods')}
           </span>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
