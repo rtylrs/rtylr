@@ -310,7 +310,7 @@ const GroupDetail = (): React.JSX.Element => {
                     className="text-xs font-semibold uppercase tracking-wider"
                     style={{ color: 'var(--dash-text-muted)' }}
                   >
-                    {app.label}
+                    {t(app.labelKey)}
                   </span>
                 </div>
 
@@ -325,7 +325,7 @@ const GroupDetail = (): React.JSX.Element => {
                     >
                       <div className="col-span-6 pl-3">
                         <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                          {section.label}
+                          {t(section.labelKey)}
                         </span>
                       </div>
                       {LEVELS.map((l) => (
@@ -333,7 +333,7 @@ const GroupDetail = (): React.JSX.Element => {
                           <button
                             type="button"
                             aria-label={t('team.groupDetail.radioAriaLabel', {
-                              section: section.label,
+                              section: t(section.labelKey),
                               level: t(l.tKey),
                             })}
                             onClick={() => setLevel(section.key, l.value)}

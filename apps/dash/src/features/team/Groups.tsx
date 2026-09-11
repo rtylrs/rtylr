@@ -20,9 +20,14 @@ const getActiveAppIds = (group: Group): string[] => {
   return Array.from(appIds);
 };
 
-/** Returns the label for an app id, falling back to the id uppercased. */
-const appLabel = (appId: string): string =>
-  APP_RESOURCES.find((a) => a.id === appId)?.label ?? appId.toUpperCase();
+/**
+ * The i18n key naming an app id, falling back to the id uppercased.
+ *
+ * The fallback is not a key, and does not need to be: `t` returns what it is
+ * given when it matches nothing, so an unknown app still reads as its id.
+ */
+const appLabelKey = (appId: string): string =>
+  APP_RESOURCES.find((a) => a.id === appId)?.labelKey ?? appId.toUpperCase();
 
 const Groups = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -164,7 +169,7 @@ const Groups = (): React.JSX.Element => {
                                 color: g.color,
                               }}
                             >
-                              {appLabel(appId)}
+                              {t(appLabelKey(appId))}
                             </span>
                           ))}
                           <span
