@@ -64,7 +64,7 @@ const Reconcile: React.FC = () => {
         for (const item of exactMatches) next[item.transactionId] = item.candidate.id;
         return next;
       });
-      toast.success('Auto-match completed');
+      toast.success(t('reconcile.autoMatched'));
     } catch (error) {
       toast.error(getOneKitErrorMessage(error, 'Auto-match failed'));
     } finally {
@@ -80,7 +80,7 @@ const Reconcile: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.reconciliation'))} />
       <PageHeader
-        title="Reconciliation"
+        title={t('reconcile.title')}
         subtitle={`${unmatched.length} transactions awaiting match`}
         actions={
           <button
@@ -153,7 +153,7 @@ const Reconcile: React.FC = () => {
               fontSize: 13,
             }}
           >
-            All transactions reconciled.
+            {t('reconcile.allDone')}
           </div>
         )}
       </div>
