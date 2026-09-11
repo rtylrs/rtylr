@@ -4,5 +4,21 @@
   "reportEmptyDescription": "Les périodes fiscales apparaîtront ici une fois que les factures génèreront une activité fiscale.",
   "ratesEmptyTitle": "Aucun taux de taxe configuré",
   "ratesEmptyDescription": "Ajoutez un taux de taxe pour commencer à calculer la taxe sur les factures et devis.",
-  "ratesEmptyCta": "Ajouter un taux de taxe"
+  "ratesEmptyCta": "Ajouter un taux de taxe",
+  "title": "Fiscalité",
+  "subtitle": "Récapitulatif de TVA et périodes de déclaration",
+  "rates": "Taux de TVA",
+  "exportAria": "Exporter le récapitulatif fiscal pour le comptable",
+  "exportForAccountant": "Exporter pour le comptable",
+  "rateConfiguration": "Configuration des taux",
+  "ratesInvalid": "Les taux doivent être des nombres positifs ou nuls",
+  "ratesSaved": "Taux enregistrés",
+  "filingPeriods": "Périodes de déclaration",
+  "report": {
+    "title": "Récapitulatif fiscal",
+    "exportSoon": "L'export arrivera dans une prochaine mise à jour",
+    "collected": "TVA collectée",
+    "owed": "TVA due",
+    "periodsToFile": "Périodes à déclarer"
+  }
 }
