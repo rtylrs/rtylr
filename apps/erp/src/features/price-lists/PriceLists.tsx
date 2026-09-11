@@ -10,6 +10,8 @@ import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -63,7 +65,7 @@ const PriceLists: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Price lists · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/price-lists'].title))} />
       <PageHeader
         title="Price Lists"
         description="Currency-based pricing strategies"
