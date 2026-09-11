@@ -28,7 +28,7 @@ const Expiry: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t(routeLabels['/expiry'].title))} />
       <PageHeader
-        title="Expiry Tracking"
+        title={t(routeLabels['/expiry'].title)}
         description={`${items.length} batches with expiry dates`}
       />
 
@@ -44,12 +44,12 @@ const Expiry: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <span>Product</span>
-          <span>Batch</span>
-          <span>Qty</span>
-          <span>Warehouse</span>
-          <span>Expiry</span>
-          <span>Days Left</span>
+          <span>{t('common.product')}</span>
+          <span>{t('common.batch')}</span>
+          <span>{t('common.qtyShort')}</span>
+          <span>{t('common.warehouse')}</span>
+          <span>{t('erp.expiry.expiryColumn')}</span>
+          <span>{t('erp.expiry.daysLeft')}</span>
         </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)

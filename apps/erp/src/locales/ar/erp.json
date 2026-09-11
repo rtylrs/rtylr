@@ -124,7 +124,23 @@
     "title": "Suppliers",
     "add": "Add Supplier",
     "comingSoon": "Supplier management is coming soon.",
-    "scorecards": "Scorecards"
+    "scorecards": "Scorecards",
+    "requiredFields": "اسم المورد والبريد الإلكتروني والمدينة والدولة مطلوبة",
+    "created": "تم إنشاء المورد",
+    "createFailed": "تعذر إنشاء المورد",
+    "newSupplier": "مورد جديد",
+    "activeCount_zero": "لا يوجد موردون نشطون",
+    "activeCount_one": "مورد نشط واحد",
+    "activeCount_two": "موردان نشطان",
+    "activeCount_few": "{{count}} موردين نشطين",
+    "activeCount_many": "{{count}} موردًا نشطًا",
+    "activeCount_other": "{{count}} مورد نشط",
+    "companyName": "اسم الشركة",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "city": "المدينة",
+    "country": "الدولة",
+    "address": "العنوان"
   },
   "common": {
     "cancel": "Cancel",
@@ -195,7 +211,12 @@
       "title": "لا توجد اقتراحات",
       "description": "جميع مستويات المخزون جيدة"
     },
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "subtitle": "توصيات ذكية بناءً على سرعة المبيعات ومهلة التوريد",
+    "avgDaily": "المتوسط اليومي",
+    "suggested": "المقترح",
+    "lead": "المهلة",
+    "confidence": "الثقة"
   },
   "variants": {
     "empty": {
@@ -256,7 +277,9 @@
       "title": "لا توجد عناصر منتهية الصلاحية قريبًا",
       "description": "لا توجد دفعات بتواريخ انتهاء صلاحية متتبَّعة"
     },
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "expiryColumn": "انتهاء الصلاحية",
+    "daysLeft": "الأيام المتبقية"
   },
   "stockTransfers": {
     "empty": {
@@ -264,7 +287,21 @@
       "description": "أنشئ أول عملية نقل مخزون"
     },
     "newTransfer": "نقل جديد",
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "warehousesRequired": "مستودعا المصدر والوجهة مطلوبان",
+    "warehousesMustDiffer": "يجب أن يختلف المصدر عن الوجهة",
+    "itemRequired": "مطلوب عنصر واحد على الأقل بمنتج وكمية موجبة",
+    "draftCreated": "تم إنشاء مسودة التحويل",
+    "createFailed": "تعذر إنشاء التحويل",
+    "subtitle": "نقل المخزون بين المستودعات",
+    "idColumn": "المعرف",
+    "from": "من",
+    "to": "إلى",
+    "items": "العناصر",
+    "created": "تاريخ الإنشاء",
+    "fromWarehouse": "من مستودع…",
+    "toWarehouse": "إلى مستودع…",
+    "newTransferTitle": "تحويل مخزون جديد"
   },
   "lowStockAlerts": {
     "empty": {
@@ -279,7 +316,24 @@
       "description": "ابدأ عملية جرد لإيجاد الفروقات"
     },
     "newStockTake": "جرد جديد",
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "warehouseRequired": "المستودع مطلوب",
+    "stillLoading": "لا يزال المخزون قيد التحميل",
+    "created": "تم إنشاء عملية الجرد",
+    "createFailed": "تعذر إنشاء عملية الجرد",
+    "completed": "تم إكمال عملية الجرد",
+    "completeFailed": "تعذر إكمال عملية الجرد",
+    "complete": "إكمال",
+    "subtitle": "عمليات جرد دورية وتقارير الفروقات",
+    "completeAria": "إكمال عملية الجرد",
+    "variance": "الفرق",
+    "selectWarehouse": "اختر المستودع…",
+    "uncountedWarning_zero": "لا توجد عناصر غير معدودة. إكمال؟",
+    "uncountedWarning_one": "عنصر واحد غير معدود. إكمال على أي حال؟",
+    "uncountedWarning_two": "عنصران غير معدودين. إكمال على أي حال؟",
+    "uncountedWarning_few": "{{count}} عناصر غير معدودة. إكمال على أي حال؟",
+    "uncountedWarning_many": "{{count}} عنصرًا غير معدود. إكمال على أي حال؟",
+    "uncountedWarning_other": "{{count}} عنصر غير معدود. إكمال على أي حال؟"
   },
   "categories": {
     "empty": {

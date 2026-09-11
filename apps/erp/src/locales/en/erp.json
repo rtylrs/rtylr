@@ -124,7 +124,19 @@
     "title": "Suppliers",
     "add": "Add Supplier",
     "comingSoon": "Supplier management is coming soon.",
-    "scorecards": "Scorecards"
+    "scorecards": "Scorecards",
+    "requiredFields": "Supplier name, email, city, and country are required",
+    "created": "Supplier created",
+    "createFailed": "Failed to create supplier",
+    "newSupplier": "New Supplier",
+    "activeCount_one": "{{count}} active supplier",
+    "activeCount_other": "{{count}} active suppliers",
+    "companyName": "Company name",
+    "email": "Email",
+    "phone": "Phone",
+    "city": "City",
+    "country": "Country",
+    "address": "Address"
   },
   "common": {
     "cancel": "Cancel",
@@ -195,7 +207,12 @@
       "title": "No suggestions",
       "description": "All stock levels are healthy"
     },
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "subtitle": "Smart recommendations based on sales velocity and lead times",
+    "avgDaily": "Avg Daily",
+    "suggested": "Suggested",
+    "lead": "Lead",
+    "confidence": "Confidence"
   },
   "variants": {
     "empty": {
@@ -252,7 +269,9 @@
       "title": "No expiring items",
       "description": "No batches with expiry dates tracked"
     },
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "expiryColumn": "Expiry",
+    "daysLeft": "Days Left"
   },
   "stockTransfers": {
     "empty": {
@@ -260,7 +279,21 @@
       "description": "Create your first stock transfer"
     },
     "newTransfer": "New Transfer",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "warehousesRequired": "Source and destination warehouses are required",
+    "warehousesMustDiffer": "Source and destination must differ",
+    "itemRequired": "At least one item with a product and positive quantity is required",
+    "draftCreated": "Transfer draft created",
+    "createFailed": "Failed to create transfer",
+    "subtitle": "Move inventory between warehouses",
+    "idColumn": "ID",
+    "from": "From",
+    "to": "To",
+    "items": "Items",
+    "created": "Created",
+    "fromWarehouse": "From warehouse…",
+    "toWarehouse": "To warehouse…",
+    "newTransferTitle": "New Stock Transfer"
   },
   "lowStockAlerts": {
     "empty": {
@@ -275,7 +308,20 @@
       "description": "Start a count to find discrepancies"
     },
     "newStockTake": "New Stock Take",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "warehouseRequired": "Warehouse is required",
+    "stillLoading": "Inventory is still loading",
+    "created": "Stock take created",
+    "createFailed": "Failed to create stock take",
+    "completed": "Stock take completed",
+    "completeFailed": "Failed to complete stock take",
+    "complete": "Complete",
+    "subtitle": "Periodic inventory counts and variance reports",
+    "completeAria": "Complete stock take",
+    "variance": "VARIANCE",
+    "selectWarehouse": "Select warehouse…",
+    "uncountedWarning_one": "{{count}} uncounted item. Complete anyway?",
+    "uncountedWarning_other": "{{count}} uncounted items. Complete anyway?"
   },
   "categories": {
     "empty": {

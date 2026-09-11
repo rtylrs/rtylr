@@ -17,5 +17,11 @@
   "total": "الإجمالي",
   "quantity": "الكمية",
   "price": "السعر",
-  "remove": "إزالة"
+  "remove": "إزالة",
+  "product": "المنتج",
+  "warehouse": "المستودع",
+  "batch": "الدفعة",
+  "qtyShort": "الكمية",
+  "notesOptional": "ملاحظات (اختياري)",
+  "stock": "المخزون"
 }

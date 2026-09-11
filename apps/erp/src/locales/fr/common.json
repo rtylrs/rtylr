@@ -17,5 +17,11 @@
   "total": "Total",
   "quantity": "Quantité",
   "price": "Prix",
-  "remove": "Retirer"
+  "remove": "Retirer",
+  "product": "Produit",
+  "warehouse": "Entrepôt",
+  "batch": "Lot",
+  "qtyShort": "Qté",
+  "notesOptional": "Notes (facultatif)",
+  "stock": "Stock"
 }

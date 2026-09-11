@@ -43,7 +43,10 @@ const Valuation: React.FC = () => {
       className="w-full min-w-0 space-y-5"
     >
       <HelmetContainer title={pageTitle(t(routeLabels['/valuation'].title))} />
-      <PageHeader title="Inventory Valuation" description="Total value of inventory on hand" />
+      <PageHeader
+        title={t(routeLabels['/valuation'].title)}
+        description="Total value of inventory on hand"
+      />
 
       {isLoading ? (
         <Skeleton className="h-32 rounded-xl" />

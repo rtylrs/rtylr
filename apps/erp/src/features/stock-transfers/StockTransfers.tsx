@@ -85,15 +85,15 @@ const StockTransfers: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!fromWarehouseId || !toWarehouseId) {
-      toast.error('Source and destination warehouses are required');
+      toast.error(t('erp.stockTransfers.warehousesRequired'));
       return;
     }
     if (fromWarehouseId === toWarehouseId) {
-      toast.error('Source and destination must differ');
+      toast.error(t('erp.stockTransfers.warehousesMustDiffer'));
       return;
     }
     if (validItems.length === 0) {
-      toast.error('At least one item with a product and positive quantity is required');
+      toast.error(t('erp.stockTransfers.itemRequired'));
       return;
     }
     try {
@@ -103,14 +103,14 @@ const StockTransfers: React.FC = () => {
         notes: notes.trim(),
         items: validItems,
       });
-      toast.success('Transfer draft created');
+      toast.success(t('erp.stockTransfers.draftCreated'));
       setShowCreate(false);
       setFromWarehouseId('');
       setToWarehouseId('');
       setNotes('');
       setNewItems([{ productId: '', quantity: '' }]);
     } catch {
-      toast.error('Failed to create transfer');
+      toast.error(t('erp.stockTransfers.createFailed'));
     }
   };
 
@@ -122,8 +122,8 @@ const StockTransfers: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t(routeLabels['/transfers'].title))} />
       <PageHeader
-        title="Stock Transfers"
-        description="Move inventory between warehouses"
+        title={t(routeLabels['/transfers'].title)}
+        description={t('erp.stockTransfers.subtitle')}
         actions={
           canCreateTransfer && (
             <button
@@ -150,13 +150,13 @@ const StockTransfers: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <span>ID</span>
-          <span>From</span>
+          <span>{t('erp.stockTransfers.idColumn')}</span>
+          <span>{t('erp.stockTransfers.from')}</span>
           <span></span>
-          <span>To</span>
-          <span>Items</span>
-          <span>Created</span>
-          <span>Status</span>
+          <span>{t('erp.stockTransfers.to')}</span>
+          <span>{t('erp.stockTransfers.items')}</span>
+          <span>{t('erp.stockTransfers.created')}</span>
+          <span>{t('common.status')}</span>
         </div>
         <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
           {isLoading ? (
@@ -239,14 +239,14 @@ const StockTransfers: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Stock Transfer
+              {t('erp.stockTransfers.newTransferTitle')}
             </h3>
             <select
               value={fromWarehouseId}
               onChange={(e) => setFromWarehouseId(e.target.value)}
               style={inputStyle}
             >
-              <option value="">From warehouse…</option>
+              <option value="">{t('erp.stockTransfers.fromWarehouse')}</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -258,7 +258,7 @@ const StockTransfers: React.FC = () => {
               onChange={(e) => setToWarehouseId(e.target.value)}
               style={inputStyle}
             >
-              <option value="">To warehouse…</option>
+              <option value="">{t('erp.stockTransfers.toWarehouse')}</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -268,7 +268,7 @@ const StockTransfers: React.FC = () => {
             <input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes (optional)"
+              placeholder={t('common.notesOptional')}
               style={inputStyle}
             />
             <p
@@ -345,7 +345,7 @@ const StockTransfers: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
