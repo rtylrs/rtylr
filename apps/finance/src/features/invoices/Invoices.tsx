@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -147,7 +148,7 @@ const Invoices: React.FC = () => {
       transition={{ duration: 0.2 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Invoices · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.invoices'))} />
       <PageHeader
         title="Invoices"
         subtitle={
