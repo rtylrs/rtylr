@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Play, Pause, Repeat } from 'lucide-react';
@@ -172,7 +173,7 @@ const RecurringInvoices: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Recurring invoices · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.recurringInvoices'))} />
       <PageHeader
         title="Recurring Invoices"
         subtitle={`${data.length} active subscriptions`}
