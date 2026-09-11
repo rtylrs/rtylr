@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all build-media-engine generate generate-module lint test test-db direct-authorization-evidence role-access-control-v2-rollback-check route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
+.PHONY: onion setup build build-all build-media-engine generate generate-module lint vet test test-db direct-authorization-evidence role-access-control-v2-rollback-check route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -6,11 +6,20 @@ onion: sql-check test build
 setup:
 	./scripts/setup.sh
 
-build:
+# SQLC output is gitignored, so a checkout advanced across commits keeps
+# whatever was generated for the older revision. Every target below that
+# compiles Go for verification takes `generate` as a prerequisite, so stale
+# output cannot reach the compiler. Make builds a prerequisite at most once
+# per invocation, so `make onion` still generates a single time.
+#
+# build.sh generates again on its own so it stays self-contained when invoked
+# directly. The repeat costs about seven seconds against a multi-minute target,
+# which is worth keeping both entry points correct on their own terms.
+build: generate
 	./scripts/build.sh
 
 # Build all service binaries
-build-all:
+build-all: generate
 	./scripts/check-voxie-ref.sh
 	@echo "Building API binary..."
 	@mkdir -p ./bin
@@ -38,23 +47,26 @@ generate-module:
 	@test -n "$(NAME)" || (echo "usage: make generate-module NAME=<module_name>" && exit 1)
 	./scripts/generate-module.sh $(NAME)
 
-lint:
+lint: generate
 	./scripts/lint.sh
 
-test:
+vet: generate
+	go vet ./...
+
+test: generate
 	./scripts/test.sh
 
 # Run the database-backed integration tests against the local-env MySQL
 # container. Resets a dedicated onion_test DB (drop → migrate → seed) each
 # run so the tests stay repeatable. Requires `make local-env-up` first.
 # Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos_users/...`
-test-db:
+test-db: generate
 	./scripts/test-db.sh $(PKG)
 
 direct-authorization-evidence:
 	./scripts/run-role-access-control-v2-direct-coverage.sh
 
-role-access-control-v2-rollback-check:
+role-access-control-v2-rollback-check: generate
 	./scripts/test-role-access-control-v2-rollback.sh
 
 route-contract-check:
