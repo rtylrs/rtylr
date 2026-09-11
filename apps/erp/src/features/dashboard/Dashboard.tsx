@@ -20,6 +20,9 @@ import { timeAgo, formatCurrency } from '../../shared/lib/format';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import { useDashboardStats } from '../../shared/hooks/queries/useDashboardStats';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
+import { useTranslation } from 'react-i18next';
 
 const AMBER = 'var(--erp-accent)';
 const CARD_STYLE: React.CSSProperties = {
@@ -82,6 +85,7 @@ const itemVariants: Variants = {
 };
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [quickAddOpen, setQuickAddOpen] = React.useState(false);
   const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats();
   const { data: productsResult, isLoading: productsLoading } = useProducts({ pageSize: 5 });
@@ -142,7 +146,7 @@ const Dashboard: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-6"
     >
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/'].title))} />
       <motion.div
         variants={itemVariants}
         className="flex flex-wrap items-start justify-between gap-4"
