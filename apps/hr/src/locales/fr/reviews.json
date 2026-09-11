@@ -32,5 +32,14 @@
   "notesPlaceholder": "Retours clés et prochaines étapes",
   "overallRating": "Évaluation globale",
   "errorPickBoth": "Choisissez un employé et un évaluateur",
-  "created": "Évaluation créée"
+  "created": "Évaluation créée",
+  "page": {
+    "metaTitle": "Évaluations de performance · rtylr",
+    "title": "Évaluations de performance",
+    "subtitle": "Suivre les cycles d'évaluation et les notes",
+    "newReview": "Nouvelle évaluation",
+    "goals": "Objectifs",
+    "values": "Valeurs",
+    "skills": "Compétences"
+  }
 }

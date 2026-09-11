@@ -34,5 +34,36 @@
     "target": "Cible",
     "shiftDay": "Jour de service",
     "reason": "Motif"
+  },
+  "metaTitle": "Opérations · rtylr",
+  "title": "Opérations",
+  "subtitle": "Coût de main-d'œuvre, échanges de postes, disponibilités, pauses, heures supplémentaires",
+  "department": "Service",
+  "weeklyLabor": "Main-d'œuvre hebdomadaire",
+  "weeklyHours": "Heures hebdomadaires",
+  "blendedRate": "Taux moyen",
+  "gpsTitle": "Démo de pointage GPS",
+  "gpsClockIn": "Pointer avec le GPS",
+  "requestSwapTitle": "Demander un échange",
+  "selectPlaceholder": "Sélectionner",
+  "requestSwap": "Envoyer la demande",
+  "breaksSubtitle": "Suivi des pauses pour la conformité et le calcul des heures supplémentaires",
+  "breakColumns": {
+    "employee": "Employé",
+    "type": "Type",
+    "started": "Début",
+    "duration": "Durée"
+  },
+  "endBreak": "Terminer",
+  "toasts": {
+    "breakStarted": "Pause commencée",
+    "breakEnded": "Pause terminée",
+    "geolocationUnavailable": "Géolocalisation indisponible",
+    "clockedInWithLocation": "Pointage enregistré avec la position",
+    "locationPermissionDenied": "Autorisation de localisation refusée",
+    "completeAllFields": "Complétez tous les champs",
+    "swapRequested": "Demande envoyée",
+    "swapAccepted": "Échange accepté",
+    "swapRejected": "Échange refusé"
   }
 }

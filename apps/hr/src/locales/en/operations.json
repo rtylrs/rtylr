@@ -34,5 +34,36 @@
     "target": "Target",
     "shiftDay": "Shift day",
     "reason": "Reason"
+  },
+  "metaTitle": "Operations · rtylr",
+  "title": "Operations",
+  "subtitle": "Labor cost, shift swaps, availability, breaks, overtime",
+  "department": "Department",
+  "weeklyLabor": "Weekly labor",
+  "weeklyHours": "Weekly hours",
+  "blendedRate": "Blended rate",
+  "gpsTitle": "GPS clock-in demo",
+  "gpsClockIn": "Clock in with GPS",
+  "requestSwapTitle": "Request a swap",
+  "selectPlaceholder": "Select",
+  "requestSwap": "Request swap",
+  "breaksSubtitle": "Track breaks for compliance and overtime calculations",
+  "breakColumns": {
+    "employee": "Employee",
+    "type": "Type",
+    "started": "Started",
+    "duration": "Duration"
+  },
+  "endBreak": "End",
+  "toasts": {
+    "breakStarted": "Break started",
+    "breakEnded": "Break ended",
+    "geolocationUnavailable": "Geolocation unavailable",
+    "clockedInWithLocation": "Clocked in with location",
+    "locationPermissionDenied": "Location permission denied",
+    "completeAllFields": "Complete all fields",
+    "swapRequested": "Swap requested",
+    "swapAccepted": "Swap accepted",
+    "swapRejected": "Swap rejected"
   }
 }

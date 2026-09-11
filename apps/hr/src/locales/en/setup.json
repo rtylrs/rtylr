@@ -127,6 +127,13 @@
     "overtimeAfter": "Overtime after (hrs/week)",
     "ptoPolicy": "PTO policy (days/year)",
     "currency": "Currency",
-    "industry": "Industry"
+    "industry": "Industry",
+    "saved": "Settings saved",
+    "metaTitle": "HR settings · rtylr",
+    "pageTitle": "HR Settings",
+    "subtitle": "Work week, overtime, PTO policy, and currency",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "save": "Save settings"
   }
 }

@@ -90,9 +90,9 @@ const Operations: React.FC = () => {
   const handleStartLunchBreak = useCallback((): void => {
     startBreak.mutate(
       { staffId: staff[0]?.id ?? 1, staffName: staff[0]?.name ?? 'Alex Chen', type: 'Lunch' },
-      { onSuccess: () => toast.success('Break started') }
+      { onSuccess: () => toast.success(t('operations.toasts.breakStarted')) }
     );
-  }, [startBreak, staff]);
+  }, [startBreak, staff, t]);
   const { data: settings } = useHrSettings();
 
   /* Labor cost */
@@ -127,29 +127,26 @@ const Operations: React.FC = () => {
   const checkGps = () => {
     if (!navigator.geolocation) {
       setGpsStatus('Geolocation not supported');
-      toast.error('Geolocation unavailable');
+      toast.error(t('operations.toasts.geolocationUnavailable'));
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsStatus(`${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`);
-        toast.success('Clocked in with location');
+        toast.success(t('operations.toasts.clockedInWithLocation'));
       },
       () => {
         setGpsStatus('Permission denied');
-        toast.error('Location permission denied');
+        toast.error(t('operations.toasts.locationPermissionDenied'));
       }
     );
   };
 
   return (
     <>
-      <HelmetContainer title="Operations · rtylr" />
+      <HelmetContainer title={t('operations.metaTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader
-          title="Operations"
-          subtitle="Labor cost, shift swaps, availability, breaks, overtime"
-        />
+        <SectionHeader title={t('operations.title')} subtitle={t('operations.subtitle')} />
         <Tabs
           tabs={[...visibleTabs]}
           active={activeTab}
@@ -166,7 +163,7 @@ const Operations: React.FC = () => {
                 gap: 12,
               }}
             >
-              <Label style={{ marginBottom: 0 }}>Department</Label>
+              <Label style={{ marginBottom: 0 }}>{t('operations.department')}</Label>
               <div style={{ width: isMobile ? '100%' : 200 }}>
                 <Select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
                   {departments.map((d) => (
@@ -193,7 +190,7 @@ const Operations: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    Weekly labor
+                    {t('operations.weeklyLabor')}
                   </span>
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
@@ -226,7 +223,7 @@ const Operations: React.FC = () => {
                     marginBottom: 6,
                   }}
                 >
-                  Weekly hours
+                  {t('operations.weeklyHours')}
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
                   {weeklyHours}h
@@ -242,7 +239,7 @@ const Operations: React.FC = () => {
                     marginBottom: 6,
                   }}
                 >
-                  Blended rate
+                  {t('operations.blendedRate')}
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
                   {formatCurrency(blendedRate, settings?.currency)}/h
@@ -270,14 +267,14 @@ const Operations: React.FC = () => {
               <MapPin size={14} style={{ color: ACCENT }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                  GPS clock-in demo
+                  {t('operations.gpsTitle')}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
                   Status: {gpsStatus}
                 </div>
               </div>
               <Button variant="primary" onClick={checkGps}>
-                Clock in with GPS
+                {t('operations.gpsClockIn')}
               </Button>
             </Card>
           </div>
@@ -286,7 +283,7 @@ const Operations: React.FC = () => {
         {activeTab === 'Swap Shifts' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <Card>
-              <SectionHeader title="Request a swap" />
+              <SectionHeader title={t('operations.requestSwapTitle')} />
               <div
                 style={{
                   marginTop: 10,
@@ -303,7 +300,7 @@ const Operations: React.FC = () => {
                       setSwapForm({ ...swapForm, requesterId: Number(e.target.value) })
                     }
                   >
-                    <option value={0}>Select</option>
+                    <option value={0}>{t('operations.selectPlaceholder')}</option>
                     {staff.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
@@ -317,7 +314,7 @@ const Operations: React.FC = () => {
                     value={swapForm.targetId}
                     onChange={(e) => setSwapForm({ ...swapForm, targetId: Number(e.target.value) })}
                   >
-                    <option value={0}>Select</option>
+                    <option value={0}>{t('operations.selectPlaceholder')}</option>
                     {staff.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
@@ -349,7 +346,7 @@ const Operations: React.FC = () => {
                     const requester = staff.find((s) => s.id === swapForm.requesterId);
                     const target = staff.find((s) => s.id === swapForm.targetId);
                     if (!requester || !target || !swapForm.shiftDay) {
-                      toast.error('Complete all fields');
+                      toast.error(t('operations.toasts.completeAllFields'));
                       return;
                     }
                     createSwap.mutate(
@@ -363,14 +360,14 @@ const Operations: React.FC = () => {
                       },
                       {
                         onSuccess: () => {
-                          toast.success('Swap requested');
+                          toast.success(t('operations.toasts.swapRequested'));
                           setSwapForm({ requesterId: 0, targetId: 0, shiftDay: '', reason: '' });
                         },
                       }
                     );
                   }}
                 >
-                  Request swap
+                  {t('operations.requestSwap')}
                 </Button>
               </div>
             </Card>
@@ -413,13 +410,17 @@ const Operations: React.FC = () => {
                           onApprove={() =>
                             resolveSwap.mutate(
                               { id: s.id, accepted: true },
-                              { onSuccess: () => toast.success('Swap accepted') }
+                              {
+                                onSuccess: () => toast.success(t('operations.toasts.swapAccepted')),
+                              }
                             )
                           }
                           onReject={() =>
                             resolveSwap.mutate(
                               { id: s.id, accepted: false },
-                              { onSuccess: () => toast.success('Swap rejected') }
+                              {
+                                onSuccess: () => toast.success(t('operations.toasts.swapRejected')),
+                              }
                             )
                           }
                         />
@@ -546,7 +547,7 @@ const Operations: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <Coffee size={14} style={{ color: ACCENT }} />
                 <div style={{ flex: 1, fontSize: 12, color: 'var(--hr-text-muted)' }}>
-                  Track breaks for compliance and overtime calculations
+                  {t('operations.breaksSubtitle')}
                 </div>
                 <Button variant="primary" onClick={handleStartLunchBreak}>
                   {t('operations.startLunchBreak')}
@@ -577,7 +578,7 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Employee
+                        {t('operations.breakColumns.employee')}
                       </th>
                       <th
                         style={{
@@ -588,7 +589,7 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Type
+                        {t('operations.breakColumns.type')}
                       </th>
                       <th
                         style={{
@@ -599,7 +600,7 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Started
+                        {t('operations.breakColumns.started')}
                       </th>
                       <th
                         style={{
@@ -610,7 +611,7 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Duration
+                        {t('operations.breakColumns.duration')}
                       </th>
                       <th></th>
                     </tr>
@@ -639,11 +640,11 @@ const Operations: React.FC = () => {
                               style={{ padding: '4px 10px' }}
                               onClick={() =>
                                 endBreak.mutate(b.id, {
-                                  onSuccess: () => toast.success('Break ended'),
+                                  onSuccess: () => toast.success(t('operations.toasts.breakEnded')),
                                 })
                               }
                             >
-                              End
+                              {t('operations.endBreak')}
                             </Button>
                           )}
                         </td>

@@ -27,5 +27,23 @@
     "cannotPublishConflicts": "قم بحل جميع تعارضات الجدولة قبل نشر الجدول.",
     "emptyTitle": "لا توجد بيانات جدول",
     "emptyDescription": "أضف موظفين إلى هذا الموقع لبناء الجدول."
+  },
+  "schedule": {
+    "fillAllFields": "أكمل جميع الحقول",
+    "shiftSaved": "تم حفظ المناوبة",
+    "shiftRemoved": "تم حذف المناوبة",
+    "weekPublished": "تم نشر الأسبوع",
+    "metaTitle": "جدول المناوبات · rtylr",
+    "title": "جدول المناوبات",
+    "subtitle": "عرض أسبوعي شبكي لجدولة المناوبات",
+    "publishWeek": "نشر الأسبوع",
+    "newShift": "مناوبة جديدة",
+    "employee": "الموظف",
+    "selectPlaceholder": "اختر",
+    "start": "البداية",
+    "end": "النهاية",
+    "color": "اللون",
+    "cancel": "إلغاء",
+    "saveShift": "حفظ المناوبة"
   }
 }

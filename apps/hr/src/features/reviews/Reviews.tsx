@@ -21,15 +21,15 @@ const Reviews: React.FC = () => {
   const { data, isLoading } = useReviews();
   return (
     <>
-      <HelmetContainer title="Performance reviews · rtylr" />
+      <HelmetContainer title={t('reviews.page.metaTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
-          title="Performance Reviews"
-          subtitle="Track review cycles and ratings"
+          title={t('reviews.page.title')}
+          subtitle={t('reviews.page.subtitle')}
           right={
             <Link to="/reviews/new" style={{ textDecoration: 'none' }}>
               <Button variant="primary" icon={<Plus size={13} />}>
-                New review
+                {t('reviews.page.newReview')}
               </Button>
             </Link>
           }
@@ -81,15 +81,19 @@ const Reviews: React.FC = () => {
                   }}
                 >
                   <div>
-                    <span style={{ color: 'var(--hr-text-muted)' }}>Goals</span>{' '}
+                    <span style={{ color: 'var(--hr-text-muted)' }}>{t('reviews.page.goals')}</span>{' '}
                     <strong style={{ color: 'var(--hr-text)' }}>{r.goals}/5</strong>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--hr-text-muted)' }}>Values</span>{' '}
+                    <span style={{ color: 'var(--hr-text-muted)' }}>
+                      {t('reviews.page.values')}
+                    </span>{' '}
                     <strong style={{ color: 'var(--hr-text)' }}>{r.values}/5</strong>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--hr-text-muted)' }}>Skills</span>{' '}
+                    <span style={{ color: 'var(--hr-text-muted)' }}>
+                      {t('reviews.page.skills')}
+                    </span>{' '}
                     <strong style={{ color: 'var(--hr-text)' }}>{r.skills}/5</strong>
                   </div>
                 </div>

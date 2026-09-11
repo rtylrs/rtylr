@@ -68,7 +68,7 @@ const Departments: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Departments · rtylr" />
+      <HelmetContainer title={t('departments.page.metaTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* Header */}
         <div
@@ -82,7 +82,7 @@ const Departments: React.FC = () => {
         >
           <div>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>
-              Departments
+              {t('departments.page.title')}
             </h2>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
               {loading
@@ -226,7 +226,7 @@ const Departments: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <UserCheck size={14} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />
                     <span style={{ fontSize: '12px', color: 'var(--hr-text-dim)' }}>
-                      Department Head
+                      {t('departments.page.head')}
                     </span>
                     <span
                       style={{
@@ -254,7 +254,7 @@ const Departments: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Users size={13} style={{ color: 'var(--hr-text-dim)' }} />
                         <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
-                          Team Size
+                          {t('departments.page.teamSize')}
                         </span>
                       </div>
                       <span style={{ fontSize: '18px', fontWeight: 700, color }}>
@@ -266,7 +266,7 @@ const Departments: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <DollarSign size={13} style={{ color: 'var(--hr-text-dim)' }} />
                           <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
-                            Avg Salary
+                            {t('departments.page.avgSalary')}
                           </span>
                         </div>
                         <span
@@ -288,7 +288,7 @@ const Departments: React.FC = () => {
                       }}
                     >
                       <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
-                        Share of total workforce
+                        {t('departments.page.shareOfWorkforce')}
                       </span>
                       <span style={{ fontSize: '11px', fontWeight: 600, color }}>
                         {departments.reduce((s, d) => s + d.staffCount, 0) > 0
