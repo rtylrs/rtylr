@@ -10,6 +10,8 @@ import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import BarcodeSvg from '../../shared/components/BarcodeSvg';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -45,7 +47,7 @@ const Barcodes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Barcode generator · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/barcodes'].title))} />
       <PageHeader
         title="Barcode Generator"
         description="Select products, choose copy count, and print labels"

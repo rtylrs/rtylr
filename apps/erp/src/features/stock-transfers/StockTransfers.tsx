@@ -19,6 +19,8 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -118,7 +120,7 @@ const StockTransfers: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Stock transfers · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/transfers'].title))} />
       <PageHeader
         title="Stock Transfers"
         description="Move inventory between warehouses"

@@ -32,6 +32,7 @@ import { formatCurrency } from '../../shared/lib/format';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -155,7 +156,7 @@ const Products: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Products · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.products'))} />
       <PageHeader
         title={t('erp.products.title')}
         description={`${totalProducts} product${totalProducts === 1 ? '' : 's'} in your catalog`}

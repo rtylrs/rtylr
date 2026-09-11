@@ -12,6 +12,8 @@ import SupplierBillHistory from '../../shared/components/SupplierBillHistory';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -148,7 +150,7 @@ const Suppliers: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Suppliers · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/suppliers'].title))} />
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>

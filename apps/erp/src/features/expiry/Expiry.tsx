@@ -8,6 +8,8 @@ import { useExpiry } from './useExpiry';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate, daysUntil } from '../../shared/lib/format';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 const AMBER = 'var(--erp-accent)';
 
 const Expiry: React.FC = () => {
@@ -24,7 +26,7 @@ const Expiry: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Expiry tracking · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/expiry'].title))} />
       <PageHeader
         title="Expiry Tracking"
         description={`${items.length} batches with expiry dates`}

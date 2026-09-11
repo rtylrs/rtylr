@@ -10,6 +10,7 @@ import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatNumber } from '../../shared/lib/format';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -70,7 +71,7 @@ const Warehouses: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title={`${t('erp.warehouses.title')} · rtylr`} />
+      <HelmetContainer title={pageTitle(t('erp.warehouses.title'))} />
       <PageHeader
         title={t('erp.warehouses.title')}
         description={t('erp.warehouses.count', { count: warehouses.length })}
