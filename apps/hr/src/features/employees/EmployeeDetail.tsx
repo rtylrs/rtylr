@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -76,7 +77,7 @@ const EmployeeDetail = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Employee detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.employeeDetail'))} />
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <button
