@@ -9,11 +9,7 @@ interface Props {
   placeholder?: string;
 }
 
-const DepartmentSelect: React.FC<Props> = ({
-  value,
-  onChange,
-  placeholder = 'Select department',
-}) => {
+const DepartmentSelect: React.FC<Props> = ({ value, onChange, placeholder }) => {
   const { t } = useTranslation();
   const { data } = useDepartments();
   const [open, setOpen] = useState(false);
@@ -44,7 +40,7 @@ const DepartmentSelect: React.FC<Props> = ({
           cursor: 'pointer',
         }}
       >
-        {value || placeholder}
+        {value || placeholder || t('common.select')}
         <ChevronDown size={14} />
       </button>
       {open && (
