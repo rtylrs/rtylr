@@ -44,8 +44,26 @@ const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
     // message, so this text reaches a stack trace and nowhere else.
     'Social sign-in returned no redirect URL',
   ],
-  // A key cap. The user's keyboard says ESC whatever language they read.
-  flow: ['ESC'],
+  flow: [
+    // Key caps and keyboard hints. The user's keyboard says these whatever
+    // language they read.
+    'ESC',
+    'G I',
+    'G M',
+    // Product names of the integrations themselves.
+    'Slack',
+    'GitHub',
+    'Email',
+    // Seeded time categories, which a workspace renames and which are then
+    // persisted as its own data. They live in a zustand store module that
+    // cannot reach `t`, which is the question already open as rtylr#1221.
+    // This is a deferral, not a resolution: a French workspace still gets
+    // English defaults to rename.
+    'Development',
+    'Review',
+    'Meeting',
+    'Admin',
+  ],
   hr: ['ESC'],
   // Nothing: finance has no string that should stay English.
   finance: [],
@@ -165,6 +183,38 @@ describe('collectLiterals', () => {
 
     expect(formatLiterals(collectLiterals(dir, ['MM-DD']))).toEqual([]);
     expect(formatLiterals(collectLiterals(dir))).toEqual(['a.tsx:1  MM-DD']);
+  });
+
+  it('finds copy inside a data object, which no markup sweep can see', () => {
+    const dir = fixture({
+      'a.tsx': [
+        'const NAV = [',
+        "  { to: '/careers', label: 'Careers' },",
+        "  { to: '/admin', label: 'Page branding', blurb: 'Colours and fonts' },",
+        '];',
+      ].join('\n'),
+    });
+
+    expect(formatLiterals(collectLiterals(dir))).toEqual([
+      'a.tsx:2  Careers',
+      'a.tsx:3  Page branding',
+    ]);
+  });
+
+  it('leaves a bare string in an object alone, since it is as likely an id', () => {
+    const dir = fixture({
+      'a.tsx': ["const c = { to: '/Admin', icon: 'Briefcase', key: 'Careers' };"].join('\n'),
+    });
+
+    expect(formatLiterals(collectLiterals(dir))).toEqual([]);
+  });
+
+  it('finds a default for a destructured parameter, which renders when omitted', () => {
+    const dir = fixture({
+      'a.tsx': ["const C = ({ placeholder = 'Select department' }) => <input />;"].join('\n'),
+    });
+
+    expect(formatLiterals(collectLiterals(dir))).toEqual(['a.tsx:1  Select department']);
   });
 
   it('does not read a test file, which asserts on copy by design', () => {
