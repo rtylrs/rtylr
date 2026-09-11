@@ -159,11 +159,11 @@ const ReviewForm: React.FC = () => {
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <Link to="/reviews">
                 <Button type="button" variant="ghost">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </Link>
               <Button type="submit" variant="primary">
-                Submit review
+                {t('reviews.form.submit')}
               </Button>
             </div>
           </form>
