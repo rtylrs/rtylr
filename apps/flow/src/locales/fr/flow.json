@@ -622,7 +622,8 @@
     "groupByLabel": "Grouper :",
     "addTask": "Ajouter une tâche",
     "emptyColumn": "Rien ici pour le moment.",
-    "emptyLane": "Aucune"
+    "emptyLane": "Aucune",
+    "deleteColumn": "Supprimer la colonne"
   },
   "views": {
     "addTooltip": "Nouvelle vue",
@@ -806,7 +807,8 @@
     "pageTitle": "Liste · rtylr",
     "toggleDoneLabel": "Marquer comme terminé",
     "columnTitle": "Titre",
-    "moreOptions": "Plus d'options"
+    "moreOptions": "Plus d'options",
+    "otherSection": "Autres"
   },
   "projectOverview": {
     "pageTitle": "Aperçu · rtylr",
@@ -886,7 +888,12 @@
     "visibility": "Visibilité",
     "visibilityGateReason": "Seul un administrateur du projet peut changer la visibilité.",
     "visibilityPersonalGate": "Votre projet Mes tâches est toujours privé.",
-    "visibilitySaved": "Visibilité mise à jour"
+    "visibilitySaved": "Visibilité mise à jour",
+    "integrations": {
+      "slack": "Publier les mises à jour du projet dans #flow-updates",
+      "github": "Lier les PR aux tâches automatiquement",
+      "email": "Envoyer un résumé quotidien aux membres"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",
@@ -975,7 +982,9 @@
   },
   "confirm": {
     "typeToConfirm": "Pour confirmer, saisissez {{word}} ci-dessous",
-    "working": "En cours…"
+    "working": "En cours…",
+    "delete": "Supprimer",
+    "cancel": "Annuler"
   },
   "project": {
     "loading": "Chargement du projet…",
@@ -1013,5 +1022,8 @@
     "title": "Route de prévisualisation indisponible",
     "body": "Cette page n'est pas activée dans cet environnement. La route reste disponible lorsque les routes de prévisualisation sont activées.",
     "back": "Retour à Mes tickets"
+  },
+  "projectSelect": {
+    "placeholder": "Choisir un projet"
   }
 }
