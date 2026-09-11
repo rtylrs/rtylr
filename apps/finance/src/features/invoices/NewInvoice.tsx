@@ -220,7 +220,7 @@ const NewInvoice: React.FC = () => {
       <HelmetContainer title={pageTitle(t('common.pageTitles.newInvoice'))} />
       <PageHeader
         title={t('invoices.new.title')}
-        breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'New' }]}
+        breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: t('common.new') }]}
       />
 
       {/* Stepper */}
