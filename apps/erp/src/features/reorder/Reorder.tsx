@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useReorderSuggestions } from './useReorderSuggestions';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -21,7 +23,7 @@ const Reorder: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Reorder suggestions · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/reorder'].title))} />
       <PageHeader
         title="Reorder Suggestions"
         description="Smart recommendations based on sales velocity and lead times"
