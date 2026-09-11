@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, DollarSign, Clock } from 'lucide-react';
 import MoneyDisplay from './MoneyDisplay';
 import { cardStyle } from '../lib/tokens';
@@ -13,6 +14,7 @@ interface Kpi {
 }
 
 const FinanceKpiWidgets: React.FC = () => {
+  const { t } = useTranslation();
   const { data, isLoading } = useFinanceDashboard();
 
   const dash = data as
@@ -26,7 +28,7 @@ const FinanceKpiWidgets: React.FC = () => {
 
   const kpis: Kpi[] = [
     {
-      label: 'Receivable',
+      label: t('finance.kpi.receivable'),
       value:
         isLoading || !dash ? (
           '-'
@@ -38,7 +40,7 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-receivable',
     },
     {
-      label: 'Expenses MTD',
+      label: t('finance.kpi.expensesMtd'),
       value:
         isLoading || !dash ? (
           '-'
@@ -50,7 +52,7 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-expenses',
     },
     {
-      label: 'Net Profit MTD',
+      label: t('finance.kpi.netProfitMtd'),
       value:
         isLoading || !dash ? '-' : <MoneyDisplay amount={dash.netProfitMtd} fractionDigits={0} />,
       hint: 'month to date',
@@ -58,7 +60,7 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-profit',
     },
     {
-      label: 'Overdue',
+      label: t('finance.kpi.overdue'),
       value:
         isLoading || !dash ? '-' : <MoneyDisplay amount={dash.overdueAmount} fractionDigits={0} />,
       hint: 'past due date',
