@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
@@ -53,7 +54,7 @@ const Documents: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Documents · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.documents'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader title={t('documents.title')} subtitle={t('documents.subtitle')} />
 

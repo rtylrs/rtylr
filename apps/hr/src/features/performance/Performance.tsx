@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { BarChart3 } from 'lucide-react';
@@ -140,13 +141,16 @@ const PerformanceInner = (): React.JSX.Element => {
   );
 };
 
-const Performance = (): React.JSX.Element => (
-  <>
-    <HelmetContainer title="Performance · rtylr" />
-    <ErrorBoundary>
-      <PerformanceInner />
-    </ErrorBoundary>
-  </>
-);
+const Performance = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <HelmetContainer title={pageTitle(t('nav.performance'))} />
+      <ErrorBoundary>
+        <PerformanceInner />
+      </ErrorBoundary>
+    </>
+  );
+};
 
 export default Performance;

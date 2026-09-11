@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -104,7 +105,7 @@ const PaySlip = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Pay slip · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.paySlip'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 600 }}>
         <Breadcrumbs
           items={[

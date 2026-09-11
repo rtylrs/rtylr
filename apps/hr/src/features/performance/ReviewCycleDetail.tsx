@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -289,7 +290,7 @@ const ReviewCycleDetail = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Review cycle · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.reviewCycle'))} />
       <div>
         <SectionHeader
           title={cycle.name ?? ''}

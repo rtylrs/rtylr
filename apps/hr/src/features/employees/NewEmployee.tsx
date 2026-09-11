@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -126,7 +127,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
 
   return (
     <>
-      <HelmetContainer title="New employee · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.newEmployee'))} />
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <button

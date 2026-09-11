@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
@@ -33,7 +34,7 @@ const Offboarding: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Offboarding · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.offboarding'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader title={t('offboarding.title')} subtitle={t('offboarding.subtitle')} />
         {isLoading ? (

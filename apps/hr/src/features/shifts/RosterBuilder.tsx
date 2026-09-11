@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -385,13 +386,16 @@ const ShiftChip = ({ assignment }: { assignment: ShiftAssignment }): React.JSX.E
   );
 };
 
-const RosterBuilder = (): React.JSX.Element => (
-  <>
-    <HelmetContainer title="Roster builder · rtylr" />
-    <ErrorBoundary>
-      <RosterBuilderInner />
-    </ErrorBoundary>
-  </>
-);
+const RosterBuilder = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <HelmetContainer title={pageTitle(t('nav.rosterBuilder'))} />
+      <ErrorBoundary>
+        <RosterBuilderInner />
+      </ErrorBoundary>
+    </>
+  );
+};
 
 export default RosterBuilder;

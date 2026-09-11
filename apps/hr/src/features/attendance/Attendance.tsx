@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
@@ -49,7 +50,7 @@ const Attendance = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Attendance · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.attendance'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <SectionHeader title={t('attendance.title')} subtitle={t('attendance.subtitle')} />
 

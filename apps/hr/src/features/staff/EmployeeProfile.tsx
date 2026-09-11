@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useParams, useNavigate, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
@@ -77,7 +78,7 @@ const EmployeeProfile: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Employee profile · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.employeeProfile'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Breadcrumbs items={[{ label: 'Staff', href: '/staff' }, { label: staff.name }]} />
 

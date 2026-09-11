@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
@@ -68,7 +69,7 @@ const Staff: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Staff · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.staff'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* Header */}
         <div

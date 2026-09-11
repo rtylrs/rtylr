@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +29,7 @@ const MyPaySlips = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="My pay slips · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.myPaySlips'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('payroll.paySlip.myPaySlips')}

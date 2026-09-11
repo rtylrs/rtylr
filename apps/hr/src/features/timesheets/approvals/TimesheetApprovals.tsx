@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
@@ -73,7 +74,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Timesheet approvals · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.timesheetApprovals'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <SectionHeader
           title={t('timesheets.approvals.title')}

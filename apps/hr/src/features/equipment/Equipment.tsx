@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Package, Plus, CheckCircle, XCircle } from 'lucide-react';
@@ -57,7 +58,7 @@ const Equipment = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Equipment · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.equipment'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('equipment.title')}

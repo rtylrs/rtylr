@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -52,7 +53,7 @@ const TimesheetsList = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Timesheets · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.timesheets'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <SectionHeader title={t('timesheets.title')} subtitle={t('timesheets.subtitle')} />
 

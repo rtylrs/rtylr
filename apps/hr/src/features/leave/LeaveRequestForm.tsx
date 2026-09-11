@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -181,7 +182,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Leave request · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.leaveRequest'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 560 }}>
         <SectionHeader title={t('leave.form.title')} subtitle={t('leave.form.subtitle')} />
 

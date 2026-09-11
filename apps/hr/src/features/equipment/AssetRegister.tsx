@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { HardDrive } from 'lucide-react';
@@ -26,7 +27,7 @@ const AssetRegister = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Asset register · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.assets'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('equipment.assets.title')}
