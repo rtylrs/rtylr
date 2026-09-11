@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Download } from 'lucide-react';
 import { ghostBtn } from '../lib/tokens';
 
@@ -10,17 +11,20 @@ interface DownloadPdfButtonProps {
 const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({
   invoiceId: _invoiceId,
   label = 'Download PDF',
-}) => (
-  <button
-    type="button"
-    style={ghostBtn}
-    aria-label="Download PDF"
-    disabled
-    title="PDF download coming in a future update"
-  >
-    <Download size={13} />
-    {label}
-  </button>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      style={ghostBtn}
+      aria-label={t('finance.pdf.download')}
+      disabled
+      title={t('finance.pdf.comingSoon')}
+    >
+      <Download size={13} />
+      {label}
+    </button>
+  );
+};
 
 export default DownloadPdfButton;
