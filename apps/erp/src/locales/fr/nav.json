@@ -31,6 +31,8 @@
     "receiving": "Réception de marchandises",
     "expiry": "Suivi des péremptions",
     "reorder": "Suggestions de réapprovisionnement",
-    "valuation": "Valorisation des stocks"
-  }
+    "valuation": "Valorisation des stocks",
+    "productDetail": "Détail du produit"
+  },
+  "products": "Produits"
 }
