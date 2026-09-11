@@ -20,7 +20,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   destructive,
 }) => {
   const { t } = useTranslation();
@@ -46,7 +46,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               onClose();
             }}
           >
-            {confirmLabel}
+            {confirmLabel ?? t('common.confirmLabel')}
           </button>
         </>
       }
