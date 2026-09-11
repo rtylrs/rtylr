@@ -42,5 +42,20 @@
     "JPY": "ين ياباني",
     "AUD": "دولار أسترالي",
     "CAD": "دولار كندي"
+  },
+  "pageTitles": {
+    "employeeDetail": "تفاصيل الموظف",
+    "newEmployee": "موظف جديد",
+    "leaveRequest": "طلب إجازة",
+    "checklistTemplates": "قوالب قوائم المهام",
+    "onboardingManagement": "إدارة الانضمام",
+    "paySlip": "قسيمة الراتب",
+    "payrollRun": "دورة رواتب",
+    "reviewCycle": "دورة تقييم",
+    "payrollConfiguration": "إعدادات الرواتب",
+    "setupWizard": "معالج الإعداد",
+    "employeeProfile": "ملف الموظف",
+    "timesheetDetail": "تفاصيل سجل الدوام",
+    "timesheetApprovals": "اعتمادات سجلات الدوام"
   }
 }
