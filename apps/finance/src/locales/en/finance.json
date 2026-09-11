@@ -62,5 +62,23 @@
     "markedDone": "Invoice loop closed: {{marked}} hours stamped invoiced, {{skipped}} skipped.",
     "fallbackClient": "",
     "billToPlaceholder": "Bill to (client name)"
+  },
+  "profitLoss": {
+    "title": "Profit & Loss",
+    "exportAria": "Export profit and loss as CSV",
+    "export": "Export",
+    "closeFiscalYear": "Close Fiscal Year",
+    "statement": "P&L Statement",
+    "revenue": "Revenue",
+    "grossRevenue": "Gross Revenue",
+    "cogs": "Cost of Goods Sold",
+    "directCosts": "Direct costs (COGS)",
+    "operatingExpenses": "Operating Expenses",
+    "totalOperatingExpenses": "Total Operating Expenses",
+    "totalOperating": "Total Operating",
+    "expensesByCategory": "Expenses by Category",
+    "categoryUnavailable": "Category breakdown not available yet.",
+    "lockingComingSoon": "Fiscal year period locking is coming soon",
+    "closeYear": "Close fiscal year"
   }
 }
