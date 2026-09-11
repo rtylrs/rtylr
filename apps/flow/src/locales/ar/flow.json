@@ -634,7 +634,8 @@
     "groupByLabel": "تجميع:",
     "addTask": "إضافة مهمة",
     "emptyColumn": "لا شيء هنا بعد.",
-    "emptyLane": "لا شيء"
+    "emptyLane": "لا شيء",
+    "deleteColumn": "حذف العمود"
   },
   "views": {
     "addTooltip": "عرض جديد",
@@ -833,7 +834,8 @@
     "pageTitle": "القائمة · rtylr",
     "toggleDoneLabel": "وضع علامة مكتمل",
     "columnTitle": "العنوان",
-    "moreOptions": "خيارات أخرى"
+    "moreOptions": "خيارات أخرى",
+    "otherSection": "أخرى"
   },
   "projectOverview": {
     "pageTitle": "نظرة عامة · rtylr",
@@ -913,7 +915,12 @@
     "visibility": "الظهور",
     "visibilityGateReason": "يمكن لمسؤول المشروع فقط تغيير الظهور.",
     "visibilityPersonalGate": "مشروع «مهامي» خاص دائمًا.",
-    "visibilitySaved": "تم تحديث الظهور"
+    "visibilitySaved": "تم تحديث الظهور",
+    "integrations": {
+      "slack": "نشر تحديثات المشروع في ‎#flow-updates",
+      "github": "ربط طلبات الدمج بالمهام تلقائيًا",
+      "email": "إرسال ملخص يومي إلى الأعضاء"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد",
@@ -1002,7 +1009,9 @@
   },
   "confirm": {
     "typeToConfirm": "للتأكيد، اكتب {{word}} أدناه",
-    "working": "جارٍ التنفيذ…"
+    "working": "جارٍ التنفيذ…",
+    "delete": "حذف",
+    "cancel": "إلغاء"
   },
   "project": {
     "loading": "جارٍ تحميل المشروع…",
@@ -1043,5 +1052,8 @@
     "title": "مسار المعاينة غير متاح",
     "body": "هذه الصفحة غير مفعّلة في هذه البيئة. يبقى المسار متاحًا عند تفعيل مسارات المعاينة.",
     "back": "العودة إلى مهامي"
+  },
+  "projectSelect": {
+    "placeholder": "اختر مشروعًا"
   }
 }
