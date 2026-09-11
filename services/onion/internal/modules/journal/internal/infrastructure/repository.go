@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/journal/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/financeaccounts"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -221,16 +221,12 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 		_ = tx.Rollback()
 		return err
 	}
-	gross := roundMoney(input.TotalGross)
-	net := roundMoney(input.TotalNet)
-	// Derive the deductions line from the rounded ledger values. Rounding the
-	// unrounded difference independently can leave the entry one cent short or
-	// over, which violates double-entry balance.
-	deductions := roundMoney(gross - net)
-	if deductions < 0 {
+	amounts, err := derivePayrollAmounts(input.TotalGross, input.TotalNet)
+	if err != nil {
 		_ = tx.Rollback()
-		return fmt.Errorf("payroll deductions cannot be negative after rounding")
+		return err
 	}
+	gross, net, deductions := amounts.gross, amounts.net, amounts.deductions
 	description := fmt.Sprintf("Payroll %d: %s to %s", input.RunID, input.PeriodStart, input.PeriodEnd)
 	result, err := tx.ExecContext(ctx, `
 		INSERT INTO finance_journal_entries
@@ -247,11 +243,7 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 		return err
 	}
 
-	lines := []struct {
-		accountID int64
-		debit     float64
-		credit    float64
-	}{
+	lines := []payrollLine{
 		{accountID: expenseAccountID, debit: gross},
 		{accountID: payableAccountID, credit: net},
 	}
@@ -261,25 +253,24 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 			_ = tx.Rollback()
 			return accountErr
 		}
-		lines = append(lines, struct {
-			accountID int64
-			debit     float64
-			credit    float64
-		}{accountID: deductionsAccountID, credit: deductions})
+		lines = append(lines, payrollLine{accountID: deductionsAccountID, credit: deductions})
 	}
-	var totalDebits, totalCredits float64
+	var totalDebits, totalCredits money.Amount
 	for _, line := range lines {
 		totalDebits += line.debit
 		totalCredits += line.credit
 	}
-	if roundMoney(totalDebits-totalCredits) != 0 {
+	// Exact, because both sides are integers. derivePayrollAmounts already
+	// guarantees these three lines close, so this guards a future fourth line
+	// added without updating the derivation, not the arithmetic above.
+	if totalDebits != totalCredits {
 		_ = tx.Rollback()
-		return fmt.Errorf("payroll journal is unbalanced: debits=%0.2f credits=%0.2f", totalDebits, totalCredits)
+		return fmt.Errorf("payroll journal is unbalanced: debits=%s credits=%s", totalDebits, totalCredits)
 	}
 	for _, line := range lines {
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO finance_journal_lines (entry_id, account_id, debit, credit)
-			VALUES (?, ?, ?, ?)`, entryID, line.accountID, line.debit, line.credit); err != nil {
+			VALUES (?, ?, ?, ?)`, entryID, line.accountID, line.debit.String(), line.credit.String()); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
@@ -313,11 +304,59 @@ func (unavailablePayrollAccountProvider) GetPayrollAccountMapping(context.Contex
 	return financeaccounts.PayrollAccountMapping{}, financeaccounts.ErrPayrollAccountsNotConfigured
 }
 
-const payrollSourceType = "payroll_run"
-
-func roundMoney(value float64) float64 {
-	return math.Round(value*100) / 100
+// payrollLine is one ledger line of a payroll entry, in cents.
+type payrollLine struct {
+	accountID int64
+	debit     money.Amount
+	credit    money.Amount
 }
+
+// payrollAmounts is the balanced set of amounts a payroll entry posts.
+type payrollAmounts struct {
+	gross      money.Amount
+	net        money.Amount
+	deductions money.Amount
+}
+
+// derivePayrollAmounts turns a payroll export's float64 gross and net into the
+// exact cent amounts the ledger stores.
+//
+// Deliberately pure: no database and no transaction. The double-entry
+// arithmetic is the part worth testing exhaustively, and it used to be
+// unreachable without a MySQL instance and three configured accounts, which is
+// why the posting path had no test at all.
+//
+// The payroll port carries these as float64, so they are converted once, here,
+// and every amount after this point is an integer. The path used to be float64
+// throughout with math.Round(value*100)/100 standing in for a cent boundary,
+// which made the balance assertion unreliable because it was written in the
+// same arithmetic it was guarding (#1183).
+func derivePayrollAmounts(grossAmount, netAmount float64) (payrollAmounts, error) {
+	// Refused rather than rounded. Rounding a three-decimal amount into the
+	// ledger is what the old half-cent tolerance allowed.
+	gross, err := money.FromFloat64(grossAmount)
+	if err != nil {
+		return payrollAmounts{}, fmt.Errorf("payroll gross: %w", err)
+	}
+	net, err := money.FromFloat64(netAmount)
+	if err != nil {
+		return payrollAmounts{}, fmt.Errorf("payroll net: %w", err)
+	}
+
+	// Derived as a residual, so the three lines close by construction rather
+	// than by each being rounded independently.
+	deductions := gross - net
+	if deductions < 0 {
+		return payrollAmounts{}, fmt.Errorf("payroll deductions cannot be negative: gross=%s net=%s", gross, net)
+	}
+	if gross != net+deductions {
+		return payrollAmounts{}, fmt.Errorf("payroll amounts do not balance: gross=%s net=%s deductions=%s", gross, net, deductions)
+	}
+
+	return payrollAmounts{gross: gross, net: net, deductions: deductions}, nil
+}
+
+const payrollSourceType = "payroll_run"
 
 func (r *Repository) GetLines(ctx context.Context, entryID int64) ([]domain.JournalLine, error) {
 	rows, err := r.queries.GetJournalLines(ctx, entryID)
@@ -379,12 +418,30 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		return 0, err
 	}
 
-	for _, line := range input.Lines {
+	for i, line := range input.Lines {
+		// Converted to cents rather than formatted from the float64 with
+		// strconv, so the value written is the value the caller meant and the
+		// column holds it exactly (#1183). ValidateJournalEntryInput has
+		// already refused anything that is not a whole number of cents, so
+		// these conversions cannot fail in practice; the errors are handled
+		// rather than discarded because a future caller may reach Create
+		// without going through the service.
+		debit, convErr := money.FromFloat64(line.Debit)
+		if convErr != nil {
+			_ = tx.Rollback()
+			return 0, fmt.Errorf("line[%d]: debit: %w", i, convErr)
+		}
+		credit, convErr := money.FromFloat64(line.Credit)
+		if convErr != nil {
+			_ = tx.Rollback()
+			return 0, fmt.Errorf("line[%d]: credit: %w", i, convErr)
+		}
+
 		if err := qtx.CreateJournalLine(ctx, sqlc.CreateJournalLineParams{
 			EntryID:   entryID,
 			AccountID: line.AccountID,
-			Debit:     nullableString(fmtFloat(line.Debit)),
-			Credit:    nullableString(fmtFloat(line.Credit)),
+			Debit:     nullableString(debit.String()),
+			Credit:    nullableString(credit.String()),
 		}); err != nil {
 			_ = tx.Rollback()
 			logger.Ctx(ctx).Error("Failed to create journal line", logger.Error(err))
@@ -453,10 +510,6 @@ func nullTime(t sql.NullTime) time.Time {
 		return t.Time
 	}
 	return time.Time{}
-}
-
-func fmtFloat(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
 }
 
 func parseFloatNull(s sql.NullString) float64 {

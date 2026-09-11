@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 // ValidateJournalEntryInput returns a non-nil error if the input fails
@@ -21,7 +23,13 @@ func ValidateJournalEntryInput(input JournalEntryInput) error {
 		return fmt.Errorf("a journal entry must have at least two lines")
 	}
 
-	var totalDebit, totalCredit float64
+	// Summed in minor units so the accounting identity is checked exactly.
+	// This used to add float64 values and forgive a difference of up to half a
+	// cent (const epsilon = 0.005), which meant an entry of 10.00 against
+	// 9.996 was accepted as balanced and carried a third decimal the column
+	// cannot hold (#1183). The guard was written in the same arithmetic it was
+	// guarding.
+	var totalDebit, totalCredit money.Amount
 	for i, line := range input.Lines {
 		if line.AccountID <= 0 {
 			return fmt.Errorf("line[%d]: account_id must be positive", i)
@@ -35,21 +43,24 @@ func ValidateJournalEntryInput(input JournalEntryInput) error {
 		if line.Debit == 0 && line.Credit == 0 {
 			return fmt.Errorf("line[%d]: at least one of debit or credit must be non-zero", i)
 		}
-		totalDebit += line.Debit
-		totalCredit += line.Credit
+
+		debit, err := money.FromFloat64(line.Debit)
+		if err != nil {
+			return fmt.Errorf("line[%d]: debit: %w", i, err)
+		}
+		credit, err := money.FromFloat64(line.Credit)
+		if err != nil {
+			return fmt.Errorf("line[%d]: credit: %w", i, err)
+		}
+
+		totalDebit += debit
+		totalCredit += credit
 	}
 
-	// Accounting identity: debits must equal credits (within floating-point epsilon).
-	const epsilon = 0.005
-	diff := totalDebit - totalCredit
-	if diff < -epsilon || diff > epsilon {
-		return fmt.Errorf("journal entry is not balanced: total_debit=%.2f total_credit=%.2f", totalDebit, totalCredit)
+	if totalDebit != totalCredit {
+		return fmt.Errorf("journal entry is not balanced: total_debit=%s total_credit=%s",
+			totalDebit, totalCredit)
 	}
 
 	return nil
-}
-
-// CentsToFloat converts integer cents to standard float amount.
-func CentsToFloat(cents int64) float64 {
-	return float64(cents) / 100.0
 }
