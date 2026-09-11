@@ -9,6 +9,8 @@ import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { formatCurrency, formatNumber } from '../../shared/lib/format';
 import { safeRatio, toFiniteNumber } from '@voxire/api';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -40,7 +42,7 @@ const Valuation: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Inventory valuation · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/valuation'].title))} />
       <PageHeader title="Inventory Valuation" description="Total value of inventory on hand" />
 
       {isLoading ? (
