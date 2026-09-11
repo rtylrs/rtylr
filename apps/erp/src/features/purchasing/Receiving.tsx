@@ -12,6 +12,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -99,7 +100,7 @@ const Receiving: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title={`${t('erp.receiving.title')} · rtylr`} />
+      <HelmetContainer title={pageTitle(t('erp.receiving.title'))} />
       <PageHeader title={t('erp.receiving.title')} description={t('erp.receiving.description')} />
 
       {isLoading ? (
