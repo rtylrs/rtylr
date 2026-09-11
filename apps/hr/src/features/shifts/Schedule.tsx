@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { ChevronLeft, ChevronRight, Send } from 'lucide-react';
@@ -44,6 +45,7 @@ function dayStr(date: Date) {
 const ROLE_COLORS = ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
 const Schedule: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
   const weekStartStr = dayStr(weekStart);
@@ -77,7 +79,7 @@ const Schedule: React.FC = () => {
 
   const saveShift = () => {
     if (!editing || !editing.staffId || !editing.day || !editing.start || !editing.end) {
-      toast.error('Fill all fields');
+      toast.error(t('shifts.schedule.fillAllFields'));
       return;
     }
     const who = staff.find((s) => s.id === editing.staffId);
@@ -96,7 +98,7 @@ const Schedule: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Shift saved');
+          toast.success(t('shifts.schedule.shiftSaved'));
           setModalOpen(false);
           setEditing(null);
         },
@@ -111,11 +113,11 @@ const Schedule: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Shift schedule · rtylr" />
+      <HelmetContainer title={t('shifts.schedule.metaTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
-          title="Shift Schedule"
-          subtitle="Weekly grid view for scheduling shifts"
+          title={t('shifts.schedule.title')}
+          subtitle={t('shifts.schedule.subtitle')}
           right={
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <Button
@@ -132,11 +134,11 @@ const Schedule: React.FC = () => {
                 icon={<Send size={13} />}
                 onClick={() =>
                   publish.mutate(dayStr(weekStart), {
-                    onSuccess: () => toast.success('Week published'),
+                    onSuccess: () => toast.success(t('shifts.schedule.weekPublished')),
                   })
                 }
               >
-                Publish week
+                {t('shifts.schedule.publishWeek')}
               </Button>
             </div>
           }
@@ -194,7 +196,7 @@ const Schedule: React.FC = () => {
                               label: 'Delete',
                               onClick: () =>
                                 del.mutate(sh.id, {
-                                  onSuccess: () => toast.success('Shift removed'),
+                                  onSuccess: () => toast.success(t('shifts.schedule.shiftRemoved')),
                                 }),
                             },
                           });
@@ -223,16 +225,20 @@ const Schedule: React.FC = () => {
           </div>
         </Card>
 
-        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New shift">
+        <Modal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title={t('shifts.schedule.newShift')}
+        >
           {editing && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <Label>Employee</Label>
+                <Label>{t('shifts.schedule.employee')}</Label>
                 <Select
                   value={editing.staffId ?? ''}
                   onChange={(e) => setEditing({ ...editing, staffId: Number(e.target.value) })}
                 >
-                  <option value="">Select</option>
+                  <option value="">{t('shifts.schedule.selectPlaceholder')}</option>
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -248,7 +254,7 @@ const Schedule: React.FC = () => {
                 }}
               >
                 <div>
-                  <Label>Start</Label>
+                  <Label>{t('shifts.schedule.start')}</Label>
                   <Input
                     type="time"
                     value={editing.start ?? ''}
@@ -256,7 +262,7 @@ const Schedule: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label>End</Label>
+                  <Label>{t('shifts.schedule.end')}</Label>
                   <Input
                     type="time"
                     value={editing.end ?? ''}
@@ -265,7 +271,7 @@ const Schedule: React.FC = () => {
                 </div>
               </div>
               <div>
-                <Label>Color</Label>
+                <Label>{t('shifts.schedule.color')}</Label>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {ROLE_COLORS.map((c) => (
                     <button
@@ -287,10 +293,10 @@ const Schedule: React.FC = () => {
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                 <Button variant="ghost" onClick={() => setModalOpen(false)}>
-                  Cancel
+                  {t('shifts.schedule.cancel')}
                 </Button>
                 <Button variant="primary" onClick={saveShift}>
-                  Save shift
+                  {t('shifts.schedule.saveShift')}
                 </Button>
               </div>
             </div>
