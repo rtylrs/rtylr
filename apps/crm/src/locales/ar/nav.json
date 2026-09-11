@@ -4,6 +4,34 @@
   "loyalty": "الولاء",
   "campaigns": "الحملات",
   "segments": "الشرائح",
-  "reports": "التقارير",
-  "settings": "الإعدادات"
+  "automations": "الأتمتة",
+  "templates": "القوالب",
+  "feedback": "الملاحظات",
+  "settings": "الإعدادات",
+  "pipeline": "مسار المبيعات",
+  "leads": "العملاء المحتملون",
+  "contracts": "العقود",
+  "newCustomer": "عميل جديد",
+  "importCustomers": "استيراد العملاء",
+  "loyaltyMembers": "أعضاء الولاء",
+  "rewardsCatalog": "كتالوج المكافآت",
+  "loyaltyTiers": "مستويات الولاء",
+  "newEmailCampaign": "حملة بريد إلكتروني جديدة",
+  "newSmsCampaign": "حملة رسائل نصية جديدة",
+  "newSegment": "شريحة جديدة",
+  "newAutomation": "أتمتة جديدة",
+  "appName": "CRM",
+  "groups": {
+    "navigate": "التنقل",
+    "create": "إنشاء",
+    "customers": "العملاء",
+    "loyalty": "الولاء"
+  },
+  "titles": {
+    "feedback": "الملاحظات وصافي نقاط الترويج"
+  },
+  "actions": {
+    "importCustomersCsv": "استيراد العملاء من ملف CSV",
+    "loyaltyRewardsCatalog": "كتالوج مكافآت الولاء"
+  }
 }
