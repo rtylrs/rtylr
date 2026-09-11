@@ -98,7 +98,29 @@ func NewCachedValidator(cfg *platformconfig.AppConfig) *CachedValidator {
 		grace = maxOfflineGrace
 	}
 	key, _ := configuredKey(cfg)
-	authority := platformconfig.DefaultLicenseAuthorityURL
+
+	// The configured authority, not the hardcoded default. #1079 restored
+	// reading LICENSE_AUTHORITY_URL into the config and this is the only
+	// construction path for the client, so without this the setting reached
+	// nothing and an air-gapped self-host install could not point at its own
+	// authority.
+	//
+	// Safe to honour here rather than pinning: Current and Refresh both return
+	// hostedReport unless the deployment is self-hosted, so a hosted install
+	// never contacts an authority at all and this value is only ever used by an
+	// operator configuring their own. Authenticating the authority's reply is a
+	// separate and still-open concern, tracked in #1091; pinning the URL was
+	// never a substitute for it, since an operator who controls the host can
+	// redirect the hosted name just as easily.
+	//
+	// Config defaults this to DefaultLicenseAuthorityURL and NewClient falls
+	// back to the same value for an empty string, so a deployment that sets
+	// nothing is unchanged.
+	authority := ""
+	if cfg != nil {
+		authority = cfg.LicenseAuthorityURL
+	}
+
 	return &CachedValidator{
 		cfg:    cfg,
 		client: NewClient(authority),
