@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import {
   Search,
@@ -83,6 +84,7 @@ interface GlobalSearchProps {
 }
 
 const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const [clients, setClients] = useState<Client[]>([]);
@@ -142,7 +144,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
   }, [open, results, index, navigate, onClose]);
 
   return (
-    <Modal open={open} onClose={onClose} title="Search" width={560}>
+    <Modal open={open} onClose={onClose} title={t('common.search')} width={560}>
       <div
         style={{
           display: 'flex',
@@ -162,7 +164,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
             setQuery(e.target.value);
             setIndex(0);
           }}
-          placeholder="Search invoices, expenses, clients, pages..."
+          placeholder={t('finance.search.placeholder')}
           style={{ ...inputStyle, background: 'transparent', border: 'none', padding: 0 }}
         />
       </div>
@@ -171,7 +173,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
           <div
             style={{ padding: 30, textAlign: 'center', fontSize: 12, color: 'var(--hub-text-dim)' }}
           >
-            No results
+            {t('finance.search.none')}
           </div>
         )}
         {results.map((r, i) => {
