@@ -1,4 +1,5 @@
 import { getOneKitErrorMessage, oneKitResult, unwrap } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -42,6 +43,7 @@ export const useFinanceTeam = (): UseQueryResult<FinanceTeamMember[]> =>
   });
 
 export const useFinanceInviteMember = (): UseMutationResult<unknown, unknown, InvitePayload> => {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
@@ -49,7 +51,7 @@ export const useFinanceInviteMember = (): UseMutationResult<unknown, unknown, In
         oneKitResult(() => teamInvitationsClient.inviteUser({ ...payload, apps: ['finance'] }))
       ),
     onSuccess: (): void => {
-      toast.success('Invitation sent');
+      toast.success(t('finance.team.invited'));
       void qc.invalidateQueries({ queryKey: ['finance-team'] });
     },
     onError: (error): void => {
@@ -59,6 +61,7 @@ export const useFinanceInviteMember = (): UseMutationResult<unknown, unknown, In
 };
 
 export const useFinanceDeactivateMember = (): UseMutationResult<unknown, unknown, string> => {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
@@ -67,7 +70,7 @@ export const useFinanceDeactivateMember = (): UseMutationResult<unknown, unknown
       // PATCH /team/members/{id}/deactivate had always 404'd (#910).
       unwrap(oneKitResult(() => teamMembersClient.removeMember({ userId: id }))),
     onSuccess: (): void => {
-      toast.success('Member removed');
+      toast.success(t('finance.team.removed'));
       void qc.invalidateQueries({ queryKey: ['finance-team'] });
     },
     onError: (error): void => {
