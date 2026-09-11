@@ -57,5 +57,7 @@
     "employeeProfile": "ملف الموظف",
     "timesheetDetail": "تفاصيل سجل الدوام",
     "timesheetApprovals": "اعتمادات سجلات الدوام"
-  }
+  },
+  "select": "اختر",
+  "noMatches": "لا نتائج مطابقة"
 }
