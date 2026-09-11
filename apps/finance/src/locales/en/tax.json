@@ -20,5 +20,7 @@
     "collected": "Tax collected",
     "owed": "Tax owed",
     "periodsToFile": "Periods to file"
-  }
+  },
+  "collected": "Tax Collected",
+  "owed": "Tax Owed"
 }
