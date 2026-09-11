@@ -24,12 +24,9 @@ import {
   labelStyle,
 } from '../../shared/lib/tokens';
 
-const frequencyLabel: Record<string, string> = {
-  weekly: 'Weekly',
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  yearly: 'Yearly',
-};
+// The stored value is the frequency; only its label is translated. A second
+// copy of these four words lived here and a third in the options below.
+const FREQUENCIES = ['weekly', 'monthly', 'quarterly', 'yearly'] as const;
 
 interface NewRecurringForm {
   templateInvoiceId: number;
@@ -41,6 +38,7 @@ import { useInvoices } from '../invoices/useInvoices';
 import { todayIso } from '../../shared/lib/date';
 
 const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const create = useCreateRecurringInvoice();
   const { data: invoicesData } = useInvoices({ pageSize: 100 });
   const invoiceList = invoicesData?.invoices ?? [];
@@ -54,7 +52,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
 
   const handleSubmit = (): void => {
     if (form.templateInvoiceId <= 0) {
-      toast.error('A template invoice is required');
+      toast.error(t('recurringInvoices.templateRequired'));
       return;
     }
     create.mutate(
@@ -66,7 +64,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
       },
       {
         onSuccess: () => {
-          toast.success('Recurring invoice created');
+          toast.success(t('recurringInvoices.created'));
           onClose();
           setForm(emptyForm());
         },
@@ -80,12 +78,12 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
     <Modal
       open={open}
       onClose={onClose}
-      title="New Recurring Invoice"
+      title={t('recurringInvoices.new')}
       width={420}
       footer={
         <>
           <button type="button" style={ghostBtn} onClick={onClose} disabled={create.isPending}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -100,7 +98,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Template Invoice</label>
+          <label style={labelStyle}>{t('recurringInvoices.templateInvoice')}</label>
           <select
             value={form.templateInvoiceId || ''}
             onChange={(e) =>
@@ -108,7 +106,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
             }
             style={inputStyle}
           >
-            <option value="">Select template invoice...</option>
+            <option value="">{t('recurringInvoices.templatePlaceholder')}</option>
             {invoiceList.map((inv) => (
               <option key={inv.id} value={inv.id}>
                 {inv.number ? `Invoice #${inv.number}` : `Invoice ${inv.id}`} — {inv.client} ($
@@ -119,20 +117,21 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle}>Frequency</label>
+            <label style={labelStyle}>{t('recurringInvoices.frequencyLabel')}</label>
             <select
               value={form.frequency}
               onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value }))}
               style={inputStyle}
             >
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="yearly">Yearly</option>
+              {FREQUENCIES.map((f) => (
+                <option key={f} value={f}>
+                  {t(`recurringInvoices.frequency.${f}`)}
+                </option>
+              ))}
             </select>
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle}>Next Invoice Date</label>
+            <label style={labelStyle}>{t('recurringInvoices.nextInvoiceDate')}</label>
             <input
               type="date"
               value={form.nextInvoiceDate}
@@ -175,14 +174,14 @@ const RecurringInvoices: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.recurringInvoices'))} />
       <PageHeader
-        title="Recurring Invoices"
+        title={t('recurringInvoices.title')}
         subtitle={`${data.length} active subscriptions`}
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'Recurring' }]}
         actions={
           <button
             type="button"
             style={primaryBtn}
-            aria-label="New Recurring Invoice"
+            aria-label={t('recurringInvoices.new')}
             onClick={() => setShowCreate(true)}
           >
             <Repeat size={13} /> New Recurring
@@ -245,7 +244,9 @@ const RecurringInvoices: React.FC = () => {
                   <td
                     style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
                   >
-                    {frequencyLabel[r.frequency] ?? r.frequency}
+                    {FREQUENCIES.includes(r.frequency as (typeof FREQUENCIES)[number])
+                      ? t(`recurringInvoices.frequency.${r.frequency}`)
+                      : r.frequency}
                   </td>
                   <td
                     style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
