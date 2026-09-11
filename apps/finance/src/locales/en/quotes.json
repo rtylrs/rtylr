@@ -19,5 +19,7 @@
   "accepted": "Quote marked as accepted",
   "view": "View",
   "prev": "Prev",
-  "next": "Next"
+  "next": "Next",
+  "createdToast": "Quote created",
+  "convertedToast": "Quote converted to invoice"
 }
