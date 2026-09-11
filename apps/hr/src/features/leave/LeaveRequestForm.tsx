@@ -152,13 +152,13 @@ const LeaveRequestForm = (): React.JSX.Element => {
     return (
       <Card style={{ textAlign: 'center', padding: 32 }}>
         <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hr-error)', margin: '0 0 8px' }}>
-          Unable to load leave policies
+          {t('leave.policiesUnavailableTitle')}
         </p>
         <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
-          The leave policy service could not be reached. Try again.
+          {t('leave.policiesUnavailableBody')}
         </p>
         <Button variant="secondary" onClick={() => refetchLeaveTypes()}>
-          Retry
+          {t('common.retry')}
         </Button>
       </Card>
     );
@@ -174,7 +174,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
           {t('leave.configureLeaveTypes')}
         </p>
         <Button variant="primary" onClick={() => navigate({ to: '/settings/leave-policy' })}>
-          Configure leave policies
+          {t('leave.configurePolicies')}
         </Button>
       </Card>
     );
