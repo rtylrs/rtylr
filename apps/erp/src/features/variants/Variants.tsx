@@ -10,6 +10,8 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatCurrency } from '../../shared/lib/format';
 import StockBadge from '../../shared/components/StockBadge';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -78,7 +80,7 @@ const Variants: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Product variants · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/variants'].title))} />
       <PageHeader
         title="Product Variants"
         description="Individual SKUs for sizes, colors, flavors and more"
