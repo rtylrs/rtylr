@@ -12,5 +12,6 @@
   "deleteTitle": "Supprimer la catégorie de dépenses",
   "name": "Nom",
   "color": "Couleur",
-  "monthlyBudget": "Budget mensuel"
+  "monthlyBudget": "Budget mensuel",
+  "deleteConfirm": "Voulez-vous vraiment supprimer cette catégorie ? Les dépenses existantes deviendront sans catégorie."
 }
