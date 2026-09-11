@@ -102,6 +102,7 @@ export function useTimeOff() {
 }
 
 export function useSubmitTimeOff() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof hrExtras.submitTimeOff>[0]) =>
@@ -110,11 +111,12 @@ export function useSubmitTimeOff() {
       qc.invalidateQueries({ queryKey: ['time-off-extras'] });
       qc.invalidateQueries({ queryKey: ['time-off'] });
     },
-    onError: () => toast.error('Failed to submit time off request'),
+    onError: () => toast.error(t('errors.submitTimeOff')),
   });
 }
 
 export function useApproveTimeOff() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, approved, note }: { id: number; approved: boolean; note?: string }) =>
@@ -123,7 +125,7 @@ export function useApproveTimeOff() {
       qc.invalidateQueries({ queryKey: ['time-off-extras'] });
       qc.invalidateQueries({ queryKey: ['time-off'] });
     },
-    onError: () => toast.error('Failed to update time off request'),
+    onError: () => toast.error(t('errors.updateTimeOff')),
   });
 }
 
@@ -140,30 +142,33 @@ export function useShiftSchedule(weekStart?: string) {
 }
 
 export function useUpsertShift() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (shift: Parameters<typeof hrExtras.upsertScheduleShift>[0]) =>
       unwrap(hrExtras.upsertScheduleShift(shift)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedule'] }),
-    onError: () => toast.error('Failed to save shift'),
+    onError: () => toast.error(t('errors.saveShift')),
   });
 }
 
 export function useDeleteShift() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.deleteScheduleShift(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedule'] }),
-    onError: () => toast.error('Failed to delete shift'),
+    onError: () => toast.error(t('errors.deleteShift')),
   });
 }
 
 export function usePublishWeek() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (weekStart: string) => unwrap(hrExtras.publishWeek(weekStart)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedule'] }),
-    onError: () => toast.error('Failed to publish schedule'),
+    onError: () => toast.error(t('errors.publishSchedule')),
   });
 }
 
@@ -180,11 +185,12 @@ export function useTimesheets() {
 }
 
 export function useApproveTimesheet() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.approveTimesheet(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['timesheets'] }),
-    onError: () => toast.error('Failed to approve timesheet'),
+    onError: () => toast.error(t('errors.approveTimesheet')),
   });
 }
 
@@ -201,12 +207,13 @@ export function useReviews() {
 }
 
 export function useCreateReview() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof hrExtras.createReview>[0]) =>
       unwrap(hrExtras.createReview(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reviews'] }),
-    onError: () => toast.error('Failed to create review'),
+    onError: () => toast.error(t('errors.createReview')),
   });
 }
 
@@ -223,12 +230,13 @@ export function useOneOnOnes() {
 }
 
 export function useCreateOneOnOne() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof hrExtras.createOneOnOne>[0]) =>
       unwrap(hrExtras.createOneOnOne(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['one-on-ones'] }),
-    onError: () => toast.error('Failed to schedule 1:1'),
+    onError: () => toast.error(t('errors.scheduleOneOnOne')),
   });
 }
 
@@ -245,11 +253,12 @@ export function useOnboardingChecklist() {
 }
 
 export function useToggleOnboardingTask() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.toggleOnboardingTask(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['onboarding'] }),
-    onError: () => toast.error('Failed to update onboarding task'),
+    onError: () => toast.error(t('errors.updateOnboardingTask')),
   });
 }
 
@@ -265,11 +274,12 @@ export function useOffboardingChecklist() {
 }
 
 export function useToggleOffboardingTask() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.toggleOffboardingTask(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offboarding'] }),
-    onError: () => toast.error('Failed to update offboarding task'),
+    onError: () => toast.error(t('errors.updateOffboardingTask')),
   });
 }
 
@@ -286,21 +296,23 @@ export function useDocuments() {
 }
 
 export function useAddDocument() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (doc: Parameters<typeof hrExtras.addDocument>[0]) =>
       unwrap(hrExtras.addDocument(doc)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents'] }),
-    onError: () => toast.error('Failed to upload document'),
+    onError: () => toast.error(t('errors.uploadDocument')),
   });
 }
 
 export function useDeleteDocument() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.deleteDocument(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents'] }),
-    onError: () => toast.error('Failed to delete document'),
+    onError: () => toast.error(t('errors.deleteDocument')),
   });
 }
 
@@ -433,22 +445,24 @@ export function useSwaps() {
 }
 
 export function useResolveSwap() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, accepted }: { id: number; accepted: boolean }) =>
       unwrap(hrExtras.resolveSwap(id, accepted)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['swaps'] }),
-    onError: () => toast.error('Failed to resolve swap request'),
+    onError: () => toast.error(t('errors.resolveSwap')),
   });
 }
 
 export function useCreateSwap() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof hrExtras.createSwap>[0]) =>
       unwrap(hrExtras.createSwap(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['swaps'] }),
-    onError: () => toast.error('Failed to create swap request'),
+    onError: () => toast.error(t('errors.createSwap')),
   });
 }
 
@@ -464,6 +478,7 @@ export function useBreaks() {
 }
 
 export function useStartBreak() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -476,16 +491,17 @@ export function useStartBreak() {
       type: 'Lunch' | 'Short' | 'Other';
     }) => unwrap(hrExtras.startBreak(staffId, staffName, type)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['breaks'] }),
-    onError: () => toast.error('Failed to start break'),
+    onError: () => toast.error(t('errors.startBreak')),
   });
 }
 
 export function useEndBreak() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.endBreak(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['breaks'] }),
-    onError: () => toast.error('Failed to end break'),
+    onError: () => toast.error(t('errors.endBreak')),
   });
 }
 
@@ -511,11 +527,12 @@ export function useHrSettings() {
 }
 
 export function useUpdateHrSettings() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (patch: Parameters<typeof hrExtras.updateSettings>[0]) =>
       unwrap(hrExtras.updateSettings(patch)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
-    onError: () => toast.error('Failed to save settings'),
+    onError: () => toast.error(t('errors.saveSettings')),
   });
 }
