@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import {
   Search,
@@ -51,6 +52,7 @@ const useCommandPalette = () => {
 };
 
 const CommandPalette: React.FC = () => {
+  const { t } = useTranslation();
   const { open, setOpen } = useCommandPalette();
   const navigate = useNavigate();
   const { data: staff = [] } = useStaff();
@@ -267,7 +269,7 @@ const CommandPalette: React.FC = () => {
                 onRun(filtered[active]);
               }
             }}
-            placeholder="Search people, pages, actions"
+            placeholder={t('layout.commandPalette.placeholder')}
             style={{
               flex: 1,
               background: 'transparent',
@@ -299,7 +301,7 @@ const CommandPalette: React.FC = () => {
                 fontSize: 13,
               }}
             >
-              No matches
+              {t('common.noMatches')}
             </div>
           )}
           {filtered.map((a, i) => {
