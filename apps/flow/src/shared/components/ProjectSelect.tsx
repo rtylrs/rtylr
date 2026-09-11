@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Circle, ChevronDown } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
 
@@ -8,11 +9,8 @@ interface ProjectSelectProps {
   placeholder?: string;
 }
 
-export const ProjectSelect: React.FC<ProjectSelectProps> = ({
-  value,
-  onChange,
-  placeholder = 'Select project',
-}) => {
+export const ProjectSelect: React.FC<ProjectSelectProps> = ({ value, onChange, placeholder }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { projects } = useFlowStore();
   const current = projects.find((p) => p.id === value);
@@ -35,7 +33,9 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
             <span className="flex-1 text-start truncate">{current.name}</span>
           </>
         ) : (
-          <span className="flex-1 text-start">{placeholder}</span>
+          <span className="flex-1 text-start">
+            {placeholder ?? t('flow.projectSelect.placeholder')}
+          </span>
         )}
         <ChevronDown size={11} />
       </button>
