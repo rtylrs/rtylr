@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Send } from 'lucide-react';
 import Modal from './Modal';
 import { primaryBtn, ghostBtn } from '../lib/tokens';
@@ -17,6 +18,7 @@ const SendInvoiceModal: React.FC<SendInvoiceModalProps> = ({
   invoiceId,
   onSent,
 }) => {
+  const { t } = useTranslation();
   const { mutate: sendInvoice, isPending: sending } = useSendInvoice();
 
   const handleSend = (): void => {
@@ -40,7 +42,7 @@ const SendInvoiceModal: React.FC<SendInvoiceModalProps> = ({
       footer={
         <>
           <button type="button" style={ghostBtn} onClick={onClose} disabled={sending}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button type="button" style={primaryBtn} onClick={handleSend} disabled={sending}>
             <Send size={13} />
@@ -51,7 +53,7 @@ const SendInvoiceModal: React.FC<SendInvoiceModalProps> = ({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <p style={{ margin: 0, color: 'var(--finance-invoice-muted)' }}>
-          This invoice will be sent to the recipient configured for it.
+          {t('invoices.send.notice')}
         </p>
       </div>
     </Modal>
