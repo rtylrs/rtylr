@@ -42,5 +42,20 @@
     "JPY": "Japanese Yen",
     "AUD": "Australian Dollar",
     "CAD": "Canadian Dollar"
+  },
+  "pageTitles": {
+    "employeeDetail": "Employee detail",
+    "newEmployee": "New employee",
+    "leaveRequest": "Leave request",
+    "checklistTemplates": "Checklist templates",
+    "onboardingManagement": "Onboarding management",
+    "paySlip": "Pay slip",
+    "payrollRun": "Payroll run",
+    "reviewCycle": "Review cycle",
+    "payrollConfiguration": "Payroll configuration",
+    "setupWizard": "Setup wizard",
+    "employeeProfile": "Employee profile",
+    "timesheetDetail": "Timesheet detail",
+    "timesheetApprovals": "Timesheet approvals"
   }
 }
