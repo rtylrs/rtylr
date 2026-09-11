@@ -35,6 +35,9 @@ import PaginationControls from '../../shared/components/PaginationControls';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 import { toIsoDate } from '../../shared/lib/dateUtils';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
+import { useTranslation } from 'react-i18next';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -104,6 +107,7 @@ const SkeletonTableRow: React.FC = () => (
 );
 
 const Purchasing: React.FC = () => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<PurchaseOrderFilter>('All');
   const status = purchaseOrderStatusFilter(filter);
@@ -219,7 +223,7 @@ const Purchasing: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Purchase orders · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/purchasing'].title))} />
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Purchase Orders
