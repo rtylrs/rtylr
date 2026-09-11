@@ -176,7 +176,7 @@ const RecurringInvoices: React.FC = () => {
       <PageHeader
         title={t('recurringInvoices.title')}
         subtitle={`${data.length} active subscriptions`}
-        breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'Recurring' }]}
+        breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: t('nav.recurring') }]}
         actions={
           <button
             type="button"
