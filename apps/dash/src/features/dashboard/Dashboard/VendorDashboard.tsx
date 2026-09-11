@@ -21,6 +21,8 @@ import { APP_URLS, resolveAppUrl } from '@voxire/config';
 import { useUserStore } from '../../../shared/stores/userStore';
 import { useCommandPalette } from '../../../shared/stores/commandPaletteStore';
 import { getTenantKey } from '../../../shared/utils/tenantStorage';
+import { useTranslation } from 'react-i18next';
+import { APP_NAMES } from '../../../shared/config/appNames';
 
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -37,8 +39,8 @@ const today = new Date().toLocaleDateString('en-US', {
 
 interface AppLink {
   id: string;
-  name: string;
-  blurb: string;
+  nameKey: string;
+  blurbKey: string;
   href: string;
   external: boolean;
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
@@ -48,8 +50,8 @@ interface AppLink {
 const APP_LINKS: AppLink[] = [
   {
     id: 'pos',
-    name: 'Point of Sale',
-    blurb: 'Take orders',
+    nameKey: APP_NAMES.pos.full,
+    blurbKey: 'appNames.blurb.pos',
     href: APP_URLS.pos,
     external: true,
     icon: MonitorSpeaker,
@@ -57,8 +59,8 @@ const APP_LINKS: AppLink[] = [
   },
   {
     id: 'erp',
-    name: 'Inventory',
-    blurb: 'Stock & suppliers',
+    nameKey: APP_NAMES.erp.full,
+    blurbKey: 'appNames.blurb.erp',
     href: APP_URLS.erp,
     external: true,
     icon: Package,
@@ -66,8 +68,8 @@ const APP_LINKS: AppLink[] = [
   },
   {
     id: 'hr',
-    name: 'Human Resources',
-    blurb: 'Staff & shifts',
+    nameKey: APP_NAMES.hr.full,
+    blurbKey: 'appNames.blurb.hr',
     href: APP_URLS.hr,
     external: true,
     icon: UserCheck,
@@ -75,8 +77,8 @@ const APP_LINKS: AppLink[] = [
   },
   {
     id: 'crm',
-    name: 'Customers',
-    blurb: 'CRM & loyalty',
+    nameKey: APP_NAMES.crm.full,
+    blurbKey: 'appNames.blurb.crm',
     href: APP_URLS.crm,
     external: true,
     icon: Users,
@@ -84,8 +86,8 @@ const APP_LINKS: AppLink[] = [
   },
   {
     id: 'finance',
-    name: 'Finance',
-    blurb: 'Invoices & bills',
+    nameKey: APP_NAMES.finance.full,
+    blurbKey: 'appNames.blurb.finance',
     href: APP_URLS.finance,
     external: true,
     icon: CreditCard,
@@ -93,8 +95,8 @@ const APP_LINKS: AppLink[] = [
   },
   {
     id: 'flow',
-    name: 'Flow',
-    blurb: 'Projects & inbox',
+    nameKey: APP_NAMES.flow.full,
+    blurbKey: 'appNames.blurb.flow',
     href: APP_URLS.flow,
     external: true,
     icon: Layers,
@@ -118,6 +120,15 @@ const SHORTCUTS: Shortcut[] = [
 ];
 
 interface RecentEntry {
+  /**
+   * An i18n key, not text.
+   *
+   * Recents are persisted, so storing the translated name would freeze the
+   * language at the moment of the click: switch to Arabic and the list would
+   * still read "Point of Sale". Entries written before this change hold English
+   * text, which `t` returns unchanged when it matches no key, so they keep
+   * rendering as they did.
+   */
   label: string;
   path: string;
   at: number;
@@ -150,6 +161,7 @@ export function recordRecent(label: string, path: string) {
 }
 
 const AdminHome: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useUserStore();
   const { setOpen: setPaletteOpen } = useCommandPalette();
   const navigate = useNavigate();
@@ -228,7 +240,7 @@ const AdminHome: React.FC = () => {
                 <li key={app.id}>
                   <button
                     type="button"
-                    onClick={() => openExternal(app.name, app.href, `/apps/${app.id}`)}
+                    onClick={() => openExternal(app.nameKey, app.href, `/apps/${app.id}`)}
                     className="w-full flex items-center gap-3 rounded-lg px-2 py-4 text-left transition-colors hover:bg-[var(--dash-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                   >
                     <span
@@ -242,13 +254,13 @@ const AdminHome: React.FC = () => {
                         className="block text-sm font-medium truncate"
                         style={{ color: 'var(--dash-text)' }}
                       >
-                        {app.name}
+                        {t(app.nameKey)}
                       </span>
                       <span
                         className="block text-xs truncate"
                         style={{ color: 'var(--dash-text-dim)' }}
                       >
-                        {app.blurb}
+                        {t(app.blurbKey)}
                       </span>
                     </span>
                     <ArrowUpRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
@@ -334,7 +346,7 @@ const AdminHome: React.FC = () => {
                       className="flex-1 text-sm font-medium truncate"
                       style={{ color: 'var(--dash-text)' }}
                     >
-                      {r.label}
+                      {t(r.label)}
                     </span>
                     <ChevronRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
                   </button>
