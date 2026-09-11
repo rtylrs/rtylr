@@ -14,6 +14,9 @@ interface CompanyProfileStepProps {
   isSubmitting?: boolean;
 }
 
+// The code is what gets stored; only the name is translated.
+const SETUP_CURRENCIES = ['USD', 'EUR', 'GBP', 'AED', 'SAR', 'LBP', 'JPY', 'AUD', 'CAD'] as const;
+
 const CompanyProfileStep = ({
   onNext,
   onBack,
@@ -163,15 +166,11 @@ const CompanyProfileStep = ({
             }}
             style={inputStyle}
           >
-            <option value="USD">USD, US Dollar</option>
-            <option value="EUR">EUR, Euro</option>
-            <option value="GBP">GBP, British Pound</option>
-            <option value="AED">AED, UAE Dirham</option>
-            <option value="SAR">SAR, Saudi Riyal</option>
-            <option value="LBP">LBP, Lebanese Pound</option>
-            <option value="JPY">JPY, Japanese Yen</option>
-            <option value="AUD">AUD, Australian Dollar</option>
-            <option value="CAD">CAD, Canadian Dollar</option>
+            {SETUP_CURRENCIES.map((code) => (
+              <option key={code} value={code}>
+                {code}, {t(`common.currencies.${code}`)}
+              </option>
+            ))}
           </select>
           {errors.currency && <p className="mt-1 text-xs text-red-500">{errors.currency}</p>}
         </div>
