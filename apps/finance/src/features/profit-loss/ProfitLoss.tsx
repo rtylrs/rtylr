@@ -150,25 +150,25 @@ const ProfitLoss: React.FC = () => {
   // Summary cards
   const summaryItems = [
     {
-      label: 'Revenue',
+      label: t('finance.profitLoss.revenue'),
       value: data.revenue,
       color: 'var(--finance-accent)',
       Icon: TrendingUp,
     },
     {
-      label: 'Gross Profit',
+      label: t('finance.profitLoss.grossProfit'),
       value: grossProfit,
       color: 'var(--finance-info)',
       Icon: TrendingUp,
     },
     {
-      label: 'Net Profit',
+      label: t('finance.profitLoss.netProfit'),
       value: netProfit,
       color: netProfit >= 0 ? 'var(--finance-accent)' : 'var(--finance-danger)',
       Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
     },
     {
-      label: 'Net Margin',
+      label: t('finance.profitLoss.netMargin'),
       value: parseFloat(netMargin),
       color: 'var(--finance-warning)',
       Icon: TrendingUp,
@@ -495,8 +495,8 @@ const ProfitLoss: React.FC = () => {
         onClose={() => setShowClose(false)}
         onConfirm={() => toast.info(t('finance.profitLoss.lockingComingSoon'))}
         title={t('finance.profitLoss.closeYear')}
-        message="This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
-        confirmLabel="Close year"
+        message={t('finance.profitLoss.closeYearConfirm')}
+        confirmLabel={t('common.closeYear')}
         destructive
       />
     </motion.div>
