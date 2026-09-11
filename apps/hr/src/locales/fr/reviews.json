@@ -5,7 +5,7 @@
   "oneOnOnes": {
     "emptyTitle": "Aucun entretien individuel programmé",
     "emptyDescription": "Les managers verront ici les entretiens individuels à venir.",
-    "schedule": "Programmer un entretien individuel",
+    "schedule": "Planifier",
     "pageTitle": "Entretiens individuels",
     "title": "Entretiens individuels",
     "subtitle": "Conversations planifiées entre manager et collaborateur",
@@ -15,7 +15,8 @@
     "duration": "Durée (min)",
     "topics": "Sujets (séparés par des virgules)",
     "topicsPlaceholder": "ex. Objectifs de carrière, Blocages, Retours",
-    "errorCompleteAll": "Complétez tous les champs"
+    "errorCompleteAll": "Complétez tous les champs",
+    "scheduleTitle": "Planifier un tête-à-tête"
   },
   "pageTitle": "Nouvelle évaluation",
   "formTitle": "Nouvelle évaluation de performance",
@@ -41,5 +42,8 @@
     "goals": "Objectifs",
     "values": "Valeurs",
     "skills": "Compétences"
+  },
+  "form": {
+    "submit": "Envoyer l'évaluation"
   }
 }
