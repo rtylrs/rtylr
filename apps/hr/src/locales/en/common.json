@@ -57,5 +57,7 @@
     "employeeProfile": "Employee profile",
     "timesheetDetail": "Timesheet detail",
     "timesheetApprovals": "Timesheet approvals"
-  }
+  },
+  "select": "Select",
+  "noMatches": "No matches"
 }
