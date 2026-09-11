@@ -202,7 +202,18 @@
       "title": "لا توجد متغيرات",
       "description": "أضف متغيرات لتمييز منتجاتك"
     },
-    "addVariant": "إضافة متغيّر"
+    "addVariant": "إضافة متغيّر",
+    "productIdRequired": "معرف المنتج مطلوب",
+    "nameRequired": "اسم المتغير مطلوب",
+    "priceNegative": "لا يمكن أن يكون السعر سالبًا",
+    "created": "تم إنشاء المتغير",
+    "createFailed": "تعذر إنشاء المتغير",
+    "subtitle": "وحدات تخزين منفصلة للمقاسات والألوان والنكهات وغيرها",
+    "newVariant": "متغير جديد",
+    "productIdPlaceholder": "معرف المنتج",
+    "namePlaceholder": "اسم المتغير (مثل كبير / أحمر)",
+    "skuPlaceholder": "رمز التخزين (اختياري)",
+    "attributes": "الخصائص"
   },
   "priceLists": {
     "empty": {
@@ -210,14 +221,35 @@
       "description": "أنشئ أول قائمة أسعار لتفعيل التسعير المتدرّج"
     },
     "newPriceList": "قائمة أسعار جديدة",
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "nameRequired": "اسم قائمة الأسعار مطلوب",
+    "created": "تم إنشاء قائمة الأسعار",
+    "createFailed": "تعذر إنشاء قائمة الأسعار",
+    "subtitle": "استراتيجيات تسعير حسب العملة",
+    "currencyPlaceholder": "العملة (مثل USD)",
+    "setDefault": "تعيين كقائمة أسعار افتراضية"
   },
   "brands": {
     "empty": {
       "title": "لا توجد علامات تجارية بعد",
       "description": "أضف علامتك التجارية الأولى لتجميع المنتجات."
     },
-    "newBrand": "علامة تجارية جديدة"
+    "newBrand": "علامة تجارية جديدة",
+    "nameRequired": "اسم العلامة التجارية مطلوب",
+    "created": "تم إنشاء العلامة التجارية",
+    "createFailed": "تعذر إنشاء العلامة التجارية",
+    "countAcrossCatalog_zero": "لا توجد علامات تجارية في الكتالوج",
+    "countAcrossCatalog_one": "علامة تجارية واحدة في الكتالوج",
+    "countAcrossCatalog_two": "علامتان تجاريتان في الكتالوج",
+    "countAcrossCatalog_few": "{{count}} علامات تجارية في الكتالوج",
+    "countAcrossCatalog_many": "{{count}} علامة تجارية في الكتالوج",
+    "countAcrossCatalog_other": "{{count}} علامة تجارية في الكتالوج",
+    "deleteAria": "حذف العلامة التجارية",
+    "confirmDeleteTitle": "حذف العلامة التجارية؟",
+    "confirmDeleteBody": "لن تُحذف المنتجات المرتبطة بهذه العلامة التجارية، لكنها ستصبح بدون علامة تجارية.",
+    "deleted": "تم حذف العلامة التجارية",
+    "namePlaceholder": "اسم العلامة التجارية",
+    "descriptionPlaceholder": "الوصف (اختياري)"
   },
   "expiry": {
     "empty": {
@@ -254,7 +286,19 @@
       "title": "لا توجد فئات بعد",
       "description": "أنشئ فئتك الأولى لتنظيم المنتجات"
     },
-    "addCategory": "إضافة فئة"
+    "addCategory": "إضافة فئة",
+    "nameRequired": "اسم الفئة مطلوب",
+    "created": "تم إنشاء الفئة \"{{name}}\"",
+    "createFailed": "تعذر إنشاء الفئة",
+    "subtitle": "تنظيم المنتجات في فئات هرمية",
+    "newNamePlaceholder": "اسم فئة جديدة…",
+    "saveAria": "حفظ الفئة",
+    "cancelEditAria": "إلغاء التعديل",
+    "editAria": "تعديل الفئة",
+    "confirmDeleteTitle": "حذف الفئة؟",
+    "confirmDeleteBody": "لن تُحذف المنتجات في هذه الفئة، لكنها ستصبح بدون فئة.",
+    "deleted": "تم حذف الفئة",
+    "updated": "تم تحديث الفئة"
   },
   "settings": {
     "team": {
@@ -271,7 +315,17 @@
       "description": "اختر منتجًا واحدًا أو أكثر من القائمة لعرض ملصقات الرموز الشريطية هنا."
     },
     "selectFirst": "تحديد أول منتج",
-    "goToProducts": "الانتقال إلى المنتجات"
+    "goToProducts": "الانتقال إلى المنتجات",
+    "selectFirstToast": "اختر المنتجات أولًا",
+    "printing_zero": "لا توجد ملصقات للطباعة",
+    "printing_one": "طباعة ملصق واحد",
+    "printing_two": "طباعة ملصقين",
+    "printing_few": "طباعة {{count}} ملصقات",
+    "printing_many": "طباعة {{count}} ملصقًا",
+    "printing_other": "طباعة {{count}} ملصق",
+    "subtitle": "اختر المنتجات وعدد النسخ واطبع الملصقات",
+    "copies": "النسخ",
+    "products": "المنتجات"
   },
   "valuation": {
     "empty": {
