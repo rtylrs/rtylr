@@ -83,6 +83,23 @@ jobs:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN || github.token }}
 
+      # The release tag supplies the schema set, which is the thing being
+      # applied. The migration tooling has to come from this workflow's own
+      # commit instead: a tag cut before the tooling existed carries a
+      # Dockerfile.migrate that does not ship dsn.sh and a migrate.sh that
+      # cannot read DATABASE_URL, so an image built from it would abort with
+      # "DB_USER is required" against a production task that sets only a DSN.
+      # Separating the two means an old release can still be migrated.
+      - name: Take the migration tooling from this workflow's commit
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --depth 1 origin "$TOOLING_SHA"
+          git checkout "$TOOLING_SHA" -- scripts Dockerfile.migrate
+          echo "Migration tooling taken from $TOOLING_SHA"
+          echo "Schema set remains at ${{ inputs.release_tag }}"
+
       - name: Confirm the schema set is present
         run: |
           set -euo pipefail
