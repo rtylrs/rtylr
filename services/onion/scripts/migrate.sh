@@ -80,6 +80,18 @@ trap 'rm -f "$OUTPUT_FILE"' EXIT
 deferred_migrations=(
     "hr_time/zz_flow_client_key_tenant_scope.sql"
     "shared/zz_role_access_v2_integrity.sql"
+    # Installs 14 triggers, which managed MySQL refuses without SUPER while
+    # binary logging is on:
+    #   ERROR 1419 (HY000): You do not have the SUPER privilege and binary
+    #   logging is enabled
+    # It has therefore never applied to the hosted database. Left in the run it
+    # halts every migration at this point, and because `migrations` is second
+    # from last in migration_order.sh that also stranded `_perf`, so the hosted
+    # database has never received its performance indexes either. Deferring it
+    # loses nothing that currently works: console stats are an internal admin
+    # view, and re-enabling this needs either a parameter group that sets
+    # log_bin_trust_function_creators or a counting strategy without triggers.
+    "migrations/console_stats_summary.sql"
 )
 
 is_deferred() {
