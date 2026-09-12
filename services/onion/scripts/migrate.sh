@@ -9,8 +9,19 @@
 #   DB_USER     - Database user
 #   DB_PASSWORD - Database password
 #   DB_NAME     - Database name
+#
+# DATABASE_URL is accepted instead, and is what production actually sets: the
+# deployed task definition carries a DSN and no DB_* variables at all (see
+# resolveMainDSN in internal/platform/database/dbclient/mysql.go). Without this
+# the container would default DB_HOST to localhost and cheerfully migrate
+# nothing. An explicitly set DB_* still wins over the DSN.
 
 set -eo pipefail
+
+SCRIPT_DIR_EARLY="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./dsn.sh
+source "$SCRIPT_DIR_EARLY/dsn.sh"
+export_db_vars_from_dsn
 
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-3306}"

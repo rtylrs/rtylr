@@ -16,9 +16,12 @@ RUN addgroup -S onion && adduser -S -G onion onion
 WORKDIR /app
 
 COPY scripts/migrate.sh /app/scripts/migrate.sh
+# migrate.sh sources dsn.sh to accept a DATABASE_URL, which is the only database
+# configuration the deployed task definition carries.
+COPY scripts/dsn.sh /app/scripts/dsn.sh
 COPY internal/platform/database/schemas /app/internal/platform/database/schemas
 
-RUN chmod +x /app/scripts/migrate.sh
+RUN chmod +x /app/scripts/migrate.sh /app/scripts/dsn.sh
 
 RUN addgroup -S app && adduser -S -G app app
 USER app
