@@ -80,19 +80,37 @@ trap 'rm -f "$OUTPUT_FILE"' EXIT
 deferred_migrations=(
     "hr_time/zz_flow_client_key_tenant_scope.sql"
     "shared/zz_role_access_v2_integrity.sql"
-    # Installs 14 triggers, which managed MySQL refuses without SUPER while
-    # binary logging is on:
-    #   ERROR 1419 (HY000): You do not have the SUPER privilege and binary
-    #   logging is enabled
-    # It has therefore never applied to the hosted database. Left in the run it
-    # halts every migration at this point, and because `migrations` is second
-    # from last in migration_order.sh that also stranded `_perf`, so the hosted
-    # database has never received its performance indexes either. Deferring it
-    # loses nothing that currently works: console stats are an internal admin
-    # view, and re-enabling this needs either a parameter group that sets
-    # log_bin_trust_function_creators or a counting strategy without triggers.
+)
+
+# Files that cannot run against this database at all, as opposed to files that
+# merely have to run last. Deferring is not the same thing: a deferred file is
+# still applied, just at the end, so it still fails and still exits non-zero.
+#
+# console_stats_summary.sql installs 14 triggers, and managed MySQL refuses
+# those without SUPER while binary logging is on:
+#
+#   ERROR 1419 (HY000): You do not have the SUPER privilege and binary logging
+#   is enabled
+#
+# So it has never applied to the hosted database and cannot until either an RDS
+# parameter group sets log_bin_trust_function_creators, or console stats are
+# counted without triggers. Skipping it loses nothing that works today: the
+# console_stats table already exists from the partial application, and only the
+# triggers that would maintain it are missing, which was already true.
+unsupported_migrations=(
     "migrations/console_stats_summary.sql"
 )
+
+is_unsupported() {
+    local filename="$1"
+    local entry
+    for entry in "${unsupported_migrations[@]}"; do
+        if [ "$filename" = "$entry" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
 
 is_deferred() {
     local filename="$1"
@@ -148,6 +166,11 @@ for dir in "${SCHEMA_MIGRATION_DIRS[@]}"; do
     for f in "$schema_dir"/*.sql; do
         [ -f "$f" ] || continue
         filename="$dir/$(basename "$f")"
+
+        if is_unsupported "$filename"; then
+            echo "  ~ $filename (skipped: unsupported by this database)"
+            continue
+        fi
 
         if is_deferred "$filename"; then
             continue
