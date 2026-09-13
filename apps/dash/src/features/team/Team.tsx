@@ -21,7 +21,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
 import { Button, Input } from '../../shared/components/ui';
 import { SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/dash';
@@ -33,11 +33,8 @@ import {
   type TeamMember,
   type AccessRequest,
 } from '../../shared/hooks/queries/useTeam';
-import {
-  useMySubscription,
-  centsToDisplay,
-  computeSeatProration,
-} from '../../shared/hooks/queries/useSubscription';
+import { useMySubscription } from '../../shared/hooks/queries/useSubscription';
+import { SeatSavingsNote } from '../../shared/components/SeatSavingsNote';
 import { useGroups, useAddGroupMembers } from '../../shared/hooks/queries/useGroups';
 import { legacyRoleToDashRole } from './authorizationDraft';
 import { mailtoFor } from '../../shared/utils/mailto';
@@ -723,40 +720,7 @@ const Team: React.FC = (): React.JSX.Element => {
           description={
             <span className="flex flex-col gap-1.5">
               <span>{t('team.list.deactivateDescription')}</span>
-              {sub &&
-                sub.pricePerSeatCents > 0 &&
-                (() => {
-                  const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                    computeSeatProration(sub.pricePerSeatCents);
-                  return (
-                    <span style={{ color: 'var(--dash-text-muted)', fontSize: '12px' }}>
-                      {/* Trans rather than two half-sentences: the bold amounts sit
-                          mid-sentence and Arabic puts them in a different order. */}
-                      <Trans
-                        i18nKey="team.list.seatSavings"
-                        values={{
-                          saved: centsToDisplay(proratedCents),
-                          daysRemaining,
-                          daysInMonth,
-                          perSeat: centsToDisplay(sub.pricePerSeatCents),
-                          month: nextMonthName,
-                        }}
-                        components={[
-                          <span
-                            key="saved"
-                            className="font-semibold"
-                            style={{ color: 'var(--dash-text)' }}
-                          />,
-                          <span
-                            key="perSeat"
-                            className="font-semibold"
-                            style={{ color: 'var(--dash-text)' }}
-                          />,
-                        ]}
-                      />
-                    </span>
-                  );
-                })()}
+              {sub && <SeatSavingsNote pricePerSeatCents={sub.pricePerSeatCents} />}
             </span>
           }
           confirmLabel={t('team.list.deactivateConfirm')}
