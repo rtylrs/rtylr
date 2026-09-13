@@ -22,6 +22,27 @@
  * description of the palette.
  * ───────────────────────────────────────────────────────────────────────── */
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * `dark:` follows the theme the user picked, not the one their OS is set to.
+ *
+ * Without this, v4 compiles `dark:` to `@media (prefers-color-scheme: dark)`,
+ * while every app that themes at all switches on `:root[data-theme]` and sets
+ * that attribute from its own control. The two only agree by coincidence, so a
+ * light OS running the app in dark mode got a white DropdownMenu panel, a white
+ * Dialog and light Inputs on a dark surface, and the reverse broke too
+ * (rtylr#1314).
+ *
+ * Seven of @voxire/ui's components style their dark appearance this way, so the
+ * mismatch reached every app through the shared components rather than through
+ * anything an app wrote.
+ *
+ * Apps with no theme control - auth, menu and recruit - never set the attribute,
+ * so no `dark:` rule matches there and they stay consistently light. That is the
+ * intended outcome: auth's 404 currently paints `dark:text-gray-100` on its light
+ * background whenever the reader's OS is dark.
+ * ───────────────────────────────────────────────────────────────────────── */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 @theme {
   /* ── Brand ─────────────────────────────────────────────────────────────── */
   --color-primary: #040428;
