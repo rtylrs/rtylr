@@ -38,11 +38,8 @@ import {
   useUpdateMember,
   type TeamMember,
 } from '../../shared/hooks/queries/useTeam';
-import {
-  useMySubscription,
-  centsToDisplay,
-  computeSeatProration,
-} from '../../shared/hooks/queries/useSubscription';
+import { useMySubscription } from '../../shared/hooks/queries/useSubscription';
+import { SeatSavingsNote } from '../../shared/components/SeatSavingsNote';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import {
@@ -90,12 +87,7 @@ const ALL_APPS = [
   },
 ];
 
-const ROLES = [
-  { id: 'admin', label: 'Admin' },
-  { id: 'manager', label: 'Manager' },
-  { id: 'member', label: 'Member' },
-  { id: 'viewer', label: 'Viewer' },
-];
+const ROLE_IDS = ['admin', 'manager', 'member', 'viewer'] as const;
 
 function getInitials(name?: string | null): string {
   if (!name) return '?';
@@ -154,11 +146,11 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
       await groupsClient.removeGroupMember({ id: String(groupId), userId: String(userId) });
     },
     onSuccess: () => {
-      toast.success('Removed from group');
+      toast.success(t('team.memberDetail.removedFromGroup'));
       qc.invalidateQueries({ queryKey: ['user-groups', id] });
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: () => toast.error('Failed to remove from group'),
+    onError: () => toast.error(t('team.memberDetail.removeFromGroupFailed')),
   });
 
   useEffect(() => {
@@ -188,7 +180,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     return (
       <div className="max-w-3xl">
         <p className="text-sm" style={{ color: 'var(--dash-text-dim)' }}>
-          Loading member...
+          {t('team.memberDetail.loading')}
         </p>
       </div>
     );
@@ -272,7 +264,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
 
   const saveMember = async (): Promise<void> => {
     if (!nameDraft.trim()) {
-      toast.error('Name is required');
+      toast.error(t('team.memberDetail.nameRequired'));
       return;
     }
     try {
@@ -297,7 +289,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Member detail · rtylr" />
+      <HelmetContainer title={`${t('team.memberDetail.pageTitle')} · rtylr`} />
       <div className="space-y-5 max-w-4xl">
         <div className="flex items-center gap-4">
           <Avatar
@@ -332,17 +324,17 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     }}
                   >
                     <X size={14} />
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button onClick={saveMember} disabled={updateMember.isPending}>
                     <Save size={14} />
-                    Save
+                    {t('common.save')}
                   </Button>
                 </>
               ) : (
                 <Button variant="outline" onClick={() => setIsEditing(true)}>
                   <Pencil size={14} />
-                  Edit
+                  {t('common.edit')}
                 </Button>
               )}
             </div>
@@ -351,12 +343,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
 
         {isEditing && (
           <SettingSection
-            title="Member details"
-            description="Edit this member's profile and access."
+            title={t('team.memberDetail.detailsTitle')}
+            description={t('team.memberDetail.detailsDescription')}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="member-name">Name</Label>
+                <Label htmlFor="member-name">{t('team.memberDetail.nameLabel')}</Label>
                 <Input
                   id="member-name"
                   value={nameDraft}
@@ -364,7 +356,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="member-role">Role</Label>
+                <Label htmlFor="member-role">{t('team.memberDetail.roleLabel')}</Label>
                 <select
                   id="member-role"
                   value={roleDraft}
@@ -376,9 +368,9 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     color: 'var(--dash-text)',
                   }}
                 >
-                  {ROLES.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.label}
+                  {ROLE_IDS.map((roleId) => (
+                    <option key={roleId} value={roleId}>
+                      {t(`common.roleLabels.${roleId}`)}
                     </option>
                   ))}
                 </select>
@@ -445,11 +437,11 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
 
             {posSelected && (
               <div className="mt-4 space-y-2">
-                <Label>POS locations</Label>
+                <Label>{t('team.memberDetail.posLocationsLabel')}</Label>
                 <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                   {roleDraft === 'manager'
-                    ? 'Locations this manager runs within the assigned POS scope'
-                    : 'Locations this member can work at'}
+                    ? t('team.memberDetail.posLocationsManagerHint')
+                    : t('team.memberDetail.posLocationsMemberHint')}
                 </p>
                 {allLocations.length === 0 ? (
                   <EmptyState
@@ -542,7 +534,10 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           </div>
         </div>
 
-        <SettingSection title="App access" description="Apps this member can launch.">
+        <SettingSection
+          title={t('team.memberDetail.appAccessTitle')}
+          description={t('team.memberDetail.appAccessDescription')}
+        >
           <div className="flex flex-wrap gap-2">
             {(member.apps ?? []).length === 0 ? (
               <EmptyState
@@ -629,7 +624,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--dash-border)' }}>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Groups
+                {t('team.memberDetail.groupsTitle')}
               </p>
               <button
                 type="button"
@@ -637,11 +632,11 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                 className="text-xs"
                 style={{ color: '#4583C4' }}
               >
-                Manage groups
+                {t('team.memberDetail.manageGroups')}
               </button>
             </div>
             <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-              Groups this member belongs to.
+              {t('team.memberDetail.groupsDescription')}
             </p>
           </div>
           <div className="px-5 py-4">
@@ -688,9 +683,9 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           <DangerZone
             actions={[
               {
-                label: 'Deactivate member',
-                description: 'Immediately revoke all access. Can be undone later.',
-                buttonLabel: 'Deactivate',
+                label: t('team.memberDetail.deactivateLabel'),
+                description: t('team.memberDetail.deactivateDescription'),
+                buttonLabel: t('team.memberDetail.deactivateButton'),
                 onClick: () => setConfirmOpen(true),
               },
             ]}
@@ -700,32 +695,14 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
         <ConfirmDialog
           open={confirmOpen}
           onOpenChange={setConfirmOpen}
-          title={`Deactivate ${member.name}?`}
+          title={t('team.memberDetail.confirmDeactivateTitle', { name: member.name })}
           description={
             <span className="flex flex-col gap-1.5">
-              <span>They will lose access to all apps immediately.</span>
-              {sub &&
-                sub.pricePerSeatCents > 0 &&
-                (() => {
-                  const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                    computeSeatProration(sub.pricePerSeatCents);
-                  return (
-                    <span style={{ color: 'var(--dash-text-muted)', fontSize: '12px' }}>
-                      Saves{' '}
-                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                        {centsToDisplay(proratedCents)}
-                      </span>{' '}
-                      this month ({daysRemaining}/{daysInMonth} days), then{' '}
-                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                        {centsToDisplay(sub.pricePerSeatCents)}/mo
-                      </span>{' '}
-                      from {nextMonthName} 1st.
-                    </span>
-                  );
-                })()}
+              <span>{t('team.memberDetail.confirmDeactivateDescription')}</span>
+              {sub && <SeatSavingsNote pricePerSeatCents={sub.pricePerSeatCents} />}
             </span>
           }
-          confirmLabel="Deactivate"
+          confirmLabel={t('team.memberDetail.deactivateButton')}
           destructive
           isLoading={deactivate.isPending}
           onConfirm={async () => {

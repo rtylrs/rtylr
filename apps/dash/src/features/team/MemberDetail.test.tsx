@@ -4,6 +4,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+  // MemberDetail's deactivate dialog renders SeatSavingsNote, which uses Trans.
+  // A mock supplying only useTranslation throws when that dialog opens.
+  Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -154,7 +157,7 @@ describe('MemberDetail: app-access empty state (permission-gated)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'team.memberDetail.assignApp' }));
 
     // Entering edit mode swaps the header "Edit" button for "Cancel"/"Save".
-    expect(screen.getByRole('button', { name: /Save/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'common.save' })).toBeInTheDocument();
   });
 
   it('shows a refresh fallback instead when the current user cannot edit the member', () => {
@@ -221,8 +224,8 @@ describe('MemberDetail: POS location capabilities (#1028)', () => {
     memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
 
     render(<MemberDetail />);
-    fireEvent.click(screen.getByRole('button', { name: /Edit/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.save' }));
     await waitFor(() => expect(assignLocationMock).toHaveBeenCalled());
   };
 
@@ -258,8 +261,8 @@ describe('MemberDetail: POS location capabilities (#1028)', () => {
     memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
 
     render(<MemberDetail />);
-    fireEvent.click(screen.getByRole('button', { name: /Edit/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.save' }));
 
     await waitFor(() => expect(assignLocationMock).toHaveBeenCalled());
     expect(assignLocationMock).toHaveBeenCalledWith(
