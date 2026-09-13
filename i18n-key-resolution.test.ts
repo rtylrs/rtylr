@@ -22,14 +22,16 @@ import {
  * default, as most do, English renders correctly and only Arabic and French
  * are wrong. Where it passes none, the raw key paints to the user.
  *
- * Enforced apps are listed explicitly, and every app is enforced except one.
+ * Every app is enforced.
  *
- * `menu` is the exception, and not because it is unmeasured: its keys all
- * resolve since rtylr#1277. It fails the namespace-file parity assertion
- * below, because `en` declares 15 locale files, `ar` 11 and `fr` 9, and ten of
- * those 15 namespaces are read by nothing at all. Translating 126 strings into
- * namespaces no call site reaches would satisfy this suite and deliver
- * nothing, so the parity gap is being resolved first, in rtylr#1278.
+ * `menu` was the last exception, and not because it was unmeasured: its keys
+ * all resolved since rtylr#1277. It failed the namespace-file parity
+ * assertion below, because `en` declared 15 locale files, `ar` 11 and `fr` 9,
+ * and ten of those 15 namespaces were read by nothing at all. Translating 126
+ * strings into namespaces no call site reaches would have satisfied this suite
+ * and delivered nothing, so the parity gap was closed first instead
+ * (rtylr#1278): nine dead namespaces deleted, and the tenth wired to the
+ * component that had been hardcoding English beside it.
  */
 const ENFORCED_APPS = [
   'auth',
@@ -40,6 +42,7 @@ const ENFORCED_APPS = [
   'flow',
   'hr',
   'insights',
+  'menu',
   'recruit',
 ] as const;
 
@@ -54,6 +57,9 @@ const MINIMUM_KEYS: Record<(typeof ENFORCED_APPS)[number], number> = {
   flow: 500,
   hr: 700,
   insights: 110,
+  // menu is a customer-facing QR menu with six namespaces, so its floor is an
+  // order of magnitude below the admin apps' by nature rather than by neglect.
+  menu: 35,
   recruit: 250,
 };
 
