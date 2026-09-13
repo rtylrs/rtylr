@@ -165,5 +165,9 @@
     "navigate": "Naviguer",
     "storefront": "Boutique"
   },
-  "launch": "Ouvrir"
+  "launch": "Ouvrir",
+  "pagination": {
+    "previous": "Préc.",
+    "next": "Suiv."
+  }
 }

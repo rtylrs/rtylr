@@ -162,5 +162,9 @@
     "navigate": "Navigate",
     "storefront": "Storefront"
   },
-  "launch": "Launch"
+  "launch": "Launch",
+  "pagination": {
+    "previous": "Prev",
+    "next": "Next"
+  }
 }

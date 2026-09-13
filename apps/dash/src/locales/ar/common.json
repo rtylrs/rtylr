@@ -165,5 +165,9 @@
     "navigate": "تنقل",
     "storefront": "واجهة المتجر"
   },
-  "launch": "تشغيل"
+  "launch": "تشغيل",
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي"
+  }
 }
