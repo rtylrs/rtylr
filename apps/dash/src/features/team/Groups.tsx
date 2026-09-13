@@ -43,7 +43,7 @@ const Groups = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Groups · rtylr" />
+      <HelmetContainer title={`${t('team.groups.title')} · rtylr`} />
       <div className="space-y-5">
         <motion.div
           initial={{ opacity: 0, y: -6 }}

@@ -166,5 +166,12 @@
   "pagination": {
     "previous": "Prev",
     "next": "Next"
+  },
+  "roleDescriptions": {
+    "admin": "Manage business access and assigned applications",
+    "manager": "Manage assigned work within delegated scope",
+    "member": "Use assigned applications and operational resources",
+    "viewer": "Read-only access to assigned applications",
+    "menu_manager": "Manage menus, QR codes, and storefront design"
   }
 }

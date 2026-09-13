@@ -169,5 +169,12 @@
   "pagination": {
     "previous": "Préc.",
     "next": "Suiv."
+  },
+  "roleDescriptions": {
+    "admin": "Gérer les accès à l’entreprise et les applications attribuées",
+    "manager": "Gérer le travail attribué dans le périmètre délégué",
+    "member": "Utiliser les applications attribuées et les ressources opérationnelles",
+    "viewer": "Accès en lecture seule aux applications attribuées",
+    "menu_manager": "Gérer les menus, les QR codes et le design de la boutique"
   }
 }

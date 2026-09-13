@@ -99,12 +99,7 @@ const ALL_APPS = [
   },
 ];
 
-const ROLES = [
-  { id: 'admin', label: 'Admin', desc: 'Manage business access and assigned applications' },
-  { id: 'manager', label: 'Manager', desc: 'Manage assigned work within delegated scope' },
-  { id: 'member', label: 'Member', desc: 'Use assigned applications and operational resources' },
-  { id: 'viewer', label: 'Viewer', desc: 'Read-only access to assigned applications' },
-];
+const ROLE_IDS = ['admin', 'manager', 'member', 'viewer'] as const;
 
 const STATUS_COLORS: Record<BulkResult['status'], string> = {
   invited: '#10b981',
@@ -154,18 +149,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const { data: addonsData = [] } = useAddons();
   const menuAddonEnabled = isAddonEnabled(addonsData, 'menu');
 
-  const allRoles = [
-    ...ROLES,
-    ...(menuAddonEnabled
-      ? [
-          {
-            id: 'menu_manager',
-            label: 'Menu Manager',
-            desc: 'Manage menus, QR codes, and storefront design',
-          },
-        ]
-      : []),
-  ];
+  const allRoles: string[] = [...ROLE_IDS, ...(menuAddonEnabled ? ['menu_manager'] : [])];
 
   const parsedEmails = bulkEmailsRaw
     .split('\n')
@@ -212,18 +196,18 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       )
     );
     if (results.some((r) => r.status === 'rejected')) {
-      toast.error('Member invited, but some location assignments failed');
+      toast.error(t('team.inviteUser.locationAssignmentsFailed'));
     }
   };
 
   const submitSingle = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!email.trim() || !name.trim()) {
-      toast.error('Email and name are required');
+      toast.error(t('team.inviteUser.emailAndNameRequired'));
       return;
     }
     if (authMethod === 'manual' && (!username.trim() || password.length < 8)) {
-      toast.error('Password must be at least 8 characters');
+      toast.error(t('team.inviteUser.passwordTooShort'));
       return;
     }
     try {
@@ -343,36 +327,36 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     onChange: (r: string) => void
   ): React.JSX.Element => (
     <div className="space-y-2">
-      {allRoles.map((r) => (
+      {allRoles.map((roleId) => (
         <button
-          key={r.id}
+          key={roleId}
           type="button"
-          onClick={() => onChange(r.id)}
+          onClick={() => onChange(roleId)}
           className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors"
           style={{
-            background: currentRole === r.id ? 'rgba(69,131,196,0.06)' : 'transparent',
+            background: currentRole === roleId ? 'rgba(69,131,196,0.06)' : 'transparent',
             border: `1px solid ${
-              currentRole === r.id ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
+              currentRole === roleId ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
             }`,
           }}
         >
           <div
             className="h-4 w-4 rounded-full border-2 shrink-0 flex items-center justify-center"
-            style={{ borderColor: currentRole === r.id ? '#4583C4' : 'var(--dash-border)' }}
+            style={{ borderColor: currentRole === roleId ? '#4583C4' : 'var(--dash-border)' }}
           >
-            {currentRole === r.id && (
+            {currentRole === roleId && (
               <div className="h-2 w-2 rounded-full" style={{ background: '#4583C4' }} />
             )}
           </div>
           <div className="flex-1 min-w-0">
             <p
               className="text-sm font-medium"
-              style={{ color: currentRole === r.id ? '#4583C4' : 'var(--dash-text)' }}
+              style={{ color: currentRole === roleId ? '#4583C4' : 'var(--dash-text)' }}
             >
-              {r.label}
+              {t(`common.roleLabels.${roleId}`)}
             </p>
             <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-              {r.desc}
+              {t(`common.roleDescriptions.${roleId}`)}
             </p>
           </div>
         </button>
@@ -429,11 +413,11 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     <div className="space-y-2 pt-1">
       <div>
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          POS locations
+          {t('team.inviteUser.posLocationsTitle')}
         </p>
         <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
           {currentRole === 'manager'
-            ? 'Locations this manager runs within the assigned POS scope'
+            ? t('team.inviteUser.posLocationsManagerHint')
             : 'Locations this member can work at'}
         </p>
       </div>
@@ -497,10 +481,13 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     >
       <div>
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Group <span style={{ color: 'var(--dash-text-dim)', fontWeight: 400 }}>(optional)</span>
+          {t('team.inviteUser.groupTitle')}{' '}
+          <span style={{ color: 'var(--dash-text-dim)', fontWeight: 400 }}>
+            {t('team.inviteUser.groupOptional')}
+          </span>
         </p>
         <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-          Add this member to an existing group
+          {t('team.inviteUser.groupHint')}
         </p>
       </div>
       <select
@@ -513,7 +500,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           color: 'var(--dash-text)',
         }}
       >
-        <option value="">No group</option>
+        <option value="">{t('team.inviteUser.noGroup')}</option>
         {groups.map((g) => (
           <option key={g.id} value={String(g.id)}>
             {g.name}
@@ -532,7 +519,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
             {t('common.nav.addMember')}
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--dash-text-muted)' }}>
-            Add a new member to your organization.
+            {t('team.inviteUser.subtitle')}
           </p>
         </div>
 
@@ -599,21 +586,21 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                   style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
                 >
                   <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                    Personal details
+                    {t('team.inviteUser.personalDetails')}
                   </p>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="inv-name">Full name</Label>
+                      <Label htmlFor="inv-name">{t('team.inviteUser.fullNameLabel')}</Label>
                       <Input
                         id="inv-name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Jane Doe"
+                        placeholder={t('team.inviteUser.fullNamePlaceholder')}
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="inv-email">Email address</Label>
+                      <Label htmlFor="inv-email">{t('team.inviteUser.emailLabel')}</Label>
                       <Input
                         id="inv-email"
                         type="email"
@@ -632,7 +619,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                   style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
                 >
                   <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                    Authentication
+                    {t('team.inviteUser.authenticationTitle')}
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -648,12 +635,12 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                         color: authMethod === 'invite' ? '#4583C4' : 'var(--dash-text-muted)',
                       }}
                     >
-                      <p className="font-semibold">Send invitation email</p>
+                      <p className="font-semibold">{t('team.inviteUser.sendInvitationEmail')}</p>
                       <p
                         className="text-[11px] mt-0.5 font-normal"
                         style={{ color: 'var(--dash-text-dim)' }}
                       >
-                        Member sets their own password
+                        {t('team.inviteUser.sendInvitationEmailHint')}
                       </p>
                     </button>
                     <button
@@ -669,12 +656,12 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                         color: authMethod === 'manual' ? '#4583C4' : 'var(--dash-text-muted)',
                       }}
                     >
-                      <p className="font-semibold">Set password manually</p>
+                      <p className="font-semibold">{t('team.inviteUser.setPasswordManually')}</p>
                       <p
                         className="text-[11px] mt-0.5 font-normal"
                         style={{ color: 'var(--dash-text-dim)' }}
                       >
-                        You share credentials directly
+                        {t('team.inviteUser.setPasswordManuallyHint')}
                       </p>
                     </button>
                   </div>
@@ -738,10 +725,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 >
                   <div>
                     <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                      Role
+                      {t('team.inviteUser.roleTitle')}
                     </p>
                     <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                      Controls what this member can see and do
+                      {t('team.inviteUser.roleHint')}
                     </p>
                   </div>
                   {renderRoleSelector(role, setRole)}
@@ -754,10 +741,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 >
                   <div>
                     <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                      Assign licenses
+                      {t('team.inviteUser.licensesTitle')}
                     </p>
                     <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                      Choose which apps this member can access
+                      {t('team.inviteUser.licensesHint')}
                     </p>
                   </div>
                   {renderAppSelector(selectedApps, toggleApp)}
@@ -923,7 +910,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 className="min-h-11 px-4 py-2 rounded-lg text-sm font-medium"
                 style={{ color: 'var(--dash-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               {singleStep > 0 && (
                 <button
@@ -979,10 +966,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
             >
               <div>
                 <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  Email addresses
+                  {t('team.inviteUser.bulkEmailsTitle')}
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  Paste one email per line
+                  {t('team.inviteUser.bulkEmailsHint')}
                 </p>
               </div>
               <textarea
@@ -1012,10 +999,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
             >
               <div>
                 <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  Role
+                  {t('team.inviteUser.roleTitle')}
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  Applied to all invited members
+                  {t('team.inviteUser.appliedToAllInvited')}
                 </p>
               </div>
               {renderRoleSelector(bulkRole, setBulkRole)}
@@ -1028,10 +1015,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
             >
               <div>
                 <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  Assign licenses
+                  {t('team.inviteUser.licensesTitle')}
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  Applied to all invited members
+                  {t('team.inviteUser.appliedToAllInvited')}
                 </p>
               </div>
               {renderAppSelector(bulkApps, toggleBulkApp)}
@@ -1053,7 +1040,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 className="min-h-11 px-4 py-2 rounded-lg text-sm font-medium"
                 style={{ color: 'var(--dash-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -1064,8 +1051,8 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               >
                 <Send size={14} />
                 {bulkInvite.isPending
-                  ? 'Sending...'
-                  : `Send ${parsedEmails.length > 0 ? parsedEmails.length : ''} invitation${parsedEmails.length !== 1 ? 's' : ''}`}
+                  ? t('team.inviteUser.bulkSending')
+                  : t('team.inviteUser.bulkSend', { count: parsedEmails.length })}
               </button>
             </div>
 
@@ -1082,9 +1069,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                     borderBottom: '1px solid var(--dash-border)',
                   }}
                 >
-                  <div className="col-span-6">Email</div>
-                  <div className="col-span-3">Status</div>
-                  <div className="col-span-3">Note</div>
+                  <div className="col-span-6">{t('team.inviteUser.resultEmail')}</div>
+                  <div className="col-span-3">{t('team.inviteUser.resultStatus')}</div>
+                  <div className="col-span-3">{t('team.inviteUser.resultNote')}</div>
                 </div>
                 {bulkResults.map((r, idx) => (
                   <div
