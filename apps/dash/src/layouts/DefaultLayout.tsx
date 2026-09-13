@@ -59,6 +59,7 @@ import type { TFunction } from 'i18next';
 import { licenseClient } from '../shared/lib/clients';
 
 interface NavItem {
+  /** Stable id, also the tour anchor. Never the label: that is a translation. */
   key: string;
   label: string;
   path: string;
@@ -66,52 +67,55 @@ interface NavItem {
   badge?: number | string;
 }
 
-const rawNavItems: NavItem[] = [
-  { key: 'dashboard', label: 'Account Home', path: '/', icon: LayoutDashboard },
-  { key: 'team', label: 'Team', path: '/team', icon: Users },
-  { key: 'apps', label: 'Apps', path: '/apps', icon: Grid3x3 },
+/** A nav entry as written down: no label, because the label is a translation. */
+type NavItemDef = Omit<NavItem, 'label'>;
+
+const rawNavItems: NavItemDef[] = [
+  { key: 'dashboard', path: '/', icon: LayoutDashboard },
+  { key: 'team', path: '/team', icon: Users },
+  { key: 'apps', path: '/apps', icon: Grid3x3 },
 ];
 
-const rawMenuSubItems: NavItem[] = [
-  { key: 'menus', label: 'Menus', path: '/menus', icon: UtensilsCrossed },
-  { key: 'qrCodes', label: 'QR Codes', path: '/qr-codes', icon: QrCode },
-  { key: 'design', label: 'Design', path: '/design', icon: Palette },
+const rawMenuSubItems: NavItemDef[] = [
+  { key: 'menus', path: '/menus', icon: UtensilsCrossed },
+  { key: 'qrCodes', path: '/qr-codes', icon: QrCode },
+  { key: 'design', path: '/design', icon: Palette },
 ];
 
-const routeKeys: Record<string, { key: string; fallback: string }> = {
-  '/': { key: 'dashboard', fallback: 'Account Home' },
-  '/chat': { key: 'chat', fallback: '__caret__' },
-  '/menus': { key: 'menus', fallback: 'Menus' },
-  '/orders': { key: 'orders', fallback: 'Orders' },
-  '/qr-codes': { key: 'qrCodes', fallback: 'QR Codes' },
-  '/design': { key: 'design', fallback: 'Design' },
-  '/menu': { key: 'menu', fallback: 'Menu' },
-  '/create-item': { key: 'createItem', fallback: 'Create Item' },
-  '/create-banner': { key: 'createBanner', fallback: 'Create Banner' },
-  '/team': { key: 'team', fallback: 'Team' },
-  '/team/invite': { key: 'addMember', fallback: 'Add a member' },
-  '/permissions': { key: 'permissions', fallback: 'Permissions' },
-  '/roles': { key: 'roles', fallback: 'Roles' },
-  '/apps': { key: 'apps', fallback: 'Apps' },
-  '/audit': { key: 'auditLog', fallback: 'Audit log' },
-  '/notifications': { key: 'notifications', fallback: 'Notifications' },
-  '/account': { key: 'account', fallback: 'Account' },
-  '/billing': { key: 'billing', fallback: 'Billing' },
-  '/integrations': { key: 'integrations', fallback: 'Integrations' },
-  '/api-keys': { key: 'apiKeys', fallback: 'API Keys' },
-  '/webhooks': { key: 'webhooks', fallback: 'Webhooks' },
-  '/security': { key: 'security', fallback: 'Security' },
-  '/theme': { key: 'theme', fallback: 'Theme' },
-  '/help': { key: 'helpCenter', fallback: 'Help center' },
-  '/settings': { key: 'manageAccount', fallback: 'Manage account' },
-  '/settings/account': { key: 'account', fallback: 'Account' },
-  '/settings/general': { key: 'general', fallback: 'General' },
-  '/settings/industry': { key: 'industry', fallback: 'Industry' },
-  '/settings/domain': { key: 'customDomain', fallback: 'Custom Domain' },
-  '/settings/email': { key: 'emailSettings', fallback: 'Email Settings' },
-  '/settings/billing': { key: 'billing', fallback: 'Billing' },
-  '/settings/subscription': { key: 'billing', fallback: 'Billing' },
-  '/settings/addons': { key: 'addons', fallback: 'Addons' },
+const routeKeys: Record<string, string> = {
+  '/': 'dashboard',
+  '/chat': 'chat',
+  '/menus': 'menus',
+  '/orders': 'orders',
+  '/qr-codes': 'qrCodes',
+  '/design': 'design',
+  '/menu': 'menu',
+  '/create-item': 'createItem',
+  '/create-banner': 'createBanner',
+  '/team': 'team',
+  '/team/invite': 'addMember',
+  '/permissions': 'permissions',
+  '/roles': 'roles',
+  '/apps': 'apps',
+  '/audit': 'auditLog',
+  '/notifications': 'notifications',
+  '/account': 'account',
+  '/billing': 'billing',
+  '/integrations': 'integrations',
+  '/api-keys': 'apiKeys',
+  '/webhooks': 'webhooks',
+  '/security': 'security',
+  '/theme': 'theme',
+  '/help': 'helpCenter',
+  '/settings': 'manageAccount',
+  '/settings/account': 'account',
+  '/settings/general': 'general',
+  '/settings/industry': 'industry',
+  '/settings/domain': 'customDomain',
+  '/settings/email': 'emailSettings',
+  '/settings/billing': 'billing',
+  '/settings/subscription': 'billing',
+  '/settings/addons': 'addons',
 };
 
 function getPageTitle(pathname: string, t: TFunction<'common', undefined>): string {
@@ -122,8 +126,8 @@ function getPageTitle(pathname: string, t: TFunction<'common', undefined>): stri
       : null;
 
   if (matchEntry) {
-    if (matchEntry.key === 'chat') return '__caret__';
-    return t(`nav.${matchEntry.key}`, matchEntry.fallback);
+    if (matchEntry === 'chat') return '__caret__';
+    return t(`nav.${matchEntry}`);
   }
   return 'Dash';
 }
@@ -138,14 +142,20 @@ function getInitials(name?: string | null): string {
     .slice(0, 2);
 }
 
-const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon, badge }) => {
+export const SidebarNavItem: React.FC<NavItem & { tourId: string }> = ({
+  tourId,
+  label,
+  path,
+  icon: Icon,
+  badge,
+}) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
 
   return (
     <Link
       to={path}
-      data-tour={label.toLowerCase()}
+      data-tour={tourId}
       title={label}
       className={cn(
         'group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
@@ -228,7 +238,13 @@ const SidebarSection: React.FC<{
           style={{ borderInlineStart: '1px solid var(--dash-border)' }}
         >
           {items.map((item) => (
-            <SidebarNavItem key={item.path} label={item.label} path={item.path} icon={item.icon} />
+            <SidebarNavItem
+              key={item.path}
+              tourId={item.key}
+              label={item.label}
+              path={item.path}
+              icon={item.icon}
+            />
           ))}
         </div>
       )}
@@ -237,6 +253,7 @@ const SidebarSection: React.FC<{
 };
 
 const AppsSection: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useUserStore();
   const { data: apps = [] } = useApps();
   const userApps = (user?.apps as string[] | undefined) ?? [];
@@ -263,7 +280,7 @@ const AppsSection: React.FC = () => {
         className="dash-sidebar-section-label px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide"
         style={{ color: 'var(--dash-text-dim)' }}
       >
-        Apps
+        {t('common.nav.apps')}
       </div>
       <div className="space-y-0.5">
         {visible.map((a) => {
@@ -429,12 +446,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   const navItems = rawNavItems.map((item) => ({
     ...item,
-    label: t(`nav.${item.key}`, item.label),
+    label: t(`nav.${item.key}`),
   }));
 
   const menuSubItems = rawMenuSubItems.map((item) => ({
     ...item,
-    label: t(`nav.${item.key}`, item.label),
+    label: t(`nav.${item.key}`),
   }));
   const userEmail = user?.email || null;
   const userName = user?.fullName || 'User';
@@ -478,7 +495,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-3 focus:bg-[var(--dash-surface)] focus:text-[var(--dash-text)] focus:border focus:border-[var(--dash-border)] focus:rounded-lg focus:shadow-lg focus:top-2 focus:left-2"
       >
-        Skip to main content
+        {t('common.skipToMainContent')}
       </a>
       <div
         className="dash-shell flex h-screen overflow-hidden relative"
@@ -528,6 +545,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {navItems.map((item) => (
               <SidebarNavItem
                 key={item.path}
+                tourId={item.key}
                 label={item.label}
                 path={item.path}
                 icon={item.icon}
@@ -613,14 +631,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
                     style={{ color: 'var(--dash-text-dim)' }}
                   >
-                    Appearance
+                    {t('common.appearance.title')}
                   </p>
                   <div className="flex gap-1">
                     {(
                       [
-                        { value: 'light', icon: Sun, label: 'Light' },
-                        { value: 'dark', icon: Moon, label: 'Dark' },
-                        { value: 'system', icon: Monitor, label: 'System' },
+                        { value: 'light', icon: Sun, label: t('common.appearance.light') },
+                        { value: 'dark', icon: Moon, label: t('common.appearance.dark') },
+                        { value: 'system', icon: Monitor, label: t('common.appearance.system') },
                       ] as const
                     ).map(({ value, icon: Icon, label }) => (
                       <button
@@ -654,14 +672,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                       }}
                     >
                       <ExternalLink size={14} />
-                      Open console
+                      {t('common.openConsole')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}
                 <DropdownMenuItem destructive onClick={handleLogout}>
                   <LogOut size={14} />
-                  Sign out
+                  {t('common.signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -686,7 +704,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   onClick={() => setMobileSidebarOpen((v) => !v)}
                   className="md:hidden h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
-                  aria-label="Toggle navigation menu"
+                  aria-label={t('common.toggleNavigation')}
                 >
                   <Menu size={16} />
                 </button>

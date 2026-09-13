@@ -160,7 +160,9 @@
     "activityLog": "Activity Log",
     "language": "Language",
     "navigate": "Navigate",
-    "storefront": "Storefront"
+    "storefront": "Storefront",
+    "createItem": "Create item",
+    "createBanner": "Create banner"
   },
   "launch": "Launch",
   "pagination": {
@@ -173,5 +175,15 @@
     "member": "Use assigned applications and operational resources",
     "viewer": "Read-only access to assigned applications",
     "menu_manager": "Manage menus, QR codes, and storefront design"
+  },
+  "skipToMainContent": "Skip to main content",
+  "toggleNavigation": "Toggle navigation menu",
+  "openConsole": "Open console",
+  "signOut": "Sign out",
+  "appearance": {
+    "title": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
