@@ -1,0 +1,21 @@
+{
+  "logoAlt": "Logo Rtylr",
+  "company": "Entreprise",
+  "aboutUs": "À propos",
+  "contactUs": "Nous contacter",
+  "careers": "Carrières",
+  "quickLinks": "Liens rapides",
+  "faqs": "FAQ",
+  "pricing": "Tarifs",
+  "legal": "Mentions légales",
+  "privacyPolicy": "Politique de confidentialité",
+  "terms": "Conditions générales",
+  "sectionNavigation": "Navigation de la section {{section}}",
+  "contact": "Contact",
+  "email": "E-mail",
+  "followUs": "Suivez-nous",
+  "instagram": "Suivez-nous sur Instagram",
+  "rightsReserved": "Tous droits réservés.",
+  "thirdPartyLogos": "Sauf mention contraire, l’utilisation de logos tiers n’implique aucune approbation, aucun parrainage ni aucune affiliation avec Rtylr.",
+  "currentVersion": "Version actuelle : {{version}}"
+}
