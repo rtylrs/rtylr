@@ -2,33 +2,35 @@ import { FaInstagram } from 'react-icons/fa';
 import { Link } from '@tanstack/react-router';
 import { APP_URLS } from '@voxire/config';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation('footer');
   const landingUrl = (APP_URLS.landing || 'https://rtylr.com').replace(/\/$/, '');
   const contactEmail = 'info@rtylr.com';
   const appVersion = import.meta.env.VITE_APP_VERSION ?? '0.0.0';
 
   const footerSections = [
     {
-      title: 'Company',
+      title: t('footer.company'),
       links: [
-        { to: `${landingUrl}/about`, label: 'About Us', external: true },
-        { to: `${landingUrl}/contact`, label: 'Contact Us', external: true },
-        { to: 'https://voxire.com/careers', label: 'Careers', external: true },
+        { to: `${landingUrl}/about`, label: t('footer.aboutUs'), external: true },
+        { to: `${landingUrl}/contact`, label: t('footer.contactUs'), external: true },
+        { to: 'https://voxire.com/careers', label: t('footer.careers'), external: true },
       ],
     },
     {
-      title: 'Quick Links',
+      title: t('footer.quickLinks'),
       links: [
-        { to: `${landingUrl}/faqs`, label: 'FAQs', external: true },
-        { to: `${landingUrl}/pricing`, label: 'Pricing', external: true },
+        { to: `${landingUrl}/faqs`, label: t('footer.faqs'), external: true },
+        { to: `${landingUrl}/pricing`, label: t('footer.pricing'), external: true },
       ],
     },
     {
-      title: 'Legal',
+      title: t('footer.legal'),
       links: [
-        { to: `${landingUrl}/privacy`, label: 'Privacy Policy', external: true },
-        { to: `${landingUrl}/terms`, label: 'Terms and Conditions', external: true },
+        { to: `${landingUrl}/privacy`, label: t('footer.privacyPolicy'), external: true },
+        { to: `${landingUrl}/terms`, label: t('footer.terms'), external: true },
       ],
     },
   ];
@@ -37,7 +39,7 @@ const Footer: React.FC = () => {
     <footer className="bg-gray-900 text-white" role="contentinfo">
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="mb-8">
-          <img src="/logo.png" alt="Rtylr Logo" className="h-8 w-auto" />
+          <img src="/logo.png" alt={t('footer.logoAlt')} className="h-8 w-auto" />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
@@ -46,7 +48,7 @@ const Footer: React.FC = () => {
               <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">
                 {section.title}
               </h3>
-              <nav aria-label={`${section.title} navigation`}>
+              <nav aria-label={t('footer.sectionNavigation', { section: section.title })}>
                 <ul className="space-y-2">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
@@ -76,26 +78,29 @@ const Footer: React.FC = () => {
 
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">
-              Contact
+              {t('footer.contact')}
             </h3>
             <div className="space-y-2">
               <div>
-                <span className="text-xs text-white/40 block">Email</span>
+                <span className="text-xs text-white/40 block">{t('footer.email')}</span>
+                {/* dir="ltr" because an address is Latin script in every language, and
+                    the bidi algorithm otherwise moves its trailing punctuation in ar. */}
                 <a
                   href={`mailto:${contactEmail}`}
+                  dir="ltr"
                   className="text-sm text-white/70 hover:text-white transition-colors"
                 >
                   {contactEmail}
                 </a>
               </div>
               <div>
-                <span className="text-xs text-white/40 block mb-1">Follow us</span>
+                <span className="text-xs text-white/40 block mb-1">{t('footer.followUs')}</span>
                 <a
                   href="https://www.instagram.com/voxire.tech"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-white/70 hover:text-white transition-colors"
-                  aria-label="Follow us on Instagram"
+                  aria-label={t('footer.instagram')}
                 >
                   <FaInstagram size={18} />
                 </a>
@@ -116,17 +121,15 @@ const Footer: React.FC = () => {
               >
                 Voxire
               </a>{' '}
-              All rights reserved.
+              {t('footer.rightsReserved')}
             </p>
-            <p className="text-xs text-white/30 mt-1">
-              Unless otherwise noted, the use of third-party logos does not imply endorsement,
-              sponsorship, or affiliation with Rtylr.
-            </p>
+            <p className="text-xs text-white/30 mt-1">{t('footer.thirdPartyLogos')}</p>
           </div>
           <button
             type="button"
+            dir="ltr"
             className="text-xs text-white/30 hover:text-white/50 transition-colors"
-            aria-label={`Current version: ${appVersion}`}
+            aria-label={t('footer.currentVersion', { version: appVersion })}
           >
             v{appVersion}
           </button>
