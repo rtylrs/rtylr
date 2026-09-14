@@ -1,0 +1,64 @@
+{
+  "pageTitle": "Design",
+  "subtitle": "Storefront appearance",
+  "layouts": "Layouts",
+  "newLayoutPlaceholder": "New layout...",
+  "preview": "Preview",
+  "none": "None",
+  "sections": {
+    "pages": "Pages",
+    "header": "Header",
+    "nav": "Nav tabs",
+    "items": "Item cards",
+    "colors": "Colors",
+    "typography": "Typography"
+  },
+  "pages": {
+    "about": "About",
+    "gallery": "Gallery",
+    "reviews": "Reviews",
+    "offers": "Offers"
+  },
+  "header": {
+    "coverHeight": "Cover height",
+    "sticky": "Sticky header",
+    "showLogo": "Show logo",
+    "showDescription": "Show description",
+    "showMeta": "Show meta (address, hours)"
+  },
+  "nav": {
+    "style": "Style",
+    "styleUnderline": "Underline",
+    "stylePill": "Pill",
+    "styleFlat": "Flat",
+    "size": "Size"
+  },
+  "items": {
+    "layout": "Layout",
+    "layoutGrid": "Grid",
+    "layoutList": "List",
+    "layoutMinimal": "Minimal",
+    "columns": "Columns",
+    "imagePosition": "Image position",
+    "imageTop": "Top",
+    "imageRight": "Right",
+    "imageLeft": "Left",
+    "imageSize": "Image size",
+    "cardRadius": "Card radius",
+    "showDescription": "Show description",
+    "showBadges": "Show badges"
+  },
+  "colors": {
+    "primary": "Primary",
+    "accent": "Accent",
+    "background": "Background"
+  },
+  "typography": {
+    "fontFamily": "Font family",
+    "fontSize": "Font size"
+  },
+  "businessPlaceholder": {
+    "name": "Your Business",
+    "description": "Add your business description in settings."
+  }
+}

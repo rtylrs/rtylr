@@ -1,0 +1,64 @@
+{
+  "pageTitle": "Design",
+  "subtitle": "Apparence de la boutique",
+  "layouts": "Mises en page",
+  "newLayoutPlaceholder": "Nouvelle mise en page...",
+  "preview": "Aperçu",
+  "none": "Aucun",
+  "sections": {
+    "pages": "Pages",
+    "header": "En-tête",
+    "nav": "Onglets de navigation",
+    "items": "Cartes d’articles",
+    "colors": "Couleurs",
+    "typography": "Typographie"
+  },
+  "pages": {
+    "about": "À propos",
+    "gallery": "Galerie",
+    "reviews": "Avis",
+    "offers": "Offres"
+  },
+  "header": {
+    "coverHeight": "Hauteur de la couverture",
+    "sticky": "En-tête fixe",
+    "showLogo": "Afficher le logo",
+    "showDescription": "Afficher la description",
+    "showMeta": "Afficher les infos (adresse, horaires)"
+  },
+  "nav": {
+    "style": "Style",
+    "styleUnderline": "Souligné",
+    "stylePill": "Pilule",
+    "styleFlat": "Plat",
+    "size": "Taille"
+  },
+  "items": {
+    "layout": "Disposition",
+    "layoutGrid": "Grille",
+    "layoutList": "Liste",
+    "layoutMinimal": "Minimal",
+    "columns": "Colonnes",
+    "imagePosition": "Position de l’image",
+    "imageTop": "Haut",
+    "imageRight": "Droite",
+    "imageLeft": "Gauche",
+    "imageSize": "Taille de l’image",
+    "cardRadius": "Arrondi des cartes",
+    "showDescription": "Afficher la description",
+    "showBadges": "Afficher les badges"
+  },
+  "colors": {
+    "primary": "Couleur principale",
+    "accent": "Couleur d’accentuation",
+    "background": "Arrière-plan"
+  },
+  "typography": {
+    "fontFamily": "Police",
+    "fontSize": "Taille de police"
+  },
+  "businessPlaceholder": {
+    "name": "Votre entreprise",
+    "description": "Ajoutez la description de votre entreprise dans les paramètres."
+  }
+}

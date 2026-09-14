@@ -22,6 +22,14 @@ import {
  * default, as most do, English renders correctly and only Arabic and French
  * are wrong. Where it passes none, the raw key paints to the user.
  *
+ * Known limit: it collects **literal** keys. A call site that builds its key,
+ * `t(`nav.${item.key}`)`, is invisible here, and dash has ten of those. That
+ * blind spot is what let `nav.createItem` and `nav.createBanner` reach three
+ * locale files as nothing at all while both screens rendered English
+ * (rtylr#1266). `apps/dash/src/locales/dynamicKeys.test.ts` covers dash's
+ * families by deriving them from the code that produces them; an app that grows
+ * dynamic keys wants the same.
+ *
  * Every app is enforced.
  *
  * `menu` was the last exception, and not because it was unmeasured: its keys
