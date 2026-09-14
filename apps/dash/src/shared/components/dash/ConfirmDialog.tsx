@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import {
   Dialog,
@@ -27,12 +28,17 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   destructive,
   onConfirm,
   isLoading,
 }) => {
+  const { t } = useTranslation();
+  // Defaults resolved here rather than in the parameter list, which is evaluated
+  // per render but cannot reach a hook.
+  const confirmText = confirmLabel ?? t('common.confirm');
+  const cancelText = cancelLabel ?? t('common.cancel');
   const handleConfirm = async () => {
     await onConfirm();
     onOpenChange(false);
@@ -57,14 +63,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </DialogHeader>
         <DialogFooter>
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            {cancelLabel}
+            {cancelText}
           </Button>
           <Button
             variant={destructive ? 'destructive' : 'default'}
             onClick={handleConfirm}
             disabled={isLoading}
           >
-            {confirmLabel}
+            {confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

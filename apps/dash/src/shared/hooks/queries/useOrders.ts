@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import i18next from 'i18next';
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -41,10 +42,10 @@ export const useUpdateOrderStatus = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dash-orders'] });
-      toast.success('Order status updated');
+      toast.success(i18next.t('common.toasts.orderStatusUpdated'));
     },
     onError: () => {
-      toast.error('Failed to update order status');
+      toast.error(i18next.t('common.toasts.failedUpdateOrderStatus'));
     },
   });
 };

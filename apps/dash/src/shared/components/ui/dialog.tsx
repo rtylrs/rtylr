@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -49,6 +50,7 @@ interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const DialogContent: React.FC<DialogContentProps> = ({ children, className }) => {
+  const { t } = useTranslation();
   const { open, setOpen } = useContext(DialogContext);
 
   useEffect(() => {
@@ -76,7 +78,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
       >
         <button
           type="button"
-          aria-label="Close dialog"
+          aria-label={t('common.closeDialog')}
           className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 hover:text-gray-600 hover:bg-black/5 transition-colors"
           onClick={() => setOpen(false)}
         >

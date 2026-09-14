@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '../ui';
 
@@ -14,6 +15,7 @@ export interface DangerZoneProps {
 }
 
 export const DangerZone: React.FC<DangerZoneProps> = ({ actions }) => {
+  const { t } = useTranslation();
   return (
     <div
       className="rounded-xl"
@@ -28,7 +30,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ actions }) => {
       >
         <AlertTriangle size={16} style={{ color: 'var(--status-cancelled)' }} />
         <p className="text-sm font-semibold" style={{ color: 'var(--status-cancelled)' }}>
-          Danger zone
+          {t('common.dangerZone')}
         </p>
       </div>
       <div className="divide-y" style={{ borderColor: 'var(--status-cancelled-bg)' }}>
