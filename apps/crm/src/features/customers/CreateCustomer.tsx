@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -17,13 +18,11 @@ interface FormData {
   consentMarketing: boolean;
 }
 
-const steps = [
-  { key: 'info', label: 'Info' },
-  { key: 'contact', label: 'Contact' },
-  { key: 'consent', label: 'Consent' },
-];
+// Ids only: this is module scope, evaluated before i18next has a language.
+const STEP_KEYS = ['info', 'contact', 'consent'] as const;
 
 const CreateCustomer: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const create = useCreateCustomer();
   const [step, setStep] = useState(0);
@@ -65,11 +64,11 @@ const CreateCustomer: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Customer created');
+          toast.success(t('crm.customers.created'));
           navigate({ to: '/customers' });
         },
         onError: () => {
-          toast.error('Failed to create customer');
+          toast.error(t('crm.customers.createFailed'));
         },
       }
     );
@@ -77,16 +76,24 @@ const CreateCustomer: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="New customer · rtylr" />
+      <HelmetContainer title={`${t('crm.createCustomer.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '680px' }}>
-        <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'New' }]} />
-        <PageHeader title="New customer" subtitle="Add a customer in 3 short steps" />
+        <Breadcrumbs
+          items={[
+            { label: t('nav.customers'), to: '/customers' },
+            { label: t('crm.customers.breadcrumbNew') },
+          ]}
+        />
+        <PageHeader
+          title={t('crm.createCustomer.pageTitle')}
+          subtitle={t('crm.createCustomer.subtitle')}
+        />
 
         {/* Stepper */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-          {steps.map((s, i) => (
+          {STEP_KEYS.map((stepKey, i) => (
             <div
-              key={s.key}
+              key={stepKey}
               style={{
                 flex: 1,
                 padding: '10px 14px',
@@ -123,7 +130,7 @@ const CreateCustomer: React.FC = () => {
                   color: i <= step ? 'var(--hub-text)' : 'var(--hub-text-muted)',
                 }}
               >
-                {s.label}
+                {t(`crm.createCustomer.step${stepKey[0].toUpperCase()}${stepKey.slice(1)}`)}
               </span>
             </div>
           ))}
@@ -133,36 +140,36 @@ const CreateCustomer: React.FC = () => {
           {step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <Input
-                label="Full name"
+                label={t('crm.createCustomer.fullName')}
                 value={data.name}
                 onChange={(e) => set('name', e.target.value)}
-                placeholder="Jane Doe"
+                placeholder={t('crm.leadDetail.namePlaceholder')}
               />
               <Input
-                label="Birthday"
+                label={t('crm.createCustomer.birthday')}
                 type="date"
                 value={data.birthday}
                 onChange={(e) => set('birthday', e.target.value)}
               />
               <Input
-                label="Address"
+                label={t('crm.createCustomer.address')}
                 value={data.address}
                 onChange={(e) => set('address', e.target.value)}
-                placeholder="Street, city, zip"
+                placeholder={t('crm.createCustomer.addressPlaceholder')}
               />
             </div>
           )}
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <Input
-                label="Email"
+                label={t('common.email')}
                 type="email"
                 value={data.email}
                 onChange={(e) => set('email', e.target.value)}
                 placeholder="jane@example.com"
               />
               <Input
-                label="Phone"
+                label={t('common.phone')}
                 type="tel"
                 value={data.phone}
                 onChange={(e) => set('phone', e.target.value)}
@@ -175,18 +182,18 @@ const CreateCustomer: React.FC = () => {
               {[
                 {
                   key: 'consentEmail' as const,
-                  label: 'Email updates',
-                  desc: 'Order confirmations, product news',
+                  label: t('crm.createCustomer.emailUpdates'),
+                  desc: t('crm.createCustomer.consentEmailDesc'),
                 },
                 {
                   key: 'consentSms' as const,
-                  label: 'SMS updates',
-                  desc: 'Text reminders and alerts',
+                  label: t('crm.createCustomer.smsUpdates'),
+                  desc: t('crm.createCustomer.consentSmsDesc'),
                 },
                 {
                   key: 'consentMarketing' as const,
-                  label: 'Marketing',
-                  desc: 'Promotional offers and campaigns',
+                  label: t('crm.createCustomer.marketing'),
+                  desc: t('crm.createCustomer.consentMarketingDesc'),
                 },
               ].map((c) => (
                 <label
@@ -227,11 +234,11 @@ const CreateCustomer: React.FC = () => {
             onClick={() => (step > 0 ? setStep(step - 1) : navigate({ to: '/customers' }))}
           >
             <ArrowLeft size={13} />
-            {step === 0 ? 'Cancel' : 'Back'}
+            {step === 0 ? t('common.cancel') : t('crm.createCustomer.back')}
           </Button>
-          {step < steps.length - 1 ? (
+          {step < STEP_KEYS.length - 1 ? (
             <Button variant="primary" disabled={!canNext()} onClick={() => setStep(step + 1)}>
-              Next <ArrowRight size={13} />
+              {t('crm.createCustomer.next')} <ArrowRight size={13} />
             </Button>
           ) : (
             <Button
@@ -239,7 +246,7 @@ const CreateCustomer: React.FC = () => {
               onClick={handleSubmit}
               disabled={create.isPending || !data.name.trim()}
             >
-              {create.isPending ? 'Creating…' : 'Create customer'}
+              {create.isPending ? t('crm.createCustomer.creating') : t('crm.createCustomer.submit')}
             </Button>
           )}
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -9,6 +10,7 @@ import { SearchableCustomerSelect, CustomerAvatar, TierBadge } from '../../share
 import { getCustomerTier } from '../../shared/lib/tiers';
 
 const MergeCustomers: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const merge = useMergeCustomers();
@@ -27,18 +29,18 @@ const MergeCustomers: React.FC = () => {
   const handleMerge = () => {
     if (!primaryId || !secondaryId) return;
     if (primaryId === secondaryId) {
-      toast.error('Cannot merge a customer with themselves');
+      toast.error(t('crm.mergeCustomers.sameCustomer'));
       return;
     }
     merge.mutate(
       { primaryId, secondaryId },
       {
         onSuccess: () => {
-          toast.success('Customers merged');
+          toast.success(t('crm.customers.merged'));
           navigate({ to: '/customers' });
         },
         onError: () => {
-          toast.error('Failed to merge customers');
+          toast.error(t('crm.customers.mergeFailed'));
         },
       }
     );
@@ -66,16 +68,24 @@ const MergeCustomers: React.FC = () => {
             letterSpacing: '0.05em',
           }}
         >
-          Merge preview
+          {t('crm.mergeCustomers.preview')}
         </h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
           {[
-            { label: 'Total Spent', value: `$${merged.totalSpent.toLocaleString()}` },
-            { label: 'Visits', value: merged.visits },
-            { label: 'Loyalty Points', value: merged.loyaltyPoints.toLocaleString() },
+            {
+              id: 'totalSpent',
+              label: t('crm.customers.stats.totalSpent'),
+              value: `$${merged.totalSpent.toLocaleString()}`,
+            },
+            { id: 'visits', label: t('crm.customers.stats.visits'), value: merged.visits },
+            {
+              id: 'loyaltyPoints',
+              label: t('crm.customers.stats.loyaltyPoints'),
+              value: merged.loyaltyPoints.toLocaleString(),
+            },
           ].map((s) => (
             <div
-              key={s.label}
+              key={s.id}
               style={{ padding: '10px', background: 'rgba(59,130,246,0.08)', borderRadius: '8px' }}
             >
               <div
@@ -104,10 +114,18 @@ const MergeCustomers: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Merge customers · rtylr" />
+      <HelmetContainer title={`${t('crm.mergeCustomers.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '680px' }}>
-        <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'Merge' }]} />
-        <PageHeader title="Merge customers" subtitle="Combine duplicate records" />
+        <Breadcrumbs
+          items={[
+            { label: t('nav.customers'), to: '/customers' },
+            { label: t('crm.customers.breadcrumbMerge') },
+          ]}
+        />
+        <PageHeader
+          title={t('crm.mergeCustomers.title')}
+          subtitle={t('crm.mergeCustomers.subtitle')}
+        />
 
         <Card>
           <div
@@ -196,7 +214,7 @@ const MergeCustomers: React.FC = () => {
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
           <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             variant="primary"

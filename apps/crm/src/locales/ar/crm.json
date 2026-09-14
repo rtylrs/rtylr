@@ -34,7 +34,40 @@
     "supportTickets_two": "تذكرتا دعم",
     "supportTickets_few": "{{count}} تذاكر دعم",
     "supportTickets_many": "{{count}} تذكرة دعم",
-    "supportTickets_other": "{{count}} تذكرة دعم"
+    "supportTickets_other": "{{count}} تذكرة دعم",
+    "stats": {
+      "totalSpent": "إجمالي الإنفاق",
+      "visits": "الزيارات",
+      "loyaltyPoints": "نقاط الولاء",
+      "lastVisit": "آخر زيارة"
+    },
+    "addTagPlaceholder": "أضف وسمًا...",
+    "loadFailed": "تعذّر تحميل العملاء. حدّث الصفحة وحاول مرة أخرى.",
+    "csvExported": "تم تصدير ملف CSV",
+    "pageTitle": "العملاء",
+    "searchPlaceholder": "ابحث في العملاء...",
+    "apply": "تطبيق",
+    "clear": "مسح",
+    "colContactInfo": "بيانات التواصل",
+    "colSummary": "ملخّص",
+    "viewProfile": "عرض الملف",
+    "pointsCount_zero": "لا نقاط",
+    "pointsCount_one": "نقطة واحدة",
+    "pointsCount_two": "نقطتان",
+    "pointsCount_few": "{{count}} نقاط",
+    "pointsCount_many": "{{count}} نقطة",
+    "pointsCount_other": "{{count}} نقطة",
+    "lifetimeSpend": "{{amount}} إجمالي الإنفاق",
+    "visitsCount_zero": "لا زيارات",
+    "visitsCount_one": "زيارة واحدة",
+    "visitsCount_two": "زيارتان",
+    "visitsCount_few": "{{count}} زيارات",
+    "visitsCount_many": "{{count}} زيارة",
+    "visitsCount_other": "{{count}} زيارة",
+    "loadedCount": "{{count}} محمَّل",
+    "breadcrumbNew": "جديد",
+    "breadcrumbMerge": "دمج",
+    "breadcrumbImport": "استيراد"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
@@ -166,7 +199,20 @@
   },
   "customerProfile": {
     "noTagsTitle": "لا توجد وسوم بعد",
-    "addTag": "إضافة وسم"
+    "addTag": "إضافة وسم",
+    "loadFailed": "تعذّر تحميل بيانات هذا العميل. حاول مرة أخرى.",
+    "notFound": "لم يُعثر على العميل.",
+    "tagNameRequired": "اسم الوسم مطلوب",
+    "addTagFailed": "تعذّرت إضافة الوسم",
+    "removeTagFailed": "تعذّرت إزالة الوسم",
+    "loyaltyDisabled": "برنامج الولاء معطّل حاليًا",
+    "awardFailed": "تعذّر منح النقاط",
+    "deductFailed": "تعذّر خصم النقاط",
+    "pageTitle": "ملف العميل",
+    "merge": "دمج",
+    "timeline": "السجل الزمني",
+    "loadMore": "تحميل المزيد",
+    "tierProgress": "التقدّم نحو المستوى التالي"
   },
   "leadDetail": {
     "noTouchpointsTitle": "لا توجد نقاط تواصل بعد",
@@ -298,5 +344,41 @@
     "subtitle": "تتبّع الصفقات من التواصل الأولي حتى توقيع العقد",
     "addLead": "إضافة عميل محتمل",
     "addNewLead": "إضافة عميل محتمل جديد"
+  },
+  "createCustomer": {
+    "pageTitle": "عميل جديد",
+    "stepInfo": "البيانات",
+    "stepContact": "التواصل",
+    "stepConsent": "الموافقات",
+    "fullName": "الاسم الكامل",
+    "birthday": "تاريخ الميلاد",
+    "address": "العنوان",
+    "addressPlaceholder": "الشارع، المدينة، الرمز البريدي",
+    "emailUpdates": "تحديثات بالبريد الإلكتروني",
+    "smsUpdates": "تحديثات بالرسائل النصية",
+    "marketing": "التسويق",
+    "consentEmailDesc": "تأكيدات الطلبات وأخبار المنتجات",
+    "consentSmsDesc": "تذكيرات وتنبيهات نصية",
+    "consentMarketingDesc": "عروض ترويجية وحملات تسويقية",
+    "subtitle": "أضف عميلًا في 3 خطوات قصيرة",
+    "back": "رجوع",
+    "next": "التالي",
+    "creating": "جارٍ الإنشاء…",
+    "submit": "إنشاء العميل"
+  },
+  "importCustomers": {
+    "pageTitle": "استيراد العملاء",
+    "browseHint": "اضغط للاختيار. يجب أن يحتوي ملفك على عناوين الأعمدة في الصف الأول.",
+    "columnMapping": "مطابقة الأعمدة",
+    "selectColumn": "اختر عمودًا...",
+    "deduplicate": "إزالة التكرار حسب البريد الإلكتروني",
+    "subtitle": "ارفع ملف CSV وطابِق الأعمدة"
+  },
+  "mergeCustomers": {
+    "pageTitle": "دمج العملاء",
+    "title": "دمج العملاء",
+    "sameCustomer": "لا يمكن دمج العميل مع نفسه",
+    "preview": "معاينة الدمج",
+    "subtitle": "دمج السجلات المكررة"
   }
 }

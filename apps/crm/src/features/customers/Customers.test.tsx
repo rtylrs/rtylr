@@ -69,7 +69,12 @@ describe('Customers empty state', () => {
     expect(screen.getByText('crm.customers.empty')).toBeInTheDocument();
     expect(screen.getByText('crm.customers.createFirst')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.customers.new' }));
+    // The header action and the empty-state action are the same action offered
+    // twice, and both now go through crm.customers.new, so they share an
+    // accessible name. Assert both are there rather than matching one by luck.
+    const newCustomerButtons = screen.getAllByRole('button', { name: 'crm.customers.new' });
+    expect(newCustomerButtons).toHaveLength(2);
+    fireEvent.click(newCustomerButtons[1]);
 
     expect(mocks.navigate).toHaveBeenCalledWith({ to: '/customers/new' });
   });
@@ -78,7 +83,7 @@ describe('Customers empty state', () => {
     customersList.push(customer);
     renderCustomers();
 
-    fireEvent.change(screen.getByPlaceholderText('Search customers...'), {
+    fireEvent.change(screen.getByPlaceholderText('crm.customers.searchPlaceholder'), {
       target: { value: 'nonexistent' },
     });
 

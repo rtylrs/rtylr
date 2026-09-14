@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { Upload, Check } from 'lucide-react';
@@ -47,6 +48,7 @@ export function parseCsv(input: string): string[][] {
 }
 
 const ImportCustomers: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const importMut = useImportCustomerRows();
   const [rows, setRows] = useState<string[][]>([]);
@@ -106,10 +108,18 @@ const ImportCustomers: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Import customers · rtylr" />
+      <HelmetContainer title={`${t('crm.importCustomers.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '820px' }}>
-        <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'Import' }]} />
-        <PageHeader title="Import customers" subtitle="Upload a CSV and map the columns" />
+        <Breadcrumbs
+          items={[
+            { label: t('nav.customers'), to: '/customers' },
+            { label: t('crm.customers.breadcrumbImport') },
+          ]}
+        />
+        <PageHeader
+          title={t('crm.importCustomers.pageTitle')}
+          subtitle={t('crm.importCustomers.subtitle')}
+        />
 
         <Card style={{ marginBottom: '16px' }}>
           <label
@@ -150,7 +160,7 @@ const ImportCustomers: React.FC = () => {
               {fileName || 'Upload CSV file'}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
-              Click to browse. Your file should have headers in the first row.
+              {t('crm.importCustomers.browseHint')}
             </div>
           </label>
         </Card>
@@ -168,7 +178,7 @@ const ImportCustomers: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Column mapping
+                {t('crm.importCustomers.columnMapping')}
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {REQUIRED.map((req) => (
@@ -195,7 +205,7 @@ const ImportCustomers: React.FC = () => {
                       value={mapping[req] || ''}
                       onChange={(e) => setMapping((m) => ({ ...m, [req]: e.target.value }))}
                     >
-                      <option value="">Select column...</option>
+                      <option value="">{t('crm.importCustomers.selectColumn')}</option>
                       {headers.map((h) => (
                         <option key={h} value={h}>
                           {h}
@@ -222,7 +232,7 @@ const ImportCustomers: React.FC = () => {
                   onChange={(e) => setDedupe(e.target.checked)}
                   style={{ accentColor: '#3b82f6' }}
                 />
-                Deduplicate by email
+                {t('crm.importCustomers.deduplicate')}
               </label>
             </Card>
 
@@ -278,7 +288,7 @@ const ImportCustomers: React.FC = () => {
               style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}
             >
               <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="primary"

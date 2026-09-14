@@ -30,7 +30,32 @@
     "notesFailed": "Failed to save notes",
     "outstanding": "{{amount}} outstanding",
     "supportTickets_one": "{{count}} support ticket",
-    "supportTickets_other": "{{count}} support tickets"
+    "supportTickets_other": "{{count}} support tickets",
+    "stats": {
+      "totalSpent": "Total spent",
+      "visits": "Visits",
+      "loyaltyPoints": "Loyalty points",
+      "lastVisit": "Last visit"
+    },
+    "addTagPlaceholder": "Add tag...",
+    "loadFailed": "Unable to load customers. Please refresh and try again.",
+    "csvExported": "CSV exported",
+    "pageTitle": "Customers",
+    "searchPlaceholder": "Search customers...",
+    "apply": "Apply",
+    "clear": "Clear",
+    "colContactInfo": "Contact info",
+    "colSummary": "Summary",
+    "viewProfile": "View profile",
+    "pointsCount_one": "{{count}} point",
+    "pointsCount_other": "{{count}} points",
+    "lifetimeSpend": "{{amount}} lifetime spend",
+    "visitsCount_one": "{{count}} total visit",
+    "visitsCount_other": "{{count}} total visits",
+    "loadedCount": "{{count}} loaded",
+    "breadcrumbNew": "New",
+    "breadcrumbMerge": "Merge",
+    "breadcrumbImport": "Import"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
@@ -162,7 +187,20 @@
   },
   "customerProfile": {
     "noTagsTitle": "No tags yet",
-    "addTag": "Add tag"
+    "addTag": "Add tag",
+    "loadFailed": "Unable to load this customer. Please try again.",
+    "notFound": "Customer not found.",
+    "tagNameRequired": "Tag name is required",
+    "addTagFailed": "Failed to add tag",
+    "removeTagFailed": "Failed to remove tag",
+    "loyaltyDisabled": "Loyalty program is currently disabled",
+    "awardFailed": "Failed to award points",
+    "deductFailed": "Failed to deduct points",
+    "pageTitle": "Customer profile",
+    "merge": "Merge",
+    "timeline": "Timeline",
+    "loadMore": "Load more",
+    "tierProgress": "Tier progress"
   },
   "leadDetail": {
     "noTouchpointsTitle": "No touchpoints yet",
@@ -294,5 +332,41 @@
     "subtitle": "Track deals from cold outreach to closed contracts",
     "addLead": "Add lead",
     "addNewLead": "Add new lead"
+  },
+  "createCustomer": {
+    "pageTitle": "New customer",
+    "stepInfo": "Info",
+    "stepContact": "Contact",
+    "stepConsent": "Consent",
+    "fullName": "Full name",
+    "birthday": "Birthday",
+    "address": "Address",
+    "addressPlaceholder": "Street, city, zip",
+    "emailUpdates": "Email updates",
+    "smsUpdates": "SMS updates",
+    "marketing": "Marketing",
+    "consentEmailDesc": "Order confirmations, product news",
+    "consentSmsDesc": "Text reminders and alerts",
+    "consentMarketingDesc": "Promotional offers and campaigns",
+    "subtitle": "Add a customer in 3 short steps",
+    "back": "Back",
+    "next": "Next",
+    "creating": "Creating…",
+    "submit": "Create customer"
+  },
+  "importCustomers": {
+    "pageTitle": "Import customers",
+    "browseHint": "Click to browse. Your file should have headers in the first row.",
+    "columnMapping": "Column mapping",
+    "selectColumn": "Select column...",
+    "deduplicate": "Deduplicate by email",
+    "subtitle": "Upload a CSV and map the columns"
+  },
+  "mergeCustomers": {
+    "pageTitle": "Merge customers",
+    "title": "Merge customers",
+    "sameCustomer": "Cannot merge a customer with themselves",
+    "preview": "Merge preview",
+    "subtitle": "Combine duplicate records"
   }
 }

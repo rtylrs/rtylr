@@ -31,7 +31,34 @@
     "outstanding": "{{amount}} impayé",
     "supportTickets_one": "{{count}} ticket de support",
     "supportTickets_many": "{{count}} de tickets de support",
-    "supportTickets_other": "{{count}} tickets de support"
+    "supportTickets_other": "{{count}} tickets de support",
+    "stats": {
+      "totalSpent": "Total dépensé",
+      "visits": "Visites",
+      "loyaltyPoints": "Points de fidélité",
+      "lastVisit": "Dernière visite"
+    },
+    "addTagPlaceholder": "Ajouter une étiquette...",
+    "loadFailed": "Impossible de charger les clients. Actualisez la page et réessayez.",
+    "csvExported": "CSV exporté",
+    "pageTitle": "Clients",
+    "searchPlaceholder": "Rechercher des clients...",
+    "apply": "Appliquer",
+    "clear": "Effacer",
+    "colContactInfo": "Coordonnées",
+    "colSummary": "Résumé",
+    "viewProfile": "Voir la fiche",
+    "pointsCount_one": "{{count}} point",
+    "pointsCount_many": "{{count}} points",
+    "pointsCount_other": "{{count}} points",
+    "lifetimeSpend": "{{amount}} de dépenses cumulées",
+    "visitsCount_one": "{{count}} visite au total",
+    "visitsCount_many": "{{count}} visites au total",
+    "visitsCount_other": "{{count}} visites au total",
+    "loadedCount": "{{count}} chargés",
+    "breadcrumbNew": "Nouveau",
+    "breadcrumbMerge": "Fusion",
+    "breadcrumbImport": "Import"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
@@ -163,7 +190,20 @@
   },
   "customerProfile": {
     "noTagsTitle": "Aucune étiquette pour le moment",
-    "addTag": "Ajouter une étiquette"
+    "addTag": "Ajouter une étiquette",
+    "loadFailed": "Impossible de charger ce client. Veuillez réessayer.",
+    "notFound": "Client introuvable.",
+    "tagNameRequired": "Le nom de l’étiquette est obligatoire",
+    "addTagFailed": "Échec de l’ajout de l’étiquette",
+    "removeTagFailed": "Échec du retrait de l’étiquette",
+    "loyaltyDisabled": "Le programme de fidélité est actuellement désactivé",
+    "awardFailed": "Échec de l’attribution des points",
+    "deductFailed": "Échec du retrait des points",
+    "pageTitle": "Fiche client",
+    "merge": "Fusionner",
+    "timeline": "Historique",
+    "loadMore": "Charger plus",
+    "tierProgress": "Progression de niveau"
   },
   "leadDetail": {
     "noTouchpointsTitle": "Aucun point de contact pour le moment",
@@ -295,5 +335,41 @@
     "subtitle": "Suivez les affaires du premier contact à la signature",
     "addLead": "Ajouter un prospect",
     "addNewLead": "Ajouter un nouveau prospect"
+  },
+  "createCustomer": {
+    "pageTitle": "Nouveau client",
+    "stepInfo": "Informations",
+    "stepContact": "Contact",
+    "stepConsent": "Consentement",
+    "fullName": "Nom complet",
+    "birthday": "Date de naissance",
+    "address": "Adresse",
+    "addressPlaceholder": "Rue, ville, code postal",
+    "emailUpdates": "Informations par e-mail",
+    "smsUpdates": "Informations par SMS",
+    "marketing": "Marketing",
+    "consentEmailDesc": "Confirmations de commande, actualités produit",
+    "consentSmsDesc": "Rappels et alertes par SMS",
+    "consentMarketingDesc": "Offres promotionnelles et campagnes",
+    "subtitle": "Ajoutez un client en 3 étapes",
+    "back": "Retour",
+    "next": "Suivant",
+    "creating": "Création…",
+    "submit": "Créer le client"
+  },
+  "importCustomers": {
+    "pageTitle": "Importer des clients",
+    "browseHint": "Cliquez pour parcourir. Votre fichier doit comporter les en-têtes sur la première ligne.",
+    "columnMapping": "Correspondance des colonnes",
+    "selectColumn": "Sélectionner une colonne...",
+    "deduplicate": "Dédupliquer par e-mail",
+    "subtitle": "Importez un CSV et associez les colonnes"
+  },
+  "mergeCustomers": {
+    "pageTitle": "Fusionner des clients",
+    "title": "Fusionner des clients",
+    "sameCustomer": "Impossible de fusionner un client avec lui-même",
+    "preview": "Aperçu de la fusion",
+    "subtitle": "Fusionner les doublons"
   }
 }
