@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExternalLink, ArrowRight, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { RtylrApp } from '../../hooks/queries/useApps';
@@ -9,6 +10,7 @@ export interface AppCardProps {
 }
 
 export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
+  const { t } = useTranslation();
   if (!app) return null;
   const Icon = app.icon;
   const isExternal = (app.href ?? '').startsWith('http');
@@ -23,7 +25,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
           style={{ background: 'var(--status-trial-bg)', color: 'var(--status-trial)' }}
         >
           <Lock size={9} />
-          Upgrade
+          {t('common.appCard.upgrade')}
         </span>
       );
     }
@@ -33,7 +35,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
           className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
           style={{ background: 'rgba(139,92,246,0.15)', color: 'var(--app-crm)' }}
         >
-          Beta
+          {t('common.appCard.beta')}
         </span>
       );
     }
@@ -43,7 +45,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
           className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
           style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
         >
-          Soon
+          {t('common.appCard.comingSoon')}
         </span>
       );
     }

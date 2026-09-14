@@ -1,4 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
+import i18next from 'i18next';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
@@ -57,7 +58,7 @@ function toMenuList(items: PosMenuItem[]): MenuListEntry[] {
   return [
     {
       _id: 'pos-menu',
-      name: 'POS Menu',
+      name: i18next.t('common.posMenuName'),
       items: storeItems,
       itemCount: items.length,
       isActive: true,

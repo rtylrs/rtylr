@@ -188,5 +188,38 @@
     "light": "Clair",
     "dark": "Sombre",
     "system": "Système"
-  }
+  },
+  "dropzone": {
+    "active": "Déposez les fichiers ici ...",
+    "idle": "Glissez-déposez un fichier ici, ou cliquez pour en choisir un"
+  },
+  "apiKey": {
+    "created": "Créée",
+    "revoke": "Révoquer la clé d’API"
+  },
+  "appCard": {
+    "upgrade": "Passer à l’offre supérieure",
+    "beta": "Bêta",
+    "comingSoon": "Bientôt"
+  },
+  "breadcrumb": "Fil d’Ariane",
+  "dangerZone": "Zone sensible",
+  "commandPalette": {
+    "placeholder": "Rechercher applications, pages, actions...",
+    "label": "Palette de commandes"
+  },
+  "webhook": {
+    "active": "Actif",
+    "paused": "En pause",
+    "failing": "En échec",
+    "delete": "Supprimer le webhook"
+  },
+  "closeDialog": "Fermer la boîte de dialogue",
+  "closePanel": "Fermer le panneau",
+  "userMenu": "Menu utilisateur",
+  "accountSettings": "Paramètres du compte",
+  "accessRequested": "Demandé",
+  "requestAccess": "Demander l’accès",
+  "posMenuName": "Menu du point de vente",
+  "defaultPageTitle": "Rtylr - Menu sans contact par QR code"
 }

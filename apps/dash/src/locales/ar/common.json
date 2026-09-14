@@ -188,5 +188,38 @@
     "light": "فاتح",
     "dark": "داكن",
     "system": "النظام"
-  }
+  },
+  "dropzone": {
+    "active": "أفلِت الملفات هنا ...",
+    "idle": "اسحب ملفًا وأفلته هنا، أو اضغط لاختيار ملف"
+  },
+  "apiKey": {
+    "created": "أُنشئ",
+    "revoke": "إبطال مفتاح واجهة البرمجة"
+  },
+  "appCard": {
+    "upgrade": "ترقية",
+    "beta": "تجريبي",
+    "comingSoon": "قريبًا"
+  },
+  "breadcrumb": "مسار التنقل",
+  "dangerZone": "منطقة الإجراءات الحساسة",
+  "commandPalette": {
+    "placeholder": "ابحث في التطبيقات والصفحات والإجراءات...",
+    "label": "لوحة الأوامر"
+  },
+  "webhook": {
+    "active": "نشط",
+    "paused": "متوقف مؤقتًا",
+    "failing": "يفشل",
+    "delete": "حذف الويب هوك"
+  },
+  "closeDialog": "إغلاق النافذة",
+  "closePanel": "إغلاق اللوحة",
+  "userMenu": "قائمة المستخدم",
+  "accountSettings": "إعدادات الحساب",
+  "accessRequested": "تم الطلب",
+  "requestAccess": "طلب الوصول",
+  "posMenuName": "قائمة نقاط البيع",
+  "defaultPageTitle": "Rtylr - قائمة بلا لمس عبر رمز QR"
 }

@@ -185,5 +185,38 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
-  }
+  },
+  "dropzone": {
+    "active": "Drop the files here ...",
+    "idle": "Drag 'n' drop a file here, or click to select one"
+  },
+  "apiKey": {
+    "created": "Created",
+    "revoke": "Revoke API key"
+  },
+  "appCard": {
+    "upgrade": "Upgrade",
+    "beta": "Beta",
+    "comingSoon": "Soon"
+  },
+  "breadcrumb": "Breadcrumb",
+  "dangerZone": "Danger zone",
+  "commandPalette": {
+    "placeholder": "Search apps, pages, actions...",
+    "label": "Command palette"
+  },
+  "webhook": {
+    "active": "Active",
+    "paused": "Paused",
+    "failing": "Failing",
+    "delete": "Delete webhook"
+  },
+  "closeDialog": "Close dialog",
+  "closePanel": "Close panel",
+  "userMenu": "User menu",
+  "accountSettings": "Account settings",
+  "accessRequested": "Requested",
+  "requestAccess": "Request access",
+  "posMenuName": "POS Menu",
+  "defaultPageTitle": "Rtylr - Contactless QR Menu"
 }

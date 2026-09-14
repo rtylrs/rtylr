@@ -158,7 +158,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="User menu"
+            aria-label={t('common.userMenu')}
             style={{ border: 'none', padding: 0, background: 'transparent', cursor: 'pointer' }}
           >
             <Avatar src={avatarUrl} alt={fullName || 'User'} size="md" />
@@ -211,7 +211,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   textDecoration: 'none',
                 }}
               >
-                Account settings
+                {t('common.accountSettings')}
               </a>
               <button
                 type="button"
@@ -228,7 +228,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   cursor: 'pointer',
                 }}
               >
-                Sign out
+                {t('common.signOut')}
               </button>
             </div>
           )}
@@ -352,7 +352,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   </span>
                   {isRequested ? (
                     <span style={{ fontSize: 11, color: '#10b981', fontWeight: 500 }}>
-                      Requested
+                      {t('common.accessRequested')}
                     </span>
                   ) : requestLoading === app.id ? (
                     <div
@@ -381,7 +381,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                         textUnderlineOffset: 2,
                       }}
                     >
-                      Request access
+                      {t('common.requestAccess')}
                     </button>
                   )}
                 </div>

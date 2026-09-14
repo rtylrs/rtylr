@@ -65,7 +65,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
       </div>
       <div className="hidden md:flex flex-col items-end shrink-0">
         <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-          Created
+          {t('common.apiKey.created')}
         </p>
         <p className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
           {formatDate(apiKey.createdAt)}
@@ -76,7 +76,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/10"
         style={{ color: 'var(--status-cancelled)' }}
         onClick={() => onRevoke?.(apiKey.id)}
-        aria-label="Revoke API key"
+        aria-label={t('common.apiKey.revoke')}
       >
         <Trash2 size={14} />
       </button>
