@@ -67,7 +67,7 @@ describe('LeadDetail touchpoints empty state', () => {
     fireEvent.click(screen.getByRole('button', { name: 'crm.leadDetail.logTouchpoint' }));
 
     // Opens the inline touchpoint form rather than mutating anything itself.
-    expect(screen.getByPlaceholderText('What happened on this touchpoint?')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('crm.leadDetail.notesPlaceholder')).toBeInTheDocument();
   });
 });
 
@@ -81,7 +81,7 @@ describe('LeadDetail contacts empty state', () => {
     fireEvent.click(screen.getByRole('button', { name: 'crm.leadDetail.addContact' }));
 
     // Opens the inline contact form (and the empty state itself disappears).
-    expect(screen.getByPlaceholderText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('crm.leadDetail.namePlaceholder')).toBeInTheDocument();
     expect(screen.queryByText('crm.leadDetail.noContactsTitle')).not.toBeInTheDocument();
   });
 });

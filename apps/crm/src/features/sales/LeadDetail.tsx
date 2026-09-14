@@ -48,14 +48,16 @@ import {
   ConfirmModal,
 } from '../../shared/components/ui';
 
-const STAGE_OPTIONS: Array<{ value: LeadStage; label: string }> = [
-  { value: 'cold', label: 'Cold' },
-  { value: 'contacted', label: 'Contacted' },
-  { value: 'demo_booked', label: 'Demo Booked' },
-  { value: 'demo_done', label: 'Demo Done' },
-  { value: 'proposal_sent', label: 'Proposal Sent' },
-  { value: 'contracted', label: 'Contracted' },
-  { value: 'lost', label: 'Lost' },
+// Ids only: this is evaluated at module load, before i18next has a language.
+// The labels come from crm.leadStages.<id> at render.
+const STAGE_VALUES: LeadStage[] = [
+  'cold',
+  'contacted',
+  'demo_booked',
+  'demo_done',
+  'proposal_sent',
+  'contracted',
+  'lost',
 ];
 
 const TOUCHPOINT_TYPE_ICONS: Record<TouchpointType, React.ReactNode> = {
@@ -115,7 +117,7 @@ const LeadDetail: React.FC = () => {
     if (!leadId) return;
     updateLead.mutate(
       { id: leadId, data: { stage } },
-      { onError: () => toast.error('Failed to update stage') }
+      { onError: () => toast.error(t('crm.leadDetail.stageUpdateFailed')) }
     );
   };
 
@@ -125,7 +127,7 @@ const LeadDetail: React.FC = () => {
     if (!leadId) return;
     deleteLead.mutate(leadId, {
       onSuccess: () => navigate({ to: '/sales/leads' }),
-      onError: () => toast.error('Failed to delete lead'),
+      onError: () => toast.error(t('crm.leadDetail.deleteFailed')),
     });
   };
 
@@ -141,7 +143,7 @@ const LeadDetail: React.FC = () => {
 
   const submitTouchpoint = (): void => {
     if (!tpForm.notes.trim()) {
-      toast.error('Notes are required');
+      toast.error(t('crm.leadDetail.notesRequired'));
       return;
     }
     if (!leadId) return;
@@ -166,7 +168,7 @@ const LeadDetail: React.FC = () => {
           });
           setTpOpen(false);
         },
-        onError: () => toast.error('Failed to log touchpoint'),
+        onError: () => toast.error(t('crm.leadDetail.touchpointFailed')),
       }
     );
   };
@@ -180,7 +182,7 @@ const LeadDetail: React.FC = () => {
 
   const submitContact = (): void => {
     if (!contactForm.name.trim()) {
-      toast.error('Contact name is required');
+      toast.error(t('crm.leadDetail.contactNameRequired'));
       return;
     }
     if (!leadId) return;
@@ -191,7 +193,7 @@ const LeadDetail: React.FC = () => {
           setContactForm({ name: '', role: '', phone: '', email: '' });
           setContactOpen(false);
         },
-        onError: () => toast.error('Failed to add contact'),
+        onError: () => toast.error(t('crm.leadDetail.addContactFailed')),
       }
     );
   };
@@ -228,7 +230,7 @@ const LeadDetail: React.FC = () => {
         onSuccess: () => {
           setContractOpen(false);
         },
-        onError: () => toast.error('Failed to save contract'),
+        onError: () => toast.error(t('crm.leadDetail.saveContractFailed')),
       }
     );
   };
@@ -244,20 +246,20 @@ const LeadDetail: React.FC = () => {
   if (!lead) {
     return (
       <div style={{ padding: '24px', color: 'var(--hub-text-muted)', fontSize: '14px' }}>
-        Lead not found.
+        {t('crm.leadDetail.notFound')}
       </div>
     );
   }
 
   return (
     <>
-      <HelmetContainer title="Lead detail · rtylr" />
+      <HelmetContainer title={`${t('crm.leadDetail.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px' }}>
         {/* Back + header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             type="button"
-            aria-label="Back to leads"
+            aria-label={t('crm.leadDetail.backToLeads')}
             onClick={() => navigate({ to: '/sales/leads' })}
             style={{
               background: 'transparent',
@@ -282,7 +284,7 @@ const LeadDetail: React.FC = () => {
           <div style={{ display: 'flex', gap: '8px' }}>
             <Button variant="outline" onClick={() => setConfirmDeleteLead(true)}>
               <Trash2 size={13} />
-              Delete
+              {t('common.delete')}
             </Button>
           </div>
         </div>
@@ -297,11 +299,11 @@ const LeadDetail: React.FC = () => {
               <h3
                 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
               >
-                Activity Timeline
+                {t('crm.leadDetail.timelineTitle')}
               </h3>
               <Button variant="primary" onClick={() => setTpOpen((v) => !v)}>
                 <Plus size={13} />
-                Log touchpoint
+                {t('crm.leadDetail.logTouchpointTitle')}
               </Button>
             </div>
 
@@ -323,22 +325,22 @@ const LeadDetail: React.FC = () => {
                           margin: 0,
                         }}
                       >
-                        Log touchpoint
+                        {t('crm.leadDetail.logTouchpointTitle')}
                       </p>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <Select
-                          label="Type"
+                          label={t('crm.leadDetail.typeLabel')}
                           value={tpForm.type}
                           onChange={(e) =>
                             setTpForm((f) => ({ ...f, type: e.target.value as TouchpointType }))
                           }
                         >
-                          <option value="phone">Phone</option>
-                          <option value="email">Email</option>
-                          <option value="meeting">Meeting</option>
+                          <option value="phone">{t('crm.leadDetail.typePhone')}</option>
+                          <option value="email">{t('crm.leadDetail.typeEmail')}</option>
+                          <option value="meeting">{t('crm.leadDetail.typeMeeting')}</option>
                         </Select>
                         <Select
-                          label="Outcome"
+                          label={t('crm.leadDetail.outcomeLabel')}
                           value={tpForm.outcome}
                           onChange={(e) =>
                             setTpForm((f) => ({
@@ -347,21 +349,21 @@ const LeadDetail: React.FC = () => {
                             }))
                           }
                         >
-                          <option value="positive">Positive</option>
-                          <option value="neutral">Neutral</option>
-                          <option value="negative">Negative</option>
-                          <option value="no_answer">No answer</option>
+                          <option value="positive">{t('crm.leadDetail.outcomePositive')}</option>
+                          <option value="neutral">{t('crm.leadDetail.outcomeNeutral')}</option>
+                          <option value="negative">{t('crm.leadDetail.outcomeNegative')}</option>
+                          <option value="no_answer">{t('crm.leadDetail.outcomeNoAnswer')}</option>
                         </Select>
                       </div>
                       <Textarea
-                        label="Notes"
+                        label={t('crm.leadDetail.notesLabel')}
                         value={tpForm.notes}
                         onChange={(e) => setTpForm((f) => ({ ...f, notes: e.target.value }))}
-                        placeholder="What happened on this touchpoint?"
+                        placeholder={t('crm.leadDetail.notesPlaceholder')}
                       />
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <Input
-                          label="Next Follow-up"
+                          label={t('crm.leadDetail.nextFollowUp')}
                           type="date"
                           value={tpForm.nextFollowUp}
                           onChange={(e) =>
@@ -369,11 +371,11 @@ const LeadDetail: React.FC = () => {
                           }
                         />
                         <Select
-                          label="Contact (optional)"
+                          label={t('crm.leadDetail.contactOptional')}
                           value={tpForm.contactId}
                           onChange={(e) => setTpForm((f) => ({ ...f, contactId: e.target.value }))}
                         >
-                          <option value="">None</option>
+                          <option value="">{t('crm.leadDetail.none')}</option>
                           {(contacts ?? []).map((c) => (
                             <option key={c.id} value={String(c.id)}>
                               {c.name}
@@ -383,7 +385,7 @@ const LeadDetail: React.FC = () => {
                       </div>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                         <Button variant="ghost" onClick={() => setTpOpen(false)}>
-                          Cancel
+                          {t('common.cancel')}
                         </Button>
                         <Button
                           variant="primary"
@@ -497,7 +499,7 @@ const LeadDetail: React.FC = () => {
                       </div>
                       <button
                         type="button"
-                        aria-label="Delete touchpoint"
+                        aria-label={t('crm.leadDetail.deleteTouchpoint')}
                         onClick={() => setDeleteTpId(tp.id)}
                         style={{
                           background: 'transparent',
@@ -533,21 +535,24 @@ const LeadDetail: React.FC = () => {
                 <p
                   style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
                 >
-                  Lead Info
+                  {t('crm.leadDetail.infoTitle')}
                 </p>
                 <Edit2 size={13} style={{ color: 'var(--hub-text-dim)' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <InfoRow label="Company" value={lead.companyName ?? lead.company ?? '—'} />
-                <InfoRow label="Industry" value={lead.industry ?? '—'} />
-                <InfoRow label="Size" value={lead.size ?? '—'} />
-                <InfoRow label="Source" value={lead.source ?? '—'} />
                 <InfoRow
-                  label="MRR Potential"
+                  label={t('crm.leadDetail.company')}
+                  value={lead.companyName ?? lead.company ?? '—'}
+                />
+                <InfoRow label={t('crm.leadDetail.industry')} value={lead.industry ?? '—'} />
+                <InfoRow label={t('crm.leadDetail.size')} value={lead.size ?? '—'} />
+                <InfoRow label={t('crm.leadDetail.source')} value={lead.source ?? '—'} />
+                <InfoRow
+                  label={t('crm.leadDetail.mrrPotential')}
                   value={`$${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo`}
                 />
                 <InfoRow
-                  label="Assigned Rep"
+                  label={t('crm.leadDetail.assignedRep')}
                   value={lead.assignedTo != null ? String(lead.assignedTo) : '—'}
                 />
                 <div>
@@ -561,7 +566,7 @@ const LeadDetail: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    Stage
+                    {t('crm.leadDetail.stage')}
                   </p>
                   <select
                     value={lead.stage}
@@ -579,9 +584,9 @@ const LeadDetail: React.FC = () => {
                       cursor: 'pointer',
                     }}
                   >
-                    {STAGE_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
+                    {STAGE_VALUES.map((stage) => (
+                      <option key={stage} value={stage}>
+                        {t(`crm.leadStages.${stage}`)}
                       </option>
                     ))}
                   </select>
@@ -602,11 +607,11 @@ const LeadDetail: React.FC = () => {
                 <p
                   style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
                 >
-                  Contacts
+                  {t('crm.leadDetail.contactsTitle')}
                 </p>
                 <button
                   type="button"
-                  aria-label="Add contact"
+                  aria-label={t('crm.leadDetail.addContactAria')}
                   onClick={() => setContactOpen((v) => !v)}
                   style={{
                     background: 'transparent',
@@ -622,7 +627,7 @@ const LeadDetail: React.FC = () => {
                   }}
                 >
                   <Plus size={11} />
-                  Add
+                  {t('crm.leadDetail.add')}
                 </button>
               </div>
 
@@ -640,25 +645,25 @@ const LeadDetail: React.FC = () => {
                     }}
                   >
                     <Input
-                      label="Name"
+                      label={t('common.name')}
                       value={contactForm.name}
                       onChange={(e) => setContactForm((f) => ({ ...f, name: e.target.value }))}
-                      placeholder="Jane Doe"
+                      placeholder={t('crm.leadDetail.namePlaceholder')}
                     />
                     <Input
-                      label="Role"
+                      label={t('crm.leadDetail.roleLabel')}
                       value={contactForm.role}
                       onChange={(e) => setContactForm((f) => ({ ...f, role: e.target.value }))}
-                      placeholder="CTO"
+                      placeholder={t('crm.leadDetail.rolePlaceholder')}
                     />
                     <Input
-                      label="Phone"
+                      label={t('common.phone')}
                       value={contactForm.phone}
                       onChange={(e) => setContactForm((f) => ({ ...f, phone: e.target.value }))}
-                      placeholder="+1 555 000 0000"
+                      placeholder={t('crm.leadDetail.phonePlaceholder')}
                     />
                     <Input
-                      label="Email"
+                      label={t('common.email')}
                       type="email"
                       value={contactForm.email}
                       onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))}
@@ -666,7 +671,7 @@ const LeadDetail: React.FC = () => {
                     />
                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                       <Button variant="ghost" onClick={() => setContactOpen(false)}>
-                        Cancel
+                        {t('common.cancel')}
                       </Button>
                       <Button
                         variant="primary"
@@ -674,7 +679,9 @@ const LeadDetail: React.FC = () => {
                         disabled={createContact.isPending || !contactForm.name.trim()}
                         style={{ padding: '6px 12px', fontSize: '12px' }}
                       >
-                        {createContact.isPending ? 'Adding...' : 'Add'}
+                        {createContact.isPending
+                          ? t('crm.leadDetail.adding')
+                          : t('crm.leadDetail.add')}
                       </Button>
                     </div>
                   </motion.div>
@@ -767,7 +774,7 @@ const LeadDetail: React.FC = () => {
                   </div>
                   <button
                     type="button"
-                    aria-label="Delete contact"
+                    aria-label={t('crm.leadDetail.deleteContact')}
                     onClick={() => setDeleteContactId(c.id)}
                     style={{
                       background: 'transparent',
@@ -798,12 +805,12 @@ const LeadDetail: React.FC = () => {
                 <p
                   style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
                 >
-                  Contract
+                  {t('crm.leadDetail.contractTitle')}
                 </p>
                 {!contract && (
                   <button
                     type="button"
-                    aria-label="Add contract"
+                    aria-label={t('crm.leadDetail.addContractAria')}
                     onClick={() => setContractOpen((v) => !v)}
                     style={{
                       background: 'transparent',
@@ -819,7 +826,7 @@ const LeadDetail: React.FC = () => {
                     }}
                   >
                     <Plus size={11} />
-                    Add
+                    {t('crm.leadDetail.add')}
                   </button>
                 )}
               </div>
@@ -841,11 +848,17 @@ const LeadDetail: React.FC = () => {
                       {contract.plan}
                     </span>
                   </div>
-                  <InfoRow label="MRR" value={`$${contract.mrr.toLocaleString()}/mo`} />
-                  <InfoRow label="Seats" value={String(contract.seats)} />
-                  <InfoRow label="Signed" value={formatDate(contract.signedAt)} />
-                  <InfoRow label="Signed by" value={contract.signedBy} />
-                  <InfoRow label="Closed by" value={contract.closedBy} />
+                  <InfoRow
+                    label={t('crm.leadDetail.mrr')}
+                    value={`$${contract.mrr.toLocaleString()}/mo`}
+                  />
+                  <InfoRow label={t('crm.leadDetail.seats')} value={String(contract.seats)} />
+                  <InfoRow
+                    label={t('crm.leadDetail.signed')}
+                    value={formatDate(contract.signedAt)}
+                  />
+                  <InfoRow label={t('crm.leadDetail.signedBy')} value={contract.signedBy} />
+                  <InfoRow label={t('crm.leadDetail.closedBy')} value={contract.closedBy} />
                   {contract.notes && (
                     <p
                       style={{
@@ -863,7 +876,7 @@ const LeadDetail: React.FC = () => {
                 <>
                   {!contractOpen && (
                     <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>
-                      No contract yet.
+                      {t('crm.leadDetail.noContract')}
                     </p>
                   )}
                   <AnimatePresence>
@@ -875,25 +888,25 @@ const LeadDetail: React.FC = () => {
                         style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
                       >
                         <Select
-                          label="Plan"
+                          label={t('crm.leadDetail.planLabel')}
                           value={contractForm.plan}
                           onChange={(e) =>
                             setContractForm((f) => ({ ...f, plan: e.target.value as ContractPlan }))
                           }
                         >
-                          <option value="free">Free</option>
-                          <option value="pro">Pro</option>
-                          <option value="scale">Scale</option>
+                          <option value="free">{t('crm.leadDetail.planFree')}</option>
+                          <option value="pro">{t('crm.leadDetail.planPro')}</option>
+                          <option value="scale">{t('crm.leadDetail.planScale')}</option>
                         </Select>
                         <Input
-                          label="MRR ($)"
+                          label={t('crm.leadDetail.mrrUsd')}
                           type="number"
                           value={contractForm.mrr}
                           onChange={(e) => setContractForm((f) => ({ ...f, mrr: e.target.value }))}
                           placeholder="500"
                         />
                         <Input
-                          label="Seats"
+                          label={t('crm.leadDetail.seats')}
                           type="number"
                           value={contractForm.seats}
                           onChange={(e) =>
@@ -902,7 +915,7 @@ const LeadDetail: React.FC = () => {
                           placeholder="5"
                         />
                         <Input
-                          label="Signed At"
+                          label={t('crm.leadDetail.signedAt')}
                           type="date"
                           value={contractForm.signedAt}
                           onChange={(e) =>
@@ -910,32 +923,32 @@ const LeadDetail: React.FC = () => {
                           }
                         />
                         <Input
-                          label="Signed By"
+                          label={t('crm.leadDetail.signedBy')}
                           value={contractForm.signedBy}
                           onChange={(e) =>
                             setContractForm((f) => ({ ...f, signedBy: e.target.value }))
                           }
-                          placeholder="John Smith"
+                          placeholder={t('crm.leadDetail.signedByPlaceholder')}
                         />
                         <Input
-                          label="Closed By (rep user ID)"
+                          label={t('crm.leadDetail.closedByLabel')}
                           value={contractForm.closedBy}
                           onChange={(e) =>
                             setContractForm((f) => ({ ...f, closedBy: e.target.value }))
                           }
-                          placeholder="User ID of the rep"
+                          placeholder={t('crm.leadDetail.closedByPlaceholder')}
                         />
                         <Textarea
-                          label="Notes"
+                          label={t('crm.leadDetail.notesLabel')}
                           value={contractForm.notes}
                           onChange={(e) =>
                             setContractForm((f) => ({ ...f, notes: e.target.value }))
                           }
-                          placeholder="Additional notes..."
+                          placeholder={t('crm.leadDetail.contractNotesPlaceholder')}
                         />
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                           <Button variant="ghost" onClick={() => setContractOpen(false)}>
-                            Cancel
+                            {t('common.cancel')}
                           </Button>
                           <Button
                             variant="primary"
@@ -960,9 +973,9 @@ const LeadDetail: React.FC = () => {
           open={confirmDeleteLead}
           onClose={() => setConfirmDeleteLead(false)}
           onConfirm={handleDeleteLead}
-          title="Delete lead"
+          title={t('crm.leadDetail.deleteLead')}
           description={`Permanently delete "${lead.company}" and all associated data?`}
-          confirmLabel="Delete"
+          confirmLabel={t('common.delete')}
           variant="danger"
         />
 
@@ -974,9 +987,9 @@ const LeadDetail: React.FC = () => {
             if (deleteTpId !== null) deleteTouchpoint.mutate(deleteTpId);
             setDeleteTpId(null);
           }}
-          title="Delete touchpoint"
-          description="Remove this touchpoint from the timeline?"
-          confirmLabel="Delete"
+          title={t('crm.leadDetail.deleteTouchpoint')}
+          description={t('crm.leadDetail.deleteTouchpointMessage')}
+          confirmLabel={t('common.delete')}
           variant="danger"
         />
 
@@ -990,9 +1003,9 @@ const LeadDetail: React.FC = () => {
             }
             setDeleteContactId(null);
           }}
-          title="Remove contact"
-          description="Remove this contact from the lead?"
-          confirmLabel="Remove"
+          title={t('crm.leadDetail.removeContact')}
+          description={t('crm.leadDetail.removeContactMessage')}
+          confirmLabel={t('crm.leadDetail.remove')}
           variant="danger"
         />
       </div>
