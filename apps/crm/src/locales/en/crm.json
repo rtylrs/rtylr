@@ -44,13 +44,26 @@
     "empty": "No leads found",
     "emptySearchDescription": "No leads match \"{{search}}\"",
     "createFirstDescription": "Create your first lead to get started.",
-    "new": "New lead"
+    "new": "New lead",
+    "deleted": "Lead deleted",
+    "pageTitle": "Leads",
+    "searchPlaceholder": "Search by company...",
+    "allSources": "All sources",
+    "viewLead": "View lead"
   },
   "contracts": {
     "loadFailedTitle": "Unable to load contracts",
     "empty": "No contracts yet",
     "emptyDescription": "Signed contracts will appear here once you close a deal.",
-    "new": "New contract"
+    "new": "New contract",
+    "pageTitle": "Contracts",
+    "subtitle": "All signed contracts and their details",
+    "requiredFields": "Lead, signed date, and signed by are required",
+    "createFailed": "Failed to create contract",
+    "totalMrr": "Total contracted MRR",
+    "leadLabel": "Lead",
+    "selectLead": "Select a lead...",
+    "repUserIdPlaceholder": "User ID of the sales rep"
   },
   "loyaltyMembers": {
     "loadFailedTitle": "Unable to load members",
@@ -262,5 +275,24 @@
     "proposal_sent": "Proposal sent",
     "contracted": "Contracted",
     "lost": "Lost"
+  },
+  "createLead": {
+    "companyRequired": "Company name is required",
+    "createFailed": "Failed to create lead",
+    "companyLabel": "Company *",
+    "companyPlaceholder": "Acme Corp",
+    "industryPlaceholder": "SaaS",
+    "companySize": "Company size",
+    "sourcePlaceholder": "LinkedIn, Referral...",
+    "mrrPotentialUsd": "MRR potential ($)",
+    "userId": "User ID",
+    "notesPlaceholder": "Context about this lead..."
+  },
+  "pipeline": {
+    "pageTitle": "Sales pipeline",
+    "title": "Sales pipeline",
+    "subtitle": "Track deals from cold outreach to closed contracts",
+    "addLead": "Add lead",
+    "addNewLead": "Add new lead"
   }
 }

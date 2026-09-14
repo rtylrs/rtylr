@@ -76,7 +76,7 @@ describe('Leads search-empty state', () => {
     leadsList.push(lead);
     renderLeads();
 
-    fireEvent.change(screen.getByPlaceholderText('Search by company...'), {
+    fireEvent.change(screen.getByPlaceholderText('crm.leads.searchPlaceholder'), {
       target: { value: 'nonexistent' },
     });
 
@@ -95,8 +95,12 @@ describe('Leads true-empty state', () => {
     expect(screen.getByText('crm.leads.empty')).toBeInTheDocument();
     expect(screen.getByText('crm.leads.createFirstDescription')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.leads.new' }));
+    // Header and empty-state actions share crm.leads.new, so both carry the
+    // same accessible name; assert both exist rather than matching one by luck.
+    const buttons = screen.getAllByRole('button', { name: 'crm.leads.new' });
+    expect(buttons).toHaveLength(2);
+    fireEvent.click(buttons[1]);
 
-    expect(screen.getByText('New Lead')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'crm.leads.new' })).toBeInTheDocument();
   });
 });

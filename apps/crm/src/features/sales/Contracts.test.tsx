@@ -55,22 +55,31 @@ describe('Contracts load-failed state', () => {
 });
 
 describe('Contracts true-empty state', () => {
+  // The header action and the empty-state action are the same action offered
+  // twice, and since both went through crm.contracts.new they now carry the
+  // same accessible name. getAllBy is deliberate: it asserts that both are
+  // present rather than silently matching whichever comes first.
+  const newContractButtons = (): HTMLElement[] =>
+    screen.getAllByRole('button', { name: 'crm.contracts.new' });
+
   it('shows a "new contract" call-to-action that opens the create-contract modal', () => {
     renderContracts();
 
     expect(screen.getByText('crm.contracts.empty')).toBeInTheDocument();
     expect(screen.getByText('crm.contracts.emptyDescription')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.contracts.new' }));
+    const buttons = newContractButtons();
+    expect(buttons).toHaveLength(2);
+    fireEvent.click(buttons[1]);
 
-    expect(screen.getByText('New Contract')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'crm.contracts.new' })).toBeInTheDocument();
   });
 
-  it('the pre-existing header "New contract" action opens the same modal', () => {
+  it('the pre-existing header action opens the same modal', () => {
     renderContracts();
 
-    fireEvent.click(screen.getByRole('button', { name: /new contract/i }));
+    fireEvent.click(newContractButtons()[0]);
 
-    expect(screen.getByText('New Contract')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'crm.contracts.new' })).toBeInTheDocument();
   });
 });

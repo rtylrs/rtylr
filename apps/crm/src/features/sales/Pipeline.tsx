@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { Plus, TrendingUp } from 'lucide-react';
@@ -8,14 +9,16 @@ import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
 import CreateLeadModal from './components/CreateLeadModal';
 
-const STAGES: Array<{ key: LeadStage; label: string }> = [
-  { key: 'cold', label: 'Cold' },
-  { key: 'contacted', label: 'Contacted' },
-  { key: 'demo_booked', label: 'Demo Booked' },
-  { key: 'demo_done', label: 'Demo Done' },
-  { key: 'proposal_sent', label: 'Proposal Sent' },
-  { key: 'contracted', label: 'Contracted' },
-  { key: 'lost', label: 'Lost' },
+// Ids only: evaluated at module load, before i18next has a language. Labels
+// come from crm.leadStages.<id>, shared with LeadDetail and CreateLeadModal.
+const STAGES: LeadStage[] = [
+  'cold',
+  'contacted',
+  'demo_booked',
+  'demo_done',
+  'proposal_sent',
+  'contracted',
+  'lost',
 ];
 
 const STAGE_COLORS: Record<LeadStage, string> = {
@@ -136,6 +139,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
 );
 
 const Pipeline: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: pipelineCols, isLoading: pipelineLoading } = usePipeline();
   const { data: leads, isLoading: leadsLoading } = useLeads();
@@ -146,7 +150,7 @@ const Pipeline: React.FC = () => {
   const leadsByStage = useMemo((): Record<LeadStage, Lead[]> => {
     const all = leads ?? [];
     const map = {} as Record<LeadStage, Lead[]>;
-    STAGES.forEach(({ key }) => {
+    STAGES.forEach((key) => {
       map[key] = all.filter((l) => l.stage === key);
     });
     return map;
@@ -155,7 +159,7 @@ const Pipeline: React.FC = () => {
   const colSummary = useMemo((): Record<LeadStage, { count: number; mrr: number }> => {
     const byStage = leadsByStage;
     const result = {} as Record<LeadStage, { count: number; mrr: number }>;
-    STAGES.forEach(({ key }) => {
+    STAGES.forEach((key) => {
       const fromApi = (pipelineCols ?? []).find((c) => c.stage === key);
       if (fromApi) {
         result[key] = { count: fromApi.count, mrr: fromApi.totalMrr };
@@ -172,15 +176,15 @@ const Pipeline: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Sales pipeline · rtylr" />
+      <HelmetContainer title={`${t('crm.pipeline.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
         <PageHeader
-          title="Sales Pipeline"
-          subtitle="Track deals from cold outreach to closed contracts"
+          title={t('crm.pipeline.title')}
+          subtitle={t('crm.pipeline.subtitle')}
           actions={
             <Button variant="primary" onClick={() => setCreateOpen(true)}>
               <Plus size={13} />
-              Add lead
+              {t('crm.pipeline.addLead')}
             </Button>
           }
         />
@@ -199,7 +203,8 @@ const Pipeline: React.FC = () => {
               paddingBottom: '8px',
             }}
           >
-            {STAGES.map(({ key, label }) => {
+            {STAGES.map((key) => {
+              const label = t(`crm.leadStages.${key}`);
               const summary = colSummary[key];
               const columnLeads = leadsByStage[key] ?? [];
               const stageColor = STAGE_COLORS[key];
@@ -278,7 +283,7 @@ const Pipeline: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setCreateOpen(true)}
-                      aria-label="Add new lead"
+                      aria-label={t('crm.pipeline.addNewLead')}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -303,7 +308,7 @@ const Pipeline: React.FC = () => {
                       }}
                     >
                       <Plus size={12} />
-                      Add lead
+                      {t('crm.pipeline.addLead')}
                     </button>
                   )}
                 </div>

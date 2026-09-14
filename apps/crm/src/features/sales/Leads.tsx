@@ -118,24 +118,24 @@ const Leads: React.FC = () => {
     if (deleteId === null) return;
     deleteLead.mutate(deleteId, {
       onSuccess: () => {
-        toast.success('Lead deleted');
+        toast.success(t('crm.leads.deleted'));
         setDeleteId(null);
       },
-      onError: () => toast.error('Failed to delete lead'),
+      onError: () => toast.error(t('crm.leadDetail.deleteFailed')),
     });
   };
 
   return (
     <>
-      <HelmetContainer title="Leads · rtylr" />
+      <HelmetContainer title={`${t('crm.leads.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         <PageHeader
-          title="Leads"
+          title={t('crm.leads.pageTitle')}
           subtitle={`${leads.length} loaded`}
           actions={
             <Button variant="primary" onClick={() => setCreateOpen(true)}>
               <Plus size={13} />
-              New lead
+              {t('crm.leads.new')}
             </Button>
           }
         />
@@ -162,7 +162,7 @@ const Leads: React.FC = () => {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by company..."
+              placeholder={t('crm.leads.searchPlaceholder')}
               style={{
                 flex: 1,
                 background: 'transparent',
@@ -213,7 +213,7 @@ const Leads: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            <option value="all">All sources</option>
+            <option value="all">{t('crm.leads.allSources')}</option>
             {sources.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -364,7 +364,7 @@ const Leads: React.FC = () => {
                         <div style={{ display: 'flex', gap: '6px' }}>
                           <button
                             type="button"
-                            aria-label="View lead"
+                            aria-label={t('crm.leads.viewLead')}
                             onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
                             style={{
                               height: '28px',
@@ -383,7 +383,7 @@ const Leads: React.FC = () => {
                           </button>
                           <button
                             type="button"
-                            aria-label="Delete lead"
+                            aria-label={t('crm.leadDetail.deleteLead')}
                             onClick={() => setDeleteId(lead.id)}
                             style={{
                               height: '28px',
@@ -427,13 +427,13 @@ const Leads: React.FC = () => {
           open={deleteId !== null}
           onClose={() => setDeleteId(null)}
           onConfirm={handleDelete}
-          title="Delete lead"
+          title={t('crm.leadDetail.deleteLead')}
           description={
             deleteTarget
               ? `Delete "${deleteTarget.companyName ?? deleteTarget.company ?? 'this lead'}"? This will also remove all associated touchpoints and contacts.`
               : 'Are you sure?'
           }
-          confirmLabel="Delete"
+          confirmLabel={t('common.delete')}
           variant="danger"
         />
       </div>

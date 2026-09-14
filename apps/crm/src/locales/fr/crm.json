@@ -45,13 +45,26 @@
     "empty": "Aucun prospect trouvé",
     "emptySearchDescription": "Aucun prospect ne correspond à \"{{search}}\"",
     "createFirstDescription": "Créez votre premier prospect pour commencer.",
-    "new": "Nouveau prospect"
+    "new": "Nouveau prospect",
+    "deleted": "Prospect supprimé",
+    "pageTitle": "Prospects",
+    "searchPlaceholder": "Rechercher par entreprise...",
+    "allSources": "Toutes les sources",
+    "viewLead": "Voir le prospect"
   },
   "contracts": {
     "loadFailedTitle": "Impossible de charger les contrats",
     "empty": "Aucun contrat pour le moment",
     "emptyDescription": "Les contrats signés apparaîtront ici une fois une affaire conclue.",
-    "new": "Nouveau contrat"
+    "new": "Nouveau contrat",
+    "pageTitle": "Contrats",
+    "subtitle": "Tous les contrats signés et leurs détails",
+    "requiredFields": "Le prospect, la date de signature et le signataire sont obligatoires",
+    "createFailed": "Échec de la création du contrat",
+    "totalMrr": "MRR total sous contrat",
+    "leadLabel": "Prospect",
+    "selectLead": "Sélectionner un prospect...",
+    "repUserIdPlaceholder": "ID utilisateur du commercial"
   },
   "loyaltyMembers": {
     "loadFailedTitle": "Impossible de charger les membres",
@@ -263,5 +276,24 @@
     "proposal_sent": "Proposition envoyée",
     "contracted": "Sous contrat",
     "lost": "Perdu"
+  },
+  "createLead": {
+    "companyRequired": "Le nom de l’entreprise est obligatoire",
+    "createFailed": "Échec de la création du prospect",
+    "companyLabel": "Entreprise *",
+    "companyPlaceholder": "Entreprise Exemple",
+    "industryPlaceholder": "SaaS",
+    "companySize": "Taille de l’entreprise",
+    "sourcePlaceholder": "LinkedIn, recommandation...",
+    "mrrPotentialUsd": "MRR potentiel ($)",
+    "userId": "ID utilisateur",
+    "notesPlaceholder": "Contexte sur ce prospect..."
+  },
+  "pipeline": {
+    "pageTitle": "Pipeline commercial",
+    "title": "Pipeline commercial",
+    "subtitle": "Suivez les affaires du premier contact à la signature",
+    "addLead": "Ajouter un prospect",
+    "addNewLead": "Ajouter un nouveau prospect"
   }
 }
