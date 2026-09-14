@@ -49,3 +49,30 @@ describe('SidebarNavItem tour anchor', () => {
     expect(screen.getByRole('link')).toHaveAttribute('data-tour', 'team');
   });
 });
+
+/**
+ * The anchors and the tour are written in two files, and nothing connected them
+ * until the dashboard step silently attached to nothing for however long it took
+ * to notice. This ties them together: every element a tour step attaches to must
+ * be one this layout can actually render.
+ */
+describe('onboarding tour anchors', () => {
+  it('every attachTo selector has a producer in the layout', async () => {
+    const { buildTourSteps } = await import('../shared/hooks/useOnboardingTour');
+    const { rawNavItems } = await import('./DefaultLayout');
+
+    // The two anchors written directly into the layout's markup.
+    const STATIC_ANCHORS = ['settings', 'caret'];
+    const producible = new Set([...rawNavItems.map((i) => i.key), ...STATIC_ANCHORS]);
+
+    const required = buildTourSteps(((k: string) => k) as never)
+      .map((step) => {
+        const el = (step.attachTo as { element?: string } | undefined)?.element;
+        return el?.match(/\[data-tour="([^"]+)"\]/)?.[1];
+      })
+      .filter((id): id is string => Boolean(id));
+
+    expect(required.length).toBeGreaterThan(0);
+    expect(required.filter((id) => !producible.has(id))).toEqual([]);
+  });
+});

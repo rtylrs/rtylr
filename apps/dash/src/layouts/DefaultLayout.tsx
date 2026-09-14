@@ -70,7 +70,7 @@ interface NavItem {
 /** A nav entry as written down: no label, because the label is a translation. */
 type NavItemDef = Omit<NavItem, 'label'>;
 
-const rawNavItems: NavItemDef[] = [
+export const rawNavItems: NavItemDef[] = [
   { key: 'dashboard', path: '/', icon: LayoutDashboard },
   { key: 'team', path: '/team', icon: Users },
   { key: 'apps', path: '/apps', icon: Grid3x3 },
