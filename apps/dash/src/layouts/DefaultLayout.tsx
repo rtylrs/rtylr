@@ -76,13 +76,13 @@ export const rawNavItems: NavItemDef[] = [
   { key: 'apps', path: '/apps', icon: Grid3x3 },
 ];
 
-const rawMenuSubItems: NavItemDef[] = [
+export const rawMenuSubItems: NavItemDef[] = [
   { key: 'menus', path: '/menus', icon: UtensilsCrossed },
   { key: 'qrCodes', path: '/qr-codes', icon: QrCode },
   { key: 'design', path: '/design', icon: Palette },
 ];
 
-const routeKeys: Record<string, string> = {
+export const routeKeys: Record<string, string> = {
   '/': 'dashboard',
   '/chat': 'chat',
   '/menus': 'menus',

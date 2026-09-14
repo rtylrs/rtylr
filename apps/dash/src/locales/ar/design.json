@@ -1,0 +1,64 @@
+{
+  "pageTitle": "التصميم",
+  "subtitle": "مظهر المتجر",
+  "layouts": "التخطيطات",
+  "newLayoutPlaceholder": "تخطيط جديد...",
+  "preview": "معاينة",
+  "none": "بلا",
+  "sections": {
+    "pages": "الصفحات",
+    "header": "الترويسة",
+    "nav": "تبويبات التنقل",
+    "items": "بطاقات العناصر",
+    "colors": "الألوان",
+    "typography": "الخطوط"
+  },
+  "pages": {
+    "about": "من نحن",
+    "gallery": "المعرض",
+    "reviews": "التقييمات",
+    "offers": "العروض"
+  },
+  "header": {
+    "coverHeight": "ارتفاع صورة الغلاف",
+    "sticky": "ترويسة ثابتة",
+    "showLogo": "إظهار الشعار",
+    "showDescription": "إظهار الوصف",
+    "showMeta": "إظهار التفاصيل (العنوان وساعات العمل)"
+  },
+  "nav": {
+    "style": "النمط",
+    "styleUnderline": "خط سفلي",
+    "stylePill": "كبسولة",
+    "styleFlat": "مسطّح",
+    "size": "الحجم"
+  },
+  "items": {
+    "layout": "التخطيط",
+    "layoutGrid": "شبكة",
+    "layoutList": "قائمة",
+    "layoutMinimal": "مبسّط",
+    "columns": "الأعمدة",
+    "imagePosition": "موضع الصورة",
+    "imageTop": "أعلى",
+    "imageRight": "يمين",
+    "imageLeft": "يسار",
+    "imageSize": "حجم الصورة",
+    "cardRadius": "استدارة البطاقة",
+    "showDescription": "إظهار الوصف",
+    "showBadges": "إظهار الشارات"
+  },
+  "colors": {
+    "primary": "اللون الأساسي",
+    "accent": "لون التمييز",
+    "background": "الخلفية"
+  },
+  "typography": {
+    "fontFamily": "نوع الخط",
+    "fontSize": "حجم الخط"
+  },
+  "businessPlaceholder": {
+    "name": "اسم نشاطك",
+    "description": "أضف وصف نشاطك من الإعدادات."
+  }
+}
