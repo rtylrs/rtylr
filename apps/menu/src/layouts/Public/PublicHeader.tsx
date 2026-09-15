@@ -117,8 +117,12 @@ const Header: React.FC = () => {
 
   const handleExternalLink = useCallback(() => {
     setDropdown(false);
-    window.open('https://voxire.com/careers', '_blank', 'noopener,noreferrer');
+    window.open('https://hire.voxire.com/jobs/', '_blank', 'noopener,noreferrer');
   }, []);
+
+  const externalLinkStyle = (color?: string): React.CSSProperties => ({
+    color: color || primary,
+  });
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
     return (props) => {
@@ -166,10 +170,31 @@ const Header: React.FC = () => {
           transform: 'translateX(5%)',
         }}
       >
-        <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
-        <LinkWithColor to="/pricing">Pricing</LinkWithColor>
-        <LinkWithColor to="/restaurants">Restaurants</LinkWithColor>
-        <LinkWithColor to="/uses">Use Cases</LinkWithColor>
+        <LinkWithColor to="/b/69">Demo</LinkWithColor>
+        <a
+          href={`${landingUrl}/pricing`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={externalLinkStyle()}
+        >
+          Pricing
+        </a>
+        <a
+          href={`${landingUrl}/pos`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={externalLinkStyle()}
+        >
+          Restaurants
+        </a>
+        <a
+          href={`${landingUrl}/pos`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={externalLinkStyle()}
+        >
+          Use Cases
+        </a>
         <p
           style={{
             color: primary,
@@ -191,7 +216,7 @@ const Header: React.FC = () => {
           <div className="header-dropdown">
             <h6 onClick={() => handleNavigation('/about')}>About Us</h6>
             <h6 onClick={() => handleNavigation('/contact')}>Contact Us</h6>
-            <h6 onClick={() => handleNavigation('/faqs')}>FAQs</h6>
+            <h6 onClick={() => handleNavigation('/support')}>FAQs</h6>
             <h6 onClick={handleExternalLink}>Careers (Jobs)</h6>
           </div>
         )}
@@ -274,11 +299,46 @@ const Header: React.FC = () => {
 
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <LinkWithColor to="/menu">Menu</LinkWithColor>
-          <LinkWithColor to="/deals">Deals</LinkWithColor>
-          <LinkWithColor to="/blog">Blog</LinkWithColor>
-          <LinkWithColor to="/about">About</LinkWithColor>
-          <LinkWithColor to="/contact">Contact Us</LinkWithColor>
+          <a
+            href={`${landingUrl}/pos`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={externalLinkStyle()}
+          >
+            Menu
+          </a>
+          <a
+            href={`${landingUrl}/pricing`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={externalLinkStyle()}
+          >
+            Deals
+          </a>
+          <a
+            href={`${landingUrl}/blog`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={externalLinkStyle()}
+          >
+            Blog
+          </a>
+          <a
+            href={`${landingUrl}/about`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={externalLinkStyle()}
+          >
+            About
+          </a>
+          <a
+            href={`${landingUrl}/contact`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={externalLinkStyle()}
+          >
+            Contact Us
+          </a>
           <Button
             styles={{
               display: token ? 'none' : 'flex',

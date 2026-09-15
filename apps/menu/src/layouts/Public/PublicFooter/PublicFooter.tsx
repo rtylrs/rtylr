@@ -14,21 +14,21 @@ const Footer: React.FC = () => {
       links: [
         { to: `${landingUrl}/about`, label: 'About Us', external: true },
         { to: `${landingUrl}/contact`, label: 'Contact Us', external: true },
-        { to: 'https://voxire.com/careers', label: 'Careers', external: true },
+        { to: 'https://hire.voxire.com/jobs/', label: 'Careers', external: true },
       ],
     },
     {
       title: 'Quick Links',
       links: [
-        { to: `${landingUrl}/faqs`, label: 'FAQs', external: true },
+        { to: `${landingUrl}/support`, label: 'FAQs', external: true },
         { to: `${landingUrl}/pricing`, label: 'Pricing', external: true },
       ],
     },
     {
       title: 'Legal',
       links: [
-        { to: `${landingUrl}/privacy`, label: 'Privacy Policy', external: true },
-        { to: `${landingUrl}/terms`, label: 'Terms and Conditions', external: true },
+        { to: `${landingUrl}/legal/privacy-policy`, label: 'Privacy Policy', external: true },
+        { to: `${landingUrl}/legal/terms`, label: 'Terms and Conditions', external: true },
       ],
     },
   ];
