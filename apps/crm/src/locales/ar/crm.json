@@ -380,5 +380,67 @@
     "sameCustomer": "لا يمكن دمج العميل مع نفسه",
     "preview": "معاينة الدمج",
     "subtitle": "دمج السجلات المكررة"
+  },
+  "segmentFields": {
+    "totalSpent": "إجمالي الإنفاق",
+    "visits": "الزيارات",
+    "lastVisitDays": "الأيام منذ آخر زيارة",
+    "loyaltyPoints": "نقاط الولاء",
+    "tier": "المستوى"
+  },
+  "commandPalette": {
+    "placeholder": "ابحث عن عملاء، أو تنقّل، أو أنشئ...",
+    "runCommand": "تنفيذ الأمر"
+  },
+  "trialBanner": {
+    "addPayment": "أضف وسيلة دفع للاحتفاظ ببياناتك.",
+    "activatePlan": "تفعيل الخطة"
+  },
+  "composer": {
+    "subject": "الموضوع",
+    "subjectPlaceholder": "اكتب سطر الموضوع...",
+    "insert": "إدراج:",
+    "body": "النص",
+    "bodyPlaceholder": "اكتب رسالتك...",
+    "smsPlaceholder": "اكتب رسالتك النصية...",
+    "smsHint": "الرسالة النصية المفردة: 160 حرفًا"
+  },
+  "components": {
+    "removeTag": "إزالة الوسم",
+    "removeNode": "إزالة العنصر",
+    "adjustPoints": "تعديل النقاط",
+    "amount": "المقدار",
+    "reasonOptional": "السبب (اختياري)",
+    "sms": "رسالة نصية",
+    "spent": "الإنفاق",
+    "points": "النقاط",
+    "lastSeen": "آخر ظهور",
+    "selectCustomer": "اختر عميلًا...",
+    "searchPlaceholder": "بحث...",
+    "noResults": "لا نتائج",
+    "closeDialog": "إغلاق النافذة",
+    "valuePlaceholder": "القيمة"
+  },
+  "sales": {
+    "leadCreated": "أُنشئ العميل المحتمل",
+    "leadUpdated": "حُدّث العميل المحتمل",
+    "leadUpdateFailed": "تعذّر تحديث العميل المحتمل",
+    "touchpointLogged": "سُجّلت نقطة التواصل",
+    "touchpointDeleted": "حُذفت نقطة التواصل",
+    "touchpointDeleteFailed": "تعذّر حذف نقطة التواصل",
+    "contactAdded": "أُضيفت جهة الاتصال",
+    "contactUpdated": "حُدّثت جهة الاتصال",
+    "contactUpdateFailed": "تعذّر تحديث جهة الاتصال",
+    "contactRemoved": "أُزيلت جهة الاتصال",
+    "contactRemoveFailed": "تعذّرت إزالة جهة الاتصال",
+    "contractCreated": "أُنشئ العقد",
+    "contractUpdated": "حُدّث العقد",
+    "contractUpdateFailed": "تعذّر تحديث العقد"
+  },
+  "segmentOperators": {
+    "gt": "أكبر من",
+    "lt": "أصغر من",
+    "eq": "يساوي",
+    "ne": "لا يساوي"
   }
 }

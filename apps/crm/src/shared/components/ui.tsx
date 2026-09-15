@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { X, Loader2 } from 'lucide-react';
@@ -207,6 +208,7 @@ export const Modal: React.FC<{
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg';
 }> = ({ open, onClose, title, children, footer, size = 'md' }) => {
+  const { t } = useTranslation();
   if (!open) return null;
   const widths = { sm: '380px', md: '520px', lg: '720px' };
   return (
@@ -253,7 +255,7 @@ export const Modal: React.FC<{
             {title}
           </h3>
           <button
-            aria-label="Close dialog"
+            aria-label={t('crm.components.closeDialog')}
             type="button"
             onClick={onClose}
             style={{
@@ -298,44 +300,39 @@ export const ConfirmModal: React.FC<{
   description?: string;
   confirmLabel?: string;
   variant?: 'primary' | 'danger';
-}> = ({
-  open,
-  onClose,
-  onConfirm,
-  title,
-  description,
-  confirmLabel = 'Confirm',
-  variant = 'primary',
-}) => (
-  <Modal
-    open={open}
-    onClose={onClose}
-    title={title}
-    size="sm"
-    footer={
-      <>
-        <Button variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          variant={variant}
-          onClick={() => {
-            onConfirm();
-            onClose();
-          }}
-        >
-          {confirmLabel}
-        </Button>
-      </>
-    }
-  >
-    {description && (
-      <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: 0, lineHeight: 1.6 }}>
-        {description}
-      </p>
-    )}
-  </Modal>
-);
+}> = ({ open, onClose, onConfirm, title, description, confirmLabel, variant = 'primary' }) => {
+  const { t } = useTranslation();
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      size="sm"
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            variant={variant}
+            onClick={() => {
+              onConfirm();
+              onClose();
+            }}
+          >
+            {confirmLabel ?? t('common.confirm')}
+          </Button>
+        </>
+      }
+    >
+      {description && (
+        <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: 0, lineHeight: 1.6 }}>
+          {description}
+        </p>
+      )}
+    </Modal>
+  );
+};
 
 // ── Skeleton ─────────────────────────────────────────────────────
 export const Skeleton: React.FC<{

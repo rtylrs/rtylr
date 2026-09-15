@@ -368,5 +368,67 @@
     "sameCustomer": "Cannot merge a customer with themselves",
     "preview": "Merge preview",
     "subtitle": "Combine duplicate records"
+  },
+  "segmentFields": {
+    "totalSpent": "Total spent",
+    "visits": "Visits",
+    "lastVisitDays": "Days since visit",
+    "loyaltyPoints": "Loyalty points",
+    "tier": "Tier"
+  },
+  "commandPalette": {
+    "placeholder": "Search customers, navigate, create...",
+    "runCommand": "Run command"
+  },
+  "trialBanner": {
+    "addPayment": "Add a payment method to keep your data.",
+    "activatePlan": "Activate plan"
+  },
+  "composer": {
+    "subject": "Subject",
+    "subjectPlaceholder": "Your subject line...",
+    "insert": "Insert:",
+    "body": "Body",
+    "bodyPlaceholder": "Write your message...",
+    "smsPlaceholder": "Your SMS message...",
+    "smsHint": "SMS single message: 160 chars"
+  },
+  "components": {
+    "removeTag": "Remove tag",
+    "removeNode": "Remove node",
+    "adjustPoints": "Adjust points",
+    "amount": "Amount",
+    "reasonOptional": "Reason (optional)",
+    "sms": "SMS",
+    "spent": "Spent",
+    "points": "Points",
+    "lastSeen": "Last seen",
+    "selectCustomer": "Select customer...",
+    "searchPlaceholder": "Search...",
+    "noResults": "No results",
+    "closeDialog": "Close dialog",
+    "valuePlaceholder": "value"
+  },
+  "sales": {
+    "leadCreated": "Lead created",
+    "leadUpdated": "Lead updated",
+    "leadUpdateFailed": "Failed to update lead",
+    "touchpointLogged": "Touchpoint logged",
+    "touchpointDeleted": "Touchpoint deleted",
+    "touchpointDeleteFailed": "Failed to delete touchpoint",
+    "contactAdded": "Contact added",
+    "contactUpdated": "Contact updated",
+    "contactUpdateFailed": "Failed to update contact",
+    "contactRemoved": "Contact removed",
+    "contactRemoveFailed": "Failed to remove contact",
+    "contractCreated": "Contract created",
+    "contractUpdated": "Contract updated",
+    "contractUpdateFailed": "Failed to update contract"
+  },
+  "segmentOperators": {
+    "gt": "greater than",
+    "lt": "less than",
+    "eq": "equals",
+    "ne": "not equals"
   }
 }

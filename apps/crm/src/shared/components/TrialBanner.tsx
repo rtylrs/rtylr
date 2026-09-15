@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
 import { X, Clock, Zap } from 'lucide-react';
@@ -17,6 +18,7 @@ function daysLeft(trialEndsAt: string | null): number {
 const DISMISSED_KEY = 'trial_banner_dismissed_date';
 
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
+  const { t } = useTranslation();
   const today = todayIso();
   const [dismissed, setDismissed] = useState(() => readLocalStorage(DISMISSED_KEY) === today);
 
@@ -51,7 +53,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         {days === 0
           ? 'Your trial ends today.'
           : `Your trial ends in ${days} day${days !== 1 ? 's' : ''}.`}{' '}
-        Add a payment method to keep your data.
+        {t('crm.trialBanner.addPayment')}
       </p>
       <a
         href={`${resolveAppUrl('dash')}/settings/billing`}
@@ -59,11 +61,11 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         style={{ background: '#f59e0b', color: '#fff' }}
       >
         <Zap size={11} />
-        Activate plan
+        {t('crm.trialBanner.activatePlan')}
       </a>
       <button
         type="button"
-        aria-label="Dismiss"
+        aria-label={t('license.license.dismiss')}
         onClick={dismiss}
         className="h-6 w-6 flex items-center justify-center rounded shrink-0 hover:bg-amber-100 transition-colors"
         style={{ color: '#92400e' }}

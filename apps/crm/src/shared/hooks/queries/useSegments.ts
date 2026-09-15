@@ -1,4 +1,5 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import i18next from 'i18next';
 import {
   useMutation,
   useInfiniteQuery,
@@ -124,7 +125,7 @@ export const useGetSegment = (id: string | undefined): UseQueryResult<Segment> =
     queryKey: ['crm-segment', id],
     queryFn: async (): Promise<Segment> => {
       const res = await segmentClient.getSegmentDetail({ id: id ?? '' });
-      if (!res.segment) throw new Error('Segment not found');
+      if (!res.segment) throw new Error(i18next.t('crm.segmentDetail.notFoundTitle'));
       const segment = fromApiSegment(res.segment);
       return { ...segment, rules: filtersToRules(segment.filters) };
     },
