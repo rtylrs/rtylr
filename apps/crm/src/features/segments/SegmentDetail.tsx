@@ -51,9 +51,11 @@ const SegmentDetail: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Segment detail · rtylr" />
+      <HelmetContainer title={`${t('crm.segmentDetail.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
-        <Breadcrumbs items={[{ label: 'Segments', to: '/segments' }, { label: segment.name }]} />
+        <Breadcrumbs
+          items={[{ label: t('nav.segments'), to: '/segments' }, { label: segment.name }]}
+        />
         <button
           type="button"
           onClick={() => navigate({ to: '/segments' })}
@@ -123,14 +125,14 @@ const SegmentDetail: React.FC = () => {
                 onClick={() => navigate({ to: '/campaigns/email', search: { segment: id } })}
               >
                 <Mail size={13} />
-                Email
+                {t('common.email')}
               </Button>
               <Button
                 variant="primary"
                 onClick={() => navigate({ to: '/campaigns/sms', search: { segment: id } })}
               >
                 <MessageSquare size={13} />
-                SMS
+                {t('crm.components.sms')}
               </Button>
             </div>
           </div>
@@ -145,9 +147,13 @@ const SegmentDetail: React.FC = () => {
           }}
         >
           {[
-            { label: 'Customers', value: segment.customerCount.toLocaleString() },
-            { label: 'Trend', value: segment.trend },
-            { label: 'Avg Spend', value: '-' },
+            {
+              id: 'customers',
+              label: t('crm.customers.pageTitle'),
+              value: segment.customerCount.toLocaleString(),
+            },
+            { id: 'trend', label: t('crm.segmentDetail.trend'), value: segment.trend },
+            { id: 'avgSpend', label: t('crm.segmentDetail.avgSpend'), value: '-' },
           ].map((s) => (
             <Card key={s.label}>
               <div
@@ -187,7 +193,7 @@ const SegmentDetail: React.FC = () => {
                 letterSpacing: '0.05em',
               }}
             >
-              Customers in this segment
+              {t('crm.segmentDetail.customersIn')}
             </h4>
           </div>
           {isLoading ? (

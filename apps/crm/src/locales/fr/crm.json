@@ -182,7 +182,16 @@
     "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
-    "deleteConfirmTitle": "Delete segment?"
+    "deleteConfirmTitle": "Delete segment?",
+    "pageTitle": "Segments",
+    "deleteSegment": "Supprimer le segment",
+    "breadcrumbNew": "Nouveau",
+    "activeCount_one": "{{count}} segment actif",
+    "activeCount_many": "{{count}} segments actifs",
+    "activeCount_other": "{{count}} segments actifs",
+    "customersTotal_one": "{{count}} client au total",
+    "customersTotal_many": "{{count}} clients au total",
+    "customersTotal_other": "{{count}} clients au total"
   },
   "segmentDetail": {
     "notFoundTitle": "Segment introuvable",
@@ -190,7 +199,11 @@
     "backToSegments": "Retour aux segments",
     "noCustomersTitle": "Aucun client",
     "noCustomersDescription": "Ce segment est vide.",
-    "loadMoreCustomers": "Charger plus de clients"
+    "loadMoreCustomers": "Charger plus de clients",
+    "pageTitle": "Détail du segment",
+    "trend": "Tendance",
+    "avgSpend": "Dépense moyenne",
+    "customersIn": "Clients dans ce segment"
   },
   "automations": {
     "created": "Automation created",
@@ -487,5 +500,20 @@
     "newEmailTitle": "Nouvelle campagne e-mail",
     "editSmsTitle": "Modifier la campagne SMS",
     "newSmsTitle": "Nouvelle campagne SMS"
+  },
+  "segmentBuilder": {
+    "pageTitle": "Nouveau segment",
+    "subtitle": "Créez des règles dynamiques pour cibler les clients",
+    "namePlaceholder": "Clients à forte valeur",
+    "color": "Couleur",
+    "descriptionPlaceholder": "Qu’est-ce qui définit ce segment ?",
+    "rules": "Règles",
+    "matchAll": "Toutes les règles",
+    "matchAny": "Au moins une règle",
+    "title": "Générateur de segments",
+    "nameLabel": "Nom du segment",
+    "and": "ET",
+    "addRule": "Ajouter une règle",
+    "createSegment": "Créer le segment"
   }
 }

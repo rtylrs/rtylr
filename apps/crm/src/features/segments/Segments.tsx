@@ -135,11 +135,11 @@ function RuleBuilder({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Filter size={15} style={{ color: ACCENT }} />
             <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              Segment Builder
+              {t('crm.segmentBuilder.title')}
             </span>
           </div>
           <button
-            aria-label="Close"
+            aria-label={t('common.close')}
             type="button"
             onClick={onClose}
             style={{
@@ -167,7 +167,7 @@ function RuleBuilder({
               letterSpacing: '0.05em',
             }}
           >
-            Segment Name
+            {t('crm.segmentBuilder.nameLabel')}
           </label>
           <input
             value={segmentName}
@@ -216,7 +216,7 @@ function RuleBuilder({
                       flexShrink: 0,
                     }}
                   >
-                    AND
+                    {t('crm.segmentBuilder.and')}
                   </span>
                 )}
                 {i === 0 && <div style={{ width: '28px', flexShrink: 0 }} />}
@@ -269,7 +269,7 @@ function RuleBuilder({
             ))}
           </div>
           <button
-            aria-label="Add rule"
+            aria-label={t('crm.segmentBuilder.addRule')}
             type="button"
             onClick={addRule}
             style={{
@@ -288,7 +288,7 @@ function RuleBuilder({
             }}
           >
             <Plus size={12} />
-            Add Rule
+            {t('crm.segmentBuilder.addRule')}
           </button>
         </div>
 
@@ -308,7 +308,7 @@ function RuleBuilder({
               cursor: 'pointer',
             }}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -324,7 +324,7 @@ function RuleBuilder({
               cursor: 'pointer',
             }}
           >
-            Create Segment
+            {t('crm.segmentBuilder.createSegment')}
           </button>
         </div>
       </div>
@@ -347,6 +347,7 @@ function SegmentCard({
   deletePending: boolean;
   canDelete: boolean;
 }) {
+  const { t } = useTranslation();
   const Icon = segment.icon;
   return (
     <motion.div
@@ -463,7 +464,7 @@ function SegmentCard({
             (e.currentTarget as HTMLElement).style.background = `${segment.color}10`;
           }}
         >
-          <span>View Customers</span>
+          <span>{t('crm.actions.viewCustomers')}</span>
           <ChevronRight size={13} />
         </button>
         {canDelete && (
@@ -474,7 +475,7 @@ function SegmentCard({
               onDelete();
             }}
             disabled={deletePending}
-            aria-label="Delete segment"
+            aria-label={t('crm.segments.deleteSegment')}
             style={{
               padding: '6px 10px',
               borderRadius: '8px',
@@ -504,6 +505,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 };
 
 const Segments: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   // Segment deletion has no dedicated resource; `crm:segments` is the operator-tier
@@ -526,11 +528,11 @@ const Segments: React.FC = () => {
   const handleDelete = (id: string): void => {
     removeSegment.mutate(id, {
       onSuccess: () => {
-        toast.success('Segment deleted');
+        toast.success(t('crm.segments.deleted'));
         setConfirmDeleteId(null);
       },
       onError: () => {
-        toast.error('Failed to delete segment');
+        toast.error(t('crm.segments.deleteFailed'));
         setConfirmDeleteId(null);
       },
     });
@@ -542,11 +544,11 @@ const Segments: React.FC = () => {
       { name, rules: rules.map(serializeSegmentRule) },
       {
         onSuccess: () => {
-          toast.success('Segment created');
+          toast.success(t('crm.segments.created'));
           setBuilderOpen(false);
         },
         onError: () => {
-          toast.error('Failed to create segment');
+          toast.error(t('crm.segments.createFailed'));
         },
       }
     );
@@ -556,18 +558,19 @@ const Segments: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Segments · rtylr" />
+      <HelmetContainer title={`${t('crm.segments.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              Segments
+              {t('crm.segments.pageTitle')}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-              {segments.length} active segments ·{' '}
-              {segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers
-              total
+              {t('crm.segments.activeCount', { count: segments.length })} ·{' '}
+              {t('crm.segments.customersTotal', {
+                count: segments.reduce((sum, s) => sum + s.customerCount, 0),
+              })}
             </p>
           </div>
           <button
@@ -588,7 +591,7 @@ const Segments: React.FC = () => {
             }}
           >
             <Plus size={15} />
-            New Segment
+            {t('nav.newSegment')}
           </button>
         </div>
 
@@ -611,13 +614,13 @@ const Segments: React.FC = () => {
           open={confirmDeleteId !== null}
           onClose={() => setConfirmDeleteId(null)}
           onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
-          title="Delete segment?"
+          title={t('crm.segments.deleteConfirmTitle')}
           description={
             deleteTarget
               ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
               : ''
           }
-          confirmLabel="Delete"
+          confirmLabel={t('common.delete')}
           variant="danger"
         />
 

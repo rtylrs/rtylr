@@ -178,7 +178,14 @@
     "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
-    "deleteConfirmTitle": "Delete segment?"
+    "deleteConfirmTitle": "Delete segment?",
+    "pageTitle": "Segments",
+    "deleteSegment": "Delete segment",
+    "breadcrumbNew": "New",
+    "activeCount_one": "{{count}} active segment",
+    "activeCount_other": "{{count}} active segments",
+    "customersTotal_one": "{{count}} customer total",
+    "customersTotal_other": "{{count}} customers total"
   },
   "segmentDetail": {
     "notFoundTitle": "Segment not found",
@@ -186,7 +193,11 @@
     "backToSegments": "Back to segments",
     "noCustomersTitle": "No customers",
     "noCustomersDescription": "This segment is empty.",
-    "loadMoreCustomers": "Load more customers"
+    "loadMoreCustomers": "Load more customers",
+    "pageTitle": "Segment detail",
+    "trend": "Trend",
+    "avgSpend": "Avg spend",
+    "customersIn": "Customers in this segment"
   },
   "automations": {
     "created": "Automation created",
@@ -483,5 +494,20 @@
     "newEmailTitle": "New email campaign",
     "editSmsTitle": "Edit SMS campaign",
     "newSmsTitle": "New SMS campaign"
+  },
+  "segmentBuilder": {
+    "pageTitle": "New segment",
+    "subtitle": "Build dynamic rules to target customers",
+    "namePlaceholder": "High value customers",
+    "color": "Color",
+    "descriptionPlaceholder": "What defines this segment?",
+    "rules": "Rules",
+    "matchAll": "Match all",
+    "matchAny": "Match any",
+    "title": "Segment builder",
+    "nameLabel": "Segment name",
+    "and": "AND",
+    "addRule": "Add rule",
+    "createSegment": "Create segment"
   }
 }

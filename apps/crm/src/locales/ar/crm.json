@@ -194,7 +194,22 @@
     "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
-    "deleteConfirmTitle": "Delete segment?"
+    "deleteConfirmTitle": "Delete segment?",
+    "pageTitle": "الشرائح",
+    "deleteSegment": "حذف الشريحة",
+    "breadcrumbNew": "جديدة",
+    "activeCount_zero": "لا شرائح نشطة",
+    "activeCount_one": "شريحة نشطة واحدة",
+    "activeCount_two": "شريحتان نشطتان",
+    "activeCount_few": "{{count}} شرائح نشطة",
+    "activeCount_many": "{{count}} شريحة نشطة",
+    "activeCount_other": "{{count}} شريحة نشطة",
+    "customersTotal_zero": "لا عملاء إجمالًا",
+    "customersTotal_one": "عميل واحد إجمالًا",
+    "customersTotal_two": "عميلان إجمالًا",
+    "customersTotal_few": "{{count}} عملاء إجمالًا",
+    "customersTotal_many": "{{count}} عميلًا إجمالًا",
+    "customersTotal_other": "{{count}} عميل إجمالًا"
   },
   "segmentDetail": {
     "notFoundTitle": "الشريحة غير موجودة",
@@ -202,7 +217,11 @@
     "backToSegments": "العودة إلى الشرائح",
     "noCustomersTitle": "لا يوجد عملاء",
     "noCustomersDescription": "هذه الشريحة فارغة.",
-    "loadMoreCustomers": "تحميل المزيد من العملاء"
+    "loadMoreCustomers": "تحميل المزيد من العملاء",
+    "pageTitle": "تفاصيل الشريحة",
+    "trend": "الاتجاه",
+    "avgSpend": "متوسط الإنفاق",
+    "customersIn": "العملاء في هذه الشريحة"
   },
   "automations": {
     "created": "Automation created",
@@ -499,5 +518,20 @@
     "newEmailTitle": "حملة بريد جديدة",
     "editSmsTitle": "تعديل حملة الرسائل النصية",
     "newSmsTitle": "حملة رسائل نصية جديدة"
+  },
+  "segmentBuilder": {
+    "pageTitle": "شريحة جديدة",
+    "subtitle": "ابنِ قواعد ديناميكية لاستهداف العملاء",
+    "namePlaceholder": "العملاء ذوو القيمة العالية",
+    "color": "اللون",
+    "descriptionPlaceholder": "ما الذي يحدد هذه الشريحة؟",
+    "rules": "القواعد",
+    "matchAll": "مطابقة الكل",
+    "matchAny": "مطابقة أي",
+    "title": "منشئ الشرائح",
+    "nameLabel": "اسم الشريحة",
+    "and": "و",
+    "addRule": "إضافة قاعدة",
+    "createSegment": "إنشاء الشريحة"
   }
 }
