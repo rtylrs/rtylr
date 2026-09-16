@@ -14,7 +14,7 @@ describe('segment rules', () => {
   });
 
   it('keeps the canonical field list stable for every segment builder', () => {
-    expect(SEGMENT_RULE_FIELDS.map((field) => field.value)).toEqual([
+    expect([...SEGMENT_RULE_FIELDS]).toEqual([
       'totalSpent',
       'visits',
       'lastVisitDays',

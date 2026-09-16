@@ -1,12 +1,14 @@
+// Ids only. This is module scope, evaluated before i18next has a language, so
+// the labels live at crm.segmentFields.<id> and are read where they render.
 export const SEGMENT_RULE_FIELDS = [
-  { value: 'totalSpent', label: 'Total Spent' },
-  { value: 'visits', label: 'Visits' },
-  { value: 'lastVisitDays', label: 'Days Since Visit' },
-  { value: 'loyaltyPoints', label: 'Loyalty Points' },
-  { value: 'tier', label: 'Tier' },
+  'totalSpent',
+  'visits',
+  'lastVisitDays',
+  'loyaltyPoints',
+  'tier',
 ] as const;
 
-export type SegmentRuleField = (typeof SEGMENT_RULE_FIELDS)[number]['value'];
+export type SegmentRuleField = (typeof SEGMENT_RULE_FIELDS)[number];
 
 export const SEGMENT_RULE_OPERATORS = ['>', '<', '=', '!='] as const;
 export type SegmentRuleOperator = (typeof SEGMENT_RULE_OPERATORS)[number];

@@ -29,6 +29,7 @@ const ACCENT = '#3b82f6';
 const tierFilters: Array<Tier | 'All'> = ['All', 'Platinum', 'Gold', 'Silver', 'Bronze'];
 
 function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () => void }) {
+  const { t } = useTranslation();
   const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier);
   return (
     <motion.tr
@@ -51,7 +52,7 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
         >
           <div>
             <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>
-              Contact Info
+              {t('crm.customers.colContactInfo')}
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
               <Mail size={12} style={{ color: ACCENT }} />
@@ -64,27 +65,29 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
           </div>
           <div>
             <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>
-              Loyalty
+              {t('nav.loyalty')}
             </p>
             <TierBadge tier={tier} />
             <p style={{ fontSize: '13px', color: 'var(--hub-text)', marginTop: '6px' }}>
-              {customer.loyaltyPoints.toLocaleString()} points
+              {t('crm.customers.pointsCount', { count: customer.loyaltyPoints })}
             </p>
           </div>
           <div>
             <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>
-              Summary
+              {t('crm.customers.colSummary')}
             </p>
             <p style={{ fontSize: '13px', color: 'var(--hub-text)' }}>
-              ${customer.totalSpent.toLocaleString()} lifetime spend
+              {t('crm.customers.lifetimeSpend', {
+                amount: `$${customer.totalSpent.toLocaleString()}`,
+              })}
             </p>
             <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {customer.visits} total visits
+              {t('crm.customers.visitsCount', { count: customer.visits })}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Button variant="primary" onClick={onView}>
-              View profile
+              {t('crm.customers.viewProfile')}
             </Button>
           </div>
         </div>
@@ -144,7 +147,7 @@ const Customers: React.FC = () => {
   if (isError && customers.length === 0) {
     return (
       <div style={{ maxWidth: '1100px', padding: '40px 0', color: 'var(--hub-text-muted)' }}>
-        Unable to load customers. Please refresh and try again.
+        {t('crm.customers.loadFailed')}
       </div>
     );
   }
@@ -222,28 +225,28 @@ const Customers: React.FC = () => {
     a.download = 'customers.csv';
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('CSV exported');
+    toast.success(t('crm.customers.csvExported'));
   };
 
   return (
     <>
-      <HelmetContainer title="Customers · rtylr" />
+      <HelmetContainer title={`${t('crm.customers.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         <PageHeader
-          title="Customers"
-          subtitle={`${customers.length} loaded`}
+          title={t('crm.customers.pageTitle')}
+          subtitle={t('crm.customers.loadedCount', { count: customers.length })}
           actions={
             <>
               <Button variant="outline" onClick={() => navigate({ to: '/customers/import' })}>
                 <Upload size={13} />
-                Import
+                {t('crm.customers.import')}
               </Button>
               <Button variant="outline" onClick={exportCsv}>
-                Export CSV
+                {t('crm.customers.exportCsv')}
               </Button>
               <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
                 <Plus size={13} />
-                New customer
+                {t('crm.customers.new')}
               </Button>
             </>
           }
@@ -275,7 +278,7 @@ const Customers: React.FC = () => {
                 setLoadedCustomers([]);
                 setSelected(new Set());
               }}
-              placeholder="Search customers..."
+              placeholder={t('crm.customers.searchPlaceholder')}
               style={{
                 flex: 1,
                 background: 'transparent',
@@ -345,7 +348,7 @@ const Customers: React.FC = () => {
               <input
                 value={bulkTag}
                 onChange={(e) => setBulkTag(e.target.value)}
-                placeholder="Add tag..."
+                placeholder={t('crm.customers.addTagPlaceholder')}
                 onKeyDown={(e) => e.key === 'Enter' && applyBulkTag()}
                 style={{
                   height: '30px',
@@ -360,10 +363,10 @@ const Customers: React.FC = () => {
                 }}
               />
               <Button variant="primary" onClick={applyBulkTag} style={{ padding: '6px 12px' }}>
-                Apply
+                {t('crm.customers.apply')}
               </Button>
               <Button variant="ghost" onClick={() => setSelected(new Set())}>
-                Clear
+                {t('crm.customers.clear')}
               </Button>
             </div>
           </div>

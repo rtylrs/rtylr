@@ -1,4 +1,5 @@
 import { unwrap } from '@voxire/api';
+import i18next from 'i18next';
 import {
   useMutation,
   useQuery,
@@ -95,10 +96,10 @@ export const useCreateLead = (): UseMutationResult<Lead, unknown, CreateLeadRequ
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-pipeline'] });
-      toast.success('Lead created');
+      toast.success(i18next.t('crm.sales.leadCreated'));
     },
     onError: (): void => {
-      toast.error('Failed to create lead');
+      toast.error(i18next.t('crm.createLead.createFailed'));
     },
   });
 };
@@ -134,10 +135,10 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-lead', variables.id] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-pipeline'] });
-      toast.success('Lead updated');
+      toast.success(i18next.t('crm.sales.leadUpdated'));
     },
     onError: (): void => {
-      toast.error('Failed to update lead');
+      toast.error(i18next.t('crm.sales.leadUpdateFailed'));
     },
   });
 };
@@ -149,10 +150,10 @@ export const useDeleteLead = (): UseMutationResult<unknown, unknown, number> => 
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-pipeline'] });
-      toast.success('Lead deleted');
+      toast.success(i18next.t('crm.leads.deleted'));
     },
     onError: (): void => {
-      toast.error('Failed to delete lead');
+      toast.error(i18next.t('crm.leadDetail.deleteFailed'));
     },
   });
 };
@@ -184,10 +185,10 @@ export const useCreateTouchpoint = (): UseMutationResult<
       void qc.invalidateQueries({
         queryKey: ['crm-sales-touchpoints', variables.leadId],
       });
-      toast.success('Touchpoint logged');
+      toast.success(i18next.t('crm.sales.touchpointLogged'));
     },
     onError: (): void => {
-      toast.error('Failed to log touchpoint');
+      toast.error(i18next.t('crm.leadDetail.touchpointFailed'));
     },
   });
 };
@@ -198,10 +199,10 @@ export const useDeleteTouchpoint = (): UseMutationResult<unknown, unknown, numbe
     mutationFn: (id: number): Promise<unknown> => unwrap(crmApi.deleteTouchpoint(id)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-touchpoints'] });
-      toast.success('Touchpoint deleted');
+      toast.success(i18next.t('crm.sales.touchpointDeleted'));
     },
     onError: (): void => {
-      toast.error('Failed to delete touchpoint');
+      toast.error(i18next.t('crm.sales.touchpointDeleteFailed'));
     },
   });
 };
@@ -234,10 +235,10 @@ export const useCreateContact = (): UseMutationResult<
     },
     onSuccess: (_data: SalesContact, _variables: CreateContactRequest): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
-      toast.success('Contact added');
+      toast.success(i18next.t('crm.sales.contactAdded'));
     },
     onError: (): void => {
-      toast.error('Failed to add contact');
+      toast.error(i18next.t('crm.leadDetail.addContactFailed'));
     },
   });
 };
@@ -261,10 +262,10 @@ export const useUpdateContact = (): UseMutationResult<
     },
     onSuccess: (_data: SalesContact, _variables: UpdateContactPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
-      toast.success('Contact updated');
+      toast.success(i18next.t('crm.sales.contactUpdated'));
     },
     onError: (): void => {
-      toast.error('Failed to update contact');
+      toast.error(i18next.t('crm.sales.contactUpdateFailed'));
     },
   });
 };
@@ -281,10 +282,10 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
       unwrap(crmApi.deleteContact(payload.id)),
     onSuccess: (_data: unknown, _variables: DeleteContactPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
-      toast.success('Contact removed');
+      toast.success(i18next.t('crm.sales.contactRemoved'));
     },
     onError: (): void => {
-      toast.error('Failed to remove contact');
+      toast.error(i18next.t('crm.sales.contactRemoveFailed'));
     },
   });
 };
@@ -336,10 +337,10 @@ export const useCreateContract = (): UseMutationResult<
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contracts'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
-      toast.success('Contract created');
+      toast.success(i18next.t('crm.sales.contractCreated'));
     },
     onError: (): void => {
-      toast.error('Failed to create contract');
+      toast.error(i18next.t('crm.contracts.createFailed'));
     },
   });
 };
@@ -364,10 +365,10 @@ export const useUpdateContract = (): UseMutationResult<
     onSuccess: (_data: Contract, variables: UpdateContractPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contracts'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-contract', variables.id] });
-      toast.success('Contract updated');
+      toast.success(i18next.t('crm.sales.contractUpdated'));
     },
     onError: (): void => {
-      toast.error('Failed to update contract');
+      toast.error(i18next.t('crm.sales.contractUpdateFailed'));
     },
   });
 };

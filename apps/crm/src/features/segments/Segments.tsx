@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
@@ -52,6 +53,7 @@ function RuleBuilder({
   onClose: () => void;
   onSave: (name: string, rules: SegmentRule[]) => void;
 }) {
+  const { t } = useTranslation();
   const [rules, setRules] = useState<SegmentRule[]>([
     { id: 1, field: 'totalSpent', operator: '>', value: '500' },
   ]);
@@ -68,7 +70,7 @@ function RuleBuilder({
       prev.map((r) => {
         if (r.id !== id) return r;
         if (key === 'field') {
-          const nextField = SEGMENT_RULE_FIELDS.find((field) => field.value === val)?.value;
+          const nextField = SEGMENT_RULE_FIELDS.find((field) => field === val);
           if (!nextField) return r;
           const nextOperators = getSegmentRuleOperators(nextField);
           return {
@@ -223,9 +225,9 @@ function RuleBuilder({
                   value={rule.field}
                   onChange={(e) => updateRule(rule.id, 'field', e.target.value)}
                 >
-                  {SEGMENT_RULE_FIELDS.map((f) => (
-                    <option key={f.value} value={f.value}>
-                      {f.label}
+                  {SEGMENT_RULE_FIELDS.map((field) => (
+                    <option key={field} value={field}>
+                      {t(`crm.segmentFields.${field}`)}
                     </option>
                   ))}
                 </select>

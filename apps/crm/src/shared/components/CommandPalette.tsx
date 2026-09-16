@@ -290,7 +290,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                   setQuery(e.target.value);
                   setCursor(0);
                 }}
-                placeholder="Search customers, navigate, create..."
+                placeholder={t('crm.commandPalette.placeholder')}
                 style={{
                   flex: 1,
                   background: 'transparent',
@@ -346,7 +346,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                     const Icon = item.icon;
                     return (
                       <button
-                        aria-label="Run command"
+                        aria-label={t('crm.commandPalette.runCommand')}
                         type="button"
                         key={item.id}
                         onClick={() => {

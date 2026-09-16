@@ -106,6 +106,6 @@ describe('CustomerProfile tags empty state', () => {
 
     fireEvent.click(addTag);
 
-    expect(screen.getByPlaceholderText('Add tag...')).toHaveFocus();
+    expect(screen.getByPlaceholderText('crm.customers.addTagPlaceholder')).toHaveFocus();
   });
 });

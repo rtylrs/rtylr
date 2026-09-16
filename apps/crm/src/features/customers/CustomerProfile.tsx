@@ -106,7 +106,7 @@ const CustomerProfile: React.FC = () => {
     return (
       <div style={{ maxWidth: '1100px', textAlign: 'center', padding: '60px 20px' }}>
         <p style={{ fontSize: '14px', color: 'var(--hub-text-muted)' }}>
-          Unable to load this customer. Please try again.
+          {t('crm.customerProfile.loadFailed')}
         </p>
       </div>
     );
@@ -115,7 +115,9 @@ const CustomerProfile: React.FC = () => {
   if (!customer) {
     return (
       <div style={{ maxWidth: '1100px', textAlign: 'center', padding: '60px 20px' }}>
-        <p style={{ fontSize: '14px', color: 'var(--hub-text-muted)' }}>Customer not found.</p>
+        <p style={{ fontSize: '14px', color: 'var(--hub-text-muted)' }}>
+          {t('crm.customerProfile.notFound')}
+        </p>
       </div>
     );
   }
@@ -135,7 +137,7 @@ const CustomerProfile: React.FC = () => {
 
   const handleAddTag = () => {
     if (!newTag.trim()) {
-      toast.error('Tag name is required');
+      toast.error(t('crm.customerProfile.tagNameRequired'));
       return;
     }
     const tagName = newTag.trim();
@@ -144,7 +146,7 @@ const CustomerProfile: React.FC = () => {
       { id: customer.id, data: { tags: updated } },
       {
         onSuccess: () => toast.success(`Tag "${tagName}" added`),
-        onError: () => toast.error('Failed to add tag'),
+        onError: () => toast.error(t('crm.customerProfile.addTagFailed')),
       }
     );
     setNewTag('');
@@ -156,7 +158,7 @@ const CustomerProfile: React.FC = () => {
       { id: customer.id, data: { tags: updated } },
       {
         onSuccess: () => toast.success(`Tag "${tag}" removed`),
-        onError: () => toast.error('Failed to remove tag'),
+        onError: () => toast.error(t('crm.customerProfile.removeTagFailed')),
       }
     );
   };
@@ -165,36 +167,36 @@ const CustomerProfile: React.FC = () => {
     update.mutate(
       { id: customer.id, data: { notes } },
       {
-        onSuccess: () => toast.success('Notes saved'),
-        onError: () => toast.error('Failed to save notes'),
+        onSuccess: () => toast.success(t('crm.customers.notesSaved')),
+        onError: () => toast.error(t('crm.customers.notesFailed')),
       }
     );
   };
 
   const handleAward = (points: number, reason: string) => {
     if (!loyaltyConfig?.programEnabled) {
-      toast.error('Loyalty program is currently disabled');
+      toast.error(t('crm.customerProfile.loyaltyDisabled'));
       return;
     }
     award.mutate(
       { customerId: customer.id, points, reason },
       {
         onSuccess: () => toast.success(`Awarded ${points} points`),
-        onError: () => toast.error('Failed to award points'),
+        onError: () => toast.error(t('crm.customerProfile.awardFailed')),
       }
     );
   };
 
   const handleDeduct = (points: number, reason: string) => {
     if (!loyaltyConfig?.programEnabled) {
-      toast.error('Loyalty program is currently disabled');
+      toast.error(t('crm.customerProfile.loyaltyDisabled'));
       return;
     }
     redeem.mutate(
       { customerId: customer.id, points, reason },
       {
         onSuccess: () => toast.success(`Deducted ${points} points`),
-        onError: () => toast.error('Failed to deduct points'),
+        onError: () => toast.error(t('crm.customerProfile.deductFailed')),
       }
     );
   };
@@ -202,11 +204,11 @@ const CustomerProfile: React.FC = () => {
   const handleDelete = () => {
     remove.mutate(customer.id, {
       onSuccess: () => {
-        toast.success('Customer deleted');
+        toast.success(t('crm.customers.deleted'));
         navigate({ to: '/customers' });
       },
       onError: () => {
-        toast.error('Failed to delete customer');
+        toast.error(t('crm.customers.deleteFailed'));
       },
     });
   };
@@ -214,7 +216,7 @@ const CustomerProfile: React.FC = () => {
   const handleExport = () => {
     exportData.mutate(customer.id, {
       onSuccess: (data) => {
-        toast.success('Customer data exported');
+        toast.success(t('crm.customers.exported'));
         if (data) {
           const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
@@ -227,15 +229,17 @@ const CustomerProfile: React.FC = () => {
           URL.revokeObjectURL(url);
         }
       },
-      onError: () => toast.error('Failed to export customer data'),
+      onError: () => toast.error(t('crm.customers.exportFailed')),
     });
   };
 
   return (
     <>
-      <HelmetContainer title="Customer profile · rtylr" />
+      <HelmetContainer title={`${t('crm.customerProfile.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
-        <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: customer.name }]} />
+        <Breadcrumbs
+          items={[{ label: t('nav.customers'), to: '/customers' }, { label: customer.name }]}
+        />
         <button
           type="button"
           onClick={() => navigate({ to: '/customers' })}
@@ -352,7 +356,7 @@ const CustomerProfile: React.FC = () => {
               onClick={() => navigate({ to: '/customers/merge?primary=' + customer.id })}
             >
               <Users size={13} />
-              Merge
+              {t('crm.customerProfile.merge')}
             </Button>
             {canDeleteCustomer && (
               <Button
@@ -374,12 +378,24 @@ const CustomerProfile: React.FC = () => {
             {/* Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
               {[
-                { label: 'Total Spent', value: `$${customer.totalSpent.toLocaleString()}` },
-                { label: 'Visits', value: customer.visits },
-                { label: 'Loyalty Points', value: customer.loyaltyPoints.toLocaleString() },
-                { label: 'Last Visit', value: customer.lastVisit },
+                {
+                  id: 'totalSpent',
+                  label: t('crm.customers.stats.totalSpent'),
+                  value: `$${customer.totalSpent.toLocaleString()}`,
+                },
+                { id: 'visits', label: t('crm.customers.stats.visits'), value: customer.visits },
+                {
+                  id: 'loyaltyPoints',
+                  label: t('crm.customers.stats.loyaltyPoints'),
+                  value: customer.loyaltyPoints.toLocaleString(),
+                },
+                {
+                  id: 'lastVisit',
+                  label: t('crm.customers.stats.lastVisit'),
+                  value: customer.lastVisit,
+                },
               ].map((s) => (
-                <Card key={s.label}>
+                <Card key={s.id}>
                   <div
                     style={{
                       fontSize: '10px',
@@ -453,7 +469,7 @@ const CustomerProfile: React.FC = () => {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
-                  placeholder="Add tag..."
+                  placeholder={t('crm.customers.addTagPlaceholder')}
                   style={{
                     flex: 1,
                     height: '32px',
@@ -467,7 +483,7 @@ const CustomerProfile: React.FC = () => {
                   }}
                 />
                 <Button variant="primary" onClick={handleAddTag} style={{ padding: '6px 12px' }}>
-                  Add
+                  {t('crm.leadDetail.add')}
                 </Button>
               </div>
             </Card>
@@ -484,11 +500,11 @@ const CustomerProfile: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Timeline
+                {t('crm.customerProfile.timeline')}
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {timeline.map((t) => (
-                  <TimelineEntryRow key={t.id} entry={t} />
+                {timeline.map((entry) => (
+                  <TimelineEntryRow key={entry.id} entry={entry} />
                 ))}
               </div>
               {fetchedTimeline?.nextCursor && (
@@ -497,7 +513,7 @@ const CustomerProfile: React.FC = () => {
                   onClick={() => setTimelineCursor(fetchedTimeline.nextCursor)}
                   style={{ marginTop: '14px' }}
                 >
-                  Load more
+                  {t('crm.customerProfile.loadMore')}
                 </Button>
               )}
             </Card>
@@ -516,7 +532,7 @@ const CustomerProfile: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Tier Progress
+                {t('crm.customerProfile.tierProgress')}
               </h4>
               <div
                 style={{
@@ -570,9 +586,9 @@ const CustomerProfile: React.FC = () => {
           open={confirmDelete}
           onClose={() => setConfirmDelete(false)}
           onConfirm={handleDelete}
-          title="Delete customer?"
+          title={t('crm.customers.deleteConfirmTitle')}
           description={`Are you sure you want to delete ${customer.name}? This action cannot be undone.`}
-          confirmLabel="Delete"
+          confirmLabel={t('common.delete')}
           variant="danger"
         />
       </div>
