@@ -197,6 +197,7 @@ function CampaignCard({
   canSend: boolean;
   canManage: boolean;
 }) {
+  const { t } = useTranslation();
   const ChannelIcon = channelIcon[campaign.channel];
 
   return (
@@ -266,20 +267,32 @@ function CampaignCard({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
         {[
           {
-            label: 'Audience',
+            id: 'audience',
+            label: t('crm.campaigns.colAudience'),
             value: campaign.audience ? campaign.audience.toLocaleString() : '-',
             icon: Users,
           },
           {
-            label: 'Sent',
+            id: 'sent',
+            label: t('crm.campaigns.colSent'),
             value: campaign.sent ? campaign.sent.toLocaleString() : '-',
             icon: Send,
           },
-          { label: 'Open Rate', value: campaign.openRate, icon: Eye },
-          { label: 'Click Rate', value: campaign.clickRate, icon: TrendingUp },
-        ].map(({ label, value, icon: Icon }) => (
+          {
+            id: 'openRate',
+            label: t('crm.campaigns.colOpenRate'),
+            value: campaign.openRate,
+            icon: Eye,
+          },
+          {
+            id: 'clickRate',
+            label: t('crm.campaigns.colClickRate'),
+            value: campaign.clickRate,
+            icon: TrendingUp,
+          },
+        ].map(({ id, label, value, icon: Icon }) => (
           <div
-            key={label}
+            key={id}
             style={{
               padding: '10px 12px',
               borderRadius: '8px',
@@ -393,7 +406,7 @@ function CampaignCard({
                 onDelete();
               }}
               disabled={deletePending}
-              aria-label="Delete campaign"
+              aria-label={t('crm.campaigns.deleteCampaign')}
               style={{
                 padding: '6px 10px',
                 borderRadius: '7px',
@@ -481,14 +494,14 @@ const Campaigns: React.FC = () => {
       return;
     }
     if (!campaign || !hasVerifiedCampaignAudience(campaign, audienceBySegment)) {
-      toast.error('No eligible recipients for this campaign');
+      toast.error(t('crm.campaigns.noEligibleRecipients'));
       return;
     }
     updateStatus.mutate(
       { id, status: 'active' },
       {
-        onSuccess: () => toast.success('Campaign activated'),
-        onError: () => toast.error('Failed to activate campaign'),
+        onSuccess: () => toast.success(t('crm.campaigns.activated')),
+        onError: () => toast.error(t('crm.campaigns.activateFailed')),
       }
     );
   };
@@ -497,8 +510,8 @@ const Campaigns: React.FC = () => {
     updateStatus.mutate(
       { id, status: 'paused' },
       {
-        onSuccess: () => toast.success('Campaign paused'),
-        onError: () => toast.error('Failed to pause campaign'),
+        onSuccess: () => toast.success(t('crm.campaigns.paused')),
+        onError: () => toast.error(t('crm.campaigns.pauseFailed')),
       }
     );
   };
@@ -515,11 +528,11 @@ const Campaigns: React.FC = () => {
   const handleDelete = (id: number): void => {
     removeCampaign.mutate(id, {
       onSuccess: () => {
-        toast.success('Campaign deleted');
+        toast.success(t('crm.campaigns.deleted'));
         setConfirmDeleteId(null);
       },
       onError: () => {
-        toast.error('Failed to delete campaign');
+        toast.error(t('crm.campaigns.deleteFailed'));
         setConfirmDeleteId(null);
       },
     });
@@ -529,16 +542,18 @@ const Campaigns: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Campaigns · rtylr" />
+      <HelmetContainer title={`${t('crm.campaigns.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              Campaigns
+              {t('crm.campaigns.pageTitle')}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-              {campaigns.filter((c) => c.status === 'Active').length} active campaigns
+              {t('crm.campaigns.activeCount', {
+                count: campaigns.filter((c) => c.status === 'Active').length,
+              })}
             </p>
           </div>
           {canManageCampaigns && (
@@ -636,7 +651,7 @@ const Campaigns: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {isError && campaigns.length === 0 && (
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
-              Unable to load campaigns. Please refresh and try again.
+              {t('crm.campaigns.loadFailed')}
             </div>
           )}
           {isLoading && campaigns.length === 0 && (
@@ -723,13 +738,13 @@ const Campaigns: React.FC = () => {
           open={confirmDeleteId !== null}
           onClose={() => setConfirmDeleteId(null)}
           onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
-          title="Delete campaign?"
+          title={t('crm.campaigns.deleteConfirmTitle')}
           description={
             deleteTarget
-              ? `Are you sure you want to delete ${deleteTarget.name}? This action cannot be undone.`
+              ? t('crm.campaigns.deleteConfirmDescription', { name: deleteTarget.name })
               : ''
           }
-          confirmLabel="Delete"
+          confirmLabel={t('common.delete')}
           variant="danger"
         />
       </div>
