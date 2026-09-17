@@ -124,7 +124,14 @@
   },
   "feedback": {
     "empty": "Aucun avis pour le moment",
-    "emptyDescription": "Les avis apparaîtront ici une fois collectés."
+    "emptyDescription": "Les avis apparaîtront ici une fois collectés.",
+    "pageTitle": "Avis",
+    "title": "Avis et NPS",
+    "npsScore": "Score NPS",
+    "avgRating": "Note moyenne",
+    "promoters": "Promoteurs",
+    "detractors": "Détracteurs",
+    "recentReviews": "Avis récents"
   },
   "templates": {
     "empty": "Aucun modèle",
@@ -132,7 +139,17 @@
     "new": "Nouveau modèle",
     "created": "Modèle créé",
     "updated": "Modèle mis à jour",
-    "deleted": "Modèle supprimé"
+    "deleted": "Modèle supprimé",
+    "pageTitle": "Modèles",
+    "libraryTitle": "Bibliothèque de modèles",
+    "librarySubtitle": "Modèles d’e-mail et de SMS réutilisables",
+    "use": "Utiliser",
+    "nameLabel": "Nom du modèle",
+    "nameAndBodyRequired": "Le nom et le contenu du modèle sont obligatoires",
+    "createFailed": "Échec de la création du modèle",
+    "categoryLabel": "Catégorie (promo, bienvenue...)",
+    "subjectLine": "Objet",
+    "bodyContent": "Contenu du message"
   },
   "campaigns": {
     "created": "Campaign created",
@@ -244,7 +261,33 @@
     "colDone": "Terminés"
   },
   "settings": {
-    "updated": "Settings updated"
+    "updated": "Settings updated",
+    "pageTitle": "Paramètres",
+    "tabGeneral": "Général",
+    "tabTeam": "Équipe",
+    "saved": "Paramètres enregistrés",
+    "saveFailed": "Échec de l’enregistrement des paramètres",
+    "saveChanges": "Enregistrer les modifications",
+    "business": "Entreprise",
+    "timezone": "Fuseau horaire",
+    "tzLosAngeles": "Heure du Pacifique (Los Angeles)",
+    "tzNewYork": "Heure de l’Est (New York)",
+    "tzLondon": "Londres",
+    "tzParis": "Paris",
+    "tzTokyo": "Tokyo",
+    "messaging": "Messagerie",
+    "fromEmail": "E-mail d’expéditeur",
+    "fromName": "Nom d’expéditeur",
+    "smsSenderId": "Identifiant d’expéditeur SMS",
+    "consentDefaults": "Consentements par défaut",
+    "optInByDefault": "Inscrire les nouveaux clients par défaut",
+    "optInByDefaultHint": "Les nouveaux clients seront inscrits au marketing sauf avis contraire",
+    "emailAndNameRequired": "L’e-mail et le nom complet sont obligatoires",
+    "teamTitle": "Équipe",
+    "teamSubtitle": "Les personnes ayant accès au CRM.",
+    "inviteSomeone": "Inviter quelqu’un au CRM",
+    "invitePlaceholder": "Marie Durand",
+    "subtitle": "Configurez les valeurs par défaut du CRM"
   },
   "team": {
     "inviteSent": "Invitation sent",
@@ -349,7 +392,19 @@
   "dashboard": {
     "atRiskEmptyTitle": "Aucun client à risque pour le moment",
     "campaignPerformanceUnavailableTitle": "Les performances des campagnes ne sont pas disponibles",
-    "campaignPerformanceUnavailableDescription": "Ces données n'ont pas pu être chargées depuis l'API du tableau de bord CRM."
+    "campaignPerformanceUnavailableDescription": "Ces données n'ont pas pu être chargées depuis l'API du tableau de bord CRM.",
+    "pageTitle": "Tableau de bord",
+    "noTrendData": "Aucune donnée de tendance",
+    "totalCustomers": "Total clients",
+    "newThisMonth": "Nouveaux ce mois-ci",
+    "activeLoyaltyMembers": "Membres fidélité actifs",
+    "campaignReach": "Portée des campagnes",
+    "avgLtv": "LTV moyenne",
+    "churnRate": "Taux d’attrition",
+    "topSegment": "Segment principal",
+    "atRiskCustomers": "Clients à risque",
+    "topCustomers": "Meilleurs clients",
+    "recentCampaignPerformance": "Performance récente des campagnes"
   },
   "actions": {
     "launch": "Launch",
@@ -573,5 +628,21 @@
     "send_sms": "Envoie un SMS",
     "award_points": "Ajoute des points de fidélité",
     "tag_add": "Ajoute une étiquette au client"
+  },
+  "layout": {
+    "workspace": "Espace de travail",
+    "sales": "Ventes",
+    "appearance": "Apparence",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "signOut": "Se déconnecter",
+    "openCommandPalette": "Ouvrir la palette de commandes",
+    "notifications": "Notifications",
+    "noNotifications": "Aucune nouvelle notification"
+  },
+  "addons": {
+    "loadFailedTitle": "Impossible de charger vos modules.",
+    "loadFailedDescription": "Vérifiez votre connexion et réessayez. Les ventes restent indisponibles tant que la liste des modules n’est pas chargée."
   }
 }

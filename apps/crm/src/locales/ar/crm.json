@@ -133,7 +133,14 @@
   },
   "feedback": {
     "empty": "لا توجد ملاحظات بعد",
-    "emptyDescription": "ستظهر الملاحظات هنا بعد جمعها."
+    "emptyDescription": "ستظهر الملاحظات هنا بعد جمعها.",
+    "pageTitle": "الملاحظات",
+    "title": "الملاحظات ومؤشر الترشيح",
+    "npsScore": "مؤشر الترشيح",
+    "avgRating": "متوسط التقييم",
+    "promoters": "المروّجون",
+    "detractors": "المنتقدون",
+    "recentReviews": "أحدث التقييمات"
   },
   "templates": {
     "empty": "لا توجد قوالب",
@@ -141,7 +148,17 @@
     "new": "قالب جديد",
     "created": "تم إنشاء القالب",
     "updated": "تم تحديث القالب",
-    "deleted": "تم حذف القالب"
+    "deleted": "تم حذف القالب",
+    "pageTitle": "القوالب",
+    "libraryTitle": "مكتبة القوالب",
+    "librarySubtitle": "قوالب بريد ورسائل نصية قابلة لإعادة الاستخدام",
+    "use": "استخدام",
+    "nameLabel": "اسم القالب",
+    "nameAndBodyRequired": "اسم القالب ونصّه مطلوبان",
+    "createFailed": "تعذّر إنشاء القالب",
+    "categoryLabel": "الفئة (مثل عرض أو ترحيب)",
+    "subjectLine": "سطر الموضوع",
+    "bodyContent": "محتوى النص"
   },
   "campaigns": {
     "created": "Campaign created",
@@ -262,7 +279,33 @@
     "colDone": "المكتمل"
   },
   "settings": {
-    "updated": "Settings updated"
+    "updated": "Settings updated",
+    "pageTitle": "الإعدادات",
+    "tabGeneral": "عام",
+    "tabTeam": "الفريق",
+    "saved": "حُفظت الإعدادات",
+    "saveFailed": "تعذّر حفظ الإعدادات",
+    "saveChanges": "حفظ التغييرات",
+    "business": "النشاط",
+    "timezone": "المنطقة الزمنية",
+    "tzLosAngeles": "توقيت المحيط الهادئ (لوس أنجلوس)",
+    "tzNewYork": "التوقيت الشرقي (نيويورك)",
+    "tzLondon": "لندن",
+    "tzParis": "باريس",
+    "tzTokyo": "طوكيو",
+    "messaging": "المراسلة",
+    "fromEmail": "البريد المُرسِل",
+    "fromName": "اسم المُرسِل",
+    "smsSenderId": "معرّف مُرسِل الرسائل النصية",
+    "consentDefaults": "الموافقات الافتراضية",
+    "optInByDefault": "تسجيل العملاء الجدد تلقائيًا",
+    "optInByDefaultHint": "سيُسجَّل العملاء الجدد في التسويق ما لم يرفضوا ذلك",
+    "emailAndNameRequired": "البريد الإلكتروني والاسم الكامل مطلوبان",
+    "teamTitle": "الفريق",
+    "teamSubtitle": "الأشخاص الذين لديهم وصول إلى إدارة العملاء.",
+    "inviteSomeone": "ادعُ شخصًا إلى إدارة العملاء",
+    "invitePlaceholder": "سارة أحمد",
+    "subtitle": "اضبط الإعدادات الافتراضية لإدارة العملاء"
   },
   "team": {
     "inviteSent": "Invitation sent",
@@ -367,7 +410,19 @@
   "dashboard": {
     "atRiskEmptyTitle": "لا يوجد عملاء معرضون للخطر حاليًا",
     "campaignPerformanceUnavailableTitle": "أداء الحملات غير متاح",
-    "campaignPerformanceUnavailableDescription": "تعذّر تحميل هذه البيانات من واجهة برمجة تطبيقات لوحة تحكم إدارة العلاقات مع العملاء."
+    "campaignPerformanceUnavailableDescription": "تعذّر تحميل هذه البيانات من واجهة برمجة تطبيقات لوحة تحكم إدارة العلاقات مع العملاء.",
+    "pageTitle": "لوحة المعلومات",
+    "noTrendData": "لا توجد بيانات اتجاه",
+    "totalCustomers": "إجمالي العملاء",
+    "newThisMonth": "الجدد هذا الشهر",
+    "activeLoyaltyMembers": "أعضاء الولاء النشطون",
+    "campaignReach": "مدى وصول الحملات",
+    "avgLtv": "متوسط القيمة الدائمة",
+    "churnRate": "معدل الفقد",
+    "topSegment": "أبرز شريحة",
+    "atRiskCustomers": "العملاء المعرّضون للفقد",
+    "topCustomers": "أبرز العملاء",
+    "recentCampaignPerformance": "أداء الحملات الأخير"
   },
   "actions": {
     "launch": "Launch",
@@ -591,5 +646,21 @@
     "send_sms": "يرسل رسالة نصية",
     "award_points": "يضيف نقاط ولاء",
     "tag_add": "يضيف وسمًا إلى العميل"
+  },
+  "layout": {
+    "workspace": "مساحة العمل",
+    "sales": "المبيعات",
+    "appearance": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "signOut": "تسجيل الخروج",
+    "openCommandPalette": "فتح لوحة الأوامر",
+    "notifications": "الإشعارات",
+    "noNotifications": "لا إشعارات جديدة"
+  },
+  "addons": {
+    "loadFailedTitle": "تعذّر تحميل الإضافات.",
+    "loadFailedDescription": "تحقّق من اتصالك وحاول مرة أخرى. تبقى المبيعات غير متاحة حتى تُحمَّل قائمة الإضافات."
   }
 }

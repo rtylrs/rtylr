@@ -121,7 +121,14 @@
   },
   "feedback": {
     "empty": "No feedback yet",
-    "emptyDescription": "Feedback will appear here once collected."
+    "emptyDescription": "Feedback will appear here once collected.",
+    "pageTitle": "Feedback",
+    "title": "Feedback and NPS",
+    "npsScore": "NPS score",
+    "avgRating": "Avg rating",
+    "promoters": "Promoters",
+    "detractors": "Detractors",
+    "recentReviews": "Recent reviews"
   },
   "templates": {
     "empty": "No templates",
@@ -129,7 +136,17 @@
     "new": "New template",
     "created": "Template created",
     "updated": "Template updated",
-    "deleted": "Template deleted"
+    "deleted": "Template deleted",
+    "pageTitle": "Templates",
+    "libraryTitle": "Templates library",
+    "librarySubtitle": "Reusable email and SMS templates",
+    "use": "Use",
+    "nameLabel": "Template name",
+    "nameAndBodyRequired": "Template name and body are required",
+    "createFailed": "Failed to create template",
+    "categoryLabel": "Category (e.g. promo, welcome)",
+    "subjectLine": "Subject line",
+    "bodyContent": "Body content"
   },
   "campaigns": {
     "created": "Campaign created",
@@ -238,7 +255,33 @@
     "colDone": "Done"
   },
   "settings": {
-    "updated": "Settings updated"
+    "updated": "Settings updated",
+    "pageTitle": "Settings",
+    "tabGeneral": "General",
+    "tabTeam": "Team",
+    "saved": "Settings saved",
+    "saveFailed": "Failed to save settings",
+    "saveChanges": "Save changes",
+    "business": "Business",
+    "timezone": "Timezone",
+    "tzLosAngeles": "Pacific Time (Los Angeles)",
+    "tzNewYork": "Eastern Time (New York)",
+    "tzLondon": "London",
+    "tzParis": "Paris",
+    "tzTokyo": "Tokyo",
+    "messaging": "Messaging",
+    "fromEmail": "From email",
+    "fromName": "From name",
+    "smsSenderId": "SMS sender ID",
+    "consentDefaults": "Consent defaults",
+    "optInByDefault": "Opt in new customers by default",
+    "optInByDefaultHint": "New customers will be opted into marketing unless they say otherwise",
+    "emailAndNameRequired": "Email and full name are required",
+    "teamTitle": "Team",
+    "teamSubtitle": "People who have access to CRM.",
+    "inviteSomeone": "Invite someone to CRM",
+    "invitePlaceholder": "Jane Smith",
+    "subtitle": "Configure your CRM defaults"
   },
   "team": {
     "inviteSent": "Invitation sent",
@@ -343,7 +386,19 @@
   "dashboard": {
     "atRiskEmptyTitle": "No at-risk customers right now",
     "campaignPerformanceUnavailableTitle": "Campaign performance is unavailable",
-    "campaignPerformanceUnavailableDescription": "This data couldn't be loaded from the CRM dashboard API."
+    "campaignPerformanceUnavailableDescription": "This data couldn't be loaded from the CRM dashboard API.",
+    "pageTitle": "Dashboard",
+    "noTrendData": "No trend data",
+    "totalCustomers": "Total customers",
+    "newThisMonth": "New this month",
+    "activeLoyaltyMembers": "Active loyalty members",
+    "campaignReach": "Campaign reach",
+    "avgLtv": "Avg LTV",
+    "churnRate": "Churn rate",
+    "topSegment": "Top segment",
+    "atRiskCustomers": "At-risk customers",
+    "topCustomers": "Top customers",
+    "recentCampaignPerformance": "Recent campaign performance"
   },
   "actions": {
     "launch": "Launch",
@@ -567,5 +622,21 @@
     "send_sms": "Sends an SMS message",
     "award_points": "Adds loyalty points",
     "tag_add": "Adds a tag to the customer"
+  },
+  "layout": {
+    "workspace": "Workspace",
+    "sales": "Sales",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "signOut": "Sign out",
+    "openCommandPalette": "Open command palette",
+    "notifications": "Notifications",
+    "noNotifications": "No new notifications"
+  },
+  "addons": {
+    "loadFailedTitle": "Could not load your add-ons.",
+    "loadFailedDescription": "Check your connection and try again. Sales stays unavailable until the add-on list loads."
   }
 }

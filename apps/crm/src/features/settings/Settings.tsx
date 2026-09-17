@@ -29,14 +29,17 @@ interface TabDef {
   icon: React.ComponentType<{ size?: number }>;
 }
 
-const TABS: TabDef[] = [
-  { id: 'general', label: 'General', icon: Settings2 },
-  { id: 'team', label: 'Team', icon: Users },
+// Ids only: module scope runs before i18next has a language. The labels come
+// from crm.settings.tab<Id> where the tab bar renders.
+const TABS: Omit<TabDef, 'label'>[] = [
+  { id: 'general', icon: Settings2 },
+  { id: 'team', icon: Users },
 ];
 
 // ── General Tab ───────────────────────────────────────────────────────────────
 
 const GeneralTab: React.FC = () => {
+  const { t } = useTranslation();
   const { data: fetched } = useCrmSettings();
   const update = useUpdateCrmSettings();
   const defaultSettings: Settings = {
@@ -57,8 +60,8 @@ const GeneralTab: React.FC = () => {
 
   const handleSave = (): void => {
     update.mutate(form, {
-      onSuccess: () => toast.success('Settings saved'),
-      onError: () => toast.error('Failed to save settings'),
+      onSuccess: () => toast.success(t('crm.settings.saved')),
+      onError: () => toast.error(t('crm.settings.saveFailed')),
     });
   };
 
@@ -67,7 +70,7 @@ const GeneralTab: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
         <Button variant="primary" onClick={handleSave}>
           <Save size={13} />
-          Save changes
+          {t('crm.settings.saveChanges')}
         </Button>
       </div>
 
@@ -82,19 +85,19 @@ const GeneralTab: React.FC = () => {
             letterSpacing: '0.05em',
           }}
         >
-          Business
+          {t('crm.settings.business')}
         </h4>
         <div style={{ display: 'grid', gap: '12px' }}>
           <Select
-            label="Timezone"
+            label={t('crm.settings.timezone')}
             value={form.timezone}
             onChange={(e) => set('timezone', e.target.value)}
           >
-            <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
-            <option value="America/New_York">Eastern Time (New York)</option>
-            <option value="Europe/London">London</option>
-            <option value="Europe/Paris">Paris</option>
-            <option value="Asia/Tokyo">Tokyo</option>
+            <option value="America/Los_Angeles">{t('crm.settings.tzLosAngeles')}</option>
+            <option value="America/New_York">{t('crm.settings.tzNewYork')}</option>
+            <option value="Europe/London">{t('crm.settings.tzLondon')}</option>
+            <option value="Europe/Paris">{t('crm.settings.tzParis')}</option>
+            <option value="Asia/Tokyo">{t('crm.settings.tzTokyo')}</option>
           </Select>
           <p style={{ margin: 0, fontSize: '11px', color: 'var(--hub-text-muted)' }}>
             Business profile, currency, and at-risk policy are not available from the CRM settings
@@ -114,22 +117,22 @@ const GeneralTab: React.FC = () => {
             letterSpacing: '0.05em',
           }}
         >
-          Messaging
+          {t('crm.settings.messaging')}
         </h4>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <Input
-            label="From email"
+            label={t('crm.settings.fromEmail')}
             type="email"
             value={form.fromEmail}
             onChange={(e) => set('fromEmail', e.target.value)}
           />
           <Input
-            label="From name"
+            label={t('crm.settings.fromName')}
             value={form.fromName}
             onChange={(e) => set('fromName', e.target.value)}
           />
           <Input
-            label="SMS sender ID"
+            label={t('crm.settings.smsSenderId')}
             value={form.smsSenderId}
             onChange={(e) => set('smsSenderId', e.target.value)}
           />
@@ -147,7 +150,7 @@ const GeneralTab: React.FC = () => {
             letterSpacing: '0.05em',
           }}
         >
-          Consent defaults
+          {t('crm.settings.consentDefaults')}
         </h4>
         <label
           style={{
@@ -166,10 +169,10 @@ const GeneralTab: React.FC = () => {
           />
           <div>
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-              Opt in new customers by default
+              {t('crm.settings.optInByDefault')}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              New customers will be opted into marketing unless they say otherwise
+              {t('crm.settings.optInByDefaultHint')}
             </div>
           </div>
         </label>
@@ -196,7 +199,7 @@ const TeamTab: React.FC = () => {
 
   const handleInvite = (): void => {
     if (!email.trim() || !fullName.trim()) {
-      toast.error('Email and full name are required');
+      toast.error(t('crm.settings.emailAndNameRequired'));
       return;
     }
     invite.mutate(
@@ -227,10 +230,10 @@ const TeamTab: React.FC = () => {
     <div style={{ maxWidth: '680px', display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div>
         <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 4px' }}>
-          Team
+          {t('crm.settings.teamTitle')}
         </h2>
         <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', margin: 0 }}>
-          People who have access to CRM.
+          {t('crm.settings.teamSubtitle')}
         </p>
       </div>
 
@@ -239,7 +242,7 @@ const TeamTab: React.FC = () => {
           <h3
             style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px' }}
           >
-            Invite someone to CRM
+            {t('crm.settings.inviteSomeone')}
           </h3>
           <div
             style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}
@@ -254,11 +257,11 @@ const TeamTab: React.FC = () => {
                   color: 'var(--hub-text-muted)',
                 }}
               >
-                Full name
+                {t('crm.createCustomer.fullName')}
               </label>
               <input
                 type="text"
-                placeholder="Jane Smith"
+                placeholder={t('crm.settings.invitePlaceholder')}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 style={inputStyle}
@@ -274,7 +277,7 @@ const TeamTab: React.FC = () => {
                   color: 'var(--hub-text-muted)',
                 }}
               >
-                Email
+                {t('common.email')}
               </label>
               <input
                 type="email"
@@ -317,7 +320,7 @@ const TeamTab: React.FC = () => {
               {invite.isPending ? 'Sending…' : 'Send invite'}
             </Button>
             <Button variant="ghost" onClick={() => setShowInvite(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
           </div>
         </Card>
@@ -325,7 +328,7 @@ const TeamTab: React.FC = () => {
         <div>
           <Button variant="primary" onClick={() => setShowInvite(true)}>
             <UserPlus size={13} />
-            Invite member
+            {t('crm.team.inviteMember')}
           </Button>
         </div>
       ) : null}
@@ -462,13 +465,14 @@ const TeamTab: React.FC = () => {
 // ── Main Settings Component ───────────────────────────────────────────────────
 
 const SettingsScreen: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabId>('general');
 
   return (
     <>
-      <HelmetContainer title="Settings · rtylr" />
+      <HelmetContainer title={`${t('crm.settings.pageTitle')} · rtylr`} />
       <div>
-        <PageHeader title="Settings" subtitle="Configure your CRM defaults" />
+        <PageHeader title={t('crm.settings.pageTitle')} subtitle={t('crm.settings.subtitle')} />
 
         {/* Tab bar */}
         <div
@@ -505,7 +509,7 @@ const SettingsScreen: React.FC = () => {
                 }}
               >
                 <Icon size={14} />
-                {tab.label}
+                {t(`crm.settings.tab${tab.id === 'general' ? 'General' : 'Team'}`)}
               </button>
             );
           })}

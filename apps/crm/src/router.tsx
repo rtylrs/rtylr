@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   createRootRoute,
   createRoute,
@@ -233,6 +234,7 @@ const settingsRoute = createRoute({
 const appClient = createOneKitClient(AppServiceClient, 'crm');
 
 function SalesAddonGuard({ children }: { children: React.ReactNode }): React.JSX.Element {
+  const { t } = useTranslation();
   // A failed addons query must not read as "sales disabled": swallowing the
   // error and caching the empty result for 5 minutes made Sales vanish with
   // no explanation and no retry (#941). Let the query throw so errors are
@@ -255,9 +257,9 @@ function SalesAddonGuard({ children }: { children: React.ReactNode }): React.JSX
         className="flex h-[60vh] flex-col items-center justify-center gap-3"
         style={{ color: 'var(--crm-text, #111)' }}
       >
-        <p className="text-sm font-medium">Could not load your add-ons.</p>
+        <p className="text-sm font-medium">{t('crm.addons.loadFailedTitle')}</p>
         <p className="text-xs" style={{ opacity: 0.7 }}>
-          Check your connection and try again. Sales stays unavailable until the add-on list loads.
+          {t('crm.addons.loadFailedDescription')}
         </p>
         <button
           type="button"
@@ -265,7 +267,7 @@ function SalesAddonGuard({ children }: { children: React.ReactNode }): React.JSX
           className="mt-2 rounded-lg border px-4 py-2 text-sm transition-colors hover:bg-black/5"
           style={{ borderColor: 'var(--crm-border, #e5e5e5)' }}
         >
-          Retry
+          {t('crm.actions.retry')}
         </button>
       </div>
     );

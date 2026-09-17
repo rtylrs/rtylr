@@ -44,7 +44,7 @@ import SettingsScreen from './Settings';
 
 function renderSettings(): void {
   render(<SettingsScreen />);
-  fireEvent.click(screen.getByRole('button', { name: 'Team' }));
+  fireEvent.click(screen.getByRole('button', { name: 'crm.settings.tabTeam' }));
 }
 
 beforeEach(() => {
@@ -59,10 +59,14 @@ describe('Settings team empty state', () => {
 
     expect(screen.getByText('crm.team.emptyTitle')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.team.inviteMember' }));
+    // Header and empty-state actions share one key now, so both carry the same
+    // accessible name. Assert both exist rather than matching one by luck.
+    const buttons = screen.getAllByRole('button', { name: 'crm.team.inviteMember' });
+    expect(buttons).toHaveLength(2);
+    fireEvent.click(buttons[1]);
 
     // Opens the inline invite form rather than mutating anything itself.
-    expect(screen.getByText('Invite someone to CRM')).toBeInTheDocument();
+    expect(screen.getByText('crm.settings.inviteSomeone')).toBeInTheDocument();
   });
 
   it('falls back to a "refresh" call-to-action for a role that cannot invite', () => {

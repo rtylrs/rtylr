@@ -23,9 +23,9 @@ const Feedback: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Feedback · rtylr" />
+      <HelmetContainer title={`${t('crm.feedback.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
-        <PageHeader title="Feedback and NPS" subtitle={`${feedback.length} responses`} />
+        <PageHeader title={t('crm.feedback.title')} subtitle={`${feedback.length} responses`} />
 
         <div
           style={{
@@ -45,7 +45,7 @@ const Feedback: React.FC = () => {
                 fontWeight: 700,
               }}
             >
-              NPS Score
+              {t('crm.feedback.npsScore')}
             </div>
             <div
               style={{
@@ -68,7 +68,7 @@ const Feedback: React.FC = () => {
                 fontWeight: 700,
               }}
             >
-              Avg Rating
+              {t('crm.feedback.avgRating')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
               <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--hub-text)' }}>
@@ -87,7 +87,7 @@ const Feedback: React.FC = () => {
                 fontWeight: 700,
               }}
             >
-              Promoters
+              {t('crm.feedback.promoters')}
             </div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: '#10b981', marginTop: '4px' }}>
               {promoters}
@@ -106,7 +106,7 @@ const Feedback: React.FC = () => {
                 fontWeight: 700,
               }}
             >
-              Detractors
+              {t('crm.feedback.detractors')}
             </div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: '#ef4444', marginTop: '4px' }}>
               {detractors}
@@ -129,7 +129,7 @@ const Feedback: React.FC = () => {
                 letterSpacing: '0.05em',
               }}
             >
-              Recent reviews
+              {t('crm.feedback.recentReviews')}
             </h4>
           </div>
           {isLoading ? (

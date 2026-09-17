@@ -30,6 +30,8 @@ const ACCENT = '#3b82f6';
 const AT_RISK_DAYS = 60;
 
 interface StatItem {
+  /** Stable id, used as the React key: the label is a translation and changes with the language. */
+  id: string;
   label: string;
   value: string;
   change: string | undefined;
@@ -46,6 +48,7 @@ const tierColor: Record<string, string> = {
 };
 
 function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX.Element {
+  const { t } = useTranslation();
   const Icon = stat.icon;
   return (
     <motion.div
@@ -103,7 +106,7 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX
           </span>
         ) : (
           <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', paddingBottom: '2px' }}>
-            No trend data
+            {t('crm.dashboard.noTrendData')}
           </span>
         )}
       </div>
@@ -159,7 +162,8 @@ const Dashboard: React.FC = () => {
   const stats = dashboardData
     ? [
         {
-          label: 'Total Customers',
+          id: 'totalCustomers',
+          label: t('crm.dashboard.totalCustomers'),
           value: (dashboardData as DashboardStats).totalCustomers.toLocaleString(),
           change: dashboardData.totalCustomersChange,
           up: dashboardData.totalCustomersChange?.startsWith('+'),
@@ -167,7 +171,8 @@ const Dashboard: React.FC = () => {
           color: '#3b82f6',
         },
         {
-          label: 'New This Month',
+          id: 'newThisMonth',
+          label: t('crm.dashboard.newThisMonth'),
           value: dashboardData.newThisMonth.toLocaleString(),
           change: dashboardData.newThisMonthChange,
           up: dashboardData.newThisMonthChange?.startsWith('+'),
@@ -175,7 +180,8 @@ const Dashboard: React.FC = () => {
           color: '#10b981',
         },
         {
-          label: 'Active Loyalty Members',
+          id: 'activeLoyaltyMembers',
+          label: t('crm.dashboard.activeLoyaltyMembers'),
           value: dashboardData.activeLoyaltyMembers.toLocaleString(),
           change: dashboardData.activeLoyaltyMembersChange,
           up: dashboardData.activeLoyaltyMembersChange?.startsWith('+'),
@@ -183,7 +189,8 @@ const Dashboard: React.FC = () => {
           color: '#f59e0b',
         },
         {
-          label: 'Campaign Reach',
+          id: 'campaignReach',
+          label: t('crm.dashboard.campaignReach'),
           value:
             dashboardData.campaignReach === undefined
               ? 'Unavailable'
@@ -200,7 +207,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={`${t('crm.dashboard.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
@@ -220,7 +227,7 @@ const Dashboard: React.FC = () => {
                   <Skeleton height={10} width="40%" />
                 </div>
               ))
-            : stats.map((stat, i) => <StatCard key={stat.label} stat={stat} index={i} />)}
+            : stats.map((stat, i) => <StatCard key={stat.id} stat={stat} index={i} />)}
         </div>
 
         {/* Extended KPI widgets */}
@@ -253,7 +260,7 @@ const Dashboard: React.FC = () => {
                   fontWeight: 700,
                 }}
               >
-                Avg LTV
+                {t('crm.dashboard.avgLtv')}
               </span>
               <div
                 style={{
@@ -308,7 +315,7 @@ const Dashboard: React.FC = () => {
                   fontWeight: 700,
                 }}
               >
-                New This Month
+                {t('crm.dashboard.newThisMonth')}
               </span>
               <div
                 style={{
@@ -361,7 +368,7 @@ const Dashboard: React.FC = () => {
                   fontWeight: 700,
                 }}
               >
-                Churn Rate
+                {t('crm.dashboard.churnRate')}
               </span>
               <div
                 style={{
@@ -416,7 +423,7 @@ const Dashboard: React.FC = () => {
                   fontWeight: 700,
                 }}
               >
-                Top Segment
+                {t('crm.dashboard.topSegment')}
               </span>
               <div
                 style={{
@@ -475,7 +482,7 @@ const Dashboard: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                At-risk customers
+                {t('crm.dashboard.atRiskCustomers')}
               </span>
               <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
                 not visited in {AT_RISK_DAYS}+ days
@@ -561,7 +568,7 @@ const Dashboard: React.FC = () => {
           >
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hub-border)' }}>
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                Top Customers
+                {t('crm.dashboard.topCustomers')}
               </span>
             </div>
             <div>
@@ -643,7 +650,7 @@ const Dashboard: React.FC = () => {
           >
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hub-border)' }}>
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                Recent Campaign Performance
+                {t('crm.dashboard.recentCampaignPerformance')}
               </span>
             </div>
             <div>
