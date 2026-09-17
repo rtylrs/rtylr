@@ -72,23 +72,23 @@ const SMSCampaign: React.FC = () => {
     const callbacks = {
       onSuccess: (result: { campaignId?: number; campaign_id?: number }) => {
         if (!send) {
-          toast.success('Draft saved');
+          toast.success(t('crm.campaigns.draftSaved'));
           navigate({ to: '/campaigns' });
           return;
         }
         const createdId = result.campaignId ?? result.campaign_id;
         if (!createdId && !campaignId) {
-          toast.error('Campaign was saved but could not be activated');
+          toast.error(t('crm.campaigns.savedNotActivated'));
           return;
         }
         updateStatus.mutate(
           { id: campaignId ?? createdId!, status: 'active' },
           {
             onSuccess: () => {
-              toast.success('SMS campaign activated');
+              toast.success(t('crm.campaigns.smsActivated'));
               navigate({ to: '/campaigns' });
             },
-            onError: () => toast.error('Campaign was saved but could not be activated'),
+            onError: () => toast.error(t('crm.campaigns.savedNotActivated')),
           }
         );
       },
@@ -111,17 +111,23 @@ const SMSCampaign: React.FC = () => {
   return (
     <>
       <HelmetContainer
-        title={isEditing ? 'Edit SMS campaign · rtylr' : 'New SMS campaign · rtylr'}
+        title={`${isEditing ? t('crm.campaignEditor.editSmsTitle') : t('crm.campaignEditor.newSmsTitle')} · rtylr`}
       />
       <div style={{ maxWidth: '1100px' }}>
         <Breadcrumbs
           items={[
-            { label: 'Campaigns', to: '/campaigns' },
-            { label: isEditing ? 'Edit SMS' : 'New SMS' },
+            { label: t('nav.campaigns'), to: '/campaigns' },
+            {
+              label: isEditing
+                ? t('crm.campaignEditor.breadcrumbEditSms')
+                : t('crm.campaignEditor.breadcrumbNewSms'),
+            },
           ]}
         />
         <PageHeader
-          title={isEditing ? 'Edit SMS campaign' : 'New SMS campaign'}
+          title={
+            isEditing ? t('crm.campaignEditor.editSmsTitle') : t('crm.campaignEditor.newSmsTitle')
+          }
           actions={
             <>
               {canManageCampaigns && (
@@ -152,10 +158,10 @@ const SMSCampaign: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Card>
               <Input
-                label="Campaign name"
+                label={t('crm.campaignEditor.nameLabel')}
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="SMS Promo"
+                placeholder={t('crm.campaignEditor.smsNamePlaceholder')}
                 style={{ marginBottom: '14px' }}
               />
               {/* The rest of this screen predates i18n and is still hardcoded
@@ -181,7 +187,7 @@ const SMSCampaign: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Recipient preview
+                {t('crm.campaignEditor.recipientPreview')}
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {previewRecipients.map((customer) => (
@@ -232,7 +238,7 @@ const SMSCampaign: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Audience
+                {t('crm.campaignEditor.audience')}
               </h4>
               <Select value={segmentId} onChange={(event) => setSegmentId(event.target.value)}>
                 {segments.map((item) => (
@@ -258,7 +264,7 @@ const SMSCampaign: React.FC = () => {
                       fontWeight: 700,
                     }}
                   >
-                    Recipients
+                    {t('crm.campaignEditor.recipients')}
                   </div>
                   <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--hub-text)' }}>
                     {segment.customerCount.toLocaleString()}
@@ -277,7 +283,7 @@ const SMSCampaign: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Reminder
+                {t('crm.campaignEditor.reminder')}
               </h4>
               <p
                 style={{

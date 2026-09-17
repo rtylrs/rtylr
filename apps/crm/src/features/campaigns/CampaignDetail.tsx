@@ -54,9 +54,11 @@ const CampaignDetail: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Campaign detail · rtylr" />
+      <HelmetContainer title={`${t('crm.campaignDetail.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1200px' }}>
-        <Breadcrumbs items={[{ label: 'Campaigns', to: '/campaigns' }, { label: campaign.name }]} />
+        <Breadcrumbs
+          items={[{ label: t('nav.campaigns'), to: '/campaigns' }, { label: campaign.name }]}
+        />
         <button
           type="button"
           onClick={() => navigate({ to: '/campaigns' })}
@@ -133,40 +135,40 @@ const CampaignDetail: React.FC = () => {
               }}
             >
               <CampaignStatsCard
-                label="Sent"
+                label={t('crm.campaignDetail.statSent')}
                 value={stats.sent.toLocaleString()}
-                subValue={`${stats.delivered.toLocaleString()} delivered`}
+                subValue={t('crm.campaignDetail.subDelivered', { count: stats.delivered })}
               />
               <CampaignStatsCard
-                label="Delivered"
+                label={t('crm.campaignDetail.statDelivered')}
                 value={`${pct(stats.delivered, stats.sent)}%`}
                 subValue={`${stats.delivered.toLocaleString()}`}
                 color="#10b981"
               />
               <CampaignStatsCard
-                label="Opened"
+                label={t('crm.campaignDetail.statOpened')}
                 value={`${pct(stats.opened, stats.delivered)}%`}
-                subValue={`${stats.opened.toLocaleString()} opens`}
+                subValue={t('crm.campaignDetail.subOpens', { count: stats.opened })}
                 sparkline={stats.timeline.map((t) => t.opens)}
                 color="#3b82f6"
               />
               <CampaignStatsCard
-                label="Clicked"
+                label={t('crm.campaignDetail.statClicked')}
                 value={`${pct(stats.clicked, stats.delivered)}%`}
-                subValue={`${stats.clicked.toLocaleString()} clicks`}
+                subValue={t('crm.campaignDetail.subClicks', { count: stats.clicked })}
                 sparkline={stats.timeline.map((t) => t.clicks)}
                 color="#8b5cf6"
               />
               <CampaignStatsCard
-                label="Unsubscribed"
+                label={t('crm.campaignDetail.statUnsubscribed')}
                 value={stats.unsubscribed}
                 subValue={`${pct(stats.unsubscribed, stats.delivered)}%`}
                 color="#ef4444"
               />
               <CampaignStatsCard
-                label="Revenue"
+                label={t('crm.campaignDetail.statRevenue')}
                 value={`$${stats.revenue.toLocaleString()}`}
-                subValue="from campaign"
+                subValue={t('crm.campaignDetail.subFromCampaign')}
                 color="#22c55e"
               />
             </div>
@@ -182,7 +184,7 @@ const CampaignDetail: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Engagement by day
+                {t('crm.campaignDetail.engagementByDay')}
               </h4>
               <div
                 style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '160px' }}
@@ -252,7 +254,7 @@ const CampaignDetail: React.FC = () => {
                       display: 'inline-block',
                     }}
                   />{' '}
-                  Opens
+                  {t('crm.campaignDetail.opens')}
                 </span>
                 <span
                   style={{
@@ -271,7 +273,7 @@ const CampaignDetail: React.FC = () => {
                       display: 'inline-block',
                     }}
                   />{' '}
-                  Clicks
+                  {t('crm.campaignDetail.clicks')}
                 </span>
               </div>
             </Card>

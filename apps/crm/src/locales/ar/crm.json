@@ -74,7 +74,14 @@
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
-    "pointsRedeemed": "Points redeemed"
+    "pointsRedeemed": "Points redeemed",
+    "pageTitle": "الولاء",
+    "programTitle": "برنامج الولاء",
+    "programSubtitle": "اضبط المستويات وقواعد النقاط ومكافآت الأعضاء",
+    "programConfiguration": "إعدادات البرنامج",
+    "never": "أبدًا",
+    "redemptionRate": "معدل الاستبدال",
+    "pointsActivityLog": "سجل حركة النقاط"
   },
   "leads": {
     "loadFailedTitle": "تعذّر تحميل العملاء المحتملين",
@@ -106,16 +113,34 @@
     "loadFailedTitle": "تعذّر تحميل الأعضاء",
     "empty": "لا يوجد أعضاء",
     "searchEmptyDescription": "جرّب مصطلح بحث مختلف.",
-    "trueEmptyDescription": "سيظهر الأعضاء هنا بعد انضمام العملاء إلى برنامج الولاء."
+    "trueEmptyDescription": "سيظهر الأعضاء هنا بعد انضمام العملاء إلى برنامج الولاء.",
+    "pageTitle": "أعضاء الولاء",
+    "searchPlaceholder": "ابحث في الأعضاء..."
   },
   "rewards": {
     "empty": "لا توجد مكافآت بعد",
     "emptyDescription": "أضف أول مكافأة إلى القائمة.",
-    "addReward": "إضافة مكافأة"
+    "addReward": "إضافة مكافأة",
+    "pageTitle": "كتالوج المكافآت",
+    "subtitle": "ما يمكن للعملاء استبدال نقاطهم به",
+    "newReward": "مكافأة جديدة",
+    "nameLabel": "اسم المكافأة",
+    "nameRequired": "اسم المكافأة مطلوب",
+    "saveFailed": "تعذّر حفظ المكافأة",
+    "categoryLabel": "الفئة (مثل خصم أو هدية)",
+    "pointsCost": "تكلفة النقاط",
+    "stock": "المخزون"
   },
   "feedback": {
     "empty": "لا توجد ملاحظات بعد",
-    "emptyDescription": "ستظهر الملاحظات هنا بعد جمعها."
+    "emptyDescription": "ستظهر الملاحظات هنا بعد جمعها.",
+    "pageTitle": "الملاحظات",
+    "title": "الملاحظات ومؤشر الترشيح",
+    "npsScore": "مؤشر الترشيح",
+    "avgRating": "متوسط التقييم",
+    "promoters": "المروّجون",
+    "detractors": "المنتقدون",
+    "recentReviews": "أحدث التقييمات"
   },
   "templates": {
     "empty": "لا توجد قوالب",
@@ -123,7 +148,17 @@
     "new": "قالب جديد",
     "created": "تم إنشاء القالب",
     "updated": "تم تحديث القالب",
-    "deleted": "تم حذف القالب"
+    "deleted": "تم حذف القالب",
+    "pageTitle": "القوالب",
+    "libraryTitle": "مكتبة القوالب",
+    "librarySubtitle": "قوالب بريد ورسائل نصية قابلة لإعادة الاستخدام",
+    "use": "استخدام",
+    "nameLabel": "اسم القالب",
+    "nameAndBodyRequired": "اسم القالب ونصّه مطلوبان",
+    "createFailed": "تعذّر إنشاء القالب",
+    "categoryLabel": "الفئة (مثل عرض أو ترحيب)",
+    "subjectLine": "سطر الموضوع",
+    "bodyContent": "محتوى النص"
   },
   "campaigns": {
     "created": "Campaign created",
@@ -148,12 +183,45 @@
     "loadMore": "تحميل المزيد من الحملات",
     "newEmailCampaign": "حملة بريد إلكتروني جديدة",
     "descriptionLabel": "الوصف",
-    "descriptionPlaceholder": "الغرض من هذه الحملة"
+    "descriptionPlaceholder": "الغرض من هذه الحملة",
+    "pageTitle": "الحملات",
+    "loadFailed": "تعذّر تحميل الحملات. حدّث الصفحة وحاول مرة أخرى.",
+    "noEligibleRecipients": "لا يوجد مستلمون مؤهلون لهذه الحملة",
+    "activated": "فُعّلت الحملة",
+    "activateFailed": "تعذّر تفعيل الحملة",
+    "savedNotActivated": "حُفظت الحملة لكن تعذّر تفعيلها",
+    "smsActivated": "فُعّلت حملة الرسائل النصية",
+    "deleteCampaign": "حذف الحملة",
+    "colAudience": "الجمهور",
+    "colSent": "المُرسَل",
+    "colOpenRate": "معدل الفتح",
+    "colClickRate": "معدل النقر",
+    "activeCount_zero": "لا حملات نشطة",
+    "activeCount_one": "حملة نشطة واحدة",
+    "activeCount_two": "حملتان نشطتان",
+    "activeCount_few": "{{count}} حملات نشطة",
+    "activeCount_many": "{{count}} حملة نشطة",
+    "activeCount_other": "{{count}} حملة نشطة",
+    "deleteConfirmDescription": "هل تريد بالتأكيد حذف {{name}}؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "campaignDetail": {
     "notFoundTitle": "الحملة غير موجودة",
     "notFoundDescription": "تعذّر تحميل هذه الحملة.",
-    "backToCampaigns": "العودة إلى الحملات"
+    "backToCampaigns": "العودة إلى الحملات",
+    "pageTitle": "تفاصيل الحملة",
+    "statSent": "المُرسَل",
+    "statDelivered": "المُسلَّم",
+    "statOpened": "المفتوح",
+    "statClicked": "المنقور",
+    "statUnsubscribed": "إلغاء الاشتراك",
+    "statRevenue": "الإيراد",
+    "subDelivered": "{{count}} مُسلَّمة",
+    "subOpens": "{{count}} فتحة",
+    "subClicks": "{{count}} نقرة",
+    "subFromCampaign": "من الحملة",
+    "engagementByDay": "التفاعل حسب اليوم",
+    "opens": "الفتحات",
+    "clicks": "النقرات"
   },
   "segments": {
     "created": "Segment created",
@@ -161,7 +229,22 @@
     "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
-    "deleteConfirmTitle": "Delete segment?"
+    "deleteConfirmTitle": "Delete segment?",
+    "pageTitle": "الشرائح",
+    "deleteSegment": "حذف الشريحة",
+    "breadcrumbNew": "جديدة",
+    "activeCount_zero": "لا شرائح نشطة",
+    "activeCount_one": "شريحة نشطة واحدة",
+    "activeCount_two": "شريحتان نشطتان",
+    "activeCount_few": "{{count}} شرائح نشطة",
+    "activeCount_many": "{{count}} شريحة نشطة",
+    "activeCount_other": "{{count}} شريحة نشطة",
+    "customersTotal_zero": "لا عملاء إجمالًا",
+    "customersTotal_one": "عميل واحد إجمالًا",
+    "customersTotal_two": "عميلان إجمالًا",
+    "customersTotal_few": "{{count}} عملاء إجمالًا",
+    "customersTotal_many": "{{count}} عميلًا إجمالًا",
+    "customersTotal_other": "{{count}} عميل إجمالًا"
   },
   "segmentDetail": {
     "notFoundTitle": "الشريحة غير موجودة",
@@ -169,7 +252,11 @@
     "backToSegments": "العودة إلى الشرائح",
     "noCustomersTitle": "لا يوجد عملاء",
     "noCustomersDescription": "هذه الشريحة فارغة.",
-    "loadMoreCustomers": "تحميل المزيد من العملاء"
+    "loadMoreCustomers": "تحميل المزيد من العملاء",
+    "pageTitle": "تفاصيل الشريحة",
+    "trend": "الاتجاه",
+    "avgSpend": "متوسط الإنفاق",
+    "customersIn": "العملاء في هذه الشريحة"
   },
   "automations": {
     "created": "Automation created",
@@ -184,10 +271,41 @@
     "updateFailed": "Failed to update automation",
     "emptyTitle": "لا توجد أتمتة بعد",
     "emptyDescription": "أنشئ حملات تلقائية وتهاني أعياد ميلاد ومسارات استعادة العملاء.",
-    "createOne": "إنشاء واحدة"
+    "createOne": "إنشاء واحدة",
+    "pageTitle": "الأتمتة",
+    "deleteAutomation": "حذف الأتمتة",
+    "colTrigger": "المُشغِّل",
+    "colEnrolled": "المسجَّلون",
+    "colDone": "المكتمل"
   },
   "settings": {
-    "updated": "Settings updated"
+    "updated": "Settings updated",
+    "pageTitle": "الإعدادات",
+    "tabGeneral": "عام",
+    "tabTeam": "الفريق",
+    "saved": "حُفظت الإعدادات",
+    "saveFailed": "تعذّر حفظ الإعدادات",
+    "saveChanges": "حفظ التغييرات",
+    "business": "النشاط",
+    "timezone": "المنطقة الزمنية",
+    "tzLosAngeles": "توقيت المحيط الهادئ (لوس أنجلوس)",
+    "tzNewYork": "التوقيت الشرقي (نيويورك)",
+    "tzLondon": "لندن",
+    "tzParis": "باريس",
+    "tzTokyo": "طوكيو",
+    "messaging": "المراسلة",
+    "fromEmail": "البريد المُرسِل",
+    "fromName": "اسم المُرسِل",
+    "smsSenderId": "معرّف مُرسِل الرسائل النصية",
+    "consentDefaults": "الموافقات الافتراضية",
+    "optInByDefault": "تسجيل العملاء الجدد تلقائيًا",
+    "optInByDefaultHint": "سيُسجَّل العملاء الجدد في التسويق ما لم يرفضوا ذلك",
+    "emailAndNameRequired": "البريد الإلكتروني والاسم الكامل مطلوبان",
+    "teamTitle": "الفريق",
+    "teamSubtitle": "الأشخاص الذين لديهم وصول إلى إدارة العملاء.",
+    "inviteSomeone": "ادعُ شخصًا إلى إدارة العملاء",
+    "invitePlaceholder": "سارة أحمد",
+    "subtitle": "اضبط الإعدادات الافتراضية لإدارة العملاء"
   },
   "team": {
     "inviteSent": "Invitation sent",
@@ -292,7 +410,19 @@
   "dashboard": {
     "atRiskEmptyTitle": "لا يوجد عملاء معرضون للخطر حاليًا",
     "campaignPerformanceUnavailableTitle": "أداء الحملات غير متاح",
-    "campaignPerformanceUnavailableDescription": "تعذّر تحميل هذه البيانات من واجهة برمجة تطبيقات لوحة تحكم إدارة العلاقات مع العملاء."
+    "campaignPerformanceUnavailableDescription": "تعذّر تحميل هذه البيانات من واجهة برمجة تطبيقات لوحة تحكم إدارة العلاقات مع العملاء.",
+    "pageTitle": "لوحة المعلومات",
+    "noTrendData": "لا توجد بيانات اتجاه",
+    "totalCustomers": "إجمالي العملاء",
+    "newThisMonth": "الجدد هذا الشهر",
+    "activeLoyaltyMembers": "أعضاء الولاء النشطون",
+    "campaignReach": "مدى وصول الحملات",
+    "avgLtv": "متوسط القيمة الدائمة",
+    "churnRate": "معدل الفقد",
+    "topSegment": "أبرز شريحة",
+    "atRiskCustomers": "العملاء المعرّضون للفقد",
+    "topCustomers": "أبرز العملاء",
+    "recentCampaignPerformance": "أداء الحملات الأخير"
   },
   "actions": {
     "launch": "Launch",
@@ -442,5 +572,95 @@
     "lt": "أصغر من",
     "eq": "يساوي",
     "ne": "لا يساوي"
+  },
+  "campaignEditor": {
+    "preview": "معاينة",
+    "nameLabel": "اسم الحملة",
+    "emailNamePlaceholder": "عرض الربيع",
+    "smsNamePlaceholder": "عرض عبر الرسائل النصية",
+    "startFromTemplate": "ابدأ من قالب",
+    "blank": "فارغ",
+    "audience": "الجمهور",
+    "recipients": "المستلمون",
+    "recipientPreview": "معاينة المستلمين",
+    "reminder": "تذكير",
+    "tips": "نصائح",
+    "tipSubjectLength": "أبقِ سطر الموضوع دون 60 حرفًا",
+    "tipPersonalization": "استخدم first_name للتخصيص",
+    "tipCallToAction": "أضف دعوة واضحة لاتخاذ إجراء",
+    "breadcrumbEditEmail": "تعديل البريد",
+    "breadcrumbNewEmail": "بريد جديد",
+    "breadcrumbEditSms": "تعديل الرسالة النصية",
+    "breadcrumbNewSms": "رسالة نصية جديدة",
+    "editEmailTitle": "تعديل حملة البريد",
+    "newEmailTitle": "حملة بريد جديدة",
+    "editSmsTitle": "تعديل حملة الرسائل النصية",
+    "newSmsTitle": "حملة رسائل نصية جديدة"
+  },
+  "segmentBuilder": {
+    "pageTitle": "شريحة جديدة",
+    "subtitle": "ابنِ قواعد ديناميكية لاستهداف العملاء",
+    "namePlaceholder": "العملاء ذوو القيمة العالية",
+    "color": "اللون",
+    "descriptionPlaceholder": "ما الذي يحدد هذه الشريحة؟",
+    "rules": "القواعد",
+    "matchAll": "مطابقة الكل",
+    "matchAny": "مطابقة أي",
+    "title": "منشئ الشرائح",
+    "nameLabel": "اسم الشريحة",
+    "and": "و",
+    "addRule": "إضافة قاعدة",
+    "createSegment": "إنشاء الشريحة"
+  },
+  "loyaltyTiers": {
+    "pageTitle": "مستويات الولاء",
+    "thresholdOrder": "يجب أن يكون حد المستوى أكبر من المستويات الأدنى وأقل من المستويات الأعلى",
+    "subtitle": "اضبط هيكل المستويات والمزايا"
+  },
+  "automationBuilder": {
+    "subtitle": "اسحب المشغّلات والإجراءات لبناء سير عمل",
+    "namePlaceholder": "سلسلة الترحيب",
+    "triggers": "المشغّلات",
+    "workflow": "سير العمل",
+    "breadcrumbEdit": "تعديل",
+    "breadcrumbNew": "جديدة"
+  },
+  "automationTriggers": {
+    "customer_signup": "عميل جديد",
+    "tag_added": "أُضيف وسم",
+    "points_threshold": "حد النقاط"
+  },
+  "automationTriggerDescriptions": {
+    "customer_signup": "عند إنشاء عميل",
+    "tag_added": "عند إضافة وسم إلى عميل",
+    "points_threshold": "عند بلوغ نقاط العميل الحد المستهدف"
+  },
+  "automationActions": {
+    "send_email": "إرسال بريد إلكتروني",
+    "send_sms": "إرسال رسالة نصية",
+    "award_points": "منح نقاط",
+    "tag_add": "إضافة وسم"
+  },
+  "automationActionDescriptions": {
+    "send_email": "يرسل حملة بريد إلكتروني",
+    "send_sms": "يرسل رسالة نصية",
+    "award_points": "يضيف نقاط ولاء",
+    "tag_add": "يضيف وسمًا إلى العميل"
+  },
+  "layout": {
+    "workspace": "مساحة العمل",
+    "sales": "المبيعات",
+    "appearance": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "signOut": "تسجيل الخروج",
+    "openCommandPalette": "فتح لوحة الأوامر",
+    "notifications": "الإشعارات",
+    "noNotifications": "لا إشعارات جديدة"
+  },
+  "addons": {
+    "loadFailedTitle": "تعذّر تحميل الإضافات.",
+    "loadFailedDescription": "تحقّق من اتصالك وحاول مرة أخرى. تبقى المبيعات غير متاحة حتى تُحمَّل قائمة الإضافات."
   }
 }

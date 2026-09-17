@@ -27,7 +27,7 @@ const Templates: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim() || !newBody.trim()) {
-      toast.error('Template name and body are required');
+      toast.error(t('crm.templates.nameAndBodyRequired'));
       return;
     }
     try {
@@ -38,14 +38,14 @@ const Templates: React.FC = () => {
         subject: newChannel === 'email' ? newSubject.trim() : undefined,
         body: newBody.trim(),
       });
-      toast.success('Template created');
+      toast.success(t('crm.templates.created'));
       setShowCreate(false);
       setNewName('');
       setNewSubject('');
       setNewBody('');
       setNewCategory('general');
     } catch {
-      toast.error('Failed to create template');
+      toast.error(t('crm.templates.createFailed'));
     }
   };
 
@@ -72,15 +72,15 @@ const Templates: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Templates · rtylr" />
+      <HelmetContainer title={`${t('crm.templates.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
         <PageHeader
-          title="Templates library"
-          subtitle="Reusable email and SMS templates"
+          title={t('crm.templates.libraryTitle')}
+          subtitle={t('crm.templates.librarySubtitle')}
           actions={
             <Button variant="primary" onClick={() => setShowCreate(true)}>
               <Plus size={13} />
-              New template
+              {t('crm.templates.new')}
             </Button>
           }
         />
@@ -129,12 +129,12 @@ const Templates: React.FC = () => {
               gap: '14px',
             }}
           >
-            {filtered.map((t) => {
-              const Icon = t.channel === 'email' ? Mail : MessageSquare;
-              const color = t.channel === 'email' ? '#3b82f6' : '#f59e0b';
+            {filtered.map((template) => {
+              const Icon = template.channel === 'email' ? Mail : MessageSquare;
+              const color = template.channel === 'email' ? '#3b82f6' : '#f59e0b';
               return (
                 <div
-                  key={t.id}
+                  key={template.id}
                   style={{
                     background: 'var(--hub-card)',
                     border: '1px solid var(--hub-border)',
@@ -177,7 +177,7 @@ const Templates: React.FC = () => {
                         textTransform: 'uppercase',
                       }}
                     >
-                      {t.category}
+                      {template.category}
                     </span>
                   </div>
                   <div>
@@ -189,13 +189,13 @@ const Templates: React.FC = () => {
                         margin: '0 0 4px',
                       }}
                     >
-                      {t.name}
+                      {template.name}
                     </h3>
-                    {t.subject && (
+                    {template.subject && (
                       <div
                         style={{ fontSize: '11px', color: 'var(--hub-text-dim)', fontWeight: 500 }}
                       >
-                        {t.subject}
+                        {template.subject}
                       </div>
                     )}
                     <p
@@ -210,23 +210,23 @@ const Templates: React.FC = () => {
                         overflow: 'hidden',
                       }}
                     >
-                      {t.body}
+                      {template.body}
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px', marginTop: 'auto' }}>
                     <Button
                       variant="outline"
                       style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
-                      onClick={() => duplicate(t)}
+                      onClick={() => duplicate(template)}
                     >
                       <Copy size={11} /> Duplicate
                     </Button>
                     <Button
                       variant="primary"
                       style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
-                      onClick={() => applyTemplate(t)}
+                      onClick={() => applyTemplate(template)}
                     >
-                      Use
+                      {t('crm.templates.use')}
                     </Button>
                   </div>
                 </div>
@@ -265,10 +265,10 @@ const Templates: React.FC = () => {
               <h3
                 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}
               >
-                New Template
+                {t('crm.templates.new')}
               </h3>
               <input
-                placeholder="Template name"
+                placeholder={t('crm.templates.nameLabel')}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 style={{
@@ -294,11 +294,11 @@ const Templates: React.FC = () => {
                   outline: 'none',
                 }}
               >
-                <option value="email">Email</option>
-                <option value="sms">SMS</option>
+                <option value="email">{t('common.email')}</option>
+                <option value="sms">{t('crm.components.sms')}</option>
               </select>
               <input
-                placeholder="Category (e.g. promo, welcome)"
+                placeholder={t('crm.templates.categoryLabel')}
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
                 style={{
@@ -313,7 +313,7 @@ const Templates: React.FC = () => {
               />
               {newChannel === 'email' && (
                 <input
-                  placeholder="Subject line"
+                  placeholder={t('crm.templates.subjectLine')}
                   value={newSubject}
                   onChange={(e) => setNewSubject(e.target.value)}
                   style={{
@@ -328,7 +328,7 @@ const Templates: React.FC = () => {
                 />
               )}
               <textarea
-                placeholder="Body content"
+                placeholder={t('crm.templates.bodyContent')}
                 value={newBody}
                 onChange={(e) => setNewBody(e.target.value)}
                 rows={4}
@@ -346,7 +346,7 @@ const Templates: React.FC = () => {
               />
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <Button variant="outline" onClick={() => setShowCreate(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   variant="primary"

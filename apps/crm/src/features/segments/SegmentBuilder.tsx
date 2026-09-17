@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -17,6 +18,7 @@ interface Rule {
 let nextRuleId = 1;
 
 const SegmentBuilder: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const create = useCreateSegment();
   const [name, setName] = useState('');
@@ -49,11 +51,11 @@ const SegmentBuilder: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Segment created');
+          toast.success(t('crm.segments.created'));
           navigate({ to: '/segments' });
         },
         onError: () => {
-          toast.error('Failed to create segment');
+          toast.error(t('crm.segments.createFailed'));
         },
       }
     );
@@ -61,12 +63,17 @@ const SegmentBuilder: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="New segment · rtylr" />
+      <HelmetContainer title={`${t('crm.segmentBuilder.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '840px' }}>
-        <Breadcrumbs items={[{ label: 'Segments', to: '/segments' }, { label: 'New' }]} />
+        <Breadcrumbs
+          items={[
+            { label: t('nav.segments'), to: '/segments' },
+            { label: t('crm.segments.breadcrumbNew') },
+          ]}
+        />
         <PageHeader
-          title="New segment"
-          subtitle="Build dynamic rules to target customers"
+          title={t('crm.segmentBuilder.pageTitle')}
+          subtitle={t('crm.segmentBuilder.subtitle')}
           actions={
             <Button variant="primary" onClick={handleSave} disabled={!name || create.isPending}>
               <Save size={13} />
@@ -86,10 +93,10 @@ const SegmentBuilder: React.FC = () => {
               }}
             >
               <Input
-                label="Name"
+                label={t('common.name')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="High Value Customers"
+                placeholder={t('crm.segmentBuilder.namePlaceholder')}
               />
               <div>
                 <div
@@ -102,7 +109,7 @@ const SegmentBuilder: React.FC = () => {
                     marginBottom: '4px',
                   }}
                 >
-                  Color
+                  {t('crm.segmentBuilder.color')}
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#e879f9'].map((c) => (
@@ -124,10 +131,10 @@ const SegmentBuilder: React.FC = () => {
               </div>
             </div>
             <Textarea
-              label="Description"
+              label={t('crm.campaigns.descriptionLabel')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What defines this segment?"
+              placeholder={t('crm.segmentBuilder.descriptionPlaceholder')}
             />
           </Card>
 
@@ -150,7 +157,7 @@ const SegmentBuilder: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Rules
+                {t('crm.segmentBuilder.rules')}
               </h4>
               <div
                 style={{
@@ -162,8 +169,8 @@ const SegmentBuilder: React.FC = () => {
                 }}
               >
                 {[
-                  { key: true, label: 'Match all' },
-                  { key: false, label: 'Match any' },
+                  { key: true, label: t('crm.segmentBuilder.matchAll') },
+                  { key: false, label: t('crm.segmentBuilder.matchAny') },
                 ].map((o) => (
                   <button
                     type="button"

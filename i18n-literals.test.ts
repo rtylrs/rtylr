@@ -17,7 +17,7 @@ import { collectLiterals, formatLiterals } from './test/i18nLiterals';
  * finding. Each app joins as it is cleared, the way `ENFORCED_APPS` in
  * `i18n-key-resolution.test.ts` grew from two to nine.
  */
-const ENFORCED_APPS = ['auth', 'finance', 'flow', 'hr', 'insights', 'recruit'] as const;
+const ENFORCED_APPS = ['auth', 'crm', 'finance', 'flow', 'hr', 'insights', 'recruit'] as const;
 
 /**
  * Text that is deliberately not translated, per app.
@@ -43,6 +43,24 @@ const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
     // Login.tsx and Register.tsx both catch it and show their own translated
     // message, so this text reaches a stack trace and nowhere else.
     'Social sign-in returned no redirect URL',
+  ],
+  crm: [
+    // The automation trigger and action labels, which are persisted rather than
+    // displayed. Each is written to the automation's `trigger` column and into
+    // every saved node, and `triggerTypeFor` in useAutomations.ts is a lookup
+    // keyed on these exact strings, used to resolve the type of automations
+    // saved before `automationType` existed. Translating them would write
+    // Arabic into that column and stop old rows resolving at all.
+    //
+    // What the builder shows comes from the type instead, via
+    // crm.automationTriggers.<type>. These are the wire values, not copy.
+    'New customer',
+    'Tag added',
+    'Points threshold',
+    'Send email',
+    'Send SMS',
+    'Award points',
+    'Add tag',
   ],
   flow: [
     // Key caps and keyboard hints. The user's keyboard says these whatever
@@ -81,6 +99,7 @@ const ALLOWED: Record<(typeof ENFORCED_APPS)[number], readonly string[]> = {
  */
 const MINIMUM_KEYS: Record<(typeof ENFORCED_APPS)[number], number> = {
   auth: 70,
+  crm: 450,
   finance: 180,
   flow: 500,
   hr: 700,

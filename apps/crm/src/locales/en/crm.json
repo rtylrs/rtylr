@@ -62,7 +62,14 @@
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
-    "pointsRedeemed": "Points redeemed"
+    "pointsRedeemed": "Points redeemed",
+    "pageTitle": "Loyalty",
+    "programTitle": "Loyalty program",
+    "programSubtitle": "Configure tiers, point rules, and member rewards",
+    "programConfiguration": "Program configuration",
+    "never": "Never",
+    "redemptionRate": "Redemption rate",
+    "pointsActivityLog": "Points activity log"
   },
   "leads": {
     "loadFailedTitle": "Unable to load leads",
@@ -94,16 +101,34 @@
     "loadFailedTitle": "Unable to load members",
     "empty": "No members found",
     "searchEmptyDescription": "Try a different search term.",
-    "trueEmptyDescription": "Members will appear here once customers join your loyalty program."
+    "trueEmptyDescription": "Members will appear here once customers join your loyalty program.",
+    "pageTitle": "Loyalty members",
+    "searchPlaceholder": "Search members..."
   },
   "rewards": {
     "empty": "No rewards yet",
     "emptyDescription": "Add your first reward to the catalog.",
-    "addReward": "Add reward"
+    "addReward": "Add reward",
+    "pageTitle": "Rewards catalog",
+    "subtitle": "What customers can redeem their points for",
+    "newReward": "New reward",
+    "nameLabel": "Reward name",
+    "nameRequired": "Reward name is required",
+    "saveFailed": "Failed to save reward",
+    "categoryLabel": "Category (e.g. discount, freebie)",
+    "pointsCost": "Points cost",
+    "stock": "Stock"
   },
   "feedback": {
     "empty": "No feedback yet",
-    "emptyDescription": "Feedback will appear here once collected."
+    "emptyDescription": "Feedback will appear here once collected.",
+    "pageTitle": "Feedback",
+    "title": "Feedback and NPS",
+    "npsScore": "NPS score",
+    "avgRating": "Avg rating",
+    "promoters": "Promoters",
+    "detractors": "Detractors",
+    "recentReviews": "Recent reviews"
   },
   "templates": {
     "empty": "No templates",
@@ -111,7 +136,17 @@
     "new": "New template",
     "created": "Template created",
     "updated": "Template updated",
-    "deleted": "Template deleted"
+    "deleted": "Template deleted",
+    "pageTitle": "Templates",
+    "libraryTitle": "Templates library",
+    "librarySubtitle": "Reusable email and SMS templates",
+    "use": "Use",
+    "nameLabel": "Template name",
+    "nameAndBodyRequired": "Template name and body are required",
+    "createFailed": "Failed to create template",
+    "categoryLabel": "Category (e.g. promo, welcome)",
+    "subjectLine": "Subject line",
+    "bodyContent": "Body content"
   },
   "campaigns": {
     "created": "Campaign created",
@@ -136,12 +171,41 @@
     "loadMore": "Load more campaigns",
     "newEmailCampaign": "New email campaign",
     "descriptionLabel": "Description",
-    "descriptionPlaceholder": "What this campaign is for"
+    "descriptionPlaceholder": "What this campaign is for",
+    "pageTitle": "Campaigns",
+    "loadFailed": "Unable to load campaigns. Please refresh and try again.",
+    "noEligibleRecipients": "No eligible recipients for this campaign",
+    "activated": "Campaign activated",
+    "activateFailed": "Failed to activate campaign",
+    "savedNotActivated": "Campaign was saved but could not be activated",
+    "smsActivated": "SMS campaign activated",
+    "deleteCampaign": "Delete campaign",
+    "colAudience": "Audience",
+    "colSent": "Sent",
+    "colOpenRate": "Open rate",
+    "colClickRate": "Click rate",
+    "activeCount_one": "{{count}} active campaign",
+    "activeCount_other": "{{count}} active campaigns",
+    "deleteConfirmDescription": "Are you sure you want to delete {{name}}? This action cannot be undone."
   },
   "campaignDetail": {
     "notFoundTitle": "Campaign not found",
     "notFoundDescription": "This campaign could not be loaded.",
-    "backToCampaigns": "Back to campaigns"
+    "backToCampaigns": "Back to campaigns",
+    "pageTitle": "Campaign detail",
+    "statSent": "Sent",
+    "statDelivered": "Delivered",
+    "statOpened": "Opened",
+    "statClicked": "Clicked",
+    "statUnsubscribed": "Unsubscribed",
+    "statRevenue": "Revenue",
+    "subDelivered": "{{count}} delivered",
+    "subOpens": "{{count}} opens",
+    "subClicks": "{{count}} clicks",
+    "subFromCampaign": "from campaign",
+    "engagementByDay": "Engagement by day",
+    "opens": "Opens",
+    "clicks": "Clicks"
   },
   "segments": {
     "created": "Segment created",
@@ -149,7 +213,14 @@
     "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
-    "deleteConfirmTitle": "Delete segment?"
+    "deleteConfirmTitle": "Delete segment?",
+    "pageTitle": "Segments",
+    "deleteSegment": "Delete segment",
+    "breadcrumbNew": "New",
+    "activeCount_one": "{{count}} active segment",
+    "activeCount_other": "{{count}} active segments",
+    "customersTotal_one": "{{count}} customer total",
+    "customersTotal_other": "{{count}} customers total"
   },
   "segmentDetail": {
     "notFoundTitle": "Segment not found",
@@ -157,7 +228,11 @@
     "backToSegments": "Back to segments",
     "noCustomersTitle": "No customers",
     "noCustomersDescription": "This segment is empty.",
-    "loadMoreCustomers": "Load more customers"
+    "loadMoreCustomers": "Load more customers",
+    "pageTitle": "Segment detail",
+    "trend": "Trend",
+    "avgSpend": "Avg spend",
+    "customersIn": "Customers in this segment"
   },
   "automations": {
     "created": "Automation created",
@@ -172,10 +247,41 @@
     "updateFailed": "Failed to update automation",
     "emptyTitle": "No automations yet",
     "emptyDescription": "Set up drip campaigns, birthday greetings, and win-back flows.",
-    "createOne": "Create one"
+    "createOne": "Create one",
+    "pageTitle": "Automations",
+    "deleteAutomation": "Delete automation",
+    "colTrigger": "Trigger",
+    "colEnrolled": "Enrolled",
+    "colDone": "Done"
   },
   "settings": {
-    "updated": "Settings updated"
+    "updated": "Settings updated",
+    "pageTitle": "Settings",
+    "tabGeneral": "General",
+    "tabTeam": "Team",
+    "saved": "Settings saved",
+    "saveFailed": "Failed to save settings",
+    "saveChanges": "Save changes",
+    "business": "Business",
+    "timezone": "Timezone",
+    "tzLosAngeles": "Pacific Time (Los Angeles)",
+    "tzNewYork": "Eastern Time (New York)",
+    "tzLondon": "London",
+    "tzParis": "Paris",
+    "tzTokyo": "Tokyo",
+    "messaging": "Messaging",
+    "fromEmail": "From email",
+    "fromName": "From name",
+    "smsSenderId": "SMS sender ID",
+    "consentDefaults": "Consent defaults",
+    "optInByDefault": "Opt in new customers by default",
+    "optInByDefaultHint": "New customers will be opted into marketing unless they say otherwise",
+    "emailAndNameRequired": "Email and full name are required",
+    "teamTitle": "Team",
+    "teamSubtitle": "People who have access to CRM.",
+    "inviteSomeone": "Invite someone to CRM",
+    "invitePlaceholder": "Jane Smith",
+    "subtitle": "Configure your CRM defaults"
   },
   "team": {
     "inviteSent": "Invitation sent",
@@ -280,7 +386,19 @@
   "dashboard": {
     "atRiskEmptyTitle": "No at-risk customers right now",
     "campaignPerformanceUnavailableTitle": "Campaign performance is unavailable",
-    "campaignPerformanceUnavailableDescription": "This data couldn't be loaded from the CRM dashboard API."
+    "campaignPerformanceUnavailableDescription": "This data couldn't be loaded from the CRM dashboard API.",
+    "pageTitle": "Dashboard",
+    "noTrendData": "No trend data",
+    "totalCustomers": "Total customers",
+    "newThisMonth": "New this month",
+    "activeLoyaltyMembers": "Active loyalty members",
+    "campaignReach": "Campaign reach",
+    "avgLtv": "Avg LTV",
+    "churnRate": "Churn rate",
+    "topSegment": "Top segment",
+    "atRiskCustomers": "At-risk customers",
+    "topCustomers": "Top customers",
+    "recentCampaignPerformance": "Recent campaign performance"
   },
   "actions": {
     "launch": "Launch",
@@ -430,5 +548,95 @@
     "lt": "less than",
     "eq": "equals",
     "ne": "not equals"
+  },
+  "campaignEditor": {
+    "preview": "Preview",
+    "nameLabel": "Campaign name",
+    "emailNamePlaceholder": "Spring promo",
+    "smsNamePlaceholder": "SMS promo",
+    "startFromTemplate": "Start from template",
+    "blank": "Blank",
+    "audience": "Audience",
+    "recipients": "Recipients",
+    "recipientPreview": "Recipient preview",
+    "reminder": "Reminder",
+    "tips": "Tips",
+    "tipSubjectLength": "Keep subject lines under 60 characters",
+    "tipPersonalization": "Use first_name for personalization",
+    "tipCallToAction": "Include a clear call to action",
+    "breadcrumbEditEmail": "Edit email",
+    "breadcrumbNewEmail": "New email",
+    "breadcrumbEditSms": "Edit SMS",
+    "breadcrumbNewSms": "New SMS",
+    "editEmailTitle": "Edit email campaign",
+    "newEmailTitle": "New email campaign",
+    "editSmsTitle": "Edit SMS campaign",
+    "newSmsTitle": "New SMS campaign"
+  },
+  "segmentBuilder": {
+    "pageTitle": "New segment",
+    "subtitle": "Build dynamic rules to target customers",
+    "namePlaceholder": "High value customers",
+    "color": "Color",
+    "descriptionPlaceholder": "What defines this segment?",
+    "rules": "Rules",
+    "matchAll": "Match all",
+    "matchAny": "Match any",
+    "title": "Segment builder",
+    "nameLabel": "Segment name",
+    "and": "AND",
+    "addRule": "Add rule",
+    "createSegment": "Create segment"
+  },
+  "loyaltyTiers": {
+    "pageTitle": "Loyalty tiers",
+    "thresholdOrder": "Tier threshold must be greater than lower tiers and less than higher tiers",
+    "subtitle": "Configure your tier structure and perks"
+  },
+  "automationBuilder": {
+    "subtitle": "Drag triggers and actions to build a workflow",
+    "namePlaceholder": "Welcome series",
+    "triggers": "Triggers",
+    "workflow": "Workflow",
+    "breadcrumbEdit": "Edit",
+    "breadcrumbNew": "New"
+  },
+  "automationTriggers": {
+    "customer_signup": "New customer",
+    "tag_added": "Tag added",
+    "points_threshold": "Points threshold"
+  },
+  "automationTriggerDescriptions": {
+    "customer_signup": "When a customer is created",
+    "tag_added": "When a tag is added to a customer",
+    "points_threshold": "When customer points reach target"
+  },
+  "automationActions": {
+    "send_email": "Send email",
+    "send_sms": "Send SMS",
+    "award_points": "Award points",
+    "tag_add": "Add tag"
+  },
+  "automationActionDescriptions": {
+    "send_email": "Sends an email campaign",
+    "send_sms": "Sends an SMS message",
+    "award_points": "Adds loyalty points",
+    "tag_add": "Adds a tag to the customer"
+  },
+  "layout": {
+    "workspace": "Workspace",
+    "sales": "Sales",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "signOut": "Sign out",
+    "openCommandPalette": "Open command palette",
+    "notifications": "Notifications",
+    "noNotifications": "No new notifications"
+  },
+  "addons": {
+    "loadFailedTitle": "Could not load your add-ons.",
+    "loadFailedDescription": "Check your connection and try again. Sales stays unavailable until the add-on list loads."
   }
 }

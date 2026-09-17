@@ -330,7 +330,7 @@ const DefaultLayout: React.FC = () => {
                 marginTop: '4px',
               }}
             >
-              Workspace
+              {t('crm.layout.workspace')}
             </p>
             {navItems.map((item) => (
               <SidebarNavItem key={item.path} {...item} />
@@ -350,7 +350,7 @@ const DefaultLayout: React.FC = () => {
                     marginTop: '8px',
                   }}
                 >
-                  Sales
+                  {t('crm.layout.sales')}
                 </p>
                 <SidebarNavItem
                   labelKey={routeLabels['/sales'].nav}
@@ -493,13 +493,13 @@ const DefaultLayout: React.FC = () => {
                         padding: '0 4px',
                       }}
                     >
-                      Appearance
+                      {t('crm.layout.appearance')}
                     </p>
                     <div style={{ display: 'flex', gap: '4px' }}>
                       {[
-                        { value: 'light' as Theme, icon: Sun, label: 'Light' },
-                        { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-                        { value: 'system' as Theme, icon: Monitor, label: 'System' },
+                        { value: 'light' as Theme, icon: Sun, label: t('crm.layout.light') },
+                        { value: 'dark' as Theme, icon: Moon, label: t('crm.layout.dark') },
+                        { value: 'system' as Theme, icon: Monitor, label: t('crm.layout.system') },
                       ].map(({ value, icon: Icon, label }) => (
                         <button
                           type="button"
@@ -557,7 +557,7 @@ const DefaultLayout: React.FC = () => {
                     }}
                   >
                     <LogOut size={13} />
-                    Sign out
+                    {t('crm.layout.signOut')}
                   </button>
                 </motion.div>
               )}
@@ -589,7 +589,7 @@ const DefaultLayout: React.FC = () => {
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
-                  aria-label="Open command palette"
+                  aria-label={t('crm.layout.openCommandPalette')}
                   type="button"
                   onClick={openPalette}
                   style={{
@@ -608,7 +608,7 @@ const DefaultLayout: React.FC = () => {
                   }}
                 >
                   <Search size={12} />
-                  <span>Search...</span>
+                  <span>{t('crm.components.searchPlaceholder')}</span>
                   <kbd
                     style={{
                       fontSize: '9px',
@@ -624,8 +624,8 @@ const DefaultLayout: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  aria-label="Notifications"
-                  onClick={() => toast.info('No new notifications')}
+                  aria-label={t('crm.layout.notifications')}
+                  onClick={() => toast.info(t('crm.layout.noNotifications'))}
                   style={{
                     height: '28px',
                     width: '28px',
