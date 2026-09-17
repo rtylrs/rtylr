@@ -789,7 +789,7 @@ export const ConsentBanner: React.FC<{
       }}
     >
       {items.map((it) => (
-        <div key={it.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <div
             style={{
               width: '16px',

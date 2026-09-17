@@ -155,7 +155,7 @@ const SegmentDetail: React.FC = () => {
             { id: 'trend', label: t('crm.segmentDetail.trend'), value: segment.trend },
             { id: 'avgSpend', label: t('crm.segmentDetail.avgSpend'), value: '-' },
           ].map((s) => (
-            <Card key={s.label}>
+            <Card key={s.id}>
               <div
                 style={{
                   fontSize: '10px',
