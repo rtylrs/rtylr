@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -21,23 +22,30 @@ interface Node {
   description?: string;
 }
 
+/**
+ * `label` here is the canonical English and is deliberately not translated: it
+ * is persisted as the automation's `trigger`, and `triggerTypeFor` matches it
+ * against rows already in the database that predate `automationType`. Translating
+ * it would write Arabic into that column and stop old automations resolving
+ * their type.
+ *
+ * What the builder shows comes from the type instead, via
+ * crm.automationTriggers.<type> and its description twin.
+ */
 const triggers = [
-  { type: 'customer_signup', label: 'New customer', description: 'When a customer is created' },
-  { type: 'tag_added', label: 'Tag added', description: 'When a tag is added to a customer' },
-  {
-    type: 'points_threshold',
-    label: 'Points threshold',
-    description: 'When customer points reach target',
-  },
-];
+  { type: 'customer_signup', label: 'New customer' },
+  { type: 'tag_added', label: 'Tag added' },
+  { type: 'points_threshold', label: 'Points threshold' },
+] as const;
 const actions = [
-  { type: 'send_email', label: 'Send email', description: 'Sends an email campaign', icon: Mail },
-  { type: 'send_sms', label: 'Send SMS', description: 'Sends an SMS message', icon: MessageSquare },
-  { type: 'award_points', label: 'Award points', description: 'Adds loyalty points', icon: Gift },
-  { type: 'tag_add', label: 'Add tag', description: 'Adds a tag to the customer', icon: Plus },
-];
+  { type: 'send_email', label: 'Send email', icon: Mail },
+  { type: 'send_sms', label: 'Send SMS', icon: MessageSquare },
+  { type: 'award_points', label: 'Award points', icon: Gift },
+  { type: 'tag_add', label: 'Add tag', icon: Plus },
+] as const;
 
 const AutomationBuilder: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { id?: number };
   const automationId = search?.id ? Number(search.id) : undefined;
@@ -52,7 +60,6 @@ const AutomationBuilder: React.FC = () => {
       type: 'trigger',
       automationType: 'customer_signup',
       label: 'New customer',
-      description: 'When a customer is created',
     },
   ]);
   // Monotonic id source so removed nodes never free up an id that a later
@@ -82,27 +89,25 @@ const AutomationBuilder: React.FC = () => {
     nextNodeId.current = Math.max(nextNodeId.current, maxLoaded + 1);
   }, [existing]);
 
-  const addTrigger = (t: (typeof triggers)[number]) => {
+  const addTrigger = (trigger: (typeof triggers)[number]) => {
     setNodes([
       {
         id: 'n1',
         type: 'trigger',
-        automationType: t.type,
-        label: t.label,
-        description: t.description,
+        automationType: trigger.type,
+        label: trigger.label,
       },
     ]);
   };
 
-  const addAction = (a: (typeof actions)[number]) => {
+  const addAction = (action: (typeof actions)[number]) => {
     setNodes((n) => [
       ...n,
       {
         id: 'n' + nextNodeId.current++,
         type: 'action',
-        automationType: a.type,
-        label: a.label,
-        description: a.description,
+        automationType: action.type,
+        label: action.label,
       },
     ]);
   };
@@ -126,11 +131,11 @@ const AutomationBuilder: React.FC = () => {
     };
     const callbacks = {
       onSuccess: () => {
-        toast.success('Automation saved');
+        toast.success(t('crm.automations.saved'));
         navigate({ to: '/automations' });
       },
       onError: () => {
-        toast.error('Failed to save automation');
+        toast.error(t('crm.automations.saveFailed'));
       },
     };
     if (isEditing) {
@@ -146,13 +151,17 @@ const AutomationBuilder: React.FC = () => {
       <div style={{ maxWidth: '1200px' }}>
         <Breadcrumbs
           items={[
-            { label: 'Automations', to: '/automations' },
-            { label: isEditing ? 'Edit' : 'New' },
+            { label: t('nav.automations'), to: '/automations' },
+            {
+              label: isEditing
+                ? t('crm.automationBuilder.breadcrumbEdit')
+                : t('crm.automationBuilder.breadcrumbNew'),
+            },
           ]}
         />
         <PageHeader
           title={isEditing ? 'Edit automation' : 'New automation'}
-          subtitle="Drag triggers and actions to build a workflow"
+          subtitle={t('crm.automationBuilder.subtitle')}
           actions={
             <Button
               variant="primary"
@@ -166,10 +175,10 @@ const AutomationBuilder: React.FC = () => {
         />
 
         <Input
-          label="Name"
+          label={t('common.name')}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Welcome series"
+          placeholder={t('crm.automationBuilder.namePlaceholder')}
           style={{ maxWidth: '320px', marginBottom: '16px' }}
         />
 
@@ -187,13 +196,13 @@ const AutomationBuilder: React.FC = () => {
                   margin: '0 0 10px',
                 }}
               >
-                Triggers
+                {t('crm.automationBuilder.triggers')}
               </h4>
-              {triggers.map((t) => (
+              {triggers.map((trigger) => (
                 <button
                   type="button"
-                  key={t.label}
-                  onClick={() => addTrigger(t)}
+                  key={trigger.type}
+                  onClick={() => addTrigger(trigger)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -211,7 +220,7 @@ const AutomationBuilder: React.FC = () => {
                   }}
                 >
                   <Zap size={12} style={{ color: '#10b981', flexShrink: 0 }} />
-                  {t.label}
+                  {t(`crm.automationTriggers.${trigger.type}`)}
                 </button>
               ))}
             </Card>
@@ -226,15 +235,15 @@ const AutomationBuilder: React.FC = () => {
                   margin: '0 0 10px',
                 }}
               >
-                Actions
+                {t('common.actions')}
               </h4>
-              {actions.map((a) => {
-                const Icon = a.icon;
+              {actions.map((action) => {
+                const Icon = action.icon;
                 return (
                   <button
                     type="button"
-                    key={a.label}
-                    onClick={() => addAction(a)}
+                    key={action.type}
+                    onClick={() => addAction(action)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -252,7 +261,7 @@ const AutomationBuilder: React.FC = () => {
                     }}
                   >
                     <Icon size={12} style={{ color: '#3b82f6', flexShrink: 0 }} />
-                    {a.label}
+                    {t(`crm.automationActions.${action.type}`)}
                   </button>
                 );
               })}
@@ -271,7 +280,7 @@ const AutomationBuilder: React.FC = () => {
                 margin: '0 0 14px',
               }}
             >
-              Workflow
+              {t('crm.automationBuilder.workflow')}
             </h4>
             <div
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
@@ -280,8 +289,16 @@ const AutomationBuilder: React.FC = () => {
                 <React.Fragment key={node.id}>
                   <AutomationNode
                     type={node.type}
-                    label={node.label}
-                    description={node.description}
+                    label={
+                      node.type === 'trigger'
+                        ? t(`crm.automationTriggers.${node.automationType}`, node.label)
+                        : t(`crm.automationActions.${node.automationType}`, node.label)
+                    }
+                    description={
+                      node.type === 'trigger'
+                        ? t(`crm.automationTriggerDescriptions.${node.automationType}`, '')
+                        : t(`crm.automationActionDescriptions.${node.automationType}`, '')
+                    }
                     onRemove={i > 0 ? () => removeNode(node.id) : undefined}
                   />
                   {i < nodes.length - 1 && (

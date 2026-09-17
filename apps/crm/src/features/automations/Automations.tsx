@@ -32,7 +32,7 @@ const Automations: React.FC = () => {
       {
         onSuccess: () =>
           toast.success(next === 'active' ? 'Automation resumed' : 'Automation paused'),
-        onError: () => toast.error('Failed to update automation'),
+        onError: () => toast.error(t('crm.automations.updateFailed')),
       }
     );
   };
@@ -40,11 +40,11 @@ const Automations: React.FC = () => {
   const handleDelete = (id: number): void => {
     removeAutomation.mutate(id, {
       onSuccess: () => {
-        toast.success('Automation deleted');
+        toast.success(t('crm.automations.deleted'));
         setConfirmDeleteId(null);
       },
       onError: () => {
-        toast.error('Failed to delete automation');
+        toast.error(t('crm.automations.deleteFailed'));
         setConfirmDeleteId(null);
       },
     });
@@ -61,15 +61,15 @@ const Automations: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Automations · rtylr" />
+      <HelmetContainer title={`${t('crm.automations.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
         <PageHeader
-          title="Automations"
+          title={t('crm.automations.pageTitle')}
           subtitle={`${automations.length} workflows configured`}
           actions={
             <Button variant="primary" onClick={() => navigate({ to: '/automations/new' })}>
               <Plus size={13} />
-              New automation
+              {t('nav.newAutomation')}
             </Button>
           }
         />
@@ -211,7 +211,7 @@ const Automations: React.FC = () => {
                             setConfirmDeleteId(a.id);
                           }}
                           disabled={removeAutomation.isPending}
-                          aria-label="Delete automation"
+                          aria-label={t('crm.automations.deleteAutomation')}
                           style={{
                             padding: '4px 6px',
                             borderRadius: '6px',
@@ -262,7 +262,7 @@ const Automations: React.FC = () => {
                           fontWeight: 700,
                         }}
                       >
-                        Trigger
+                        {t('crm.automations.colTrigger')}
                       </div>
                       <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{a.trigger}</div>
                     </div>
@@ -274,7 +274,7 @@ const Automations: React.FC = () => {
                           fontWeight: 700,
                         }}
                       >
-                        Enrolled
+                        {t('crm.automations.colEnrolled')}
                       </div>
                       <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{a.enrolled}</div>
                     </div>
@@ -286,7 +286,7 @@ const Automations: React.FC = () => {
                           fontWeight: 700,
                         }}
                       >
-                        Done
+                        {t('crm.automations.colDone')}
                       </div>
                       <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{a.completed}</div>
                     </div>
@@ -301,13 +301,13 @@ const Automations: React.FC = () => {
           open={confirmDeleteId !== null}
           onClose={() => setConfirmDeleteId(null)}
           onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
-          title="Delete automation?"
+          title={t('crm.automations.deleteConfirmTitle')}
           description={
             deleteTarget
               ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
               : ''
           }
-          confirmLabel="Delete"
+          confirmLabel={t('common.delete')}
           variant="danger"
         />
       </div>

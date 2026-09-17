@@ -74,7 +74,14 @@
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
-    "pointsRedeemed": "Points redeemed"
+    "pointsRedeemed": "Points redeemed",
+    "pageTitle": "الولاء",
+    "programTitle": "برنامج الولاء",
+    "programSubtitle": "اضبط المستويات وقواعد النقاط ومكافآت الأعضاء",
+    "programConfiguration": "إعدادات البرنامج",
+    "never": "أبدًا",
+    "redemptionRate": "معدل الاستبدال",
+    "pointsActivityLog": "سجل حركة النقاط"
   },
   "leads": {
     "loadFailedTitle": "تعذّر تحميل العملاء المحتملين",
@@ -106,12 +113,23 @@
     "loadFailedTitle": "تعذّر تحميل الأعضاء",
     "empty": "لا يوجد أعضاء",
     "searchEmptyDescription": "جرّب مصطلح بحث مختلف.",
-    "trueEmptyDescription": "سيظهر الأعضاء هنا بعد انضمام العملاء إلى برنامج الولاء."
+    "trueEmptyDescription": "سيظهر الأعضاء هنا بعد انضمام العملاء إلى برنامج الولاء.",
+    "pageTitle": "أعضاء الولاء",
+    "searchPlaceholder": "ابحث في الأعضاء..."
   },
   "rewards": {
     "empty": "لا توجد مكافآت بعد",
     "emptyDescription": "أضف أول مكافأة إلى القائمة.",
-    "addReward": "إضافة مكافأة"
+    "addReward": "إضافة مكافأة",
+    "pageTitle": "كتالوج المكافآت",
+    "subtitle": "ما يمكن للعملاء استبدال نقاطهم به",
+    "newReward": "مكافأة جديدة",
+    "nameLabel": "اسم المكافأة",
+    "nameRequired": "اسم المكافأة مطلوب",
+    "saveFailed": "تعذّر حفظ المكافأة",
+    "categoryLabel": "الفئة (مثل خصم أو هدية)",
+    "pointsCost": "تكلفة النقاط",
+    "stock": "المخزون"
   },
   "feedback": {
     "empty": "لا توجد ملاحظات بعد",
@@ -236,7 +254,12 @@
     "updateFailed": "Failed to update automation",
     "emptyTitle": "لا توجد أتمتة بعد",
     "emptyDescription": "أنشئ حملات تلقائية وتهاني أعياد ميلاد ومسارات استعادة العملاء.",
-    "createOne": "إنشاء واحدة"
+    "createOne": "إنشاء واحدة",
+    "pageTitle": "الأتمتة",
+    "deleteAutomation": "حذف الأتمتة",
+    "colTrigger": "المُشغِّل",
+    "colEnrolled": "المسجَّلون",
+    "colDone": "المكتمل"
   },
   "settings": {
     "updated": "Settings updated"
@@ -533,5 +556,40 @@
     "and": "و",
     "addRule": "إضافة قاعدة",
     "createSegment": "إنشاء الشريحة"
+  },
+  "loyaltyTiers": {
+    "pageTitle": "مستويات الولاء",
+    "thresholdOrder": "يجب أن يكون حد المستوى أكبر من المستويات الأدنى وأقل من المستويات الأعلى",
+    "subtitle": "اضبط هيكل المستويات والمزايا"
+  },
+  "automationBuilder": {
+    "subtitle": "اسحب المشغّلات والإجراءات لبناء سير عمل",
+    "namePlaceholder": "سلسلة الترحيب",
+    "triggers": "المشغّلات",
+    "workflow": "سير العمل",
+    "breadcrumbEdit": "تعديل",
+    "breadcrumbNew": "جديدة"
+  },
+  "automationTriggers": {
+    "customer_signup": "عميل جديد",
+    "tag_added": "أُضيف وسم",
+    "points_threshold": "حد النقاط"
+  },
+  "automationTriggerDescriptions": {
+    "customer_signup": "عند إنشاء عميل",
+    "tag_added": "عند إضافة وسم إلى عميل",
+    "points_threshold": "عند بلوغ نقاط العميل الحد المستهدف"
+  },
+  "automationActions": {
+    "send_email": "إرسال بريد إلكتروني",
+    "send_sms": "إرسال رسالة نصية",
+    "award_points": "منح نقاط",
+    "tag_add": "إضافة وسم"
+  },
+  "automationActionDescriptions": {
+    "send_email": "يرسل حملة بريد إلكتروني",
+    "send_sms": "يرسل رسالة نصية",
+    "award_points": "يضيف نقاط ولاء",
+    "tag_add": "يضيف وسمًا إلى العميل"
   }
 }

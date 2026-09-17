@@ -66,7 +66,7 @@ describe('LoyaltyMembers empty state', () => {
     membersList.push(member);
     renderMembers();
 
-    fireEvent.change(screen.getByPlaceholderText('Search members...'), {
+    fireEvent.change(screen.getByPlaceholderText('crm.loyaltyMembers.searchPlaceholder'), {
       target: { value: 'nonexistent' },
     });
 

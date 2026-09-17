@@ -62,7 +62,14 @@
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
-    "pointsRedeemed": "Points redeemed"
+    "pointsRedeemed": "Points redeemed",
+    "pageTitle": "Loyalty",
+    "programTitle": "Loyalty program",
+    "programSubtitle": "Configure tiers, point rules, and member rewards",
+    "programConfiguration": "Program configuration",
+    "never": "Never",
+    "redemptionRate": "Redemption rate",
+    "pointsActivityLog": "Points activity log"
   },
   "leads": {
     "loadFailedTitle": "Unable to load leads",
@@ -94,12 +101,23 @@
     "loadFailedTitle": "Unable to load members",
     "empty": "No members found",
     "searchEmptyDescription": "Try a different search term.",
-    "trueEmptyDescription": "Members will appear here once customers join your loyalty program."
+    "trueEmptyDescription": "Members will appear here once customers join your loyalty program.",
+    "pageTitle": "Loyalty members",
+    "searchPlaceholder": "Search members..."
   },
   "rewards": {
     "empty": "No rewards yet",
     "emptyDescription": "Add your first reward to the catalog.",
-    "addReward": "Add reward"
+    "addReward": "Add reward",
+    "pageTitle": "Rewards catalog",
+    "subtitle": "What customers can redeem their points for",
+    "newReward": "New reward",
+    "nameLabel": "Reward name",
+    "nameRequired": "Reward name is required",
+    "saveFailed": "Failed to save reward",
+    "categoryLabel": "Category (e.g. discount, freebie)",
+    "pointsCost": "Points cost",
+    "stock": "Stock"
   },
   "feedback": {
     "empty": "No feedback yet",
@@ -212,7 +230,12 @@
     "updateFailed": "Failed to update automation",
     "emptyTitle": "No automations yet",
     "emptyDescription": "Set up drip campaigns, birthday greetings, and win-back flows.",
-    "createOne": "Create one"
+    "createOne": "Create one",
+    "pageTitle": "Automations",
+    "deleteAutomation": "Delete automation",
+    "colTrigger": "Trigger",
+    "colEnrolled": "Enrolled",
+    "colDone": "Done"
   },
   "settings": {
     "updated": "Settings updated"
@@ -509,5 +532,40 @@
     "and": "AND",
     "addRule": "Add rule",
     "createSegment": "Create segment"
+  },
+  "loyaltyTiers": {
+    "pageTitle": "Loyalty tiers",
+    "thresholdOrder": "Tier threshold must be greater than lower tiers and less than higher tiers",
+    "subtitle": "Configure your tier structure and perks"
+  },
+  "automationBuilder": {
+    "subtitle": "Drag triggers and actions to build a workflow",
+    "namePlaceholder": "Welcome series",
+    "triggers": "Triggers",
+    "workflow": "Workflow",
+    "breadcrumbEdit": "Edit",
+    "breadcrumbNew": "New"
+  },
+  "automationTriggers": {
+    "customer_signup": "New customer",
+    "tag_added": "Tag added",
+    "points_threshold": "Points threshold"
+  },
+  "automationTriggerDescriptions": {
+    "customer_signup": "When a customer is created",
+    "tag_added": "When a tag is added to a customer",
+    "points_threshold": "When customer points reach target"
+  },
+  "automationActions": {
+    "send_email": "Send email",
+    "send_sms": "Send SMS",
+    "award_points": "Award points",
+    "tag_add": "Add tag"
+  },
+  "automationActionDescriptions": {
+    "send_email": "Sends an email campaign",
+    "send_sms": "Sends an SMS message",
+    "award_points": "Adds loyalty points",
+    "tag_add": "Adds a tag to the customer"
   }
 }

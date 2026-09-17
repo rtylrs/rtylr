@@ -48,9 +48,12 @@ const LoyaltyMembers: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Loyalty members · rtylr" />
+      <HelmetContainer title={`${t('crm.loyaltyMembers.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1000px' }}>
-        <PageHeader title="Loyalty members" subtitle={`${members.length} active members`} />
+        <PageHeader
+          title={t('crm.loyaltyMembers.pageTitle')}
+          subtitle={`${members.length} active members`}
+        />
 
         <div style={{ marginBottom: '16px', maxWidth: '320px' }}>
           <div
@@ -69,7 +72,7 @@ const LoyaltyMembers: React.FC = () => {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search members..."
+              placeholder={t('crm.loyaltyMembers.searchPlaceholder')}
               style={{
                 flex: 1,
                 background: 'transparent',

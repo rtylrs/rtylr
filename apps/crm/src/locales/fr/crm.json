@@ -65,7 +65,14 @@
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
-    "pointsRedeemed": "Points redeemed"
+    "pointsRedeemed": "Points redeemed",
+    "pageTitle": "Fidélité",
+    "programTitle": "Programme de fidélité",
+    "programSubtitle": "Configurez les niveaux, les règles de points et les récompenses",
+    "programConfiguration": "Configuration du programme",
+    "never": "Jamais",
+    "redemptionRate": "Taux d’utilisation",
+    "pointsActivityLog": "Journal des points"
   },
   "leads": {
     "loadFailedTitle": "Impossible de charger les prospects",
@@ -97,12 +104,23 @@
     "loadFailedTitle": "Impossible de charger les membres",
     "empty": "Aucun membre trouvé",
     "searchEmptyDescription": "Essayez un autre terme de recherche.",
-    "trueEmptyDescription": "Les membres apparaîtront ici dès que des clients rejoindront votre programme de fidélité."
+    "trueEmptyDescription": "Les membres apparaîtront ici dès que des clients rejoindront votre programme de fidélité.",
+    "pageTitle": "Membres fidélité",
+    "searchPlaceholder": "Rechercher des membres..."
   },
   "rewards": {
     "empty": "Aucune récompense pour le moment",
     "emptyDescription": "Ajoutez votre première récompense au catalogue.",
-    "addReward": "Ajouter une récompense"
+    "addReward": "Ajouter une récompense",
+    "pageTitle": "Catalogue de récompenses",
+    "subtitle": "Ce que les clients peuvent obtenir avec leurs points",
+    "newReward": "Nouvelle récompense",
+    "nameLabel": "Nom de la récompense",
+    "nameRequired": "Le nom de la récompense est obligatoire",
+    "saveFailed": "Échec de l’enregistrement de la récompense",
+    "categoryLabel": "Catégorie (remise, cadeau...)",
+    "pointsCost": "Coût en points",
+    "stock": "Stock"
   },
   "feedback": {
     "empty": "Aucun avis pour le moment",
@@ -218,7 +236,12 @@
     "updateFailed": "Failed to update automation",
     "emptyTitle": "Aucune automatisation pour le moment",
     "emptyDescription": "Configurez des campagnes au compte-gouttes, des vœux d'anniversaire et des flux de reconquête.",
-    "createOne": "En créer une"
+    "createOne": "En créer une",
+    "pageTitle": "Automatisations",
+    "deleteAutomation": "Supprimer l’automatisation",
+    "colTrigger": "Déclencheur",
+    "colEnrolled": "Inscrits",
+    "colDone": "Terminés"
   },
   "settings": {
     "updated": "Settings updated"
@@ -515,5 +538,40 @@
     "and": "ET",
     "addRule": "Ajouter une règle",
     "createSegment": "Créer le segment"
+  },
+  "loyaltyTiers": {
+    "pageTitle": "Niveaux de fidélité",
+    "thresholdOrder": "Le seuil du niveau doit être supérieur aux niveaux inférieurs et inférieur aux niveaux supérieurs",
+    "subtitle": "Configurez vos niveaux et leurs avantages"
+  },
+  "automationBuilder": {
+    "subtitle": "Glissez des déclencheurs et des actions pour construire un flux",
+    "namePlaceholder": "Série de bienvenue",
+    "triggers": "Déclencheurs",
+    "workflow": "Flux",
+    "breadcrumbEdit": "Modifier",
+    "breadcrumbNew": "Nouvelle"
+  },
+  "automationTriggers": {
+    "customer_signup": "Nouveau client",
+    "tag_added": "Étiquette ajoutée",
+    "points_threshold": "Seuil de points"
+  },
+  "automationTriggerDescriptions": {
+    "customer_signup": "Quand un client est créé",
+    "tag_added": "Quand une étiquette est ajoutée à un client",
+    "points_threshold": "Quand les points du client atteignent le seuil"
+  },
+  "automationActions": {
+    "send_email": "Envoyer un e-mail",
+    "send_sms": "Envoyer un SMS",
+    "award_points": "Attribuer des points",
+    "tag_add": "Ajouter une étiquette"
+  },
+  "automationActionDescriptions": {
+    "send_email": "Envoie une campagne e-mail",
+    "send_sms": "Envoie un SMS",
+    "award_points": "Ajoute des points de fidélité",
+    "tag_add": "Ajoute une étiquette au client"
   }
 }
