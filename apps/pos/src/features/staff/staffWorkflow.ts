@@ -1,0 +1,85 @@
+import type { POSUser, UpdatePOSUserRequest } from '@voxire/voxie/pos/user/v1/types';
+
+// Pure helpers for the staff-management screen.
+
+export type StaffRole = 'manager' | 'cashier' | 'server' | 'bartender' | 'kitchen';
+
+export interface StaffUser {
+  id: number;
+  name: string;
+  role: StaffRole;
+  isActive: boolean;
+  maxDiscountPct: number;
+  canVoid: boolean;
+  canRefund: boolean;
+  canOpenDrawer: boolean;
+  canApplyDiscount: boolean;
+}
+
+const ROLES: StaffRole[] = ['manager', 'cashier', 'server', 'bartender', 'kitchen'];
+
+function positiveInt(value: unknown): number {
+  const n = typeof value === 'string' ? Number(value.trim()) : Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
+function asRole(value: unknown): StaffRole {
+  return ROLES.includes(value as StaffRole) ? (value as StaffRole) : 'cashier';
+}
+
+export function mapPOSUsers(users: POSUser[]): StaffUser[] {
+  return users.flatMap((u) => {
+    const id = positiveInt(u.id);
+    const name = (u.name ?? '').trim();
+    if (!id || !name) return [];
+    return [
+      {
+        id,
+        name,
+        role: asRole(u.role),
+        isActive: u.isActive ?? false,
+        maxDiscountPct: u.maxDiscountPct ?? 0,
+        canVoid: u.canVoid ?? false,
+        canRefund: u.canRefund ?? false,
+        canOpenDrawer: u.canOpenDrawer ?? false,
+        canApplyDiscount: u.canApplyDiscount ?? false,
+      },
+    ];
+  });
+}
+
+export interface StaffEdits {
+  role: StaffRole;
+  isActive: boolean;
+  maxDiscountPct: number;
+  canVoid: boolean;
+  canRefund: boolean;
+  canOpenDrawer: boolean;
+  canApplyDiscount: boolean;
+  newPin?: string;
+}
+
+/**
+ * Builds the generated updatePOSUser payload from edited staff fields. A blank
+ * newPin is omitted so an edit that doesn't touch the PIN leaves it unchanged.
+ * hourlyRate is omitted too: the list response carries no rate, and sending a
+ * hardcoded 0 would zero out the employee's real rate on every role/PIN edit.
+ */
+export const STAFF_PIN_LENGTH = 4;
+
+export function buildStaffUpdate(
+  user: StaffUser,
+  edits: StaffEdits
+): UpdatePOSUserRequest {
+  const pin = (edits.newPin ?? '').trim();
+  // A manager-typed 1-3 digit PIN would lock the employee out on next login.
+  if (pin && pin.length !== STAFF_PIN_LENGTH) {
+    throw new Error(`PIN must be exactly ${STAFF_PIN_LENGTH} digits.`);
+  }
+  return {
+    id: String(user.id),
+    name: user.name,
+    ...(pin ? { pin } : {}),
+    isActive: edits.isActive,
+  };
+}

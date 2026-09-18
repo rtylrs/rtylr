@@ -1,0 +1,30 @@
+[package]
+name = "rtylr-pos"
+version = "0.1.0"
+description = "rtylr POS Terminal"
+authors = ["Voxire"]
+license = "UNLICENSED"
+repository = "https://github.com/voxire/rtylr"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+# Required by tauri::generate_context! (not referenced from our source directly).
+serde_json = "1"
+serialport = "4"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winspool", "minwindef", "winerror"] }
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"

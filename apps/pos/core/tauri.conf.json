@@ -1,0 +1,47 @@
+{
+  "productName": "rtylr POS",
+  "version": "0.1.0",
+  "identifier": "com.rtylr.pos",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:5178",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "rtylr POS",
+        "fullscreen": true,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost https://cdn.voxire.com https://cdn.voxire.dev data: blob:; font-src 'self' data:; connect-src 'self' https: wss: http://localhost:* ws://localhost:*; frame-src 'none'; object-src 'none'; base-uri 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "createUpdaterArtifacts": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEIxQTcyNUVDNzE1NDU5MDIKUldRQ1dWUng3Q1duc2N1c3Z3aDVINU9jRkdxRm1MNmF2VVZzUEQ0Vmo5RERTOCtQcEw3VWZpWkoK",
+      "endpoints": [
+        "https://pos-downloads.rtylr.com/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

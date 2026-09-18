@@ -1,0 +1,83 @@
+name: Publish public image
+
+# Builds the PUBLIC self-host image docker.io/rtylr/pos. Triggered by a version
+# bump in tryrtylr/rtylr-version (repository_dispatch "rtylr-release") or manually
+# with a version. NOT on normal pushes — day-to-day CI deploys to Cloudflare
+# Pages and never publishes an image. Only the web app is built here (no
+# native/Tauri build).
+on:
+  repository_dispatch:
+    types: [rtylr-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Suite version tag (e.g. 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    name: Publish rtylr/pos
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (web)
+        run: pnpm build
+
+      - name: Resolve version
+        id: v
+        env:
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="${DISPATCH_VERSION:-$INPUT_VERSION}"
+          if [ -z "$VERSION" ]; then echo "no version supplied"; exit 1; fi
+          # Restrict to a safe Docker-tag charset (dispatch payload is trusted-org
+          # but validate anyway — no shell metachars reach the build).
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9A-Za-z][0-9A-Za-z._-]{0,127}$'; then
+            echo "invalid version tag: $VERSION"; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+      - name: Build and push public image
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          PUB="docker.io/rtylr/pos"
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -f docker/frontend.Dockerfile \
+            -t "$PUB:$VERSION" \
+            -t "$PUB:latest" \
+            --push \
+            .
+          echo "Published $PUB:$VERSION + :latest"

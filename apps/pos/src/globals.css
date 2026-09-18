@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+
+/* v4 auto-detects content relative to this CSS file. We add an
+ * explicit @source for the cross-workspace packages we pull classes
+ * from (shared components, menu package, etc.). The shared
+ * `@voxire/tailwind-config` theme extensions are ported below into
+ * v4's native `@theme` block - JS configs via `@config` break v4's
+ * auto content scanner in monorepo setups. */
+@source '../packages/**/*.{ts,tsx}';
+
+@theme inline {
+  --color-pos-bg: var(--pos-bg);
+  --color-pos-card: var(--pos-card);
+  --color-pos-border: var(--pos-border);
+  --color-pos-muted: var(--pos-muted);
+  --color-pos-text: var(--pos-text);
+  --color-pos-input: var(--pos-input);
+}
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --pos-bg: #151515;
+  --pos-card: #1c1b1a;
+  --pos-border: rgba(232, 230, 225, 0.12);
+  --pos-muted: rgba(232, 230, 225, 0.6);
+  --pos-text: #e8e6e1;
+  --pos-input: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='midnight'] {
+  color-scheme: dark;
+  --pos-bg: #0a0a0f;
+  --pos-card: #111116;
+  --pos-border: rgba(232, 230, 225, 0.13);
+  --pos-muted: rgba(232, 230, 225, 0.62);
+  --pos-text: #eceae4;
+  --pos-input: rgba(255, 255, 255, 0.065);
+}
+
+[data-theme='slate'] {
+  color-scheme: dark;
+  --pos-bg: #0e0e1e;
+  --pos-card: #101428;
+  --pos-border: rgba(214, 224, 255, 0.14);
+  --pos-muted: rgba(214, 224, 255, 0.64);
+  --pos-text: #edf1ff;
+  --pos-input: rgba(214, 224, 255, 0.07);
+}
+
+[data-theme='aurora'] {
+  color-scheme: dark;
+  --pos-bg: #030b14;
+  --pos-card: #06121f;
+  --pos-border: rgba(111, 231, 204, 0.16);
+  --pos-muted: rgba(198, 240, 231, 0.64);
+  --pos-text: #e7fff9;
+  --pos-input: rgba(61, 255, 154, 0.075);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --pos-bg: #f6f4ef;
+  --pos-card: #ffffff;
+  --pos-border: rgba(10, 10, 10, 0.12);
+  --pos-muted: rgba(10, 10, 10, 0.6);
+  --pos-text: #0a0a0a;
+  --pos-input: rgba(10, 10, 10, 0.06);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--pos-bg);
+    color: var(--pos-text);
+  }
+}

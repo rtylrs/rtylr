@@ -1,0 +1,168 @@
+name: Desktop Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: macOS Apple Silicon
+            os: blacksmith-6vcpu-macos-15
+            rust_targets: aarch64-apple-darwin
+            args: --target aarch64-apple-darwin
+          - label: Windows
+            os: blacksmith-2vcpu-windows-2025
+            rust_targets: ''
+            args: ''
+          - label: Linux
+            os: blacksmith-2vcpu-ubuntu-2204
+            rust_targets: ''
+            args: ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libfuse2 libudev-dev
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: core -> target
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and publish desktop release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://api.voxire.com/' }}
+          VITE_APP_ENV: production
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
+        with:
+          tagName: pos-v__VERSION__
+          releaseName: rtylr POS v__VERSION__
+          releaseBody: Internal staging release. Customer-facing desktop downloads are deployed to Cloudflare Pages.
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+
+  publish-downloads:
+    name: Publish Cloudflare downloads
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve release tag
+        id: release
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "tag=pos-v${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Download signed desktop assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download "${{ steps.release.outputs.tag }}" --repo "$GITHUB_REPOSITORY" --dir desktop-downloads --clobber
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::101533649486:role/rtylr-pos-downloads-publisher
+          aws-region: eu-west-1
+
+      - name: Upload desktop assets to S3
+        run: |
+          for file in desktop-downloads/*; do
+            [ -f "$file" ] || continue
+            name=$(basename "$file")
+            [ "$name" = "latest.json" ] && continue
+
+            case "$name" in
+              *.dmg) content_type="application/x-apple-diskimage" ;;
+              *.exe) content_type="application/vnd.microsoft.portable-executable" ;;
+              *.msi) content_type="application/x-msi" ;;
+              *.deb) content_type="application/vnd.debian.binary-package" ;;
+              *.rpm) content_type="application/x-rpm" ;;
+              *.AppImage) content_type="application/octet-stream" ;;
+              *.app.tar.gz) content_type="application/gzip" ;;
+              *.sig) content_type="text/plain" ;;
+              *) content_type="application/octet-stream" ;;
+            esac
+
+            aws s3 cp "$file" "s3://rtylr-pos-downloads/${name}" \
+              --content-type "$content_type" \
+              --cache-control "public, max-age=31536000, immutable"
+          done
+
+      - name: Prepare public download site
+        env:
+          DOWNLOADS_BASE_URL: https://pos-downloads.rtylr.com
+          DOWNLOADS_ASSETS_BASE_URL: https://pos-download-assets.rtylr.com
+        run: node scripts/prepare-desktop-downloads.mjs desktop-downloads desktop-public
+
+      - name: Deploy downloads to Cloudflare Pages
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: pnpm dlx wrangler@latest pages deploy desktop-public --project-name rtylr-pos-downloads --branch main --commit-dirty=true
+
+      - name: Delete private staging release
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete "${{ steps.release.outputs.tag }}" --repo "$GITHUB_REPOSITORY" --yes || true
