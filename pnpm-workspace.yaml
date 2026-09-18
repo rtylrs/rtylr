@@ -10,6 +10,7 @@ packages:
   - 'apps/landing'
   - 'apps/pos'
   - 'apps/docs'
+  - 'apps/mcp'
 
 onlyBuiltDependencies:
   - '@parcel/watcher'
