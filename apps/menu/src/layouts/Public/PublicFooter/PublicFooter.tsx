@@ -14,23 +14,23 @@ const Footer: React.FC = () => {
     {
       title: t('footer.company'),
       links: [
-        { to: `${landingUrl}/about`, label: t('footer.aboutUs'), external: true },
-        { to: `${landingUrl}/contact`, label: t('footer.contactUs'), external: true },
-        { to: 'https://voxire.com/careers', label: t('footer.careers'), external: true },
+        { to: `${landingUrl}/about`, label: 'About Us', external: true },
+        { to: `${landingUrl}/contact`, label: 'Contact Us', external: true },
+        { to: 'https://hire.voxire.com/jobs/', label: 'Careers', external: true },
       ],
     },
     {
       title: t('footer.quickLinks'),
       links: [
-        { to: `${landingUrl}/faqs`, label: t('footer.faqs'), external: true },
-        { to: `${landingUrl}/pricing`, label: t('footer.pricing'), external: true },
+        { to: `${landingUrl}/support`, label: 'FAQs', external: true },
+        { to: `${landingUrl}/pricing`, label: 'Pricing', external: true },
       ],
     },
     {
       title: t('footer.legal'),
       links: [
-        { to: `${landingUrl}/privacy`, label: t('footer.privacyPolicy'), external: true },
-        { to: `${landingUrl}/terms`, label: t('footer.terms'), external: true },
+        { to: `${landingUrl}/legal/privacy-policy`, label: 'Privacy Policy', external: true },
+        { to: `${landingUrl}/legal/terms`, label: 'Terms and Conditions', external: true },
       ],
     },
   ];
