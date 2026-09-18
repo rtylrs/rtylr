@@ -1,0 +1,43 @@
+export interface IndustryOption {
+  value: string;
+  label: string;
+}
+
+export const INDUSTRIES: IndustryOption[] = [
+  { value: 'restaurant', label: 'Restaurant & Food Service' },
+  { value: 'cafe', label: 'Café & Coffee Shop' },
+  { value: 'retail', label: 'Retail & Fashion' },
+  { value: 'grocery', label: 'Grocery & Supermarket' },
+  { value: 'hospitality', label: 'Hotel & Hospitality' },
+  { value: 'salon', label: 'Salon & Beauty' },
+  { value: 'spa', label: 'Spa & Wellness' },
+  { value: 'gym', label: 'Gym & Fitness' },
+  { value: 'pharmacy', label: 'Pharmacy & Health' },
+  { value: 'clinic', label: 'Medical Clinic' },
+  { value: 'dental', label: 'Dental Practice' },
+  { value: 'optometry', label: 'Optometry & Eyewear' },
+  { value: 'bakery', label: 'Bakery & Pastry' },
+  { value: 'catering', label: 'Catering & Events' },
+  { value: 'bar', label: 'Bar & Nightlife' },
+  { value: 'food_truck', label: 'Food Truck & Street Food' },
+  { value: 'cleaning', label: 'Cleaning & Facilities' },
+  { value: 'laundry', label: 'Laundry & Dry Cleaning' },
+  { value: 'auto', label: 'Auto Service & Repair' },
+  { value: 'real_estate', label: 'Real Estate Agency' },
+  { value: 'construction', label: 'Construction & Contracting' },
+  { value: 'logistics', label: 'Logistics & Delivery' },
+  { value: 'manufacturing', label: 'Manufacturing & Production' },
+  { value: 'wholesale', label: 'Wholesale & Distribution' },
+  { value: 'ecommerce', label: 'E-commerce & Online Retail' },
+  { value: 'marketing_agency', label: 'Marketing & Creative Agency' },
+  { value: 'accounting', label: 'Accounting & Bookkeeping' },
+  { value: 'law_firm', label: 'Law Firm & Legal Services' },
+  { value: 'consulting', label: 'Consulting & Advisory' },
+  { value: 'recruitment', label: 'Recruitment & Staffing' },
+  { value: 'it_services', label: 'IT Services & Technology' },
+  { value: 'education', label: 'Education & Training' },
+  { value: 'childcare', label: 'Childcare & Nursery' },
+  { value: 'ngo', label: 'NGO & Non-Profit' },
+  { value: 'government', label: 'Government & Public Sector' },
+  { value: 'other', label: 'Other' },
+];

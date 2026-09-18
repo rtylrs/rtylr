@@ -1,0 +1,342 @@
+@import './keyframes.css';
+@import './markdown.css';
+
+.caret-panel-shell {
+  --caret-accent: #63d1c4;
+  --caret-accent-strong: #7cddd2;
+  --caret-accent-soft: rgba(100, 197, 185, 0.12);
+  --caret-accent-border: rgba(100, 197, 185, 0.28);
+  --caret-on-accent: #0d1715;
+  --caret-bg: #121315;
+  --caret-surface: #17181b;
+  --caret-surface-high: #1e2023;
+  --caret-surface-raised: #18191c;
+  --caret-border: rgba(255, 255, 255, 0.12);
+  --caret-border-strong: rgba(255, 255, 255, 0.24);
+  --caret-text: #f2f2ef;
+  --caret-text-muted: #b2b2ae;
+  --caret-text-dim: #90908c;
+  --caret-input-bg: #18191c;
+  --caret-hover: rgba(255, 255, 255, 0.055);
+  --caret-active: rgba(255, 255, 255, 0.09);
+  --caret-scrollbar: rgba(255, 255, 255, 0.16);
+  --caret-shadow: 4px 4px 0 rgba(0, 0, 0, 0.44);
+  --caret-danger: #ff7b82;
+  --caret-danger-soft: rgba(255, 123, 130, 0.12);
+  --caret-danger-text: #ff9ca1;
+  --caret-warn: #e7b569;
+  --caret-warn-soft: rgba(231, 181, 105, 0.12);
+  --caret-success: #63c69d;
+  --caret-thinking: #64c5b9;
+  --caret-panel-shadow: none;
+  color-scheme: dark;
+  isolation: isolate;
+  container-name: caret-panel;
+  container-type: inline-size;
+  background: var(--caret-bg);
+  box-shadow: var(--caret-panel-shadow);
+  color: var(--caret-text);
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+}
+
+.caret-panel-shell button,
+.caret-panel-shell input,
+.caret-panel-shell select,
+.caret-panel-shell textarea {
+  font: inherit;
+}
+
+.caret-panel-shell button:focus-visible {
+  outline: 1px solid var(--caret-accent);
+  outline-offset: 1px;
+}
+
+.caret-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.caret-header-bar {
+  position: relative;
+  z-index: 20;
+  border-bottom: 1px solid var(--caret-border);
+}
+
+.caret-chrome-button,
+.caret-composer-icon {
+  color: var(--caret-text-muted) !important;
+}
+
+.caret-chrome-button:hover:not(:disabled),
+.caret-composer-icon:hover:not(:disabled) {
+  background: var(--caret-hover) !important;
+  color: var(--caret-text) !important;
+}
+
+.caret-chrome-button[aria-pressed='true'] {
+  background: var(--caret-active) !important;
+  color: var(--caret-text) !important;
+}
+
+.caret-tabs-scroll {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 38px;
+  margin: 0;
+  padding: 2px 10px 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  background: transparent;
+  border-bottom: 0;
+  scrollbar-width: none;
+}
+
+.caret-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.caret-tab-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 88px;
+  max-width: 160px;
+  height: 30px;
+  padding-right: 2px;
+  border-radius: 2px;
+  color: var(--caret-text-muted);
+  flex: 0 1 auto;
+  box-sizing: border-box;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.caret-tab-shell.is-active {
+  background: var(--caret-surface-high);
+  box-shadow: inset 0 0 0 1px var(--caret-border-strong);
+  color: var(--caret-text);
+}
+
+.caret-tab-shell:hover:not(.is-active) {
+  background: var(--caret-hover) !important;
+  color: var(--caret-text) !important;
+}
+
+.caret-tab-shell.is-active:hover {
+  background: #242629 !important;
+}
+
+.caret-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  height: 100%;
+  padding: 0 5px 0 9px;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  flex: 1;
+  outline: none;
+}
+
+.caret-tab-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.caret-tab-shell.is-active .caret-tab-title {
+  font-weight: 580;
+}
+
+.caret-tab-close {
+  color: var(--caret-text-dim) !important;
+  opacity: 0 !important;
+  transition:
+    opacity 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease !important;
+}
+
+.caret-tab-shell.is-active .caret-tab-close {
+  opacity: 0.5 !important;
+}
+
+.caret-tab-shell:hover .caret-tab-close,
+.caret-tab-shell:focus-within .caret-tab-close,
+.caret-tab-close:focus-visible {
+  opacity: 1 !important;
+}
+
+.caret-tab-button:focus-visible {
+  outline: none !important;
+  box-shadow: inset 0 0 0 1px var(--caret-accent);
+}
+
+.caret-tab-spinner {
+  animation: caret-spin 0.9s linear infinite;
+}
+
+.caret-tab-status {
+  animation: caret-pulse 1.25s ease-in-out infinite;
+}
+
+.caret-empty-state {
+  position: relative;
+  background: var(--caret-bg);
+}
+
+.caret-message-list,
+.caret-chat-list-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--caret-scrollbar) transparent;
+}
+
+.caret-chat-row .caret-chat-actions {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.caret-chat-row:hover .caret-chat-actions,
+.caret-chat-row:focus-within .caret-chat-actions {
+  opacity: 1;
+}
+
+.caret-message-actions {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+}
+
+.caret-assistant-message:hover .caret-message-actions,
+.caret-assistant-message:focus-within .caret-message-actions {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+.caret-composer {
+  transition:
+    border-color 0.14s ease,
+    box-shadow 0.14s ease,
+    background 0.14s ease;
+}
+
+.caret-composer:focus-within {
+  border-color: var(--caret-accent-border) !important;
+  background: var(--caret-surface-raised) !important;
+  box-shadow: none !important;
+}
+
+.caret-composer textarea::placeholder {
+  color: var(--caret-text-muted);
+  opacity: 1;
+}
+
+.caret-composer textarea {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent !important;
+}
+
+.caret-send-button {
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease !important;
+}
+
+.caret-send-button:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.caret-follow-up:hover,
+.caret-new-chat-button:hover,
+.caret-chat-row:hover {
+  background: var(--caret-hover) !important;
+  color: var(--caret-text) !important;
+}
+
+.caret-chat-row.is-active,
+.caret-chat-row.is-active:hover {
+  background: var(--caret-surface-high) !important;
+  color: var(--caret-text) !important;
+}
+
+.caret-chat-search:focus-within,
+.caret-settings-select-wrap:focus-within {
+  border-color: var(--caret-accent-border) !important;
+  box-shadow: none;
+}
+
+.caret-settings-row:hover {
+  background: var(--caret-hover) !important;
+}
+
+.caret-switch-thumb {
+  transform: translateX(0);
+  transition: transform 0.16s ease;
+}
+
+.caret-switch[aria-checked='true'] .caret-switch-thumb {
+  transform: translateX(14px);
+}
+
+.caret-voice-status {
+  animation: caret-fadein 0.16s ease-out;
+}
+
+.caret-listening-dot {
+  animation: caret-pulse 1.1s ease-in-out infinite;
+}
+
+@container caret-panel (max-width: 430px) {
+  .caret-tabs-scroll {
+    min-height: 36px;
+    padding: 1px 8px 5px;
+  }
+
+  .caret-tab-shell {
+    min-width: 84px;
+    max-width: 148px;
+  }
+
+  .caret-composer {
+    margin: 9px 9px 10px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret-panel-shell *,
+  .caret-panel-shell *::before,
+  .caret-panel-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,221 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * Shared design tokens, as a Tailwind v4 @theme block.
+ *
+ * tailwind.config.ts beside this file is a v3-style JS config, and v4 does not
+ * read it: the apps deliberately do not use @config, because it breaks v4's
+ * content scanner in this monorepo. The result was that every utility the preset
+ * defined resolved to nothing - `bg-accent` computed to rgba(0,0,0,0), Button's
+ * loading spinner did not spin, Dialog had no shadow. This file is the port that
+ * every globals.css claimed had already happened.
+ *
+ * Import it after `@import 'tailwindcss'`:
+ *
+ *   @import 'tailwindcss';
+ *   @import '../../../packages/tailwind-config/theme.css';
+ *
+ * An app re-points any of these at its own runtime custom properties from its
+ * own `:root`, which wins on the cascade:
+ *
+ *   :root { --color-accent: var(--accent); }
+ *
+ * Keep this in step with tailwind.config.ts, which stays as the readable
+ * description of the palette.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * `dark:` follows the theme the user picked, not the one their OS is set to.
+ *
+ * Without this, v4 compiles `dark:` to `@media (prefers-color-scheme: dark)`,
+ * while every app that themes at all switches on `:root[data-theme]` and sets
+ * that attribute from its own control. The two only agree by coincidence, so a
+ * light OS running the app in dark mode got a white DropdownMenu panel, a white
+ * Dialog and light Inputs on a dark surface, and the reverse broke too
+ * (rtylr#1314).
+ *
+ * Seven of @voxire/ui's components style their dark appearance this way, so the
+ * mismatch reached every app through the shared components rather than through
+ * anything an app wrote.
+ *
+ * Apps with no theme control - auth, menu and recruit - never set the attribute,
+ * so no `dark:` rule matches there and they stay consistently light. That is the
+ * intended outcome: auth's 404 currently paints `dark:text-gray-100` on its light
+ * background whenever the reader's OS is dark.
+ * ───────────────────────────────────────────────────────────────────────── */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  /* ── Brand ─────────────────────────────────────────────────────────────── */
+  --color-primary: #040428;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #4485c4;
+  --color-secondary-foreground: #ffffff;
+  --color-accent: #03aed2;
+  /* Near-black, not white. White on the accent fill measures 1.9:1 and fails
+   * WCAG AA at every size, which is why @voxire/ui's Button uses this token. */
+  --color-accent-foreground: #0a0a0a;
+
+  /* ── Admin / Dash ──────────────────────────────────────────────────────── */
+  --color-admin: #262626;
+  --color-admin-bg: #eff0f1;
+  --color-admin-border: rgba(255, 255, 255, 0.08);
+
+  /* ── POS (already variable-driven in the preset) ───────────────────────── */
+  --color-pos-bg: var(--pos-bg);
+  --color-pos-card: var(--pos-card);
+  --color-pos-border: var(--pos-border);
+  --color-pos-muted: var(--pos-muted);
+  --color-pos-text: var(--pos-text);
+  --color-pos-input: var(--pos-input);
+
+  /* ── Semantic ──────────────────────────────────────────────────────────── */
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #059669;
+  --color-success-foreground: #ffffff;
+  --color-warning: #d97706;
+  --color-warning-foreground: #ffffff;
+  --color-muted: #6b7280;
+  --color-muted-foreground: #9ca3af;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-ring: #03aed2;
+
+  /* ── Type ──────────────────────────────────────────────────────────────── */
+  --font-sans: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  /* ── Radius ────────────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  /* ── Shadows ───────────────────────────────────────────────────────────── */
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.14);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.18);
+  --shadow-pos-phone: 0 0 0 10px #1a1a1a, 0 24px 60px rgba(0, 0, 0, 0.35);
+
+  /* ── Animation ─────────────────────────────────────────────────────────── */
+  --animate-shake: shake 0.4s ease;
+  --animate-fade-in: fade-in 0.2s ease;
+  --animate-slide-up: slide-up 0.2s ease;
+  /* Button's loading state uses this; without it the spinner sat still. */
+  --animate-spin-slow: spin-slow 0.8s linear infinite;
+  --animate-dropdown-in: dropdown-in 0.15s ease;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Shared interaction cursors ────────────────────────────────────────────
+ * Keep the affordance consistent across every app that imports this theme.
+ * Component-specific cursor utilities and inline styles can still override
+ * these low-specificity defaults for loading, resize, and other states. */
+@layer base {
+  :where(
+    button:not(:disabled):not([aria-disabled='true']),
+    a[href]:not([aria-disabled='true']),
+    summary,
+    select:not(:disabled),
+    input[type='checkbox']:not(:disabled),
+    input[type='radio']:not(:disabled),
+    input[type='file']:not(:disabled),
+    label[for],
+    [role='button']:not([aria-disabled='true']),
+    [role='link']:not([aria-disabled='true']),
+    [role='menuitem']:not([aria-disabled='true']),
+    [role='menuitemcheckbox']:not([aria-disabled='true']),
+    [role='menuitemradio']:not([aria-disabled='true']),
+    [role='option']:not([aria-disabled='true']),
+    [role='radio']:not([aria-disabled='true']),
+    [role='switch']:not([aria-disabled='true']),
+    [role='tab']:not([aria-disabled='true']),
+    [role='treeitem']:not([aria-disabled='true']),
+    [data-interactive='true']:not([aria-disabled='true'])
+  ) {
+    cursor: pointer;
+  }
+
+  :where(
+    button:disabled,
+    input:disabled,
+    select:disabled,
+    textarea:disabled,
+    a[href][aria-disabled='true'],
+    [role='button'][aria-disabled='true'],
+    [role='link'][aria-disabled='true'],
+    [role='menuitem'][aria-disabled='true'],
+    [role='menuitemcheckbox'][aria-disabled='true'],
+    [role='menuitemradio'][aria-disabled='true'],
+    [role='option'][aria-disabled='true'],
+    [role='radio'][aria-disabled='true'],
+    [role='switch'][aria-disabled='true'],
+    [role='tab'][aria-disabled='true'],
+    [role='treeitem'][aria-disabled='true'],
+    [data-interactive='true'][aria-disabled='true']
+  ) {
+    cursor: not-allowed;
+  }
+
+  :where([draggable='true']) {
+    cursor: grab;
+  }
+
+  :where([draggable='true']:active) {
+    cursor: grabbing;
+  }
+}

@@ -1,0 +1,243 @@
+.voxire-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  border: none;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: var(
+    --primary-font,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif
+  );
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.22s var(--ease-out-soft, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s var(--ease-out-soft, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.22s var(--ease-out-soft, cubic-bezier(0.22, 1, 0.36, 1));
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.voxire-button-sm {
+    padding: 8px 16px;
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  &.voxire-button-md {
+    padding: 12px 24px;
+    font-size: 16px;
+    gap: 8px;
+  }
+
+  &.voxire-button-lg {
+    padding: 16px 32px;
+    font-size: 18px;
+    gap: 10px;
+  }
+
+  &.voxire-button-full-width {
+    width: 100%;
+  }
+
+  &.voxire-button-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+
+    &:active {
+      transform: none;
+    }
+  }
+
+  &.voxire-button-loading {
+    cursor: wait;
+    pointer-events: none;
+
+    .voxire-button-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      display: none;
+    }
+  }
+
+  .voxire-button-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .voxire-button-text {
+    display: inline-block;
+    line-height: 1;
+  }
+
+  .voxire-button-prefix,
+  .voxire-button-suffix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .voxire-button-prefix {
+    order: 1;
+  }
+
+  .voxire-button-text {
+    order: 2;
+  }
+
+  .voxire-button-suffix {
+    order: 3;
+  }
+
+  &.voxire-button-sm {
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &.voxire-button-lg {
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.voxire-button-primary {
+  background: var(--primary-color, #151515);
+  border-color: var(--primary-color, #151515);
+  color: #ffffff;
+  border-radius: 8px;
+  box-shadow: none;
+  text-shadow: none;
+
+  &:hover:not(.voxire-button-disabled) {
+    background: #2a2a2a;
+    border-color: #2a2a2a;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: none;
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    background: var(--primary-color, #151515);
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
+.voxire-button-secondary,
+.voxire-button-outline,
+.voxire-button-soft,
+.voxire-button-dark-outline {
+  background: #ffffff;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 8px;
+  box-shadow: none;
+  text-shadow: none;
+
+  &:hover:not(.voxire-button-disabled) {
+    background: #f4f4f4;
+    color: #0a0a0a;
+    transform: translateY(-1px);
+    box-shadow: none;
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    background: #eeeeee;
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
+.voxire-button-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--primary-color);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .voxire-button {
+    &.voxire-button-lg {
+      padding: 14px 28px;
+      font-size: 16px;
+    }
+
+    &.voxire-button-md {
+      padding: 10px 20px;
+      font-size: 15px;
+    }
+
+    &.voxire-button-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  }
+}
+
+@media (prefers-contrast: high) {
+  .voxire-button {
+    border-width: 3px;
+
+    &:focus-visible {
+      outline-width: 3px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voxire-button {
+    transition: none;
+
+    &:hover,
+    &:active {
+      transform: none;
+    }
+  }
+}

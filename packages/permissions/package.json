@@ -1,0 +1,19 @@
+{
+  "name": "@voxire/permissions",
+  "version": "0.0.1",
+  "description": "Typed RBAC permissions for the rtylr platform",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@voxire/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@voxire/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./result": "./src/result.ts"
+  },
+  "dependencies": {
+    "@voxire/config": "workspace:*",
+    "@voxire/types": "workspace:*",
+    "axios": "^1.19.0",
+    "neverthrow": "8.2.0"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

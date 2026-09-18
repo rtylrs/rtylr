@@ -1,0 +1,25 @@
+{
+  "name": "@voxire/consent",
+  "version": "0.0.1",
+  "description": "GDPR-strict cookie consent banner + hook. No non-essential cookies fire until the user explicitly accepts.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch"
+  },
+  "dependencies": {
+    "@voxire/observability": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "react": "19.2.5",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

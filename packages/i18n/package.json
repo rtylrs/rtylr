@@ -1,0 +1,23 @@
+{
+  "name": "@voxire/i18n",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@voxire/auth": "workspace:*",
+    "i18next": "^26.0.6",
+    "i18next-resources-to-backend": "^1.2.1",
+    "react-i18next": "^17.0.4"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@voxire/observability",
+  "version": "0.0.1",
+  "description": "Sentry + PostHog wiring for every rtylr frontend app. Consent-gated.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch"
+  },
+  "dependencies": {
+    "@sentry/react": "^10.49.0",
+    "posthog-js": "^1.417.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

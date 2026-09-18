@@ -1,0 +1,222 @@
+.reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+// ─── Summary ─────────────────────────────────────────────────────────────────
+
+.reviews__summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--menu-card-bg, #ffffff);
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
+  border-radius: 12px;
+}
+
+.reviews__avgNum {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--menu-heading, #1a1a1a);
+  line-height: 1;
+}
+
+.reviews__avgRight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reviews__count {
+  font-size: 0.8rem;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.55));
+}
+
+// ─── Stars ────────────────────────────────────────────────────────────────────
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.stars__filled {
+  color: #f59e0b;
+  font-size: 1.1rem;
+}
+
+.stars__empty {
+  color: rgba(0, 0, 0, 0.15);
+  font-size: 1.1rem;
+}
+
+// ─── Form ─────────────────────────────────────────────────────────────────────
+
+.reviews__form {
+  background: var(--menu-card-bg, #ffffff);
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reviews__formTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--menu-heading, #1a1a1a);
+  margin: 0;
+}
+
+.reviews__formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reviews__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.5));
+}
+
+.reviews__input,
+.reviews__textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.12));
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: var(--menu-input-bg, rgba(0, 0, 0, 0.02));
+  color: var(--menu-text, #1a1a1a);
+  outline: none;
+  transition: border-color 0.15s ease;
+  resize: none;
+
+  &::placeholder {
+    color: var(--menu-subtext, rgba(26, 26, 26, 0.35));
+  }
+
+  &:focus {
+    border-color: var(--menu-accent, #1a1a1a);
+  }
+}
+
+.reviews__submitBtn {
+  padding: 12px;
+  background: var(--menu-accent, #1a1a1a);
+  color: var(--menu-accent-text, #ffffff);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.88;
+  }
+}
+
+.reviews__thanks {
+  font-size: 0.9rem;
+  color: #16a34a;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+  padding: 12px 0;
+}
+
+// ─── Review list ──────────────────────────────────────────────────────────────
+
+.reviews__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reviews__listTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.5));
+  margin: 0 0 4px;
+}
+
+.reviews__card {
+  background: var(--menu-card-bg, #ffffff);
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reviews__cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.reviews__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.reviews__avatarFallback {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--menu-accent, #1a1a1a);
+  color: var(--menu-accent-text, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.reviews__cardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reviews__author {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--menu-text, #1a1a1a);
+}
+
+.reviews__cardStarRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reviews__date {
+  font-size: 0.75rem;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.45));
+}
+
+.reviews__comment {
+  font-size: 0.875rem;
+  color: var(--menu-text, #1a1a1a);
+  line-height: 1.55;
+  margin: 0;
+}

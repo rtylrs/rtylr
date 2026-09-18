@@ -1,0 +1,26 @@
+{
+  "name": "@voxire/config",
+  "version": "0.0.1",
+  "description": "Shared configuration, theme, and types for Voxire apps",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "dependencies": {
+    "@voxire/observability": "workspace:*",
+    "@voxire/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11",
+    "@testing-library/react": "^16.3.0"
+  }
+}

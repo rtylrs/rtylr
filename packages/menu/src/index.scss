@@ -1,0 +1,18 @@
+// @voxire/menu - CSS custom property defaults
+// Apps import this and override variables to theme the menu.
+
+:root {
+  --menu-bg: #f9f9f7;
+  --menu-card-bg: #ffffff;
+  --menu-header-bg: #ffffff;
+  --menu-border: rgba(0, 0, 0, 0.08);
+  --menu-text: #1a1a1a;
+  --menu-heading: #1a1a1a;
+  --menu-subtext: rgba(26, 26, 26, 0.6);
+  --menu-price: #1a1a1a;
+  --menu-accent: #1a1a1a;
+  --menu-accent-text: #ffffff;
+  --menu-image-bg: #f0f0ee;
+  --menu-bubble-bg: rgba(0, 0, 0, 0.05);
+  --menu-input-bg: rgba(0, 0, 0, 0.03);
+}
