@@ -635,6 +635,34 @@ importers:
       motion:
         specifier: ^12.38.0
         version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.2.4
+        version: 4.3.3
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.9.7
+      '@vitejs/plugin-react':
+        specifier: ^6.0.1
+        version: 6.1.1(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
+      sass:
+        specifier: ^1.99.0
+        version: 1.99.0
+      tailwindcss:
+        specifier: ^4.2.4
+        version: 4.3.3
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.0.16
+        version: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
+      vite-plugin-svgr:
+        specifier: ^5.2.0
+        version: 5.2.0(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
+      vite-tsconfig-paths:
+        specifier: ^6.1.1
+        version: 6.1.1(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
 
   apps/rtylr/apps/crm:
     dependencies:
@@ -1611,6 +1639,34 @@ importers:
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.7.0(react@19.2.5))
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.2.4
+        version: 4.3.3
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.9.7
+      '@vitejs/plugin-react':
+        specifier: ^6.0.1
+        version: 6.1.1(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
+      sass:
+        specifier: ^1.99.0
+        version: 1.99.0
+      tailwindcss:
+        specifier: ^4.2.4
+        version: 4.3.3
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.0.16
+        version: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
+      vite-plugin-svgr:
+        specifier: ^5.2.0
+        version: 5.2.0(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
+      vite-tsconfig-paths:
+        specifier: ^6.1.1
+        version: 6.1.1(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
 
   apps/rtylr/apps/recruit:
     dependencies:
@@ -11101,6 +11157,11 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.104.1)(tsx@4.23.13)(yaml@2.9.1)
 
+  '@vitejs/plugin-react@6.1.1(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))':
+    dependencies:
+      '@rolldown/pluginutils': 1.0.1
+      vite: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
+
   '@vitest/coverage-v8@4.1.11(vitest@4.1.11)':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
@@ -15067,12 +15128,33 @@ snapshots:
       - supports-color
       - typescript
 
+  vite-plugin-svgr@5.2.0(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)):
+    dependencies:
+      '@rollup/pluginutils': 5.4.0
+      '@svgr/core': 8.1.0(typescript@6.0.3)
+      '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@6.0.3))
+      vite: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
+    transitivePeerDependencies:
+      - rollup
+      - supports-color
+      - typescript
+
   vite-tsconfig-paths@6.1.1(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@6.0.3)
       vite: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
+  vite-tsconfig-paths@6.1.1(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)):
+    dependencies:
+      debug: 4.4.3
+      globrex: 0.1.2
+      tsconfck: 3.1.6(typescript@6.0.3)
+      vite: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -15122,6 +15204,22 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.7.0
       sass: 1.104.1
+      tsx: 4.23.13
+      yaml: 2.9.1
+
+  vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1):
+    dependencies:
+      lightningcss: 1.33.0
+      picomatch: 4.0.7
+      postcss: 8.5.28
+      rolldown: 1.2.9
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      '@types/node': 25.9.7
+      esbuild: 0.28.2
+      fsevents: 2.3.3
+      jiti: 2.7.0
+      sass: 1.99.0
       tsx: 4.23.13
       yaml: 2.9.1
 
