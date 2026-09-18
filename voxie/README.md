@@ -14,6 +14,7 @@ voxie/
     ...
   gen/go/            # generated Go types, validation, HTTP server, and client
   gen/ts/            # generated TypeScript types, HTTP client, and validation metadata
+  gen/openapi/       # generated OpenAPI 3.1 specs (YAML and JSON)
 ```
 
 The base HTTP path for a service is inferred from its schema directory (kebab-casing multi-word segments, e.g. `hr/time_entry` → `/hr/time-entry`) - no `base_path` needed unless the route is irregular. Cross-directory type references resolve automatically by name, with no import statement needed.
@@ -23,9 +24,13 @@ Go output (`gen/go`) is generated here and committed — `onion` consumes it dir
 ## Usage
 
 ```bash
-make generate   # regenerates gen/go and gen/ts from api/*.onk — commit the result
+make generate   # regenerates code and OpenAPI docs from api/*.onk — commit the result
 make typecheck  # typechecks the generated TypeScript output
 ```
+
+OpenAPI generation is enabled by `[generate.openapi]` in `onekit.toml`.
+`make generate` writes both `gen/openapi/openapi.yaml` and
+`gen/openapi/openapi.json`, describing the same combined API.
 
 ## Adding or Changing Contracts
 

@@ -1,10 +1,7 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-# v0.8.0: frontend platform release - opt-in [generate.ts-client] artifacts
-# (zod schemas, React Query hooks, MSW handlers) and the stdlib `onek mock`
-# dev server. No output changes for our current config; flags stay off until
-# a consumer needs them. See 1homsi/onekit@e526fb5.
-ONK_VERSION := 6186effb3818a5dd8cbd4668b285c843b69b5e1a
+# Onekit generates OpenAPI 3.1 specs in both YAML and JSON.
+ONK_VERSION := 3bbec1c808ffd381f4b35d3e2b427d283d677a0f
 
 # Clean generated code
 clean:
@@ -18,8 +15,8 @@ install-onek:
 install-js:
 	pnpm install --frozen-lockfile
 
-# Regenerate gen/go and gen/ts from api/*.onk. Output is committed to the repo.
-# onekit.toml lives in api/ (the schema root), so generated import paths
+# Regenerate gen/go, gen/ts, and gen/openapi from api/*.onk. Output is committed.
+# onekit.toml sets api/ as the schema root, so generated import paths
 # mirror the schema path exactly (gen/go/hub/business/v1, no "api/" prefix) -
 # matching what every consumer already imports from the pre-onk proto days.
 generate: install-onek install-js

@@ -10,3 +10,8 @@ out = "gen/go"
 
 [generate.ts-client]
 out = "gen/ts"
+
+[generate.openapi]
+out = "gen/openapi"
+title = "Voxie API"
+version = "1.0.0"
