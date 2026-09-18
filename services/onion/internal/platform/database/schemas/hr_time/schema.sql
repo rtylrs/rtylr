@@ -1,0 +1,61 @@
+CREATE TABLE IF NOT EXISTS hr_time_entries (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    employee_id BIGINT NOT NULL,
+    timesheet_id BIGINT,
+    project_id BIGINT,
+    task_id BIGINT,
+    category_id BIGINT,
+    date DATE NOT NULL,
+    duration_minutes INT NOT NULL,
+    start_time VARCHAR(20),
+    end_time VARCHAR(20),
+    description TEXT,
+    is_billable BOOLEAN NOT NULL DEFAULT FALSE,
+    status VARCHAR(50) NOT NULL DEFAULT 'draft',
+    rejection_reason TEXT,
+    approved_by BIGINT,
+    source VARCHAR(50) NOT NULL DEFAULT 'manual',
+    billable_invoice_id BIGINT NULL,
+    export_batch_id BIGINT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_time_entries_owner (owner_id),
+    INDEX idx_time_entries_employee (owner_id, employee_id),
+    INDEX idx_time_entries_date (owner_id, date),
+    INDEX idx_time_entries_timesheet (owner_id, timesheet_id)
+);
+
+CREATE TABLE IF NOT EXISTS hr_timesheets (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    employee_id BIGINT NOT NULL,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'draft',
+    current_approval_level INT NOT NULL DEFAULT 0,
+    submitted_at TIMESTAMP NULL,
+    total_minutes INT NOT NULL DEFAULT 0,
+    rejection_reason TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_timesheet_period (owner_id, employee_id, period_start),
+    INDEX idx_timesheets_owner (owner_id),
+    INDEX idx_timesheets_employee (owner_id, employee_id),
+    INDEX idx_timesheets_status (owner_id, status)
+);
+
+CREATE TABLE IF NOT EXISTS hr_timesheet_approval_actions (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    timesheet_id BIGINT NOT NULL,
+    approver_id BIGINT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    level INT NOT NULL,
+    comment TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_approval_actions_timesheet (owner_id, timesheet_id)
+);

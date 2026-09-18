@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS expenses (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL DEFAULT 0,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    product VARCHAR(255) NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    term VARCHAR(100) NULL,
+    price DECIMAL(10,2) NOT NULL,
+    payment_date DATE NULL,
+    paid BOOLEAN NOT NULL DEFAULT false,
+    extra_info TEXT NULL,
+    subscription BOOLEAN NOT NULL DEFAULT false,
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

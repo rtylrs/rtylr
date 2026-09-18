@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS hr_dashboard_widgets (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    role_id BIGINT NOT NULL DEFAULT 0,
+    widget_type VARCHAR(64) NOT NULL,
+    position_x INT NOT NULL DEFAULT 0,
+    position_y INT NOT NULL DEFAULT 0,
+    width INT NOT NULL DEFAULT 1,
+    height INT NOT NULL DEFAULT 1,
+    config JSON,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_hr_dashboard_widgets_owner (owner_id)
+);
