@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -101,7 +102,7 @@ const TimesheetDetail = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Timesheet detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.timesheetDetail'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <Breadcrumbs
           items={[{ label: t('timesheets.title'), href: '/timesheets' }, { label: periodLabel }]}

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { APP_URLS } from '@voxire/config';
 import type { GoogleAuthRequest } from '@voxire/voxie/common/auth/v1/types';
 import { useGoogleAuth } from '../../shared/hooks/useAuth';
@@ -15,6 +16,7 @@ function getRedirectUrl(redirectParam: string | null): string {
 }
 
 const Callback: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const googleAuthMutation = useGoogleAuth();
   const done = useRef(false);
 
@@ -37,7 +39,7 @@ const Callback: React.FC = (): React.JSX.Element => {
 
     const request: GoogleAuthRequest = {
       code,
-      businessName: businessName || null,
+      businessName: businessName || undefined,
     };
 
     googleAuthMutation.mutate(request, {
@@ -59,7 +61,7 @@ const Callback: React.FC = (): React.JSX.Element => {
         fontSize: 14,
       }}
     >
-      Signing you in...
+      {t('auth.callback.signingIn')}
     </div>
   );
 };

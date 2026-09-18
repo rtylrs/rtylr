@@ -1,16 +1,17 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Reorder from './Reorder';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useReorderSuggestions: vi.fn(),
   refetch: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -26,6 +27,10 @@ vi.mock('./useReorderSuggestions', () => ({
   useReorderSuggestions: mocks.useReorderSuggestions,
 }));
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('Reorder empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,12 +44,12 @@ describe('Reorder empty state', () => {
   it('shows the illustration, empty copy, and refetches on CTA click', () => {
     render(<Reorder />);
 
-    const title = screen.getByText('reorder.empty.title');
+    const title = screen.getByText('No suggestions');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('reorder.empty.description')).toBeInTheDocument();
+    expect(screen.getByText('All stock levels are healthy')).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'reorder.refresh' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Refresh' }));
 
     expect(mocks.refetch).toHaveBeenCalledTimes(1);
   });
@@ -71,6 +76,6 @@ describe('Reorder empty state', () => {
 
     render(<Reorder />);
 
-    expect(screen.queryByText('reorder.empty.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('No suggestions')).not.toBeInTheDocument();
   });
 });

@@ -9,5 +9,54 @@
   "markPaidFailed": "Impossible de marquer {{id}} comme payée",
   "emptyTitle": "Aucune facture pour le moment",
   "emptyDescription": "Créez votre première facture pour commencer à facturer vos clients.",
-  "emptyCta": "Nouvelle facture"
+  "emptyCta": "Nouvelle facture",
+  "detail": {
+    "title": "Facture",
+    "cloning": "Duplication de la facture",
+    "summary": "Récapitulatif",
+    "totalInvoiced": "Total facturé",
+    "paid": "Payé",
+    "balanceDue": "Solde dû",
+    "history": "Historique",
+    "client": "Client",
+    "void": "Annuler la facture"
+  },
+  "new": {
+    "title": "Nouvelle facture",
+    "selectClientFirst": "Choisissez d'abord un client",
+    "client": "Client",
+    "number": "N° de facture",
+    "issued": "Date d'émission",
+    "due": "Échéance",
+    "discount": "Remise",
+    "notes": "Notes",
+    "saveDraft": "Enregistrer comme brouillon",
+    "saveAndSend": "Enregistrer et envoyer"
+  },
+  "preview": {
+    "heading": "FACTURE",
+    "billTo": "Facturer à",
+    "description": "Description",
+    "qty": "Qté",
+    "price": "Prix",
+    "total": "Total",
+    "subtotal": "Sous-total",
+    "tax": "TVA",
+    "discount": "Remise",
+    "notes": "Notes :"
+  },
+  "list": {
+    "title": "Factures",
+    "recurring": "Récurrentes",
+    "pdf": "PDF"
+  },
+  "notFound": "Facture introuvable",
+  "createdNotReturned": "Facture créée mais non renvoyée",
+  "updatedNotReturned": "Facture mise à jour mais non renvoyée",
+  "lineItem": {
+    "remove": "Supprimer la ligne"
+  },
+  "send": {
+    "notice": "Cette facture sera envoyée au destinataire configuré."
+  }
 }

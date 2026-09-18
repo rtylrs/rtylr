@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -61,12 +62,12 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
       shareMutation.mutate(
         { reviewId },
         {
-          onSuccess: () => toast.success('Review shared with employee'),
-          onError: () => toast.error('Failed to share review'),
+          onSuccess: () => toast.success(t('performance.reviewShared')),
+          onError: () => toast.error(t('errors.shareReview')),
         }
       );
     },
-    [shareMutation]
+    [shareMutation, t]
   );
 
   const canShare = useCallback(
@@ -289,7 +290,7 @@ const ReviewCycleDetail = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Review cycle · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.reviewCycle'))} />
       <div>
         <SectionHeader
           title={cycle.name ?? ''}

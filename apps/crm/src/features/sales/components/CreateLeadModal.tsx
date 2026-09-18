@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useCreateLead } from '../../../shared/hooks/queries/useSales';
 import type { LeadStage } from '../../../shared/hooks/queries/useSales';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const createLead = useCreateLead();
   const [form, setForm] = useState({
     company: '',
@@ -24,7 +26,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
 
   const handleSubmit = (): void => {
     if (!form.company.trim()) {
-      toast.error('Company name is required');
+      toast.error(t('crm.createLead.companyRequired'));
       return;
     }
     createLead.mutate(
@@ -52,7 +54,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
           });
           onClose();
         },
-        onError: () => toast.error('Failed to create lead'),
+        onError: () => toast.error(t('crm.createLead.createFailed')),
       }
     );
   };
@@ -61,12 +63,12 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title="New Lead"
+      title={t('crm.leads.new')}
       size="md"
       footer={
         <>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             variant="primary"
@@ -80,20 +82,20 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <Input
-          label="Company *"
+          label={t('crm.createLead.companyLabel')}
           value={form.company}
           onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
-          placeholder="Acme Corp"
+          placeholder={t('crm.createLead.companyPlaceholder')}
         />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <Input
-            label="Industry"
+            label={t('crm.leadDetail.industry')}
             value={form.industry}
             onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
-            placeholder="SaaS"
+            placeholder={t('crm.createLead.industryPlaceholder')}
           />
           <Input
-            label="Company size"
+            label={t('crm.createLead.companySize')}
             value={form.size}
             onChange={(e) => setForm((f) => ({ ...f, size: e.target.value }))}
             placeholder="50-200"
@@ -101,13 +103,13 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <Input
-            label="Source"
+            label={t('crm.leadDetail.source')}
             value={form.source}
             onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))}
-            placeholder="LinkedIn, Referral..."
+            placeholder={t('crm.createLead.sourcePlaceholder')}
           />
           <Input
-            label="MRR Potential ($)"
+            label={t('crm.createLead.mrrPotentialUsd')}
             type="number"
             value={form.mrrPotential}
             onChange={(e) => setForm((f) => ({ ...f, mrrPotential: e.target.value }))}
@@ -116,31 +118,39 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <Select
-            label="Stage"
+            label={t('crm.leadDetail.stage')}
             value={form.stage}
             onChange={(e) => setForm((f) => ({ ...f, stage: e.target.value as LeadStage }))}
           >
-            <option value="cold">Cold</option>
-            <option value="contacted">Contacted</option>
-            <option value="demo_booked">Demo Booked</option>
-            <option value="demo_done">Demo Done</option>
-            <option value="proposal_sent">Proposal Sent</option>
-            <option value="contracted">Contracted</option>
-            <option value="lost">Lost</option>
+            {(
+              [
+                'cold',
+                'contacted',
+                'demo_booked',
+                'demo_done',
+                'proposal_sent',
+                'contracted',
+                'lost',
+              ] as LeadStage[]
+            ).map((stage) => (
+              <option key={stage} value={stage}>
+                {t(`crm.leadStages.${stage}`)}
+              </option>
+            ))}
           </Select>
           <Input
-            label="Assigned Rep"
+            label={t('crm.leadDetail.assignedRep')}
             type="number"
             value={form.assignedTo}
             onChange={(e) => setForm((f) => ({ ...f, assignedTo: e.target.value }))}
-            placeholder="User ID"
+            placeholder={t('crm.createLead.userId')}
           />
         </div>
         <Textarea
-          label="Notes"
+          label={t('crm.leadDetail.notesLabel')}
           value={form.notes}
           onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-          placeholder="Context about this lead..."
+          placeholder={t('crm.createLead.notesPlaceholder')}
         />
       </div>
     </Modal>

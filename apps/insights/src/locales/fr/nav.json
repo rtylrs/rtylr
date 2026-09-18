@@ -4,5 +4,19 @@
   "reports": "Rapports",
   "overview": "Vue d'ensemble",
   "performance": "Performance",
-  "settings": "Paramètres"
+  "settings": "Paramètres",
+  "revenue": "Chiffre d'affaires",
+  "customers": "Clients",
+  "products": "Produits",
+  "operations": "Opérations",
+  "financial": "Finances",
+  "pages": "Pages",
+  "toggleTheme": "Changer de thème",
+  "signOut": "Se déconnecter",
+  "appearance": "Apparence",
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  }
 }

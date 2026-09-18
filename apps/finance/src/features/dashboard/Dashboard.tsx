@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import {
@@ -28,6 +30,8 @@ const cardStyle: React.CSSProperties = {
 };
 
 interface StatCardProps {
+  /** Stable id, used as the React key: the label is a translation and changes with the language. */
+  id: string;
   label: string;
   value: string;
   change: string;
@@ -89,6 +93,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, change, up, icon: Ico
 );
 
 const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
+  const { t } = useTranslation();
   const chartH = 140;
   const barW = 28;
   const gap = 16;
@@ -165,7 +170,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
           opacity={0.85}
         />
         <text x={14} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
-          Revenue
+          {t('finance.dashboard.revenue')}
         </text>
         <rect
           x={60}
@@ -177,7 +182,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
           opacity={0.7}
         />
         <text x={74} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
-          Expenses
+          {t('finance.dashboard.expenses')}
         </text>
       </g>
     </svg>
@@ -185,6 +190,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
 };
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { data: dashData, isLoading: loading } = useFinanceDashboard();
 
   const expensesMtd = dashData?.totalExpensesMtd ?? 0;
@@ -193,7 +199,9 @@ const Dashboard: React.FC = () => {
 
   const statsItems: StatCardProps[] = [
     {
-      label: 'Total Revenue (MTD)',
+      id: 'totalRevenueMtd',
+
+      label: t('finance.dashboard.totalRevenueMtd'),
       value: loading ? '…' : fmt(revenueMtd),
       change: dashData?.totalRevenueMtdChange ?? '+0%',
       up: true,
@@ -201,7 +209,9 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-accent)',
     },
     {
-      label: 'Total Expenses (MTD)',
+      id: 'totalExpensesMtd',
+
+      label: t('finance.dashboard.totalExpensesMtd'),
       value: loading ? '…' : fmt(expensesMtd),
       change: dashData?.totalExpensesMtdChange ?? '+0%',
       up: false,
@@ -209,7 +219,9 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-danger)',
     },
     {
-      label: 'Net Profit (MTD)',
+      id: 'netProfitMtd',
+
+      label: t('finance.dashboard.netProfitMtd'),
       value: loading ? '…' : fmt(netProfitMtd),
       change: dashData?.netProfitChange ?? '+0%',
       up: true,
@@ -217,7 +229,9 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-accent)',
     },
     {
-      label: 'Outstanding Invoices',
+      id: 'outstandingInvoices',
+
+      label: t('finance.dashboard.outstandingInvoices'),
       value: loading ? '…' : fmt(dashData?.totalReceivable ?? 0),
       change: dashData?.outstandingInvoicesCount
         ? `${dashData.outstandingInvoicesCount} invoices`
@@ -239,7 +253,7 @@ const Dashboard: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
     >
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.dashboard'))} />
       {/* Overdue alert */}
       {overdueInvoices.length > 0 && (
         <div
@@ -283,7 +297,7 @@ const Dashboard: React.FC = () => {
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
         {statsItems.map((s) => (
-          <StatCard key={s.label} {...s} />
+          <StatCard key={s.id} {...s} />
         ))}
       </div>
 
@@ -305,7 +319,7 @@ const Dashboard: React.FC = () => {
                   color: 'var(--hub-text)',
                 }}
               >
-                Revenue vs Expenses
+                {t('finance.dashboard.revenueVsExpenses')}
               </h2>
               <BarChart barData={barData} />
             </div>
@@ -344,7 +358,7 @@ const Dashboard: React.FC = () => {
           <h2
             style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}
           >
-            Recent Transactions
+            {t('finance.dashboard.recentTransactions')}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {transactions.map((t, i) => (

@@ -15,6 +15,7 @@ import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable
 import RouteNotFound from './shared/components/RouteNotFound';
 import { settingsSearchSchema } from './shared/schemas/settings';
 import { myDaySearchSchema } from './shared/schemas/time';
+import { taskDrawerSearchSchema } from './shared/schemas/taskDrawer';
 import { useTranslation } from 'react-i18next';
 // The preview-route fallback is eager so a disabled deep link can explain its state
 // without waiting for a lazy route component to load.
@@ -86,6 +87,11 @@ function previewRoute(element: React.ReactNode): React.ReactNode {
 }
 
 const rootRoute = createRootRoute({
+  // `?openTask=<id>` is valid on every screen, because a task can be opened
+  // from the board, both calendars, My tasks, Today, Triage, Archive, Team and
+  // the command bar. Declaring it here rather than on each of 38 routes
+  // (rtylr#1079).
+  validateSearch: taskDrawerSearchSchema,
   component: () => (
     <ErrorBoundary>
       <AppGuard

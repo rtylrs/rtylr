@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import {
   createMemoryHistory,
@@ -11,6 +11,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ApplyPage from './ApplyPage';
+import { initTestI18n } from '../../shared/testing/i18n';
 import type { Customization, RecruitCareer } from '../../shared/lib/types';
 
 /**
@@ -132,6 +133,12 @@ async function renderAt(path: string) {
 }
 
 describe('ApplyPage integration', () => {
+  // Real locale files, so an assertion written in English also proves the key
+  // resolves. See the helper for why an identity `t` mock would not.
+  beforeAll(async () => {
+    await initTestI18n('en');
+  });
+
   it('renders the role title and brand name in the header', async () => {
     await renderAt('/acme/backend-engineer/apply');
     expect(screen.getByText('Apply for Backend Engineer')).toBeInTheDocument();

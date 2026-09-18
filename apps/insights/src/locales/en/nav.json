@@ -4,5 +4,19 @@
   "reports": "Reports",
   "overview": "Overview",
   "performance": "Performance",
-  "settings": "Settings"
+  "settings": "Settings",
+  "revenue": "Revenue",
+  "customers": "Customers",
+  "products": "Products",
+  "operations": "Operations",
+  "financial": "Financial",
+  "pages": "Pages",
+  "toggleTheme": "Toggle theme",
+  "signOut": "Sign out",
+  "appearance": "Appearance",
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
 }

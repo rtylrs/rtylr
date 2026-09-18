@@ -14,7 +14,9 @@
       "margin": "Gross Margin"
     },
     "emptyTitle": "No KPI data yet",
-    "emptyDescription": "Metrics will appear here once your business starts generating activity."
+    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "vsPrior": "vs prior",
+    "metaTitle": "Dashboard · rtylr"
   },
   "revenue": {
     "title": "Revenue",
@@ -31,7 +33,9 @@
     "emptyByApp": {
       "title": "No revenue breakdown yet",
       "description": "A breakdown by app will appear once revenue comes in from more than one app."
-    }
+    },
+    "vsPrevious": "vs previous",
+    "metaTitle": "Revenue · rtylr"
   },
   "customers": {
     "title": "Customers",
@@ -55,7 +59,11 @@
     "emptyChurn": {
       "title": "No churn data yet",
       "description": "Churn rates will appear once there is enough customer history to measure retention."
-    }
+    },
+    "churnedCount": "churned",
+    "customers_one": "{{formatted}} customer",
+    "customers_other": "{{formatted}} customers",
+    "metaTitle": "Customers · rtylr"
   },
   "products": {
     "title": "Products",
@@ -84,7 +92,13 @@
     "emptyCategoryMix": {
       "title": "No category data yet",
       "description": "A breakdown by category will appear once products are assigned to categories and sold."
-    }
+    },
+    "inStock": "in stock",
+    "units_one": "{{formatted}} unit",
+    "units_other": "{{formatted}} units",
+    "products_one": "{{formatted}} product",
+    "products_other": "{{formatted}} products",
+    "metaTitle": "Products · rtylr"
   },
   "financial": {
     "title": "Financial",
@@ -102,7 +116,10 @@
     "emptyCashFlow": {
       "title": "No cash flow data yet",
       "description": "Cash flow will appear here once inflows and outflows are recorded."
-    }
+    },
+    "invoices_one": "{{formatted}} invoice",
+    "invoices_other": "{{formatted}} invoices",
+    "metaTitle": "Financial · rtylr"
   },
   "operations": {
     "title": "Operations",
@@ -131,7 +148,15 @@
     "emptyTimeOff": {
       "title": "No time-off data yet",
       "description": "Time-off requests will appear here once staff submit them."
-    }
+    },
+    "hours": "hours",
+    "scheduled": "Scheduled",
+    "completed": "Completed",
+    "noShows": "No-shows",
+    "completion": "Completion",
+    "pending": "Pending",
+    "approved": "Approved",
+    "metaTitle": "Operations · rtylr"
   },
   "reports": {
     "title": "Reports",
@@ -142,7 +167,8 @@
     "empty": {
       "title": "No report templates yet",
       "description": "Report templates will appear here once they are made available for this workspace."
-    }
+    },
+    "metaTitle": "Reports · rtylr"
   },
   "settings": {
     "title": "Insights Settings",
@@ -162,6 +188,15 @@
         "description": "Reports you schedule for recurring delivery will appear here."
       }
     },
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "save": "Save settings",
+    "saving": "Saving…",
+    "metaTitle": "Settings · rtylr"
+  },
+  "charts": {
+    "revenueTrend": "Revenue trend chart",
+    "revenueByApp": "Revenue by app chart",
+    "revenueSparkline": "Revenue sparkline",
+    "topCustomers": "Top customers chart"
   }
 }

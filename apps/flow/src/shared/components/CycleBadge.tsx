@@ -11,7 +11,7 @@ interface CycleBadgeProps {
 const STATUS_COLORS: Record<Cycle['status'], string> = {
   active: 'var(--flow-status-approved)',
   upcoming: 'var(--flow-info-fg)',
-  completed: '#6b7280',
+  completed: 'var(--flow-neutral-fg)',
 };
 
 export const CycleBadge: React.FC<CycleBadgeProps> = ({ cycle, compact }) => {

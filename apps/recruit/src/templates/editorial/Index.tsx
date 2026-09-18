@@ -51,15 +51,15 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections
 
         <section className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Open roles
+            {t('public.index.openRoles')}
           </h2>
           <div className="mt-10 divide-y" style={{ borderColor: 'var(--recruit-border)' }}>
             {careers.length === 0 ? (
               <EmptyState
                 icon={Briefcase}
-                title={t('emptyStates.publicRolesNone')}
+                title={t('common.emptyStates.publicRolesNone')}
                 action={{
-                  label: t('emptyStates.checkAgain'),
+                  label: t('common.emptyStates.checkAgain'),
                   onClick: () => window.location.reload(),
                 }}
               />
@@ -67,7 +67,8 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections
               careers.map((c) => (
                 <Link
                   key={c.id}
-                  to={`/${customization.slug}/${c.slug}` as any}
+                  to="/$slug/$careerSlug"
+                  params={{ slug: customization.slug, careerSlug: c.slug }}
                   className="group grid grid-cols-1 gap-2 py-8 transition sm:grid-cols-[1fr_auto] sm:items-center sm:gap-8"
                 >
                   <div>

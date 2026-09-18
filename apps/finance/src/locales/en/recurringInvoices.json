@@ -3,5 +3,18 @@
   "updated": "Recurring invoice updated",
   "emptyTitle": "No recurring invoices yet",
   "emptyDescription": "Create a subscription to automatically bill customers on a schedule.",
-  "emptyCta": "Create subscription"
+  "emptyCta": "Create subscription",
+  "title": "Recurring Invoices",
+  "new": "New Recurring Invoice",
+  "templateRequired": "A template invoice is required",
+  "templateInvoice": "Template Invoice",
+  "templatePlaceholder": "Select template invoice...",
+  "frequencyLabel": "Frequency",
+  "nextInvoiceDate": "Next Invoice Date",
+  "frequency": {
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "yearly": "Yearly"
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import {
   Search,
@@ -51,6 +52,7 @@ const useCommandPalette = () => {
 };
 
 const CommandPalette: React.FC = () => {
+  const { t } = useTranslation();
   const { open, setOpen } = useCommandPalette();
   const navigate = useNavigate();
   const { data: staff = [] } = useStaff();
@@ -70,58 +72,68 @@ const CommandPalette: React.FC = () => {
     () => [
       {
         id: 'nav-dashboard',
-        label: 'Dashboard',
+        label: t('nav.dashboard'),
         icon: Users,
         run: () => navigate({ to: '/' }),
         keywords: 'home',
       },
-      { id: 'nav-staff', label: 'Staff', icon: Users, run: () => navigate({ to: '/staff' }) },
-      { id: 'nav-shifts', label: 'Shifts', icon: Clock, run: () => navigate({ to: '/shifts' }) },
+      {
+        id: 'nav-staff',
+        label: t('nav.staff'),
+        icon: Users,
+        run: () => navigate({ to: '/staff' }),
+      },
+      {
+        id: 'nav-shifts',
+        label: t('nav.shifts'),
+        icon: Clock,
+        run: () => navigate({ to: '/shifts' }),
+      },
       {
         id: 'nav-schedule',
-        label: 'Schedule',
+        label: t('nav.schedule'),
         icon: Calendar,
         run: () => navigate({ to: '/schedule' }),
       },
       {
         id: 'nav-timesheets',
-        label: 'Timesheets',
+        label: t('nav.timesheets'),
         icon: Clock,
         run: () => navigate({ to: '/timesheets' }),
       },
       {
         id: 'nav-payroll',
-        label: 'Payroll',
+        label: t('nav.payroll'),
         icon: DollarSign,
         run: () => navigate({ to: '/payroll' }),
       },
       {
         id: 'nav-departments',
-        label: 'Departments',
+        label: t('nav.departments'),
         icon: Building2,
         run: () => navigate({ to: '/departments' }),
       },
       {
         id: 'nav-time-off',
-        label: 'Time Off',
+        label: t('nav.timeOff'),
         icon: Calendar,
         run: () => navigate({ to: '/time-off' }),
       },
       {
         id: 'nav-new-time-off',
-        label: 'New time off request',
+        label: t('timeOff.page.newRequest'),
         icon: Calendar,
         run: () => navigate({ to: '/time-off/new' }),
       },
       {
         id: 'nav-calendar',
-        label: 'Time Off Calendar',
+        label: t('timeOff.calendar.title'),
         icon: Calendar,
         run: () => navigate({ to: '/calendar' }),
       },
       {
         id: 'nav-reviews',
-        label: 'Performance Reviews',
+        label: t('reviews.page.title'),
         icon: ClipboardList,
         run: () => navigate({ to: '/reviews' }),
       },
@@ -133,48 +145,48 @@ const CommandPalette: React.FC = () => {
       },
       {
         id: 'nav-onboarding',
-        label: 'Onboarding',
+        label: t('nav.onboarding'),
         icon: Rocket,
         run: () => navigate({ to: '/onboarding' }),
       },
       {
         id: 'nav-offboarding',
-        label: 'Offboarding',
+        label: t('nav.offboarding'),
         icon: LogOut,
         run: () => navigate({ to: '/offboarding' }),
       },
       {
         id: 'nav-documents',
-        label: 'Documents',
+        label: t('nav.documents'),
         icon: FileText,
         run: () => navigate({ to: '/documents' }),
       },
       {
         id: 'nav-benefits',
-        label: 'Benefits',
+        label: t('nav.benefits'),
         icon: Shield,
         run: () => navigate({ to: '/benefits' }),
       },
       {
         id: 'nav-training',
-        label: 'Training',
+        label: t('nav.training'),
         icon: GraduationCap,
         run: () => navigate({ to: '/training' }),
       },
       {
         id: 'nav-org-chart',
-        label: 'Org Chart',
+        label: t('nav.orgChart'),
         icon: Network,
         run: () => navigate({ to: '/org-chart' }),
       },
       {
         id: 'nav-settings',
-        label: 'Settings',
+        label: t('nav.settings'),
         icon: SettingsIcon,
         run: () => navigate({ to: '/settings' }),
       },
     ],
-    [navigate]
+    [navigate, t]
   );
 
   const staffActions: Action[] = useMemo(
@@ -184,7 +196,7 @@ const CommandPalette: React.FC = () => {
         label: s.name,
         subtitle: `${s.role} • ${s.department}`,
         icon: Users,
-        run: () => navigate({ to: `/staff/${s.id}` as any }),
+        run: () => navigate({ to: '/staff/$id', params: { id: String(s.id) } }),
         keywords: s.email,
       })),
     [staff, navigate]
@@ -267,7 +279,7 @@ const CommandPalette: React.FC = () => {
                 onRun(filtered[active]);
               }
             }}
-            placeholder="Search people, pages, actions"
+            placeholder={t('layout.commandPalette.placeholder')}
             style={{
               flex: 1,
               background: 'transparent',
@@ -299,7 +311,7 @@ const CommandPalette: React.FC = () => {
                 fontSize: 13,
               }}
             >
-              No matches
+              {t('common.noMatches')}
             </div>
           )}
           {filtered.map((a, i) => {

@@ -53,5 +53,22 @@
     "location": "الموقع",
     "emptyTitle": "لا توجد إجازات مجدولة",
     "emptyDescription": "ستظهر الإجازات الموافق عليها في التقويم."
-  }
+  },
+  "policies": {
+    "pageTitle": "إعدادات سياسات الإجازات",
+    "title": "سياسات الإجازات",
+    "subtitle": "أنشئ أنواع الإجازات التي يمكن للموظفين طلبها.",
+    "namePlaceholder": "إجازة سنوية",
+    "maxCarryover": "أقصى أيام مُدوَّرة",
+    "minNotice": "أدنى أيام إشعار"
+  },
+  "policiesUnavailableTitle": "تعذر تحميل سياسات الإجازات",
+  "policiesUnavailableBody": "تعذر الوصول إلى خدمة سياسات الإجازات. حاول مرة أخرى.",
+  "configurePolicies": "إعداد سياسات الإجازات",
+  "policy": {
+    "nameAndLimitsRequired": "أدخل اسمًا وحدودًا موجبة للسياسة",
+    "paidLeave": "إجازة مدفوعة",
+    "requiresApproval": "تتطلب موافقة المدير"
+  },
+  "policyCreated": "تم إنشاء سياسة الإجازة"
 }

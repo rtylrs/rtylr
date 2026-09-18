@@ -1,6 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import LineItemRow, { LineItem } from './LineItemRow';
+import { initTestI18n } from '../testing/i18n';
+
+// i18next is not mocked here: the real locale files mean an assertion
+// written in English also proves the key resolves (rtylr#1269).
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('LineItemRow', () => {
   const sampleItem: LineItem = {

@@ -20,6 +20,7 @@ import { useUserStore, type StoredUser } from '../stores/userStore';
 import { normalizeConfigData, useConfigStore } from '../stores/configStore';
 import { accessClient, configClient, userClient } from '../lib/clients';
 import { useBusinessFavicon } from '../hooks/useBusinessFavicon';
+import { APP_NAMES } from '../config/appNames';
 
 const getCookieToken = (): string | null => {
   const raw = document.cookie
@@ -38,56 +39,56 @@ const getCookieToken = (): string | null => {
 const ALL_APPS = [
   {
     id: 'pos',
-    name: 'POS',
-    desc: 'Point of sale',
+    nameKey: APP_NAMES.pos.short,
+    descKey: 'appNames.desc.pos',
     color: 'var(--app-pos)',
     icon: MonitorSpeaker,
     href: APP_URLS.pos,
   },
   {
     id: 'erp',
-    name: 'ERP',
-    desc: 'Inventory and supply',
+    nameKey: APP_NAMES.erp.short,
+    descKey: 'appNames.desc.erp',
     color: 'var(--app-erp)',
     icon: Package,
     href: APP_URLS.erp,
   },
   {
     id: 'hr',
-    name: 'HR',
-    desc: 'Staff and payroll',
+    nameKey: APP_NAMES.hr.short,
+    descKey: 'appNames.desc.hr',
     color: 'var(--app-hr)',
     icon: UserCheck,
     href: APP_URLS.hr,
   },
   {
     id: 'crm',
-    name: 'CRM',
-    desc: 'Customers and loyalty',
+    nameKey: APP_NAMES.crm.short,
+    descKey: 'appNames.desc.crm',
     color: 'var(--app-crm)',
     icon: Users,
     href: APP_URLS.crm,
   },
   {
     id: 'finance',
-    name: 'Finance',
-    desc: 'Invoices and expenses',
+    nameKey: APP_NAMES.finance.short,
+    descKey: 'appNames.desc.finance',
     color: 'var(--app-finance)',
     icon: CreditCard,
     href: APP_URLS.finance,
   },
   {
     id: 'flow',
-    name: 'Flow',
-    desc: 'Projects and tasks',
+    nameKey: APP_NAMES.flow.short,
+    descKey: 'appNames.desc.flow',
     color: 'var(--app-flow)',
     icon: Layers,
     href: APP_URLS.flow,
   },
   {
     id: 'insights',
-    name: 'Insights',
-    desc: 'Analytics and reports',
+    nameKey: APP_NAMES.insights.short,
+    descKey: 'appNames.desc.insights',
     color: 'var(--app-insights)',
     icon: BarChart3,
     href: APP_URLS.insights,
@@ -108,6 +109,7 @@ const ROLE_SCOPED_PATHS: Record<string, string[]> = {
 };
 
 function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
+  const { t } = useTranslation();
   const userApps: string[] =
     user.effectiveAccess?.apps
       .filter((app) => app.licensed && app.hasAccess)
@@ -156,7 +158,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="User menu"
+            aria-label={t('common.userMenu')}
             style={{ border: 'none', padding: 0, background: 'transparent', cursor: 'pointer' }}
           >
             <Avatar src={avatarUrl} alt={fullName || 'User'} size="md" />
@@ -209,7 +211,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   textDecoration: 'none',
                 }}
               >
-                Account settings
+                {t('common.accountSettings')}
               </a>
               <button
                 type="button"
@@ -226,7 +228,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   cursor: 'pointer',
                 }}
               >
-                Sign out
+                {t('common.signOut')}
               </button>
             </div>
           )}
@@ -306,10 +308,10 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                     <span
                       style={{ fontSize: 13, fontWeight: 600, color: 'var(--dash-text, #111)' }}
                     >
-                      {app.name}
+                      {t(app.nameKey)}
                     </span>
                     <span style={{ fontSize: 11, color: 'var(--dash-text-muted, #999)' }}>
-                      {app.desc}
+                      {t(app.descKey)}
                     </span>
                   </a>
                 );
@@ -346,11 +348,11 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   <span
                     style={{ fontSize: 13, fontWeight: 600, color: 'var(--dash-text-muted, #888)' }}
                   >
-                    {app.name}
+                    {t(app.nameKey)}
                   </span>
                   {isRequested ? (
                     <span style={{ fontSize: 11, color: '#10b981', fontWeight: 500 }}>
-                      Requested
+                      {t('common.accessRequested')}
                     </span>
                   ) : requestLoading === app.id ? (
                     <div
@@ -379,7 +381,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                         textUnderlineOffset: 2,
                       }}
                     >
-                      Request access
+                      {t('common.requestAccess')}
                     </button>
                   )}
                 </div>
@@ -417,7 +419,7 @@ function MFAAccessGate({ enrollmentRequired }: { enrollmentRequired: boolean }):
         <a
           href="/security"
           className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold"
-          style={{ background: 'var(--accent)', color: 'var(--accent-contrast, #fff)' }}
+          style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
         >
           {enrollmentRequired
             ? t('common.mfaGate.openSetup')
@@ -497,7 +499,7 @@ function BusinessRoute(): React.JSX.Element | null {
         // auth interceptor handles 401 redirect
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, setAboutContent, setContactInfo, setMaintanance, setToken, setUser, setWebsiteData]);
 
   if (!token) return null;
 

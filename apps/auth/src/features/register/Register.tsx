@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
@@ -32,6 +33,7 @@ function getRedirectUrl(redirectParam: string | null): string {
 // ── Register ────────────────────────────────────────────────────────────────
 
 const Register: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [businessName, setBusinessName] = useState('');
@@ -56,7 +58,9 @@ const Register: React.FC = (): React.JSX.Element => {
     const seq = ++emailCheckSeq.current;
     try {
       const { exists } = await checkEmailExists(email);
-      if (seq === emailCheckSeq.current) setEmailTaken(exists);
+      // Optional on the response. An answer that did not arrive is not a
+      // reason to tell the user their email is taken.
+      if (seq === emailCheckSeq.current) setEmailTaken(exists ?? false);
     } catch {
       // never block signup on a lookup failure
       if (seq === emailCheckSeq.current) setEmailTaken(false);
@@ -122,10 +126,10 @@ const Register: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Create account · rtylr" />
+      <HelmetContainer title={t('auth.register.metaTitle')} />
       <AuthShell
-        title="Create your account."
-        subtitle="Start on the Free plan. Upgrade later from billing."
+        title={t('auth.register.heading')}
+        subtitle={t('auth.register.planNotice')}
         footer={
           <div className="text-center">
             <p className="text-sm text-[#666]">
@@ -137,7 +141,7 @@ const Register: React.FC = (): React.JSX.Element => {
                   navigate({ to: redirectParam ? `/?redirect=${redirectParam}` : '/' })
                 }
               >
-                Sign in
+                {t('auth.common.signIn')}
               </button>
             </p>
           </div>
@@ -153,12 +157,12 @@ const Register: React.FC = (): React.JSX.Element => {
           {/* Full name */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="register-name" className="text-sm font-medium text-[#111]">
-              Full name
+              {t('auth.common.fullName')}
             </label>
             <input
               id="register-name"
               type="text"
-              placeholder="Jane Doe"
+              placeholder={t('auth.register.namePlaceholder')}
               autoComplete="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -169,12 +173,12 @@ const Register: React.FC = (): React.JSX.Element => {
           {/* Business name */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="register-business" className="text-sm font-medium text-[#111]">
-              Business name
+              {t('auth.common.businessName')}
             </label>
             <input
               id="register-business"
               type="text"
-              placeholder="My Coffee Shop"
+              placeholder={t('auth.register.businessPlaceholder')}
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
               required
@@ -185,7 +189,7 @@ const Register: React.FC = (): React.JSX.Element => {
           {/* Email */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="register-email" className="text-sm font-medium text-[#111]">
-              Email
+              {t('auth.common.email')}
             </label>
             <input
               id="register-email"
@@ -203,20 +207,20 @@ const Register: React.FC = (): React.JSX.Element => {
             />
             {emailError && <p className="text-xs text-red-500">{emailError}</p>}
             {!emailError && emailTaken && (
-              <p className="text-xs text-red-500">An account with this email already exists.</p>
+              <p className="text-xs text-red-500">{t('auth.register.emailTaken')}</p>
             )}
           </div>
 
           {/* Password */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="register-password" className="text-sm font-medium text-[#111]">
-              Password
+              {t('auth.common.password')}
             </label>
             <div className="relative">
               <input
                 id="register-password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="At least 8 characters"
+                placeholder={t('auth.common.atLeastEight')}
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -238,13 +242,13 @@ const Register: React.FC = (): React.JSX.Element => {
           {/* Confirm password */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="register-confirm" className="text-sm font-medium text-[#111]">
-              Confirm password
+              {t('auth.common.confirmPassword')}
             </label>
             <div className="relative">
               <input
                 id="register-confirm"
                 type={showConfirm ? 'text' : 'password'}
-                placeholder="Repeat password"
+                placeholder={t('auth.common.repeatPassword')}
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -292,7 +296,7 @@ const Register: React.FC = (): React.JSX.Element => {
               !businessName.trim()
             }
           >
-            Create account
+            {t('auth.register.submit')}
           </Button>
 
           {showSocialLogin && (
@@ -307,7 +311,7 @@ const Register: React.FC = (): React.JSX.Element => {
               >
                 <span className="inline-flex items-center gap-2">
                   <FaGoogle className="text-[#444]" />
-                  Google
+                  {t('auth.common.google')}
                 </span>
               </Button>
               <Button
@@ -320,7 +324,7 @@ const Register: React.FC = (): React.JSX.Element => {
               >
                 <span className="inline-flex items-center gap-2">
                   <FaGithub className="text-[#444]" />
-                  GitHub
+                  {t('auth.common.github')}
                 </span>
               </Button>
               <Button
@@ -333,7 +337,7 @@ const Register: React.FC = (): React.JSX.Element => {
               >
                 <span className="inline-flex items-center gap-2">
                   <FaMicrosoft className="text-[#444]" />
-                  Microsoft
+                  {t('auth.common.microsoft')}
                 </span>
               </Button>
               <Button
@@ -346,7 +350,7 @@ const Register: React.FC = (): React.JSX.Element => {
               >
                 <span className="inline-flex items-center gap-2">
                   <FaApple className="text-[#444]" />
-                  Apple
+                  {t('auth.common.apple')}
                 </span>
               </Button>
             </div>

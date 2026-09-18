@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Stable deep-link state for routes that are intentionally hidden by a flag.
@@ -7,6 +8,7 @@ import { Link } from '@tanstack/react-router';
  * sending the user somewhere else.
  */
 export function PreviewRouteUnavailable(): React.JSX.Element {
+  const { t } = useTranslation();
   return (
     <div
       role="status"
@@ -22,17 +24,16 @@ export function PreviewRouteUnavailable(): React.JSX.Element {
       }}
     >
       <h1 style={{ margin: 0, fontSize: 'var(--text-screen)', fontWeight: 600 }}>
-        Preview route unavailable
+        {t('flow.previewRoute.title')}
       </h1>
       <p style={{ maxWidth: '420px', margin: '12px 0 20px', color: 'var(--flow-text-muted)' }}>
-        This Flow page is not enabled in the current environment. The route is still available when
-        preview routes are enabled.
+        {t('flow.previewRoute.body')}
       </p>
       <Link
         to="/my-issues"
         style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}
       >
-        Return to My Issues
+        {t('flow.previewRoute.back')}
       </Link>
     </div>
   );

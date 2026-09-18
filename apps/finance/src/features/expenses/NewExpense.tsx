@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -14,6 +16,7 @@ import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../s
 import { todayIso } from '../../shared/lib/date';
 
 const NewExpense: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: categories = [] } = useExpenseCategories();
   const [receipt, setReceipt] = useState<string | null>(null);
@@ -26,11 +29,11 @@ const NewExpense: React.FC = () => {
 
   const handleSave = (): void => {
     if (!description.trim() || categoryId === undefined) {
-      toast.error('Description and category are required');
+      toast.error(t('expenses.descriptionAndCategoryRequired'));
       return;
     }
     if (amount <= 0) {
-      toast.error('Amount must be greater than zero');
+      toast.error(t('expenses.amountPositive'));
       return;
     }
     createExpense.mutate(
@@ -44,7 +47,7 @@ const NewExpense: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Expense submitted');
+          toast.success(t('expenses.submitted'));
           navigate({ to: '/expenses' });
         },
         onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to submit expense')),
@@ -58,10 +61,10 @@ const NewExpense: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Submit expense · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.submitExpense'))} />
       <PageHeader
-        title="Submit Expense"
-        breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: 'New' }]}
+        title={t('expenses.submitTitle')}
+        breadcrumbs={[{ label: t('nav.expenses'), to: '/expenses' }, { label: t('common.new') }]}
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
@@ -69,23 +72,23 @@ const NewExpense: React.FC = () => {
           style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}
         >
           <div>
-            <label style={labelStyle}>Description</label>
+            <label style={labelStyle}>{t('expenses.description')}</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               style={{ ...inputStyle, marginTop: 6 }}
-              placeholder="Client dinner, Uber ride..."
+              placeholder={t('expenses.descriptionPlaceholder')}
             />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={labelStyle}>Amount</label>
+              <label style={labelStyle}>{t('expenses.amount')}</label>
               <div style={{ marginTop: 6 }}>
                 <CurrencyInput value={amount} onChange={setAmount} />
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Date</label>
+              <label style={labelStyle}>{t('expenses.date')}</label>
               <input
                 type="date"
                 value={date}
@@ -95,7 +98,7 @@ const NewExpense: React.FC = () => {
             </div>
           </div>
           <div>
-            <label style={labelStyle}>Category</label>
+            <label style={labelStyle}>{t('expenses.category')}</label>
             <select
               value={categoryId ?? ''}
               onChange={(e) =>
@@ -103,7 +106,7 @@ const NewExpense: React.FC = () => {
               }
               style={{ ...inputStyle, marginTop: 6 }}
             >
-              <option value="">Select category</option>
+              <option value="">{t('expenses.selectCategory')}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -112,7 +115,7 @@ const NewExpense: React.FC = () => {
             </select>
           </div>
           <div>
-            <label style={labelStyle}>Notes</label>
+            <label style={labelStyle}>{t('expenses.notes')}</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -131,7 +134,7 @@ const NewExpense: React.FC = () => {
               marginBottom: 12,
             }}
           >
-            Receipt
+            {t('expenses.receipt')}
           </div>
           <ReceiptUpload value={receipt} onChange={setReceipt} />
         </div>

@@ -3,10 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { signOut } from '@voxire/auth';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import type {
-  LoginEntry as ApiLoginEntry,
-  LoginHistoryResponse,
-} from '@voxire/voxie/hub/security/v1/types';
+import type { LoginEntry as ApiLoginEntry } from '@voxire/voxie/hub/security/v1/types';
 import { toast } from 'sonner';
 import {
   CheckCircle2,
@@ -62,20 +59,31 @@ function formatDateTime(dateStr: string): string {
 
 type DeviceKind = 'mobile' | 'tablet' | 'desktop' | 'unknown';
 
+/**
+ * Facts about a device, not display text.
+ *
+ * This used to return a ready-made `label` and `description`, which meant a
+ * module-level function was composing user-facing English: "Chrome on macOS"
+ * glued with the word "on", `kind` capitalised into "Mobile", and literals for
+ * "Unknown device" and "Device information unavailable" (rtylr#1266).
+ *
+ * `t` cannot be reached from here, and threading it in would only move the
+ * problem. So the function reports what it detected and the component formats
+ * it. Browser and platform names stay literal: they are proper nouns and are
+ * the same in every language.
+ */
 interface DeviceDetails {
   kind: DeviceKind;
-  label: string;
-  description: string;
+  /** A proper noun, or empty when the user agent said nothing useful. */
+  browser: string;
+  /** A proper noun, or empty when undetected. */
+  platform: string;
 }
 
 function getDeviceDetails(userAgent: string): DeviceDetails {
   const ua = userAgent.toLowerCase();
   if (!ua) {
-    return {
-      kind: 'unknown',
-      label: 'Unknown device',
-      description: 'Device information unavailable',
-    };
+    return { kind: 'unknown', browser: '', platform: '' };
   }
 
   const kind: DeviceKind = /ipad|tablet/.test(ua)
@@ -96,7 +104,7 @@ function getDeviceDetails(userAgent: string): DeviceDetails {
             ? 'Chrome'
             : /safari/.test(ua)
               ? 'Safari'
-              : 'Browser';
+              : '';
 
   const platform = /iphone/.test(ua)
     ? 'iPhone'
@@ -112,11 +120,7 @@ function getDeviceDetails(userAgent: string): DeviceDetails {
               ? 'Linux'
               : '';
 
-  return {
-    kind,
-    label: platform ? `${browser} on ${platform}` : browser,
-    description: kind[0].toUpperCase() + kind.slice(1),
-  };
+  return { kind, browser, platform };
 }
 
 function getDeviceIcon(kind: DeviceKind) {
@@ -236,16 +240,16 @@ const Account: React.FC = () => {
   const updateProfile = useMutation({
     mutationFn: () => userClient.updateProfile({ name: formData.name }),
     onSuccess: () => {
-      toast.success('Profile saved');
+      toast.success(t('settings.accountPage.profileSaved'));
       setIsEditing(false);
     },
-    onError: () => toast.error('Failed to save profile'),
+    onError: () => toast.error(t('settings.accountPage.profileSaveFailed')),
   });
 
   const invalidateSessions = useMutation({
     mutationFn: () => securityClient.invalidateSessions({}),
     onSuccess: () => signOut('dash'),
-    onError: () => toast.error('Failed to invalidate sessions'),
+    onError: () => toast.error(t('settings.accountPage.invalidateFailed')),
   });
 
   const handleSave = (): void => {
@@ -264,27 +268,27 @@ const Account: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Account · rtylr" />
+      <HelmetContainer title={t('settings.accountPage.pageTitle')} />
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-primary">Account</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Manage your personal account information</p>
+          <h1 className="text-xl font-bold text-primary">{t('settings.accountPage.heading')}</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{t('settings.accountPage.subheading')}</p>
         </div>
 
         {/* Profile */}
         <Card>
           <CardHeader>
-            <CardTitle>Profile</CardTitle>
-            <CardDescription>Update your personal details</CardDescription>
+            <CardTitle>{t('settings.accountPage.profileTitle')}</CardTitle>
+            <CardDescription>{t('settings.accountPage.profileDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="name">Full name</Label>
+                <Label htmlFor="name">{t('settings.accountPage.fullName')}</Label>
                 <Input id="name" name="name" value={formData.name} onChange={handleInputChange} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('settings.accountPage.email')}</Label>
                 <Input
                   id="email"
                   name="email"
@@ -313,8 +317,8 @@ const Account: React.FC = () => {
         {/* Security */}
         <Card>
           <CardHeader>
-            <CardTitle>Security</CardTitle>
-            <CardDescription>Manage your account sessions</CardDescription>
+            <CardTitle>{t('settings.accountPage.securityTitle')}</CardTitle>
+            <CardDescription>{t('settings.accountPage.securityDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-sm text-gray-500 mb-3">
@@ -329,7 +333,7 @@ const Account: React.FC = () => {
         <ConfirmDialog
           open={confirmInvalidateOpen}
           onOpenChange={setConfirmInvalidateOpen}
-          title="Invalidate all sessions?"
+          title={t('settings.accountPage.invalidateTitle')}
           description="This will sign you out of Dash and revoke every active session for your account."
           confirmLabel="Invalidate sessions"
           destructive
@@ -342,7 +346,7 @@ const Account: React.FC = () => {
         {/* Login History */}
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle>Login history</CardTitle>
+            <CardTitle>{t('settings.accountPage.historyTitle')}</CardTitle>
             <CardDescription>
               {loginHistoryData.total > 0
                 ? `${loginHistoryData.total} sign-in${loginHistoryData.total === 1 ? '' : 's'} recorded for your account`
@@ -353,12 +357,12 @@ const Account: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Device</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>IP Address</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Time</TableHead>
+                  <TableHead>{t('settings.accountPage.email')}</TableHead>
+                  <TableHead>{t('settings.accountPage.colDevice')}</TableHead>
+                  <TableHead>{t('settings.accountPage.colMethod')}</TableHead>
+                  <TableHead>{t('settings.accountPage.colIpAddress')}</TableHead>
+                  <TableHead>{t('settings.accountPage.colStatus')}</TableHead>
+                  <TableHead>{t('settings.accountPage.colTime')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -402,10 +406,17 @@ const Account: React.FC = () => {
                                 className="font-medium truncate"
                                 style={{ color: 'var(--dash-text)' }}
                               >
-                                {item.device.label}
+                                {item.device.browser
+                                  ? item.device.platform
+                                    ? t('settings.accountPage.browserOnPlatform', {
+                                        browser: item.device.browser,
+                                        platform: item.device.platform,
+                                      })
+                                    : item.device.browser
+                                  : t('settings.accountPage.unknownDevice')}
                               </p>
                               <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                                {item.device.description}
+                                {t(`settings.accountPage.deviceKind.${item.device.kind}`)}
                               </p>
                             </div>
                           </div>

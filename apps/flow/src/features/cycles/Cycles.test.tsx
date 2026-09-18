@@ -53,6 +53,20 @@ function cycle(over: Partial<ApiCycle> = {}): ApiCycle {
   };
 }
 
+/**
+ * Every describe here shares one mocked project list, and the last one empties
+ * it to check the disabled primary. Nothing put it back, so under
+ * `--sequence.shuffle` the create-form tests could render with no projects,
+ * where the form is gated shut, and failed looking for a date picker that was
+ * never on screen (#1194).
+ *
+ * Top-level, so a describe added later inherits the reset rather than having
+ * to remember it.
+ */
+beforeEach(() => {
+  projectsState.data = [{ id: 'p-1', name: 'Website Redesign' }];
+});
+
 describe('Cycles', () => {
   beforeEach(() => {
     vi.clearAllMocks();

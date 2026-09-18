@@ -30,6 +30,8 @@ import {
   computeSeatProration,
 } from '../../shared/hooks/queries/useErpSubscription';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 type TabId = 'general' | 'team';
 
@@ -463,12 +465,12 @@ const TeamTab: React.FC = () => {
       ) : members.length === 0 ? (
         <EmptyState
           icon={Users}
-          title={t('settings.team.empty.title')}
+          title={t('erp.settings.team.empty.title')}
           size="compact"
           action={
             canInviteMember
-              ? { label: t('settings.team.invite'), onClick: () => setShowInvite(true) }
-              : { label: t('settings.team.refresh'), onClick: () => void refetch() }
+              ? { label: t('erp.settings.team.invite'), onClick: () => setShowInvite(true) }
+              : { label: t('erp.settings.team.refresh'), onClick: () => void refetch() }
           }
         />
       ) : (
@@ -530,11 +532,12 @@ const TeamTab: React.FC = () => {
 // ── Main Settings Component ───────────────────────────────────────────────────
 
 const Settings: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabId>('general');
 
   return (
     <div className="space-y-0">
-      <HelmetContainer title="Settings · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/settings'].title))} />
       <PageHeader title="Settings" description="Configure ERP defaults" />
 
       {/* Tab bar */}

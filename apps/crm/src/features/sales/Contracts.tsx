@@ -107,7 +107,7 @@ const Contracts: React.FC = () => {
 
   const handleSubmit = (): void => {
     if (!form.leadId || !form.signedAt || !form.signedBy) {
-      toast.error('Lead, signed date, and signed by are required');
+      toast.error(t('crm.contracts.requiredFields'));
       return;
     }
     createContract.mutate(
@@ -135,22 +135,22 @@ const Contracts: React.FC = () => {
             notes: '',
           });
         },
-        onError: () => toast.error('Failed to create contract'),
+        onError: () => toast.error(t('crm.contracts.createFailed')),
       }
     );
   };
 
   return (
     <>
-      <HelmetContainer title="Contracts · rtylr" />
+      <HelmetContainer title={`${t('crm.contracts.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1100px' }}>
         <PageHeader
-          title="Contracts"
-          subtitle="All signed contracts and their details"
+          title={t('crm.contracts.pageTitle')}
+          subtitle={t('crm.contracts.subtitle')}
           actions={
             <Button variant="primary" onClick={() => setCreateOpen(true)}>
               <Plus size={13} />
-              New contract
+              {t('crm.contracts.new')}
             </Button>
           }
         />
@@ -183,7 +183,7 @@ const Contracts: React.FC = () => {
             </div>
             <div>
               <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: 0 }}>
-                Total contracted MRR
+                {t('crm.contracts.totalMrr')}
               </p>
               <p style={{ fontSize: '20px', fontWeight: 700, color: '#10b981', margin: 0 }}>
                 ${totalMrr.toLocaleString()}
@@ -338,12 +338,18 @@ const Contracts: React.FC = () => {
                               gap: '16px',
                             }}
                           >
-                            <DetailItem label="Plan" value={c.plan} />
-                            <DetailItem label="MRR" value={`$${c.mrr.toLocaleString()}/mo`} />
-                            <DetailItem label="Seats" value={String(c.seats)} />
-                            <DetailItem label="Signed At" value={formatDate(c.signedAt)} />
-                            <DetailItem label="Signed By" value={c.signedBy} />
-                            <DetailItem label="Closed By" value={c.closedBy} />
+                            <DetailItem label={t('crm.leadDetail.planLabel')} value={c.plan} />
+                            <DetailItem
+                              label={t('crm.leadDetail.mrr')}
+                              value={`$${c.mrr.toLocaleString()}/mo`}
+                            />
+                            <DetailItem label={t('crm.leadDetail.seats')} value={String(c.seats)} />
+                            <DetailItem
+                              label={t('crm.leadDetail.signedAt')}
+                              value={formatDate(c.signedAt)}
+                            />
+                            <DetailItem label={t('crm.leadDetail.signedBy')} value={c.signedBy} />
+                            <DetailItem label={t('crm.leadDetail.closedBy')} value={c.closedBy} />
                             {c.notes && (
                               <div style={{ gridColumn: '1 / -1' }}>
                                 <p
@@ -356,7 +362,7 @@ const Contracts: React.FC = () => {
                                     margin: '0 0 4px',
                                   }}
                                 >
-                                  Notes
+                                  {t('crm.leadDetail.notesLabel')}
                                 </p>
                                 <p
                                   style={{
@@ -396,12 +402,12 @@ const Contracts: React.FC = () => {
         <Modal
           open={createOpen}
           onClose={() => setCreateOpen(false)}
-          title="New Contract"
+          title={t('crm.contracts.new')}
           size="md"
           footer={
             <>
               <Button variant="outline" onClick={() => setCreateOpen(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="primary"
@@ -427,7 +433,7 @@ const Contracts: React.FC = () => {
                   margin: '0 0 4px',
                 }}
               >
-                Lead
+                {t('crm.contracts.leadLabel')}
               </p>
               <select
                 value={form.leadId}
@@ -445,7 +451,7 @@ const Contracts: React.FC = () => {
                   cursor: 'pointer',
                 }}
               >
-                <option value="">Select a lead...</option>
+                <option value="">{t('crm.contracts.selectLead')}</option>
                 {(leads ?? []).map((l) => (
                   <option key={l.id} value={String(l.id)}>
                     {l.company}
@@ -454,24 +460,24 @@ const Contracts: React.FC = () => {
               </select>
             </div>
             <Select
-              label="Plan"
+              label={t('crm.leadDetail.planLabel')}
               value={form.plan}
               onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as ContractPlan }))}
             >
-              <option value="free">Free</option>
-              <option value="pro">Pro</option>
-              <option value="scale">Scale</option>
+              <option value="free">{t('crm.leadDetail.planFree')}</option>
+              <option value="pro">{t('crm.leadDetail.planPro')}</option>
+              <option value="scale">{t('crm.leadDetail.planScale')}</option>
             </Select>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <Input
-                label="MRR ($)"
+                label={t('crm.leadDetail.mrrUsd')}
                 type="number"
                 value={form.mrr}
                 onChange={(e) => setForm((f) => ({ ...f, mrr: e.target.value }))}
                 placeholder="500"
               />
               <Input
-                label="Seats"
+                label={t('crm.leadDetail.seats')}
                 type="number"
                 value={form.seats}
                 onChange={(e) => setForm((f) => ({ ...f, seats: e.target.value }))}
@@ -479,30 +485,30 @@ const Contracts: React.FC = () => {
               />
             </div>
             <Input
-              label="Signed At"
+              label={t('crm.leadDetail.signedAt')}
               type="date"
               value={form.signedAt}
               onChange={(e) => setForm((f) => ({ ...f, signedAt: e.target.value }))}
             />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <Input
-                label="Signed By"
+                label={t('crm.leadDetail.signedBy')}
                 value={form.signedBy}
                 onChange={(e) => setForm((f) => ({ ...f, signedBy: e.target.value }))}
-                placeholder="John Smith"
+                placeholder={t('crm.leadDetail.signedByPlaceholder')}
               />
               <Input
-                label="Closed By (rep user ID)"
+                label={t('crm.leadDetail.closedByLabel')}
                 value={form.closedBy}
                 onChange={(e) => setForm((f) => ({ ...f, closedBy: e.target.value }))}
-                placeholder="User ID of the sales rep"
+                placeholder={t('crm.contracts.repUserIdPlaceholder')}
               />
             </div>
             <Textarea
-              label="Notes"
+              label={t('crm.leadDetail.notesLabel')}
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-              placeholder="Additional notes..."
+              placeholder={t('crm.leadDetail.contractNotesPlaceholder')}
             />
           </div>
         </Modal>

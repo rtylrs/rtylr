@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle, FileSignature } from 'lucide-react';
@@ -33,6 +34,7 @@ interface NewQuoteForm {
 }
 
 const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const createQuote = useCreateQuote();
   const currency = useSettings((s) => s.currency);
   const [form, setForm] = useState<NewQuoteForm>({
@@ -46,11 +48,11 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!form.client.trim()) {
-      toast.error('Client name is required');
+      toast.error(t('quotes.clientRequired'));
       return;
     }
     if (form.amount <= 0) {
-      toast.error('Amount must be greater than zero');
+      toast.error(t('quotes.amountPositive'));
       return;
     }
     createQuote.mutate(
@@ -64,7 +66,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       },
       {
         onSuccess: () => {
-          toast.success('Quote created');
+          toast.success(t('quotes.created'));
           onClose();
           setForm({
             client: '',
@@ -82,12 +84,12 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
     <Modal
       open={open}
       onClose={onClose}
-      title="New Quote"
+      title={t('quotes.newQuote')}
       width={440}
       footer={
         <>
           <button type="button" style={ghostBtn} onClick={onClose} disabled={createQuote.isPending}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -103,16 +105,16 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Client</label>
+          <label style={labelStyle}>{t('quotes.client')}</label>
           <input
             value={form.client}
             onChange={(e) => setForm((f) => ({ ...f, client: e.target.value }))}
-            placeholder="Client or company name"
+            placeholder={t('quotes.clientPlaceholder')}
             style={inputStyle}
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Amount</label>
+          <label style={labelStyle}>{t('quotes.amount')}</label>
           <CurrencyInput
             value={form.amount}
             onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
@@ -120,7 +122,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle}>Issue Date</label>
+            <label style={labelStyle}>{t('quotes.issueDate')}</label>
             <input
               type="date"
               value={form.issuedDate}
@@ -129,7 +131,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
             />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle}>Expires</label>
+            <label style={labelStyle}>{t('quotes.expires')}</label>
             <input
               type="date"
               value={form.expiresAt}
@@ -139,11 +141,11 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Description</label>
+          <label style={labelStyle}>{t('quotes.description')}</label>
           <input
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            placeholder="Optional notes"
+            placeholder={t('quotes.notesPlaceholder')}
             style={inputStyle}
           />
         </div>
@@ -165,7 +167,7 @@ const Quotes: React.FC = () => {
 
   const handleConvert = (id: string): void => {
     convertQuote.mutate(id, {
-      onSuccess: () => toast.success('Quote converted to invoice'),
+      onSuccess: () => toast.success(t('quotes.converted')),
       onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to convert quote')),
     });
   };
@@ -173,7 +175,7 @@ const Quotes: React.FC = () => {
   const handleMarkAccepted = (id: string): void => {
     updateStatus.mutate(
       { id, status: 'accepted' },
-      { onSuccess: () => toast.success('Quote marked as accepted') }
+      { onSuccess: () => toast.success(t('quotes.accepted')) }
     );
   };
 
@@ -183,9 +185,9 @@ const Quotes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Quotes & estimates · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.quotes'))} />
       <PageHeader
-        title="Quotes & Estimates"
+        title={t('quotes.title')}
         subtitle={
           <>
             {data.length} quotes <>&middot;</> <MoneyDisplay amount={total} /> total
@@ -195,7 +197,7 @@ const Quotes: React.FC = () => {
           <button
             type="button"
             style={primaryBtn}
-            aria-label="New Quote"
+            aria-label={t('quotes.newQuote')}
             onClick={() => setShowCreate(true)}
           >
             <Plus size={13} /> New Quote
@@ -323,7 +325,7 @@ const Quotes: React.FC = () => {
                         style={{ ...ghostBtn, padding: '4px 10px' }}
                         aria-label={`View quote ${q.id}`}
                       >
-                        View
+                        {t('quotes.view')}
                       </button>
                     )}
                   </td>
@@ -347,7 +349,7 @@ const Quotes: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Prev
+              {t('quotes.prev')}
             </button>
             <button
               type="button"
@@ -356,7 +358,7 @@ const Quotes: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Next
+              {t('quotes.next')}
             </button>
           </div>
         </div>

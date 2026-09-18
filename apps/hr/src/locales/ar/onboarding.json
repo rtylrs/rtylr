@@ -6,5 +6,6 @@
   "tasksDone": "{{done}} من {{total}} مهمة مكتملة",
   "markedComplete": "تم التحديد كمكتمل",
   "markedIncomplete": "تم التحديد كغير مكتمل",
-  "due": "الاستحقاق {{date}}"
+  "due": "الاستحقاق {{date}}",
+  "templateNameRequired": "اسم القالب مطلوب"
 }

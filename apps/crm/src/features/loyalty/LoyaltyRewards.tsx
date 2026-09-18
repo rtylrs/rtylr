@@ -18,6 +18,7 @@ interface RewardForm {
 }
 
 const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { t } = useTranslation();
   const upsert = useUpsertReward();
   const [form, setForm] = useState<RewardForm>({
     name: '',
@@ -29,14 +30,14 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleSubmit = (): void => {
     if (!form.name.trim()) {
-      toast.error('Reward name is required');
+      toast.error(t('crm.rewards.nameRequired'));
       return;
     }
     upsert.mutate(
       { data: { ...form, active: true } },
       {
         onSuccess: () => onClose(),
-        onError: () => toast.error('Failed to save reward'),
+        onError: () => toast.error(t('crm.rewards.saveFailed')),
       }
     );
   };
@@ -82,11 +83,11 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-            New reward
+            {t('crm.rewards.newReward')}
           </h3>
           <button
             type="button"
-            aria-label="Close"
+            aria-label={t('common.close')}
             onClick={onClose}
             style={{
               background: 'none',
@@ -99,19 +100,19 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </button>
         </div>
         <input
-          placeholder="Reward name"
+          placeholder={t('crm.rewards.nameLabel')}
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           style={inputStyle}
         />
         <input
-          placeholder="Description"
+          placeholder={t('crm.campaigns.descriptionLabel')}
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
           style={inputStyle}
         />
         <input
-          placeholder="Category (e.g. discount, freebie)"
+          placeholder={t('crm.rewards.categoryLabel')}
           value={form.category}
           onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
           style={inputStyle}
@@ -126,7 +127,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 marginBottom: '4px',
               }}
             >
-              Points cost
+              {t('crm.rewards.pointsCost')}
             </label>
             <input
               type="number"
@@ -145,7 +146,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 marginBottom: '4px',
               }}
             >
-              Stock
+              {t('crm.rewards.stock')}
             </label>
             <input
               type="number"
@@ -158,7 +159,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             variant="primary"
@@ -183,16 +184,20 @@ const LoyaltyRewards: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Rewards catalog · rtylr" />
+      <HelmetContainer title={`${t('crm.rewards.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
         <PageHeader
-          title="Rewards catalog"
-          subtitle="What customers can redeem their points for"
+          title={t('crm.rewards.pageTitle')}
+          subtitle={t('crm.rewards.subtitle')}
           actions={
             canConfigureLoyalty ? (
-              <Button variant="primary" aria-label="Add reward" onClick={() => setShowAdd(true)}>
+              <Button
+                variant="primary"
+                aria-label={t('crm.rewards.addReward')}
+                onClick={() => setShowAdd(true)}
+              >
                 <Plus size={13} />
-                Add reward
+                {t('crm.rewards.addReward')}
               </Button>
             ) : undefined
           }

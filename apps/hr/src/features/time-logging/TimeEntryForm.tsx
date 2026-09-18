@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 import { useCreateTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
 import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
-import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import { timeEntryFormSchema } from '../../shared/schemas/timeEntries';
 import { Modal, Button, Input, Textarea, Label, Checkbox } from '../../shared/components/ui';
 import { todayIso } from '../../shared/lib/dateUtils';
@@ -26,7 +24,6 @@ const TimeEntryForm = ({
   const { t } = useTranslation();
   const createEntry = useCreateTimeEntry();
   const { data: myEmployeeId, isError: employeeLookupFailed } = useMyEmployeeId();
-  const config = useHRConfigStore((s) => s.config);
 
   const today = todayIso();
   const [date, setDate] = useState(today);

@@ -1,4 +1,26 @@
 {
+  "pageTitle": "Statut de la commande · rtylr",
+  "orderLabel": "Commande",
+  "cancelled": "Commande annulée",
+  "refunded": "Commande remboursée",
+  "steps": {
+    "received": "Reçue",
+    "preparing": "En préparation",
+    "ready": "Prête",
+    "done": "Terminée"
+  },
+  "messages": {
+    "received": "Commande reçue !",
+    "preparing": "En cours de préparation...",
+    "ready": "Prête à récupérer !",
+    "done": "Commande terminée !"
+  },
+  "statusFallback": "Statut : {{status}}",
+  "loading": "Chargement du statut de la commande...",
+  "loadFailed": "Impossible de charger le statut de la commande.",
+  "retry": "Réessayer",
+  "pollNotice": "Le statut est actualisé automatiquement toutes les {{seconds}} secondes.",
+  "orderAnother": "Commander à nouveau",
   "notFoundTitle": "Commande introuvable",
   "notFoundDescription": "Nous n'avons trouvé aucune commande correspondant à cet identifiant. Vérifiez votre lien de commande.",
   "backToMenu": "Retour au menu"

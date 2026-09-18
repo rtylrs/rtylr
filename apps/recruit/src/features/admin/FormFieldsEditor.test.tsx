@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 /**
  * FormFieldsEditor empty state. Unlike the other admin screens there
@@ -10,9 +10,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  * request shape the "Short text" button already sends.
  */
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. The seed label this test asserts on is
+// persisted and then shown to the candidate, so an identity `t` would have the
+// test agreeing that a dotted path is the right thing to store.
 
 vi.mock('sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },
@@ -28,6 +28,11 @@ vi.mock('../../shared/hooks/queries/useAdmin', () => ({
 }));
 
 import FormFieldsEditor from './FormFieldsEditor';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -37,9 +42,11 @@ describe('FormFieldsEditor empty state', () => {
   it('shows the empty message and creates a default short-text question from its CTA', () => {
     render(<FormFieldsEditor careerId={42} />);
 
-    expect(screen.getByText('emptyStates.questionsNone')).toBeInTheDocument();
+    expect(
+      screen.getByText('No custom questions yet. Add one to start collecting more from applicants.')
+    ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.addQuestion' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add question' }));
 
     expect(createMutate).toHaveBeenCalledTimes(1);
     const [body] = createMutate.mock.calls[0];

@@ -1,7 +1,25 @@
 {
-  "created": "Quote created",
+  "created": "Devis créé",
   "markedAccepted": "Marked {{id}} as accepted",
   "emptyTitle": "Aucun devis pour le moment",
   "emptyDescription": "Envoyez des devis à vos clients et convertissez-les en factures une fois acceptés.",
-  "emptyCta": "Nouveau devis"
+  "emptyCta": "Nouveau devis",
+  "title": "Devis et estimations",
+  "newQuote": "Nouveau devis",
+  "clientRequired": "Le nom du client est obligatoire",
+  "amountPositive": "Le montant doit être supérieur à zéro",
+  "client": "Client",
+  "clientPlaceholder": "Nom du client ou de l'entreprise",
+  "amount": "Montant",
+  "issueDate": "Date d'émission",
+  "expires": "Date d'expiration",
+  "description": "Description",
+  "notesPlaceholder": "Notes facultatives",
+  "converted": "Devis converti en facture",
+  "accepted": "Devis accepté",
+  "view": "Voir",
+  "prev": "Précédent",
+  "next": "Suivant",
+  "createdToast": "Devis créé",
+  "convertedToast": "Devis converti en facture"
 }

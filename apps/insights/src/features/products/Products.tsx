@@ -68,21 +68,29 @@ const Products: React.FC = (): React.JSX.Element => {
 
   const stats = [
     {
+      id: 'totalSkus',
+
       label: t('insights.products.kpis.totalSkus'),
       value: formatNumber(totalSkus),
       icon: Package,
     },
     {
+      id: 'activeSkus',
+
       label: t('insights.products.kpis.activeSkus'),
       value: formatNumber(activeSkus),
       icon: BarChart3,
     },
     {
+      id: 'outOfStock',
+
       label: t('insights.products.kpis.outOfStock'),
       value: formatNumber(outOfStock),
       icon: TrendingDown,
     },
     {
+      id: 'avgMargin',
+
       label: t('insights.products.kpis.avgMargin'),
       value: `${avgMarginPct.toFixed(1)}%`,
       icon: BarChart3,
@@ -96,7 +104,7 @@ const Products: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Products · rtylr" />
+      <HelmetContainer title={t('insights.products.metaTitle')} />
       <motion.div variants={itemVariants}>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.title')}
@@ -115,7 +123,7 @@ const Products: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
@@ -128,7 +136,7 @@ const Products: React.FC = (): React.JSX.Element => {
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
                     style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: 'var(--accent)' }} />
+                    <Icon size={14} style={{ color: 'var(--accent-on-muted)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -181,7 +189,10 @@ const Products: React.FC = (): React.JSX.Element => {
                   </span>
                 </div>
                 <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(p.unitsSold)} {t('insights.products.units', 'units')}
+                  {t('insights.products.units', {
+                    count: p.unitsSold,
+                    formatted: formatNumber(p.unitsSold),
+                  })}
                 </span>
                 <span
                   className="text-xs font-semibold text-right"
@@ -228,7 +239,10 @@ const Products: React.FC = (): React.JSX.Element => {
                   {b.label}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(b.productCount)} {t('insights.products.products', 'products')}
+                  {t('insights.products.products', {
+                    count: b.productCount,
+                    formatted: formatNumber(b.productCount),
+                  })}
                 </span>
               </div>
             ))}
@@ -269,7 +283,7 @@ const Products: React.FC = (): React.JSX.Element => {
                   {p.name}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(p.stockQuantity)} {t('insights.products.inStock', 'in stock')}
+                  {formatNumber(p.stockQuantity)} {t('insights.products.inStock')}
                 </span>
               </div>
             ))}
@@ -310,7 +324,10 @@ const Products: React.FC = (): React.JSX.Element => {
                   {c.categoryName}
                 </span>
                 <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(c.unitsSold)} {t('insights.products.units', 'units')}
+                  {t('insights.products.units', {
+                    count: c.unitsSold,
+                    formatted: formatNumber(c.unitsSold),
+                  })}
                 </span>
                 <span
                   className="text-xs font-semibold text-right"

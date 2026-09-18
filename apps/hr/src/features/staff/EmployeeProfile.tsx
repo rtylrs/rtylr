@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useParams, useNavigate, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
@@ -77,9 +78,9 @@ const EmployeeProfile: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Employee profile · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.employeeProfile'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <Breadcrumbs items={[{ label: 'Staff', href: '/staff' }, { label: staff.name }]} />
+        <Breadcrumbs items={[{ label: t('nav.staff'), href: '/staff' }, { label: staff.name }]} />
 
         {/* Hero */}
         <Card
@@ -130,7 +131,7 @@ const EmployeeProfile: React.FC = () => {
           style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
         >
           <Card>
-            <SectionHeader title="Contact" />
+            <SectionHeader title={t('staff.profile.contact')} />
             <div
               style={{
                 display: 'flex',
@@ -160,7 +161,7 @@ const EmployeeProfile: React.FC = () => {
           </Card>
 
           <Card>
-            <SectionHeader title="Employment" />
+            <SectionHeader title={t('staff.profile.employment')} />
             <div
               style={{
                 display: 'flex',
@@ -225,7 +226,7 @@ const EmployeeProfile: React.FC = () => {
 
         {/* Documents */}
         <Card>
-          <SectionHeader title="Documents" subtitle={`${myDocs.length} files`} />
+          <SectionHeader title={t('staff.profile.documents')} subtitle={`${myDocs.length} files`} />
           <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {myDocs.length === 0 && (
               <EmptyState
@@ -264,7 +265,7 @@ const EmployeeProfile: React.FC = () => {
 
         {/* Training */}
         <Card>
-          <SectionHeader title="Training" />
+          <SectionHeader title={t('staff.profile.training')} />
           <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {myTraining.length === 0 && (
               <EmptyState
@@ -285,7 +286,7 @@ const EmployeeProfile: React.FC = () => {
 
         {/* Benefits */}
         <Card>
-          <SectionHeader title="Benefits" />
+          <SectionHeader title={t('staff.profile.benefits')} />
           <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {myBenefits.length === 0 && (
               <EmptyState

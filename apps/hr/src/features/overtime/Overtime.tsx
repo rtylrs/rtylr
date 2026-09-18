@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
@@ -45,7 +46,7 @@ const Overtime = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Overtime · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.overtime'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('overtime.title')}

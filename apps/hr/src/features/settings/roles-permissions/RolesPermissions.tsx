@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import {
@@ -72,7 +73,7 @@ const RoleCard = ({
             className="ms-2 rounded px-1.5 py-0.5 text-xs"
             style={{
               background: role.isSystem ? 'var(--hr-hover)' : 'var(--accent)',
-              color: role.isSystem ? 'var(--hr-text-dim)' : 'var(--hr-card-bg)',
+              color: role.isSystem ? 'var(--hr-text-dim)' : 'var(--hr-on-accent)',
             }}
           >
             {role.isSystem
@@ -194,7 +195,7 @@ const RolesPermissions = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Roles & Permissions · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.rolesPermissions'))} />
       <div className="flex flex-col gap-4">
         <SectionHeader
           title={t('rolesPermissions.title')}

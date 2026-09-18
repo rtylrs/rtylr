@@ -1,0 +1,80 @@
+{
+  "errors": {
+    "careersPage": "Impossible de charger la page carrières",
+    "jobDetails": "Impossible de charger les détails du poste",
+    "refreshHint": "Veuillez actualiser la page.",
+    "retry": "Réessayer"
+  },
+  "apply": {
+    "invalidLink": "Lien de candidature invalide.",
+    "loadFailed": "Impossible de charger le formulaire de candidature",
+    "fileType": "Veuillez joindre un fichier PDF ou Word",
+    "uploadFailed": "Échec de l'envoi du fichier",
+    "required": "Le champ « {{label}} » est obligatoire",
+    "tooLong": "Le champ « {{label}} » dépasse la longueur maximale de {{max}} caractères",
+    "consentRequired": "Vous devez accepter le traitement des données pour postuler",
+    "received": "Candidature reçue",
+    "submitFailed": "Envoi impossible. Réessayez.",
+    "doneTitle": "C'est envoyé.",
+    "doneBody": "Merci d'avoir postulé à <name>{{title}}</name>. L'équipe {{brand}} examinera votre candidature et vous répondra si votre profil correspond.",
+    "backToRoles": "Retour aux postes ouverts",
+    "backToRole": "Retour au poste",
+    "heading": "Postuler à {{title}}",
+    "remote": "À distance",
+    "fullName": "Nom complet",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "resume": "CV",
+    "uploadCta": "Joignez votre CV",
+    "uploadHint": "· PDF ou Word, jusqu'à 10 Mo",
+    "uploading": "Envoi en cours…",
+    "uploaded": "Envoyé",
+    "remove": "Retirer",
+    "linkInstead": "…ou collez un lien",
+    "linkHint": "Google Drive, Dropbox, site personnel",
+    "whyYou": "Pourquoi vous",
+    "whyYouPlaceholder": "Quelques lignes sur ce qui fait de vous le bon profil.",
+    "uploadingResume": "Envoi du CV…",
+    "submitting": "Envoi en cours…",
+    "submit": "Envoyer ma candidature",
+    "select": "Sélectionner…",
+    "consent": "J'accepte le traitement des données de ma candidature par {{brand}}.",
+    "consentWithPrivacy": "J'accepte le traitement des données de ma candidature par {{brand}}. Consultez la <privacy>politique de confidentialité</privacy>.",
+    "consentWithTerms": "J'accepte le traitement des données de ma candidature par {{brand}}. Consultez les <terms>conditions</terms>.",
+    "consentWithBoth": "J'accepte le traitement des données de ma candidature par {{brand}}. Consultez la <privacy>politique de confidentialité</privacy> et les <terms>conditions</terms>."
+  },
+  "notFound": {
+    "metaTitle": "Introuvable · rtylr",
+    "eyebrow": "404 · Introuvable",
+    "title": "Cette page carrières n'est pas en ligne.",
+    "body": "Vérifiez le lien, ou retournez au site principal.",
+    "back": "Retour à rtylr"
+  },
+  "landing": {
+    "metaTitle": "Recrutement · rtylr",
+    "title": "Des pages carrières,\nsans les frais d'un site dédié.",
+    "body": "Publiez des postes, recevez les candidatures et faites avancer les candidats dans votre processus, depuis le compte qui vous sert déjà à gérer le reste de votre activité.",
+    "pricing": "Voir les tarifs",
+    "startFree": "Commencer gratuitement"
+  },
+  "job": {
+    "allRoles": "Tous les postes",
+    "requirements": "Profil recherché",
+    "lookingFor": "Ce que nous recherchons",
+    "compensation": "Rémunération",
+    "apply": "Postuler à ce poste"
+  },
+  "index": {
+    "openPositions": "Postes ouverts",
+    "openRoles": "Postes ouverts",
+    "careersEyebrow": "Carrières",
+    "heroTitle": "Un travail\nqui fait\nla différence.",
+    "roleCount_one": "{{count}} poste",
+    "roleCount_many": "{{count}} de postes",
+    "roleCount_other": "{{count}} postes"
+  },
+  "sections": {
+    "watchVideo": "Voir la vidéo",
+    "getInTouch": "Nous contacter"
+  }
+}

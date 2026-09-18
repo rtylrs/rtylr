@@ -17,6 +17,8 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -59,11 +61,11 @@ const StockTakes: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newWarehouseId) {
-      toast.error('Warehouse is required');
+      toast.error(t('erp.stockTakes.warehouseRequired'));
       return;
     }
     if (inventoryLoading) {
-      toast.error('Inventory is still loading');
+      toast.error(t('erp.stockTakes.stillLoading'));
       return;
     }
     if (itemsToCount.length === 0) {
@@ -80,12 +82,12 @@ const StockTakes: React.FC = () => {
         notes: newNotes.trim(),
         items: itemsToCount,
       });
-      toast.success('Stock take created');
+      toast.success(t('erp.stockTakes.created'));
       setShowCreate(false);
       setNewWarehouseId('');
       setNewNotes('');
     } catch {
-      toast.error('Failed to create stock take');
+      toast.error(t('erp.stockTakes.createFailed'));
     }
   };
 
@@ -96,14 +98,14 @@ const StockTakes: React.FC = () => {
     const doComplete = async (): Promise<void> => {
       try {
         await updateMut.mutateAsync({ id, body: { status: 'completed', notes: '', items } });
-        toast.success('Stock take completed');
+        toast.success(t('erp.stockTakes.completed'));
       } catch {
-        toast.error('Failed to complete stock take');
+        toast.error(t('erp.stockTakes.completeFailed'));
       }
     };
     if (uncounted > 0) {
-      toast.warning(`${uncounted} uncounted item${uncounted === 1 ? '' : 's'}. Complete anyway?`, {
-        action: { label: 'Complete', onClick: () => void doComplete() },
+      toast.warning(t('erp.stockTakes.uncountedWarning', { count: uncounted }), {
+        action: { label: t('erp.stockTakes.complete'), onClick: () => void doComplete() },
       });
       return;
     }
@@ -116,10 +118,10 @@ const StockTakes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Stock takes · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/stock-takes'].title))} />
       <PageHeader
-        title="Stock Takes"
-        description="Periodic inventory counts and variance reports"
+        title={t(routeLabels['/stock-takes'].title)}
+        description={t('erp.stockTakes.subtitle')}
         actions={
           canManageStockTakes && (
             <button
@@ -140,12 +142,12 @@ const StockTakes: React.FC = () => {
         ) : stockTakes.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
-            title={t('stockTakes.empty.title')}
-            description={t('stockTakes.empty.description')}
+            title={t('erp.stockTakes.empty.title')}
+            description={t('erp.stockTakes.empty.description')}
             action={
               canManageStockTakes
-                ? { label: t('stockTakes.newStockTake'), onClick: () => setShowCreate(true) }
-                : { label: t('stockTakes.refresh'), onClick: () => void refetch() }
+                ? { label: t('erp.stockTakes.newStockTake'), onClick: () => setShowCreate(true) }
+                : { label: t('erp.stockTakes.refresh'), onClick: () => void refetch() }
             }
           />
         ) : (
@@ -191,7 +193,7 @@ const StockTakes: React.FC = () => {
                     {st.status !== 'completed' && canManageStockTakes && (
                       <button
                         type="button"
-                        aria-label="Complete stock take"
+                        aria-label={t('erp.stockTakes.completeAria')}
                         onClick={() =>
                           handleComplete(
                             st.id ?? '',
@@ -240,7 +242,7 @@ const StockTakes: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                      VARIANCE
+                      {t('erp.stockTakes.variance')}
                     </p>
                     <p
                       className="text-sm font-bold"
@@ -278,14 +280,14 @@ const StockTakes: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Stock Take
+              {t('erp.stockTakes.newStockTake')}
             </h3>
             <select
               value={newWarehouseId}
               onChange={(e) => setNewWarehouseId(e.target.value)}
               style={inputStyle}
             >
-              <option value="">Select warehouse…</option>
+              <option value="">{t('erp.stockTakes.selectWarehouse')}</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -295,7 +297,7 @@ const StockTakes: React.FC = () => {
             <input
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
-              placeholder="Notes (optional)"
+              placeholder={t('common.notesOptional')}
               style={inputStyle}
             />
             <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }} aria-live="polite">
@@ -312,7 +314,7 @@ const StockTakes: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"

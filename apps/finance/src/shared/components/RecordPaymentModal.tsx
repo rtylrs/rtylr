@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
@@ -37,6 +38,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   currency,
   onRecorded,
 }) => {
+  const { t } = useTranslation();
   const [value, setValue] = useState(amount);
   const [method, setMethod] = useState(METHODS[0]);
   const [date, setDate] = useState(todayIso());
@@ -45,11 +47,11 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
   const handle = (): void => {
     if (value <= 0) {
-      toast.error('Amount must be greater than zero');
+      toast.error(t('bankAccounts.payment.amountPositive'));
       return;
     }
     if (!date || !reference.trim()) {
-      toast.error('Payment date and reference are required');
+      toast.error(t('bankAccounts.payment.dateAndReferenceRequired'));
       return;
     }
     recordPayment.mutate(
@@ -86,7 +88,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             onClick={onClose}
             disabled={recordPayment.isPending}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -102,11 +104,11 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Amount</label>
+          <label style={labelStyle}>{t('common.amount')}</label>
           <CurrencyInput value={value} onChange={setValue} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Method</label>
+          <label style={labelStyle}>{t('bankAccounts.payment.method')}</label>
           <select value={method} onChange={(e) => setMethod(e.target.value)} style={inputStyle}>
             {METHODS.map((m) => (
               <option key={m}>{m}</option>
@@ -114,7 +116,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           </select>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Date</label>
+          <label style={labelStyle}>{t('common.date')}</label>
           <input
             type="date"
             value={date}
@@ -123,11 +125,11 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Reference</label>
+          <label style={labelStyle}>{t('bankAccounts.payment.reference')}</label>
           <input
             value={reference}
             onChange={(e) => setReference(e.target.value)}
-            placeholder="Transaction ID or receipt number"
+            placeholder={t('bankAccounts.payment.referencePlaceholder')}
             style={inputStyle}
           />
         </div>

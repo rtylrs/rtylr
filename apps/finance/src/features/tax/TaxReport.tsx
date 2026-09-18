@@ -1,4 +1,5 @@
 import React from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { FileSpreadsheet, Download, Landmark } from 'lucide-react';
@@ -35,12 +36,12 @@ const TaxReport: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Tax summary · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.taxSummary'))} />
       <PageHeader
-        title="Tax Summary"
-        breadcrumbs={[{ label: 'Reports' }, { label: 'Tax' }]}
+        title={t('tax.report.title')}
+        breadcrumbs={[{ label: t('nav.reports') }, { label: t('nav.tax') }]}
         actions={
-          <button type="button" style={ghostBtn} disabled title="Export coming in a future update">
+          <button type="button" style={ghostBtn} disabled title={t('tax.report.exportSoon')}>
             <Download size={13} /> Export
           </button>
         }
@@ -48,13 +49,15 @@ const TaxReport: React.FC = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Tax collected</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            {t('tax.report.collected')}
+          </div>
           <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}>
             <MoneyDisplay amount={totalCollected} />
           </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Tax owed</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{t('tax.report.owed')}</div>
           <div
             style={{ fontSize: 22, fontWeight: 700, color: 'var(--finance-warning)', marginTop: 6 }}
           >
@@ -62,7 +65,9 @@ const TaxReport: React.FC = () => {
           </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Periods to file</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            {t('tax.report.periodsToFile')}
+          </div>
           <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)', marginTop: 6 }}>
             {toFile}
           </div>

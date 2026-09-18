@@ -5,6 +5,45 @@
   "oneOnOnes": {
     "emptyTitle": "لا توجد لقاءات فردية مجدولة",
     "emptyDescription": "سيرى المدراء اللقاءات الفردية القادمة هنا.",
-    "schedule": "جدولة لقاء فردي"
+    "schedule": "جدولة",
+    "pageTitle": "اجتماعات فردية",
+    "title": "اجتماعات فردية",
+    "subtitle": "محادثات مجدولة بين المدير والموظف",
+    "manager": "المدير",
+    "report": "الموظف",
+    "when": "الموعد",
+    "duration": "المدة (دقيقة)",
+    "topics": "المواضيع (مفصولة بفواصل)",
+    "topicsPlaceholder": "مثال: الأهداف المهنية، المعوقات، الملاحظات",
+    "errorCompleteAll": "أكمل جميع الحقول",
+    "scheduleTitle": "جدولة اجتماع ثنائي"
+  },
+  "pageTitle": "تقييم جديد",
+  "formTitle": "تقييم أداء جديد",
+  "formSubtitle": "قيّم الأهداف والقيم والمهارات",
+  "employee": "الموظف",
+  "reviewer": "المُقيّم",
+  "select": "اختر",
+  "period": "الفترة",
+  "periodPlaceholder": "مثال: الربع الثاني 2026",
+  "goals": "الأهداف",
+  "values": "القيم",
+  "skills": "المهارات",
+  "notes": "ملاحظات",
+  "notesPlaceholder": "الملاحظات الرئيسية والخطوات التالية",
+  "overallRating": "التقييم العام",
+  "errorPickBoth": "اختر موظفًا ومُقيّمًا",
+  "created": "تم إنشاء التقييم",
+  "page": {
+    "metaTitle": "تقييمات الأداء · rtylr",
+    "title": "تقييمات الأداء",
+    "subtitle": "تتبع دورات التقييم والتقديرات",
+    "newReview": "تقييم جديد",
+    "goals": "الأهداف",
+    "values": "القيم",
+    "skills": "المهارات"
+  },
+  "form": {
+    "submit": "إرسال التقييم"
   }
 }

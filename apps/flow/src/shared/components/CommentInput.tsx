@@ -115,7 +115,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
             >
               <span
                 className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold"
-                style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
               >
                 {m.initials}
               </span>

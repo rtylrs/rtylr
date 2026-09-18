@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -82,7 +83,7 @@ const Reports: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Reports · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.reports'))} />
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

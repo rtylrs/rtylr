@@ -41,14 +41,16 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Careers · rtylr" />
+      <HelmetContainer title={t('admin.careers.metaTitle')} />
       <div className="px-4 py-6 sm:px-10 sm:py-8">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Careers</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t('admin.careers.heading')}</h1>
             <p className="mt-1 text-sm text-white/60">
-              {careers.length} {careers.length === 1 ? 'role' : 'roles'} ·{' '}
-              {careers.filter((c) => c.isPublished).length} published
+              {t('admin.careers.roleCount', { count: careers.length })} ·{' '}
+              {t('admin.careers.publishedCount', {
+                count: careers.filter((c) => c.isPublished).length,
+              })}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -60,7 +62,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                 className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-white/10 px-3.5 py-2.5 text-sm hover:bg-white/5"
               >
                 <ExternalLink className="h-4 w-4" />
-                View public page
+                {t('admin.careers.viewPublic')}
               </a>
             )}
             <button
@@ -69,7 +71,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
               className="inline-flex min-h-[44px] items-center gap-2 rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-white/90"
             >
               <Plus className="h-4 w-4" />
-              New role
+              {t('admin.careers.newRole')}
             </button>
           </div>
         </div>
@@ -82,22 +84,27 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
           }}
         >
           {isLoading ? (
-            <div className="p-10 text-center text-sm text-white/60">Loading…</div>
+            <div className="p-10 text-center text-sm text-white/60">
+              {t('admin.careers.loading')}
+            </div>
           ) : careers.length === 0 ? (
             <EmptyState
               icon={Briefcase}
-              title={t('emptyStates.rolesNone')}
-              action={{ label: t('emptyStates.createRole'), onClick: () => setCreating(true) }}
+              title={t('common.emptyStates.rolesNone')}
+              action={{
+                label: t('common.emptyStates.createRole'),
+                onClick: () => setCreating(true),
+              }}
             />
           ) : (
             <table className="w-full">
               <thead>
                 <tr className="border-b" style={{ borderColor: 'var(--recruit-admin-border)' }}>
-                  <Th>Title</Th>
-                  <Th>Department</Th>
-                  <Th>Location</Th>
-                  <Th>Status</Th>
-                  <Th align="right">Actions</Th>
+                  <Th>{t('admin.careers.colTitle')}</Th>
+                  <Th>{t('admin.careers.colDepartment')}</Th>
+                  <Th>{t('admin.careers.colLocation')}</Th>
+                  <Th>{t('admin.careers.colStatus')}</Th>
+                  <Th align="right">{t('admin.careers.colActions')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -122,12 +129,12 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                             : 'rgba(255,255,255,0.6)',
                         }}
                       >
-                        {c.isPublished ? 'Published' : 'Draft'}
+                        {c.isPublished ? t('admin.careers.published') : t('admin.careers.draft')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="inline-flex items-center gap-1">
-                        <IconButton onClick={() => setEditing(c)} title="Edit">
+                        <IconButton onClick={() => setEditing(c)} title={t('admin.careers.edit')}>
                           <Edit3 className="h-4 w-4" />
                         </IconButton>
                         <IconButton
@@ -145,16 +152,16 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                                 : `Archive "${c.title}"?`;
                             toast.warning(message, {
                               action: {
-                                label: 'Archive',
+                                label: t('admin.careers.archive'),
                                 onClick: () =>
                                   del.mutate(c.id, {
-                                    onSuccess: () => toast.success('Role archived'),
-                                    onError: () => toast.error("Couldn't archive"),
+                                    onSuccess: () => toast.success(t('admin.careers.archived')),
+                                    onError: () => toast.error(t('admin.careers.archiveFailed')),
                                   }),
                               },
                             });
                           }}
-                          title="Archive"
+                          title={t('admin.careers.archive')}
                         >
                           <Trash2 className="h-4 w-4" />
                         </IconButton>
@@ -180,19 +187,19 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                   { ...body, id: editing.id },
                   {
                     onSuccess: () => {
-                      toast.success('Role updated');
+                      toast.success(t('admin.careers.updated'));
                       setEditing(null);
                     },
-                    onError: () => toast.error("Couldn't update"),
+                    onError: () => toast.error(t('admin.careers.updateFailed')),
                   }
                 );
               } else {
                 create.mutate(body, {
                   onSuccess: () => {
-                    toast.success('Role created');
+                    toast.success(t('admin.careers.created'));
                     setCreating(false);
                   },
-                  onError: () => toast.error("Couldn't create"),
+                  onError: () => toast.error(t('admin.careers.createFailed')),
                 });
               }
             }}

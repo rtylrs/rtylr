@@ -1,7 +1,8 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import PriceLists from './PriceLists';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   usePriceLists: vi.fn(),
@@ -9,9 +10,9 @@ const mocks = vi.hoisted(() => ({
   role: 'admin' as string,
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -33,6 +34,10 @@ vi.mock('./usePriceLists', () => ({
   useCreatePriceList: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
 describe('PriceLists empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -43,12 +48,14 @@ describe('PriceLists empty state', () => {
     mocks.role = 'admin';
     render(<PriceLists />);
 
-    const title = screen.getByText('priceLists.empty.title');
+    const title = screen.getByText('No price lists');
     expect(title).toBeInTheDocument();
-    expect(screen.getByText('priceLists.empty.description')).toBeInTheDocument();
+    expect(
+      screen.getByText('Create your first price list to enable tier pricing')
+    ).toBeInTheDocument();
 
     const emptyState = title.parentElement as HTMLElement;
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'priceLists.newPriceList' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'New Price List' }));
 
     expect(screen.getByPlaceholderText('Currency (e.g. USD)')).toBeInTheDocument();
     expect(mocks.refetch).not.toHaveBeenCalled();
@@ -58,14 +65,14 @@ describe('PriceLists empty state', () => {
     mocks.role = 'staff';
     render(<PriceLists />);
 
-    const title = screen.getByText('priceLists.empty.title');
+    const title = screen.getByText('No price lists');
     const emptyState = title.parentElement as HTMLElement;
 
     expect(
-      within(emptyState).queryByRole('button', { name: 'priceLists.newPriceList' })
+      within(emptyState).queryByRole('button', { name: 'New Price List' })
     ).not.toBeInTheDocument();
 
-    fireEvent.click(within(emptyState).getByRole('button', { name: 'priceLists.refresh' }));
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Refresh' }));
 
     expect(mocks.refetch).toHaveBeenCalledTimes(1);
     expect(screen.queryByPlaceholderText('Currency (e.g. USD)')).not.toBeInTheDocument();
@@ -80,6 +87,6 @@ describe('PriceLists empty state', () => {
 
     render(<PriceLists />);
 
-    expect(screen.queryByText('priceLists.empty.title')).not.toBeInTheDocument();
+    expect(screen.queryByText('No price lists')).not.toBeInTheDocument();
   });
 });

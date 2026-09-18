@@ -34,7 +34,7 @@ import BoardSettingsPanel from './components/BoardSettingsPanel';
 import StatusSettingsPanel from './components/StatusSettingsPanel';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 // ── Group-by (swimlanes) ────────────────────────────────────────────────
@@ -357,7 +357,7 @@ const ProjectBoard: React.FC = () => {
     }
     createColumn.mutate({
       name,
-      color: '#6b7280',
+      color: 'var(--flow-neutral-fg)',
       sortOrder: columns.length,
     });
     setNewColumnName('');
@@ -535,7 +535,7 @@ const ProjectBoard: React.FC = () => {
             will need to be moved manually first or they will become orphaned.
           </>
         }
-        confirmLabel="Delete column"
+        confirmLabel={t('flow.board.deleteColumn')}
         pending={deleteColumn.isPending}
         onConfirm={() => {
           if (!pendingDeleteColumn) return;
@@ -639,7 +639,12 @@ const KanbanColumn: React.FC<{
   return (
     <div
       ref={registerRef}
-      className="flex w-[min(248px,calc(100vw-1.5rem))] min-w-[min(248px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[248px] sm:min-w-[248px]"
+      // 296px, inside the 280-320 the board rule asks for. It was 248, which
+      // squeezed a two-line title to the point that the card carried less than
+      // the row beside it (rtylr#1078, S-08). The viewport clamp stays, so a
+      // 390px phone still gets one full-width column rather than a horizontal
+      // scrollbar on the page itself.
+      className="flex w-[min(296px,calc(100vw-1.5rem))] min-w-[min(296px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[296px] sm:min-w-[296px]"
       style={{
         background: isOver ? withAlpha(col.color, 5) : 'transparent',
         border: isOver ? `1px dashed ${col.color}` : '1px solid transparent',
@@ -679,28 +684,21 @@ const KanbanColumn: React.FC<{
 
         <span
           className="text-meta px-1.5 py-0.5 rounded-full font-medium shrink-0"
-          style={{ background: withAlpha(col.color, 13), color: col.color }}
+          style={{ background: withAlpha(col.color, 13), color: onTint(col.color) }}
         >
           {colTaskCount}
         </span>
 
-        {/* Actions (visible on header hover) */}
+        {/* Actions (visible on header hover). Add is not among them any more: it
+            lives in the persistent row below, because a hover-only control is
+            unreachable on a touch screen and this one was 20px besides. */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
           <button
             type="button"
-            onClick={onAddTask}
-            className="h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-dim)' }}
-            title={t('flow.board.addTaskLabel')}
-            aria-label={t('flow.board.addTaskLabel')}
-          >
-            <Plus size={11} />
-          </button>
-          <button
-            type="button"
             onClick={onDelete}
-            className="h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] hover:text-red-400"
-            style={{ color: 'var(--flow-text-dim)' }}
+            // hover:text-red-400 was a Tailwind palette colour on a screen whose
+            // every other colour is a token, and it does not follow the theme.
+            className="flow-focus flex h-11 w-11 items-center justify-center rounded-sm text-[var(--flow-text-dim)] hover:bg-[var(--flow-hover)] hover:text-[var(--flow-danger-fg)] md:h-6 md:w-6"
             title={t('flow.board.deleteColumnLabel')}
             aria-label={t('flow.board.deleteColumnLabel')}
           >
@@ -708,6 +706,23 @@ const KanbanColumn: React.FC<{
           </button>
         </div>
       </div>
+
+      {/* Add task, directly under the header and on every column.
+          It used to appear only in empty columns, centred vertically, so the
+          two columns that had cards offered no way to add one; and the
+          alternative in the header was hover-only at 20px, which a touch screen
+          cannot reach at all (rtylr#1078, Asana rule 1.2). 32px on a pointer,
+          44px where a finger has to hit it. */}
+      <button
+        type="button"
+        onClick={onAddTask}
+        aria-label={t('flow.board.addTaskLabel')}
+        className="flow-focus mb-1.5 flex min-h-11 w-full items-center gap-1.5 rounded-md px-1.5 text-meta font-medium transition-colors hover:bg-[var(--flow-hover)] md:min-h-8"
+        style={{ color: 'var(--flow-text-muted)' }}
+      >
+        <Plus size={12} />
+        {t('flow.board.addTask')}
+      </button>
 
       {/* Cards */}
       <div className="flex flex-col gap-1.5 flex-1 min-h-[80px] overflow-y-auto">
@@ -724,17 +739,18 @@ const KanbanColumn: React.FC<{
               />
             ))}
             {colTaskCount === 0 && (
-              <button
-                type="button"
-                onClick={onAddTask}
-                className="flex-1 flex items-center justify-center rounded-sm text-meta min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
+              // A sentence, not a second add control: the row above the cards is
+              // already the way in, and this said "Add task" in hardcoded
+              // English on a screen that ships in Arabic and French.
+              <p
+                className="flex flex-1 items-center justify-center rounded-md px-3 py-4 text-center text-meta"
                 style={{
-                  color: 'var(--flow-text-dim)',
+                  color: 'var(--flow-text-muted)',
                   border: '1px dashed var(--flow-border)',
                 }}
               >
-                <Plus size={12} className="me-1" /> Add task
-              </button>
+                {t('flow.board.emptyColumn')}
+              </p>
             )}
           </>
         ) : (
@@ -763,15 +779,15 @@ const KanbanColumn: React.FC<{
                   />
                 ))}
                 {lane.tasks.length === 0 && (
-                  <div
-                    className="rounded-sm text-meta min-h-[28px] flex items-center justify-center"
+                  <p
+                    className="flex min-h-[28px] items-center justify-center rounded-md text-meta"
                     style={{
-                      color: 'var(--flow-text-dim)',
+                      color: 'var(--flow-text-muted)',
                       border: '1px dashed var(--flow-border)',
                     }}
                   >
-                    &mdash;
-                  </div>
+                    {t('flow.board.emptyLane')}
+                  </p>
                 )}
               </div>
             </div>

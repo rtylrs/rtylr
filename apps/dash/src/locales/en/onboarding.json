@@ -7,5 +7,17 @@
   "nameAvailable": "Name is available",
   "creating": "Creating...",
   "createButton": "Create business",
-  "createError": "Failed to create business"
+  "createError": "Failed to create business",
+  "tour": {
+    "skip": "Skip tour",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "welcome": "Welcome to rtylr! Let me show you around your command center.",
+    "dashboard": "This is your home. Search anything, launch apps, and pick up where you left off.",
+    "team": "Manage your team here. Add members, assign roles, and control which apps they can access.",
+    "apps": "All your apps live here. POS, ERP, HR, CRM, Finance, and Flow. Click any app to launch it.",
+    "caret": "Meet Caret, your AI assistant. Ask it anything about your business data.",
+    "settings": "Account settings, billing, and integrations are all here."
+  }
 }

@@ -9,6 +9,8 @@ import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -36,7 +38,7 @@ const Brands: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
-      toast.error('Brand name is required');
+      toast.error(t('erp.brands.nameRequired'));
       return;
     }
     try {
@@ -45,12 +47,12 @@ const Brands: React.FC = () => {
         logoUrl: '',
         description: newDescription.trim(),
       });
-      toast.success('Brand created');
+      toast.success(t('erp.brands.created'));
       setShowCreate(false);
       setNewName('');
       setNewDescription('');
     } catch {
-      toast.error('Failed to create brand');
+      toast.error(t('erp.brands.createFailed'));
     }
   };
 
@@ -60,10 +62,10 @@ const Brands: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Brands · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/brands'].title))} />
       <PageHeader
-        title="Brands"
-        description={`${brands.length} brands across your catalog`}
+        title={t(routeLabels['/brands'].title)}
+        description={t('erp.brands.countAcrossCatalog', { count: brands.length })}
         actions={
           <button
             type="button"
@@ -85,9 +87,9 @@ const Brands: React.FC = () => {
       ) : brands.length === 0 ? (
         <EmptyState
           icon={Tag}
-          title={t('brands.empty.title')}
-          description={t('brands.empty.description')}
-          action={{ label: t('brands.newBrand'), onClick: () => setShowCreate(true) }}
+          title={t('erp.brands.empty.title')}
+          description={t('erp.brands.empty.description')}
+          action={{ label: t('erp.brands.newBrand'), onClick: () => setShowCreate(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -132,7 +134,7 @@ const Brands: React.FC = () => {
                 <Tag size={14} style={{ color: 'var(--hub-text-dim)' }} />
                 <button
                   type="button"
-                  aria-label="Delete brand"
+                  aria-label={t('erp.brands.deleteAria')}
                   onClick={() => setConfirmDeleteId(b.id ?? null)}
                   className="h-7 w-7 rounded-lg flex items-center justify-center"
                   style={{ color: 'var(--erp-danger)' }}
@@ -159,15 +161,15 @@ const Brands: React.FC = () => {
 
       <ConfirmModal
         open={confirmDeleteId !== null}
-        title="Delete brand?"
-        description="Products with this brand will not be deleted, but they will become unbranded."
+        title={t('erp.brands.confirmDeleteTitle')}
+        description={t('erp.brands.confirmDeleteBody')}
         danger
-        confirmLabel="Delete"
+        confirmLabel={t('common.delete')}
         onConfirm={async () => {
           if (confirmDeleteId !== null) {
             try {
               await deleteMut.mutateAsync(confirmDeleteId);
-              toast.success('Brand deleted');
+              toast.success(t('erp.brands.deleted'));
             } catch {
               // onError in hook handles toast
             }
@@ -190,18 +192,18 @@ const Brands: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Brand
+              {t('erp.brands.newBrand')}
             </h3>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Brand name"
+              placeholder={t('erp.brands.namePlaceholder')}
               style={inputStyle}
             />
             <input
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="Description (optional)"
+              placeholder={t('erp.brands.descriptionPlaceholder')}
               style={inputStyle}
             />
             <div className="flex gap-2 justify-end">
@@ -211,7 +213,7 @@ const Brands: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"

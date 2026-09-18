@@ -13,6 +13,8 @@ import {
 } from '../products/useProducts';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PaginationControls from '../../shared/components/PaginationControls';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -92,7 +94,7 @@ const Inventory: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Inventory · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/inventory'].title))} />
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -125,7 +127,7 @@ const Inventory: React.FC = () => {
         />
         <input
           type="text"
-          placeholder="Search products…"
+          placeholder={t('erp.products.searchPlaceholder')}
           value={search}
           onChange={(e) => {
             setPage(1);

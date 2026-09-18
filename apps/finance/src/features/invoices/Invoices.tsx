@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -147,9 +148,9 @@ const Invoices: React.FC = () => {
       transition={{ duration: 0.2 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Invoices · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.invoices'))} />
       <PageHeader
-        title="Invoices"
+        title={t('invoices.list.title')}
         subtitle={
           <>
             {filtered.length} invoice{filtered.length !== 1 ? 's' : ''} <>&middot;</>{' '}
@@ -178,7 +179,7 @@ const Invoices: React.FC = () => {
               <Download size={13} /> Xero
             </button>
             <Link to="/invoices/recurring" style={{ ...ghostBtn, textDecoration: 'none' }}>
-              Recurring
+              {t('invoices.list.recurring')}
             </Link>
             <button
               type="button"
@@ -194,7 +195,7 @@ const Invoices: React.FC = () => {
       {unbilled && unbilled.length > 0 && (
         <div
           role="region"
-          aria-label={t('unbilled.region')}
+          aria-label={t('finance.unbilled.region')}
           style={{
             ...cardStyle,
             padding: 16,
@@ -203,7 +204,7 @@ const Invoices: React.FC = () => {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hub-text)' }}>
-              {t('unbilled.title')} ({unbilled.length})
+              {t('finance.unbilled.title')} ({unbilled.length})
             </div>
             <button
               type="button"
@@ -217,19 +218,19 @@ const Invoices: React.FC = () => {
               onClick={billSelectedHours}
             >
               {createInvoice.isPending || markInvoiced.isPending
-                ? t('unbilled.working')
-                : t('unbilled.billSelected', { count: pickedHours.size })}
+                ? t('finance.unbilled.working')
+                : t('finance.unbilled.billSelected', { count: pickedHours.size })}
             </button>
           </div>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginTop: 2 }}>
-            {t('unbilled.hint')}
+            {t('finance.unbilled.hint')}
           </div>
           <input
             type="text"
             value={billToName}
             onChange={(e) => setBillToName(e.target.value)}
-            placeholder={t('unbilled.billToPlaceholder')}
-            aria-label={t('unbilled.billToPlaceholder')}
+            placeholder={t('finance.unbilled.billToPlaceholder')}
+            aria-label={t('finance.unbilled.billToPlaceholder')}
             style={{
               marginTop: 10,
               padding: '7px 10px',
@@ -405,7 +406,7 @@ const Invoices: React.FC = () => {
                       >
                         <Eye size={12} /> View
                       </Link>
-                      <DownloadPdfButton invoiceId={inv.id} label="PDF" />
+                      <DownloadPdfButton invoiceId={inv.id} label={t('invoices.list.pdf')} />
                       {inv.status === 'Draft' && (
                         <button
                           type="button"
@@ -460,7 +461,7 @@ const Invoices: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Prev
+              {t('common.prev')}
             </button>
             <button
               type="button"
@@ -469,7 +470,7 @@ const Invoices: React.FC = () => {
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
               style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
             >
-              Next
+              {t('common.next')}
             </button>
           </div>
         </div>

@@ -54,9 +54,9 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={SearchX}
-          title={t('businessNotFoundTitle')}
-          description={t('businessNotFoundDescription', { slug })}
-          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+          title={t('sluglanding.businessNotFoundTitle')}
+          description={t('sluglanding.businessNotFoundDescription', { slug })}
+          action={{ label: t('sluglanding.goBack'), onClick: () => router.history.back() }}
         />
       </div>
     );
@@ -66,7 +66,7 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Locations · rtylr" />
+      <HelmetContainer title={t('sluglanding.pageTitle')} />
       <div style={{ minHeight: '100vh', background: 'var(--menu-bg, #fafafa)' }}>
         <header style={{ padding: '24px 16px', textAlign: 'center' }}>
           {data.business.logoUrl && (
@@ -78,7 +78,7 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
           )}
           <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{data.business.name}</h1>
           <p style={{ fontSize: 13, opacity: 0.65, marginTop: 4 }}>
-            Pick a location to see its menu
+            {t('sluglanding.pickLocation')}
           </p>
         </header>
 
@@ -103,7 +103,7 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
                 opacity: 0.7,
               }}
             >
-              No active locations yet.
+              {t('sluglanding.noLocations')}
             </li>
           )}
           {data.locations.map((loc) => (

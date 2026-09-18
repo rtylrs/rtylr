@@ -1,4 +1,11 @@
 {
   "emptyTitle": "Aucun cours de formation",
-  "emptyDescription": "Ajoutez les cours que les employés doivent suivre."
+  "emptyDescription": "Ajoutez les cours que les employés doivent suivre.",
+  "noEnrollments": "Aucune inscription pour le moment.",
+  "page": {
+    "title": "Formation",
+    "required": "Obligatoire",
+    "employeeProgress": "Progression des employés",
+    "subtitle": "Cours, suivi des achèvements, certificats"
+  }
 }

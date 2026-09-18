@@ -65,7 +65,7 @@ const StepContainer = ({
           onClick={onNext}
           disabled={isSubmitting}
           className="rounded-lg px-5 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
-          style={{ background: 'var(--accent)', color: '#fff' }}
+          style={{ background: 'var(--accent)', color: 'var(--hr-on-accent)' }}
         >
           {isSubmitting ? t('common.loading') : isLast ? t('setup.finishSetup') : t('common.next')}
         </button>

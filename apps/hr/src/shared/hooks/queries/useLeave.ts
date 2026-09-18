@@ -46,7 +46,7 @@ export const useCreateLeaveType = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leave-types'] });
       queryClient.invalidateQueries({ queryKey: ['leave-balances'] });
-      toast.success('Leave policy created');
+      toast.success(t('leave.policyCreated'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));

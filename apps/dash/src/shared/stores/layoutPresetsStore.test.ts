@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useLayoutPresetsStore, type LayoutPreset } from './layoutPresetsStore';
+import { useLayoutPresetsStore } from './layoutPresetsStore';
 import { DEFAULT_LAYOUT_CONFIG } from '@voxire/menu';
 
 const { getState } = useLayoutPresetsStore;

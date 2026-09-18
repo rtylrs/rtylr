@@ -17,5 +17,11 @@
   "total": "Total",
   "quantity": "Quantity",
   "price": "Price",
-  "remove": "Remove"
+  "remove": "Remove",
+  "product": "Product",
+  "warehouse": "Warehouse",
+  "batch": "Batch",
+  "qtyShort": "Qty",
+  "notesOptional": "Notes (optional)",
+  "stock": "Stock"
 }

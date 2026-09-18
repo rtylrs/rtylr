@@ -61,21 +61,34 @@
     "locationName": "Location name",
     "locationAddress": "Address",
     "locationTimezone": "Timezone",
-    "noLocations": "No locations added yet"
+    "noLocations": "No locations added yet",
+    "required": "Location name and address are required"
   },
   "rolesPermissions": {
     "title": "Roles & Permissions",
     "description": "These are the default roles your business starts with.",
     "previewNotice": "You can customize exactly what each role can do anytime from Settings → Roles & Permissions, once setup is complete.",
     "defaultRoles": {
-      "employee": { "name": "Employee", "description": "Standard employee with basic access" },
-      "manager": { "name": "Manager", "description": "Team manager with approval rights" },
-      "hrAdmin": { "name": "HR Admin", "description": "Full HR administration access" },
+      "employee": {
+        "name": "Employee",
+        "description": "Standard employee with basic access"
+      },
+      "manager": {
+        "name": "Manager",
+        "description": "Team manager with approval rights"
+      },
+      "hrAdmin": {
+        "name": "HR Admin",
+        "description": "Full HR administration access"
+      },
       "payrollManager": {
         "name": "Finance/Payroll Manager",
         "description": "Payroll and finance operations"
       },
-      "executive": { "name": "Executive", "description": "Executive-level oversight" }
+      "executive": {
+        "name": "Executive",
+        "description": "Executive-level oversight"
+      }
     }
   },
   "payrollConfig": {
@@ -108,5 +121,24 @@
     "csvComingSoon": "CSV import coming soon",
     "noEmployees": "No employees added yet. Add your first employee to continue.",
     "noEmployeesHint": "No employees added yet. You can add them here or from the Staff section after setup."
+  },
+  "hrSettings": {
+    "workWeekStart": "Work week starts on",
+    "weeklyHours": "Weekly hours",
+    "overtimeAfter": "Overtime after (hrs/week)",
+    "ptoPolicy": "PTO policy (days/year)",
+    "currency": "Currency",
+    "industry": "Industry",
+    "saved": "Settings saved",
+    "metaTitle": "HR settings · rtylr",
+    "pageTitle": "HR Settings",
+    "subtitle": "Work week, overtime, PTO policy, and currency",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "save": "Save settings"
+  },
+  "progress": "Setup progress",
+  "org": {
+    "departmentNameRequired": "Department name is required"
   }
 }

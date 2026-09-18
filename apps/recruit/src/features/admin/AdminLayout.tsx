@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { Briefcase, Inbox, Palette, LayoutGrid, Menu, X, LogOut } from 'lucide-react';
 import { signOut, useUserStore } from '@voxire/auth';
@@ -24,41 +25,40 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
     canRecruit('recruit:jobs:manage') ||
     canRecruit('recruit:candidates:view');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { t } = useTranslation();
 
   if (user && !canAdministerRecruit) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--recruit-admin-bg)] p-6 text-center text-white/70">
-        <h2 className="text-xl font-semibold text-white">Access Denied</h2>
-        <p className="mt-2 text-sm text-white/60">
-          Owner or Admin permission is required to access Recruit administration and candidate data.
-        </p>
+        <h2 className="text-xl font-semibold text-white">{t('admin.accessDenied.title')}</h2>
+        <p className="mt-2 text-sm text-white/60">{t('admin.accessDenied.body')}</p>
       </div>
     );
   }
 
-  const navItems = [
+  const navItems: { to: AdminPath; icon: React.ReactNode; label: string; visible: boolean }[] = [
     {
-      to: '/admin/careers',
+      to: '/admin/careers' as AdminPath,
       icon: <Briefcase className="h-4 w-4" />,
-      label: 'Careers',
+      label: t('admin.nav.careers'),
       visible: canRecruit('recruit:jobs:view') || canRecruit('recruit:jobs:manage'),
     },
     {
-      to: '/admin/submissions',
+      to: '/admin/submissions' as AdminPath,
       icon: <Inbox className="h-4 w-4" />,
-      label: 'Submissions',
+      label: t('admin.nav.submissions'),
       visible: canRecruit('recruit:candidates:view'),
     },
     {
-      to: '/admin/sections',
+      to: '/admin/sections' as AdminPath,
       icon: <LayoutGrid className="h-4 w-4" />,
-      label: 'Page sections',
+      label: t('admin.nav.sections'),
       visible: canRecruit('recruit:jobs:manage'),
     },
     {
-      to: '/admin/customization',
+      to: '/admin/customization' as AdminPath,
       icon: <Palette className="h-4 w-4" />,
-      label: 'Page branding',
+      label: t('admin.nav.branding'),
       visible: canRecruit('recruit:jobs:manage'),
     },
   ].filter((item) => item.visible);
@@ -76,12 +76,12 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
           background: 'var(--recruit-admin-surface)',
         }}
       >
-        <div className="text-base font-semibold">Recruit Admin</div>
+        <div className="text-base font-semibold">{t('admin.nav.mobileTitle')}</div>
         <button
           type="button"
           onClick={() => setMobileNavOpen((prev) => !prev)}
           className="flex h-11 w-11 items-center justify-center rounded-md border border-white/10 text-white/80 hover:bg-white/5"
-          aria-label="Toggle navigation menu"
+          aria-label={t('admin.nav.toggle')}
         >
           {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -117,7 +117,7 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
               className="flex min-h-[44px] w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-white/5"
             >
               <LogOut className="h-4 w-4" />
-              Sign out
+              {t('admin.nav.signOut')}
             </button>
           </div>
         </div>
@@ -131,7 +131,7 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
           background: 'var(--recruit-admin-surface)',
         }}
       >
-        <div className="px-5 py-5 text-lg font-semibold">Recruit</div>
+        <div className="px-5 py-5 text-lg font-semibold">{t('admin.nav.title')}</div>
         <nav className="flex-1 space-y-1 px-3">
           {navItems.map((item) => (
             <AdminLink key={item.to} to={item.to} icon={item.icon} label={item.label} />
@@ -144,7 +144,7 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
             className="flex min-h-[44px] items-center gap-2 rounded-md border-0 bg-transparent px-3 py-2.5 text-left text-sm font-medium text-red-400 cursor-pointer hover:bg-white/5 hover:text-red-300"
           >
             <LogOut className="h-4 w-4" />
-            Sign out
+            {t('admin.nav.signOut')}
           </button>
         </div>
       </aside>
@@ -157,8 +157,14 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
   );
 };
 
+type AdminPath =
+  | '/admin/careers'
+  | '/admin/submissions'
+  | '/admin/sections'
+  | '/admin/customization';
+
 const AdminLink: React.FC<{
-  to: string;
+  to: AdminPath;
   icon: React.ReactNode;
   label: string;
   onClick?: () => void;
@@ -167,7 +173,7 @@ const AdminLink: React.FC<{
   const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
   return (
     <Link
-      to={to as any}
+      to={to}
       onClick={onClick}
       className={`flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition ${
         isActive ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'

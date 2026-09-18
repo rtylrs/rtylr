@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 
 interface HelmetContainerProps {
   title?: string;
@@ -20,7 +21,7 @@ interface HelmetContainerProps {
 }
 
 function HelmetContainer({
-  title = 'Rtylr - Contactless QR Menu',
+  title,
   description = '',
   image = '',
   url = '',
@@ -37,17 +38,21 @@ function HelmetContainer({
   customMetaTags = [],
   favicon = '',
 }: HelmetContainerProps) {
+  const { t } = useTranslation();
+  // Default resolved here, not in the parameter list: a default there is a
+  // literal and cannot reach a hook.
+  const pageTitle = title ?? t('common.defaultPageTitle');
   return (
     <Helmet>
       <meta charSet="utf-8" />
-      <title>{title}</title>
+      <title>{pageTitle}</title>
       {favicon && <link rel="icon" href={favicon} type="image/x-icon" />}
       <meta name="description" content={description} />
       {author && <meta name="author" content={author} />}
       {keywords && <meta name="keywords" content={keywords} />}
       {robots && <meta name="robots" content={robots} />}
 
-      <meta property="og:title" content={title} />
+      <meta property="og:title" content={pageTitle} />
       <meta property="og:image" content={image} />
 
       <meta property="og:url" content={url} />

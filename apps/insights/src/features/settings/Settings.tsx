@@ -67,7 +67,7 @@ const Settings: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-3xl"
     >
-      <HelmetContainer title="Settings · rtylr" />
+      <HelmetContainer title={t('insights.settings.metaTitle')} />
       <motion.div variants={itemVariants}>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.settings.title')}
@@ -160,13 +160,11 @@ const Settings: React.FC = (): React.JSX.Element => {
           onClick={handleSave}
           disabled={updateSettings.isPending || settingsLoading}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px] disabled:opacity-50"
-          style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
-          aria-label={t('insights.settings.save', 'Save settings')}
+          style={{ background: 'var(--accent)', color: 'var(--hub-on-accent)' }}
+          aria-label={t('insights.settings.save')}
         >
           {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
-          {updateSettings.isPending
-            ? t('insights.settings.saving', 'Saving…')
-            : t('insights.settings.save', 'Save settings')}
+          {updateSettings.isPending ? t('insights.settings.saving') : t('insights.settings.save')}
         </button>
       </motion.div>
 

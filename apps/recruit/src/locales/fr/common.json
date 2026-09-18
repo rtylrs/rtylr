@@ -24,5 +24,20 @@
     "addQuestion": "Ajouter une question",
     "publicRolesNone": "Aucun poste ouvert pour le moment. Revenez bientôt.",
     "checkAgain": "Vérifier à nouveau"
+  },
+  "errors": {
+    "createCareer": "Création du poste impossible",
+    "updateCareer": "Mise à jour du poste impossible",
+    "deleteCareer": "Suppression du poste impossible",
+    "updateCustomization": "Mise à jour de l'identité impossible",
+    "updateSubmission": "Mise à jour du statut impossible",
+    "createSection": "Création de la section impossible",
+    "updateSection": "Mise à jour de la section impossible",
+    "deleteSection": "Suppression de la section impossible",
+    "reorderSections": "Réordonnancement des sections impossible",
+    "createField": "Création de la question impossible",
+    "updateField": "Mise à jour de la question impossible",
+    "deleteField": "Suppression de la question impossible",
+    "apply": "Envoi de la candidature impossible"
   }
 }

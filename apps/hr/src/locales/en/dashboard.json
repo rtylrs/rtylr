@@ -67,5 +67,9 @@
     "noData": "No data available.",
     "dragToReorder": "Drag to reorder",
     "errorFallback": "Widget unavailable"
-  }
+  },
+  "nothingUpcoming": "Nothing upcoming.",
+  "workAnniversaries": "Work anniversaries",
+  "upcomingBirthdays": "Upcoming birthdays",
+  "noBirthdays": "No birthdays in view."
 }

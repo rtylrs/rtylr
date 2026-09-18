@@ -47,21 +47,29 @@ const Operations: React.FC = (): React.JSX.Element => {
 
   const stats = [
     {
+      id: 'activeStaff',
+
       label: t('insights.operations.kpis.activeStaff'),
       value: formatNumber(kpis?.activeStaff ?? 0),
       icon: Users,
     },
     {
+      id: 'shiftsThisWeek',
+
       label: t('insights.operations.kpis.shiftsThisWeek'),
       value: formatNumber(kpis?.shiftsThisWeek ?? 0),
       icon: Calendar,
     },
     {
+      id: 'pendingTimeOff',
+
       label: t('insights.operations.kpis.pendingTimeOff'),
       value: formatNumber(kpis?.pendingTimeOff ?? 0),
       icon: Clock,
     },
     {
+      id: 'openLeaveRequests',
+
       label: t('insights.operations.kpis.openLeaveRequests'),
       value: formatNumber(kpis?.openLeaveRequests ?? 0),
       icon: Activity,
@@ -75,7 +83,7 @@ const Operations: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Operations · rtylr" />
+      <HelmetContainer title={t('insights.operations.metaTitle')} />
       <motion.div variants={itemVariants}>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.operations.title')}
@@ -94,7 +102,7 @@ const Operations: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
@@ -107,7 +115,7 @@ const Operations: React.FC = (): React.JSX.Element => {
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
                     style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: 'var(--accent)' }} />
+                    <Icon size={14} style={{ color: 'var(--accent-on-muted)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -182,7 +190,7 @@ const Operations: React.FC = (): React.JSX.Element => {
               </p>
               <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
                 {utilization.scheduledHours.toFixed(1)} / {utilization.availableHours.toFixed(1)}{' '}
-                {t('insights.operations.hours', 'hours')}
+                {t('insights.operations.hours')}
               </p>
             </div>
           )}
@@ -210,25 +218,25 @@ const Operations: React.FC = (): React.JSX.Element => {
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.scheduled', 'Scheduled')}
+                  {t('insights.operations.scheduled')}
                 </span>
                 <span className="font-semibold">{formatNumber(shifts.scheduled)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.completed', 'Completed')}
+                  {t('insights.operations.completed')}
                 </span>
                 <span className="font-semibold">{formatNumber(shifts.completed)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.noShows', 'No-shows')}
+                  {t('insights.operations.noShows')}
                 </span>
                 <span className="font-semibold">{formatNumber(shifts.noShows)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.completion', 'Completion')}
+                  {t('insights.operations.completion')}
                 </span>
                 <span className="font-semibold">{shifts.completionRatePct.toFixed(1)}%</span>
               </div>
@@ -258,13 +266,13 @@ const Operations: React.FC = (): React.JSX.Element => {
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.pending', 'Pending')}
+                  {t('insights.operations.pending')}
                 </span>
                 <span className="font-semibold">{formatNumber(timeOff.pending)}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {t('insights.operations.approved', 'Approved')}
+                  {t('insights.operations.approved')}
                 </span>
                 <span className="font-semibold">{formatNumber(timeOff.approved)}</span>
               </div>

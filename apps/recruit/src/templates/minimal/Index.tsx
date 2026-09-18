@@ -41,9 +41,9 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
             <div className="rounded-lg border" style={{ borderColor: 'var(--recruit-border)' }}>
               <EmptyState
                 icon={Briefcase}
-                title={t('emptyStates.publicRolesNone')}
+                title={t('common.emptyStates.publicRolesNone')}
                 action={{
-                  label: t('emptyStates.checkAgain'),
+                  label: t('common.emptyStates.checkAgain'),
                   onClick: () => window.location.reload(),
                 }}
               />
@@ -52,7 +52,8 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
             careers.map((c) => (
               <Link
                 key={c.id}
-                to={`/${customization.slug}/${c.slug}` as any}
+                to="/$slug/$careerSlug"
+                params={{ slug: customization.slug, careerSlug: c.slug }}
                 className="group flex items-center justify-between rounded-lg border bg-white px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-sm"
                 style={{ borderColor: 'var(--recruit-border)' }}
               >

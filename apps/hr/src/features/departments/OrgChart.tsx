@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { Network } from 'lucide-react';
@@ -33,7 +34,7 @@ const OrgChart: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Org chart · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.orgChart'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('departments.orgChart.title')}

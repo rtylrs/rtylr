@@ -1,6 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 const mocks = vi.hoisted(() => ({
   role: 'operator' as string | null,
@@ -58,6 +63,10 @@ vi.mock('../../shared/components/ExportButton', () => ({ default: () => null }))
 vi.mock('../../shared/components/PaginationControls', () => ({ default: () => null }));
 
 import Purchasing from './Purchasing';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('Purchasing approval gating', () => {
   it('hides the Approve action for an operator', () => {

@@ -1,13 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, opts?: Record<string, unknown>) =>
-      opts ? `${key}:${JSON.stringify(opts)}` : key,
-  }),
-}));
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves,
+// which is how this suite passed while every string on screen was a dotted
+// path (rtylr#1269). The real locale files mean the copy below also proves the
+// lookup.
 
 vi.mock('@voxire/components', () => ({
   FullScreenLoader: () => null,
@@ -52,6 +51,11 @@ vi.mock('../../../shared/stores/cartStore', () => ({
 }));
 
 import LocationMenu from './LocationMenu';
+import { initTestI18n } from '../../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('LocationMenu empty states', () => {
   beforeEach(() => {
@@ -68,8 +72,8 @@ describe('LocationMenu empty states', () => {
   it('shows business-not-found and goes back on the CTA', () => {
     render(<LocationMenu />);
 
-    expect(screen.getByText('businessNotFoundTitle')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'goBack' }));
+    expect(screen.getByText('Business not found')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
     expect(backSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -82,14 +86,27 @@ describe('LocationMenu empty states', () => {
 
     render(<LocationMenu />);
 
-    expect(screen.getByText('locationNotFoundTitle')).toBeInTheDocument();
+    expect(screen.getByText('Location not found')).toBeInTheDocument();
 
     const cta = screen.getByRole('button', {
-      name: 'backToBusiness:{"businessName":"Acme Diner"}',
+      name: 'Back to Acme Diner',
     });
     fireEvent.click(cta);
 
     expect(navigateSpy).toHaveBeenCalledWith({ to: '/$slug', params: { slug: 'acme' } });
+  });
+
+  it('shows a translated message when the menu itself fails to load', () => {
+    businessQuery.isError = false;
+    businessQuery.data = {
+      business: { id: 1, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
+      locations: [{ id: 5, name: 'Downtown', slug: 'downtown', address: '', timezone: 'UTC' }],
+    };
+    menuQuery.isError = true;
+
+    render(<LocationMenu />);
+
+    expect(screen.getByRole('heading', { name: "Couldn't load the menu" })).toBeInTheDocument();
   });
 
   it('shows no-items-available and navigates back to the business on the CTA', () => {
@@ -105,10 +122,10 @@ describe('LocationMenu empty states', () => {
 
     render(<LocationMenu />);
 
-    expect(screen.getByText('noItemsTitle')).toBeInTheDocument();
+    expect(screen.getByText('No menu items available')).toBeInTheDocument();
 
     const cta = screen.getByRole('button', {
-      name: 'backToBusiness:{"businessName":"Acme Diner"}',
+      name: 'Back to Acme Diner',
     });
     fireEvent.click(cta);
 

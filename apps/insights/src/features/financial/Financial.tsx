@@ -48,7 +48,7 @@ const Financial: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Financial · rtylr" />
+      <HelmetContainer title={t('insights.financial.metaTitle')} />
       <motion.div variants={itemVariants}>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.financial.title')}
@@ -136,7 +136,10 @@ const Financial: React.FC = (): React.JSX.Element => {
                       {b.bucket}
                     </p>
                     <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                      {formatNumber(b.invoiceCount)} {t('insights.financial.invoices', 'invoices')}
+                      {t('insights.financial.invoices', {
+                        count: b.invoiceCount,
+                        formatted: formatNumber(b.invoiceCount),
+                      })}
                     </p>
                   </div>
                   <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>

@@ -29,7 +29,7 @@ const WorkScheduleStep = ({
 }: WorkScheduleStepProps): React.JSX.Element => {
   const { t } = useTranslation();
   const [form, setForm] = useState<WorkScheduleFormData>({
-    name: 'Standard',
+    name: t('shifts.schedule.standardName'),
     workingDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
     startTime: '09:00',
     endTime: '17:00',

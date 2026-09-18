@@ -33,11 +33,8 @@ import {
   type TeamMember,
   type AccessRequest,
 } from '../../shared/hooks/queries/useTeam';
-import {
-  useMySubscription,
-  centsToDisplay,
-  computeSeatProration,
-} from '../../shared/hooks/queries/useSubscription';
+import { useMySubscription } from '../../shared/hooks/queries/useSubscription';
+import { SeatSavingsNote } from '../../shared/components/SeatSavingsNote';
 import { useGroups, useAddGroupMembers } from '../../shared/hooks/queries/useGroups';
 import { legacyRoleToDashRole } from './authorizationDraft';
 import { mailtoFor } from '../../shared/utils/mailto';
@@ -72,7 +69,7 @@ const Team: React.FC = (): React.JSX.Element => {
     page: 1,
     pageSize: FETCH_WINDOW_SIZE,
   });
-  const members = teamData?.members ?? [];
+  const members = useMemo(() => teamData?.members ?? [], [teamData]);
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -161,7 +158,7 @@ const Team: React.FC = (): React.JSX.Element => {
         return mem && mem.role?.toLowerCase() !== 'owner';
       });
       if (nonOwnerIds.length === 0) {
-        toast.error('Workspace owner(s) cannot be deactivated');
+        toast.error(t('team.list.ownersCannotBeDeactivated'));
         setBulkConfirmDeactivate(false);
         return;
       }
@@ -177,7 +174,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Team · rtylr" />
+      <HelmetContainer title={`${t('common.nav.team')} · rtylr`} />
       <div className="space-y-5">
         <motion.div
           initial={{ opacity: 0, y: -6 }}
@@ -186,16 +183,16 @@ const Team: React.FC = (): React.JSX.Element => {
         >
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              Team
+              {t('common.nav.team')}
             </h1>
             <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-              {members.length} {members.length === 1 ? 'member' : 'members'}
+              {t('team.list.memberCount', { count: members.length })}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate({ to: '/team/groups' })}>
               <FolderOpen size={14} />
-              Groups
+              {t('team.groups.title')}
             </Button>
             <Button onClick={() => navigate({ to: '/team/invite' })}>
               <UserPlus size={14} />
@@ -226,7 +223,7 @@ const Team: React.FC = (): React.JSX.Element => {
                 <div className="flex items-center gap-2">
                   <span
                     className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold uppercase shrink-0"
-                    style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                   >
                     {(req.requesterName || req.requesterEmail).charAt(0)}
                   </span>
@@ -247,7 +244,7 @@ const Team: React.FC = (): React.JSX.Element => {
                     approveAccessRequest.mutate({ id: req.id, userId: req.userId, app: req.app })
                   }
                   className="text-[11px] px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
-                  style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                  style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                 >
                   {approveAccessRequest.isPending ? '...' : 'Grant'}
                 </button>
@@ -270,17 +267,17 @@ const Team: React.FC = (): React.JSX.Element => {
                 setQuery(e.target.value);
                 setPage(0);
               }}
-              placeholder="Search by name or email..."
+              placeholder={t('team.list.searchPlaceholder')}
               className="pl-9"
             />
           </div>
           <div className="flex items-center gap-1">
             {[
-              { id: 'all', label: 'All' },
-              { id: 'admin', label: 'Admin' },
-              { id: 'manager', label: 'Manager' },
-              { id: 'member', label: 'Member' },
-              { id: 'viewer', label: 'Viewer' },
+              { id: 'all', label: t('team.list.filterAll') },
+              { id: 'admin', label: t('common.roleLabels.admin') },
+              { id: 'manager', label: t('common.roleLabels.manager') },
+              { id: 'member', label: t('common.roleLabels.member') },
+              { id: 'viewer', label: t('common.roleLabels.viewer') },
             ].map((r) => (
               <button
                 type="button"
@@ -345,16 +342,16 @@ const Team: React.FC = (): React.JSX.Element => {
                     <div className="col-span-1 flex items-center">
                       <input
                         type="checkbox"
-                        aria-label="Select all on this page"
+                        aria-label={t('team.list.selectAllOnPage')}
                         checked={allPageSelected}
                         onChange={toggleAllPage}
                         style={{ accentColor: '#4583C4' }}
                       />
                     </div>
-                    <div className="col-span-3">Member</div>
-                    <div className="col-span-2">Role</div>
-                    <div className="col-span-4">Licenses</div>
-                    <div className="col-span-1">Status</div>
+                    <div className="col-span-3">{t('team.list.colMember')}</div>
+                    <div className="col-span-2">{t('team.list.colRole')}</div>
+                    <div className="col-span-4">{t('team.list.colLicenses')}</div>
+                    <div className="col-span-1">{t('team.list.colStatus')}</div>
                     <div className="col-span-1"></div>
                   </div>
 
@@ -385,7 +382,10 @@ const Team: React.FC = (): React.JSX.Element => {
                         <div className="col-span-3 flex items-center gap-3 min-w-0">
                           <div
                             className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                            style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                            style={{
+                              background: 'var(--accent-muted)',
+                              color: 'var(--accent-on-muted)',
+                            }}
                           >
                             {(m.name || m.email || '?').charAt(0).toUpperCase()}
                           </div>
@@ -414,7 +414,7 @@ const Team: React.FC = (): React.JSX.Element => {
                         <div className="col-span-4 flex items-center gap-1.5 flex-wrap">
                           {apps.length === 0 ? (
                             <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                              No licenses
+                              {t('team.list.noLicenses')}
                             </span>
                           ) : (
                             apps.map((appId: string) => {
@@ -468,7 +468,7 @@ const Team: React.FC = (): React.JSX.Element => {
                         <div className="col-span-1 flex justify-end relative">
                           <button
                             type="button"
-                            aria-label="Member actions"
+                            aria-label={t('team.list.memberActions')}
                             onClick={(e) => {
                               e.stopPropagation();
                               setMenuOpen(menuOpen === m.id ? null : m.id);
@@ -541,7 +541,7 @@ const Team: React.FC = (): React.JSX.Element => {
                                     setMenuOpen(null);
                                   }}
                                 >
-                                  <UserX size={12} /> Deactivate
+                                  <UserX size={12} /> {t('team.list.deactivateConfirm')}
                                 </button>
                               )}
                             </div>
@@ -574,7 +574,7 @@ const Team: React.FC = (): React.JSX.Element => {
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
                       style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                     >
-                      Prev
+                      {t('common.pagination.previous')}
                     </button>
                     <button
                       type="button"
@@ -583,7 +583,7 @@ const Team: React.FC = (): React.JSX.Element => {
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
                       style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                     >
-                      Next
+                      {t('common.pagination.next')}
                     </button>
                   </div>
                 </div>
@@ -631,7 +631,7 @@ const Team: React.FC = (): React.JSX.Element => {
             </button>
             <button
               type="button"
-              aria-label="Clear selection"
+              aria-label={t('team.list.clearSelection')}
               onClick={clearSelection}
               className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
               style={{ color: 'var(--dash-text-muted)' }}
@@ -653,11 +653,11 @@ const Team: React.FC = (): React.JSX.Element => {
               style={{ background: 'var(--dash-surface)', border: '1px solid var(--dash-border)' }}
             >
               <h3 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Add {selected.size} member{selected.size !== 1 ? 's' : ''} to group
+                {t('team.list.addToGroupTitle', { count: selected.size })}
               </h3>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-                  Select group
+                  {t('team.list.selectGroupLabel')}
                 </label>
                 <select
                   value={selectedGroupId}
@@ -669,7 +669,7 @@ const Team: React.FC = (): React.JSX.Element => {
                     color: 'var(--dash-text)',
                   }}
                 >
-                  <option value="">Choose a group...</option>
+                  <option value="">{t('team.list.selectGroupPlaceholder')}</option>
                   {groups.map((g) => (
                     <option key={g.id} value={String(g.id)}>
                       {g.name}
@@ -687,13 +687,13 @@ const Team: React.FC = (): React.JSX.Element => {
                   className="px-3 py-1.5 rounded-lg text-sm"
                   style={{ color: 'var(--dash-text-muted)' }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <Button
                   onClick={handleAddToGroup}
                   disabled={!selectedGroupId || addGroupMembers.isPending}
                 >
-                  Add to group
+                  {t('team.memberDetail.addToGroup')}
                 </Button>
               </div>
             </div>
@@ -703,9 +703,9 @@ const Team: React.FC = (): React.JSX.Element => {
         <ConfirmDialog
           open={bulkConfirmDeactivate}
           onOpenChange={(o) => !o && setBulkConfirmDeactivate(false)}
-          title={`Deactivate ${selected.size} member${selected.size !== 1 ? 's' : ''}?`}
-          description="They will lose access to all apps immediately. This can be undone later."
-          confirmLabel="Deactivate"
+          title={t('team.list.bulkDeactivateTitle', { count: selected.size })}
+          description={t('team.list.bulkDeactivateDescription')}
+          confirmLabel={t('team.list.deactivateConfirm')}
           destructive
           isLoading={deactivate.isPending}
           onConfirm={handleBulkDeactivate}
@@ -714,34 +714,16 @@ const Team: React.FC = (): React.JSX.Element => {
         <ConfirmDialog
           open={!!confirm}
           onOpenChange={(o) => !o && setConfirm(null)}
-          title={`Deactivate ${confirm?.name || confirm?.email || 'member'}?`}
+          title={t('team.list.deactivateTitle', {
+            name: confirm?.name || confirm?.email || t('team.list.deactivateFallbackName'),
+          })}
           description={
             <span className="flex flex-col gap-1.5">
-              <span>
-                The member will lose access to all apps immediately. You can reactivate them later.
-              </span>
-              {sub &&
-                sub.pricePerSeatCents > 0 &&
-                (() => {
-                  const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                    computeSeatProration(sub.pricePerSeatCents);
-                  return (
-                    <span style={{ color: 'var(--dash-text-muted)', fontSize: '12px' }}>
-                      Saves{' '}
-                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                        {centsToDisplay(proratedCents)}
-                      </span>{' '}
-                      this month ({daysRemaining}/{daysInMonth} days), then{' '}
-                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                        {centsToDisplay(sub.pricePerSeatCents)}/mo
-                      </span>{' '}
-                      from {nextMonthName} 1st.
-                    </span>
-                  );
-                })()}
+              <span>{t('team.list.deactivateDescription')}</span>
+              {sub && <SeatSavingsNote pricePerSeatCents={sub.pricePerSeatCents} />}
             </span>
           }
-          confirmLabel="Deactivate"
+          confirmLabel={t('team.list.deactivateConfirm')}
           destructive
           isLoading={deactivate.isPending}
           onConfirm={async () => {

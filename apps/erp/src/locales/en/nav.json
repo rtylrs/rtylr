@@ -1,9 +1,38 @@
 {
   "dashboard": "Dashboard",
   "inventory": "Inventory",
-  "purchasing": "Purchasing",
+  "categories": "Categories",
+  "brands": "Brands",
+  "variants": "Variants",
+  "priceLists": "Price Lists",
+  "barcodes": "Barcodes",
+  "warehouses": "Warehouses",
+  "stockTransfers": "Stock Transfers",
+  "stockTakes": "Stock Takes",
+  "receiving": "Receiving",
+  "expiry": "Expiry",
+  "lowStockAlerts": "Low Stock Alerts",
+  "reorder": "Reorder",
+  "valuation": "Valuation",
+  "purchaseOrders": "Purchase Orders",
   "suppliers": "Suppliers",
-  "products": "Products",
-  "reports": "Reports",
-  "settings": "Settings"
+  "settings": "Settings",
+  "appName": "ERP",
+  "groups": {
+    "workspace": "Workspace",
+    "catalog": "Catalog",
+    "warehouseOps": "Warehouse Ops",
+    "insights": "Insights",
+    "purchasing": "Purchasing"
+  },
+  "titles": {
+    "variants": "Product Variants",
+    "barcodes": "Barcode Generator",
+    "receiving": "Goods Receiving",
+    "expiry": "Expiry Tracking",
+    "reorder": "Reorder Suggestions",
+    "valuation": "Inventory Valuation",
+    "productDetail": "Product detail"
+  },
+  "products": "Products"
 }

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 const { flagState, storeState } = vi.hoisted(() => ({
   flagState: { showPreviewRoutes: false },
@@ -92,5 +92,46 @@ describe('CommandBar preview destinations (#1048)', () => {
     for (const label of PREVIEW_LABELS) {
       expect(screen.getByText(label), `${label} should be offered`).toBeInTheDocument();
     }
+  });
+});
+
+describe('CommandBar selection uses the accent, not the hover grey (#1097 D-061)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    storeState.commandBarOpen = true;
+  });
+
+  const rowFor = (label: string): HTMLElement =>
+    screen.getByText(label).closest('button') as HTMLElement;
+
+  it('marks the row Enter will run with the accent tint', () => {
+    render(<CommandBar />);
+    const row = rowFor(ALWAYS_LABELS[1]);
+    // Selection follows the pointer as well as the keyboard, so this is how a
+    // row becomes the one Enter will run.
+    fireEvent.mouseEnter(row);
+
+    // --flow-hover also means "the pointer is here", so it could not say which
+    // row Enter would run.
+    expect(row.getAttribute('style')).toContain('accent-muted');
+    expect(row.getAttribute('style')).not.toContain('flow-hover');
+  });
+
+  it('pairs the tint with its own foreground token', () => {
+    // Reusing --accent-fg on this tint put 40 of 56 light-mode combinations
+    // under 4.5:1, which is why --accent-on-muted exists (#970).
+    render(<CommandBar />);
+    const row = rowFor(ALWAYS_LABELS[1]);
+    fireEvent.mouseEnter(row);
+    expect(row.getAttribute('style')).toContain('accent-on-muted');
+  });
+
+  it('leaves the rows that are not selected transparent', () => {
+    render(<CommandBar />);
+    fireEvent.mouseEnter(rowFor(ALWAYS_LABELS[1]));
+
+    const other = rowFor(ALWAYS_LABELS[2]);
+    expect(other.getAttribute('style')).toContain('transparent');
+    expect(other.getAttribute('style')).not.toContain('accent-muted');
   });
 });

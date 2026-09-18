@@ -78,7 +78,8 @@ const isEquipmentEnabled = (config: HRCompanyConfigPayload | null): boolean => {
 };
 
 /* -- Nav config -- */
-const ACCENT = '#8b5cf6';
+/** The themed accent, so a workspace's own colour is used (rtylr#1242). */
+const ACCENT = 'var(--accent)';
 
 interface NavSection {
   i18nKey: string;
@@ -504,7 +505,13 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                     borderRadius: '8px',
                     fontSize: '10px',
                     fontWeight: 500,
-                    border: theme === value ? `1px solid ${ACCENT}40` : '1px solid transparent',
+                    // `--accent-border`, not `${ACCENT}40`. A hex alpha suffix
+                    // cannot apply to a `var()`, so once the accent became a
+                    // token this concatenation produced the invalid
+                    // `var(--accent)40` and the border silently disappeared.
+                    // hr already declares the tint (rtylr#1242).
+                    border:
+                      theme === value ? '1px solid var(--accent-border)' : '1px solid transparent',
                     background: theme === value ? 'rgba(139,92,246,0.12)' : 'var(--hr-hover)',
                     color: theme === value ? ACCENT : 'var(--hr-text-muted)',
                     cursor: 'pointer',
@@ -940,7 +947,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
               }
-              aria-label="Open command palette"
+              aria-label={t('layout.openCommandPalette')}
             >
               <Search size={12} />
               {!isMobile && 'Search'}

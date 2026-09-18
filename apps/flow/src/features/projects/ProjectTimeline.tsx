@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { isOverdue as isTaskOverdue } from '../../shared/lib/dateUtils';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { CalendarClock } from 'lucide-react';
@@ -111,7 +112,7 @@ const ProjectTimeline: React.FC = () => {
                 borderRight: '1px solid var(--flow-border)',
               }}
             >
-              Task
+              {t('flow.projectTimeline.taskColumn')}
             </div>
             {days.map((d, i) => (
               <div
@@ -206,8 +207,12 @@ const ProjectTimeline: React.FC = () => {
                 1,
                 Math.round((dueDate.getTime() - startDate.getTime()) / dayMs) + 1
               );
-              const isOverdue = dueDate < new Date() && t.status !== 'done';
-              const barColor = isOverdue ? 'var(--flow-warn-fg)' : project.color;
+              // The same comparison as everywhere else, on the stored day
+              // rather than on a Date parsed from it. `new Date(t.dueDate)` is
+              // UTC midnight, so a task due today read as overdue for the whole
+              // working day (rtylr#1077).
+              const overdue = isTaskOverdue(t.dueDate, t.status);
+              const barColor = overdue ? 'var(--flow-warn-fg)' : project.color;
 
               return (
                 <div

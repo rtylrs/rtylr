@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useReorderSuggestions } from './useReorderSuggestions';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -21,10 +23,10 @@ const Reorder: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Reorder suggestions · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/reorder'].title))} />
       <PageHeader
-        title="Reorder Suggestions"
-        description="Smart recommendations based on sales velocity and lead times"
+        title={t(routeLabels['/reorder'].title)}
+        description={t('erp.reorder.subtitle')}
       />
 
       <div
@@ -59,21 +61,21 @@ const Reorder: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <span>Product</span>
-          <span>Stock</span>
-          <span>Avg Daily</span>
-          <span>Suggested</span>
-          <span>Lead</span>
-          <span>Confidence</span>
+          <span>{t('common.product')}</span>
+          <span>{t('common.stock')}</span>
+          <span>{t('erp.reorder.avgDaily')}</span>
+          <span>{t('erp.reorder.suggested')}</span>
+          <span>{t('erp.reorder.lead')}</span>
+          <span>{t('erp.reorder.confidence')}</span>
         </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
         ) : suggestions.length === 0 ? (
           <EmptyState
             icon={CheckCircle2}
-            title={t('reorder.empty.title')}
-            description={t('reorder.empty.description')}
-            action={{ label: t('reorder.refresh'), onClick: () => void refetch() }}
+            title={t('erp.reorder.empty.title')}
+            description={t('erp.reorder.empty.description')}
+            action={{ label: t('erp.reorder.refresh'), onClick: () => void refetch() }}
           />
         ) : (
           suggestions.map((s) => {

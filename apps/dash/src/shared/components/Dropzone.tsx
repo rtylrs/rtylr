@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDropzone } from 'react-dropzone';
 
 interface DropzoneProps {
@@ -7,6 +8,7 @@ interface DropzoneProps {
 }
 
 const Dropzone: React.FC<DropzoneProps> = ({ onFileSelected, accept = { 'image/*': [] } }) => {
+  const { t } = useTranslation();
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
@@ -25,11 +27,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ onFileSelected, accept = { 'image/*
   return (
     <div {...getRootProps({ className: 'dropzone' })} style={dropzoneStyle}>
       <input {...getInputProps()} />
-      {isDragActive ? (
-        <p>Drop the files here ...</p>
-      ) : (
-        <p>Drag 'n' drop a file here, or click to select one</p>
-      )}
+      {isDragActive ? <p>{t('common.dropzone.active')}</p> : <p>{t('common.dropzone.idle')}</p>}
     </div>
   );
 };

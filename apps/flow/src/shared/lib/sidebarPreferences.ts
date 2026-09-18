@@ -79,7 +79,20 @@ export interface SidebarPreferencesUpdateOptions {
   showToast?: boolean;
 }
 
-export const SIDEBAR_GROUP_IDS = ['plan', 'team', 'time', 'projects'] as const;
+/**
+ * Projects first, and it is `groupOrder` that decides what the sidebar renders.
+ *
+ * With projects last, 1440x900 with three projects gave the sidebar's scroll
+ * container scrollHeight 1164 against clientHeight 576, and P-Alpha landed at
+ * y=1080 in a 900px viewport. There is no scrollbar and no fade, so nothing
+ * said the region scrolled at all (#1076). The project list is the reason most
+ * people open Flow, so it goes directly under the pinned items.
+ *
+ * Only the default. `parseSidebarPreferences` keeps a stored `groupOrder` and
+ * appends anything missing, so a user who has reordered their sidebar is
+ * unaffected.
+ */
+export const SIDEBAR_GROUP_IDS = ['projects', 'plan', 'team', 'time'] as const;
 
 const builtinItems: SidebarItemPreference[] = [
   {
@@ -109,7 +122,10 @@ const builtinItems: SidebarItemPreference[] = [
   {
     id: 'builtin:projects-shortcut',
     kind: 'builtin',
-    label: 'nav.projects',
+    // The title of the screen it opens, not nav.projects. That key also names
+    // the Projects group below it, so the sidebar showed two rows called
+    // "Projects" pointing at different places.
+    label: 'flow.allProjects.title',
     route: '/projects',
     icon: 'layout-grid',
     visible: true,
@@ -251,7 +267,10 @@ const builtinItems: SidebarItemPreference[] = [
   {
     id: 'builtin:time-settings',
     kind: 'builtin',
-    label: 'flow.settings.time.section',
+    // Its own key, not flow.settings.time.section. That string is also the
+    // Settings tab label, where "Time" is right; here it sat inside a group
+    // already called Time, so the sidebar showed two entries with one name.
+    label: 'flow.time.settingsLink',
     route: '/settings?section=time',
     icon: 'settings',
     groupId: 'time',
@@ -259,6 +278,14 @@ const builtinItems: SidebarItemPreference[] = [
   },
 ];
 
+/**
+ * Plan, Team and Time start collapsed; Projects starts open.
+ *
+ * Expanded, Plan's five items and Time's six pushed the project list off the
+ * bottom of a 900px viewport (#1076). Collapsing them costs one extra click to
+ * reach Cycles or Views on a fresh profile, and nothing from the second
+ * session on, because the toggle is saved with the rest of the preferences.
+ */
 const builtinGroups: SidebarGroupPreference[] = [
   {
     id: 'plan',
@@ -267,7 +294,7 @@ const builtinGroups: SidebarGroupPreference[] = [
     icon: 'map',
     itemIds: builtinItems.filter((item) => item.groupId === 'plan').map((item) => item.id),
     visible: true,
-    collapsed: false,
+    collapsed: true,
   },
   {
     id: 'team',
@@ -276,7 +303,7 @@ const builtinGroups: SidebarGroupPreference[] = [
     icon: 'users',
     itemIds: builtinItems.filter((item) => item.groupId === 'team').map((item) => item.id),
     visible: true,
-    collapsed: false,
+    collapsed: true,
   },
   {
     id: 'time',
@@ -285,7 +312,7 @@ const builtinGroups: SidebarGroupPreference[] = [
     icon: 'clock',
     itemIds: builtinItems.filter((item) => item.groupId === 'time').map((item) => item.id),
     visible: true,
-    collapsed: false,
+    collapsed: true,
   },
   {
     id: 'projects',

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -61,13 +61,13 @@ const createWrapper = () => {
 describe('useViews (remote mode)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
+    (useFlowStore as unknown as Mock).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
   // Saved views are business-shared, so the list takes no scope at all. These
   // two cases used to assert a store fallback and an explicit override.
   it('asks for views without a workspace scope', async () => {
-    (flowApi.getViews as any).mockResolvedValue({ views: [] });
+    (flowApi.getViews as unknown as Mock).mockResolvedValue({ views: [] });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useViews(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -76,7 +76,7 @@ describe('useViews (remote mode)', () => {
 
   it('unwraps the enveloped { views: [...] } shape', async () => {
     const views = [{ id: 'v-1', name: 'My view' }];
-    (flowApi.getViews as any).mockResolvedValue({ views });
+    (flowApi.getViews as unknown as Mock).mockResolvedValue({ views });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useViews(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -85,7 +85,7 @@ describe('useViews (remote mode)', () => {
 
   it('accepts a raw array response', async () => {
     const views = [{ id: 'v-2', name: 'Another view' }];
-    (flowApi.getViews as any).mockResolvedValue(views);
+    (flowApi.getViews as unknown as Mock).mockResolvedValue(views);
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useViews(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -96,14 +96,14 @@ describe('useViews (remote mode)', () => {
 describe('useCreateView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
+    (useFlowStore as unknown as Mock).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
   // Creating a view no longer stamps a workspace on it, so the payload reaches
   // the API exactly as the caller wrote it. The two cases this replaces covered
   // the store default and an explicit override of it.
   it('sends the payload through untouched and invalidates views', async () => {
-    (flowApi.createView as any).mockResolvedValue({ id: 'v-new' });
+    (flowApi.createView as unknown as Mock).mockResolvedValue({ id: 'v-new' });
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateView(), { wrapper });
@@ -114,7 +114,7 @@ describe('useCreateView', () => {
   });
 
   it('shows an error toast and does not invalidate when the create call fails', async () => {
-    (flowApi.createView as any).mockRejectedValue(new Error('boom'));
+    (flowApi.createView as unknown as Mock).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateView(), { wrapper });
@@ -132,7 +132,7 @@ describe('useUpdateView', () => {
   });
 
   it('calls updateView with id and data and invalidates views on success', async () => {
-    (flowApi.updateView as any).mockResolvedValue({});
+    (flowApi.updateView as unknown as Mock).mockResolvedValue({});
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateView(), { wrapper });
@@ -146,7 +146,7 @@ describe('useUpdateView', () => {
   // over the cached view before it goes out, or renaming a view blanks its
   // filters, icon and sort.
   it('merges a patch over the cached view so the update does not blank fields', async () => {
-    (flowApi.updateView as any).mockResolvedValue({});
+    (flowApi.updateView as unknown as Mock).mockResolvedValue({});
     const { wrapper, client } = createWrapper();
     client.setQueryData(
       ['views'],
@@ -168,7 +168,7 @@ describe('useUpdateView', () => {
   // The toggle's field has to reach the wire. It was previously dropped: the
   // backend chain had landed on flow/view/v1 while the client is on v2.
   it('carries visibility through to the update call', async () => {
-    (flowApi.updateView as any).mockResolvedValue({});
+    (flowApi.updateView as unknown as Mock).mockResolvedValue({});
     const { wrapper, client } = createWrapper();
     client.setQueryData(['views'], [{ id: 'v-1', name: 'Mine', icon: 'eye' }]);
     const { result } = renderHook(() => useUpdateView(), { wrapper });
@@ -184,7 +184,7 @@ describe('useUpdateView', () => {
   });
 
   it('shows an error toast and does not invalidate when the update call fails', async () => {
-    (flowApi.updateView as any).mockRejectedValue(new Error('boom'));
+    (flowApi.updateView as unknown as Mock).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateView(), { wrapper });
@@ -202,7 +202,7 @@ describe('useDeleteView', () => {
   });
 
   it('calls deleteView with id and invalidates views on success', async () => {
-    (flowApi.deleteView as any).mockResolvedValue({ ok: true });
+    (flowApi.deleteView as unknown as Mock).mockResolvedValue({ ok: true });
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useDeleteView(), { wrapper });
@@ -212,7 +212,7 @@ describe('useDeleteView', () => {
   });
 
   it('shows an error toast and does not invalidate when the delete call fails', async () => {
-    (flowApi.deleteView as any).mockRejectedValue(new Error('boom'));
+    (flowApi.deleteView as unknown as Mock).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useDeleteView(), { wrapper });

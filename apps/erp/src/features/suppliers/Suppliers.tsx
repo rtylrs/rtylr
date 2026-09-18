@@ -12,6 +12,8 @@ import SupplierBillHistory from '../../shared/components/SupplierBillHistory';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -112,7 +114,7 @@ const Suppliers: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim() || !newEmail.trim() || !newCity.trim() || !newCountry.trim()) {
-      toast.error('Supplier name, email, city, and country are required');
+      toast.error(t('erp.suppliers.requiredFields'));
       return;
     }
     try {
@@ -128,7 +130,7 @@ const Suppliers: React.FC = () => {
         notes: '',
         isActive: true,
       });
-      toast.success('Supplier created');
+      toast.success(t('erp.suppliers.created'));
       setShowCreate(false);
       setNewName('');
       setNewEmail('');
@@ -137,7 +139,7 @@ const Suppliers: React.FC = () => {
       setNewCountry('');
       setNewAddress('');
     } catch {
-      toast.error('Failed to create supplier');
+      toast.error(t('erp.suppliers.createFailed'));
     }
   };
 
@@ -148,15 +150,15 @@ const Suppliers: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Suppliers · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/suppliers'].title))} />
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Suppliers
+            {t(routeLabels['/suppliers'].title)}
           </h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-            {isLoading ? '…' : `${activeCount} active supplier${activeCount !== 1 ? 's' : ''}`}
+            {isLoading ? '…' : t('erp.suppliers.activeCount', { count: activeCount })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -337,21 +339,21 @@ const Suppliers: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Supplier
+              {t('erp.suppliers.newSupplier')}
             </h3>
             {[
-              { value: newName, setter: setNewName, placeholder: 'Company name' },
-              { value: newEmail, setter: setNewEmail, placeholder: 'Email' },
-              { value: newPhone, setter: setNewPhone, placeholder: 'Phone' },
-              { value: newCity, setter: setNewCity, placeholder: 'City' },
-              { value: newCountry, setter: setNewCountry, placeholder: 'Country' },
-              { value: newAddress, setter: setNewAddress, placeholder: 'Address' },
-            ].map(({ value, setter, placeholder }) => (
+              { value: newName, setter: setNewName, placeholderKey: 'erp.suppliers.companyName' },
+              { value: newEmail, setter: setNewEmail, placeholderKey: 'erp.suppliers.email' },
+              { value: newPhone, setter: setNewPhone, placeholderKey: 'erp.suppliers.phone' },
+              { value: newCity, setter: setNewCity, placeholderKey: 'erp.suppliers.city' },
+              { value: newCountry, setter: setNewCountry, placeholderKey: 'erp.suppliers.country' },
+              { value: newAddress, setter: setNewAddress, placeholderKey: 'erp.suppliers.address' },
+            ].map(({ value, setter, placeholderKey }) => (
               <input
-                key={placeholder}
+                key={placeholderKey}
                 value={value}
                 onChange={(e) => setter(e.target.value)}
-                placeholder={placeholder}
+                placeholder={t(placeholderKey)}
                 className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                 style={{
                   background: 'var(--hub-input-bg)',
@@ -367,7 +369,7 @@ const Suppliers: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"

@@ -44,9 +44,9 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
-  admin: { icon: <Crown size={10} />, color: '#f59e0b' },
+  admin: { icon: <Crown size={10} />, color: 'var(--flow-warn-fg)' },
   member: { icon: <Shield size={10} />, color: 'var(--accent)' },
-  viewer: { icon: <Eye size={10} />, color: '#8b5cf6' },
+  viewer: { icon: <Eye size={10} />, color: 'var(--flow-neutral-fg)' },
 };
 
 const ProjectSettings: React.FC = () => {
@@ -139,10 +139,10 @@ const ProjectSettings: React.FC = () => {
       <HelmetContainer title={t('flow.projectSettings.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
-          items={[
-            { label: project.name, to: `/p/${project.id}/overview` },
-            { label: t('nav.settings') },
-          ]}
+          // The trail stops at the parent. The h1 directly below already says
+          // Settings, and repeating it in the crumb put the same word twice in
+          // two lines (#1097, D-029).
+          items={[{ label: project.name, to: `/p/${project.id}/overview` }]}
         />
         <h1 className="text-title font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
           {t('nav.settings')}
@@ -165,7 +165,11 @@ const ProjectSettings: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-6 max-w-2xl space-y-6">
+      {/* 640px, per S-11. max-w-2xl is 672, and there is no Tailwind step at
+          640, so the value is written out. The empty space to the right of a
+          capped form is the point of capping it: a 1440px-wide text input is
+          harder to read, not easier. */}
+      <div className="p-6 max-w-[640px] space-y-6">
         {/* ── General ── */}
         {tab === 'general' && (
           <>
@@ -175,6 +179,7 @@ const ProjectSettings: React.FC = () => {
                 reason={t('flow.projectSettings.generalGateReason')}
               />
             )}
+            <SectionHeading>{t('flow.projectSettings.detailsSection')}</SectionHeading>
             <Field label={t('common.name')}>
               <input
                 value={name}
@@ -335,7 +340,10 @@ const ProjectSettings: React.FC = () => {
                     >
                       <span
                         className="h-7 w-7 rounded-full flex items-center justify-center text-meta font-bold shrink-0"
-                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                        style={{
+                          background: 'var(--accent-muted)',
+                          color: 'var(--accent-on-muted)',
+                        }}
                       >
                         {initials}
                       </span>
@@ -478,7 +486,10 @@ const ProjectSettings: React.FC = () => {
                         }}
                         disabled={transferOwnership.isPending || !canManageProject}
                         className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
-                        style={{ background: '#ef4444', color: '#fff' }}
+                        style={{
+                          background: 'var(--flow-danger-fill)',
+                          color: 'var(--flow-danger-on-fill)',
+                        }}
                       >
                         {transferOwnership.isPending
                           ? t('flow.projectSettings.transferring')
@@ -512,7 +523,7 @@ const ProjectSettings: React.FC = () => {
                   )}
                 </div>
                 {confirmTransfer && (
-                  <p className="text-meta mt-1.5" style={{ color: '#f97316' }}>
+                  <p className="text-meta mt-1.5" style={{ color: 'var(--flow-warn-fg)' }}>
                     {t('flow.projectSettings.transferConfirmHint')}
                   </p>
                 )}
@@ -528,10 +539,18 @@ const ProjectSettings: React.FC = () => {
               {
                 icon: MessageSquare,
                 name: 'Slack',
-                description: 'Post project updates to #flow-updates',
+                description: t('flow.projectSettings.integrations.slack'),
               },
-              { icon: GitBranch, name: 'GitHub', description: 'Link PRs to tasks automatically' },
-              { icon: Mail, name: 'Email', description: 'Send daily digests to members' },
+              {
+                icon: GitBranch,
+                name: 'GitHub',
+                description: t('flow.projectSettings.integrations.github'),
+              },
+              {
+                icon: Mail,
+                name: 'Email',
+                description: t('flow.projectSettings.integrations.email'),
+              },
             ].map(({ icon: Icon, name, description }) => (
               <div
                 key={name}
@@ -592,7 +611,10 @@ const ProjectSettings: React.FC = () => {
               <button
                 type="button"
                 className="px-3 py-1 rounded-sm text-meta font-semibold disabled:opacity-40"
-                style={{ background: '#ef4444', color: '#fff' }}
+                style={{
+                  background: 'var(--flow-danger-fill)',
+                  color: 'var(--flow-danger-on-fill)',
+                }}
                 disabled={archiveProject.isPending || !canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-delete-gate'}
                 onClick={() => {
@@ -672,7 +694,10 @@ const ProjectSettings: React.FC = () => {
                   });
                 }}
                 className="px-3 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40"
-                style={{ background: '#ef4444', color: '#fff' }}
+                style={{
+                  background: 'var(--flow-danger-fill)',
+                  color: 'var(--flow-danger-on-fill)',
+                }}
               >
                 {archiveProject.isPending
                   ? t('common.saving')
@@ -685,6 +710,23 @@ const ProjectSettings: React.FC = () => {
     </div>
   );
 };
+
+/**
+ * A section heading inside a settings tab.
+ *
+ * Name, Description and Visibility were three bare fields in a row with
+ * nothing saying where one concern ended and the next began (#1088). Visibility
+ * already carries its own `legend`, so it is its own section; this gives the
+ * two text fields above it one too.
+ */
+const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <h2
+    className="text-meta font-semibold uppercase tracking-wider"
+    style={{ color: 'var(--flow-text-muted)' }}
+  >
+    {children}
+  </h2>
+);
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div>

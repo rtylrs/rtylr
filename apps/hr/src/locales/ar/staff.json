@@ -21,7 +21,12 @@
     "noCourses": "لا توجد دورات بعد.",
     "goToTraining": "الانتقال إلى التدريب",
     "noBenefits": "لا توجد اشتراكات مزايا نشطة.",
-    "goToBenefits": "الانتقال إلى المزايا"
+    "goToBenefits": "الانتقال إلى المزايا",
+    "contact": "بيانات التواصل",
+    "employment": "بيانات التوظيف",
+    "documents": "المستندات",
+    "training": "التدريب",
+    "benefits": "المزايا"
   },
   "reportingLines": {
     "title": "خطوط التبعية",
@@ -33,5 +38,6 @@
     "saved": "تم تحديث خط التبعية",
     "selectLabel": "اختر مديرًا لـ {{name}}",
     "changeLabel": "تغيير من يتبعه {{name}}"
-  }
+  },
+  "deptPrefix": "القسم:"
 }

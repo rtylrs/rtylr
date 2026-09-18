@@ -34,35 +34,18 @@ import type { FormField, FormFieldKind } from '../../shared/lib/types';
  * would make the connection between question and role unclear.
  */
 
-const KIND_META: Record<
-  FormFieldKind,
-  { icon: React.ReactNode; label: string; hasOptions: boolean }
-> = {
-  short_text: {
-    icon: <TypeIcon className="h-3.5 w-3.5" />,
-    label: 'Short text',
-    hasOptions: false,
-  },
-  long_text: {
-    icon: <AlignLeft className="h-3.5 w-3.5" />,
-    label: 'Long text',
-    hasOptions: false,
-  },
-  single_select: {
-    icon: <List className="h-3.5 w-3.5" />,
-    label: 'Dropdown',
-    hasOptions: true,
-  },
-  multi_select: {
-    icon: <CheckSquare className="h-3.5 w-3.5" />,
-    label: 'Multi-choice',
-    hasOptions: true,
-  },
-  url: { icon: <LinkIcon className="h-3.5 w-3.5" />, label: 'URL', hasOptions: false },
-  boolean: { icon: <ToggleRight className="h-3.5 w-3.5" />, label: 'Checkbox', hasOptions: false },
+const KIND_META: Record<FormFieldKind, { icon: React.ReactNode; hasOptions: boolean }> = {
+  short_text: { icon: <TypeIcon className="h-3.5 w-3.5" />, hasOptions: false },
+  long_text: { icon: <AlignLeft className="h-3.5 w-3.5" />, hasOptions: false },
+  single_select: { icon: <List className="h-3.5 w-3.5" />, hasOptions: true },
+  multi_select: { icon: <CheckSquare className="h-3.5 w-3.5" />, hasOptions: true },
+  url: { icon: <LinkIcon className="h-3.5 w-3.5" />, hasOptions: false },
+  boolean: { icon: <ToggleRight className="h-3.5 w-3.5" />, hasOptions: false },
 };
 
-const KIND_ORDER: FormFieldKind[] = [
+// Exported so the locale suite can assert a label and a seed label exist for
+// every kind. Both are looked up with a runtime built key.
+export const KIND_ORDER: FormFieldKind[] = [
   'short_text',
   'long_text',
   'single_select',
@@ -87,10 +70,11 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
   function addDefaultQuestion(): void {
     const kind = KIND_ORDER[0];
     create.mutate(
-      { careerId, kind, label: defaultLabelFor(kind), required: false },
+      { careerId, kind, label: defaultLabelFor(t, kind), required: false },
       {
-        onSuccess: () => toast.success(`${KIND_META[kind].label} added`),
-        onError: () => toast.error("Couldn't add"),
+        onSuccess: () =>
+          toast.success(t('admin.questions.added', { kind: t(`admin.questions.kind.${kind}`) })),
+        onError: () => toast.error(t('admin.questions.addFailed')),
       }
     );
   }
@@ -105,21 +89,19 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
     >
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold">Custom questions</div>
-          <div className="text-xs text-white/50">
-            Asked after the default name / email / resume block on the apply form.
-          </div>
+          <div className="text-sm font-semibold">{t('admin.questions.heading')}</div>
+          <div className="text-xs text-white/50">{t('admin.questions.hint')}</div>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="py-6 text-center text-sm text-white/50">Loading…</div>
+        <div className="py-6 text-center text-sm text-white/50">{t('admin.questions.loading')}</div>
       ) : fields.length === 0 ? (
         <div className="mb-4">
           <EmptyState
             icon={HelpCircle}
-            title={t('emptyStates.questionsNone')}
-            action={{ label: t('emptyStates.addQuestion'), onClick: addDefaultQuestion }}
+            title={t('common.emptyStates.questionsNone')}
+            action={{ label: t('common.emptyStates.addQuestion'), onClick: addDefaultQuestion }}
             size="compact"
           />
         </div>
@@ -131,16 +113,16 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
               field={f}
               onSave={(body) =>
                 update.mutate(body, {
-                  onSuccess: () => toast.success('Question saved'),
-                  onError: () => toast.error("Couldn't save"),
+                  onSuccess: () => toast.success(t('admin.questions.saved')),
+                  onError: () => toast.error(t('admin.questions.saveFailed')),
                 })
               }
               onDelete={() =>
                 del.mutate(
                   { id: f.id, careerId },
                   {
-                    onSuccess: () => toast.success('Question removed'),
-                    onError: () => toast.error("Couldn't delete"),
+                    onSuccess: () => toast.success(t('admin.questions.removed')),
+                    onError: () => toast.error(t('admin.questions.deleteFailed')),
                   }
                 )
               }
@@ -161,16 +143,22 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
                   {
                     careerId,
                     kind: k,
-                    label: defaultLabelFor(k),
+                    label: defaultLabelFor(t, k),
                     required: false,
                     optionsJson:
                       k === 'single_select' || k === 'multi_select'
-                        ? JSON.stringify(['Option 1', 'Option 2'])
+                        ? JSON.stringify([
+                            t('admin.questions.seedOption', { number: 1 }),
+                            t('admin.questions.seedOption', { number: 2 }),
+                          ])
                         : undefined,
                   },
                   {
-                    onSuccess: () => toast.success(`${meta.label} added`),
-                    onError: () => toast.error("Couldn't add"),
+                    onSuccess: () =>
+                      toast.success(
+                        t('admin.questions.added', { kind: t(`admin.questions.kind.${k}`) })
+                      ),
+                    onError: () => toast.error(t('admin.questions.addFailed')),
                   }
                 )
               }
@@ -178,7 +166,7 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
             >
               {meta.icon}
               <Plus className="h-3 w-3" />
-              {meta.label}
+              {t(`admin.questions.kind.${k}`)}
             </button>
           );
         })}
@@ -187,22 +175,16 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
   );
 };
 
-function defaultLabelFor(kind: FormFieldKind): string {
-  switch (kind) {
-    case 'url':
-      return 'Portfolio URL';
-    case 'long_text':
-      return 'Tell us more';
-    case 'single_select':
-      return 'Pick one';
-    case 'multi_select':
-      return 'Pick all that apply';
-    case 'boolean':
-      return 'I agree';
-    case 'short_text':
-    default:
-      return 'New question';
-  }
+type Translate = (key: string, options?: Record<string, unknown>) => string;
+
+/**
+ * The seed label is persisted and then shown to the candidate on the apply
+ * form, so it follows the language of the admin who created the question,
+ * who can then edit it. That means `t` has to reach here rather than the
+ * strings living in the module.
+ */
+function defaultLabelFor(t: Translate, kind: FormFieldKind): string {
+  return t(`admin.questions.defaultLabel.${kind}`);
 }
 
 // ── per-row editor ────────────────────────────────────────────────────
@@ -212,6 +194,7 @@ const FormFieldRow: React.FC<{
   onSave: (body: FormFieldBody) => void;
   onDelete: () => void;
 }> = ({ field, onSave, onDelete }) => {
+  const { t } = useTranslation();
   const meta = (KIND_META as Record<string, (typeof KIND_META)[FormFieldKind]>)[field.kind];
   const [label, setLabel] = useState(field.label);
   const [placeholder, setPlaceholder] = useState(field.placeholder);
@@ -241,7 +224,7 @@ const FormFieldRow: React.FC<{
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-xs text-white/70">
           {meta?.icon}
-          {meta?.label ?? field.kind}
+          {t(`admin.questions.kind.${field.kind}`)}
         </span>
         <input
           value={label}
@@ -249,7 +232,7 @@ const FormFieldRow: React.FC<{
           onBlur={commit}
           className="flex-1 rounded-md border bg-black/40 px-2.5 py-1.5 text-sm outline-none focus:border-white/40"
           style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
-          placeholder="Question label"
+          placeholder={t('admin.questions.labelPlaceholder')}
         />
         <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-white/70">
           <input
@@ -271,13 +254,13 @@ const FormFieldRow: React.FC<{
             }}
             className="h-3.5 w-3.5"
           />
-          Required
+          {t('admin.questions.required')}
         </label>
         <button
           type="button"
           onClick={() => {
-            toast.warning('Remove this field?', {
-              action: { label: 'Remove', onClick: onDelete },
+            toast.warning(t('admin.questions.confirmRemove'), {
+              action: { label: t('admin.questions.remove'), onClick: onDelete },
             });
           }}
           className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
@@ -294,7 +277,7 @@ const FormFieldRow: React.FC<{
             onBlur={commit}
             className="w-full rounded-md border bg-black/40 px-2.5 py-1.5 text-xs outline-none focus:border-white/40"
             style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
-            placeholder="Placeholder (optional)"
+            placeholder={t('admin.questions.placeholderPlaceholder')}
           />
         </div>
       )}
@@ -312,7 +295,7 @@ const FormFieldRow: React.FC<{
                 onBlur={commit}
                 className="flex-1 rounded-md border bg-black/40 px-2.5 py-1.5 text-xs outline-none focus:border-white/40"
                 style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
-                placeholder={`Option ${i + 1}`}
+                placeholder={t('admin.questions.optionPlaceholder', { number: i + 1 })}
               />
               <button
                 type="button"
@@ -345,7 +328,7 @@ const FormFieldRow: React.FC<{
             className="inline-flex items-center gap-1 rounded-md border border-dashed border-white/20 px-2.5 py-1 text-xs text-white/60 hover:bg-white/5"
           >
             <Plus className="h-3 w-3" />
-            Add option
+            {t('admin.questions.addOption')}
           </button>
         </div>
       )}

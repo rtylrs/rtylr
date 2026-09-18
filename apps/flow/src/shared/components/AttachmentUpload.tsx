@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { uploadAsset } from '@voxire/api';
 import { Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Attachment } from '../stores/flowStore';
+import { Attachment, useFlowStore } from '../stores/flowStore';
 
 interface AttachmentUploadProps {
   attachments: Attachment[];
@@ -24,6 +24,9 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   disabled,
 }) => {
   const { t } = useTranslation();
+  const members = useFlowStore((state) => state.members);
+  const uploaderName = (id: string): string =>
+    members.find((member) => String(member.id) === String(id))?.name ?? id;
   const ref = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,8 +66,14 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
                 <p className="text-meta font-medium truncate" style={{ color: 'var(--flow-text)' }}>
                   {a.name}
                 </p>
-                <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
-                  {formatSize(a.size)} · {a.uploadedBy}
+                <p className="text-meta" style={{ color: 'var(--flow-text-muted)' }}>
+                  {/* A name, not the raw user id. This read "47.0 KB · 9403",
+                      crediting the uploader with a database key (rtylr#1079).
+                      The attachment DTO carries only `uploadedBy`, so the id is
+                      resolved against the member list here; an id with no
+                      member still falls back to itself rather than to an empty
+                      string, since a missing name should not read as nobody. */}
+                  {formatSize(a.size)} · {uploaderName(a.uploadedBy)}
                 </p>
               </div>
               {onRemove && !disabled && (

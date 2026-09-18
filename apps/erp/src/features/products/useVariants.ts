@@ -1,6 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { VariantServiceClient } from '@voxire/voxie/erp/variant/v1/client';
 import type {
   CreateVariantRequest,
@@ -42,29 +43,32 @@ export function useVariants(productId?: string) {
 }
 
 export function useCreateVariant() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<CreateVariantResponse, Error, CreateVariantRequest>({
     mutationFn: (data) => variantClient.createVariant(data),
     onSuccess: (_result, variables) =>
       qc.invalidateQueries({ queryKey: ['variants', variables.productId] }),
-    onError: () => toast.error('Failed to create variant'),
+    onError: () => toast.error(t('erp.products.variants.createFailedOne')),
   });
 }
 
 export function useUpdateVariant() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<UpdateVariantResponse, Error, UpdateVariantRequest>({
     mutationFn: (data) => variantClient.updateVariant(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['variants'] }),
-    onError: () => toast.error('Failed to update variant'),
+    onError: () => toast.error(t('erp.products.variants.updateFailed')),
   });
 }
 
 export function useDeleteVariant() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<DeleteVariantResponse, Error, string>({
     mutationFn: (id) => variantClient.deleteVariant({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['variants'] }),
-    onError: () => toast.error('Failed to delete variant'),
+    onError: () => toast.error(t('erp.products.variants.deleteFailed')),
   });
 }

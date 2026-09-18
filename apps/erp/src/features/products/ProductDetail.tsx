@@ -29,6 +29,7 @@ import { formatCurrency } from '../../shared/lib/format';
 import { useCategories } from '../categories/useCategories';
 import { useBrands } from '../brands/useBrands';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -144,7 +145,7 @@ const ProductDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Product detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.titles.productDetail'))} />
       <Breadcrumbs
         items={[{ label: 'Inventory', to: '/inventory' }, { label: product.name ?? '' }]}
       />
@@ -261,7 +262,7 @@ const ProductDetail: React.FC = () => {
                   className="text-[10px] uppercase tracking-wider"
                   style={{ color: 'var(--hub-text-dim)' }}
                 >
-                  Cost Price
+                  {t('erp.products.costPrice')}
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: 'var(--hub-text)' }}>
                   {formatCurrency(product.costPrice ?? 0)}
@@ -272,7 +273,7 @@ const ProductDetail: React.FC = () => {
                   className="text-[10px] uppercase tracking-wider"
                   style={{ color: 'var(--hub-text-dim)' }}
                 >
-                  Sale Price
+                  {t('erp.products.salePrice')}
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: AMBER }}>
                   {formatCurrency(product.salePrice ?? 0)}
@@ -283,7 +284,7 @@ const ProductDetail: React.FC = () => {
                   className="text-[10px] uppercase tracking-wider"
                   style={{ color: 'var(--hub-text-dim)' }}
                 >
-                  Margin
+                  {t('erp.products.margin')}
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: 'var(--erp-success)' }}>
                   {(() => {
@@ -335,7 +336,7 @@ const ProductDetail: React.FC = () => {
               <MiniLineChart data={stockHistory} color={AMBER} height={80} />
             ) : (
               <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>
-                No stock history data yet.
+                {t('erp.products.noStockHistory')}
               </p>
             )}
           </div>
@@ -357,7 +358,7 @@ const ProductDetail: React.FC = () => {
               <MiniLineChart data={salesHistory} color="var(--erp-success)" height={80} />
             ) : (
               <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>
-                No sales history data yet.
+                {t('erp.products.noSalesHistory')}
               </p>
             )}
           </div>
@@ -376,7 +377,7 @@ const ProductDetail: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-xs font-semibold mb-3" style={{ color: 'var(--hub-text-muted)' }}>
-              BARCODE
+              {t('erp.products.barcode')}
             </h3>
             <div className="rounded-lg overflow-hidden">
               <BarcodeSvg value={(product.barcode || product.sku) ?? ''} width={240} height={72} />
@@ -395,17 +396,21 @@ const ProductDetail: React.FC = () => {
             </h3>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-dim)' }}>Lead Time</span>
+                <span style={{ color: 'var(--hub-text-dim)' }}>{t('erp.products.leadTime')}</span>
                 <span style={{ color: 'var(--hub-text)' }}>{product.leadTimeDays || 7} days</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-dim)' }}>Reorder Point</span>
+                <span style={{ color: 'var(--hub-text-dim)' }}>
+                  {t('erp.products.reorderPoint')}
+                </span>
                 <span style={{ color: 'var(--hub-text)' }}>
-                  {product.reorderQuantity || product.lowStockThreshold} units
+                  {t('erp.products.unitsCount', {
+                    count: product.reorderQuantity || product.lowStockThreshold,
+                  })}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-dim)' }}>Unit</span>
+                <span style={{ color: 'var(--hub-text-dim)' }}>{t('erp.products.unit')}</span>
                 <span style={{ color: 'var(--hub-text)' }}>{product.unit || 'pcs'}</span>
               </div>
             </div>

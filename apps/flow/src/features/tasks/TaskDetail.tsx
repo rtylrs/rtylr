@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +22,6 @@ import {
   LayoutList,
   Link2,
   ListChecks,
-  Layers,
   Gauge,
   Hourglass,
   Pin,
@@ -157,10 +157,18 @@ function activityIcon(action: string): React.ComponentType<{ size?: number }> {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-const TaskDetail: React.FC = () => {
+/**
+ * `taskId` overrides the route param, so the same component serves the
+ * standalone `/task/$id` page and the drawer that opens over a list
+ * (rtylr#1079). The drawer knows which task it is showing; the page reads it
+ * from the URL.
+ */
+const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { t } = useTranslation();
-  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
+  const openTask = useOpenTask();
+  const { id: routeId } = useParams({ strict: false });
+  const id = taskId ?? routeId;
   useTaskRealtime(id);
   const taskQuery = useTask(id);
   const { data: taskData, isLoading } = taskQuery;
@@ -464,10 +472,13 @@ const TaskDetail: React.FC = () => {
           <div className="max-w-3xl mx-auto px-4 py-6 sm:px-8 sm:py-8">
             {/* Title */}
             <input
+              aria-label={t('flow.taskDetail.taskTitle')}
               value={task.title}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
               disabled={!canEdit}
-              className="w-full bg-transparent font-bold mb-4 text-xl sm:text-2xl disabled:opacity-70"
+              // 20px at every width. S-12 asks for 20px; `sm:text-2xl` took it
+              // to 24 on desktop, and the review measured 30px before that.
+              className="w-full bg-transparent font-bold mb-4 text-xl disabled:opacity-70"
               style={{
                 color: 'var(--flow-text)',
               }}
@@ -600,6 +611,7 @@ const TaskDetail: React.FC = () => {
       >
         <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
           <select
+            aria-label={t('flow.taskDetail.status')}
             value={task.status}
             onChange={(e) => {
               const next = e.target.value as Task['status'];
@@ -631,18 +643,28 @@ const TaskDetail: React.FC = () => {
               </option>
             ))}
           </select>
-        </DetailField>
 
-        {projectStatuses.length > 0 && (
-          <DetailField icon={Layers} label={t('flow.status.settingsTitle')}>
+          {/* One STATUS row, with the project's own statuses inside it.
+              These were two adjacent rows reading `STATUS: In Progress` and
+              `STATUSES: No custom status`, which is one concept presented as
+              two and a label that differed from its neighbour by a letter
+              (rtylr#1079, S-12).
+
+              Still two controls, because they are two fields with two
+              mutations: the built-in status drives the board column, the
+              project's own is a label on top of it. Each keeps its own
+              accessible name, so a screen reader announces which is which
+              rather than hearing one group called "status" twice. */}
+          {projectStatuses.length > 0 && (
             <select
+              aria-label={t('flow.status.settingsTitle')}
               value={task.statusId ?? ''}
               onChange={(e) => {
                 setTaskStatus.mutate({ taskId: task.id, statusId: e.target.value || '0' });
               }}
               disabled={!canEdit}
-              className="bg-transparent text-meta w-full disabled:opacity-70"
-              style={{ color: 'var(--flow-text)' }}
+              className="mt-1.5 w-full bg-transparent text-meta disabled:opacity-70"
+              style={{ color: 'var(--flow-text-muted)' }}
             >
               <option value="" style={{ background: 'var(--flow-card)' }}>
                 {t('flow.status.none')}
@@ -653,11 +675,12 @@ const TaskDetail: React.FC = () => {
                 </option>
               ))}
             </select>
-          </DetailField>
-        )}
+          )}
+        </DetailField>
 
         <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
           <select
+            aria-label={t('flow.taskDetail.priority')}
             value={task.priority}
             onChange={(e) => updateTask(task.id, { priority: e.target.value as Task['priority'] })}
             disabled={!canEdit}
@@ -676,6 +699,7 @@ const TaskDetail: React.FC = () => {
           <div className="flex items-center gap-2">
             <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
             <select
+              aria-label={t('flow.taskDetail.assignee')}
               value={task.assigneeId}
               onChange={(e) => {
                 const m = members.find((m) => m.id === e.target.value);
@@ -705,7 +729,7 @@ const TaskDetail: React.FC = () => {
             style={{
               margin: '-6px 0 8px',
               padding: '6px 10px',
-              borderRadius: 8,
+              borderRadius: 'var(--radius-md)',
               background: 'var(--flow-status-pending-bg)',
               color: 'var(--flow-text)',
               fontSize: 'var(--text-meta)',
@@ -732,7 +756,11 @@ const TaskDetail: React.FC = () => {
         <DetailField icon={Clock} label={t('flow.taskDetail.estimate')}>
           <input
             type="number"
-            value={task.estimate || ''}
+            // The resolved value, the same one TimePanel is given. This read
+            // `task.estimate` alone, so whenever the API sent `estimatedHours`
+            // the field showed only its "hours" placeholder while the panel
+            // beside it said "of 40:00" (rtylr#1079).
+            value={estimatedHours ?? ''}
             onChange={(e) => updateTask(task.id, { estimate: Number(e.target.value) })}
             placeholder={t('flow.taskDetail.hours')}
             disabled={!canEdit}
@@ -850,6 +878,7 @@ const TaskDetail: React.FC = () => {
         {projectSections.length > 0 && (
           <DetailField icon={LayoutList} label={t('flow.taskDetail.section')}>
             <select
+              aria-label={t('flow.taskDetail.section')}
               value={task.sectionId ?? ''}
               onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
               disabled={!canEdit}
@@ -870,6 +899,7 @@ const TaskDetail: React.FC = () => {
           <DetailField key={def.id} icon={ListChecks} label={def.name}>
             {def.type === 'dropdown' ? (
               <select
+                aria-label={def.name}
                 value={String(task.customFieldValues?.[def.id] ?? '')}
                 onChange={(e) =>
                   updateTask(task.id, {
@@ -892,6 +922,7 @@ const TaskDetail: React.FC = () => {
               </select>
             ) : def.type === 'number' ? (
               <input
+                aria-label={def.name}
                 type="number"
                 value={task.customFieldValues?.[def.id] ?? ''}
                 onChange={(e) =>
@@ -908,6 +939,7 @@ const TaskDetail: React.FC = () => {
               />
             ) : (
               <input
+                aria-label={def.name}
                 value={String(task.customFieldValues?.[def.id] ?? '')}
                 onChange={(e) =>
                   updateTask(task.id, {
@@ -931,7 +963,16 @@ const TaskDetail: React.FC = () => {
               <div key={dt.id} className="flex items-center justify-between gap-1">
                 <button
                   type="button"
-                  onClick={() => navigate({ to: `/task/${dt.id}` as string })}
+                  onClick={() => {
+                    // In the drawer, following a dependency swaps which task the
+                    // drawer shows. On the standalone page there is no drawer to
+                    // swap, so it navigates (rtylr#1079).
+                    if (taskId !== undefined) {
+                      openTask(String(dt.id));
+                      return;
+                    }
+                    void navigate({ to: '/task/$id', params: { id: String(dt.id) } });
+                  }}
                   className="text-meta text-start truncate flex-1 hover:underline"
                   style={{ color: 'var(--accent)' }}
                 >
@@ -956,6 +997,7 @@ const TaskDetail: React.FC = () => {
             {dependencyCandidates.length > 0 && canEdit && (
               <div className="flex gap-1 pt-1">
                 <select
+                  aria-label={t('flow.taskDetail.addDependency')}
                   value={depId}
                   onChange={(e) => setDepId(e.target.value)}
                   className="bg-transparent text-meta flex-1 min-w-0 rounded-sm px-1"

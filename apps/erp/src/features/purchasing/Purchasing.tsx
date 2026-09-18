@@ -35,6 +35,9 @@ import PaginationControls from '../../shared/components/PaginationControls';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 import { toIsoDate } from '../../shared/lib/dateUtils';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
+import { useTranslation } from 'react-i18next';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -104,6 +107,7 @@ const SkeletonTableRow: React.FC = () => (
 );
 
 const Purchasing: React.FC = () => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<PurchaseOrderFilter>('All');
   const status = purchaseOrderStatusFilter(filter);
@@ -179,12 +183,12 @@ const Purchasing: React.FC = () => {
 
   const handleCreatePO = async (): Promise<void> => {
     if (!newSupplierId || !newPoNumber.trim()) {
-      toast.error('Supplier and PO number are required');
+      toast.error(t('erp.purchasing.supplierAndPoRequired'));
       return;
     }
     const validItems = newItems.filter((it) => it.productId && Number(it.quantityOrdered) > 0);
     if (validItems.length === 0) {
-      toast.error('At least one item with a product and quantity is required');
+      toast.error(t('erp.purchasing.itemRequired'));
       return;
     }
     try {
@@ -200,7 +204,7 @@ const Purchasing: React.FC = () => {
           unitCost: it.unitCost ? Number(it.unitCost) : 0,
         })),
       });
-      toast.success('Purchase order draft created');
+      toast.success(t('erp.purchasing.draftCreated'));
       setShowCreate(false);
       setNewSupplierId('');
       setNewPoNumber('');
@@ -208,7 +212,7 @@ const Purchasing: React.FC = () => {
       setNewNotes('');
       setNewItems([{ productId: '', quantityOrdered: '', unitCost: '' }]);
     } catch {
-      toast.error('Failed to create purchase order');
+      toast.error(t('erp.purchasing.createFailed'));
     }
   };
 
@@ -219,10 +223,10 @@ const Purchasing: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Purchase orders · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/purchasing'].title))} />
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Purchase Orders
+          {t(routeLabels['/purchasing'].title)}
         </h2>
         <div className="flex items-center gap-2">
           <ExportButton
@@ -237,7 +241,7 @@ const Purchasing: React.FC = () => {
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} />
-            New Order
+            {t('erp.purchasing.newOrder')}
           </button>
         </div>
       </motion.div>
@@ -366,7 +370,7 @@ const Purchasing: React.FC = () => {
                             color: 'var(--erp-info)',
                           }}
                         >
-                          Approve
+                          {t('erp.purchasing.approve')}
                         </button>
                       )}
                       {status === 'Draft' && (
@@ -379,7 +383,7 @@ const Purchasing: React.FC = () => {
                             color: AMBER,
                           }}
                         >
-                          Send
+                          {t('erp.purchasing.send')}
                         </button>
                       )}
                       <PrintPOButton
@@ -408,7 +412,7 @@ const Purchasing: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Purchase Order
+              {t('erp.purchasing.newPurchaseOrder')}
             </h3>
             <select
               value={newSupplierId}
@@ -452,7 +456,7 @@ const Purchasing: React.FC = () => {
             <input
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
-              placeholder="Notes (optional)"
+              placeholder={t('common.notesOptional')}
               className="w-full px-3 py-2 rounded-lg text-sm outline-none"
               style={{
                 background: 'var(--hub-input-bg)',
@@ -482,7 +486,7 @@ const Purchasing: React.FC = () => {
                     color: 'var(--hub-text)',
                   }}
                 >
-                  <option value="">Product</option>
+                  <option value="">{t('common.product')}</option>
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -500,7 +504,7 @@ const Purchasing: React.FC = () => {
                       )
                     )
                   }
-                  placeholder="Qty"
+                  placeholder={t('common.qtyShort')}
                   className="w-14 px-2 py-1.5 rounded-lg text-xs outline-none"
                   style={{
                     background: 'var(--hub-input-bg)',
@@ -518,7 +522,7 @@ const Purchasing: React.FC = () => {
                       prev.map((it, i) => (i === idx ? { ...it, unitCost: e.target.value } : it))
                     )
                   }
-                  placeholder="Cost"
+                  placeholder={t('erp.purchasing.cost')}
                   className="w-16 px-2 py-1.5 rounded-lg text-xs outline-none"
                   style={{
                     background: 'var(--hub-input-bg)',
@@ -557,7 +561,7 @@ const Purchasing: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"

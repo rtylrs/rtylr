@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import {
   Search,
@@ -25,56 +26,134 @@ interface Result {
   group: string;
 }
 
-const PAGES: Result[] = [
-  { id: 'p-dashboard', label: 'Dashboard', to: '/', icon: LayoutDashboard, group: 'Pages' },
-  { id: 'p-invoices', label: 'Invoices', to: '/invoices', icon: FileText, group: 'Pages' },
+const PAGE_KEYS: {
+  id: string;
+  labelKey: string;
+  to: string;
+  icon: Result['icon'];
+  groupKey: string;
+}[] = [
+  {
+    id: 'p-dashboard',
+    labelKey: 'nav.dashboard',
+    to: '/',
+    icon: LayoutDashboard,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-invoices',
+    labelKey: 'nav.invoices',
+    to: '/invoices',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
   {
     id: 'p-new-invoice',
-    label: 'New invoice',
+    labelKey: 'nav.newInvoice',
     to: '/invoices/new',
     icon: FileText,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
   {
     id: 'p-recurring',
-    label: 'Recurring invoices',
+    labelKey: 'nav.recurringInvoices',
     to: '/invoices/recurring',
     icon: FileText,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
-  { id: 'p-quotes', label: 'Quotes', to: '/quotes', icon: FileText, group: 'Pages' },
-  { id: 'p-expenses', label: 'Expenses', to: '/expenses', icon: Receipt, group: 'Pages' },
-  { id: 'p-new-expense', label: 'New expense', to: '/expenses/new', icon: Receipt, group: 'Pages' },
+  {
+    id: 'p-quotes',
+    labelKey: 'nav.quotes',
+    to: '/quotes',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-expenses',
+    labelKey: 'nav.expenses',
+    to: '/expenses',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-new-expense',
+    labelKey: 'nav.newExpense',
+    to: '/expenses/new',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
   {
     id: 'p-categories',
-    label: 'Expense categories',
+    labelKey: 'nav.expenseCategories',
     to: '/categories',
     icon: Receipt,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
-  { id: 'p-bills', label: 'Bills', to: '/bills', icon: Receipt, group: 'Pages' },
-  { id: 'p-bank', label: 'Bank feeds', to: '/bank', icon: Receipt, group: 'Pages' },
-  { id: 'p-reconcile', label: 'Reconcile', to: '/reconcile', icon: Receipt, group: 'Pages' },
-  { id: 'p-pl', label: 'Profit & Loss', to: '/pl', icon: TrendingUp, group: 'Pages' },
+  {
+    id: 'p-bills',
+    labelKey: 'nav.bills',
+    to: '/bills',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-bank',
+    labelKey: 'nav.bankFeeds',
+    to: '/bank',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-reconcile',
+    labelKey: 'nav.reconcile',
+    to: '/reconcile',
+    icon: Receipt,
+    groupKey: 'nav.groups.pages',
+  },
+  { id: 'p-pl', labelKey: 'nav.pl', to: '/pl', icon: TrendingUp, groupKey: 'nav.groups.pages' },
   {
     id: 'p-balance',
-    label: 'Balance sheet',
+    labelKey: 'nav.balanceSheet',
     to: '/reports/balance-sheet',
     icon: TrendingUp,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
   {
     id: 'p-cashflow',
-    label: 'Cash flow',
+    labelKey: 'nav.cashFlow',
     to: '/reports/cash-flow',
     icon: TrendingUp,
-    group: 'Pages',
+    groupKey: 'nav.groups.pages',
   },
-  { id: 'p-tax', label: 'Tax', to: '/tax', icon: Calculator, group: 'Pages' },
-  { id: 'p-taxreport', label: 'Tax summary', to: '/reports/tax', icon: Calculator, group: 'Pages' },
-  { id: 'p-journal', label: 'Journal', to: '/journal', icon: FileText, group: 'Pages' },
-  { id: 'p-accounts', label: 'Chart of accounts', to: '/accounts', icon: FileText, group: 'Pages' },
-  { id: 'p-settings', label: 'Settings', to: '/settings', icon: FileText, group: 'Pages' },
+  { id: 'p-tax', labelKey: 'nav.tax', to: '/tax', icon: Calculator, groupKey: 'nav.groups.pages' },
+  {
+    id: 'p-taxreport',
+    labelKey: 'nav.taxSummary',
+    to: '/reports/tax',
+    icon: Calculator,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-journal',
+    labelKey: 'nav.journal',
+    to: '/journal',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-accounts',
+    labelKey: 'nav.chartOfAccounts',
+    to: '/accounts',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
+  {
+    id: 'p-settings',
+    labelKey: 'nav.settings',
+    to: '/settings',
+    icon: FileText,
+    groupKey: 'nav.groups.pages',
+  },
 ];
 
 interface GlobalSearchProps {
@@ -83,6 +162,7 @@ interface GlobalSearchProps {
 }
 
 const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const [clients, setClients] = useState<Client[]>([]);
@@ -100,7 +180,13 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
 
   const results = useMemo(() => {
     const q = query.toLowerCase();
-    const pages = PAGES.filter((p) => p.label.toLowerCase().includes(q));
+    const pages: Result[] = PAGE_KEYS.map((p) => ({
+      id: p.id,
+      label: t(p.labelKey),
+      to: p.to,
+      icon: p.icon,
+      group: t(p.groupKey),
+    })).filter((p) => p.label.toLowerCase().includes(q));
     const clientResults: Result[] = clients
       .filter((c) => c.name.toLowerCase().includes(q))
       .map((c) => ({
@@ -112,7 +198,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
         group: 'Clients',
       }));
     return [...pages, ...clientResults].slice(0, 12);
-  }, [query, clients]);
+  }, [query, clients, t]);
 
   useEffect(() => {
     setIndex(0);
@@ -142,7 +228,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
   }, [open, results, index, navigate, onClose]);
 
   return (
-    <Modal open={open} onClose={onClose} title="Search" width={560}>
+    <Modal open={open} onClose={onClose} title={t('common.search')} width={560}>
       <div
         style={{
           display: 'flex',
@@ -162,7 +248,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
             setQuery(e.target.value);
             setIndex(0);
           }}
-          placeholder="Search invoices, expenses, clients, pages..."
+          placeholder={t('finance.search.placeholder')}
           style={{ ...inputStyle, background: 'transparent', border: 'none', padding: 0 }}
         />
       </div>
@@ -171,7 +257,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
           <div
             style={{ padding: 30, textAlign: 'center', fontSize: 12, color: 'var(--hub-text-dim)' }}
           >
-            No results
+            {t('finance.search.none')}
           </div>
         )}
         {results.map((r, i) => {

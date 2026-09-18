@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -22,7 +23,7 @@ const OnboardingManagement = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Onboarding management · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.onboardingManagement'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('onboardingMgmt.management.title')}

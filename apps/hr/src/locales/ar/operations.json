@@ -28,5 +28,42 @@
   "emptyBreaksDescription": "ابدأ استراحة لتتبع الوقت.",
   "startLunchBreak": "بدء استراحة الغداء",
   "emptyOvertimeTitle": "لا توجد تنبيهات عمل إضافي",
-  "emptyOvertimeDescription": "الجميع ضمن حدود السياسة."
+  "emptyOvertimeDescription": "الجميع ضمن حدود السياسة.",
+  "form": {
+    "requester": "مقدّم الطلب",
+    "target": "الهدف",
+    "shiftDay": "يوم الدوام",
+    "reason": "السبب"
+  },
+  "metaTitle": "العمليات · rtylr",
+  "title": "العمليات",
+  "subtitle": "تكلفة العمالة، تبديل المناوبات، التوافر، الاستراحات، العمل الإضافي",
+  "department": "القسم",
+  "weeklyLabor": "تكلفة العمالة الأسبوعية",
+  "weeklyHours": "الساعات الأسبوعية",
+  "blendedRate": "متوسط الأجر",
+  "gpsTitle": "تجربة تسجيل الحضور بالموقع",
+  "gpsClockIn": "تسجيل الحضور بالموقع",
+  "requestSwapTitle": "طلب تبديل مناوبة",
+  "selectPlaceholder": "اختر",
+  "requestSwap": "إرسال الطلب",
+  "breaksSubtitle": "تتبع الاستراحات للامتثال ولحساب العمل الإضافي",
+  "breakColumns": {
+    "employee": "الموظف",
+    "type": "النوع",
+    "started": "وقت البدء",
+    "duration": "المدة"
+  },
+  "endBreak": "إنهاء",
+  "toasts": {
+    "breakStarted": "بدأت الاستراحة",
+    "breakEnded": "انتهت الاستراحة",
+    "geolocationUnavailable": "تحديد الموقع غير متاح",
+    "clockedInWithLocation": "تم تسجيل الحضور مع الموقع",
+    "locationPermissionDenied": "تم رفض إذن الموقع",
+    "completeAllFields": "أكمل جميع الحقول",
+    "swapRequested": "تم إرسال طلب التبديل",
+    "swapAccepted": "تمت الموافقة على التبديل",
+    "swapRejected": "تم رفض التبديل"
+  }
 }

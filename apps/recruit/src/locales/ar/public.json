@@ -1,0 +1,83 @@
+{
+  "errors": {
+    "careersPage": "تعذر تحميل صفحة الوظائف",
+    "jobDetails": "تعذر تحميل تفاصيل الوظيفة",
+    "refreshHint": "يرجى تحديث الصفحة والمحاولة مرة أخرى.",
+    "retry": "إعادة المحاولة"
+  },
+  "apply": {
+    "invalidLink": "رابط التقديم غير صالح.",
+    "loadFailed": "تعذر تحميل نموذج التقديم",
+    "fileType": "يرجى إرفاق ملف PDF أو Word",
+    "uploadFailed": "تعذر الإرفاق",
+    "required": "حقل \"{{label}}\" مطلوب",
+    "tooLong": "حقل \"{{label}}\" يتجاوز الحد الأقصى {{max}} حرف",
+    "consentRequired": "يجب الموافقة على معالجة البيانات للتقديم",
+    "received": "تم استلام طلبك",
+    "submitFailed": "تعذر الإرسال. حاول مرة أخرى.",
+    "doneTitle": "تم التقديم.",
+    "doneBody": "شكرًا لتقديمك على <name>{{title}}</name>. سيراجع فريق {{brand}} طلبك ويتواصل معك إن كان هناك تطابق.",
+    "backToRoles": "العودة إلى الوظائف المتاحة",
+    "backToRole": "العودة إلى الوظيفة",
+    "heading": "التقديم على {{title}}",
+    "remote": "عن بعد",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "resume": "السيرة الذاتية",
+    "uploadCta": "أرفق سيرتك الذاتية",
+    "uploadHint": "· PDF أو Word، حتى 10 ميغابايت",
+    "uploading": "جارٍ الإرفاق…",
+    "uploaded": "تم الإرفاق",
+    "remove": "إزالة",
+    "linkInstead": "…أو الصق رابطًا",
+    "linkHint": "جوجل درايف، دروب بوكس، موقعك الشخصي",
+    "whyYou": "لماذا أنت",
+    "whyYouPlaceholder": "اكتب سطورًا عن سبب كونك مناسبًا لهذه الوظيفة.",
+    "uploadingResume": "جارٍ إرفاق السيرة الذاتية…",
+    "submitting": "جارٍ الإرسال…",
+    "submit": "إرسال الطلب",
+    "select": "اختر…",
+    "consent": "أوافق على معالجة {{brand}} لبيانات طلبي.",
+    "consentWithPrivacy": "أوافق على معالجة {{brand}} لبيانات طلبي. اطّلع على <privacy>سياسة الخصوصية</privacy>.",
+    "consentWithTerms": "أوافق على معالجة {{brand}} لبيانات طلبي. اطّلع على <terms>الشروط</terms>.",
+    "consentWithBoth": "أوافق على معالجة {{brand}} لبيانات طلبي. اطّلع على <privacy>سياسة الخصوصية</privacy> و<terms>الشروط</terms>."
+  },
+  "notFound": {
+    "metaTitle": "غير موجود · rtylr",
+    "eyebrow": "غير موجود · 404",
+    "title": "صفحة الوظائف هذه غير متاحة.",
+    "body": "تحقق من الرابط، أو عد إلى الموقع الرئيسي.",
+    "back": "العودة إلى rtylr"
+  },
+  "landing": {
+    "metaTitle": "التوظيف · rtylr",
+    "title": "صفحات توظيف\nبلا تكاليف موقع وظائف.",
+    "body": "انشر الوظائف، واجمع الطلبات، وتابع المرشحين في مسار التوظيف، كل ذلك من الحساب نفسه الذي تدير به بقية أعمالك.",
+    "pricing": "عرض الأسعار",
+    "startFree": "ابدأ مجانًا"
+  },
+  "job": {
+    "allRoles": "جميع الوظائف",
+    "requirements": "المتطلبات",
+    "lookingFor": "ما نبحث عنه",
+    "compensation": "الراتب",
+    "apply": "التقديم على هذه الوظيفة"
+  },
+  "index": {
+    "openPositions": "الوظائف المتاحة",
+    "openRoles": "الوظائف المتاحة",
+    "careersEyebrow": "الوظائف",
+    "heroTitle": "عمل\nيصنع\nالفرق.",
+    "roleCount_zero": "لا وظائف",
+    "roleCount_one": "وظيفة واحدة",
+    "roleCount_two": "وظيفتان",
+    "roleCount_few": "{{count}} وظائف",
+    "roleCount_many": "{{count}} وظيفة",
+    "roleCount_other": "{{count}} وظيفة"
+  },
+  "sections": {
+    "watchVideo": "مشاهدة الفيديو",
+    "getInTouch": "تواصل معنا"
+  }
+}

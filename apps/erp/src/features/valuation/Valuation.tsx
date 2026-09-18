@@ -9,13 +9,15 @@ import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { formatCurrency, formatNumber } from '../../shared/lib/format';
 import { safeRatio, toFiniteNumber } from '@voxire/api';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
 const Valuation: React.FC = () => {
   const { t } = useTranslation('erp');
   const { data, isLoading, refetch } = useValuation();
-  const items = data?.items ?? [];
+  const items = useMemo(() => data?.items ?? [], [data]);
   const totalCost = useMemo(
     () => items.reduce((sum, item) => sum + (item.totalCost ?? 0), 0),
     [items]
@@ -40,8 +42,11 @@ const Valuation: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Inventory valuation · rtylr" />
-      <PageHeader title="Inventory Valuation" description="Total value of inventory on hand" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/valuation'].title))} />
+      <PageHeader
+        title={t(routeLabels['/valuation'].title)}
+        description="Total value of inventory on hand"
+      />
 
       {isLoading ? (
         <Skeleton className="h-32 rounded-xl" />
@@ -102,10 +107,10 @@ const Valuation: React.FC = () => {
         {!isLoading && categories.length === 0 ? (
           <EmptyState
             icon={Boxes}
-            title={t('valuation.empty.title')}
-            description={t('valuation.empty.description')}
+            title={t('erp.valuation.empty.title')}
+            description={t('erp.valuation.empty.description')}
             size="compact"
-            action={{ label: t('valuation.refresh'), onClick: () => void refetch() }}
+            action={{ label: t('erp.valuation.refresh'), onClick: () => void refetch() }}
           />
         ) : (
           <div className="space-y-2">

@@ -23,13 +23,23 @@ function assertContractPayload(messageName: string, payload: Record<string, unkn
   }
 }
 
-function persistSession(login: (role: string) => void, token: string): void {
+/**
+ * Store the session cookie, and report whether there was a session to store.
+ *
+ * The token is optional on every generated response type, so a caller cannot
+ * assume it arrived. Persisting `undefined` would write a cookie that reads
+ * back as the string "undefined" and leave the user signed in to nothing, so
+ * the absence is returned and each caller surfaces its own error instead.
+ */
+function persistSession(login: (role: string) => void, token: string | undefined): boolean {
+  if (token === undefined || token === '') return false;
   setCookie('token', token, {
     days: 30,
     sameSite: 'lax',
     domain: getDefaultCookieDomain(),
   });
   login('');
+  return true;
 }
 
 export const useLogin = () => {
@@ -46,7 +56,9 @@ export const useLogin = () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data) => persistSession(login, data.token),
+    onSuccess: (data) => {
+      if (!persistSession(login, data.token)) setError('Login failed');
+    },
     onError: (error) => {
       setError(getOneKitErrorMessage(error, 'Login failed'));
       setLoading(false);
@@ -71,15 +83,16 @@ export const useRegisterRestaurant = () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data, variables) => {
-      if (variables.businessName) {
-        try {
-          localStorage.setItem('rtylr_business_name', variables.businessName);
-        } catch {
-          // ignore storage quota errors
-        }
-      }
-      persistSession(login, data.token);
+    onSuccess: (data) => {
+      // The business name is not stashed here any more. It was written to
+      // localStorage['rtylr_business_name'] and never read back, by anything,
+      // in any app or package (#1036, F-1).
+      //
+      // It is not lost: `business_name` is a real field on
+      // common.auth.v1.RegisterRequest, the generated encoder maps it, and the
+      // register call already carries it. Keeping a second copy in storage
+      // only suggested the request did not.
+      if (!persistSession(login, data.token)) setError('Registration failed');
     },
     onError: (error) => {
       setError(getOneKitErrorMessage(error, 'Registration failed'));
@@ -103,7 +116,9 @@ export const useGoogleAuth = () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data) => persistSession(login, data.token),
+    onSuccess: (data) => {
+      if (!persistSession(login, data.token)) setError('Google login failed');
+    },
     onError: (error) => {
       setError(getOneKitErrorMessage(error, 'Google login failed'));
       setLoading(false);

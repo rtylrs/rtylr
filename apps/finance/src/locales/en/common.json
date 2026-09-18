@@ -18,5 +18,41 @@
   "currency": "Currency",
   "saving": "Saving…",
   "creating": "Creating…",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "pageTitles": {
+    "balanceSheet": "Balance sheet",
+    "bankFeeds": "Bank feeds",
+    "expenseCategories": "Expense categories",
+    "expenseDetail": "Expense detail",
+    "submitExpense": "Submit expense",
+    "invoiceDetail": "Invoice detail",
+    "newInvoice": "New invoice",
+    "quotes": "Quotes & estimates",
+    "reconciliation": "Reconciliation",
+    "recurringInvoices": "Recurring invoices",
+    "taxSummary": "Tax summary"
+  },
+  "prev": "Prev",
+  "next": "Next",
+  "description": "Description",
+  "subtotal": "Subtotal",
+  "discount": "Discount",
+  "receipt": "Receipt",
+  "category": "Category",
+  "vendor": "Vendor",
+  "layout": {
+    "openNav": "Open navigation menu",
+    "primaryNav": "Primary navigation",
+    "closeNav": "Close navigation menu",
+    "search": "Search",
+    "shortcut": "Cmd K",
+    "appearance": "Appearance",
+    "signOut": "Sign out",
+    "notifications": "Notifications"
+  },
+  "closeDialog": "Close dialog",
+  "loadingLabel": "Loading",
+  "confirmLabel": "Confirm",
+  "closeYear": "Close year",
+  "new": "New"
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ACCENT } from '../lib/tokens';
 
 export interface CashFlowPoint {
@@ -13,6 +14,7 @@ interface CashFlowChartProps {
 }
 
 const CashFlowChart: React.FC<CashFlowChartProps> = ({ data, height = 200 }) => {
+  const { t } = useTranslation();
   const max = Math.max(...data.flatMap((d) => [d.inflow, d.outflow]), 1);
   const width = Math.max(data.length * 70, 320);
   const pad = 30;
@@ -65,11 +67,11 @@ const CashFlowChart: React.FC<CashFlowChartProps> = ({ data, height = 200 }) => 
       <g>
         <circle cx={pad} cy={pad - 12} r={4} fill={ACCENT} />
         <text x={pad + 8} y={pad - 8} fontSize={10} fill="var(--hub-text-muted)">
-          Inflow
+          {t('finance.cashFlow.inflow')}
         </text>
         <circle cx={pad + 64} cy={pad - 12} r={4} fill="var(--finance-danger)" />
         <text x={pad + 72} y={pad - 8} fontSize={10} fill="var(--hub-text-muted)">
-          Outflow
+          {t('finance.cashFlow.outflow')}
         </text>
       </g>
     </svg>

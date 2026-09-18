@@ -1,5 +1,17 @@
 {
   "emptyTitle": "Aucune catégorie pour le moment",
   "emptyDescription": "Créez des catégories pour organiser les dépenses et définir des budgets.",
-  "emptyCta": "Nouvelle catégorie"
+  "emptyCta": "Nouvelle catégorie",
+  "updated": "Catégorie mise à jour",
+  "deleted": "Catégorie supprimée",
+  "title": "Catégories de dépenses",
+  "edit": "Modifier la catégorie",
+  "delete": "Supprimer la catégorie",
+  "newTitle": "Nouvelle catégorie de dépenses",
+  "editTitle": "Modifier la catégorie de dépenses",
+  "deleteTitle": "Supprimer la catégorie de dépenses",
+  "name": "Nom",
+  "color": "Couleur",
+  "monthlyBudget": "Budget mensuel",
+  "deleteConfirm": "Voulez-vous vraiment supprimer cette catégorie ? Les dépenses existantes deviendront sans catégorie."
 }

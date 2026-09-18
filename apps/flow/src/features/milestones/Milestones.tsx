@@ -18,9 +18,9 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-  planning: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
+  planning: { bg: withAlpha('var(--flow-neutral-fg)', 12), color: 'var(--flow-neutral-fg)' },
   active: { bg: 'var(--flow-status-approved-bg)', color: 'var(--flow-status-approved)' },
-  at_risk: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
+  at_risk: { bg: withAlpha('var(--flow-warn-fg)', 12), color: 'var(--flow-warn-fg)' },
   completed: { bg: withAlpha('var(--flow-info-fg)', 12), color: 'var(--flow-info-fg)' },
 };
 

@@ -63,11 +63,17 @@ const Login: React.FC = (): React.JSX.Element => {
       }
       // No explicit redirect, decide based on the user's subscription apps
       const role = res.role;
-      const apps = res.effectiveAccess
-        ? res.effectiveAccess.apps
-            .filter((app) => app.licensed && app.hasAccess)
-            .map((app) => app.appId)
-        : res.apps;
+      // Both branches are optional on the response, and the reads below are
+      // `apps.length` and `apps[0]`, so an absent list would throw here and
+      // strand the user on the sign-in screen after a successful sign-in.
+      // No apps is a real state, and it means Dash, which is what the
+      // `apps.length === 0` branch already does.
+      const apps =
+        (res.effectiveAccess
+          ? res.effectiveAccess.apps
+              ?.filter((app) => app.licensed && app.hasAccess)
+              .map((app) => app.appId)
+          : res.apps) ?? [];
       const hasDashManagement = res.effectiveAccess
         ? res.effectiveAccess.isOwner || res.effectiveAccess.isAdmin
         : role === 'owner' || role === 'admin';
@@ -77,8 +83,9 @@ const Login: React.FC = (): React.JSX.Element => {
         return;
       }
       // Single-app subscriber, skip Dash and go straight to their app
-      if (apps.length === 1 && apps[0] in APP_URLS) {
-        window.location.href = APP_URLS[apps[0] as KnownAppId] as string;
+      const only = apps.length === 1 ? apps[0] : undefined;
+      if (only !== undefined && only in APP_URLS) {
+        window.location.href = APP_URLS[only as KnownAppId] as string;
         return;
       }
       // Multi-app, use Dash as the launcher
@@ -128,7 +135,7 @@ const Login: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Sign in · rtylr" />
+      <HelmetContainer title={t('auth.login.metaTitle')} />
       <LicenseBanner client={licenseClient} />
       <AuthShell
         title={title}

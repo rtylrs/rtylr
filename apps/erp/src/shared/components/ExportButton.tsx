@@ -3,13 +3,13 @@ import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ExportButtonProps {
-  data: Array<Record<string, any>>;
-  getData?: () => Promise<Array<Record<string, any>>>;
+  data: Array<Record<string, unknown>>;
+  getData?: () => Promise<Array<Record<string, unknown>>>;
   filename?: string;
   columns?: string[];
 }
 
-function toCSV(data: Array<Record<string, any>>, columns?: string[]): string {
+function toCSV(data: Array<Record<string, unknown>>, columns?: string[]): string {
   if (data.length === 0) return '';
   const keys = columns && columns.length ? columns : Object.keys(data[0]);
   const escape = (v: unknown) => {

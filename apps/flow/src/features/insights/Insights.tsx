@@ -87,13 +87,17 @@ const Insights: React.FC = () => {
             label={t('common.insights.kpi.cycleTime')}
             value={`${data.cycleTime}d`}
             hint={t('common.insights.kpi.cycleTimeHint')}
-            color="#f59e0b"
+            color="var(--flow-warn-fg)"
           />
           <Kpi
             icon={BarChart3}
             label={t('common.insights.kpi.throughput')}
             value={`${data.throughput.reduce((s, t) => s + t.completed, 0)}`}
             hint={t('common.insights.kpi.throughputHint')}
+            // A chart series colour, not a semantic tone. Same class as
+            // PROJECT_COLORS and LABEL_COLORS, which stay literal because a
+            // palette's job is to be distinguishable from its neighbours
+            // rather than to mean something.
             color="#a855f7"
           />
         </div>

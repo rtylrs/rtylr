@@ -110,21 +110,61 @@
       "generateBtn": "Generate {{count}} new",
       "preview": "New variants to create",
       "createAll": "Create {{count}} variants",
-      "creating": "Creating…"
-    }
+      "creating": "Creating…",
+      "createFailedOne": "Failed to create variant",
+      "updateFailed": "Failed to update variant",
+      "deleteFailed": "Failed to delete variant"
+    },
+    "updateFailed": "Failed to update product",
+    "deleteFailed": "Failed to delete product",
+    "barcodeLookupFailed": "Failed to look up barcode",
+    "searchPlaceholder": "Search products…",
+    "category": "Category",
+    "brand": "Brand",
+    "allCategories": "All categories",
+    "allStatuses": "All statuses",
+    "status": {
+      "inStock": "In Stock",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "costPrice": "Cost Price",
+    "salePrice": "Sale Price",
+    "margin": "Margin",
+    "noStockHistory": "No stock history data yet.",
+    "noSalesHistory": "No sales history data yet.",
+    "barcode": "BARCODE",
+    "leadTime": "Lead Time",
+    "reorderPoint": "Reorder Point",
+    "unit": "Unit",
+    "unitsCount_one": "{{count}} unit",
+    "unitsCount_other": "{{count}} units"
   },
   "inventory": {
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
     "empty": "No products found.",
-    "clearSearch": "Clear Search"
+    "clearSearch": "Clear Search",
+    "adjustFailed": "Failed to adjust inventory"
   },
   "suppliers": {
     "title": "Suppliers",
     "add": "Add Supplier",
     "comingSoon": "Supplier management is coming soon.",
-    "scorecards": "Scorecards"
+    "scorecards": "Scorecards",
+    "requiredFields": "Supplier name, email, city, and country are required",
+    "created": "Supplier created",
+    "createFailed": "Failed to create supplier",
+    "newSupplier": "New Supplier",
+    "activeCount_one": "{{count}} active supplier",
+    "activeCount_other": "{{count}} active suppliers",
+    "companyName": "Company name",
+    "email": "Email",
+    "phone": "Phone",
+    "city": "City",
+    "country": "Country",
+    "address": "Address"
   },
   "common": {
     "cancel": "Cancel",
@@ -165,7 +205,10 @@
       "created": "Warehouse created",
       "createFailed": "Failed to create warehouse",
       "deleted": "Warehouse deleted"
-    }
+    },
+    "createFailed": "Failed to create warehouse",
+    "updateFailed": "Failed to update warehouse",
+    "deleteFailed": "Failed to delete warehouse"
   },
   "receiving": {
     "title": "Goods Receiving",
@@ -195,14 +238,30 @@
       "title": "No suggestions",
       "description": "All stock levels are healthy"
     },
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "subtitle": "Smart recommendations based on sales velocity and lead times",
+    "avgDaily": "Avg Daily",
+    "suggested": "Suggested",
+    "lead": "Lead",
+    "confidence": "Confidence"
   },
   "variants": {
     "empty": {
       "title": "No variants",
       "description": "Add variants to differentiate your products"
     },
-    "addVariant": "Add Variant"
+    "addVariant": "Add Variant",
+    "productIdRequired": "Product ID is required",
+    "nameRequired": "Variant name is required",
+    "priceNegative": "Price cannot be negative",
+    "created": "Variant created",
+    "createFailed": "Failed to create variant",
+    "subtitle": "Individual SKUs for sizes, colors, flavors and more",
+    "newVariant": "New Variant",
+    "productIdPlaceholder": "Product ID",
+    "namePlaceholder": "Variant name (e.g. Large / Red)",
+    "skuPlaceholder": "SKU (optional)",
+    "attributes": "Attributes"
   },
   "priceLists": {
     "empty": {
@@ -210,21 +269,40 @@
       "description": "Create your first price list to enable tier pricing"
     },
     "newPriceList": "New Price List",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "nameRequired": "Price list name is required",
+    "created": "Price list created",
+    "createFailed": "Failed to create price list",
+    "subtitle": "Currency-based pricing strategies",
+    "currencyPlaceholder": "Currency (e.g. USD)",
+    "setDefault": "Set as default price list"
   },
   "brands": {
     "empty": {
       "title": "No brands yet",
       "description": "Add your first brand to group products."
     },
-    "newBrand": "New Brand"
+    "newBrand": "New Brand",
+    "nameRequired": "Brand name is required",
+    "created": "Brand created",
+    "createFailed": "Failed to create brand",
+    "countAcrossCatalog_one": "{{count}} brand across your catalog",
+    "countAcrossCatalog_other": "{{count}} brands across your catalog",
+    "deleteAria": "Delete brand",
+    "confirmDeleteTitle": "Delete brand?",
+    "confirmDeleteBody": "Products with this brand will not be deleted, but they will become unbranded.",
+    "deleted": "Brand deleted",
+    "namePlaceholder": "Brand name",
+    "descriptionPlaceholder": "Description (optional)"
   },
   "expiry": {
     "empty": {
       "title": "No expiring items",
       "description": "No batches with expiry dates tracked"
     },
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "expiryColumn": "Expiry",
+    "daysLeft": "Days Left"
   },
   "stockTransfers": {
     "empty": {
@@ -232,7 +310,21 @@
       "description": "Create your first stock transfer"
     },
     "newTransfer": "New Transfer",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "warehousesRequired": "Source and destination warehouses are required",
+    "warehousesMustDiffer": "Source and destination must differ",
+    "itemRequired": "At least one item with a product and positive quantity is required",
+    "draftCreated": "Transfer draft created",
+    "createFailed": "Failed to create transfer",
+    "subtitle": "Move inventory between warehouses",
+    "idColumn": "ID",
+    "from": "From",
+    "to": "To",
+    "items": "Items",
+    "created": "Created",
+    "fromWarehouse": "From warehouse…",
+    "toWarehouse": "To warehouse…",
+    "newTransferTitle": "New Stock Transfer"
   },
   "lowStockAlerts": {
     "empty": {
@@ -247,14 +339,39 @@
       "description": "Start a count to find discrepancies"
     },
     "newStockTake": "New Stock Take",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "warehouseRequired": "Warehouse is required",
+    "stillLoading": "Inventory is still loading",
+    "created": "Stock take created",
+    "createFailed": "Failed to create stock take",
+    "completed": "Stock take completed",
+    "completeFailed": "Failed to complete stock take",
+    "complete": "Complete",
+    "subtitle": "Periodic inventory counts and variance reports",
+    "completeAria": "Complete stock take",
+    "variance": "VARIANCE",
+    "selectWarehouse": "Select warehouse…",
+    "uncountedWarning_one": "{{count}} uncounted item. Complete anyway?",
+    "uncountedWarning_other": "{{count}} uncounted items. Complete anyway?"
   },
   "categories": {
     "empty": {
       "title": "No categories yet",
       "description": "Create your first category to organize products"
     },
-    "addCategory": "Add Category"
+    "addCategory": "Add Category",
+    "nameRequired": "Category name is required",
+    "created": "Category \"{{name}}\" created",
+    "createFailed": "Failed to create category",
+    "subtitle": "Organize products into hierarchical categories",
+    "newNamePlaceholder": "New category name…",
+    "saveAria": "Save category",
+    "cancelEditAria": "Cancel edit",
+    "editAria": "Edit category",
+    "confirmDeleteTitle": "Delete category?",
+    "confirmDeleteBody": "Products in this category will not be deleted, but they will become uncategorized.",
+    "deleted": "Category deleted",
+    "updated": "Category updated"
   },
   "settings": {
     "team": {
@@ -271,7 +388,13 @@
       "description": "Choose one or more products from the list to see their barcode labels here."
     },
     "selectFirst": "Select First Product",
-    "goToProducts": "Go to Products"
+    "goToProducts": "Go to Products",
+    "selectFirstToast": "Select products first",
+    "printing_one": "Printing {{count}} label",
+    "printing_other": "Printing {{count}} labels",
+    "subtitle": "Select products, choose copy count, and print labels",
+    "copies": "COPIES",
+    "products": "PRODUCTS"
   },
   "valuation": {
     "empty": {
@@ -280,5 +403,40 @@
     },
     "refresh": "Refresh"
   },
-  "supplierBills": "{{count}} bill(s)"
+  "supplierBills": "{{count}} bill(s)",
+  "purchasing": {
+    "supplierAndPoRequired": "Supplier and PO number are required",
+    "itemRequired": "At least one item with a product and quantity is required",
+    "draftCreated": "Purchase order draft created",
+    "createFailed": "Failed to create purchase order",
+    "statusUpdateFailed": "Failed to update purchase order status",
+    "approveFailed": "Failed to approve purchase order",
+    "newOrder": "New Order",
+    "approve": "Approve",
+    "send": "Send",
+    "newPurchaseOrder": "New Purchase Order",
+    "cost": "Cost"
+  },
+  "dashboard": {
+    "totalProducts": "Total Products",
+    "lowStockItems": "Low Stock Items",
+    "pendingOrders": "Pending Orders",
+    "totalSuppliers": "Total Suppliers",
+    "inventoryOverview": "Inventory Overview",
+    "newProduct": "New Product",
+    "inventoryValue": "Inventory Value",
+    "topItems": "Top 5 Items",
+    "noProducts": "No products yet",
+    "topCategories": "Top Categories",
+    "noCategories": "No categories yet",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity",
+    "lowStockAlert": "Low Stock Alert",
+    "noLowStockItems": "No low stock items",
+    "recentPurchaseOrders": "Recent Purchase Orders",
+    "noPurchaseOrders": "No purchase orders yet",
+    "criticalCount_one": "{{count}} critical",
+    "criticalCount_other": "{{count}} critical",
+    "needsReview": "needs review"
+  }
 }

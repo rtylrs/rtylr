@@ -45,10 +45,14 @@ describe('LoyaltyRewards empty state', () => {
     expect(screen.getByText('crm.rewards.empty')).toBeInTheDocument();
     expect(screen.getByText('crm.rewards.emptyDescription')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.rewards.addReward' }));
+    // Header action and empty-state action are the same action offered twice and
+    // now share an accessible name; assert both exist rather than matching one.
+    const addRewardButtons = screen.getAllByRole('button', { name: 'crm.rewards.addReward' });
+    expect(addRewardButtons).toHaveLength(2);
+    fireEvent.click(addRewardButtons[1]);
 
     // Opens the inline "New reward" form rather than mutating anything itself.
-    expect(screen.getByText('New reward')).toBeInTheDocument();
+    expect(screen.getByText('crm.rewards.newReward')).toBeInTheDocument();
   });
 
   it('falls back to a "refresh" call-to-action for a role that cannot configure loyalty', () => {

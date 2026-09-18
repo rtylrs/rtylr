@@ -300,7 +300,7 @@ export const SearchCommand: React.FC = () => {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search apps, pages, actions..."
+            placeholder={t('common.commandPalette.placeholder')}
             className="flex-1 bg-transparent outline-none text-sm"
             style={{ color: 'var(--dash-text)' }}
           />
@@ -360,7 +360,7 @@ export const SearchCommand: React.FC = () => {
         >
           <span className="flex items-center gap-1">
             <CommandIcon size={10} />
-            Command palette
+            {t('common.commandPalette.label')}
           </span>
           <span className="flex items-center gap-2">
             <span className="flex items-center gap-1">

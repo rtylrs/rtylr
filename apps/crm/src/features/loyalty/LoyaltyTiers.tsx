@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
@@ -15,6 +16,7 @@ interface TierEditFormProps {
 }
 
 const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) => {
+  const { t } = useTranslation();
   const upsert = useUpsertTier();
   const [threshold, setThreshold] = useState(tier.threshold);
   const [multiplier, setMultiplier] = useState(tier.multiplier);
@@ -26,11 +28,11 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
     const higherTier = currentIndex < sorted.length - 1 ? sorted[currentIndex + 1] : null;
 
     if (lowerTier !== null && threshold <= lowerTier.threshold) {
-      toast.error('Tier threshold must be greater than lower tiers and less than higher tiers');
+      toast.error(t('crm.loyaltyTiers.thresholdOrder'));
       return;
     }
     if (higherTier !== null && threshold >= higherTier.threshold) {
-      toast.error('Tier threshold must be greater than lower tiers and less than higher tiers');
+      toast.error(t('crm.loyaltyTiers.thresholdOrder'));
       return;
     }
 
@@ -132,7 +134,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
             cursor: 'pointer',
           }}
         >
-          Cancel
+          {t('common.cancel')}
         </button>
         <button
           type="button"
@@ -143,8 +145,8 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
             borderRadius: '6px',
             fontSize: '12px',
             fontWeight: 600,
-            background: '#3b82f6',
-            color: '#fff',
+            background: 'var(--accent)',
+            color: 'var(--crm-on-accent)',
             border: 'none',
             cursor: upsert.isPending ? 'not-allowed' : 'pointer',
             opacity: upsert.isPending ? 0.7 : 1,
@@ -158,6 +160,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
 };
 
 const LoyaltyTiers: React.FC = () => {
+  const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
   const { data: fetched, isLoading } = useLoyaltyTiers();
@@ -166,9 +169,12 @@ const LoyaltyTiers: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Loyalty tiers · rtylr" />
+      <HelmetContainer title={`${t('crm.loyaltyTiers.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
-        <PageHeader title="Loyalty tiers" subtitle="Configure your tier structure and perks" />
+        <PageHeader
+          title={t('crm.loyaltyTiers.pageTitle')}
+          subtitle={t('crm.loyaltyTiers.subtitle')}
+        />
 
         {isLoading ? (
           <Card>

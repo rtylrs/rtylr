@@ -34,8 +34,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   title,
   description,
   requireText,
-  confirmLabel = 'Delete',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   pending,
   onConfirm,
 }) => {
@@ -105,16 +105,16 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             className="px-3 py-1.5 rounded-lg text-meta font-medium"
             style={{ color: 'var(--flow-text-muted)' }}
           >
-            {cancelLabel}
+            {cancelLabel ?? t('flow.confirm.cancel')}
           </button>
           <button
             type="button"
             disabled={disabled}
             onClick={onConfirm}
             className="px-3 py-1.5 rounded-lg text-meta font-semibold disabled:opacity-40"
-            style={{ background: '#ef4444', color: '#fff' }}
+            style={{ background: 'var(--flow-danger-fill)', color: 'var(--flow-danger-on-fill)' }}
           >
-            {pending ? t('flow.confirm.working') : confirmLabel}
+            {pending ? t('flow.confirm.working') : (confirmLabel ?? t('flow.confirm.delete'))}
           </button>
         </div>
       </DialogContent>

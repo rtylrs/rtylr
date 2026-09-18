@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -84,6 +85,10 @@ const NewInvoice: React.FC = () => {
       setNotes(sourceInvoice.notes ?? settings.invoiceNotes);
       setDiscount(sourceInvoice.discount ?? 0);
     }
+    // Clone prefill only: re-running on the derived defaults (today/due)
+    // or settings would wipe in-progress edits, so this intentionally
+    // syncs from the clone source alone.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceInvoice]);
 
   useEffect(() => {
@@ -145,7 +150,7 @@ const NewInvoice: React.FC = () => {
 
   const handleSave = (status: 'Draft' | 'Sent'): void => {
     if (!client) {
-      toast.error('Select a client first');
+      toast.error(t('invoices.new.selectClientFirst'));
       return;
     }
     const mappedItems = items.map((it, idx) => ({
@@ -212,10 +217,10 @@ const NewInvoice: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="New invoice · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.newInvoice'))} />
       <PageHeader
-        title="New Invoice"
-        breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'New' }]}
+        title={t('invoices.new.title')}
+        breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: t('common.new') }]}
       />
 
       {/* Stepper */}
@@ -270,14 +275,14 @@ const NewInvoice: React.FC = () => {
           {step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={labelStyle}>Client</label>
+                <label style={labelStyle}>{t('invoices.new.client')}</label>
                 <div style={{ marginTop: 6 }}>
                   <ClientSelect value={client} onChange={setClient} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <div>
-                  <label style={labelStyle}>Invoice #</label>
+                  <label style={labelStyle}>{t('invoices.new.number')}</label>
                   <input
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}
@@ -285,7 +290,7 @@ const NewInvoice: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label style={labelStyle}>Issued</label>
+                  <label style={labelStyle}>{t('invoices.new.issued')}</label>
                   <input
                     type="date"
                     value={issuedDate}
@@ -294,7 +299,7 @@ const NewInvoice: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label style={labelStyle}>Due</label>
+                  <label style={labelStyle}>{t('invoices.new.due')}</label>
                   <input
                     type="date"
                     value={dueDate}
@@ -324,7 +329,7 @@ const NewInvoice: React.FC = () => {
                     htmlFor="contract-prefill"
                     style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}
                   >
-                    {t('invoices.prefillFromContract')}
+                    {t('finance.invoices.prefillFromContract')}
                   </label>
                   <select
                     id="contract-prefill"
@@ -345,7 +350,7 @@ const NewInvoice: React.FC = () => {
                       minWidth: 220,
                     }}
                   >
-                    <option value="">{t('invoices.chooseContract')}</option>
+                    <option value="">{t('finance.invoices.chooseContract')}</option>
                     {signedContracts.map((c) => (
                       <option key={c.id} value={c.id}>
                         {`${c.plan ?? 'Contract'} — ${c.mrr ?? '0'}/mo${c.signedAt ? ` (${c.signedAt})` : ''}`}
@@ -396,7 +401,7 @@ const NewInvoice: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <TaxBreakdown items={items} discount={discount} />
               <div>
-                <label style={labelStyle}>Discount</label>
+                <label style={labelStyle}>{t('invoices.new.discount')}</label>
                 <input
                   type="number"
                   value={discount}
@@ -408,7 +413,7 @@ const NewInvoice: React.FC = () => {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Notes</label>
+                <label style={labelStyle}>{t('invoices.new.notes')}</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -421,8 +426,8 @@ const NewInvoice: React.FC = () => {
 
           {step === 3 && (
             <div style={{ color: 'var(--hub-text-muted)', fontSize: 12 }}>
-              Review the invoice on the right. Click <strong>Save as Draft</strong> or{' '}
-              <strong>Save & Send</strong> to finalize.
+              Review the invoice on the right. Click <strong>{t('invoices.new.saveDraft')}</strong>{' '}
+              or <strong>{t('invoices.new.saveAndSend')}</strong> to finalize.
             </div>
           )}
         </div>

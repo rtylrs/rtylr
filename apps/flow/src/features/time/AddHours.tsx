@@ -236,7 +236,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
         });
         workDayId = upserted.workDay?.id;
       }
-      if (!workDayId) throw new Error('Could not open a work day to log against.');
+      if (!workDayId) throw new Error(t('errors.noWorkDay'));
 
       const result = await createLine.mutateAsync({
         date,
@@ -282,6 +282,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
     targetLabel,
     i18n.language,
     projectedTotalMinutes,
+    t,
   ]);
 
   const handleDiscard = useCallback((): void => {

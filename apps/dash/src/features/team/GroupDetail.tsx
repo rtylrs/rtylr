@@ -147,7 +147,7 @@ const GroupDetail = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Group detail · rtylr" />
+      <HelmetContainer title={`${t('team.groupDetail.pageTitle')} · rtylr`} />
       <div className="space-y-5 max-w-3xl">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -310,7 +310,7 @@ const GroupDetail = (): React.JSX.Element => {
                     className="text-xs font-semibold uppercase tracking-wider"
                     style={{ color: 'var(--dash-text-muted)' }}
                   >
-                    {app.label}
+                    {t(app.labelKey)}
                   </span>
                 </div>
 
@@ -325,7 +325,7 @@ const GroupDetail = (): React.JSX.Element => {
                     >
                       <div className="col-span-6 pl-3">
                         <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                          {section.label}
+                          {t(section.labelKey)}
                         </span>
                       </div>
                       {LEVELS.map((l) => (
@@ -333,7 +333,7 @@ const GroupDetail = (): React.JSX.Element => {
                           <button
                             type="button"
                             aria-label={t('team.groupDetail.radioAriaLabel', {
-                              section: section.label,
+                              section: t(section.labelKey),
                               level: t(l.tKey),
                             })}
                             onClick={() => setLevel(section.key, l.value)}
@@ -375,7 +375,7 @@ const GroupDetail = (): React.JSX.Element => {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                 style={{
                   background: 'var(--accent-muted)',
-                  color: 'var(--accent)',
+                  color: 'var(--accent-on-muted)',
                   border: '1px solid var(--accent-border)',
                 }}
               >
@@ -409,7 +409,10 @@ const GroupDetail = (): React.JSX.Element => {
                     <div className="flex items-center gap-3">
                       <div
                         className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                        style={{
+                          background: 'var(--accent-muted)',
+                          color: 'var(--accent-on-muted)',
+                        }}
                       >
                         {(m.fullName || m.email || '?').charAt(0).toUpperCase()}
                       </div>

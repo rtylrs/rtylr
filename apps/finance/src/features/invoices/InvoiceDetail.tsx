@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useUserStore } from '@voxire/auth';
@@ -22,6 +24,7 @@ import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens
 import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const InvoiceDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = routeApi.useParams();
   const navigate = useNavigate();
   const { data: invoice, isLoading } = useInvoiceDetail(id);
@@ -36,8 +39,8 @@ const InvoiceDetail: React.FC = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <PageHeader
-          title="Invoice"
-          breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: id ?? '' }]}
+          title={t('invoices.detail.title')}
+          breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: id ?? '' }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow count={4} />
@@ -59,7 +62,7 @@ const InvoiceDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Invoice detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.invoiceDetail'))} />
       <PageHeader
         title={`Invoice ${invoice.id}`}
         subtitle={
@@ -67,7 +70,7 @@ const InvoiceDetail: React.FC = () => {
             <PaymentBadge status={paymentStatus} /> <MoneyDisplay amount={invoice.amount} /> total
           </span>
         }
-        breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: invoice.id }]}
+        breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: invoice.id }]}
         actions={
           <>
             <button type="button" style={ghostBtn} onClick={() => window.print()}>
@@ -79,7 +82,7 @@ const InvoiceDetail: React.FC = () => {
               style={ghostBtn}
               onClick={() => {
                 navigate({ to: `/invoices/new?clone=${invoice.id}` });
-                toast.success('Cloning invoice');
+                toast.success(t('invoices.detail.cloning'));
               }}
             >
               <Copy size={13} /> Clone
@@ -139,7 +142,7 @@ const InvoiceDetail: React.FC = () => {
                 marginBottom: 10,
               }}
             >
-              Summary
+              {t('invoices.detail.summary')}
             </div>
             <div
               style={{
@@ -150,7 +153,7 @@ const InvoiceDetail: React.FC = () => {
                 color: 'var(--hub-text-muted)',
               }}
             >
-              <span>Total invoiced</span>
+              <span>{t('invoices.detail.totalInvoiced')}</span>
               <MoneyDisplay amount={invoice.amount} />
             </div>
             <div
@@ -162,7 +165,7 @@ const InvoiceDetail: React.FC = () => {
                 color: 'var(--hub-text-muted)',
               }}
             >
-              <span>Paid</span>
+              <span>{t('invoices.detail.paid')}</span>
               <MoneyDisplay amount={invoice.paid} />
             </div>
             <div
@@ -176,7 +179,7 @@ const InvoiceDetail: React.FC = () => {
                 color: balanceDue > 0 ? ACCENT : 'var(--hub-text)',
               }}
             >
-              <span>Balance due</span>
+              <span>{t('invoices.detail.balanceDue')}</span>
               <MoneyDisplay amount={balanceDue} />
             </div>
           </div>
@@ -191,7 +194,7 @@ const InvoiceDetail: React.FC = () => {
                 marginBottom: 10,
               }}
             >
-              History
+              {t('invoices.detail.history')}
             </div>
             {invoice.history?.map((h, i) => (
               <div
@@ -219,7 +222,7 @@ const InvoiceDetail: React.FC = () => {
                 marginBottom: 10,
               }}
             >
-              Client
+              {t('invoices.detail.client')}
             </div>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
               {invoice.client}
@@ -253,7 +256,7 @@ const InvoiceDetail: React.FC = () => {
               toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoice.id}`)),
           })
         }
-        title="Void invoice"
+        title={t('invoices.detail.void')}
         message={`Are you sure you want to void ${invoice.id}? This cannot be undone.`}
         confirmLabel={deleteInvoice.isPending ? 'Voiding...' : 'Void'}
         destructive

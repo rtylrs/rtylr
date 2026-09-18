@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import React from 'react';
 
 vi.mock('../services/flowApi', () => ({
@@ -28,7 +28,7 @@ describe('useFlowBusinessName', () => {
   });
 
   it('prefers the business flagged as active', async () => {
-    (flowApi.getMyBusinesses as any).mockResolvedValue({
+    (flowApi.getMyBusinesses as unknown as Mock).mockResolvedValue({
       businesses: [
         { id: 1, name: 'Old Business', isActive: false },
         { id: 2, name: 'Current Business', isActive: true },
@@ -40,7 +40,7 @@ describe('useFlowBusinessName', () => {
   });
 
   it('falls back to the first business when none is flagged active', async () => {
-    (flowApi.getMyBusinesses as any).mockResolvedValue({
+    (flowApi.getMyBusinesses as unknown as Mock).mockResolvedValue({
       businesses: [
         { id: 1, name: 'First Business' },
         { id: 2, name: 'Second Business' },
@@ -54,7 +54,7 @@ describe('useFlowBusinessName', () => {
   it('resolves null (not undefined) when the caller has no businesses', async () => {
     // TanStack Query v5 throws if a queryFn resolves to `undefined` - this
     // guards against that regression.
-    (flowApi.getMyBusinesses as any).mockResolvedValue({ businesses: [] });
+    (flowApi.getMyBusinesses as unknown as Mock).mockResolvedValue({ businesses: [] });
     const { result } = renderHook(() => useFlowBusinessName(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toBeNull();

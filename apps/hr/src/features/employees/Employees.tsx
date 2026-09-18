@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +64,7 @@ const Employees = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Employees · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.employees'))} />
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
@@ -73,7 +74,7 @@ const Employees = (): React.JSX.Element => {
             type="button"
             onClick={() => navigate({ to: '/employees/new' })}
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
-            style={{ background: 'var(--accent)', color: '#fff' }}
+            style={{ background: 'var(--accent)', color: 'var(--hr-on-accent)' }}
           >
             <Plus size={14} />
             {t('employees.addNew')}
@@ -190,7 +191,9 @@ const Employees = (): React.JSX.Element => {
                               transform: `translateY(${virtualRow.start}px)`,
                               borderTop: '1px solid var(--hr-border)',
                             }}
-                            onClick={() => navigate({ to: `/employees/${emp.id}` as any })}
+                            onClick={() =>
+                              navigate({ to: '/employees/$id', params: { id: String(emp.id) } })
+                            }
                             onMouseEnter={(e) => {
                               (e.currentTarget as HTMLDivElement).style.background =
                                 'var(--hr-hover)';

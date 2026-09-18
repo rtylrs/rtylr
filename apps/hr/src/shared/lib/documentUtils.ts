@@ -1,3 +1,5 @@
+import { todayIso } from './dateUtils';
+
 export type DocumentStatus = 'Draft' | 'Pending Review' | 'Approved' | 'Rejected' | 'Expired';
 export type DocumentCategory = 'Contract' | 'Policy' | 'Certificate' | 'ID' | 'Payslip' | 'Other';
 
@@ -53,8 +55,16 @@ export function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/**
+ * Whether a document's expiry has already passed.
+ *
+ * A document expiring **today** is not expired: it is valid for the whole of
+ * today. Comparing a parsed date to the current instant said otherwise from
+ * 00:00 UTC, so a valid document was flagged red for its entire last day
+ * (rtylr#1077).
+ */
 export function isExpired(expiryDateIso: string): boolean {
-  return new Date(expiryDateIso) < new Date();
+  return expiryDateIso.split('T')[0] < todayIso();
 }
 
 export function countByCategory(

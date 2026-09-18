@@ -24,6 +24,7 @@ import {
   TableHead,
   TableCell,
   Badge,
+  type BadgeVariant,
   Button,
   Dialog,
   DialogContent,
@@ -33,7 +34,7 @@ import {
 
 type OrderStatus = 'all' | 'pending' | 'in_progress' | 'completed';
 
-const statusBadgeVariant: Record<string, any> = {
+const statusBadgeVariant: Record<string, BadgeVariant> = {
   pending: 'warning',
   in_progress: 'default',
   completed: 'success',

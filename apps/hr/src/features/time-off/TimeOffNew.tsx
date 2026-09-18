@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ import {
 const TYPES = ['Vacation', 'Sick', 'Personal', 'Bereavement', 'Unpaid'] as const;
 
 const TimeOffNew: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const nav = useNavigate();
   const { data: staff } = useStaff();
@@ -34,41 +36,46 @@ const TimeOffNew: React.FC = () => {
     e.preventDefault();
     const who = (staff ?? []).find((s) => s.id === staffId);
     if (!who) {
-      toast.error('Select an employee');
+      toast.error(t('timeOff.errorSelectEmployee'));
       return;
     }
     if (!startDate || !endDate) {
-      toast.error('Select a date range');
+      toast.error(t('timeOff.errorSelectRange'));
       return;
     }
     if (endDate < startDate) {
-      toast.error('End date cannot be before start date');
+      toast.error(t('timeOff.errorEndBeforeStart'));
       return;
     }
     submit.mutate(
       { staffId, staffName: who.name, type, startDate, endDate, reason },
       {
         onSuccess: () => {
-          toast.success('Time off request submitted');
+          toast.success(t('timeOff.submitted'));
           nav({ to: '/time-off' });
         },
-        onError: () => toast.error('Failed to submit'),
+        onError: () => toast.error(t('timeOff.submitFailed')),
       }
     );
   };
 
   return (
     <>
-      <HelmetContainer title="New time off request · rtylr" />
+      <HelmetContainer title={t('timeOff.pageTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600 }}>
-        <Breadcrumbs items={[{ label: 'Time Off', href: '/time-off' }, { label: 'New request' }]} />
-        <SectionHeader title="Request Time Off" subtitle="Submit a new PTO request for review" />
+        <Breadcrumbs
+          items={[
+            { label: t('nav.timeOff'), href: '/time-off' },
+            { label: t('timeOff.page.newRequest') },
+          ]}
+        />
+        <SectionHeader title={t('timeOff.formTitle')} subtitle={t('timeOff.formSubtitle')} />
         <Card>
           <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <Label>Employee</Label>
+              <Label>{t('leave.employee')}</Label>
               <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
-                <option value={0}>Select employee</option>
+                <option value={0}>{t('timeOff.selectEmployee')}</option>
                 {(staff ?? []).map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.role})
@@ -77,7 +84,7 @@ const TimeOffNew: React.FC = () => {
               </Select>
             </div>
             <div>
-              <Label>Type</Label>
+              <Label>{t('timeOff.type')}</Label>
               <Select
                 value={type}
                 onChange={(e) => setType(e.target.value as (typeof TYPES)[number])}
@@ -97,7 +104,7 @@ const TimeOffNew: React.FC = () => {
               }}
             >
               <div>
-                <Label>Start date</Label>
+                <Label>{t('timeOff.startDate')}</Label>
                 <Input
                   type="date"
                   value={startDate}
@@ -105,22 +112,22 @@ const TimeOffNew: React.FC = () => {
                 />
               </div>
               <div>
-                <Label>End date</Label>
+                <Label>{t('timeOff.endDate')}</Label>
                 <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </div>
             </div>
             <div>
-              <Label>Reason</Label>
+              <Label>{t('timeOff.reason')}</Label>
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Brief reason for request"
+                placeholder={t('timeOff.reasonPlaceholder')}
               />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <Link to="/time-off">
                 <Button type="button" variant="ghost">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </Link>
               <Button type="submit" variant="primary" disabled={submit.isPending}>

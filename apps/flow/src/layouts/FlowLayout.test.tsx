@@ -9,7 +9,7 @@ import { useFlowStore } from '../shared/stores/flowStore';
 // (avatar/name trigger in the sidebar footer - issue #785: it didn't close on
 // Escape or on an outside click), so every react-query-backed hook/component
 // FlowLayout pulls in is stubbed out. Store hooks (userStore, appearanceStore,
-// flowStore) and other pure/local hooks (useSidebarSections, useKeyboardShortcuts,
+// flowStore) and other pure/local hooks (useKeyboardShortcuts,
 // useLifePreferences, useForesightLinks) are left real - none of them touch the
 // network and they're already exercised by other passing tests in this app.
 const mocks = vi.hoisted(() => ({
@@ -46,11 +46,17 @@ vi.mock('@tanstack/react-router', () => ({
   useLocation: () => mocks.location,
   useNavigate: () => mocks.navigate,
   useParams: () => ({}),
+  // The layout reads `searchStr`; the TaskDrawer it renders reads `search`.
+  // Supplying only one of them made the drawer's selector throw on
+  // `state.location.search.openTask`, which surfaced as every test in this file
+  // failing rather than as anything about a drawer.
   useRouterState: ({
     select,
   }: {
-    select: (state: { location: { searchStr: string } }) => unknown;
-  }) => select({ location: { searchStr: '' } }),
+    select: (state: {
+      location: { searchStr: string; search: Record<string, unknown>; pathname: string };
+    }) => unknown;
+  }) => select({ location: { searchStr: '', search: {}, pathname: '/' } }),
 }));
 
 vi.mock('motion/react', () => {
@@ -165,9 +171,6 @@ vi.mock('../shared/components/QuickCreate', () => ({ default: () => null }));
 vi.mock('../shared/components/BulkEditBar', () => ({ default: () => null }));
 // The bin section runs its own react-query hook; this suite renders the layout
 // without a QueryClientProvider, like the other data-fetching children above.
-vi.mock('../features/projects-v2/RecycleBinSection', () => ({
-  RecycleBinSection: () => null,
-}));
 
 vi.mock('../features/workspace-dashboard/useWorkspaces', () => ({
   useWorkspaces: () => ({ data: undefined, isLoading: false }),
@@ -374,6 +377,31 @@ describe('FlowLayout Caret panel mounting (#1043)', () => {
   });
 });
 
+describe('FlowLayout sidebar wiring (#1212)', () => {
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  /**
+   * A direct assertion that the sidebar the user actually sees is mounted.
+   *
+   * FlowLayout carried a second, inline sidebar behind a literal `false` for
+   * long enough that a fix was landed against it with passing unit tests and no
+   * runtime effect at all (#1076). Deleting that block left this one as the only
+   * sidebar, and until now nothing said so out loud: the coverage was incidental,
+   * via the new-project tests below, which reach the create control through it.
+   * A test that fails for the right reason is worth more than four that fail for
+   * a reason nobody stated.
+   */
+  it('mounts the sidebar navigation', () => {
+    renderLayout();
+    expect(screen.getByRole('button', { name: 'flow.shell.newProject' })).toBeTruthy();
+  });
+});
+
 describe('FlowLayout New project modal (#1060)', () => {
   const renderLayout = () =>
     render(
@@ -461,5 +489,57 @@ describe('FlowLayout New project modal (#1060)', () => {
       description: 'ENTER PATH DESC',
       visibility: 'private',
     });
+  });
+});
+
+describe('FlowLayout desktop create control (#1076)', () => {
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  it('offers exactly two new-task buttons, one per breakpoint', () => {
+    renderLayout();
+    // Both are in the DOM; CSS decides which is visible, and happy-dom applies
+    // none, so the classes are what the assertion below actually checks.
+    const buttons = screen.getAllByRole('button', { name: 'flow.shell.newTask' });
+    expect(buttons).toHaveLength(2);
+  });
+
+  it('shows one of them at desktop, where the header + is display:none', () => {
+    renderLayout();
+    const buttons = screen.getAllByRole('button', { name: 'flow.shell.newTask' });
+
+    // The header + lives in an lg:hidden container, so at 1440px it measured
+    // 0x0 and the desktop shell had no create control at all. The sidebar one
+    // is lg:flex, so exactly one of the pair is visible at any width.
+    const desktopOnly = buttons.filter((b) => b.className.includes('lg:flex'));
+    expect(desktopOnly).toHaveLength(1);
+    expect(desktopOnly[0].className).toContain('hidden');
+  });
+
+  it('opens quick create when the desktop control is clicked', () => {
+    renderLayout();
+    const desktop = screen
+      .getAllByRole('button', { name: 'flow.shell.newTask' })
+      .find((b) => b.className.includes('lg:flex'));
+    expect(desktop).toBeDefined();
+
+    expect(useFlowStore.getState().quickCreateOpen).toBe(false);
+    fireEvent.click(desktop as HTMLElement);
+    expect(useFlowStore.getState().quickCreateOpen).toBe(true);
+    useFlowStore.getState().setQuickCreateOpen(false);
+  });
+
+  it('does not hide the create control behind a hover', () => {
+    // The + is meant to be the most visible control on the panel, unlike the
+    // ... menus, which reveal on hover.
+    renderLayout();
+    const desktop = screen
+      .getAllByRole('button', { name: 'flow.shell.newTask' })
+      .find((b) => b.className.includes('lg:flex'));
+    expect(desktop?.className).not.toContain('flow-reveal-on-hover');
   });
 });

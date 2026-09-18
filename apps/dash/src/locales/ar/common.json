@@ -163,7 +163,63 @@
     "activityLog": "سجل النشاط",
     "language": "اللغة",
     "navigate": "تنقل",
-    "storefront": "واجهة المتجر"
+    "storefront": "واجهة المتجر",
+    "createItem": "إنشاء عنصر",
+    "createBanner": "إنشاء لافتة"
   },
-  "launch": "تشغيل"
+  "launch": "تشغيل",
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي"
+  },
+  "roleDescriptions": {
+    "admin": "إدارة صلاحيات الوصول إلى النشاط والتطبيقات المسنَدة",
+    "manager": "إدارة العمل المسنَد ضمن النطاق المفوَّض",
+    "member": "استخدام التطبيقات المسنَدة والموارد التشغيلية",
+    "viewer": "وصول للقراءة فقط إلى التطبيقات المسنَدة",
+    "menu_manager": "إدارة القوائم ورموز QR وتصميم المتجر"
+  },
+  "skipToMainContent": "تخطَّ إلى المحتوى الرئيسي",
+  "toggleNavigation": "إظهار قائمة التنقل أو إخفاؤها",
+  "openConsole": "فتح وحدة التحكم",
+  "signOut": "تسجيل الخروج",
+  "appearance": {
+    "title": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام"
+  },
+  "dropzone": {
+    "active": "أفلِت الملفات هنا ...",
+    "idle": "اسحب ملفًا وأفلته هنا، أو اضغط لاختيار ملف"
+  },
+  "apiKey": {
+    "created": "أُنشئ",
+    "revoke": "إبطال مفتاح واجهة البرمجة"
+  },
+  "appCard": {
+    "upgrade": "ترقية",
+    "beta": "تجريبي",
+    "comingSoon": "قريبًا"
+  },
+  "breadcrumb": "مسار التنقل",
+  "dangerZone": "منطقة الإجراءات الحساسة",
+  "commandPalette": {
+    "placeholder": "ابحث في التطبيقات والصفحات والإجراءات...",
+    "label": "لوحة الأوامر"
+  },
+  "webhook": {
+    "active": "نشط",
+    "paused": "متوقف مؤقتًا",
+    "failing": "يفشل",
+    "delete": "حذف الويب هوك"
+  },
+  "closeDialog": "إغلاق النافذة",
+  "closePanel": "إغلاق اللوحة",
+  "userMenu": "قائمة المستخدم",
+  "accountSettings": "إعدادات الحساب",
+  "accessRequested": "تم الطلب",
+  "requestAccess": "طلب الوصول",
+  "posMenuName": "قائمة نقاط البيع",
+  "defaultPageTitle": "Rtylr - قائمة بلا لمس عبر رمز QR"
 }

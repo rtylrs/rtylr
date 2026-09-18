@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import {
   Users,
@@ -19,16 +19,25 @@ import { useIsMobile } from '../../shared/components/ui';
 import { useUserStore } from '@voxire/auth';
 import { canViewCompensation } from '../../shared/lib/hrPermissions';
 
-const ACCENT = '#8b5cf6';
+/**
+ * The literal is deliberate here, and only here.
+ *
+ * `DEPT_COLORS` feeds `getDeptColor`, whose result is concatenated with a hex
+ * alpha suffix at the call site (`${color}18`). A `var(--accent)` cannot carry
+ * one, so a palette an app builds colours from by string concatenation has to
+ * hold real hex. Every *style* use of the accent below goes through the token
+ * instead (rtylr#1242).
+ */
+const ACCENT_HEX = '#8b5cf6';
 
-const DEPT_ICONS: Record<string, React.ComponentType<any>> = {
+const DEPT_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Kitchen: ChefHat,
   'Front-of-House': Coffee,
   Management: Briefcase,
   Delivery: Truck,
 };
 
-const DEPT_COLORS = ['#f59e0b', '#10b981', ACCENT, '#3b82f6', '#ef4444', '#3b82f6'];
+const DEPT_COLORS = ['#f59e0b', '#10b981', ACCENT_HEX, '#3b82f6', '#ef4444', '#3b82f6'];
 
 function getDeptIcon(name: string) {
   return DEPT_ICONS[name] || Briefcase;
@@ -43,7 +52,7 @@ function fmt(n: number): string {
 }
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
-const cardAnim: Record<string, any> = {
+const cardAnim: Variants = {
   hidden: { opacity: 0, y: 14 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -59,7 +68,7 @@ const Departments: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Departments · rtylr" />
+      <HelmetContainer title={t('departments.page.metaTitle')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* Header */}
         <div
@@ -73,7 +82,7 @@ const Departments: React.FC = () => {
         >
           <div>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>
-              Departments
+              {t('departments.page.title')}
             </h2>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
               {loading
@@ -93,9 +102,13 @@ const Departments: React.FC = () => {
               gap: '8px',
               padding: '9px 16px',
               borderRadius: '8px',
-              background: ACCENT,
+              background: 'var(--accent)',
               border: 'none',
-              color: '#fff',
+              // White on #8b5cf6 measures 4.23:1 and fails AA. It was invisible
+              // to the accent-fill guard while the background was a hardcoded
+              // hex; tokenising the background is what exposed it (rtylr#1242,
+              // the same defect as rtylr#1234).
+              color: 'var(--hr-on-accent)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
@@ -118,8 +131,8 @@ const Departments: React.FC = () => {
           }}
         >
           {departments.map((dept, idx) => {
-            const color = (dept as any).color || getDeptColor(idx);
-            const bg = (dept as any).bg || `${color}18`;
+            const color = dept.color ?? getDeptColor(idx);
+            const bg = `${color}18`;
             const DeptIcon = getDeptIcon(dept.name);
             return (
               <motion.div
@@ -213,7 +226,7 @@ const Departments: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <UserCheck size={14} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />
                     <span style={{ fontSize: '12px', color: 'var(--hr-text-dim)' }}>
-                      Department Head
+                      {t('departments.page.head')}
                     </span>
                     <span
                       style={{
@@ -241,7 +254,7 @@ const Departments: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Users size={13} style={{ color: 'var(--hr-text-dim)' }} />
                         <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
-                          Team Size
+                          {t('departments.page.teamSize')}
                         </span>
                       </div>
                       <span style={{ fontSize: '18px', fontWeight: 700, color }}>
@@ -253,7 +266,7 @@ const Departments: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <DollarSign size={13} style={{ color: 'var(--hr-text-dim)' }} />
                           <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
-                            Avg Salary
+                            {t('departments.page.avgSalary')}
                           </span>
                         </div>
                         <span
@@ -275,7 +288,7 @@ const Departments: React.FC = () => {
                       }}
                     >
                       <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
-                        Share of total workforce
+                        {t('departments.page.shareOfWorkforce')}
                       </span>
                       <span style={{ fontSize: '11px', fontWeight: 600, color }}>
                         {departments.reduce((s, d) => s + d.staffCount, 0) > 0

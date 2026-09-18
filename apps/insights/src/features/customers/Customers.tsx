@@ -113,7 +113,7 @@ const Customers: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Customers · rtylr" />
+      <HelmetContainer title={t('insights.customers.metaTitle')} />
       <motion.div variants={itemVariants}>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.title')}
@@ -129,18 +129,29 @@ const Customers: React.FC = (): React.JSX.Element => {
       ) : (
         <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: t('insights.customers.kpis.total'), value: formatNumber(total), icon: Users },
             {
+              id: 'total',
+              label: t('insights.customers.kpis.total'),
+              value: formatNumber(total),
+              icon: Users,
+            },
+            {
+              id: 'newThisMonth',
+
               label: t('insights.customers.kpis.newThisMonth'),
               value: formatNumber(newThisMonth),
               icon: UserPlus,
             },
             {
+              id: 'active',
+
               label: t('insights.customers.kpis.active'),
               value: formatNumber(active),
               icon: Star,
             },
             {
+              id: 'churned',
+
               label: t('insights.customers.kpis.churned'),
               value: formatNumber(churned),
               icon: UserMinus,
@@ -149,7 +160,7 @@ const Customers: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
@@ -162,7 +173,7 @@ const Customers: React.FC = (): React.JSX.Element => {
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
                     style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: 'var(--accent)' }} />
+                    <Icon size={14} style={{ color: 'var(--accent-on-muted)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -194,7 +205,7 @@ const Customers: React.FC = (): React.JSX.Element => {
         ) : (
           <div
             style={{ height: Math.max(180, topList.length * 36) }}
-            aria-label="Top customers chart"
+            aria-label={t('insights.charts.topCustomers')}
           >
             <Bar data={topCustomersBarData} options={topCustomersBarOptions} />
           </div>
@@ -234,7 +245,10 @@ const Customers: React.FC = (): React.JSX.Element => {
                   {b.label}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(b.customerCount)} {t('insights.customers.customers', 'customers')}
+                  {t('insights.customers.customers', {
+                    count: b.customerCount,
+                    formatted: formatNumber(b.customerCount),
+                  })}
                 </span>
               </div>
             ))}
@@ -277,8 +291,7 @@ const Customers: React.FC = (): React.JSX.Element => {
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
                   {w.churnPct.toFixed(1)}%{' '}
                   <span style={{ color: 'var(--hub-text-muted)' }}>
-                    ({formatNumber(w.churnedCount)}{' '}
-                    {t('insights.customers.churnedCount', 'churned')})
+                    ({formatNumber(w.churnedCount)} {t('insights.customers.churnedCount')})
                   </span>
                 </span>
               </div>

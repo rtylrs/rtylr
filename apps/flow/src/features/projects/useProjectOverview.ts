@@ -1,4 +1,5 @@
 import { unwrap } from '@voxire/api';
+import { isOverdue } from '../../shared/lib/dateUtils';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiTask, ApiMilestone } from '../../shared/services/flowApi';
@@ -19,7 +20,7 @@ export function useProjectOverview(projectId: string | undefined) {
       const inProgress = taskList.filter((t) => t.status === 'in_progress').length;
       const overdue = taskList.filter((t) => {
         if (!t.dueDate) return false;
-        return new Date(t.dueDate) < new Date() && t.status !== 'done';
+        return isOverdue(t.dueDate, t.status);
       }).length;
       return {
         tasks: taskList,

@@ -95,7 +95,7 @@ export function useCreateQuote() {
       }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
-      toast.success('Quote created');
+      toast.success(t('quotes.createdToast'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));
@@ -126,7 +126,7 @@ export function useConvertQuote() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
       void qc.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Quote converted to invoice');
+      toast.success(t('quotes.convertedToast'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));

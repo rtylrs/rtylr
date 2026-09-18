@@ -43,90 +43,64 @@ import { Toaster } from 'sonner';
 import CommandPalette from '../shared/components/CommandPalette';
 import KeyboardShortcutsModal from '../shared/components/KeyboardShortcutsModal';
 import QuickAddProductModal from '../shared/components/QuickAddProductModal';
+import { useTranslation } from 'react-i18next';
+import { pageTitleKey, routeLabels } from '../shared/lib/routeLabels';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
 interface NavGroup {
-  label: string;
+  labelKey: string;
   items: NavItem[];
 }
 
 const navGroups: NavGroup[] = [
   {
-    label: 'Workspace',
+    labelKey: 'nav.groups.workspace',
     items: [
-      { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-      { label: 'Inventory', path: '/inventory', icon: Package },
+      { labelKey: routeLabels['/'].nav, path: '/', icon: LayoutDashboard },
+      { labelKey: routeLabels['/inventory'].nav, path: '/inventory', icon: Package },
     ],
   },
   {
-    label: 'Catalog',
+    labelKey: 'nav.groups.catalog',
     items: [
-      { label: 'Categories', path: '/categories', icon: Folder },
-      { label: 'Brands', path: '/brands', icon: Tag },
-      { label: 'Variants', path: '/variants', icon: Layers },
-      { label: 'Price Lists', path: '/price-lists', icon: Tags },
-      { label: 'Barcodes', path: '/barcodes', icon: Barcode },
+      { labelKey: routeLabels['/categories'].nav, path: '/categories', icon: Folder },
+      { labelKey: routeLabels['/brands'].nav, path: '/brands', icon: Tag },
+      { labelKey: routeLabels['/variants'].nav, path: '/variants', icon: Layers },
+      { labelKey: routeLabels['/price-lists'].nav, path: '/price-lists', icon: Tags },
+      { labelKey: routeLabels['/barcodes'].nav, path: '/barcodes', icon: Barcode },
     ],
   },
   {
-    label: 'Warehouse Ops',
+    labelKey: 'nav.groups.warehouseOps',
     items: [
-      { label: 'Warehouses', path: '/warehouses', icon: Warehouse },
-      { label: 'Stock Transfers', path: '/transfers', icon: Truck },
-      { label: 'Stock Takes', path: '/stock-takes', icon: ClipboardList },
-      { label: 'Receiving', path: '/receiving', icon: PackageCheck },
-      { label: 'Expiry', path: '/expiry', icon: CalendarX },
+      { labelKey: routeLabels['/warehouses'].nav, path: '/warehouses', icon: Warehouse },
+      { labelKey: routeLabels['/transfers'].nav, path: '/transfers', icon: Truck },
+      { labelKey: routeLabels['/stock-takes'].nav, path: '/stock-takes', icon: ClipboardList },
+      { labelKey: routeLabels['/receiving'].nav, path: '/receiving', icon: PackageCheck },
+      { labelKey: routeLabels['/expiry'].nav, path: '/expiry', icon: CalendarX },
     ],
   },
   {
-    label: 'Insights',
+    labelKey: 'nav.groups.insights',
     items: [
-      { label: 'Low Stock Alerts', path: '/alerts', icon: AlertTriangle },
-      { label: 'Reorder', path: '/reorder', icon: Sparkles },
-      { label: 'Valuation', path: '/valuation', icon: DollarSign },
+      { labelKey: routeLabels['/alerts'].nav, path: '/alerts', icon: AlertTriangle },
+      { labelKey: routeLabels['/reorder'].nav, path: '/reorder', icon: Sparkles },
+      { labelKey: routeLabels['/valuation'].nav, path: '/valuation', icon: DollarSign },
     ],
   },
   {
-    label: 'Purchasing',
+    labelKey: 'nav.groups.purchasing',
     items: [
-      { label: 'Purchase Orders', path: '/purchasing', icon: ShoppingCart },
-      { label: 'Suppliers', path: '/suppliers', icon: Users },
+      { labelKey: routeLabels['/purchasing'].nav, path: '/purchasing', icon: ShoppingCart },
+      { labelKey: routeLabels['/suppliers'].nav, path: '/suppliers', icon: Users },
     ],
   },
 ];
-
-const routeLabels: Record<string, string> = {
-  '/': 'Dashboard',
-  '/products': 'Inventory',
-  '/inventory': 'Inventory',
-  '/purchasing': 'Purchase Orders',
-  '/suppliers': 'Suppliers',
-  '/categories': 'Categories',
-  '/brands': 'Brands',
-  '/warehouses': 'Warehouses',
-  '/transfers': 'Stock Transfers',
-  '/stock-takes': 'Stock Takes',
-  '/alerts': 'Low Stock Alerts',
-  '/receiving': 'Goods Receiving',
-  '/reorder': 'Reorder Suggestions',
-  '/price-lists': 'Price Lists',
-  '/variants': 'Product Variants',
-  '/barcodes': 'Barcode Generator',
-  '/expiry': 'Expiry Tracking',
-  '/valuation': 'Inventory Valuation',
-  '/settings': 'Settings',
-};
-
-function getPageTitle(pathname: string): string {
-  if (routeLabels[pathname]) return routeLabels[pathname];
-  const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
-  return match ? routeLabels[match] : 'ERP';
-}
 
 type Theme = 'dark' | 'light' | 'system';
 
@@ -140,7 +114,8 @@ function applyTheme(theme: Theme) {
   }
 }
 
-const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
+const SidebarNavItem: React.FC<NavItem> = ({ labelKey, path, icon: Icon }) => {
+  const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive =
     path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`);
@@ -161,7 +136,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
         <span className="absolute inset-0 rounded-lg" style={{ background: 'var(--hub-active)' }} />
       )}
       <Icon size={14} className="relative shrink-0" />
-      <span className="relative">{label}</span>
+      <span className="relative">{t(labelKey)}</span>
       {isActive && (
         <span
           className="relative h-1 w-1 rounded-full shrink-0"
@@ -173,6 +148,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 };
 
 const DefaultLayout: React.FC = () => {
+  const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
@@ -223,7 +199,13 @@ const DefaultLayout: React.FC = () => {
   }, [erpUser]);
   const userId = Number(erpUser?.id) || 0;
   const { isOpen: caretOpen } = useCaretStore();
-  const pageTitle = getPageTitle(pathname);
+  const pageTitle = t(pageTitleKey(pathname));
+  // Caret describes the current route to the assistant, so it wants the
+  // reader's language rather than the key or the English behind it.
+  const translatedRouteLabels = React.useMemo(
+    () => Object.fromEntries(Object.entries(routeLabels).map(([p, l]) => [p, t(l.title)])),
+    [t]
+  );
   const caretPageContext = React.useMemo(
     () =>
       buildCaretRouteContext({
@@ -232,9 +214,9 @@ const DefaultLayout: React.FC = () => {
         pathname,
         search,
         page: pageTitle,
-        routeLabels,
+        routeLabels: translatedRouteLabels,
       }),
-    [pathname, search, pageTitle]
+    [pathname, search, pageTitle, translatedRouteLabels]
   );
 
   useEffect(() => {
@@ -389,12 +371,12 @@ const DefaultLayout: React.FC = () => {
 
           <nav ref={sidebarRef} className="flex-1 overflow-y-auto py-2 px-2 space-y-3">
             {navGroups.map((group) => (
-              <div key={group.label}>
+              <div key={group.labelKey}>
                 <p
                   className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest"
                   style={{ color: 'var(--hub-text-dim)' }}
                 >
-                  {group.label}
+                  {t(group.labelKey)}
                 </p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => (

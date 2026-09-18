@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import MoneyDisplay from './MoneyDisplay';
 import type { LineItem } from './LineItemRow';
 
@@ -26,6 +27,7 @@ function bucketize(items: LineItem[]): TaxBucket[] {
 }
 
 const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
+  const { t } = useTranslation();
   const buckets = bucketize(items);
   const subtotal = items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
   const totalTax = buckets.reduce((s, b) => s + b.tax, 0);
@@ -51,7 +53,7 @@ const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
           color: 'var(--hub-text-muted)',
         }}
       >
-        <span>Subtotal</span>
+        <span>{t('common.subtotal')}</span>
         <MoneyDisplay amount={subtotal} />
       </div>
       {buckets.map((b) => (
@@ -79,7 +81,7 @@ const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
             color: 'var(--finance-warning)',
           }}
         >
-          <span>Discount</span>
+          <span>{t('common.discount')}</span>
           <span>
             -<MoneyDisplay amount={discount} />
           </span>
@@ -96,7 +98,7 @@ const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
           color: 'var(--hub-text)',
         }}
       >
-        <span>Total</span>
+        <span>{t('common.total')}</span>
         <MoneyDisplay amount={total} />
       </div>
     </div>

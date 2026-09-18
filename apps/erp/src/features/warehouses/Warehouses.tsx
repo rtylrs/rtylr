@@ -10,6 +10,7 @@ import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatNumber } from '../../shared/lib/format';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -39,7 +40,7 @@ const Warehouses: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
-      toast.error(t('warehouses.validation.nameRequired'));
+      toast.error(t('erp.warehouses.validation.nameRequired'));
       return;
     }
     try {
@@ -53,14 +54,14 @@ const Warehouses: React.FC = () => {
         isDefault: false,
         isActive: true,
       });
-      toast.success(t('warehouses.toast.created'));
+      toast.success(t('erp.warehouses.toast.created'));
       setShowCreate(false);
       setNewName('');
       setNewAddress('');
       setNewManagerName('');
       setNewCapacity('');
     } catch {
-      toast.error(t('warehouses.toast.createFailed'));
+      toast.error(t('erp.warehouses.toast.createFailed'));
     }
   };
 
@@ -70,10 +71,10 @@ const Warehouses: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title={`${t('warehouses.title')} · rtylr`} />
+      <HelmetContainer title={pageTitle(t('erp.warehouses.title'))} />
       <PageHeader
-        title={t('warehouses.title')}
-        description={t('warehouses.count', { count: warehouses.length })}
+        title={t('erp.warehouses.title')}
+        description={t('erp.warehouses.count', { count: warehouses.length })}
         actions={
           <button
             type="button"
@@ -81,7 +82,7 @@ const Warehouses: React.FC = () => {
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
-            <Plus size={14} /> {t('warehouses.new')}
+            <Plus size={14} /> {t('erp.warehouses.new')}
           </button>
         }
       />
@@ -95,9 +96,9 @@ const Warehouses: React.FC = () => {
       ) : warehouses.length === 0 ? (
         <EmptyState
           icon={WarehouseIcon}
-          title={t('warehouses.empty.title')}
-          description={t('warehouses.empty.description')}
-          action={{ label: t('warehouses.new'), onClick: () => setShowCreate(true) }}
+          title={t('erp.warehouses.empty.title')}
+          description={t('erp.warehouses.empty.description')}
+          action={{ label: t('erp.warehouses.new'), onClick: () => setShowCreate(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -131,7 +132,7 @@ const Warehouses: React.FC = () => {
                             color: 'var(--erp-success)',
                           }}
                         >
-                          {t('warehouses.status.default')}
+                          {t('erp.warehouses.status.default')}
                         </span>
                       )}
                       {!w.isActive && (
@@ -142,14 +143,14 @@ const Warehouses: React.FC = () => {
                             color: 'var(--erp-danger)',
                           }}
                         >
-                          {t('warehouses.status.inactive')}
+                          {t('erp.warehouses.status.inactive')}
                         </span>
                       )}
                     </div>
                   </div>
                   <button
                     type="button"
-                    aria-label={t('warehouses.delete')}
+                    aria-label={t('erp.warehouses.delete')}
                     onClick={() => setConfirmDeleteId(w.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
                     style={{ color: 'var(--erp-danger)' }}
@@ -178,7 +179,7 @@ const Warehouses: React.FC = () => {
                       className="flex items-center gap-2 text-xs"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
-                      <User size={11} /> {t('warehouses.managedBy', { name: w.managerName })}
+                      <User size={11} /> {t('erp.warehouses.managedBy', { name: w.managerName })}
                     </div>
                   )}
                   {Number(w.capacity) > 0 && (
@@ -186,7 +187,7 @@ const Warehouses: React.FC = () => {
                       className="flex items-center justify-between text-xs"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
-                      <span>{t('warehouses.capacity')}</span>
+                      <span>{t('erp.warehouses.capacity')}</span>
                       <span style={{ color: 'var(--hub-text)' }}>
                         {formatNumber(Number(w.capacity))}
                       </span>
@@ -201,15 +202,15 @@ const Warehouses: React.FC = () => {
 
       <ConfirmModal
         open={confirmDeleteId !== null}
-        title={t('warehouses.deleteConfirm.title')}
-        description={t('warehouses.deleteConfirm.description')}
+        title={t('erp.warehouses.deleteConfirm.title')}
+        description={t('erp.warehouses.deleteConfirm.description')}
         danger
         confirmLabel={t('common.delete')}
         onConfirm={async () => {
           if (confirmDeleteId !== null) {
             try {
               await deleteMut.mutateAsync(confirmDeleteId);
-              toast.success(t('warehouses.toast.deleted'));
+              toast.success(t('erp.warehouses.toast.deleted'));
             } catch {
               // onError in hook handles toast
             }
@@ -232,30 +233,30 @@ const Warehouses: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              {t('warehouses.new')}
+              {t('erp.warehouses.new')}
             </h3>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder={t('warehouses.fields.name')}
+              placeholder={t('erp.warehouses.fields.name')}
               style={inputStyle}
             />
             <input
               value={newAddress}
               onChange={(e) => setNewAddress(e.target.value)}
-              placeholder={t('warehouses.fields.address')}
+              placeholder={t('erp.warehouses.fields.address')}
               style={inputStyle}
             />
             <input
               value={newManagerName}
               onChange={(e) => setNewManagerName(e.target.value)}
-              placeholder={t('warehouses.fields.manager')}
+              placeholder={t('erp.warehouses.fields.manager')}
               style={inputStyle}
             />
             <input
               value={newCapacity}
               onChange={(e) => setNewCapacity(e.target.value)}
-              placeholder={t('warehouses.fields.capacity')}
+              placeholder={t('erp.warehouses.fields.capacity')}
               type="number"
               min={0}
               style={inputStyle}
@@ -276,7 +277,7 @@ const Warehouses: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
-                {createMut.isPending ? t('common.creating') : t('common.create')}
+                {createMut.isPending ? t('erp.common.creating') : t('common.create')}
               </button>
             </div>
           </div>

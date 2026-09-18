@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 /**
  * SubmissionsAdmin empty-state coverage. The screen has two distinct
@@ -9,11 +9,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  * its own message and call-to-action. This test exercises both and
  * verifies the CTAs are wired to real handlers (refetch / clear
  * filter), not just prose that references a button that does nothing.
+ *
+ * i18next is deliberately not mocked. An identity `t` makes an assertion and
+ * the component agree on a key that may never resolve, which is exactly how
+ * five suites here passed while every empty state on screen rendered its own
+ * dotted path (rtylr#1270). Reading the real locale files means the English
+ * below also proves the lookup.
  */
-
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -34,6 +36,11 @@ vi.mock('../../shared/hooks/queries/useAdmin', () => ({
 }));
 
 import SubmissionsAdmin from './SubmissionsAdmin';
+import { initTestI18n } from '../../shared/testing/i18n';
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -48,10 +55,10 @@ describe('SubmissionsAdmin empty state', () => {
   it('shows the true-empty message and a refresh CTA when no filter is active', () => {
     render(<SubmissionsAdmin />);
 
-    expect(screen.getByText('emptyStates.submissionsNone')).toBeInTheDocument();
-    expect(screen.queryByText('emptyStates.submissionsNoneFiltered')).not.toBeInTheDocument();
+    expect(screen.getByText('No applications yet.')).toBeInTheDocument();
+    expect(screen.queryByText('No applications yet at this stage.')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.refresh' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
     expect(submissionsRefetch).toHaveBeenCalledTimes(1);
   });
 
@@ -60,14 +67,14 @@ describe('SubmissionsAdmin empty state', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'reviewed' }));
 
-    expect(screen.getByText('emptyStates.submissionsNoneFiltered')).toBeInTheDocument();
-    expect(screen.queryByText('emptyStates.submissionsNone')).not.toBeInTheDocument();
+    expect(screen.getByText('No applications yet at this stage.')).toBeInTheDocument();
+    expect(screen.queryByText('No applications yet.')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.clearFilter' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear filter' }));
 
     // Clearing the filter flips the empty state back to the
     // unfiltered message - proving the CTA calls the real filter
     // reset handler rather than just being decorative.
-    expect(screen.getByText('emptyStates.submissionsNone')).toBeInTheDocument();
+    expect(screen.getByText('No applications yet.')).toBeInTheDocument();
   });
 });

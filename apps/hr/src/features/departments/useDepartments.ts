@@ -1,4 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
@@ -56,20 +57,22 @@ export function useDepartments(includeCompensation = false) {
 }
 
 export function useCreateDepartment() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateDepartmentRequest) => departmentClient.createDepartment(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
-    onError: () => toast.error('Failed to create department'),
+    onError: () => toast.error(t('errors.createDepartment')),
   });
 }
 
 export function useUpdateDepartment() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; body: UpdateDepartmentBody }) =>
       departmentClient.updateDepartment(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
-    onError: () => toast.error('Failed to update department'),
+    onError: () => toast.error(t('errors.updateDepartment')),
   });
 }

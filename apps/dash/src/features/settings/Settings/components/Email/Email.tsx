@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Mail, Server, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
-import { oneKitResult, unwrap, getOneKitErrorMessage } from '@voxire/api';
+import { unwrap, getOneKitErrorMessage } from '@voxire/api';
 import { rest } from '../../../../../shared/lib/clients';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import {
@@ -147,6 +148,7 @@ interface NotificationState {
 }
 
 const Email: React.FC = () => {
+  const { t } = useTranslation();
   // Sender identity
   const [sender, setSender] = useState<SenderForm>({
     senderName: '',
@@ -185,7 +187,7 @@ const Email: React.FC = () => {
 
   const handleSaveSender = (): void => {
     if (!sender.fromEmail) {
-      toast.error('Sender email is required');
+      toast.error(t('settings.email.senderRequired'));
       return;
     }
     updateBusiness.mutate({
@@ -202,16 +204,16 @@ const Email: React.FC = () => {
       // hub/settings/compat/v1 has no contract in voxie (#894).
       unwrap(rest.post('/hub/settings/email/test', data)),
     onSuccess: () => {
-      toast.success(`SMTP connection to ${smtp.host}:${smtp.port || 587} verified successfully`);
+      toast.success(t('settings.email.smtpVerified', { host: smtp.host, port: smtp.port || 587 }));
     },
     onError: (err) => {
-      toast.error(getOneKitErrorMessage(err, 'Failed to test SMTP connection'));
+      toast.error(getOneKitErrorMessage(err, t('settings.email.smtpTestFailed')));
     },
   });
 
   const handleTestSmtp = (): void => {
     if (!smtp.host || !smtp.username) {
-      toast.error('SMTP host and user are required');
+      toast.error(t('settings.email.smtpHostUserRequired'));
       return;
     }
     testSmtpMutation.mutate({
@@ -223,7 +225,7 @@ const Email: React.FC = () => {
 
   const handleSaveSmtp = (): void => {
     if (!smtp.host) {
-      toast.error('SMTP host is required');
+      toast.error(t('settings.email.smtpHostRequired'));
       return;
     }
     updateBusiness.mutate({
@@ -247,7 +249,7 @@ const Email: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Email settings · rtylr" />
+      <HelmetContainer title={t('settings.email.pageTitle')} />
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -264,39 +266,39 @@ const Email: React.FC = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Mail size={15} style={{ color: 'var(--dash-text-dim)' }} />
-              <CardTitle>Sender Identity</CardTitle>
+              <CardTitle>{t('settings.email.senderTitle')}</CardTitle>
             </div>
-            <CardDescription>Control how your business appears in outgoing emails.</CardDescription>
+            <CardDescription>{t('settings.email.senderDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="senderName">Sender Name</Label>
+              <Label htmlFor="senderName">{t('settings.email.senderName')}</Label>
               <Input
                 id="senderName"
                 name="senderName"
-                placeholder="The Golden Fork"
+                placeholder={t('settings.email.senderNamePlaceholder')}
                 value={sender.senderName}
                 onChange={handleSenderChange}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="fromEmail">From Email</Label>
+              <Label htmlFor="fromEmail">{t('settings.email.fromEmail')}</Label>
               <Input
                 id="fromEmail"
                 name="fromEmail"
                 type="email"
-                placeholder="hello@mybusiness.com"
+                placeholder={t('settings.email.fromEmailPlaceholder')}
                 value={sender.fromEmail}
                 onChange={handleSenderChange}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="replyTo">Reply-to Email</Label>
+              <Label htmlFor="replyTo">{t('settings.email.replyTo')}</Label>
               <Input
                 id="replyTo"
                 name="replyTo"
                 type="email"
-                placeholder="support@mybusiness.com"
+                placeholder={t('settings.email.replyToPlaceholder')}
                 value={sender.replyTo}
                 onChange={handleSenderChange}
               />
@@ -314,11 +316,9 @@ const Email: React.FC = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Server size={15} style={{ color: 'var(--dash-text-dim)' }} />
-              <CardTitle>SMTP Configuration</CardTitle>
+              <CardTitle>{t('settings.email.smtpTitle')}</CardTitle>
             </div>
-            <CardDescription>
-              Optional: use your own SMTP server for full control over email delivery.
-            </CardDescription>
+            <CardDescription>{t('settings.email.smtpDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
             {/* Toggle row */}
@@ -341,17 +341,17 @@ const Email: React.FC = () => {
                 <div className="grid grid-cols-3 gap-3">
                   {/* SMTP Host spans 2 cols */}
                   <div className="col-span-2 space-y-1.5">
-                    <Label htmlFor="smtpHost">SMTP Host</Label>
+                    <Label htmlFor="smtpHost">{t('settings.email.smtpHost')}</Label>
                     <Input
                       id="smtpHost"
                       name="host"
-                      placeholder="smtp.example.com"
+                      placeholder={t('settings.email.smtpHostPlaceholder')}
                       value={smtp.host}
                       onChange={handleSmtpChange}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="smtpPort">Port</Label>
+                    <Label htmlFor="smtpPort">{t('settings.email.port')}</Label>
                     <Input
                       id="smtpPort"
                       name="port"
@@ -364,18 +364,18 @@ const Email: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="smtpUsername">Username</Label>
+                  <Label htmlFor="smtpUsername">{t('settings.email.username')}</Label>
                   <Input
                     id="smtpUsername"
                     name="username"
-                    placeholder="smtp-user@example.com"
+                    placeholder={t('settings.email.usernamePlaceholder')}
                     value={smtp.username}
                     onChange={handleSmtpChange}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="smtpPassword">Password</Label>
+                  <Label htmlFor="smtpPassword">{t('settings.email.password')}</Label>
                   <Input
                     id="smtpPassword"
                     name="password"
@@ -387,7 +387,7 @@ const Email: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Encryption</Label>
+                  <Label>{t('settings.email.encryption')}</Label>
                   <SegmentGroup
                     options={ENCRYPTION_OPTIONS}
                     value={smtp.encryption}
@@ -413,36 +413,36 @@ const Email: React.FC = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell size={15} style={{ color: 'var(--dash-text-dim)' }} />
-              <CardTitle>Email Notifications</CardTitle>
+              <CardTitle>{t('settings.email.notificationsTitle')}</CardTitle>
             </div>
-            <CardDescription>Choose which events trigger an email notification.</CardDescription>
+            <CardDescription>{t('settings.email.notificationsDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0 divide-y" style={{ borderColor: 'var(--dash-border)' }}>
             <NotificationRow
               id="notif-new-order"
-              label="New order received"
-              description="Get an email each time a customer places an order."
+              label={t('settings.email.newOrder')}
+              description={t('settings.email.newOrderDescription')}
               checked={notifications.newOrder}
               onChange={toggleNotification('newOrder')}
             />
             <NotificationRow
               id="notif-status"
-              label="Order status updates"
-              description="Notify customers when their order status changes."
+              label={t('settings.email.orderStatus')}
+              description={t('settings.email.orderStatusDescription')}
               checked={notifications.statusUpdates}
               onChange={toggleNotification('statusUpdates')}
             />
             <NotificationRow
               id="notif-weekly"
-              label="Weekly summary"
-              description="A weekly digest of orders, revenue, and trends."
+              label={t('settings.email.weeklySummary')}
+              description={t('settings.email.weeklySummaryDescription')}
               checked={notifications.weeklySummary}
               onChange={toggleNotification('weeklySummary')}
             />
             <NotificationRow
               id="notif-feedback"
-              label="Customer feedback"
-              description="Receive an email when a customer submits a review."
+              label={t('settings.email.feedback')}
+              description={t('settings.email.feedbackDescription')}
               checked={notifications.feedback}
               onChange={toggleNotification('feedback')}
             />

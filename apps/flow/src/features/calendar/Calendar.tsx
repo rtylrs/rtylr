@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@voxire/utils';
 import { HelmetContainer } from '@voxire/components';
 import { useTasks, useCreateTask } from '../tasks/useTasks';
 import { useLabels } from '../tasks/useLabels';
@@ -11,8 +12,23 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
+import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
+import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 
 const ACCENT_VAR = 'var(--accent)';
+
+/**
+ * The grid needs room; below that the month is a list.
+ *
+ * A min-width test rather than max-width, and it decides which layout is
+ * *rendered* rather than which is hidden. Two reasons: a month grid plus a full
+ * agenda is a lot of nodes to build and throw away on every render, and with
+ * both mounted every task title exists twice in the DOM, which a test cannot
+ * disambiguate and a screen reader only avoids because `display: none` happens
+ * to prune it.
+ */
+const WIDE = '(min-width: 768px)';
 
 interface CreateModal {
   date: string;
@@ -20,9 +36,10 @@ interface CreateModal {
 
 const Calendar: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const openTask = useOpenTask();
+  const isWide = useMediaQuery(WIDE);
   const { data: apiTasks = [] } = useTasks({});
   const tasks = apiTasks as ApiTask[];
-  const navigate = useNavigate();
   const { projects } = useFlowStore();
   const { data: labels = [] } = useLabels();
   const createTask = useCreateTask();
@@ -36,40 +53,23 @@ const Calendar: React.FC = () => {
     if (!newLabelId && labels.length > 0) setNewLabelId(String(labels[0].id));
   }, [labels, newLabelId]);
 
-  const { days, monthLabel } = useMemo(() => {
-    const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
-    const startDay = first.getDay();
-    const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
-    const cells: { date: Date; inMonth: boolean }[] = [];
-    for (let i = startDay - 1; i >= 0; i--) {
-      cells.push({ date: new Date(cursor.getFullYear(), cursor.getMonth(), -i), inMonth: false });
-    }
-    for (let d = 1; d <= daysInMonth; d++) {
-      cells.push({ date: new Date(cursor.getFullYear(), cursor.getMonth(), d), inMonth: true });
-    }
-    while (cells.length % 7 !== 0) {
-      const last = cells[cells.length - 1].date;
-      cells.push({
-        date: new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1),
-        inMonth: false,
-      });
-    }
-    return {
-      days: cells,
+  const { days, monthLabel } = useMemo(
+    () => ({
+      days: monthCells(cursor),
       monthLabel: cursor.toLocaleString(i18n.language, { month: 'long', year: 'numeric' }),
-    };
-  }, [cursor, i18n.language]);
+    }),
+    [cursor, i18n.language]
+  );
 
-  const tasksByDate = useMemo(() => {
-    const map: Record<string, ApiTask[]> = {};
-    tasks.forEach((t) => {
-      if (!t.dueDate) return;
-      const key = t.dueDate.split('T')[0];
-      if (!map[key]) map[key] = [];
-      map[key].push(t);
-    });
-    return map;
-  }, [tasks]);
+  // One lookup for the whole grid rather than a find() per pill per cell.
+  const projectColorById = useMemo(
+    () => new Map(projects.map((p) => [String(p.id), p.color])),
+    [projects]
+  );
+
+  const tasksByDate = useMemo(() => tasksByLocalDay(tasks), [tasks]);
+
+  const agenda = useMemo(() => agendaDays(days, tasksByDate), [days, tasksByDate]);
 
   const today = todayIso();
 
@@ -165,100 +165,140 @@ const Calendar: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4">
-        <div className="grid grid-cols-7 gap-px" style={{ background: 'var(--flow-border)' }}>
-          {days.slice(0, 7).map((c) => (
-            <div
-              key={c.date.toISOString()}
-              className="py-1.5 text-center text-meta font-semibold uppercase"
-              style={{ background: 'var(--flow-bg)', color: 'var(--flow-text-dim)' }}
-            >
-              {new Intl.DateTimeFormat(i18n.language, { weekday: 'short' }).format(c.date)}
-            </div>
-          ))}
-          {days.map((c, i) => {
-            const iso = toLocalIso(c.date);
-            const dayTasks = tasksByDate[iso] || [];
-            const isToday = iso === today;
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.1, delay: i * 0.002 }}
-                onClick={() => openCreate(c.date, c.inMonth)}
-                className="min-h-[100px] p-1.5 cursor-pointer group"
-                style={{
-                  background: 'var(--flow-bg)',
-                  opacity: c.inMonth ? 1 : 0.4,
-                }}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span
-                    className="text-meta font-semibold h-5 w-5 flex items-center justify-center rounded-full"
-                    style={{
-                      background: isToday ? ACCENT_VAR : 'transparent',
-                      color: isToday ? '#0a0a0a' : 'var(--flow-text-muted)',
-                    }}
-                  >
-                    {c.date.getDate()}
-                  </span>
-                  {c.inMonth && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openCreate(c.date, c.inMonth);
-                      }}
-                      aria-label={t('flow.calendar.addTaskLabel', {
-                        date: c.date.toLocaleDateString(i18n.language, {
-                          month: 'long',
-                          day: 'numeric',
-                          year: 'numeric',
-                        }),
-                      })}
-                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-meta opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
-                      style={{ color: 'var(--flow-text-dim)' }}
-                    >
-                      {t('flow.calendar.addHint')}
-                    </button>
-                  )}
-                </div>
-                <div className="space-y-0.5">
-                  {dayTasks.slice(0, 3).map((t) => (
-                    <button
-                      type="button"
-                      key={t.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate({ to: `/task/${t.id}` as string });
-                      }}
-                      className="w-full text-left px-1.5 py-0.5 rounded-sm text-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
-                      style={{
-                        background: 'var(--flow-card)',
-                        color: 'var(--flow-text)',
-                      }}
-                    >
-                      <PriorityIcon priority={t.priority} size={9} />
-                      <span className="truncate">{t.title}</span>
-                    </button>
-                  ))}
-                  {dayTasks.length > 3 && (
-                    <button
-                      type="button"
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-meta px-1 hover:underline"
-                      style={{ color: ACCENT_VAR }}
-                    >
-                      {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
+      {/* At 390px a seven-column month gives each day about 55px, which truncates
+          a title to two or three characters and leaves the pills too small to
+          hit (rtylr#1215, S-10). The month navigation above is shared; only the
+          body swaps. */}
+      {!isWide && (
+        <div className="flex-1 overflow-auto">
+          <CalendarAgenda
+            entries={agenda}
+            todayIso={today}
+            taskId={(task) => String(task.id)}
+            taskTitle={(task) => task.title}
+            taskTone={(task) => projectColorById.get(String(task.projectId))}
+            onOpen={(task) => openTask(String(task.id))}
+            leading={(task) => <PriorityIcon priority={task.priority} size={11} />}
+          />
         </div>
-      </div>
+      )}
+
+      {isWide && (
+        <div className="flex-1 overflow-auto p-4">
+          <div className="grid grid-cols-7 gap-px" style={{ background: 'var(--flow-border)' }}>
+            {days.slice(0, 7).map((c) => (
+              <div
+                key={c.date.toISOString()}
+                className="py-1.5 text-center text-meta font-semibold uppercase"
+                style={{ background: 'var(--flow-bg)', color: 'var(--flow-text-dim)' }}
+              >
+                {new Intl.DateTimeFormat(i18n.language, { weekday: 'short' }).format(c.date)}
+              </div>
+            ))}
+            {days.map((c, i) => {
+              const iso = c.iso;
+              const dayTasks = tasksByDate.get(iso) ?? [];
+              const isToday = iso === today;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0 }}
+                  // The out-of-month dimming rides on `animate` rather than
+                  // sitting in `style` beside it. A style opacity pins the value
+                  // and the animation stops running; on TaskCard the same
+                  // conflict left every board card invisible (rtylr#1078). Here
+                  // the style always resolved to a number, so the cells showed
+                  // and only the entrance was dead.
+                  animate={{ opacity: c.inMonth ? 1 : 0.4 }}
+                  transition={{ duration: 0.1, delay: i * 0.002 }}
+                  onClick={() => openCreate(c.date, c.inMonth)}
+                  className="min-h-[100px] p-1.5 cursor-pointer group"
+                  style={{ background: 'var(--flow-bg)' }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className="text-meta font-semibold h-5 w-5 flex items-center justify-center rounded-full"
+                      style={{
+                        background: isToday ? ACCENT_VAR : 'transparent',
+                        color: isToday ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
+                      }}
+                    >
+                      {c.date.getDate()}
+                    </span>
+                    {c.inMonth && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCreate(c.date, c.inMonth);
+                        }}
+                        aria-label={t('flow.calendar.addTaskLabel', {
+                          date: c.date.toLocaleDateString(i18n.language, {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                          }),
+                        })}
+                        className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-meta opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
+                        style={{ color: 'var(--flow-text-dim)' }}
+                      >
+                        {t('flow.calendar.addHint')}
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    {dayTasks.slice(0, 3).map((t) => {
+                      // Tinted by project. This calendar mixes every project
+                      // together, so a single card colour left no way to tell
+                      // whose work a day was full of (#1087). Falls back to the
+                      // card surface when the project is not in the store yet.
+                      const tone = projectColorById.get(String(t.projectId));
+                      return (
+                        <button
+                          type="button"
+                          key={t.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openTask(String(t.id));
+                          }}
+                          className="w-full text-left px-1.5 py-0.5 rounded-sm text-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+                          style={{
+                            // The tone appears once. Both the tint and the
+                            // foreground read it back, and a test can see it:
+                            // happy-dom drops any color-mix() set through the
+                            // style property, so the two derived values below are
+                            // invisible to the suite (rtylr#1249).
+                            ...(tone ? { ['--tone' as string]: tone } : {}),
+                            background: tone ? withAlpha('var(--tone)', 13) : 'var(--flow-card)',
+                            color: tone ? onTint('var(--tone)') : 'var(--flow-text)',
+                          }}
+                        >
+                          <PriorityIcon priority={t.priority} size={9} />
+                          {/* dir="auto" so a right-to-left title truncates at its
+                            own end rather than clipping the start of it. */}
+                          <span dir="auto" className="truncate">
+                            {t.title}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    {dayTasks.length > 3 && (
+                      <button
+                        type="button"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-meta px-1 hover:underline"
+                        style={{ color: ACCENT_VAR }}
+                      >
+                        {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Create task modal */}
       <AnimatePresence>
@@ -371,7 +411,7 @@ const Calendar: React.FC = () => {
                   onClick={submitCreate}
                   disabled={!newTitle.trim() || createTask.isPending}
                   className="px-3 py-1.5 rounded-sm text-meta font-semibold disabled:opacity-40"
-                  style={{ background: ACCENT_VAR, color: '#0a0a0a' }}
+                  style={{ background: ACCENT_VAR, color: 'var(--flow-on-accent)' }}
                 >
                   {createTask.isPending ? t('flow.calendar.creating') : t('flow.calendar.create')}
                 </button>

@@ -10,6 +10,8 @@ import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import BarcodeSvg from '../../shared/components/BarcodeSvg';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -30,10 +32,10 @@ const Barcodes: React.FC = () => {
 
   const handlePrint = () => {
     if (selected.size === 0) {
-      toast.error('Select products first');
+      toast.error(t('erp.barcodes.selectFirstToast'));
       return;
     }
-    toast.success(`Printing ${selected.size * copies} labels`);
+    toast.success(t('erp.barcodes.printing', { count: selected.size * copies }));
     setTimeout(() => window.print(), 100);
   };
 
@@ -45,10 +47,10 @@ const Barcodes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Barcode generator · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/barcodes'].title))} />
       <PageHeader
-        title="Barcode Generator"
-        description="Select products, choose copy count, and print labels"
+        title={t(routeLabels['/barcodes'].title)}
+        description={t('erp.barcodes.subtitle')}
         actions={
           <div className="flex items-center gap-2">
             <div
@@ -56,7 +58,7 @@ const Barcodes: React.FC = () => {
               style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
             >
               <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                COPIES
+                {t('erp.barcodes.copies')}
               </span>
               <input
                 type="number"
@@ -85,7 +87,7 @@ const Barcodes: React.FC = () => {
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <p className="text-xs font-semibold mb-2 px-2" style={{ color: 'var(--hub-text-muted)' }}>
-            PRODUCTS
+            {t('erp.barcodes.products')}
           </p>
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 mb-1" />)
@@ -133,17 +135,17 @@ const Barcodes: React.FC = () => {
             >
               <EmptyState
                 icon={Printer}
-                title={t('barcodes.previewEmpty.title')}
-                description={t('barcodes.previewEmpty.description')}
+                title={t('erp.barcodes.previewEmpty.title')}
+                description={t('erp.barcodes.previewEmpty.description')}
                 size="compact"
                 action={
                   products.length > 0
                     ? {
-                        label: t('barcodes.selectFirst'),
+                        label: t('erp.barcodes.selectFirst'),
                         onClick: () => toggle(products[0]?.id ?? ''),
                       }
                     : {
-                        label: t('barcodes.goToProducts'),
+                        label: t('erp.barcodes.goToProducts'),
                         onClick: () => navigate({ to: '/products' }),
                       }
                 }

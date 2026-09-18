@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import {
   Star,
@@ -171,48 +172,52 @@ export const TagChip: React.FC<{
   label: string;
   onRemove?: () => void;
   color?: string;
-}> = ({ label, onRemove, color = ACCENT }) => (
-  <span
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '4px',
-      padding: '2px 8px 2px 10px',
-      borderRadius: '9999px',
-      fontSize: '11px',
-      fontWeight: 500,
-      background: `${color}14`,
-      color,
-      border: `1px solid ${color}33`,
-    }}
-  >
-    {label}
-    {onRemove && (
-      <button
-        aria-label="Remove"
-        type="button"
-        onClick={onRemove}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          color: 'currentColor',
-          display: 'inline-flex',
-          padding: 0,
-          opacity: 0.7,
-        }}
-      >
-        <X size={10} />
-      </button>
-    )}
-  </span>
-);
+}> = ({ label, onRemove, color = ACCENT }) => {
+  const { t } = useTranslation();
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '2px 8px 2px 10px',
+        borderRadius: '9999px',
+        fontSize: '11px',
+        fontWeight: 500,
+        background: `${color}14`,
+        color,
+        border: `1px solid ${color}33`,
+      }}
+    >
+      {label}
+      {onRemove && (
+        <button
+          aria-label={t('crm.leadDetail.remove')}
+          type="button"
+          onClick={onRemove}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'currentColor',
+            display: 'inline-flex',
+            padding: 0,
+            opacity: 0.7,
+          }}
+        >
+          <X size={10} />
+        </button>
+      )}
+    </span>
+  );
+};
 
 // ── 21. NotesPanel ──────────────────────────────────────────────
 export const NotesPanel: React.FC<{
   notes: string;
   onSave: (notes: string) => void;
 }> = ({ notes, onSave }) => {
+  const { t } = useTranslation();
   const [value, setValue] = useState(notes);
   const [editing, setEditing] = useState(false);
   return (
@@ -242,7 +247,7 @@ export const NotesPanel: React.FC<{
             letterSpacing: '0.05em',
           }}
         >
-          Notes
+          {t('crm.leadDetail.notesLabel')}
         </h4>
         {!editing && (
           <button
@@ -257,7 +262,7 @@ export const NotesPanel: React.FC<{
               fontWeight: 600,
             }}
           >
-            Edit
+            {t('common.edit')}
           </button>
         )}
       </div>
@@ -291,7 +296,7 @@ export const NotesPanel: React.FC<{
                 setEditing(false);
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               variant="primary"
@@ -301,7 +306,7 @@ export const NotesPanel: React.FC<{
                 setEditing(false);
               }}
             >
-              Save
+              {t('common.save')}
             </Button>
           </div>
         </>
@@ -328,18 +333,19 @@ export const EmailEditor: React.FC<{
   body: string;
   onChange: (s: string, b: string) => void;
 }> = ({ subject, body, onChange }) => {
+  const { t } = useTranslation();
   const insertVar = (v: string) => onChange(subject, body + ` {{${v}}}`);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <Input
-        label="Subject"
+        label={t('crm.composer.subject')}
         value={subject}
         onChange={(e) => onChange(e.target.value, body)}
-        placeholder="Your subject line..."
+        placeholder={t('crm.composer.subjectPlaceholder')}
       />
       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginRight: '4px' }}>
-          Insert:
+          {t('crm.composer.insert')}
         </span>
         {['first_name', 'last_name', 'points', 'tier', 'business_name'].map((v) => (
           <button
@@ -371,13 +377,13 @@ export const EmailEditor: React.FC<{
             fontWeight: 600,
           }}
         >
-          Body
+          {t('crm.composer.body')}
         </span>
         <textarea
           value={body}
           onChange={(e) => onChange(subject, e.target.value)}
           rows={10}
-          placeholder="Write your message..."
+          placeholder={t('crm.composer.bodyPlaceholder')}
           style={{
             padding: '12px',
             borderRadius: '8px',
@@ -401,13 +407,14 @@ export const SMSComposer: React.FC<{
   body: string;
   onChange: (b: string) => void;
 }> = ({ body, onChange }) => {
+  const { t } = useTranslation();
   const remaining = 160 - body.length;
   const tooLong = remaining < 0;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginRight: '4px' }}>
-          Insert:
+          {t('crm.composer.insert')}
         </span>
         {['first_name', 'points', 'business_name'].map((v) => (
           <button
@@ -434,7 +441,7 @@ export const SMSComposer: React.FC<{
         onChange={(e) => onChange(e.target.value)}
         rows={5}
         maxLength={320}
-        placeholder="Your SMS message..."
+        placeholder={t('crm.composer.smsPlaceholder')}
         style={{
           padding: '12px',
           borderRadius: '8px',
@@ -449,7 +456,7 @@ export const SMSComposer: React.FC<{
         }}
       />
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-        <span style={{ color: 'var(--hub-text-dim)' }}>SMS single message: 160 chars</span>
+        <span style={{ color: 'var(--hub-text-dim)' }}>{t('crm.composer.smsHint')}</span>
         <span
           style={{
             color: tooLong ? '#ef4444' : remaining < 20 ? '#f59e0b' : 'var(--hub-text-muted)',
@@ -464,85 +471,89 @@ export const SMSComposer: React.FC<{
 };
 
 // ── 24. SegmentRule ─────────────────────────────────────────────
-const OPERATOR_LABELS: Record<string, string> = {
-  '>': 'greater than',
-  '<': 'less than',
-  '=': 'equals',
-  '!=': 'not equals',
+// Keys, not labels: module scope runs before i18next has a language.
+const OPERATOR_LABEL_KEYS: Record<string, string> = {
+  '>': 'crm.segmentOperators.gt',
+  '<': 'crm.segmentOperators.lt',
+  '=': 'crm.segmentOperators.eq',
+  '!=': 'crm.segmentOperators.ne',
 };
 export const SegmentRuleRow: React.FC<{
   rule: { field: string; operator: string; value: string };
   onChange: (rule: { field: string; operator: string; value: string }) => void;
   onRemove: () => void;
-}> = ({ rule, onChange, onRemove }) => (
-  <div
-    style={{
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'center',
-      padding: '10px',
-      borderRadius: '10px',
-      background: 'var(--hub-hover)',
-      border: '1px solid var(--hub-border)',
-    }}
-  >
-    <Select
-      value={rule.field}
-      onChange={(e) => {
-        const field = e.target.value;
-        const operators = getSegmentRuleOperators(field);
-        const operator = operators.includes(rule.operator as (typeof operators)[number])
-          ? rule.operator
-          : operators[0];
-        onChange({ ...rule, field, operator });
-      }}
-      style={{ flex: 1 }}
-    >
-      {SEGMENT_RULE_FIELDS.map((f) => (
-        <option key={f.value} value={f.value}>
-          {f.label}
-        </option>
-      ))}
-    </Select>
-    <Select
-      value={rule.operator}
-      onChange={(e) => onChange({ ...rule, operator: e.target.value })}
-      style={{ width: '130px' }}
-    >
-      {getSegmentRuleOperators(rule.field).map((operator) => (
-        <option key={operator} value={operator}>
-          {OPERATOR_LABELS[operator] ?? operator}
-        </option>
-      ))}
-    </Select>
-    <Input
-      value={rule.value}
-      onChange={(e) => onChange({ ...rule, value: e.target.value })}
-      placeholder="value"
-      style={{ width: '140px' }}
-    />
-    <button
-      aria-label="Remove tag"
-      type="button"
-      onClick={onRemove}
+}> = ({ rule, onChange, onRemove }) => {
+  const { t } = useTranslation();
+  return (
+    <div
       style={{
-        background: 'transparent',
-        border: '1px solid var(--hub-border)',
-        borderRadius: '8px',
-        width: '32px',
-        height: '32px',
-        cursor: 'pointer',
-        color: 'var(--hub-text-muted)',
         display: 'flex',
+        gap: '8px',
         alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
+        padding: '10px',
+        borderRadius: '10px',
+        background: 'var(--hub-hover)',
+        border: '1px solid var(--hub-border)',
       }}
     >
-      <X size={14} />
-    </button>
-  </div>
-);
+      <Select
+        value={rule.field}
+        onChange={(e) => {
+          const field = e.target.value;
+          const operators = getSegmentRuleOperators(field);
+          const operator = operators.includes(rule.operator as (typeof operators)[number])
+            ? rule.operator
+            : operators[0];
+          onChange({ ...rule, field, operator });
+        }}
+        style={{ flex: 1 }}
+      >
+        {SEGMENT_RULE_FIELDS.map((field) => (
+          <option key={field} value={field}>
+            {t(`crm.segmentFields.${field}`)}
+          </option>
+        ))}
+      </Select>
+      <Select
+        value={rule.operator}
+        onChange={(e) => onChange({ ...rule, operator: e.target.value })}
+        style={{ width: '130px' }}
+      >
+        {getSegmentRuleOperators(rule.field).map((operator) => (
+          <option key={operator} value={operator}>
+            {OPERATOR_LABEL_KEYS[operator] ? t(OPERATOR_LABEL_KEYS[operator]) : operator}
+          </option>
+        ))}
+      </Select>
+      <Input
+        value={rule.value}
+        onChange={(e) => onChange({ ...rule, value: e.target.value })}
+        placeholder={t('crm.components.valuePlaceholder')}
+        style={{ width: '140px' }}
+      />
+      <button
+        aria-label={t('crm.components.removeTag')}
+        type="button"
+        onClick={onRemove}
+        style={{
+          background: 'transparent',
+          border: '1px solid var(--hub-border)',
+          borderRadius: '8px',
+          width: '32px',
+          height: '32px',
+          cursor: 'pointer',
+          color: 'var(--hub-text-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+};
 
 // ── 25. AutomationNode ──────────────────────────────────────────
 export const AutomationNode: React.FC<{
@@ -551,6 +562,7 @@ export const AutomationNode: React.FC<{
   description?: string;
   onRemove?: () => void;
 }> = ({ type, label, description, onRemove }) => {
+  const { t } = useTranslation();
   const colors: Record<string, string> = {
     trigger: '#10b981',
     action: '#3b82f6',
@@ -586,7 +598,7 @@ export const AutomationNode: React.FC<{
         </span>
         {onRemove && (
           <button
-            aria-label="Remove node"
+            aria-label={t('crm.components.removeNode')}
             type="button"
             onClick={onRemove}
             style={{
@@ -678,6 +690,7 @@ export const LoyaltyPointsInput: React.FC<{
   onAward: (points: number, reason: string) => void;
   onDeduct: (points: number, reason: string) => void;
 }> = ({ onAward, onDeduct }) => {
+  const { t } = useTranslation();
   const [points, setPoints] = useState(0);
   const [reason, setReason] = useState('');
   return (
@@ -702,16 +715,16 @@ export const LoyaltyPointsInput: React.FC<{
           letterSpacing: '0.05em',
         }}
       >
-        Adjust Points
+        {t('crm.components.adjustPoints')}
       </h4>
       <Input
         type="number"
-        placeholder="Amount"
+        placeholder={t('crm.components.amount')}
         value={points || ''}
         onChange={(e) => setPoints(Number(e.target.value) || 0)}
       />
       <Input
-        placeholder="Reason (optional)"
+        placeholder={t('crm.components.reasonOptional')}
         value={reason}
         onChange={(e) => setReason(e.target.value)}
       />
@@ -753,10 +766,15 @@ export const LoyaltyPointsInput: React.FC<{
 export const ConsentBanner: React.FC<{
   consent: Record<string, boolean>;
 }> = ({ consent }) => {
+  const { t } = useTranslation();
   const items = [
-    { label: 'Email', allowed: consent.email === true },
-    { label: 'SMS', allowed: consent.sms === true },
-    { label: 'Marketing', allowed: consent.marketing === true },
+    { id: 'email', label: t('common.email'), allowed: consent.email === true },
+    { id: 'sms', label: t('crm.components.sms'), allowed: consent.sms === true },
+    {
+      id: 'marketing',
+      label: t('crm.createCustomer.marketing'),
+      allowed: consent.marketing === true,
+    },
   ];
   return (
     <div
@@ -771,7 +789,7 @@ export const ConsentBanner: React.FC<{
       }}
     >
       {items.map((it) => (
-        <div key={it.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <div
             style={{
               width: '16px',
@@ -800,6 +818,7 @@ export const ConsentBanner: React.FC<{
 
 // ── 29. CustomerQuickView ───────────────────────────────────────
 export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }) => {
+  const { t } = useTranslation();
   const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier);
   const next = pointsToNextTier(customer.loyaltyPoints, undefined, customer.loyaltyTier);
   return (
@@ -829,7 +848,7 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
           <div
             style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
           >
-            Spent
+            {t('crm.components.spent')}
           </div>
           <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>
             ${customer.totalSpent.toLocaleString()}
@@ -839,7 +858,7 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
           <div
             style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
           >
-            Visits
+            {t('crm.customers.stats.visits')}
           </div>
           <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{customer.visits}</div>
         </div>
@@ -847,7 +866,7 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
           <div
             style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
           >
-            Points
+            {t('crm.components.points')}
           </div>
           <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>
             {customer.loyaltyPoints.toLocaleString()}
@@ -857,7 +876,7 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
           <div
             style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
           >
-            Last seen
+            {t('crm.components.lastSeen')}
           </div>
           <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{customer.lastVisit}</div>
         </div>
@@ -877,7 +896,9 @@ export const SearchableCustomerSelect: React.FC<{
   value: number | null;
   onChange: (id: number | null) => void;
   placeholder?: string;
-}> = ({ customers, value, onChange, placeholder = 'Select customer...' }) => {
+}> = ({ customers, value, onChange, placeholder }) => {
+  const { t } = useTranslation();
+  const placeholderText = placeholder ?? t('crm.components.selectCustomer');
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
   const selected = customers.find((c) => c.id === value);
@@ -909,7 +930,7 @@ export const SearchableCustomerSelect: React.FC<{
         }}
       >
         <SearchIcon size={14} style={{ color: 'var(--hub-text-dim)' }} />
-        {selected ? selected.name : placeholder}
+        {selected ? selected.name : placeholderText}
       </button>
       {open && (
         <motion.div
@@ -935,7 +956,7 @@ export const SearchableCustomerSelect: React.FC<{
             autoFocus
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search..."
+            placeholder={t('crm.components.searchPlaceholder')}
             style={{
               padding: '10px 12px',
               background: 'transparent',
@@ -956,7 +977,7 @@ export const SearchableCustomerSelect: React.FC<{
                   color: 'var(--hub-text-muted)',
                 }}
               >
-                No results
+                {t('crm.components.noResults')}
               </div>
             )}
             {filtered.map((c) => (

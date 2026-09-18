@@ -110,21 +110,63 @@
       "generateBtn": "Générer {{count}} nouvelles",
       "preview": "Nouvelles variantes à créer",
       "createAll": "Créer {{count}} variantes",
-      "creating": "Création…"
-    }
+      "creating": "Création…",
+      "createFailedOne": "Échec de la création de la variante",
+      "updateFailed": "Échec de la mise à jour de la variante",
+      "deleteFailed": "Échec de la suppression de la variante"
+    },
+    "updateFailed": "Échec de la mise à jour du produit",
+    "deleteFailed": "Échec de la suppression du produit",
+    "barcodeLookupFailed": "Échec de la recherche du code-barres",
+    "searchPlaceholder": "Rechercher des produits…",
+    "category": "Catégorie",
+    "brand": "Marque",
+    "allCategories": "Toutes les catégories",
+    "allStatuses": "Tous les statuts",
+    "status": {
+      "inStock": "En stock",
+      "lowStock": "Stock bas",
+      "outOfStock": "Rupture de stock"
+    },
+    "costPrice": "Prix de revient",
+    "salePrice": "Prix de vente",
+    "margin": "Marge",
+    "noStockHistory": "Aucune donnée d'historique de stock pour l'instant.",
+    "noSalesHistory": "Aucune donnée d'historique des ventes pour l'instant.",
+    "barcode": "CODE-BARRES",
+    "leadTime": "Délai",
+    "reorderPoint": "Point de commande",
+    "unit": "Unité",
+    "unitsCount_one": "{{count}} unité",
+    "unitsCount_many": "{{count}} d'unités",
+    "unitsCount_other": "{{count}} unités"
   },
   "inventory": {
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
     "empty": "No products found.",
-    "clearSearch": "Effacer la recherche"
+    "clearSearch": "Effacer la recherche",
+    "adjustFailed": "Échec de l'ajustement du stock"
   },
   "suppliers": {
     "title": "Suppliers",
     "add": "Add Supplier",
     "comingSoon": "Supplier management is coming soon.",
-    "scorecards": "Scorecards"
+    "scorecards": "Scorecards",
+    "requiredFields": "Le nom du fournisseur, l'e-mail, la ville et le pays sont obligatoires",
+    "created": "Fournisseur créé",
+    "createFailed": "Échec de la création du fournisseur",
+    "newSupplier": "Nouveau fournisseur",
+    "activeCount_one": "{{count}} fournisseur actif",
+    "activeCount_many": "{{count}} de fournisseurs actifs",
+    "activeCount_other": "{{count}} fournisseurs actifs",
+    "companyName": "Raison sociale",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "city": "Ville",
+    "country": "Pays",
+    "address": "Adresse"
   },
   "common": {
     "cancel": "Cancel",
@@ -165,7 +207,10 @@
       "created": "Entrepôt créé",
       "createFailed": "Échec de la création de l'entrepôt",
       "deleted": "Entrepôt supprimé"
-    }
+    },
+    "createFailed": "Échec de la création de l'entrepôt",
+    "updateFailed": "Échec de la mise à jour de l'entrepôt",
+    "deleteFailed": "Échec de la suppression de l'entrepôt"
   },
   "receiving": {
     "title": "Réception des marchandises",
@@ -195,14 +240,30 @@
       "title": "Aucune suggestion",
       "description": "Tous les niveaux de stock sont sains"
     },
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "subtitle": "Recommandations basées sur la vitesse des ventes et les délais fournisseurs",
+    "avgDaily": "Moy. / jour",
+    "suggested": "Suggéré",
+    "lead": "Délai",
+    "confidence": "Confiance"
   },
   "variants": {
     "empty": {
       "title": "Aucune variante",
       "description": "Ajoutez des variantes pour différencier vos produits"
     },
-    "addVariant": "Ajouter une variante"
+    "addVariant": "Ajouter une variante",
+    "productIdRequired": "L'identifiant du produit est obligatoire",
+    "nameRequired": "Le nom de la variante est obligatoire",
+    "priceNegative": "Le prix ne peut pas être négatif",
+    "created": "Variante créée",
+    "createFailed": "Échec de la création de la variante",
+    "subtitle": "Des références distinctes pour les tailles, couleurs, parfums et plus",
+    "newVariant": "Nouvelle variante",
+    "productIdPlaceholder": "Identifiant du produit",
+    "namePlaceholder": "Nom de la variante (par ex. Grand / Rouge)",
+    "skuPlaceholder": "Référence (facultatif)",
+    "attributes": "Attributs"
   },
   "priceLists": {
     "empty": {
@@ -210,21 +271,41 @@
       "description": "Créez votre première liste de prix pour activer la tarification par palier"
     },
     "newPriceList": "Nouvelle liste de prix",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "nameRequired": "Le nom de la liste de prix est obligatoire",
+    "created": "Liste de prix créée",
+    "createFailed": "Échec de la création de la liste de prix",
+    "subtitle": "Stratégies tarifaires par devise",
+    "currencyPlaceholder": "Devise (par ex. USD)",
+    "setDefault": "Définir comme liste de prix par défaut"
   },
   "brands": {
     "empty": {
       "title": "Pas encore de marques",
       "description": "Ajoutez votre première marque pour regrouper les produits."
     },
-    "newBrand": "Nouvelle marque"
+    "newBrand": "Nouvelle marque",
+    "nameRequired": "Le nom de la marque est obligatoire",
+    "created": "Marque créée",
+    "createFailed": "Échec de la création de la marque",
+    "countAcrossCatalog_one": "{{count}} marque dans votre catalogue",
+    "countAcrossCatalog_many": "{{count}} de marques dans votre catalogue",
+    "countAcrossCatalog_other": "{{count}} marques dans votre catalogue",
+    "deleteAria": "Supprimer la marque",
+    "confirmDeleteTitle": "Supprimer la marque ?",
+    "confirmDeleteBody": "Les produits de cette marque ne seront pas supprimés, mais ils n'auront plus de marque.",
+    "deleted": "Marque supprimée",
+    "namePlaceholder": "Nom de la marque",
+    "descriptionPlaceholder": "Description (facultatif)"
   },
   "expiry": {
     "empty": {
       "title": "Aucun article arrivant à expiration",
       "description": "Aucun lot avec des dates d'expiration suivies"
     },
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "expiryColumn": "Péremption",
+    "daysLeft": "Jours restants"
   },
   "stockTransfers": {
     "empty": {
@@ -232,7 +313,21 @@
       "description": "Créez votre premier transfert de stock"
     },
     "newTransfer": "Nouveau transfert",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "warehousesRequired": "Les entrepôts source et destination sont obligatoires",
+    "warehousesMustDiffer": "La source et la destination doivent être différentes",
+    "itemRequired": "Au moins un article avec un produit et une quantité positive est requis",
+    "draftCreated": "Brouillon de transfert créé",
+    "createFailed": "Échec de la création du transfert",
+    "subtitle": "Déplacer le stock entre les entrepôts",
+    "idColumn": "ID",
+    "from": "De",
+    "to": "Vers",
+    "items": "Articles",
+    "created": "Créé le",
+    "fromWarehouse": "Depuis l'entrepôt…",
+    "toWarehouse": "Vers l'entrepôt…",
+    "newTransferTitle": "Nouveau transfert de stock"
   },
   "lowStockAlerts": {
     "empty": {
@@ -247,14 +342,40 @@
       "description": "Lancez un comptage pour détecter les écarts"
     },
     "newStockTake": "Nouvel inventaire",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "warehouseRequired": "L'entrepôt est obligatoire",
+    "stillLoading": "L'inventaire est encore en cours de chargement",
+    "created": "Inventaire créé",
+    "createFailed": "Échec de la création de l'inventaire",
+    "completed": "Inventaire terminé",
+    "completeFailed": "Échec de la clôture de l'inventaire",
+    "complete": "Terminer",
+    "subtitle": "Comptages périodiques et rapports d'écarts",
+    "completeAria": "Terminer l'inventaire",
+    "variance": "ÉCART",
+    "selectWarehouse": "Choisir un entrepôt…",
+    "uncountedWarning_one": "{{count}} article non compté. Terminer quand même ?",
+    "uncountedWarning_many": "{{count}} d'articles non comptés. Terminer quand même ?",
+    "uncountedWarning_other": "{{count}} articles non comptés. Terminer quand même ?"
   },
   "categories": {
     "empty": {
       "title": "Pas encore de catégories",
       "description": "Créez votre première catégorie pour organiser les produits"
     },
-    "addCategory": "Ajouter une catégorie"
+    "addCategory": "Ajouter une catégorie",
+    "nameRequired": "Le nom de la catégorie est obligatoire",
+    "created": "Catégorie \"{{name}}\" créée",
+    "createFailed": "Échec de la création de la catégorie",
+    "subtitle": "Organiser les produits en catégories hiérarchiques",
+    "newNamePlaceholder": "Nom de la nouvelle catégorie…",
+    "saveAria": "Enregistrer la catégorie",
+    "cancelEditAria": "Annuler la modification",
+    "editAria": "Modifier la catégorie",
+    "confirmDeleteTitle": "Supprimer la catégorie ?",
+    "confirmDeleteBody": "Les produits de cette catégorie ne seront pas supprimés, mais ils n'auront plus de catégorie.",
+    "deleted": "Catégorie supprimée",
+    "updated": "Catégorie mise à jour"
   },
   "settings": {
     "team": {
@@ -271,7 +392,14 @@
       "description": "Choisissez un ou plusieurs produits dans la liste pour voir leurs étiquettes de codes-barres ici."
     },
     "selectFirst": "Sélectionner le premier produit",
-    "goToProducts": "Aller aux produits"
+    "goToProducts": "Aller aux produits",
+    "selectFirstToast": "Sélectionnez d'abord des produits",
+    "printing_one": "Impression de {{count}} étiquette",
+    "printing_many": "Impression de {{count}} d'étiquettes",
+    "printing_other": "Impression de {{count}} étiquettes",
+    "subtitle": "Sélectionnez les produits, choisissez le nombre de copies et imprimez",
+    "copies": "COPIES",
+    "products": "PRODUITS"
   },
   "valuation": {
     "empty": {
@@ -280,5 +408,41 @@
     },
     "refresh": "Actualiser"
   },
-  "supplierBills": "{{count}} facture(s)"
+  "supplierBills": "{{count}} facture(s)",
+  "purchasing": {
+    "supplierAndPoRequired": "Le fournisseur et le numéro de commande sont obligatoires",
+    "itemRequired": "Au moins un article avec un produit et une quantité est requis",
+    "draftCreated": "Brouillon de bon de commande créé",
+    "createFailed": "Échec de la création du bon de commande",
+    "statusUpdateFailed": "Échec de la mise à jour du statut du bon de commande",
+    "approveFailed": "Échec de l'approbation du bon de commande",
+    "newOrder": "Nouvelle commande",
+    "approve": "Approuver",
+    "send": "Envoyer",
+    "newPurchaseOrder": "Nouveau bon de commande",
+    "cost": "Coût"
+  },
+  "dashboard": {
+    "totalProducts": "Total des produits",
+    "lowStockItems": "Articles en stock bas",
+    "pendingOrders": "Commandes en attente",
+    "totalSuppliers": "Total des fournisseurs",
+    "inventoryOverview": "Vue d'ensemble du stock",
+    "newProduct": "Nouveau produit",
+    "inventoryValue": "Valeur du stock",
+    "topItems": "Top 5 des articles",
+    "noProducts": "Aucun produit pour l'instant",
+    "topCategories": "Principales catégories",
+    "noCategories": "Aucune catégorie pour l'instant",
+    "recentActivity": "Activité récente",
+    "noRecentActivity": "Aucune activité récente",
+    "lowStockAlert": "Alerte de stock bas",
+    "noLowStockItems": "Aucun article en stock bas",
+    "recentPurchaseOrders": "Bons de commande récents",
+    "noPurchaseOrders": "Aucun bon de commande pour l'instant",
+    "criticalCount_one": "{{count}} critique",
+    "criticalCount_many": "{{count}} de critiques",
+    "criticalCount_other": "{{count}} critiques",
+    "needsReview": "à examiner"
+  }
 }

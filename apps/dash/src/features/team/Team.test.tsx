@@ -4,6 +4,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+  // Team renders <Trans> in the deactivate dialog's seat-savings line. A mock
+  // that supplies only useTranslation throws the moment that dialog opens, and
+  // the failure reads as "the dialog is broken" rather than "the mock is half a
+  // mock".
+  Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -90,7 +95,7 @@ describe('Team list empty state', () => {
     };
     render(<Team />);
 
-    fireEvent.change(screen.getByPlaceholderText('Search by name or email...'), {
+    fireEvent.change(screen.getByPlaceholderText('team.list.searchPlaceholder'), {
       target: { value: 'no such person' },
     });
 
@@ -106,7 +111,7 @@ describe('Team list empty state', () => {
     };
     render(<Team />);
 
-    const searchInput = screen.getByPlaceholderText('Search by name or email...');
+    const searchInput = screen.getByPlaceholderText('team.list.searchPlaceholder');
     fireEvent.change(searchInput, { target: { value: 'no such person' } });
     expect(screen.getByText('team.list.noMembersMatchTitle')).toBeInTheDocument();
 

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
-import { CheckCircle, XCircle, Clock, Users } from 'lucide-react';
+import { CheckCircle, XCircle, Users } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import {
   useListTimesheets,
@@ -47,8 +48,8 @@ const TimesheetApprovals = (): React.JSX.Element => {
     approveMutation.mutate(
       { timesheetId, approved: true },
       {
-        onSuccess: () => toast.success('Timesheet approved'),
-        onError: () => toast.error('Failed to approve timesheet'),
+        onSuccess: () => toast.success(t('timesheets.approved')),
+        onError: () => toast.error(t('errors.approveTimesheet')),
       }
     );
   };
@@ -73,7 +74,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Timesheet approvals · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.timesheetApprovals'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <SectionHeader
           title={t('timesheets.approvals.title')}

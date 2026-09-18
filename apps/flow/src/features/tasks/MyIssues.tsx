@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useMyIssues } from './useMyIssues';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -10,6 +11,8 @@ import {
   bucketForMyTask,
   MY_TASK_BUCKET_LABEL_KEY,
   MY_TASK_BUCKET_ORDER,
+  MY_TASK_BUCKET_COLLAPSED_BY_DEFAULT,
+  type MyTaskBucket,
 } from '../../shared/lib/myTasksBuckets';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -23,6 +26,18 @@ const MyIssues: React.FC = () => {
   // to match Triage/FocusToday/FlowLayout.
   const tasks = useMemo(() => rawTasks.map(apiTaskToTask).filter((t) => !t.archived), [rawTasks]);
   const { selectedTaskIds, setQuickCreateOpen } = useFlowStore();
+  const [collapsed, setCollapsed] = useState<ReadonlySet<MyTaskBucket>>(
+    MY_TASK_BUCKET_COLLAPSED_BY_DEFAULT
+  );
+
+  const toggle = (bucket: MyTaskBucket): void => {
+    setCollapsed((current) => {
+      const next = new Set(current);
+      if (next.has(bucket)) next.delete(bucket);
+      else next.add(bucket);
+      return next;
+    });
+  };
 
   // Grouped by time bucket, not by status. `myTasksBuckets` has implemented
   // exactly this since it was written and nothing imported it, so the screen
@@ -61,6 +76,7 @@ const MyIssues: React.FC = () => {
           {MY_TASK_BUCKET_ORDER.map((bucket, bucketIdx) => {
             const bucketTasks = byBucket.get(bucket) ?? [];
             if (bucketTasks.length === 0) return null;
+            const isCollapsed = collapsed.has(bucket);
             return (
               <motion.section
                 key={bucket}
@@ -68,19 +84,28 @@ const MyIssues: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15, delay: bucketIdx * 0.04 }}
               >
-                <h2
-                  className="flex items-center gap-2 px-1 pb-1.5 text-meta font-semibold"
-                  style={{ color: 'var(--flow-text)' }}
-                >
-                  {t(MY_TASK_BUCKET_LABEL_KEY[bucket])}
-                  <span
-                    className="rounded-sm px-1.5 py-0.5 text-meta font-medium"
-                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+                <h2>
+                  <button
+                    type="button"
+                    onClick={() => toggle(bucket)}
+                    aria-expanded={!isCollapsed}
+                    aria-controls={`my-tasks-${bucket}`}
+                    className="flow-focus flex min-h-11 w-full items-center gap-2 px-1 text-start text-meta font-semibold"
+                    style={{ color: 'var(--flow-text)' }}
                   >
-                    {bucketTasks.length}
-                  </span>
+                    {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                    {t(MY_TASK_BUCKET_LABEL_KEY[bucket])}
+                    <span
+                      className="rounded-sm px-1.5 py-0.5 text-meta font-medium"
+                      style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+                    >
+                      {bucketTasks.length}
+                    </span>
+                  </button>
                 </h2>
                 <div
+                  id={`my-tasks-${bucket}`}
+                  hidden={isCollapsed}
                   className="rounded-xl overflow-hidden"
                   style={{
                     background: 'var(--flow-card)',

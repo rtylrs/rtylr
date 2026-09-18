@@ -505,3 +505,32 @@ describe('ProjectSettings when the projects request fails', () => {
     expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
   });
 });
+
+describe('ProjectSettings general tab layout (#1088)', () => {
+  beforeEach(() => {
+    useFlowStore.setState({ projects: [], workspaces: [] });
+    canManageProjectMock.mockReturnValue(true);
+  });
+
+  it('gives the text fields a section heading', () => {
+    // Name, Description and Visibility were three bare fields in a row, with
+    // nothing saying where one concern ended and the next began.
+    renderProjectSettings();
+    expect(
+      screen.getByRole('heading', { name: 'flow.projectSettings.detailsSection' })
+    ).toBeInTheDocument();
+  });
+
+  it('caps the form at 640px rather than the 672px Tailwind step', () => {
+    // S-11 asks for form widths at or under 640px, and max-w-2xl is 672.
+    const { container } = renderProjectSettings();
+    const form = container.querySelector('.space-y-6[class*="max-w-"]');
+    expect(form?.className).toContain('max-w-[640px]');
+    expect(form?.className).not.toContain('max-w-2xl');
+  });
+
+  it('keeps the 24px rhythm S-11 asks for', () => {
+    const { container } = renderProjectSettings();
+    expect(container.querySelector('.space-y-6[class*="max-w-"]')).toBeTruthy();
+  });
+});

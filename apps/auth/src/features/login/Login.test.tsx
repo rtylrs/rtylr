@@ -30,7 +30,11 @@ vi.mock('../../shared/hooks/useFeatureGate', () => ({
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
   LicenseBanner: () => null,
-  Button: ({ children, ...props }: any) => React.createElement('button', props, children),
+  Button: ({ children, ...rest }: { children: React.ReactNode }) => (
+    <button type="button" {...rest}>
+      {children}
+    </button>
+  ),
 }));
 
 vi.mock('../../shared/components/AuthShell', () => ({

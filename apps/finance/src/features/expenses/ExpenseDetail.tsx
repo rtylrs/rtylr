@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useParams } from '@tanstack/react-router';
 import { useUserStore } from '@voxire/auth';
@@ -30,6 +32,7 @@ const statusStyle: Record<string, React.CSSProperties> = {
 };
 
 const ExpenseDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams({ strict: false });
   const { data: expense, isLoading } = useExpenseById(id);
   const { data: categories = [] } = useExpenseCategories();
@@ -52,8 +55,8 @@ const ExpenseDetail: React.FC = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <PageHeader
-          title="Expense"
-          breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: id ?? '' }]}
+          title={t('expenses.detailTitle')}
+          breadcrumbs={[{ label: t('nav.expenses'), to: '/expenses' }, { label: id ?? '' }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
@@ -68,7 +71,7 @@ const ExpenseDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Expense detail · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.expenseDetail'))} />
       <PageHeader
         title={`Expense ${expense.id}`}
         subtitle={
@@ -88,7 +91,7 @@ const ExpenseDetail: React.FC = () => {
             <MoneyDisplay amount={expense.amount} />
           </span>
         }
-        breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: expense.id }]}
+        breadcrumbs={[{ label: t('nav.expenses'), to: '/expenses' }, { label: expense.id }]}
         actions={
           canApproveExpense ? (
             <>
@@ -120,13 +123,13 @@ const ExpenseDetail: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Field label="Date" value={expense.expenseDate} />
-            <Field label="Description" value={expense.description} />
-            <Field label="Category" value={categoryName} />
-            <Field label="Amount">
+            <Field label={t('common.date')} value={expense.expenseDate} />
+            <Field label={t('common.description')} value={expense.description} />
+            <Field label={t('common.category')} value={categoryName} />
+            <Field label={t('common.amount')}>
               <MoneyDisplay amount={expense.amount} />
             </Field>
-            <Field label="Vendor" value={expense.vendor ?? undefined} />
+            <Field label={t('common.vendor')} value={expense.vendor ?? undefined} />
             <div
               style={{
                 marginTop: 10,
@@ -151,7 +154,7 @@ const ExpenseDetail: React.FC = () => {
               marginBottom: 12,
             }}
           >
-            Receipt
+            {t('common.receipt')}
           </div>
           <ReceiptUpload value={receipt} onChange={setReceipt} />
         </div>

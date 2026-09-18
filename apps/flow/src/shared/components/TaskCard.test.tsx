@@ -1,3 +1,9 @@
+// @vitest-environment jsdom
+//
+// jsdom rather than the suite default. happy-dom silently discards any
+// color-mix() assigned through the style property, which is the path React uses,
+// so the tint and the foreground derived from it are simply absent from the DOM
+// there and no assertion can see them (rtylr#1249). jsdom keeps both.
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
@@ -61,12 +67,30 @@ const baseTask: Task = {
 };
 
 describe('TaskCard custom status badge (F-A)', () => {
-  it('renders the custom status name and color when the task has one', () => {
+  it('renders the custom status name and carries its colour', () => {
     render(<TaskCard task={{ ...baseTask, statusName: 'Legal review', statusColor: '#ec4899' }} />);
 
     const badge = screen.getByText('Legal review');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveStyle({ color: '#ec4899' });
+    // The status colour reaches the badge as `--tone`, which both the tint and
+    // the foreground read back.
+    expect(badge.style.getPropertyValue('--tone')).toBe('#ec4899');
+  });
+
+  it('tints the badge and derives its foreground rather than reusing the colour', () => {
+    // This used to assert `color: #ec4899`, which pinned the defect: the badge
+    // sits on a 13% tint of that same colour, and #ec4899 on it measures 4.64:1
+    // in dark and 3.13:1 in light (rtylr#1246).
+    //
+    // Both declarations are only visible because this file runs under jsdom; see
+    // the note at the top.
+    render(<TaskCard task={{ ...baseTask, statusName: 'Legal review', statusColor: '#ec4899' }} />);
+
+    const badge = screen.getByText('Legal review');
+    expect(badge.style.background).toBe('color-mix(in srgb, var(--tone) 13%, transparent)');
+    expect(badge.style.color).toBe('color-mix(in srgb, var(--tone) 50%, var(--flow-text))');
+    // The specific thing that was wrong: the raw colour as the foreground.
+    expect(badge.style.color).not.toContain('#ec4899');
   });
 
   it('renders no badge when the task has no custom status', () => {

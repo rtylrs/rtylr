@@ -61,7 +61,7 @@ const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
     return (
       <div className="flex items-center gap-1 mt-1">
         <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-          {formatPercent(0)} {t('insights.dashboard.vsPrior', 'vs prior')}
+          {formatPercent(0)} {t('insights.dashboard.vsPrior')}
         </span>
       </div>
     );
@@ -75,7 +75,7 @@ const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
         <ArrowDownRight size={12} style={{ color: 'var(--delta-down)' }} />
       )}
       <span className="text-xs" style={{ color: up ? 'var(--delta-up)' : 'var(--delta-down)' }}>
-        {formatPercent(deltaPct)} {t('insights.dashboard.vsPrior', 'vs prior')}
+        {formatPercent(deltaPct)} {t('insights.dashboard.vsPrior')}
       </span>
     </div>
   );
@@ -109,6 +109,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
 
   const stats = [
     {
+      id: 'revenue',
+
       label: t('insights.dashboard.cards.revenue'),
       value: data ? formatMoney(data.revenue.value, currency) : '-',
       deltaPct: data?.revenue.deltaPct ?? 0,
@@ -116,6 +118,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       sparkline: true,
     },
     {
+      id: 'customers',
+
       label: t('insights.dashboard.cards.customers'),
       value: data ? formatNumber(data.customers.value) : '-',
       deltaPct: data?.customers.deltaPct ?? 0,
@@ -123,6 +127,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       sparkline: false,
     },
     {
+      id: 'orders',
+
       label: t('insights.dashboard.cards.orders'),
       value: data ? formatNumber(data.orders.value) : '-',
       deltaPct: data?.orders.deltaPct ?? 0,
@@ -130,6 +136,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       sparkline: false,
     },
     {
+      id: 'margin',
+
       label: t('insights.dashboard.cards.margin'),
       value: data ? `${data.margin.value.toFixed(1)}%` : '-',
       deltaPct: data?.margin.deltaPct ?? 0,
@@ -148,7 +156,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl mx-auto"
     >
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={t('insights.dashboard.metaTitle')} />
       <motion.div variants={itemVariants}>
         <CaretAskBar />
       </motion.div>
@@ -174,7 +182,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{
@@ -190,7 +198,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
                     style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: 'var(--accent)' }} />
+                    <Icon size={14} style={{ color: 'var(--accent-on-muted)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold truncate" style={{ color: 'var(--hub-text)' }}>
@@ -198,7 +206,10 @@ const Dashboard: React.FC = (): React.JSX.Element => {
                 </p>
                 <DeltaBadge deltaPct={stat.deltaPct} />
                 {stat.sparkline && revenueSparkPoints.length > 1 && (
-                  <div style={{ height: 44, marginTop: 12 }} aria-label="Revenue sparkline">
+                  <div
+                    style={{ height: 44, marginTop: 12 }}
+                    aria-label={t('insights.charts.revenueSparkline')}
+                  >
                     <Bar data={sparklineData} options={sparklineOptions} />
                   </div>
                 )}

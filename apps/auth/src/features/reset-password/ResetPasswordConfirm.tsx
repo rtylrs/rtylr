@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Logo from '../../shared/components/Logo';
@@ -12,6 +13,7 @@ import { isStrongPassword } from '../../shared/lib/validation';
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 const ResetPasswordConfirm: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -60,15 +62,17 @@ const ResetPasswordConfirm: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Reset password · rtylr" />
+      <HelmetContainer title={t('auth.reset.metaTitle')} />
       <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
         <div className="w-full max-w-sm">
           <div className="flex justify-center mb-8">
             <Logo variant="dark" className="h-8 w-auto select-none" />
           </div>
 
-          <h2 className="text-xl font-semibold text-[#111] mb-1">Set a new password</h2>
-          <p className="text-sm text-[#666] mb-6">Choose a strong password for your account.</p>
+          <h2 className="text-xl font-semibold text-[#111] mb-1">
+            {t('auth.reset.newPasswordTitle')}
+          </h2>
+          <p className="text-sm text-[#666] mb-6">{t('auth.reset.newPasswordSubtitle')}</p>
 
           {done ? (
             <div className="flex flex-col gap-4">
@@ -77,9 +81,7 @@ const ResetPasswordConfirm: React.FC = () => {
                 role="alert"
               >
                 <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-green-700 leading-relaxed">
-                  Password updated. You can now sign in.
-                </p>
+                <p className="text-xs text-green-700 leading-relaxed">{t('auth.reset.updated')}</p>
               </div>
               <Button
                 type="button"
@@ -89,7 +91,7 @@ const ResetPasswordConfirm: React.FC = () => {
                 height={40}
                 onClick={() => navigate({ to: '/' })}
               >
-                Go to sign in
+                {t('auth.common.goToSignIn')}
               </Button>
             </div>
           ) : (
@@ -102,12 +104,12 @@ const ResetPasswordConfirm: React.FC = () => {
             >
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="new-password" className="text-sm font-medium text-[#111]">
-                  New password
+                  {t('auth.reset.newPassword')}
                 </label>
                 <input
                   id="new-password"
                   type="password"
-                  placeholder="At least 8 characters"
+                  placeholder={t('auth.common.atLeastEight')}
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -119,19 +121,21 @@ const ResetPasswordConfirm: React.FC = () => {
 
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="confirm-password" className="text-sm font-medium text-[#111]">
-                  Confirm password
+                  {t('auth.common.confirmPassword')}
                 </label>
                 <input
                   id="confirm-password"
                   type="password"
-                  placeholder="Repeat password"
+                  placeholder={t('auth.common.repeatPassword')}
                   autoComplete="new-password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   required
                   className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
                 />
-                {mismatch && <p className="text-xs text-red-500">Passwords do not match</p>}
+                {mismatch && (
+                  <p className="text-xs text-red-500">{t('auth.reset.passwordsDoNotMatch')}</p>
+                )}
               </div>
 
               {error && (
@@ -153,7 +157,7 @@ const ResetPasswordConfirm: React.FC = () => {
                 disabled={!password || !!mismatch}
                 height={40}
               >
-                Reset password
+                {t('auth.reset.submitNew')}
               </Button>
             </form>
           )}

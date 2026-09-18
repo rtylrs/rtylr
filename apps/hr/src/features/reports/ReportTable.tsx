@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Download, FileDown, FileSearch } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { Button } from '../../shared/components/ui';
-import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { ReportPayload } from '../../shared/schemas/reports';
 import { toLocalIso } from '../../shared/lib/dateUtils';
 
@@ -154,7 +153,6 @@ const ReportTable = ({
 }: ReportTableProps): React.JSX.Element => {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
-  const config = useHRConfigStore((s) => s.config);
   const [pdfLoading, setPdfLoading] = useState(false);
 
   const rowVirtualizer = useVirtualizer({

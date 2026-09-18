@@ -43,7 +43,7 @@ const WizardProgress = ({
   };
 
   return (
-    <nav className="mb-8" aria-label="Setup progress">
+    <nav className="mb-8" aria-label={t('setup.progress')}>
       <ol className="flex flex-wrap gap-2">
         {STEP_KEYS.map((key, index) => {
           const completed = isStepCompleted(key);

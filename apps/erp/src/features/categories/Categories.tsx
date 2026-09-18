@@ -14,6 +14,8 @@ import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -31,15 +33,15 @@ const Categories: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
-      toast.error('Category name is required');
+      toast.error(t('erp.categories.nameRequired'));
       return;
     }
     try {
       await createMut.mutateAsync({ name: newName.trim(), description: '' });
-      toast.success(`Category "${newName}" created`);
+      toast.success(t('erp.categories.created', { name: newName }));
       setNewName('');
     } catch {
-      toast.error('Failed to create category');
+      toast.error(t('erp.categories.createFailed'));
     }
   };
 
@@ -49,8 +51,11 @@ const Categories: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Categories · rtylr" />
-      <PageHeader title="Categories" description="Organize products into hierarchical categories" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/categories'].title))} />
+      <PageHeader
+        title={t(routeLabels['/categories'].title)}
+        description={t('erp.categories.subtitle')}
+      />
 
       <div
         className="rounded-xl p-4 flex items-center gap-2"
@@ -61,7 +66,7 @@ const Categories: React.FC = () => {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-          placeholder="New category name…"
+          placeholder={t('erp.categories.newNamePlaceholder')}
           className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
           style={{
             background: 'var(--hub-input-bg)',
@@ -92,10 +97,10 @@ const Categories: React.FC = () => {
         ) : categories.length === 0 ? (
           <EmptyState
             icon={Folder}
-            title={t('categories.empty.title')}
-            description={t('categories.empty.description')}
+            title={t('erp.categories.empty.title')}
+            description={t('erp.categories.empty.description')}
             action={{
-              label: t('categories.addCategory'),
+              label: t('erp.categories.addCategory'),
               onClick: () => newNameInputRef.current?.focus(),
             }}
           />
@@ -128,7 +133,7 @@ const Categories: React.FC = () => {
                           },
                           {
                             onSuccess: () => {
-                              toast.success('Category updated');
+                              toast.success(t('erp.categories.updated'));
                               setEditingId(null);
                             },
                           }
@@ -161,7 +166,7 @@ const Categories: React.FC = () => {
                 <>
                   <button
                     type="button"
-                    aria-label="Save category"
+                    aria-label={t('erp.categories.saveAria')}
                     onClick={() =>
                       updateMut.mutate(
                         {
@@ -170,7 +175,7 @@ const Categories: React.FC = () => {
                         },
                         {
                           onSuccess: () => {
-                            toast.success('Category updated');
+                            toast.success(t('erp.categories.updated'));
                             setEditingId(null);
                           },
                         }
@@ -190,7 +195,7 @@ const Categories: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    aria-label="Cancel edit"
+                    aria-label={t('erp.categories.cancelEditAria')}
                     onClick={() => setEditingId(null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold"
                     style={{ color: 'var(--erp-danger)' }}
@@ -209,7 +214,7 @@ const Categories: React.FC = () => {
                 <>
                   <button
                     type="button"
-                    aria-label="Edit category"
+                    aria-label={t('erp.categories.editAria')}
                     onClick={() => {
                       setEditingId(cat.id ?? null);
                       setEditName(cat.name ?? '');
@@ -249,15 +254,15 @@ const Categories: React.FC = () => {
 
       <ConfirmModal
         open={confirmDelete !== null}
-        title="Delete category?"
-        description="Products in this category will not be deleted, but they will become uncategorized."
+        title={t('erp.categories.confirmDeleteTitle')}
+        description={t('erp.categories.confirmDeleteBody')}
         danger
-        confirmLabel="Delete"
+        confirmLabel={t('common.delete')}
         onConfirm={async () => {
           if (confirmDelete !== null) {
             try {
               await deleteMut.mutateAsync(confirmDelete);
-              toast.success('Category deleted');
+              toast.success(t('erp.categories.deleted'));
             } catch {
               // onError in hook handles toast
             }

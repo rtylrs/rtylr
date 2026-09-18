@@ -384,3 +384,43 @@ describe('flowApi project icon writes (#1045)', () => {
     expect(DEFAULT_PROJECT_ICON).toBe('\u{1F4CB}');
   });
 });
+
+describe('flowApi.getTimeLogs coerces the int64 wire string (#1079)', () => {
+  it('adds the durations instead of concatenating them', async () => {
+    // OneKit puts an int64 on the wire as a STRING, while ApiTimeLog declares
+    // `durationMinutes: number`. TypeScript believed the declaration, so
+    // `logs.reduce((sum, l) => sum + l.durationMinutes, 0)` concatenated:
+    // 2:00, 1:00, 2:15 and 1:30 rendered as "20100226:30 of 40:00" with the
+    // bar full and an "Over estimate" badge. The correct total is 6:45.
+    (taskV2.getTimeLogs as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      timeLogs: [
+        { id: '1', taskId: '42', userId: '7', durationMinutes: '120' },
+        { id: '2', taskId: '42', userId: '7', durationMinutes: '60' },
+        { id: '3', taskId: '42', userId: '7', durationMinutes: '135' },
+        { id: '4', taskId: '42', userId: '7', durationMinutes: '90' },
+      ],
+    });
+
+    const logs = (await flowApi.getTimeLogs('42'))._unsafeUnwrap().timeLogs;
+
+    for (const log of logs) {
+      expect(typeof log.durationMinutes, 'each duration is a number').toBe('number');
+    }
+    expect(logs.reduce((sum, l) => sum + l.durationMinutes, 0)).toBe(405);
+  });
+
+  it('leaves an already numeric duration alone', async () => {
+    // The generated client may be fixed later, or a mock may send numbers.
+    (taskV2.getTimeLogs as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      timeLogs: [{ id: '1', taskId: '42', userId: '7', durationMinutes: 195 }],
+    });
+
+    const logs = (await flowApi.getTimeLogs('42'))._unsafeUnwrap().timeLogs;
+    expect(logs[0].durationMinutes).toBe(195);
+  });
+
+  it('survives a response with no time logs', async () => {
+    (taskV2.getTimeLogs as ReturnType<typeof vi.fn>).mockResolvedValueOnce({});
+    expect((await flowApi.getTimeLogs('42'))._unsafeUnwrap().timeLogs).toEqual([]);
+  });
+});

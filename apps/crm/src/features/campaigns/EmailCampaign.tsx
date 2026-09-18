@@ -83,23 +83,23 @@ const EmailCampaign: React.FC = () => {
     const callbacks = {
       onSuccess: (result: { campaignId?: number; campaign_id?: number }) => {
         if (!send) {
-          toast.success('Draft saved');
+          toast.success(t('crm.campaigns.draftSaved'));
           navigate({ to: '/campaigns' });
           return;
         }
         const createdId = result.campaignId ?? result.campaign_id;
         if (!createdId && !campaignId) {
-          toast.error('Campaign was saved but could not be activated');
+          toast.error(t('crm.campaigns.savedNotActivated'));
           return;
         }
         updateStatus.mutate(
           { id: campaignId ?? createdId!, status: 'active' },
           {
             onSuccess: () => {
-              toast.success('Campaign activated');
+              toast.success(t('crm.campaigns.activated'));
               navigate({ to: '/campaigns' });
             },
-            onError: () => toast.error('Campaign was saved but could not be activated'),
+            onError: () => toast.error(t('crm.campaigns.savedNotActivated')),
           }
         );
       },
@@ -121,22 +121,30 @@ const EmailCampaign: React.FC = () => {
   return (
     <>
       <HelmetContainer
-        title={isEditing ? 'Edit email campaign · rtylr' : 'New email campaign · rtylr'}
+        title={`${isEditing ? t('crm.campaignEditor.editEmailTitle') : t('crm.campaignEditor.newEmailTitle')} · rtylr`}
       />
       <div style={{ maxWidth: '1100px' }}>
         <Breadcrumbs
           items={[
-            { label: 'Campaigns', to: '/campaigns' },
-            { label: isEditing ? 'Edit email' : 'New email' },
+            { label: t('nav.campaigns'), to: '/campaigns' },
+            {
+              label: isEditing
+                ? t('crm.campaignEditor.breadcrumbEditEmail')
+                : t('crm.campaignEditor.breadcrumbNewEmail'),
+            },
           ]}
         />
         <PageHeader
-          title={isEditing ? 'Edit email campaign' : 'New email campaign'}
+          title={
+            isEditing
+              ? t('crm.campaignEditor.editEmailTitle')
+              : t('crm.campaignEditor.newEmailTitle')
+          }
           actions={
             <>
               <Button variant="outline" onClick={() => setPreviewOpen(true)}>
                 <Eye size={13} />
-                Preview
+                {t('crm.campaignEditor.preview')}
               </Button>
               {canManageCampaigns && (
                 <Button
@@ -174,10 +182,10 @@ const EmailCampaign: React.FC = () => {
                 }}
               >
                 <Input
-                  label="Campaign name"
+                  label={t('crm.campaignEditor.nameLabel')}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="Spring promo"
+                  placeholder={t('crm.campaignEditor.emailNamePlaceholder')}
                 />
                 {/* The rest of this screen predates i18n and is still hardcoded
                     English. New strings go through t() per the repo rule;
@@ -189,10 +197,10 @@ const EmailCampaign: React.FC = () => {
                   placeholder={t('crm.campaigns.descriptionPlaceholder')}
                 />
                 <Select
-                  label="Start from template"
+                  label={t('crm.campaignEditor.startFromTemplate')}
                   onChange={(event) => applyTemplate(event.target.value)}
                 >
-                  <option value="">Blank</option>
+                  <option value="">{t('crm.campaignEditor.blank')}</option>
                   {templates.map((template) => (
                     <option key={template.id} value={template.id}>
                       {template.name}
@@ -223,7 +231,7 @@ const EmailCampaign: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Audience
+                {t('crm.campaignEditor.audience')}
               </h4>
               <Select value={segmentId} onChange={(event) => setSegmentId(event.target.value)}>
                 {segments.map((item) => (
@@ -249,7 +257,7 @@ const EmailCampaign: React.FC = () => {
                       fontWeight: 700,
                     }}
                   >
-                    Recipients
+                    {t('crm.campaignEditor.recipients')}
                   </div>
                   <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--hub-text)' }}>
                     {segment.customerCount.toLocaleString()}
@@ -271,7 +279,7 @@ const EmailCampaign: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Tips
+                {t('crm.campaignEditor.tips')}
               </h4>
               <ul
                 style={{
@@ -282,9 +290,9 @@ const EmailCampaign: React.FC = () => {
                   lineHeight: 1.7,
                 }}
               >
-                <li>Keep subject lines under 60 characters</li>
-                <li>Use first_name for personalization</li>
-                <li>Include a clear call to action</li>
+                <li>{t('crm.campaignEditor.tipSubjectLength')}</li>
+                <li>{t('crm.campaignEditor.tipPersonalization')}</li>
+                <li>{t('crm.campaignEditor.tipCallToAction')}</li>
               </ul>
             </Card>
           </div>

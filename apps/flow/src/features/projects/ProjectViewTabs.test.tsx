@@ -29,10 +29,15 @@ vi.mock('@voxire/config', () => ({
   FLAG_KEYS: { APP_FLOW_PREVIEW_ROUTES: 'app.flow.previewRoutes' },
 }));
 
-function renderTabs() {
+function renderTabs(
+  project: { name: string; color: string; icon?: string } = {
+    name: 'Test Project',
+    color: '#64C5B9',
+  }
+) {
   return render(
     <ProjectViewTabs
-      project={{ name: 'Test Project', color: '#64C5B9' }}
+      project={project}
       workspaceId="1"
       projectId="2"
       taskCount={3}
@@ -65,5 +70,34 @@ describe('ProjectViewTabs preview-route gating', () => {
     expect(screen.getByText('flow.projectViewTabs.board')).toBeInTheDocument();
     expect(screen.getByText('flow.projectViewTabs.list')).toBeInTheDocument();
     expect(screen.getByText('flow.shell.calendar')).toBeInTheDocument();
+  });
+});
+
+describe('ProjectViewTabs shows the project glyph (#1085)', () => {
+  it('draws an svg tinted with the project colour, not a bare dot', () => {
+    // The header carried a plain coloured dot, which said nothing the sidebar
+    // dot was not already saying. G-C5 wants the colour on the header icon.
+    const { container } = renderTabs({ name: 'Web', color: '#112233', icon: 'rocket' });
+
+    const tinted = [...container.querySelectorAll('svg')].filter((el) =>
+      (el.getAttribute('style') ?? '').includes('112233')
+    );
+    expect(tinted, 'no svg carries the project colour').toHaveLength(1);
+  });
+
+  it('falls back to a glyph when the project has no icon', () => {
+    // A project created before icons existed has none, and the header must
+    // still render something rather than an empty box.
+    const { container } = renderTabs({ name: 'Web', color: '#112233' });
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders the icon at the header size, not the row size', () => {
+    // G-I1: 16px in rows, 20px in headers.
+    const { container } = renderTabs({ name: 'Web', color: '#112233', icon: 'rocket' });
+    const tinted = [...container.querySelectorAll('svg')].find((el) =>
+      (el.getAttribute('style') ?? '').includes('112233')
+    );
+    expect(tinted?.getAttribute('width')).toBe('20');
   });
 });

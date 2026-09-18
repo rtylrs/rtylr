@@ -172,7 +172,7 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
       style={{
         background: 'var(--accent-muted)',
-        color: 'var(--accent)',
+        color: 'var(--accent-on-muted)',
         border: '1px solid var(--accent-border)',
       }}
     >
@@ -463,7 +463,7 @@ const SuitePlanCard: React.FC<{
             {plan.isFeatured && !isCurrent ? (
               <span
                 className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                style={{ background: 'var(--accent)', color: '#fff' }}
+                style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
               >
                 <Sparkles size={9} />
                 Popular
@@ -791,7 +791,7 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
             onClick={handleAddPayment}
             disabled={checkout.isPending}
             className="inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-60"
-            style={{ background: '#4583C4', color: '#fff' }}
+            style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
           >
             {checkout.isPending ? (
               <Loader2 size={12} className="animate-spin" />

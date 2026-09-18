@@ -34,8 +34,12 @@ describe('Templates empty state', () => {
     expect(screen.getByText('crm.templates.empty')).toBeInTheDocument();
     expect(screen.getByText('crm.templates.emptyDescription')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.templates.new' }));
+    // Header and empty-state actions share one key now, so both carry the same
+    // accessible name. Assert both exist rather than matching one by luck.
+    const buttons = screen.getAllByRole('button', { name: 'crm.templates.new' });
+    expect(buttons).toHaveLength(2);
+    fireEvent.click(buttons[1]);
 
-    expect(screen.getByText('New Template')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'crm.templates.new' })).toBeInTheDocument();
   });
 });

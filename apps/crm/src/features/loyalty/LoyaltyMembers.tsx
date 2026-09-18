@@ -6,8 +6,9 @@ import { AlertCircle, Search } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useLoyaltyMembers } from '../../shared/hooks/queries/useLoyalty';
 import type { LoyaltyMember } from '../../shared/hooks/queries/useLoyalty';
-import { Button, PageHeader, Card, Input, SkeletonList } from '../../shared/components/ui';
+import { Button, PageHeader, Card, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
+import { getCustomerTier } from '../../shared/lib/tiers';
 import { Users } from 'lucide-react';
 
 const LoyaltyMembers: React.FC = () => {
@@ -47,9 +48,12 @@ const LoyaltyMembers: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Loyalty members · rtylr" />
+      <HelmetContainer title={`${t('crm.loyaltyMembers.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1000px' }}>
-        <PageHeader title="Loyalty members" subtitle={`${members.length} active members`} />
+        <PageHeader
+          title={t('crm.loyaltyMembers.pageTitle')}
+          subtitle={`${members.length} active members`}
+        />
 
         <div style={{ marginBottom: '16px', maxWidth: '320px' }}>
           <div
@@ -68,7 +72,7 @@ const LoyaltyMembers: React.FC = () => {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search members..."
+              placeholder={t('crm.loyaltyMembers.searchPlaceholder')}
               style={{
                 flex: 1,
                 background: 'transparent',
@@ -144,7 +148,7 @@ const LoyaltyMembers: React.FC = () => {
                       {m.visits} visits • last active {m.lastActive}
                     </div>
                   </div>
-                  <TierBadge tier={m.tier as any} />
+                  <TierBadge tier={getCustomerTier(m.points, m.tier)} />
                   <PointsBadge points={m.points} trend="up" />
                 </div>
               ))}

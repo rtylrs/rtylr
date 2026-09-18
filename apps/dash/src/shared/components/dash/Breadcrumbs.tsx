@@ -44,7 +44,7 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
   if (segments.length === 0) return null;
 
   return (
-    <nav className={className} aria-label="Breadcrumb">
+    <nav className={className} aria-label={t('common.breadcrumb')}>
       <ol className="flex items-center gap-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
         <li>
           <Link to="/" className="flex items-center gap-1 hover:opacity-70 transition-opacity">

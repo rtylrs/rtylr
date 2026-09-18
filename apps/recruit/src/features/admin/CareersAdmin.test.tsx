@@ -52,10 +52,10 @@ describe('CareersAdmin empty state', () => {
   it('shows the empty message and opens the create-role editor from its own CTA', () => {
     render(<CareersAdmin />);
 
-    expect(screen.getByText('emptyStates.rolesNone')).toBeInTheDocument();
+    expect(screen.getByText('common.emptyStates.rolesNone')).toBeInTheDocument();
     expect(screen.queryByText('career-editor')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'emptyStates.createRole' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.emptyStates.createRole' }));
 
     // The CTA is wired to the same setCreating(true) the header's own
     // "New role" button uses - the editor drawer now renders.

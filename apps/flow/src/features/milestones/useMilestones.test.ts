@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -46,7 +46,7 @@ describe('useMilestones (remote mode)', () => {
 
   it('returns a raw array response unchanged', async () => {
     const data = [{ id: 'm-1', name: 'Launch' }];
-    (flowApi.getMilestones as any).mockResolvedValue(data);
+    (flowApi.getMilestones as unknown as Mock).mockResolvedValue(data);
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useMilestones({ projectId: 'p-1' }), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -56,7 +56,7 @@ describe('useMilestones (remote mode)', () => {
 
   it('unwraps the enveloped { milestones: [...] } shape', async () => {
     const milestones = [{ id: 'm-2', name: 'Beta' }];
-    (flowApi.getMilestones as any).mockResolvedValue({ milestones });
+    (flowApi.getMilestones as unknown as Mock).mockResolvedValue({ milestones });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useMilestones('p-1'), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -64,7 +64,7 @@ describe('useMilestones (remote mode)', () => {
   });
 
   it('falls back to an empty array when the envelope has no milestones key', async () => {
-    (flowApi.getMilestones as any).mockResolvedValue({ unrelated: true });
+    (flowApi.getMilestones as unknown as Mock).mockResolvedValue({ unrelated: true });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useMilestones(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -78,7 +78,7 @@ describe('useCreateMilestone', () => {
   });
 
   it('calls createMilestone with the given data and invalidates milestones on success', async () => {
-    (flowApi.createMilestone as any).mockResolvedValue({ id: 'm-new' });
+    (flowApi.createMilestone as unknown as Mock).mockResolvedValue({ id: 'm-new' });
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateMilestone(), { wrapper });
@@ -89,7 +89,7 @@ describe('useCreateMilestone', () => {
   });
 
   it('shows an error toast and does not invalidate when the create call fails', async () => {
-    (flowApi.createMilestone as any).mockRejectedValue(new Error('boom'));
+    (flowApi.createMilestone as unknown as Mock).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateMilestone(), { wrapper });
@@ -107,7 +107,7 @@ describe('useUpdateMilestone', () => {
   });
 
   it('calls updateMilestone with id and data and invalidates milestones on success', async () => {
-    (flowApi.updateMilestone as any).mockResolvedValue({});
+    (flowApi.updateMilestone as unknown as Mock).mockResolvedValue({});
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateMilestone(), { wrapper });
@@ -117,7 +117,7 @@ describe('useUpdateMilestone', () => {
   });
 
   it('shows an error toast and does not invalidate when the update call fails', async () => {
-    (flowApi.updateMilestone as any).mockRejectedValue(new Error('boom'));
+    (flowApi.updateMilestone as unknown as Mock).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateMilestone(), { wrapper });

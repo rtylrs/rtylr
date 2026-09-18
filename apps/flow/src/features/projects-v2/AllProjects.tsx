@@ -7,7 +7,7 @@ import type { Project } from '@voxire/voxie/flow/project/v2/types';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import ProjectIcon from '../../shared/components/ProjectIcon';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 
 const STATUS_FILTERS = ['', 'active', 'completed'] as const;
 const VISIBILITY_FILTERS = ['', 'private', 'public'] as const;
@@ -34,7 +34,7 @@ function ProjectCard({ project }: { project: Project }) {
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
             style={{
               background: project.color ? withAlpha(project.color, 13) : 'var(--accent-muted)',
-              color: project.color ?? 'var(--accent)',
+              color: project.color ? onTint(project.color) : 'var(--accent-on-muted)',
             }}
             aria-hidden
           >

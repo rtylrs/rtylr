@@ -163,7 +163,63 @@
     "activityLog": "Journal d'activité",
     "language": "Langue",
     "navigate": "Naviguer",
-    "storefront": "Boutique"
+    "storefront": "Boutique",
+    "createItem": "Créer un article",
+    "createBanner": "Créer une bannière"
   },
-  "launch": "Ouvrir"
+  "launch": "Ouvrir",
+  "pagination": {
+    "previous": "Préc.",
+    "next": "Suiv."
+  },
+  "roleDescriptions": {
+    "admin": "Gérer les accès à l’entreprise et les applications attribuées",
+    "manager": "Gérer le travail attribué dans le périmètre délégué",
+    "member": "Utiliser les applications attribuées et les ressources opérationnelles",
+    "viewer": "Accès en lecture seule aux applications attribuées",
+    "menu_manager": "Gérer les menus, les QR codes et le design de la boutique"
+  },
+  "skipToMainContent": "Aller au contenu principal",
+  "toggleNavigation": "Afficher ou masquer le menu de navigation",
+  "openConsole": "Ouvrir la console",
+  "signOut": "Se déconnecter",
+  "appearance": {
+    "title": "Apparence",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "dropzone": {
+    "active": "Déposez les fichiers ici ...",
+    "idle": "Glissez-déposez un fichier ici, ou cliquez pour en choisir un"
+  },
+  "apiKey": {
+    "created": "Créée",
+    "revoke": "Révoquer la clé d’API"
+  },
+  "appCard": {
+    "upgrade": "Passer à l’offre supérieure",
+    "beta": "Bêta",
+    "comingSoon": "Bientôt"
+  },
+  "breadcrumb": "Fil d’Ariane",
+  "dangerZone": "Zone sensible",
+  "commandPalette": {
+    "placeholder": "Rechercher applications, pages, actions...",
+    "label": "Palette de commandes"
+  },
+  "webhook": {
+    "active": "Actif",
+    "paused": "En pause",
+    "failing": "En échec",
+    "delete": "Supprimer le webhook"
+  },
+  "closeDialog": "Fermer la boîte de dialogue",
+  "closePanel": "Fermer le panneau",
+  "userMenu": "Menu utilisateur",
+  "accountSettings": "Paramètres du compte",
+  "accessRequested": "Demandé",
+  "requestAccess": "Demander l’accès",
+  "posMenuName": "Menu du point de vente",
+  "defaultPageTitle": "Rtylr - Menu sans contact par QR code"
 }

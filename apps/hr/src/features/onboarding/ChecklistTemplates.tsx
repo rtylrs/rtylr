@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
@@ -33,7 +34,7 @@ const ChecklistTemplates = (): React.JSX.Element => {
 
   const handleCreate = (): void => {
     if (!name.trim()) {
-      toast.error('Template name is required');
+      toast.error(t('onboarding.templateNameRequired'));
       return;
     }
     createTemplate.mutate(
@@ -50,7 +51,7 @@ const ChecklistTemplates = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Checklist templates · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.checklistTemplates'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
           title={t('onboardingMgmt.templates.title')}

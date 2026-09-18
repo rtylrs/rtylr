@@ -31,7 +31,9 @@ vi.mock('lucide-react', () => ({
 
 vi.mock('@tanstack/react-router', () => ({
   Outlet: () => <div data-testid="outlet">Outlet Content</div>,
-  useRouterState: ({ select }: { select?: (s: any) => any } = {}) =>
+  useRouterState: ({
+    select,
+  }: { select?: (s: { location: { pathname: string } }) => string } = {}) =>
     select ? select({ location: { pathname: routerState.pathname } }) : routerState.pathname,
 }));
 

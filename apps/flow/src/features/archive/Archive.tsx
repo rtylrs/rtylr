@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useNavigate } from '@tanstack/react-router';
 import { Archive as ArchiveIcon, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -15,6 +16,7 @@ import { TaskRowSkeleton } from '../../shared/components/Skeleton';
 
 const Archive: React.FC = () => {
   const { t } = useTranslation();
+  const openTask = useOpenTask();
   const navigate = useNavigate();
   const tasksQuery = useTasks({ activeOnly: false });
   const { data: apiTasks = [], isLoading } = tasksQuery;
@@ -77,7 +79,7 @@ const Archive: React.FC = () => {
                 <PriorityIcon priority={task.priority} size={12} />
                 <button
                   type="button"
-                  onClick={() => navigate({ to: `/task/${task.id}` as string })}
+                  onClick={() => openTask(String(task.id))}
                   className="min-w-0 flex-1 truncate text-left text-meta"
                   style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
                 >

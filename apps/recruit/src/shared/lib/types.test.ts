@@ -1,13 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type {
-  RecruitCareer,
-  Customization,
-  FormField,
-  TemplateId,
-  FontPairingId,
-  FormFieldKind,
-  SectionKind,
-} from './types';
+import type { RecruitCareer, Customization, TemplateId, FormFieldKind, SectionKind } from './types';
 
 // Type-level tests: ensure the structural contracts are stable.
 // These tests assert runtime-representable invariants so a type

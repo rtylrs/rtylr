@@ -18,5 +18,41 @@
   "currency": "Devise",
   "saving": "Enregistrement…",
   "creating": "Création…",
-  "refresh": "Actualiser"
+  "refresh": "Actualiser",
+  "pageTitles": {
+    "balanceSheet": "Bilan",
+    "bankFeeds": "Flux bancaires",
+    "expenseCategories": "Catégories de dépenses",
+    "expenseDetail": "Détail de la dépense",
+    "submitExpense": "Soumettre une dépense",
+    "invoiceDetail": "Détail de la facture",
+    "newInvoice": "Nouvelle facture",
+    "quotes": "Devis et estimations",
+    "reconciliation": "Rapprochement",
+    "recurringInvoices": "Factures récurrentes",
+    "taxSummary": "Récapitulatif fiscal"
+  },
+  "prev": "Précédent",
+  "next": "Suivant",
+  "description": "Description",
+  "subtotal": "Sous-total",
+  "discount": "Remise",
+  "receipt": "Justificatif",
+  "category": "Catégorie",
+  "vendor": "Fournisseur",
+  "layout": {
+    "openNav": "Ouvrir le menu de navigation",
+    "primaryNav": "Navigation principale",
+    "closeNav": "Fermer le menu de navigation",
+    "search": "Rechercher",
+    "shortcut": "Cmd K",
+    "appearance": "Apparence",
+    "signOut": "Se déconnecter",
+    "notifications": "Notifications"
+  },
+  "closeDialog": "Fermer la boîte de dialogue",
+  "loadingLabel": "Chargement",
+  "confirmLabel": "Confirmer",
+  "closeYear": "Clôturer l'exercice",
+  "new": "Nouveau"
 }

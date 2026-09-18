@@ -14,7 +14,9 @@
       "margin": "Gross Margin"
     },
     "emptyTitle": "No KPI data yet",
-    "emptyDescription": "Metrics will appear here once your business starts generating activity."
+    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "vsPrior": "مقابل السابق",
+    "metaTitle": "لوحة المعلومات · rtylr"
   },
   "revenue": {
     "title": "Revenue",
@@ -31,7 +33,9 @@
     "emptyByApp": {
       "title": "لا يوجد توزيع للإيرادات حتى الآن",
       "description": "سيظهر التوزيع حسب التطبيق بعد ورود إيرادات من أكثر من تطبيق واحد."
-    }
+    },
+    "vsPrevious": "مقابل السابق",
+    "metaTitle": "الإيرادات · rtylr"
   },
   "customers": {
     "title": "Customers",
@@ -55,7 +59,15 @@
     "emptyChurn": {
       "title": "لا توجد بيانات تسرب حتى الآن",
       "description": "ستظهر معدلات التسرب بعد توفر سجل كافٍ من نشاط العملاء لقياس الاحتفاظ بهم."
-    }
+    },
+    "churnedCount": "متوقفون",
+    "customers_zero": "لا عملاء",
+    "customers_one": "عميل واحد",
+    "customers_two": "عميلان",
+    "customers_few": "{{formatted}} عملاء",
+    "customers_many": "{{formatted}} عميلًا",
+    "customers_other": "{{formatted}} عميل",
+    "metaTitle": "العملاء · rtylr"
   },
   "products": {
     "title": "Products",
@@ -84,7 +96,21 @@
     "emptyCategoryMix": {
       "title": "لا توجد بيانات تصنيف حتى الآن",
       "description": "سيظهر التوزيع حسب الفئة بعد تعيين المنتجات إلى فئات وبيعها."
-    }
+    },
+    "inStock": "في المخزون",
+    "units_zero": "لا وحدات",
+    "units_one": "وحدة واحدة",
+    "units_two": "وحدتان",
+    "units_few": "{{formatted}} وحدات",
+    "units_many": "{{formatted}} وحدة",
+    "units_other": "{{formatted}} وحدة",
+    "products_zero": "لا منتجات",
+    "products_one": "منتج واحد",
+    "products_two": "منتجان",
+    "products_few": "{{formatted}} منتجات",
+    "products_many": "{{formatted}} منتجًا",
+    "products_other": "{{formatted}} منتج",
+    "metaTitle": "المنتجات · rtylr"
   },
   "financial": {
     "title": "Financial",
@@ -102,7 +128,14 @@
     "emptyCashFlow": {
       "title": "لا توجد بيانات تدفق نقدي حتى الآن",
       "description": "سيظهر التدفق النقدي هنا بعد تسجيل التدفقات الداخلة والخارجة."
-    }
+    },
+    "invoices_zero": "لا فواتير",
+    "invoices_one": "فاتورة واحدة",
+    "invoices_two": "فاتورتان",
+    "invoices_few": "{{formatted}} فواتير",
+    "invoices_many": "{{formatted}} فاتورة",
+    "invoices_other": "{{formatted}} فاتورة",
+    "metaTitle": "المالية · rtylr"
   },
   "operations": {
     "title": "Operations",
@@ -131,7 +164,15 @@
     "emptyTimeOff": {
       "title": "لا توجد بيانات إجازات حتى الآن",
       "description": "ستظهر طلبات الإجازة هنا بعد تقديمها من الموظفين."
-    }
+    },
+    "hours": "ساعات",
+    "scheduled": "مجدول",
+    "completed": "مكتمل",
+    "noShows": "عدم حضور",
+    "completion": "نسبة الإتمام",
+    "pending": "قيد الانتظار",
+    "approved": "معتمد",
+    "metaTitle": "العمليات · rtylr"
   },
   "reports": {
     "title": "Reports",
@@ -142,7 +183,8 @@
     "empty": {
       "title": "لا توجد قوالب تقارير حتى الآن",
       "description": "ستظهر قوالب التقارير هنا بعد توفرها لمساحة العمل هذه."
-    }
+    },
+    "metaTitle": "التقارير · rtylr"
   },
   "settings": {
     "title": "Insights Settings",
@@ -162,6 +204,15 @@
         "description": "ستظهر هنا التقارير التي تجدولها للتسليم الدوري."
       }
     },
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "save": "حفظ الإعدادات",
+    "saving": "جارٍ الحفظ…",
+    "metaTitle": "الإعدادات · rtylr"
+  },
+  "charts": {
+    "revenueTrend": "مخطط اتجاه الإيرادات",
+    "revenueByApp": "مخطط الإيرادات حسب التطبيق",
+    "revenueSparkline": "مخطط مصغر للإيرادات",
+    "topCustomers": "مخطط أفضل العملاء"
   }
 }

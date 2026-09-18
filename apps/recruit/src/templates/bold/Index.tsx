@@ -21,14 +21,10 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) =
         <section style={{ background: 'var(--recruit-accent)' }}>
           <div className="mx-auto max-w-6xl px-6 py-28 text-white sm:py-40">
             <div className="mb-6 inline-block border border-white/40 px-3 py-1 text-[10px] uppercase tracking-[0.3em]">
-              {cleanMojibake(customization.brandName)} · Careers
+              {cleanMojibake(customization.brandName)} · {t('public.index.careersEyebrow')}
             </div>
-            <h1 className="text-6xl font-black leading-[0.95] tracking-tight sm:text-8xl">
-              Work
-              <br />
-              that moves
-              <br />
-              the needle.
+            <h1 className="whitespace-pre-line text-6xl font-black leading-[0.95] tracking-tight sm:text-8xl">
+              {t('public.index.heroTitle')}
             </h1>
             {customization.aboutBlurb && (
               <p className="mt-10 max-w-2xl text-xl leading-relaxed text-white/80">
@@ -49,9 +45,11 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) =
 
         <section className="mx-auto max-w-6xl px-6 py-24">
           <div className="mb-12 flex items-baseline justify-between">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Open positions</h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              {t('public.index.openPositions')}
+            </h2>
             <div className="text-sm font-medium" style={{ color: 'var(--recruit-muted)' }}>
-              {careers.length} {careers.length === 1 ? 'role' : 'roles'}
+              {t('public.index.roleCount', { count: careers.length })}
             </div>
           </div>
 
@@ -59,9 +57,9 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) =
             {careers.length === 0 ? (
               <EmptyState
                 icon={Briefcase}
-                title={t('emptyStates.publicRolesNone')}
+                title={t('common.emptyStates.publicRolesNone')}
                 action={{
-                  label: t('emptyStates.checkAgain'),
+                  label: t('common.emptyStates.checkAgain'),
                   onClick: () => window.location.reload(),
                 }}
               />
@@ -69,7 +67,8 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) =
               careers.map((c) => (
                 <Link
                   key={c.id}
-                  to={`/${customization.slug}/${c.slug}` as any}
+                  to="/$slug/$careerSlug"
+                  params={{ slug: customization.slug, careerSlug: c.slug }}
                   className="group flex items-center justify-between border-b py-8 transition hover:pl-4"
                   style={{ borderColor: 'var(--recruit-border)' }}
                 >

@@ -12,6 +12,10 @@
 /* ── Brand accent (CRM blue) ──────────────────────────────────── */
 :root {
   --accent: #3b82f6;
+  /* Text on an --accent fill. White measures 3.68:1 on #3b82f6 and fails AA;
+     near-black is what deriveOnAccent returns for this accent, so the static
+     value matches what the provider computes. */
+  --crm-on-accent: #0a0a0a; /* 5.38:1 on #3b82f6 */
   --accent-muted: rgba(59, 130, 246, 0.12);
   --accent-border: rgba(59, 130, 246, 0.3);
   --accent-focus: rgba(59, 130, 246, 0.5);
@@ -20,6 +24,11 @@
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {
+  /* The accent used AS a foreground, on any CRM surface. The accent itself
+     passes in dark but fails in light: #3b82f6 measures 3.68:1 on white and
+     3.35:1 on the light bg. Same role as flow's --accent-fg, kept above the 4.6
+     the derivation targets rather than sitting on its own minimum. */
+  --accent-fg: #4b8cf7; /* dark, 5.51:1 worst across bg, surface and card */
   --hub-bg: #0a0a0a;
   --hub-surface: #111111;
   --hub-card: #161616;
@@ -37,6 +46,7 @@
 
 /* ── Light mode ──────────────────────────────────────────────── */
 :root[data-theme='light'] {
+  --accent-fg: #0a59da; /* light, 5.53:1 worst across bg and surface */
   --hub-bg: #f4f4f5;
   --hub-surface: #ffffff;
   --hub-card: #ffffff;

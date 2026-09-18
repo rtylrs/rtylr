@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -32,9 +33,13 @@ const Section: React.FC<{
         <AccountTypeBadge type={(rows[0]?.type ?? 'asset') as AccountType} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {rows.map((r) => (
+        {/* Index, not r.label: most rows carry a server-supplied label, but the
+            inventory row appends a translated one, so keying off the label
+            would remount the section whenever the reader switches language.
+            The list is built in a fixed order and only ever appended to. */}
+        {rows.map((r, i) => (
           <div
-            key={r.label}
+            key={i}
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -81,8 +86,8 @@ const BalanceSheet: React.FC = () => {
     return (
       <div>
         <PageHeader
-          title="Balance Sheet"
-          breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
+          title={t('finance.balanceSheet.title')}
+          breadcrumbs={[{ label: t('nav.reports') }, { label: t('nav.balanceSheet') }]}
         />
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
@@ -102,15 +107,15 @@ const BalanceSheet: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Balance sheet · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.balanceSheet'))} />
       <PageHeader
-        title="Balance Sheet"
+        title={t('finance.balanceSheet.title')}
         subtitle={`As of ${asOfDate}`}
-        breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
+        breadcrumbs={[{ label: t('nav.reports') }, { label: t('nav.balanceSheet') }]}
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <label style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>
-              As of Date:
+              {t('finance.balanceSheet.asOf')}
             </label>
             <input
               type="date"
@@ -138,13 +143,13 @@ const BalanceSheet: React.FC = () => {
         }}
       >
         <Section
-          title="Assets"
+          title={t('finance.balanceSheet.assets')}
           rows={
             inventory
               ? [
                   ...data.assets,
                   {
-                    label: t('balanceSheet.inventory'),
+                    label: t('finance.balanceSheet.inventory'),
                     amount: inventory.totalValue,
                     type: 'asset',
                   },
@@ -152,8 +157,8 @@ const BalanceSheet: React.FC = () => {
               : data.assets
           }
         />
-        <Section title="Liabilities" rows={data.liabilities} />
-        <Section title="Equity" rows={data.equity} />
+        <Section title={t('finance.balanceSheet.liabilities')} rows={data.liabilities} />
+        <Section title={t('finance.balanceSheet.equity')} rows={data.equity} />
       </div>
 
       <div
@@ -165,10 +170,22 @@ const BalanceSheet: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <Stat label="Total Assets" value={totalAssets} />
-        <Stat label="Total Liabilities" value={totalLiab} color="var(--finance-danger)" />
-        <Stat label="Total Equity" value={totalEquity} color="var(--finance-purple)" />
-        <Stat label="Check" value={totalAssets - (totalLiab + totalEquity)} color={ACCENT} />
+        <Stat label={t('finance.balanceSheet.totalAssets')} value={totalAssets} />
+        <Stat
+          label={t('finance.balanceSheet.totalLiabilities')}
+          value={totalLiab}
+          color="var(--finance-danger)"
+        />
+        <Stat
+          label={t('finance.balanceSheet.totalEquity')}
+          value={totalEquity}
+          color="var(--finance-purple)"
+        />
+        <Stat
+          label={t('finance.balanceSheet.check')}
+          value={totalAssets - (totalLiab + totalEquity)}
+          color={ACCENT}
+        />
       </div>
     </motion.div>
   );

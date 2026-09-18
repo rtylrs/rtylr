@@ -1,6 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { ProductServiceClient } from '@voxire/voxie/erp/product/v1/client';
 import type {
   CreateProductRequest,
@@ -137,6 +138,7 @@ export function useCreateProduct() {
 }
 
 export function useUpdateProduct() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<UpdateProductResponse, Error, UpdateProductInput>({
     mutationFn: (data) => productClient.updateProduct(data),
@@ -145,11 +147,12 @@ export function useUpdateProduct() {
       qc.invalidateQueries({ queryKey: ['product', variables.id] });
       qc.invalidateQueries({ queryKey: ['product-full', variables.id] });
     },
-    onError: () => toast.error('Failed to update product'),
+    onError: () => toast.error(t('erp.products.updateFailed')),
   });
 }
 
 export function useDeleteProduct() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<DeleteProductResponse, Error, string>({
     mutationFn: (id) => productClient.deleteProduct({ id }),
@@ -158,6 +161,6 @@ export function useDeleteProduct() {
       qc.invalidateQueries({ queryKey: ['product', id] });
       qc.invalidateQueries({ queryKey: ['product-full', id] });
     },
-    onError: () => toast.error('Failed to delete product'),
+    onError: () => toast.error(t('erp.products.deleteFailed')),
   });
 }

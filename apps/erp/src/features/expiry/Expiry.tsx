@@ -8,6 +8,8 @@ import { useExpiry } from './useExpiry';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate, daysUntil } from '../../shared/lib/format';
+import { pageTitle } from '../../shared/lib/pageTitle';
+import { routeLabels } from '../../shared/lib/routeLabels';
 const AMBER = 'var(--erp-accent)';
 
 const Expiry: React.FC = () => {
@@ -24,9 +26,9 @@ const Expiry: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Expiry tracking · rtylr" />
+      <HelmetContainer title={pageTitle(t(routeLabels['/expiry'].title))} />
       <PageHeader
-        title="Expiry Tracking"
+        title={t(routeLabels['/expiry'].title)}
         description={`${items.length} batches with expiry dates`}
       />
 
@@ -42,21 +44,21 @@ const Expiry: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <span>Product</span>
-          <span>Batch</span>
-          <span>Qty</span>
-          <span>Warehouse</span>
-          <span>Expiry</span>
-          <span>Days Left</span>
+          <span>{t('common.product')}</span>
+          <span>{t('common.batch')}</span>
+          <span>{t('common.qtyShort')}</span>
+          <span>{t('common.warehouse')}</span>
+          <span>{t('erp.expiry.expiryColumn')}</span>
+          <span>{t('erp.expiry.daysLeft')}</span>
         </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
         ) : sorted.length === 0 ? (
           <EmptyState
             icon={CalendarX}
-            title={t('expiry.empty.title')}
-            description={t('expiry.empty.description')}
-            action={{ label: t('expiry.refresh'), onClick: () => void refetch() }}
+            title={t('erp.expiry.empty.title')}
+            description={t('erp.expiry.empty.description')}
+            action={{ label: t('erp.expiry.refresh'), onClick: () => void refetch() }}
           />
         ) : (
           sorted.map((item, i) => {

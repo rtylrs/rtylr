@@ -38,7 +38,7 @@ export function diffDays(isoA: string, isoB: string): number {
  * Uses short month names to save space. e.g. '2026-05-15' -> 'May 15'
  */
 export function formatAxisDate(iso: string): string {
-  const [year, month, day] = iso.split('-').map(Number);
+  const [, month, day] = iso.split('-').map(Number);
   const months = [
     'Jan',
     'Feb',

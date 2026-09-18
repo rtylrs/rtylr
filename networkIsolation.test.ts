@@ -36,6 +36,14 @@ describe('a test run cannot reach the network', () => {
     expect(config).toContain("'import.meta.env.VITE_API_URL'");
   });
 
+  it('rejects fetch before a socket is opened', async () => {
+    // The refused port stopped requests being in flight at teardown, but the
+    // refusal still surfaced as an unhandled ECONNREFUSED in the run output.
+    await expect(fetch('https://api.voxire.com/runtime-config')).rejects.toThrow(
+      /Network access is disabled in tests/
+    );
+  });
+
   it('stops happy-dom loading external stylesheets and scripts', () => {
     expect(config).toContain('disableCSSFileLoading: true');
     expect(config).toContain('disableJavaScriptFileLoading: true');

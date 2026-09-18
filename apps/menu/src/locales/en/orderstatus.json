@@ -1,4 +1,26 @@
 {
+  "pageTitle": "Order status · rtylr",
+  "orderLabel": "Order",
+  "cancelled": "Order cancelled",
+  "refunded": "Order refunded",
+  "steps": {
+    "received": "Received",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "done": "Done"
+  },
+  "messages": {
+    "received": "Order received!",
+    "preparing": "Being prepared...",
+    "ready": "Ready for pickup!",
+    "done": "Order complete!"
+  },
+  "statusFallback": "Status: {{status}}",
+  "loading": "Loading order status...",
+  "loadFailed": "Could not load order status.",
+  "retry": "Retry",
+  "pollNotice": "Status refreshes automatically every {{seconds}} seconds.",
+  "orderAnother": "Order Another",
   "notFoundTitle": "Order not found",
   "notFoundDescription": "We couldn't find an order matching this ID. Please check your order link.",
   "backToMenu": "Back to menu"

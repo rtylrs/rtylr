@@ -35,10 +35,6 @@ type RawAiUsage = {
   period_end?: string;
 };
 
-type AiQuotaSettingsResponse = {
-  settings?: { mode?: AiQuotaMode };
-};
-
 function finiteNumber(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;

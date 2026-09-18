@@ -45,7 +45,7 @@ const Reports: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <HelmetContainer title="Reports · rtylr" />
+      <HelmetContainer title={t('insights.reports.metaTitle')} />
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.reports.title')}
@@ -73,7 +73,7 @@ const Reports: React.FC = (): React.JSX.Element => {
             onClick={() => generateRevenue.mutate({})}
             disabled={generateRevenue.isPending}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium min-h-[44px]"
-            style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
+            style={{ background: 'var(--accent)', color: 'var(--hub-on-accent)' }}
             aria-label={t('insights.reports.generateRevenue')}
           >
             {generateRevenue.isPending ? (

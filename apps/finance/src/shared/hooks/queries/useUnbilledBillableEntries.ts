@@ -74,7 +74,7 @@ export function useMarkEntriesInvoiced() {
     onSuccess: (res) => {
       void qc.invalidateQueries({ queryKey: ['hr', 'time-entries'] });
       toast.success(
-        t('unbilled.markedDone', {
+        t('finance.unbilled.markedDone', {
           marked: res.markedCount ?? 0,
           skipped: res.skippedCount ?? 0,
         })

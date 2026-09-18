@@ -21,7 +21,12 @@
     "noCourses": "Pas encore de cours.",
     "goToTraining": "Aller à la formation",
     "noBenefits": "Aucune inscription à un avantage active.",
-    "goToBenefits": "Aller aux avantages"
+    "goToBenefits": "Aller aux avantages",
+    "contact": "Coordonnées",
+    "employment": "Emploi",
+    "documents": "Documents",
+    "training": "Formation",
+    "benefits": "Avantages"
   },
   "reportingLines": {
     "title": "Lignes hiérarchiques",
@@ -33,5 +38,6 @@
     "saved": "Ligne hiérarchique mise à jour",
     "selectLabel": "Choisir un responsable pour {{name}}",
     "changeLabel": "Modifier le rattachement de {{name}}"
-  }
+  },
+  "deptPrefix": "Service :"
 }

@@ -26,7 +26,9 @@ const SHARED_THEME = path.resolve(SRC, '../../../packages/tailwind-config/theme.
  * declared in a stylesheet, so a static scan cannot see them. Every use in the
  * app supplies a fallback for the pre-hydration frame.
  */
-const RUNTIME_TOKENS = new Set(['--flow-r', '--flow-u', '--pane-u']);
+// --tone is set on each tinted element's own inline style, so one value feeds
+// both the tint and the foreground derived from it (rtylr#1249).
+const RUNTIME_TOKENS = new Set(['--flow-r', '--flow-u', '--pane-u', '--tone']);
 
 function declaredTokens(): Set<string> {
   const declared = new Set<string>();
@@ -68,6 +70,12 @@ describe('token references resolve', () => {
     for (const file of sourceFiles(SRC)) {
       const lines = fs.readFileSync(file, 'utf8').split('\n');
       lines.forEach((line, index) => {
+        // A comment that names a token is not a reference to one. Without this
+        // a comment explaining why some value must NOT become a token, which
+        // naturally writes out `var(--flow-...)`, is read as a reference to a
+        // token called `--flow-` and reported as an offender.
+        const trimmed = line.trim();
+        if (trimmed.startsWith('*') || trimmed.startsWith('//') || trimmed.startsWith('/*')) return;
         for (const match of line.matchAll(/var\(\s*(--[a-z0-9-]+)/gi)) {
           const token = match[1];
           if (declared.has(token) || RUNTIME_TOKENS.has(token)) continue;

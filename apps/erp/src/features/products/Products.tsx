@@ -32,6 +32,7 @@ import { formatCurrency } from '../../shared/lib/format';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -155,7 +156,7 @@ const Products: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Products · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.products'))} />
       <PageHeader
         title={t('erp.products.title')}
         description={`${totalProducts} product${totalProducts === 1 ? '' : 's'} in your catalog`}
@@ -204,7 +205,7 @@ const Products: React.FC = () => {
               setSelected(new Set());
               setSearch(e.target.value);
             }}
-            placeholder="Search products…"
+            placeholder={t('erp.products.searchPlaceholder')}
             className="w-full pl-9 pr-4 py-2 rounded-lg text-sm outline-none"
             style={{
               background: 'var(--hub-input-bg)',
@@ -316,18 +317,17 @@ const Products: React.FC = () => {
             }}
           >
             <span></span>
-            <span>Name</span>
-            <span>SKU</span>
-            <span>Category</span>
-            <span>Brand</span>
-            <span>Stock</span>
-            <span>Price</span>
-            <span>Status</span>
+            <span>{t('common.name')}</span>
+            <span>{t('erp.products.variants.sku')}</span>
+            <span>{t('erp.products.category')}</span>
+            <span>{t('erp.products.brand')}</span>
+            <span>{t('common.stock')}</span>
+            <span>{t('common.price')}</span>
+            <span>{t('common.status')}</span>
           </div>
           <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
             {products.map((p) => {
               const imageUrl = cdnImageUrl((p as Product & { imageUrl?: string }).imageUrl);
-              const stockStatus = getProductStockStatus(p);
               return (
                 <div
                   key={p.id}
@@ -425,7 +425,7 @@ const Products: React.FC = () => {
             className="text-xs font-semibold mb-1 block"
             style={{ color: 'var(--hub-text-muted)' }}
           >
-            Category
+            {t('erp.products.category')}
           </label>
           <select
             value={filters.categoryId ?? ''}
@@ -442,7 +442,7 @@ const Products: React.FC = () => {
               color: 'var(--hub-text)',
             }}
           >
-            <option value="">All categories</option>
+            <option value="">{t('erp.products.allCategories')}</option>
             {categories.map((c) => (
               <option key={c.id} value={String(c.id)}>
                 {c.name}
@@ -455,7 +455,7 @@ const Products: React.FC = () => {
             className="text-xs font-semibold mb-1 block"
             style={{ color: 'var(--hub-text-muted)' }}
           >
-            Status
+            {t('common.status')}
           </label>
           <select
             value={filters.status || ''}
@@ -472,10 +472,10 @@ const Products: React.FC = () => {
               color: 'var(--hub-text)',
             }}
           >
-            <option value="">All statuses</option>
-            <option value="In Stock">In Stock</option>
-            <option value="Low Stock">Low Stock</option>
-            <option value="Out of Stock">Out of Stock</option>
+            <option value="">{t('erp.products.allStatuses')}</option>
+            <option value="In Stock">{t('erp.products.status.inStock')}</option>
+            <option value="Low Stock">{t('erp.products.status.lowStock')}</option>
+            <option value="Out of Stock">{t('erp.products.status.outOfStock')}</option>
           </select>
         </div>
       </FilterDrawer>

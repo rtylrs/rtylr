@@ -101,3 +101,46 @@ describe('formatDate', () => {
     expect(result).toMatch(/May\s*15/i);
   });
 });
+
+describe('formatDate counts calendar days, not hours (#1097 D-020)', () => {
+  const ORIGINAL_TZ = process.env.TZ;
+
+  afterEach(() => {
+    vi.useRealTimers();
+    if (ORIGINAL_TZ === undefined) delete process.env.TZ;
+    else process.env.TZ = ORIGINAL_TZ;
+  });
+
+  const at = (localIso: string): void => {
+    process.env.TZ = 'Asia/Beirut';
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(localIso));
+  };
+
+  it('calls a task due today "Today" at 02:00, not "Tomorrow"', () => {
+    // The old sum subtracted a local now from a UTC-parsed date, so in the
+    // hours before UTC midnight a task due today came out one day ahead. Only
+    // this hour distinguishes the correct answer from the broken one.
+    at('2026-09-07T02:00:00');
+    expect(formatDate('2026-09-07')).toBe('Today');
+  });
+
+  it('gives the same answer at every hour of that day', () => {
+    for (const hour of ['00:30', '02:00', '09:00', '14:00', '23:45']) {
+      at(`2026-09-07T${hour}:00`);
+      expect(formatDate('2026-09-07'), `at ${hour}`).toBe('Today');
+      vi.useRealTimers();
+    }
+  });
+
+  it('still labels the neighbouring days', () => {
+    at('2026-09-07T02:00:00');
+    expect(formatDate('2026-09-08')).toBe('Tomorrow');
+    expect(formatDate('2026-09-06')).toBe('Yesterday');
+  });
+
+  it('returns a dash for an absent date rather than Invalid Date', () => {
+    at('2026-09-07T09:00:00');
+    expect(formatDate('')).toBe('-');
+  });
+});

@@ -164,7 +164,7 @@ const BusinessTypeSettings: React.FC = () => {
                 <div className="flex items-center gap-2 min-w-0">
                   <span
                     className="h-6 w-6 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                   >
                     <Check size={13} />
                   </span>

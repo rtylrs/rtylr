@@ -161,11 +161,26 @@
    * pre-existing cohesion defect, not an accessibility one: 9.4:1 on --flow-bg. */
   --flow-focus-ring: rgba(100, 197, 185, 0.9);
 
-  /* Only the -fg variants exist on purpose. A separate fill token would need a
-   * light value too, and nothing consumes one: every surface here uses the
-   * foreground tone. */
+  /* The -fg tones double as fills, which is why no separate fill colour exists.
+   * Measured against both cards they are already well clear of the 3:1 a filled
+   * control needs to be distinguishable: danger 6.19:1 dark and 5.93:1 light,
+   * warn 7.90:1 and 5.50:1. A second red or amber would duplicate a value and
+   * make a destructive button a different red from destructive text.
+   *
+   * What they did lack is a foreground. Four buttons painted white on the danger
+   * tone at 3.76:1 and the trial banner painted white on the warn tone at
+   * 2.29:1 (rtylr#1234). The -fill aliases below exist so a call site says which
+   * side it means, the way --accent-fg and --flow-on-accent do; the earlier note
+   * here claimed nothing consumed a fill token, which stopped being true. */
   --flow-warn-fg: #d9a066;
   --flow-danger-fg: #e5776a;
+  --flow-danger-fill: var(--flow-danger-fg);
+  --flow-warn-fill: var(--flow-warn-fg);
+  /* Which extreme wins flips with the mode, so these are not one value. Exactly
+   * what deriveOnAccent returns for each tone: the better of near-black and
+   * near-white, measured rather than assumed. */
+  --flow-danger-on-fill: #0a0a0a; /* dark, 6.77:1 on #e5776a */
+  --flow-warn-on-fill: #0a0a0a; /* dark, 8.65:1 on #d9a066 */
   --flow-locked-fg: #a8a4c8;
   /* In progress, medium priority, an upcoming cycle and a completed milestone
    * all read as one informational blue. #3b82f6 carried them, which measured
@@ -175,6 +190,28 @@
    * the rest of this family occupies (danger 6.19, locked 7.59, warn 7.90)
    * rather than being picked to clear the threshold and no more. */
   --flow-info-fg: #6aa5ff;
+  /* The muted tone: backlog, todo, low and no priority, a completed cycle, a
+   * milestone in planning, and the health fallback. Those shipped as three
+   * separate greys, #6b7280, #9ca3af and #4b5563, and five of the six
+   * mode-and-ground combinations were under 4.5:1: todo measured 2.31:1 in
+   * light and cancelled 2.39:1 in dark. No single hex can serve both grounds.
+   *
+   * One token rather than three, decided deliberately. Colour was carrying a
+   * backlog-versus-todo distinction that three mid-greys cannot convey, and
+   * the status name sits beside the dot in the list, the board and the card.
+   *
+   * 6.88:1 on the worst of the three dark grounds, inside the band the rest of
+   * this family occupies. */
+  --flow-neutral-fg: #9ba0a8;
+  /* High priority, and only that. It sits inside an ordered scale that reads
+   * as heat: urgent uses --flow-danger-fg, high this, medium --flow-info-fg,
+   * low and none --flow-neutral-fg. So it needs a hue between red and amber
+   * rather than a shared warm tone, or the scale stops being readable as one.
+   *
+   * It shipped as #f97316, which measures 2.55:1 in light mode and fails AA
+   * outright. 7.60:1 here, between danger at 6.19 and warn at 7.90, so the
+   * step is a real one. */
+  --flow-priority-high-fg: #e8945c;
 
   --flow-status-draft: var(--flow-text-muted);
   --flow-status-draft-bg: rgba(255, 255, 255, 0.06);
@@ -211,10 +248,16 @@
 
   --flow-warn-fg: #8f5f14;
   --flow-danger-fg: #b4382a;
+  --flow-danger-on-fill: #ffffff; /* light, 5.93:1 on #b4382a */
+  --flow-warn-on-fill: #ffffff; /* light, 5.50:1 on #8f5f14 */
   --flow-locked-fg: #5b5591;
   /* See the dark-mode note. 5.31:1 on white and on --flow-bg, inside this
    * family's light band (warn 5.01, danger 5.40, locked 6.06). */
   --flow-info-fg: #2a63bb;
+  /* See the dark-mode note. 5.33:1 on white and on --flow-bg. */
+  --flow-neutral-fg: #5f6570;
+  /* See the dark-mode note. 5.45:1, inside this family's light band. */
+  --flow-priority-high-fg: #9d4d16;
 
   --flow-status-draft: var(--flow-text-muted);
   --flow-status-draft-bg: rgba(0, 0, 0, 0.05);
@@ -452,6 +495,32 @@
 :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
   outline: 2px solid var(--flow-focus-ring);
   outline-offset: 2px;
+}
+
+/**
+ * A control that appears on hover, without stranding anyone who cannot hover.
+ *
+ * Guarded by `(hover: hover)`, so a touch device shows it permanently rather
+ * than hiding a control that can never be revealed. `:focus-within` and
+ * `:focus-visible` bring it back for the keyboard, so tabbing to it does not
+ * land on something invisible.
+ *
+ * Only opacity animates, so the row does not reflow on hover.
+ */
+.flow-reveal-on-hover {
+  transition: opacity 150ms ease-out;
+}
+
+@media (hover: hover) {
+  .flow-reveal-on-hover {
+    opacity: 0;
+  }
+
+  .group:hover .flow-reveal-on-hover,
+  .group:focus-within .flow-reveal-on-hover,
+  .flow-reveal-on-hover:focus-visible {
+    opacity: 1;
+  }
 }
 
 .flow-focus:focus-visible {

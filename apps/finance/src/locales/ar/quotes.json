@@ -1,7 +1,25 @@
 {
-  "created": "Quote created",
+  "created": "تم إنشاء عرض السعر",
   "markedAccepted": "Marked {{id}} as accepted",
   "emptyTitle": "لا توجد عروض أسعار حتى الآن",
   "emptyDescription": "أرسل عروض أسعار للعملاء وحوّلها إلى فواتير عند الموافقة عليها.",
-  "emptyCta": "عرض سعر جديد"
+  "emptyCta": "عرض سعر جديد",
+  "title": "عروض الأسعار",
+  "newQuote": "عرض سعر جديد",
+  "clientRequired": "اسم العميل مطلوب",
+  "amountPositive": "يجب أن يكون المبلغ أكبر من صفر",
+  "client": "العميل",
+  "clientPlaceholder": "اسم العميل أو الشركة",
+  "amount": "المبلغ",
+  "issueDate": "تاريخ الإصدار",
+  "expires": "تاريخ الانتهاء",
+  "description": "الوصف",
+  "notesPlaceholder": "ملاحظات اختيارية",
+  "converted": "تم تحويل عرض السعر إلى فاتورة",
+  "accepted": "تم قبول عرض السعر",
+  "view": "عرض",
+  "prev": "السابق",
+  "next": "التالي",
+  "createdToast": "تم إنشاء عرض السعر",
+  "convertedToast": "تم تحويل عرض السعر إلى فاتورة"
 }

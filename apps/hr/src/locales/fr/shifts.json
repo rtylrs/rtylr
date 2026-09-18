@@ -26,6 +26,27 @@
     "conflictsWarning": "Certaines attributions ont des conflits d'horaire.",
     "cannotPublishConflicts": "Résolvez tous les conflits d'horaire avant de publier le planning.",
     "emptyTitle": "Aucune donnée de planning",
-    "emptyDescription": "Ajoutez des employés à cet emplacement pour construire le planning."
+    "emptyDescription": "Ajoutez des employés à cet emplacement pour construire le planning.",
+    "published": "Planning publié"
+  },
+  "schedule": {
+    "fillAllFields": "Complétez tous les champs",
+    "shiftSaved": "Poste enregistré",
+    "shiftRemoved": "Poste supprimé",
+    "weekPublished": "Semaine publiée",
+    "metaTitle": "Planning des postes · rtylr",
+    "title": "Planning des postes",
+    "subtitle": "Vue hebdomadaire pour planifier les postes",
+    "publishWeek": "Publier la semaine",
+    "newShift": "Nouveau poste",
+    "employee": "Employé",
+    "selectPlaceholder": "Sélectionner",
+    "start": "Début",
+    "end": "Fin",
+    "color": "Couleur",
+    "cancel": "Annuler",
+    "saveShift": "Enregistrer le poste",
+    "confirmDelete": "Supprimer le poste de {{name}} ?",
+    "standardName": "Standard"
   }
 }

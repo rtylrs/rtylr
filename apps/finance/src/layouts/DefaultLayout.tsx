@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { LicenseBanner } from '@voxire/components';
@@ -42,7 +43,7 @@ import { canFinancePermission, type FinancePermission } from '../shared/lib/fina
 const ACCENT = 'var(--finance-accent)';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
   // Resource required to see this nav item. Bank feeds, reconciliation, the
@@ -54,42 +55,42 @@ interface NavItem {
 }
 
 interface NavGroup {
-  title: string;
+  titleKey: string;
   items: NavItem[];
 }
 
 const navGroups: NavGroup[] = [
   {
-    title: 'Overview',
-    items: [{ label: 'Dashboard', path: '/', icon: LayoutDashboard }],
+    titleKey: 'nav.groups.overview',
+    items: [{ labelKey: 'nav.dashboard', path: '/', icon: LayoutDashboard }],
   },
   {
-    title: 'Sales',
+    titleKey: 'nav.groups.sales',
     items: [
-      { label: 'Invoices', path: '/invoices', icon: FileText },
-      { label: 'Recurring', path: '/invoices/recurring', icon: Repeat },
-      { label: 'Quotes', path: '/quotes', icon: ClipboardList },
+      { labelKey: 'nav.invoices', path: '/invoices', icon: FileText },
+      { labelKey: 'nav.recurring', path: '/invoices/recurring', icon: Repeat },
+      { labelKey: 'nav.quotes', path: '/quotes', icon: ClipboardList },
     ],
   },
   {
-    title: 'Spend',
+    titleKey: 'nav.groups.spend',
     items: [
-      { label: 'Expenses', path: '/expenses', icon: Receipt },
-      { label: 'Categories', path: '/categories', icon: Tag },
-      { label: 'Bills', path: '/bills', icon: Wallet },
+      { labelKey: 'nav.expenses', path: '/expenses', icon: Receipt },
+      { labelKey: 'nav.categories', path: '/categories', icon: Tag },
+      { labelKey: 'nav.bills', path: '/bills', icon: Wallet },
     ],
   },
   {
-    title: 'Banking',
+    titleKey: 'nav.groups.banking',
     items: [
       {
-        label: 'Bank Feeds',
+        labelKey: 'nav.bankFeeds',
         path: '/bank',
         icon: Building2,
         requiredPermission: 'finance:accounts',
       },
       {
-        label: 'Reconcile',
+        labelKey: 'nav.reconcile',
         path: '/reconcile',
         icon: Shuffle,
         requiredPermission: 'finance:reconcile',
@@ -97,25 +98,30 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    title: 'Reports',
+    titleKey: 'nav.groups.reports',
     items: [
-      { label: 'Profit & Loss', path: '/pl', icon: TrendingUp },
-      { label: 'Balance Sheet', path: '/reports/balance-sheet', icon: BarChart2 },
-      { label: 'Cash Flow', path: '/reports/cash-flow', icon: LineChart },
-      { label: 'Tax Summary', path: '/reports/tax', icon: FileCheck },
+      { labelKey: 'nav.pl', path: '/pl', icon: TrendingUp },
+      { labelKey: 'nav.balanceSheet', path: '/reports/balance-sheet', icon: BarChart2 },
+      { labelKey: 'nav.cashFlow', path: '/reports/cash-flow', icon: LineChart },
+      { labelKey: 'nav.taxSummary', path: '/reports/tax', icon: FileCheck },
     ],
   },
   {
-    title: 'Accounting',
+    titleKey: 'nav.groups.accounting',
     items: [
-      { label: 'Journal', path: '/journal', icon: BookOpen },
+      { labelKey: 'nav.journal', path: '/journal', icon: BookOpen },
       {
-        label: 'Accounts',
+        labelKey: 'nav.accounts',
         path: '/accounts',
         icon: FileText,
         requiredPermission: 'finance:accounts',
       },
-      { label: 'Tax Config', path: '/tax', icon: Calculator, requiredPermission: 'finance:tax' },
+      {
+        labelKey: 'nav.taxConfig',
+        path: '/tax',
+        icon: Calculator,
+        requiredPermission: 'finance:tax',
+      },
     ],
   },
 ];
@@ -162,7 +168,8 @@ function applyTheme(t: Theme) {
   localStorage.setItem('finance-theme', t);
 }
 
-const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
+const SidebarNavItem: React.FC<NavItem> = ({ labelKey, path, icon: Icon }) => {
+  const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive =
     path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(path + '/');
@@ -188,7 +195,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
         />
       )}
       <Icon size={15} style={{ position: 'relative', flexShrink: 0 }} />
-      <span style={{ position: 'relative', fontSize: 12.5 }}>{label}</span>
+      <span style={{ position: 'relative', fontSize: 12.5 }}>{t(labelKey)}</span>
       {isActive && (
         <span
           style={{
@@ -207,6 +214,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 };
 
 const DefaultLayout: React.FC = () => {
+  const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
@@ -334,7 +342,7 @@ const DefaultLayout: React.FC = () => {
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            aria-label="Open navigation menu"
+            aria-label={t('common.layout.openNav')}
             aria-expanded={sidebarOpen}
             aria-controls="finance-sidebar"
             className="flex h-11 w-11 items-center justify-center rounded-lg"
@@ -358,7 +366,7 @@ const DefaultLayout: React.FC = () => {
 
         <aside
           id="finance-sidebar"
-          aria-label="Primary navigation"
+          aria-label={t('common.layout.primaryNav')}
           className={[
             sidebarOpen ? 'fixed inset-y-0 start-0 z-50 flex' : 'hidden',
             'md:flex w-56 flex-col shrink-0 overflow-hidden',
@@ -393,7 +401,7 @@ const DefaultLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              aria-label="Close navigation menu"
+              aria-label={t('common.layout.closeNav')}
               className="flex h-11 w-11 items-center justify-center rounded-lg md:hidden"
               style={{ color: 'var(--hub-text-muted)' }}
             >
@@ -420,11 +428,11 @@ const DefaultLayout: React.FC = () => {
               }}
             >
               <SearchIcon size={12} />
-              <span>Search</span>
+              <span>{t('common.layout.search')}</span>
               <span
                 style={{ marginInlineStart: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}
               >
-                Cmd K
+                {t('common.layout.shortcut')}
               </span>
             </button>
           </div>
@@ -441,7 +449,10 @@ const DefaultLayout: React.FC = () => {
             }}
           >
             {visibleNavGroups.map((group) => (
-              <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div
+                key={group.titleKey}
+                style={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+              >
                 <p
                   style={{
                     padding: '4px 12px 4px',
@@ -453,7 +464,7 @@ const DefaultLayout: React.FC = () => {
                     margin: 0,
                   }}
                 >
-                  {group.title}
+                  {t(group.titleKey)}
                 </p>
                 {group.items.map((item) => (
                   <SidebarNavItem key={item.path} {...item} />
@@ -540,16 +551,16 @@ const DefaultLayout: React.FC = () => {
                       className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
                       style={{ color: 'var(--hub-text-dim)' }}
                     >
-                      Appearance
+                      {t('common.layout.appearance')}
                     </p>
                     <div className="flex gap-1 mb-2">
                       {(
                         [
-                          { value: 'light' as Theme, icon: Sun, label: 'Light' },
-                          { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-                          { value: 'system' as Theme, icon: Monitor, label: 'System' },
+                          { value: 'light' as Theme, icon: Sun, labelKey: 'nav.theme.light' },
+                          { value: 'dark' as Theme, icon: Moon, labelKey: 'nav.theme.dark' },
+                          { value: 'system' as Theme, icon: Monitor, labelKey: 'nav.theme.system' },
                         ] as const
-                      ).map(({ value, icon: Icon, label }) => (
+                      ).map(({ value, icon: Icon, labelKey }) => (
                         <button
                           type="button"
                           key={value}
@@ -568,7 +579,7 @@ const DefaultLayout: React.FC = () => {
                           }}
                         >
                           <Icon size={13} />
-                          {label}
+                          {t(labelKey)}
                         </button>
                       ))}
                     </div>
@@ -590,7 +601,7 @@ const DefaultLayout: React.FC = () => {
                       }}
                     >
                       <LogOut size={14} />
-                      Sign out
+                      {t('common.layout.signOut')}
                     </button>
                   </motion.div>
                 )}
@@ -634,7 +645,7 @@ const DefaultLayout: React.FC = () => {
                 <button
                   type="button"
                   onClick={undefined}
-                  aria-label="Notifications"
+                  aria-label={t('common.layout.notifications')}
                   style={{
                     height: 28,
                     width: 28,

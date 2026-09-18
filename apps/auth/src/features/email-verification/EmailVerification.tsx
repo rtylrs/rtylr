@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import Logo from '../../shared/components/Logo';
@@ -7,6 +8,7 @@ import { Button, HelmetContainer } from '@voxire/components';
 import { useEmailVerification } from './useEmailVerification';
 
 const EmailVerification = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { token } = useParams({ strict: false });
   const [message, setMessage] = useState('');
@@ -30,10 +32,10 @@ const EmailVerification = () => {
       .mutateAsync({ token })
       .then((r) => {
         if (r?.verified === false) {
-          setMessage(r.message || 'Email verification failed. Please try again.');
+          setMessage(r.message || t('auth.verify.defaultFailure'));
           setSuccess(false);
         } else {
-          setMessage(r.message || 'Your email has been verified.');
+          setMessage(r.message || t('auth.verify.defaultSuccess'));
           setSuccess(true);
         }
       })
@@ -47,7 +49,7 @@ const EmailVerification = () => {
 
   return (
     <>
-      <HelmetContainer title="Verify email · rtylr" />
+      <HelmetContainer title={t('auth.verify.metaTitle')} />
       <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
         <div className="w-full max-w-sm text-center">
           {/* Logo */}
@@ -58,14 +60,20 @@ const EmailVerification = () => {
           {loading ? (
             <>
               <Loader2 className="h-10 w-10 text-[#4583C4] mx-auto animate-spin" />
-              <p className="mt-5 text-sm text-[#666]">Verifying your email...</p>
+              <p className="mt-5 text-sm text-[#666]">{t('auth.verify.verifying')}</p>
             </>
           ) : success ? (
             <>
               <div className="h-14 w-14 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="h-7 w-7 text-green-600" />
               </div>
-              <h3 className="mt-5 text-lg font-semibold text-[#111]">Email verified</h3>
+              <h3 className="mt-5 text-lg font-semibold text-[#111]">
+                {t('auth.verify.verifiedTitle')}
+              </h3>
+              {/* `message` is whatever the API returned, so it arrives in
+                  whatever language the server chose: this screen cannot
+                  translate it. Only the fallback below is ours. Worth fixing at
+                  the source rather than papering over here. */}
               <p className="mt-2 text-sm text-[#666] leading-relaxed">{message}</p>
               <div className="mt-6">
                 <Button
@@ -76,7 +84,7 @@ const EmailVerification = () => {
                   height={40}
                   onClick={() => navigate({ to: '/' })}
                 >
-                  Continue to sign in
+                  {t('auth.verify.continueToSignIn')}
                 </Button>
               </div>
             </>
@@ -85,7 +93,9 @@ const EmailVerification = () => {
               <div className="h-14 w-14 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mx-auto">
                 <AlertCircle className="h-7 w-7 text-red-500" />
               </div>
-              <h3 className="mt-5 text-lg font-semibold text-[#111]">Verification failed</h3>
+              <h3 className="mt-5 text-lg font-semibold text-[#111]">
+                {t('auth.verify.failedTitle')}
+              </h3>
               <p className="mt-2 text-sm text-[#666] leading-relaxed">{message}</p>
               <div className="mt-6">
                 <Button
@@ -95,7 +105,7 @@ const EmailVerification = () => {
                   height={40}
                   onClick={() => navigate({ to: '/' })}
                 >
-                  Back to sign in
+                  {t('auth.reset.backToSignIn')}
                 </Button>
               </div>
             </>

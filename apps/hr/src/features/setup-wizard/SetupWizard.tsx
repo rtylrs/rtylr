@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -47,7 +48,7 @@ const SetupWizard = (): React.JSX.Element => {
   const { currentStepIndex, setCurrentStepIndex } = useHRSetupStore();
   const [showNewEmployee, setShowNewEmployee] = useState(false);
 
-  const steps = data?.steps ?? [];
+  const steps = useMemo(() => data?.steps ?? [], [data]);
   // `GET /hr/setup/status` returns the config alongside the step list, so the
   // authoritative completion marker is already in this response - no second
   // request needed to agree with HRConfigRoute.
@@ -87,7 +88,7 @@ const SetupWizard = (): React.JSX.Element => {
         <button
           type="button"
           className="min-h-[44px] rounded-lg px-4 py-2 text-sm font-medium"
-          style={{ backgroundColor: 'var(--accent)', color: 'var(--hr-card-bg)' }}
+          style={{ backgroundColor: 'var(--accent)', color: 'var(--hr-on-accent)' }}
           onClick={(): void => {
             refetch();
           }}
@@ -181,7 +182,7 @@ const SetupWizard = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Setup wizard · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.setupWizard'))} />
       <div>
         <div className="mb-6 text-center">
           <h1 className="text-xl font-bold" style={{ color: 'var(--hr-text)' }}>

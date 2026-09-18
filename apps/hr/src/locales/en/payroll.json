@@ -43,7 +43,9 @@
     "approve": "Approve Run",
     "exportCsv": "Export CSV",
     "notFound": "Payroll run not found",
-    "notFoundDescription": "This payroll run could not be loaded."
+    "notFoundDescription": "This payroll run could not be loaded.",
+    "postToJournal": "Post to journal",
+    "posted": "Payroll posted to the finance journal"
   },
   "paySlip": {
     "title": "Pay Slip",
@@ -80,10 +82,11 @@
     "saved": "Payroll configuration saved",
     "notConfiguredNotice": "Payroll is not yet configured - fill in the form to get started"
   },
-  "payroll": {
-    "runDetail": {
-      "postToJournal": "Post to journal",
-      "posted": "Payroll posted to the finance journal"
-    }
+  "stub": {
+    "hours": "Hours",
+    "base": "Base",
+    "overtime": "Overtime",
+    "deductions": "Deductions",
+    "netPay": "Net pay"
   }
 }

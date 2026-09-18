@@ -32,7 +32,11 @@ import {
  * pseudo-projects still work. Migrating the column to lucide names is the
  * separate decision recorded on rtylr#1085.
  */
-type Glyph = React.ComponentType<{ size?: number; className?: string }>;
+type Glyph = React.ComponentType<{
+  size?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}>;
 
 const BY_NAME: Record<string, Glyph> = {
   briefcase: Briefcase,
@@ -81,11 +85,13 @@ interface ProjectIconProps {
   icon: string | undefined;
   size?: number;
   className?: string;
+  /** For tinting the glyph with the project's own colour. */
+  style?: React.CSSProperties;
 }
 
-export const ProjectIcon: React.FC<ProjectIconProps> = ({ icon, size = 16, className }) => {
+export const ProjectIcon: React.FC<ProjectIconProps> = ({ icon, size = 16, className, style }) => {
   const Glyph = glyphForProjectIcon(icon);
-  return <Glyph size={size} className={className} />;
+  return <Glyph size={size} className={className} style={style} />;
 };
 
 export default ProjectIcon;

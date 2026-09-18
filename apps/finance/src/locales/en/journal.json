@@ -17,5 +17,8 @@
   "creditAccPlaceholder": "Credit account name",
   "cancel": "Cancel",
   "create": "Create",
-  "creating": "Creating…"
+  "creating": "Creating…",
+  "twoLinesRequired": "Journal entry requires at least two lines",
+  "entryLines": "Entry Lines",
+  "accountName": "Account name"
 }

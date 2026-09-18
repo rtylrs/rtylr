@@ -1,10 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, DollarSign, Clock } from 'lucide-react';
 import MoneyDisplay from './MoneyDisplay';
 import { cardStyle } from '../lib/tokens';
 import { useFinanceDashboard } from '../hooks/queries/useFinanceDashboard';
 
 interface Kpi {
+  /** Stable id, used as the React key: the label is a translation and changes with the language. */
+  id: string;
   label: string;
   value: React.ReactNode;
   hint?: string;
@@ -13,6 +16,7 @@ interface Kpi {
 }
 
 const FinanceKpiWidgets: React.FC = () => {
+  const { t } = useTranslation();
   const { data, isLoading } = useFinanceDashboard();
 
   const dash = data as
@@ -26,7 +30,9 @@ const FinanceKpiWidgets: React.FC = () => {
 
   const kpis: Kpi[] = [
     {
-      label: 'Receivable',
+      id: 'receivable',
+
+      label: t('finance.kpi.receivable'),
       value:
         isLoading || !dash ? (
           '-'
@@ -38,7 +44,9 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-receivable',
     },
     {
-      label: 'Expenses MTD',
+      id: 'expensesMtd',
+
+      label: t('finance.kpi.expensesMtd'),
       value:
         isLoading || !dash ? (
           '-'
@@ -50,7 +58,9 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-expenses',
     },
     {
-      label: 'Net Profit MTD',
+      id: 'netProfitMtd',
+
+      label: t('finance.kpi.netProfitMtd'),
       value:
         isLoading || !dash ? '-' : <MoneyDisplay amount={dash.netProfitMtd} fractionDigits={0} />,
       hint: 'month to date',
@@ -58,7 +68,9 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-profit',
     },
     {
-      label: 'Overdue',
+      id: 'overdue',
+
+      label: t('finance.kpi.overdue'),
       value:
         isLoading || !dash ? '-' : <MoneyDisplay amount={dash.overdueAmount} fractionDigits={0} />,
       hint: 'past due date',
@@ -73,7 +85,7 @@ const FinanceKpiWidgets: React.FC = () => {
         const Icon = k.icon;
         const color = `var(${k.colorVar})`;
         return (
-          <div key={k.label} style={{ ...cardStyle, padding: 18 }}>
+          <div key={k.id} style={{ ...cardStyle, padding: 18 }}>
             <div
               style={{
                 display: 'flex',

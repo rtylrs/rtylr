@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useOpenTask } from '../lib/useOpenTask';
+import { dueState } from '../lib/dateUtils';
 import { useTranslation } from 'react-i18next';
 import { Task, useFlowStore } from '../stores/flowStore';
 import { useLabels } from '../../features/tasks/useLabels';
@@ -10,7 +11,7 @@ import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
-import { withAlpha } from '../lib/colorUtils';
+import { withAlpha, onTint } from '../lib/colorUtils';
 
 interface TaskRowProps {
   task: Task;
@@ -20,8 +21,8 @@ interface TaskRowProps {
 }
 
 export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
+  const openTask = useOpenTask();
   const { projects, toggleSelectTask } = useFlowStore();
   // See TaskCard: the store's `labels` is never populated, so this read from
   // the query is what makes the chips appear.
@@ -30,7 +31,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
   const project = projects.find((p) => p.id === task.projectId);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
-  const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
+  const due = dueState(task.dueDate);
 
   // Shared by mouse click and Enter/Space keydown so the row opens the task
   // (or toggles selection with a modifier held) the same way for both input
@@ -41,7 +42,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
       toggleSelectTask(task.id);
       onSelect?.(e);
     } else {
-      navigate({ to: `/task/${task.id}` as string });
+      openTask(String(task.id));
     }
   };
 
@@ -105,11 +106,18 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
           }}
           aria-label={selected ? t('common.taskRow.deselectTask') : t('common.taskRow.selectTask')}
         >
-          {selected && <Check size={9} color="#0a0a0a" strokeWidth={3} />}
+          {selected && <Check size={9} color="var(--flow-on-accent)" strokeWidth={3} />}
         </button>
         <PriorityIcon priority={task.priority} />
         <span
-          className="text-meta font-mono w-[64px] shrink-0"
+          // Hidden below md. At 390px the row is priority glyph, identifier,
+          // status, title, due date and avatar, and the identifier's fixed 64px
+          // left the title showing "Chase…" and "Re: inv…". It repeats nothing
+          // the reader needs to pick a task out of a list, so it is the part
+          // that gives way (rtylr#1077). Measured on the captured 390px shot,
+          // not reasoned about: every unit test on this row passed while the
+          // screen was unusable.
+          className="text-meta font-mono w-[64px] shrink-0 hidden md:block"
           style={{ color: 'var(--flow-text-dim)' }}
         >
           {task.identifier}
@@ -130,7 +138,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
             className="text-meta px-2 py-0.5 rounded-sm shrink-0 font-medium"
             style={{
               background: withAlpha(project.color, 13),
-              color: project.color,
+              color: onTint(project.color),
             }}
           >
             {project.name}
@@ -143,7 +151,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
               className="inline-flex items-center gap-0.5 rounded-full"
               style={{
                 background: withAlpha(l.color, 10),
-                color: l.color,
+                color: onTint(l.color),
                 border: `1px solid ${withAlpha(l.color, 20)}`,
                 padding: '1px 5px',
                 fontSize: 'var(--text-meta)',
@@ -165,7 +173,17 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         {task.dueDate && (
           <span
             className="text-meta shrink-0 w-[64px] text-right"
-            style={{ color: overdue ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)' }}
+            style={{
+              // Three states, not two, and none of them --flow-text-dim: that
+              // token measures 2.35:1 in both modes and globals.css says in as
+              // many words that it never carries text (rtylr#1077).
+              color:
+                due === 'late'
+                  ? 'var(--flow-danger-fg)'
+                  : due === 'today'
+                    ? 'var(--flow-warn-fg)'
+                    : 'var(--flow-text-muted)',
+            }}
           >
             {formatDate(task.dueDate)}
           </span>

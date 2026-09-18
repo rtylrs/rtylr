@@ -53,6 +53,13 @@ beforeEach(() => {
     milestones: [],
   };
   overviewState.isLoading = false;
+  // The query-failure flags belong here, not in one describe's own hook.
+  // They were reset inside the failure describe only, so `--sequence.shuffle`
+  // could run a failure test before an empty-state test and the empty state
+  // rendered the failed state instead (#1194).
+  overviewState.isError = false;
+  overviewState.isPaused = false;
+  overviewState.failureCount = 0;
   useFlowStore.setState({
     projects: [
       {

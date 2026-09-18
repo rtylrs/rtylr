@@ -12,6 +12,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -63,7 +64,7 @@ const Receiving: React.FC = () => {
   const completeReceipt = () => {
     const overReceived = lines.filter((l) => l.received > l.expected);
     if (overReceived.length > 0) {
-      toast.error(t('receiving.validation.overReceived'));
+      toast.error(t('erp.receiving.validation.overReceived'));
       return;
     }
     const hasReceivedItems = lines.some((line) => line.received > 0);
@@ -72,8 +73,8 @@ const Receiving: React.FC = () => {
     const variance = lines.reduce((sum, l) => sum + (l.expected - l.received), 0);
     toast.success(
       variance === 0
-        ? t('receiving.toast.completed')
-        : t('receiving.toast.completedVariance', { count: variance })
+        ? t('erp.receiving.toast.completed')
+        : t('erp.receiving.toast.completedVariance', { count: variance })
     );
     if (selectedId !== null) {
       updateStatus.mutate(
@@ -87,7 +88,7 @@ const Receiving: React.FC = () => {
             })),
           },
         },
-        { onError: () => toast.error(t('receiving.toast.updateFailed')) }
+        { onError: () => toast.error(t('erp.receiving.toast.updateFailed')) }
       );
     }
     setSelectedId(null);
@@ -99,8 +100,8 @@ const Receiving: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title={`${t('receiving.title')} · rtylr`} />
-      <PageHeader title={t('receiving.title')} description={t('receiving.description')} />
+      <HelmetContainer title={pageTitle(t('erp.receiving.title'))} />
+      <PageHeader title={t('erp.receiving.title')} description={t('erp.receiving.description')} />
 
       {isLoading ? (
         <Skeleton className="h-40 w-full rounded-xl" />
@@ -111,12 +112,12 @@ const Receiving: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              {t('receiving.receiveFor', { id: selectedId })}
+              {t('erp.receiving.receiveFor', { id: selectedId })}
             </h3>
             <button
               type="button"
               onClick={() => setSelectedId(null)}
-              aria-label={t('receiving.closeDetails')}
+              aria-label={t('erp.receiving.closeDetails')}
               className="h-11 w-11 rounded-lg flex items-center justify-center"
             >
               <XIcon size={14} style={{ color: 'var(--hub-text-muted)' }} />
@@ -136,7 +137,7 @@ const Receiving: React.FC = () => {
                       {line.name}
                     </p>
                     <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
-                      {line.sku} / {t('receiving.expected', { count: line.expected })}
+                      {line.sku} / {t('erp.receiving.expected', { count: line.expected })}
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
@@ -175,7 +176,9 @@ const Receiving: React.FC = () => {
                       color: variance === 0 ? 'var(--erp-success)' : 'var(--erp-danger)',
                     }}
                   >
-                    {variance === 0 ? t('receiving.ok') : `${variance > 0 ? '+' : ''}${variance}`}
+                    {variance === 0
+                      ? t('erp.receiving.ok')
+                      : `${variance > 0 ? '+' : ''}${variance}`}
                   </span>
                 </div>
               );
@@ -187,16 +190,16 @@ const Receiving: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
-            <Check size={14} /> {t('receiving.markReceived')}
+            <Check size={14} /> {t('erp.receiving.markReceived')}
           </button>
         </div>
       ) : open.length === 0 ? (
         <EmptyState
           icon={PackageCheck}
-          title={t('receiving.empty.title')}
-          description={t('receiving.empty.description')}
+          title={t('erp.receiving.empty.title')}
+          description={t('erp.receiving.empty.description')}
           action={{
-            label: t('receiving.goToPurchasing'),
+            label: t('erp.receiving.goToPurchasing'),
             onClick: () => navigate({ to: '/purchasing' }),
           }}
         />
@@ -231,7 +234,7 @@ const Receiving: React.FC = () => {
                   PO-{o.id} / {supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                  {t('receiving.orderSummary', {
+                  {t('erp.receiving.orderSummary', {
                     count: (o.items ?? []).length,
                     date: formatDate(o.expectedDelivery ?? ''),
                   })}

@@ -160,7 +160,63 @@
     "activityLog": "Activity Log",
     "language": "Language",
     "navigate": "Navigate",
-    "storefront": "Storefront"
+    "storefront": "Storefront",
+    "createItem": "Create item",
+    "createBanner": "Create banner"
   },
-  "launch": "Launch"
+  "launch": "Launch",
+  "pagination": {
+    "previous": "Prev",
+    "next": "Next"
+  },
+  "roleDescriptions": {
+    "admin": "Manage business access and assigned applications",
+    "manager": "Manage assigned work within delegated scope",
+    "member": "Use assigned applications and operational resources",
+    "viewer": "Read-only access to assigned applications",
+    "menu_manager": "Manage menus, QR codes, and storefront design"
+  },
+  "skipToMainContent": "Skip to main content",
+  "toggleNavigation": "Toggle navigation menu",
+  "openConsole": "Open console",
+  "signOut": "Sign out",
+  "appearance": {
+    "title": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "dropzone": {
+    "active": "Drop the files here ...",
+    "idle": "Drag 'n' drop a file here, or click to select one"
+  },
+  "apiKey": {
+    "created": "Created",
+    "revoke": "Revoke API key"
+  },
+  "appCard": {
+    "upgrade": "Upgrade",
+    "beta": "Beta",
+    "comingSoon": "Soon"
+  },
+  "breadcrumb": "Breadcrumb",
+  "dangerZone": "Danger zone",
+  "commandPalette": {
+    "placeholder": "Search apps, pages, actions...",
+    "label": "Command palette"
+  },
+  "webhook": {
+    "active": "Active",
+    "paused": "Paused",
+    "failing": "Failing",
+    "delete": "Delete webhook"
+  },
+  "closeDialog": "Close dialog",
+  "closePanel": "Close panel",
+  "userMenu": "User menu",
+  "accountSettings": "Account settings",
+  "accessRequested": "Requested",
+  "requestAccess": "Request access",
+  "posMenuName": "POS Menu",
+  "defaultPageTitle": "Rtylr - Contactless QR Menu"
 }

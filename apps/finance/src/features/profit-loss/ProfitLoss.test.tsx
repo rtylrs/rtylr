@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeAll } from 'vitest';
 import ProfitLoss from './ProfitLoss';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const toastInfo = vi.hoisted(() => vi.fn());
 
@@ -54,6 +55,10 @@ vi.mock('../../shared/components/ConfirmDialog', () => ({
 vi.mock('../../shared/lib/exports', () => ({
   exportProfitLossCsv: vi.fn(),
 }));
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
 
 describe('ProfitLoss close fiscal year', () => {
   it('uses the documented read-only toast copy after confirmation', () => {

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -104,7 +105,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
       { staffId: assignModal.staffId, shiftId: selectedShiftId, date: assignModal.date },
       {
         onSuccess: () => setAssignModal({ open: false, staffId: 0, date: '' }),
-        onError: () => toast.error('Failed to assign shift'),
+        onError: () => toast.error(t('errors.assignShift')),
       }
     );
   };
@@ -115,8 +116,8 @@ const RosterBuilderInner = (): React.JSX.Element => {
       return;
     }
     publishMutation.mutate(weekStart, {
-      onSuccess: () => toast.success('Roster published'),
-      onError: () => toast.error('Failed to publish roster'),
+      onSuccess: () => toast.success(t('shifts.roster.published')),
+      onError: () => toast.error(t('errors.publishRoster')),
     });
   };
 
@@ -385,13 +386,16 @@ const ShiftChip = ({ assignment }: { assignment: ShiftAssignment }): React.JSX.E
   );
 };
 
-const RosterBuilder = (): React.JSX.Element => (
-  <>
-    <HelmetContainer title="Roster builder · rtylr" />
-    <ErrorBoundary>
-      <RosterBuilderInner />
-    </ErrorBoundary>
-  </>
-);
+const RosterBuilder = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <HelmetContainer title={pageTitle(t('nav.rosterBuilder'))} />
+      <ErrorBoundary>
+        <RosterBuilderInner />
+      </ErrorBoundary>
+    </>
+  );
+};
 
 export default RosterBuilder;

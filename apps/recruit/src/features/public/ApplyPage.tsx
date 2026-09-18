@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import { Trans, useTranslation } from 'react-i18next';
 import { ArrowLeft, Check, Upload, FileText, X } from 'lucide-react';
 
 import Header from '../../templates/shared/Header';
@@ -28,6 +29,20 @@ import { cleanMojibake } from '../../shared/lib/sanitize';
  * resolver - templates diverge on marketing surfaces, but the apply
  * form is a utility and benefits from a single consistent shape.
  */
+/**
+ * The consent row reads differently depending on which legal links the
+ * business has set, and each variant is a complete sentence rather than a
+ * fragment, so a translator can place the links where the language wants them.
+ */
+function consentKey(privacyUrl?: string, termsUrl?: string): string {
+  if (privacyUrl && termsUrl) return 'public.apply.consentWithBoth';
+  if (privacyUrl) return 'public.apply.consentWithPrivacy';
+  if (termsUrl) return 'public.apply.consentWithTerms';
+  return 'public.apply.consent';
+}
+
+const MAX_ANSWER_LENGTH = 5000;
+
 const ApplyPage: React.FC = (): React.JSX.Element => {
   const { slug: rawSlug, careerSlug: rawCareerSlug } = useParams({ strict: false }) as {
     slug?: string;
@@ -36,6 +51,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const slug = rawSlug ?? '';
   const careerSlug = rawCareerSlug ?? '';
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const isFileUploadEnabled = resolveFlag(FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD);
 
@@ -71,7 +87,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!slug || !careerSlug) {
-    return <div>Invalid application link.</div>;
+    return <div>{t('public.apply.invalidLink')}</div>;
   }
 
   async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -83,7 +99,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
     if (!allowed.includes(file.type)) {
-      setUploadError('Please upload a PDF or Word document');
+      setUploadError(t('public.apply.fileType'));
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -97,7 +113,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       // Clear the manual URL input - we'll use the uploaded key instead.
       setResumeUrl('');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Upload failed';
+      const msg = err instanceof Error ? err.message : t('public.apply.uploadFailed');
       setUploadError(msg);
       setResumeFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -126,14 +142,14 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   if (error && !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white p-6 text-center">
-        <h2 className="text-lg font-semibold text-gray-900">Failed to load application form</h2>
-        <p className="text-sm text-gray-500">Please try refreshing the page.</p>
+        <h2 className="text-lg font-semibold text-gray-900">{t('public.apply.loadFailed')}</h2>
+        <p className="text-sm text-gray-500">{t('public.errors.refreshHint')}</p>
         <button
           type="button"
           onClick={() => window.location.reload()}
           className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
         >
-          Retry
+          {t('public.errors.retry')}
         </button>
       </div>
     );
@@ -158,17 +174,17 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       const v = answers[String(f.id)];
       const empty = v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
       if (f.required && empty) {
-        toast.error(`"${f.label}" is required`);
+        toast.error(t('public.apply.required', { label: f.label }));
         return;
       }
-      if (typeof v === 'string' && v.length > 5000) {
-        toast.error(`"${f.label}" exceeds maximum length of 5000 characters`);
+      if (typeof v === 'string' && v.length > MAX_ANSWER_LENGTH) {
+        toast.error(t('public.apply.tooLong', { label: f.label, max: MAX_ANSWER_LENGTH }));
         return;
       }
     }
 
     if (customization.requireConsent && !consented) {
-      toast.error('You must agree to data processing to apply');
+      toast.error(t('public.apply.consentRequired'));
       return;
     }
 
@@ -192,10 +208,10 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       {
         onSuccess: () => {
           setDone(true);
-          toast.success('Application received');
+          toast.success(t('public.apply.received'));
           window.history.replaceState(null, '', window.location.href);
         },
-        onError: () => toast.error("Couldn't submit - try again"),
+        onError: () => toast.error(t('public.apply.submitFailed')),
       }
     );
   };
@@ -211,19 +227,24 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
           >
             <Check className="h-6 w-6 text-white" />
           </div>
-          <h1 className="mt-6 text-3xl font-semibold tracking-tight">You're in.</h1>
+          <h1 className="mt-6 text-3xl font-semibold tracking-tight">
+            {t('public.apply.doneTitle')}
+          </h1>
           <p className="mt-4 text-base" style={{ color: 'var(--recruit-muted)' }}>
-            Thanks for applying to <span className="font-medium">{career.title}</span>. The{' '}
-            {customization.brandName} team will review and reach out if there's a fit.
+            <Trans
+              i18nKey="public.apply.doneBody"
+              values={{ title: career.title, brand: customization.brandName }}
+              components={{ name: <span className="font-medium" /> }}
+            />
           </p>
           <button
             type="button"
-            onClick={() => navigate({ to: `/${slug}` as any })}
+            onClick={() => navigate({ to: '/$slug', params: { slug } })}
             className="mt-8 inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium"
             style={{ borderColor: 'var(--recruit-border)' }}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to open roles
+            {t('public.apply.backToRoles')}
           </button>
         </main>
       </div>
@@ -235,19 +256,21 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       <Header customization={customization} compact />
       <main className="mx-auto max-w-xl px-6 py-12">
         <Link
-          to={`/${slug}/${careerSlug}` as any}
+          to="/$slug/$careerSlug"
+          params={{ slug, careerSlug }}
           className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to role
+          {t('public.apply.backToRole')}
         </Link>
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight">
-          Apply for {cleanMojibake(career.title)}
+          {t('public.apply.heading', { title: cleanMojibake(career.title) })}
         </h1>
         <p className="mt-2 text-sm" style={{ color: 'var(--recruit-muted)' }}>
-          {cleanMojibake(customization.brandName)} - {cleanMojibake(career.location) || 'Remote'}
+          {cleanMojibake(customization.brandName)} ·{' '}
+          {cleanMojibake(career.location) || t('public.apply.remote')}
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5">
@@ -261,7 +284,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               autoComplete="off"
             />
           </div>
-          <Field label="Full name" required>
+          <Field label={t('public.apply.fullName')} required>
             <input
               required
               value={candidateName}
@@ -270,7 +293,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               style={{ borderColor: 'var(--recruit-border)' }}
             />
           </Field>
-          <Field label="Email" required>
+          <Field label={t('public.apply.email')} required>
             <input
               required
               type="email"
@@ -280,7 +303,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               style={{ borderColor: 'var(--recruit-border)' }}
             />
           </Field>
-          <Field label="Phone">
+          <Field label={t('public.apply.phone')}>
             <input
               type="tel"
               value={phone}
@@ -290,7 +313,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
             />
           </Field>
           {isFileUploadEnabled && (
-            <Field label="Resume">
+            <Field label={t('public.apply.resume')}>
               {/* Hidden native input; we render a styled dropzone ourselves. */}
               <input
                 ref={fileInputRef}
@@ -307,9 +330,9 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
                   style={{ borderColor: 'var(--recruit-border)' }}
                 >
                   <Upload className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
-                  <span>Upload your resume</span>
+                  <span>{t('public.apply.uploadCta')}</span>
                   <span className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
-                    · PDF or Word, up to 10 MB
+                    {t('public.apply.uploadHint')}
                   </span>
                 </button>
               )}
@@ -323,9 +346,9 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
                     <div className="truncate font-medium">{resumeFile.name}</div>
                     <div className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
                       {uploading
-                        ? 'Uploading…'
+                        ? t('public.apply.uploading')
                         : uploadedKey
-                          ? 'Uploaded'
+                          ? t('public.apply.uploaded')
                           : uploadError
                             ? uploadError
                             : `${(resumeFile.size / 1024 / 1024).toFixed(1)} MB`}
@@ -338,7 +361,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
                     type="button"
                     onClick={clearFile}
                     className="rounded-md p-1 hover:bg-gray-100"
-                    title="Remove"
+                    title={t('public.apply.remove')}
                   >
                     <X className="h-4 w-4" style={{ color: 'var(--recruit-muted)' }} />
                   </button>
@@ -354,7 +377,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               a file is picked - two resume sources on one form is
               confusing. */}
           {!resumeFile && !uploadedKey && (
-            <Field label="…or paste a link" hint="Google Drive, Dropbox, personal site">
+            <Field label={t('public.apply.linkInstead')} hint={t('public.apply.linkHint')}>
               <input
                 type="url"
                 placeholder="https://…"
@@ -365,12 +388,12 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               />
             </Field>
           )}
-          <Field label="Why you">
+          <Field label={t('public.apply.whyYou')}>
             <textarea
               rows={6}
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
-              placeholder="A short note on why you'd be a great fit."
+              placeholder={t('public.apply.whyYouPlaceholder')}
               className="w-full rounded-md border bg-white px-3 py-2.5 text-base leading-relaxed outline-none focus:ring-2"
               style={{ borderColor: 'var(--recruit-border)' }}
             />
@@ -402,38 +425,30 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
                 className="mt-0.5 h-4 w-4"
               />
               <span style={{ color: 'var(--recruit-muted)' }}>
-                I agree to {customization.brandName}'s processing of my application data
-                {customization.privacyUrl && (
-                  <>
-                    {' '}
-                    - see the{' '}
-                    <a
-                      href={customization.privacyUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline"
-                      style={{ color: 'var(--recruit-accent)' }}
-                    >
-                      privacy policy
-                    </a>
-                  </>
-                )}
-                {customization.termsUrl && (
-                  <>
-                    {' '}
-                    and{' '}
-                    <a
-                      href={customization.termsUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline"
-                      style={{ color: 'var(--recruit-accent)' }}
-                    >
-                      terms
-                    </a>
-                  </>
-                )}
-                .
+                <Trans
+                  i18nKey={consentKey(customization.privacyUrl, customization.termsUrl)}
+                  values={{ brand: customization.brandName }}
+                  components={{
+                    privacy: (
+                      <a
+                        href={customization.privacyUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline"
+                        style={{ color: 'var(--recruit-accent)' }}
+                      />
+                    ),
+                    terms: (
+                      <a
+                        href={customization.termsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline"
+                        style={{ color: 'var(--recruit-accent)' }}
+                      />
+                    ),
+                  }}
+                />
               </span>
             </label>
           )}
@@ -445,10 +460,10 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
             style={{ background: 'var(--recruit-accent)' }}
           >
             {uploading
-              ? 'Uploading resume…'
+              ? t('public.apply.uploadingResume')
               : submit.isPending
-                ? 'Submitting…'
-                : 'Submit application'}
+                ? t('public.apply.submitting')
+                : t('public.apply.submit')}
           </button>
         </form>
       </main>
@@ -467,6 +482,7 @@ interface CustomFieldRendererProps {
   onChange: (v: string | string[]) => void;
 }
 const CustomFieldRenderer: React.FC<CustomFieldRendererProps> = ({ field, value, onChange }) => {
+  const { t } = useTranslation();
   const options = parseOptions(field.optionsJson);
   const strValue = Array.isArray(value) ? '' : value;
   const arrValue = Array.isArray(value) ? value : [];
@@ -510,7 +526,7 @@ const CustomFieldRenderer: React.FC<CustomFieldRendererProps> = ({ field, value,
             className="w-full rounded-md border bg-white px-3 py-2.5 text-base outline-none focus:ring-2"
             style={{ borderColor: 'var(--recruit-border)' }}
           >
-            <option value="">Select…</option>
+            <option value="">{t('public.apply.select')}</option>
             {options.map((o) => (
               <option key={o} value={o}>
                 {o}

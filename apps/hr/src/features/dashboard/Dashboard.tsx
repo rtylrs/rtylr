@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { motion } from 'motion/react';
 import type { Variants } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +31,6 @@ import {
   useOvertimeAlerts,
   useHrSettings,
 } from '../../shared/hooks/useHrExtras';
-import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import { canViewCompensation } from '../../shared/lib/hrPermissions';
 import { ErrorBoundary, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
@@ -212,7 +212,6 @@ const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isMobile = useIsMobile(900);
-  const config = useHRConfigStore((s) => s.config);
   const { data: settings } = useHrSettings();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const showCompensation = canViewCompensation(role);
@@ -408,7 +407,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.dashboard'))} />
       <motion.div
         variants={container}
         initial="hidden"
@@ -889,7 +888,8 @@ const Dashboard: React.FC = () => {
                 {recentHires.map((s) => (
                   <li key={s.id} style={{ fontSize: 12 }}>
                     <Link
-                      to={`/staff/${s.id}` as any}
+                      to="/staff/$id"
+                      params={{ id: String(s.id) }}
                       style={{ textDecoration: 'none', color: 'var(--hr-text)' }}
                     >
                       <div style={{ fontWeight: 600 }}>{s.name}</div>

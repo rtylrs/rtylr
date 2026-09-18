@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useUserStore } from '@voxire/auth';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -30,15 +31,15 @@ const TimeOff: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Time off · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.timeOff'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <SectionHeader
-          title="Time Off"
-          subtitle="Review pending requests and track approved absences"
+          title={t('timeOff.page.title')}
+          subtitle={t('timeOff.page.subtitle')}
           right={
             <Link to="/time-off/new" style={{ textDecoration: 'none' }}>
               <Button variant="primary" icon={<Plus size={13} />}>
-                New request
+                {t('timeOff.page.newRequest')}
               </Button>
             </Link>
           }
@@ -88,13 +89,13 @@ const TimeOff: React.FC = () => {
                     onApprove={() =>
                       approve.mutate(
                         { id: req.id, approved: true },
-                        { onSuccess: () => toast.success('Approved') }
+                        { onSuccess: () => toast.success(t('timeOff.page.approved')) }
                       )
                     }
                     onReject={() =>
                       approve.mutate(
                         { id: req.id, approved: false },
-                        { onSuccess: () => toast.success('Rejected') }
+                        { onSuccess: () => toast.success(t('timeOff.page.rejected')) }
                       )
                     }
                   />

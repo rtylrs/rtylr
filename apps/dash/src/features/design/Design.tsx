@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, ChevronDown, X } from 'lucide-react';
@@ -26,9 +27,10 @@ import { useUpdateBusinessConfig } from '../../shared/hooks/queries/useBusiness'
 const PH = (w: number, h: number, bg: string, text: string) =>
   `https://placehold.co/${w}x${h}/${bg}/ffffff?text=${encodeURIComponent(text)}`;
 
-const DEFAULT_BUSINESS: BusinessInfo = {
-  name: 'Your Business',
-  description: 'Add your business description in settings.',
+// name and description are supplied by the component, because a module-level
+// constant is evaluated before i18next has a language. Everything else here is
+// a placeholder image or an empty field and has nothing to translate.
+const DEFAULT_BUSINESS: Omit<BusinessInfo, 'name' | 'description'> = {
   coverImage: PH(800, 300, '1a1a1a', 'Cover'),
   logo: PH(120, 120, 'c8a96e', 'Logo'),
   address: '',
@@ -508,15 +510,22 @@ const Design: React.FC = () => {
     saveActivePreset,
   } = useLayoutPresetsStore();
 
+  const { t } = useTranslation();
   const { user } = useUserStore();
   const { items: menuItems } = useMenuStore();
+
+  const defaultBusiness: BusinessInfo = {
+    ...DEFAULT_BUSINESS,
+    name: t('design.businessPlaceholder.name'),
+    description: t('design.businessPlaceholder.description'),
+  };
 
   // Build business info and menu categories from real data
   const u = user as Record<string, unknown> | null;
   const businessInfo: BusinessInfo = u
     ? {
-        name: (u.businessName as string) || DEFAULT_BUSINESS.name,
-        description: (u.businessDescription as string) || DEFAULT_BUSINESS.description,
+        name: (u.businessName as string) || defaultBusiness.name,
+        description: (u.businessDescription as string) || defaultBusiness.description,
         coverImage: (u.coverImage as string) || DEFAULT_BUSINESS.coverImage,
         logo: (u.logo as string) || DEFAULT_BUSINESS.logo,
         address: (u.address as string) || DEFAULT_BUSINESS.address,
@@ -525,7 +534,7 @@ const Design: React.FC = () => {
         averageRating: (u.averageRating as number) ?? DEFAULT_BUSINESS.averageRating,
         reviewCount: (u.reviewCount as number) ?? DEFAULT_BUSINESS.reviewCount,
       }
-    : DEFAULT_BUSINESS;
+    : defaultBusiness;
 
   interface RawMenuItem {
     _id?: string;
@@ -610,7 +619,7 @@ const Design: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Design · rtylr" />
+      <HelmetContainer title={`${t('design.pageTitle')} · rtylr`} />
       <div
         style={{
           display: 'grid',
@@ -638,10 +647,10 @@ const Design: React.FC = () => {
         >
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ margin: 0, fontSize: 15, fontWeight: 650, color: 'var(--dash-text)' }}>
-              Design
+              {t('design.pageTitle')}
             </h1>
             <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--dash-text-dim)' }}>
-              Storefront appearance
+              {t('design.subtitle')}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -656,8 +665,8 @@ const Design: React.FC = () => {
               style={{
                 padding: '6px 14px',
                 borderRadius: 7,
-                background: saved ? 'rgba(69,131,196,0.15)' : '#4583C4',
-                color: saved ? '#4583C4' : '#fff',
+                background: saved ? 'var(--accent-muted)' : 'var(--accent)',
+                color: saved ? 'var(--accent-on-muted)' : 'var(--dash-on-accent)',
                 fontSize: 13,
                 fontWeight: 600,
                 border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',
@@ -706,7 +715,7 @@ const Design: React.FC = () => {
                   color: 'var(--dash-text-dim)',
                 }}
               >
-                Layouts
+                {t('design.layouts')}
               </span>
             </div>
 
@@ -791,7 +800,7 @@ const Design: React.FC = () => {
               }}
             >
               <input
-                placeholder="New layout..."
+                placeholder={t('design.newLayoutPlaceholder')}
                 value={newPresetName}
                 onChange={(e) => setNewPresetName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
@@ -839,18 +848,13 @@ const Design: React.FC = () => {
             }}
           >
             {/* Pages */}
-            <SectionCard title="Pages" index={0}>
+            <SectionCard title={t('design.sections.pages')} index={0}>
               {(
-                [
-                  ['About', 'about'],
-                  ['Gallery', 'gallery'],
-                  ['Reviews', 'reviews'],
-                  ['Offers', 'offers'],
-                ] as [string, keyof MenuLayoutConfig['pages']][]
-              ).map(([label, key]) => (
+                ['about', 'gallery', 'reviews', 'offers'] as (keyof MenuLayoutConfig['pages'])[]
+              ).map((key) => (
                 <ToggleRow
                   key={key}
-                  label={label}
+                  label={t(`design.pages.${key}`)}
                   checked={draftConfig.pages[key] === true}
                   onChange={(v) => patchPages({ [key]: v })}
                 />
@@ -858,12 +862,12 @@ const Design: React.FC = () => {
             </SectionCard>
 
             {/* Header */}
-            <SectionCard title="Header" index={1}>
-              <ControlRow label="Cover height">
+            <SectionCard title={t('design.sections.header')} index={1}>
+              <ControlRow label={t('design.header.coverHeight')}>
                 <SegmentGroup<CoverHeight>
                   value={draftConfig.header.coverHeight}
                   options={[
-                    { label: 'None', value: 'none' },
+                    { label: t('design.none'), value: 'none' },
                     { label: 'S', value: 'sm' },
                     { label: 'M', value: 'md' },
                     { label: 'L', value: 'lg' },
@@ -872,41 +876,41 @@ const Design: React.FC = () => {
                 />
               </ControlRow>
               <ToggleRow
-                label="Sticky header"
+                label={t('design.header.sticky')}
                 checked={draftConfig.header.sticky}
                 onChange={(v) => patchHeader({ sticky: v })}
               />
               <ToggleRow
-                label="Show logo"
+                label={t('design.header.showLogo')}
                 checked={draftConfig.header.showLogo}
                 onChange={(v) => patchHeader({ showLogo: v })}
               />
               <ToggleRow
-                label="Show description"
+                label={t('design.header.showDescription')}
                 checked={draftConfig.header.showDescription}
                 onChange={(v) => patchHeader({ showDescription: v })}
               />
               <ToggleRow
-                label="Show meta (address, hours)"
+                label={t('design.header.showMeta')}
                 checked={draftConfig.header.showMeta}
                 onChange={(v) => patchHeader({ showMeta: v })}
               />
             </SectionCard>
 
             {/* Nav Tabs */}
-            <SectionCard title="Nav Tabs" index={2}>
-              <ControlRow label="Style">
+            <SectionCard title={t('design.sections.nav')} index={2}>
+              <ControlRow label={t('design.nav.style')}>
                 <SegmentGroup<NavStyle>
                   value={draftConfig.nav.style}
                   options={[
-                    { label: 'Underline', value: 'underline' },
-                    { label: 'Pill', value: 'pill' },
-                    { label: 'Flat', value: 'flat' },
+                    { label: t('design.nav.styleUnderline'), value: 'underline' },
+                    { label: t('design.nav.stylePill'), value: 'pill' },
+                    { label: t('design.nav.styleFlat'), value: 'flat' },
                   ]}
                   onChange={(v) => patchNav({ style: v })}
                 />
               </ControlRow>
-              <ControlRow label="Size">
+              <ControlRow label={t('design.nav.size')}>
                 <SegmentGroup<NavSize>
                   value={draftConfig.nav.size}
                   options={[
@@ -920,19 +924,19 @@ const Design: React.FC = () => {
             </SectionCard>
 
             {/* Item Cards */}
-            <SectionCard title="Item Cards" index={3}>
-              <ControlRow label="Layout">
+            <SectionCard title={t('design.sections.items')} index={3}>
+              <ControlRow label={t('design.items.layout')}>
                 <SegmentGroup<ItemLayout>
                   value={draftConfig.items.layout}
                   options={[
-                    { label: 'Grid', value: 'grid' },
-                    { label: 'List', value: 'list' },
-                    { label: 'Minimal', value: 'minimal' },
+                    { label: t('design.items.layoutGrid'), value: 'grid' },
+                    { label: t('design.items.layoutList'), value: 'list' },
+                    { label: t('design.items.layoutMinimal'), value: 'minimal' },
                   ]}
                   onChange={(v) => patchItems({ layout: v })}
                 />
               </ControlRow>
-              <ControlRow label="Columns">
+              <ControlRow label={t('design.items.columns')}>
                 <SegmentGroup<string>
                   value={String(draftConfig.items.columns)}
                   options={[
@@ -943,19 +947,19 @@ const Design: React.FC = () => {
                   onChange={(v) => patchItems({ columns: Number(v) as 2 | 3 | 4 })}
                 />
               </ControlRow>
-              <ControlRow label="Image position">
+              <ControlRow label={t('design.items.imagePosition')}>
                 <SegmentGroup<ImagePosition>
                   value={draftConfig.items.imagePosition}
                   options={[
-                    { label: 'Top', value: 'top' },
-                    { label: 'Right', value: 'right' },
-                    { label: 'Left', value: 'left' },
-                    { label: 'None', value: 'none' },
+                    { label: t('design.items.imageTop'), value: 'top' },
+                    { label: t('design.items.imageRight'), value: 'right' },
+                    { label: t('design.items.imageLeft'), value: 'left' },
+                    { label: t('design.none'), value: 'none' },
                   ]}
                   onChange={(v) => patchItems({ imagePosition: v })}
                 />
               </ControlRow>
-              <ControlRow label="Image size">
+              <ControlRow label={t('design.items.imageSize')}>
                 <SegmentGroup<ImageSize>
                   value={draftConfig.items.imageSize}
                   options={[
@@ -966,11 +970,11 @@ const Design: React.FC = () => {
                   onChange={(v) => patchItems({ imageSize: v })}
                 />
               </ControlRow>
-              <ControlRow label="Card radius">
+              <ControlRow label={t('design.items.cardRadius')}>
                 <SegmentGroup<CardRadius>
                   value={draftConfig.items.cardRadius}
                   options={[
-                    { label: 'None', value: 'none' },
+                    { label: t('design.none'), value: 'none' },
                     { label: 'S', value: 'sm' },
                     { label: 'M', value: 'md' },
                     { label: 'L', value: 'lg' },
@@ -979,21 +983,21 @@ const Design: React.FC = () => {
                 />
               </ControlRow>
               <ToggleRow
-                label="Show description"
+                label={t('design.items.showDescription')}
                 checked={draftConfig.items.showDescription}
                 onChange={(v) => patchItems({ showDescription: v })}
               />
               <ToggleRow
-                label="Show badges"
+                label={t('design.items.showBadges')}
                 checked={draftConfig.items.showBadges}
                 onChange={(v) => patchItems({ showBadges: v })}
               />
             </SectionCard>
 
             {/* Colors */}
-            <SectionCard title="Colors" index={4}>
+            <SectionCard title={t('design.sections.colors')} index={4}>
               <ColorRow
-                label="Primary"
+                label={t('design.colors.primary')}
                 value={colorPrimary}
                 onChange={(v) => {
                   patchDraftConfig({
@@ -1002,7 +1006,7 @@ const Design: React.FC = () => {
                 }}
               />
               <ColorRow
-                label="Accent"
+                label={t('design.colors.accent')}
                 value={colorAccent}
                 onChange={(v) => {
                   patchDraftConfig({
@@ -1016,7 +1020,7 @@ const Design: React.FC = () => {
                 }}
               />
               <ColorRow
-                label="Background"
+                label={t('design.colors.background')}
                 value={colorBg}
                 onChange={(v) => {
                   patchDraftConfig({
@@ -1032,8 +1036,8 @@ const Design: React.FC = () => {
             </SectionCard>
 
             {/* Typography */}
-            <SectionCard title="Typography" index={5}>
-              <ControlRow label="Font family">
+            <SectionCard title={t('design.sections.typography')} index={5}>
+              <ControlRow label={t('design.typography.fontFamily')}>
                 <select
                   value={fontFamily}
                   onChange={(e) => setFontFamily(e.target.value)}
@@ -1055,7 +1059,7 @@ const Design: React.FC = () => {
                   <option value="poppins">Poppins</option>
                 </select>
               </ControlRow>
-              <ControlRow label="Font size">
+              <ControlRow label={t('design.typography.fontSize')}>
                 <SegmentGroup<string>
                   value={fontSize}
                   options={[
@@ -1092,7 +1096,7 @@ const Design: React.FC = () => {
                 flexShrink: 0,
               }}
             >
-              Preview
+              {t('design.preview')}
             </span>
             <div
               style={{

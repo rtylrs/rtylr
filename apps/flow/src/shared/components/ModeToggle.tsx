@@ -69,7 +69,7 @@ const ModeToggle = ({ className }: ModeToggleProps): React.JSX.Element => {
             )}
             style={{
               background: selected ? 'var(--accent-muted)' : 'var(--flow-hover)',
-              color: selected ? 'var(--accent)' : 'var(--flow-text-muted)',
+              color: selected ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
               border: selected ? '1px solid var(--accent-border)' : '1px solid transparent',
             }}
           >

@@ -20,7 +20,7 @@ import { formatDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
@@ -30,7 +30,7 @@ const HEALTH: Record<string, { color: string; labelKey: string }> = {
     color: 'var(--flow-status-approved)',
     labelKey: 'flow.projectOverview.health.onTrack',
   },
-  at_risk: { color: '#f59e0b', labelKey: 'flow.milestones.status.atRisk' },
+  at_risk: { color: 'var(--flow-warn-fg)', labelKey: 'flow.milestones.status.atRisk' },
   off_track: { color: 'var(--flow-danger-fg)', labelKey: 'flow.projectOverview.health.offTrack' },
 };
 
@@ -89,7 +89,7 @@ const ProjectOverview: React.FC = () => {
             className="text-meta px-2 py-0.5 rounded-full font-semibold"
             style={{
               background: withAlpha(health.color, 10),
-              color: health.color,
+              color: onTint(health.color),
               border: `1px solid ${withAlpha(health.color, 20)}`,
             }}
           >
@@ -273,7 +273,7 @@ const ProjectOverview: React.FC = () => {
                 <div key={c.id} className="flex items-start gap-2 text-meta">
                   <span
                     className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold shrink-0 mt-0.5"
-                    style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
                   >
                     {c.authorInitials}
                   </span>

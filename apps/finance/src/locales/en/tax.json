@@ -4,5 +4,23 @@
   "reportEmptyDescription": "Tax periods will appear here once invoices start generating tax activity.",
   "ratesEmptyTitle": "No tax rates configured yet",
   "ratesEmptyDescription": "Add a tax rate to start calculating tax on invoices and quotes.",
-  "ratesEmptyCta": "Add tax rate"
+  "ratesEmptyCta": "Add tax rate",
+  "title": "Tax",
+  "subtitle": "VAT / Sales tax summary and filing periods",
+  "rates": "Tax Rates",
+  "exportAria": "Export tax summary for accountant",
+  "exportForAccountant": "Export for Accountant",
+  "rateConfiguration": "Tax Rate Configuration",
+  "ratesInvalid": "Tax rates must be valid non-negative numbers",
+  "ratesSaved": "Tax rates saved",
+  "filingPeriods": "Filing Periods",
+  "report": {
+    "title": "Tax Summary",
+    "exportSoon": "Export coming in a future update",
+    "collected": "Tax collected",
+    "owed": "Tax owed",
+    "periodsToFile": "Periods to file"
+  },
+  "collected": "Tax Collected",
+  "owed": "Tax Owed"
 }

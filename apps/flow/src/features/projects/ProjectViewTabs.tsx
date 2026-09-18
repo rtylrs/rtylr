@@ -12,9 +12,10 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
+import ProjectIcon from '../../shared/components/ProjectIcon';
 
 interface ProjectViewTabsProps {
-  project: { name: string; color: string };
+  project: { name: string; color: string; icon?: string };
   projectId: string;
   taskCount: number;
   onNewTask: () => void;
@@ -122,7 +123,16 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
       style={{ borderBottom: '1px solid var(--flow-border)' }}
     >
       <div className="flex min-w-0 items-center gap-2.5">
-        <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: project.color }} />
+        {/* The project's own glyph, tinted with its colour, rather than a
+            plain dot. G-C5 puts the colour in three places: the sidebar dot,
+            this header icon and the chip. The dot said nothing the sidebar was
+            not already saying (#1085). 20px, per G-I1's header size. */}
+        <ProjectIcon
+          icon={project.icon}
+          size={20}
+          className="shrink-0"
+          style={{ color: project.color }}
+        />
         <h1 className="text-section font-semibold truncate" style={{ color: 'var(--flow-text)' }}>
           {project.name}
         </h1>
@@ -159,7 +169,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
                 ].join(' ')}
                 style={
                   active
-                    ? { background: 'var(--accent-muted)', color: 'var(--accent)' }
+                    ? { background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }
                     : { color: 'var(--flow-text-muted)' }
                 }
               >

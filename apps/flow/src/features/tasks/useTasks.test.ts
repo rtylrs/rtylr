@@ -56,7 +56,7 @@ describe('useTasks (remote mode)', () => {
 
   it('fetches tasks on mount', async () => {
     const data = [{ id: 't-1', title: 'Fix bug' }];
-    (flowApi.getTasks as any).mockResolvedValue(data);
+    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(data);
     const params = { projectId: 'p-1' };
     const { result } = renderHook(() => useTasks(params), {
       wrapper: createWrapper(),
@@ -67,7 +67,9 @@ describe('useTasks (remote mode)', () => {
   });
 
   it('starts in loading state when projectId provided', () => {
-    (flowApi.getTasks as any).mockReturnValue(new Promise(() => {}));
+    (flowApi.getTasks as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      new Promise(() => {})
+    );
     const { result } = renderHook(() => useTasks({ projectId: 'p-1' }), {
       wrapper: createWrapper(),
     });
@@ -82,7 +84,7 @@ describe('useMyTasks', () => {
 
   it('fetches current user tasks', async () => {
     const data = [{ id: 't-2', title: 'My task' }];
-    (flowApi.getMyTasks as any).mockResolvedValue(data);
+    (flowApi.getMyTasks as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(data);
     const { result } = renderHook(() => useMyTasks(), {
       wrapper: createWrapper(),
     });
@@ -98,7 +100,7 @@ describe('useTaskDetail', () => {
 
   it('fetches task detail by id', async () => {
     const task = { id: 't-5', title: 'Detail task' };
-    (flowApi.getTaskDetail as any).mockResolvedValue(task);
+    (flowApi.getTaskDetail as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(task);
     const { result } = renderHook(() => useTaskDetail('t-5'), {
       wrapper: createWrapper(),
     });
@@ -121,7 +123,7 @@ describe('useCreateTask', () => {
   });
 
   it('calls createTask service method', async () => {
-    (flowApi.createTask as any).mockResolvedValue({ id: 't-new' });
+    (flowApi.createTask as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 't-new' });
     const { result } = renderHook(() => useCreateTask(), {
       wrapper: createWrapper(),
     });
@@ -131,7 +133,7 @@ describe('useCreateTask', () => {
   });
 
   it('passes labels through to createTask unchanged', async () => {
-    (flowApi.createTask as any).mockResolvedValue({ id: 't-new' });
+    (flowApi.createTask as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 't-new' });
     const { result } = renderHook(() => useCreateTask(), {
       wrapper: createWrapper(),
     });
@@ -147,11 +149,11 @@ describe('useUpdateTask', () => {
   });
 
   it('calls updateTask with id and data', async () => {
-    (flowApi.updateTask as any).mockResolvedValue({});
+    (flowApi.updateTask as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({});
     const { result } = renderHook(() => useUpdateTask(), {
       wrapper: createWrapper(),
     });
-    await act(() => result.current.mutateAsync({ id: 't-1', data: { title: 'Updated' } as any }));
+    await act(() => result.current.mutateAsync({ id: 't-1', data: { title: 'Updated' } }));
     expect(flowApi.updateTask).toHaveBeenCalledWith('t-1', { title: 'Updated' });
   });
 });
@@ -162,7 +164,7 @@ describe('useDeleteTask', () => {
   });
 
   it('calls deleteTask with id', async () => {
-    (flowApi.deleteTask as any).mockResolvedValue({ ok: true });
+    (flowApi.deleteTask as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useDeleteTask(), {
       wrapper: createWrapper(),
     });
@@ -177,11 +179,13 @@ describe('useUpdateTaskStatus', () => {
   });
 
   it('calls updateTaskStatus with id and status', async () => {
-    (flowApi.updateTaskStatus as any).mockResolvedValue({ ok: true });
+    (flowApi.updateTaskStatus as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+    });
     const { result } = renderHook(() => useUpdateTaskStatus(), {
       wrapper: createWrapper(),
     });
-    await act(() => result.current.mutateAsync({ id: 't-1', status: 'done' as any }));
+    await act(() => result.current.mutateAsync({ id: 't-1', status: 'done' }));
     expect(flowApi.updateTaskStatus).toHaveBeenCalledWith('t-1', 'done');
   });
 });
@@ -195,7 +199,7 @@ describe('useBulkUpdateArchive', () => {
     // Regression guard: BulkEditBar's Archive button used to call
     // useBulkUpdateStatus with status:'cancelled' - a different field
     // entirely. This hook must touch `archived`, not `status`.
-    (flowApi.updateTask as any).mockResolvedValue({ ok: true });
+    (flowApi.updateTask as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useBulkUpdateArchive(), {
       wrapper: createWrapper(),
     });

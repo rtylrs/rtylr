@@ -106,7 +106,10 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
       },
       {
         onSuccess: (data) => {
-          if (!isAllowedOAuthRedirect(data.redirectUrl)) {
+          // The field is optional on the response. Without this the check
+          // below would be handed undefined and, if it passed, the browser
+          // would navigate to the string "undefined".
+          if (data.redirectUrl === undefined || !isAllowedOAuthRedirect(data.redirectUrl)) {
             setError('Redirect URI is not on an allowed domain.');
             return;
           }
@@ -132,7 +135,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   if (step === 'login') {
     return (
       <AuthShell
-        title="Sign in to authorize"
+        title={t('auth.oauth.signInToAuthorize')}
         subtitle={`rtylr MCP is requesting access to your account`}
       >
         <form
@@ -189,18 +192,17 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Authorize · rtylr" />
-      <AuthShell
-        title="Authorize access"
-        subtitle="Review and confirm the permissions requested below"
-      >
+      <HelmetContainer title={t('auth.oauth.metaTitle')} />
+      <AuthShell title={t('auth.oauth.title')} subtitle={t('auth.oauth.subtitle')}>
         <div className="flex flex-col gap-6">
           {error && <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
           <div className="rounded-xl border border-[#e5e5e5] overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-3 bg-[#f9f9f9] border-b border-[#e5e5e5]">
               <Shield size={16} className="text-[#4583C4] shrink-0" />
-              <span className="text-sm font-medium text-[#333]">Permissions requested</span>
+              <span className="text-sm font-medium text-[#333]">
+                {t('auth.oauth.permissionsRequested')}
+              </span>
             </div>
             <ul className="divide-y divide-[#f0f0f0]">
               {scopes.map((scope) => (
@@ -226,7 +228,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
               onClick={handleDeny}
               className="w-full rounded-lg border border-[#e5e5e5] py-2.5 text-sm text-[#666] hover:text-[#333] transition-colors"
             >
-              Deny
+              {t('auth.oauth.deny')}
             </button>
           </div>
 

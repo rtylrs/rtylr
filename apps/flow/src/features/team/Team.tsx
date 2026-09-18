@@ -1,4 +1,5 @@
 import React from 'react';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { motion } from 'motion/react';
 import { Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ import { EmptyState } from '@voxire/ui';
 
 const Team: React.FC = () => {
   const { t } = useTranslation();
+  const openTask = useOpenTask();
   const teamQuery = useTeamWorkload();
   const { data: members = [], isLoading } = teamQuery;
   const navigate = useNavigate();
@@ -82,7 +84,7 @@ const Team: React.FC = () => {
                     <button
                       type="button"
                       key={t.id}
-                      onClick={() => navigate({ to: `/task/${t.id}` as string })}
+                      onClick={() => openTask(String(t.id))}
                       className="w-full flex items-center gap-2 py-1 text-left hover:bg-[var(--flow-hover)] rounded-sm px-1.5"
                     >
                       <PriorityIcon priority={t.priority} size={11} />

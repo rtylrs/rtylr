@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
@@ -11,11 +12,10 @@ import { StaffMember } from '../../shared/services/hrApi';
 import { useStaff } from './useStaff';
 import { useIsMobile } from '../../shared/components/ui';
 
-const ACCENT = '#8b5cf6';
+/** The themed accent, so a workspace's own colour is used (rtylr#1242). */
+const ACCENT = 'var(--accent)';
 
 type EmploymentType = 'Full-time' | 'Part-time' | 'Contractor';
-type Status = 'Active' | 'Inactive';
-
 type FilterTab = 'All' | EmploymentType;
 const filterTabs: FilterTab[] = ['All', 'Full-time', 'Part-time', 'Contractor'];
 
@@ -69,7 +69,7 @@ const Staff: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Staff · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.staff'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* Header */}
         <div
@@ -209,7 +209,8 @@ const Staff: React.FC = () => {
             return (
               <motion.div key={s.id} variants={cardAnim} whileHover={{ scale: 1.015 }}>
                 <Link
-                  to={`/staff/${s.id}` as any}
+                  to="/staff/$id"
+                  params={{ id: String(s.id) }}
                   style={{ textDecoration: 'none', display: 'block' }}
                 >
                   <div
@@ -300,7 +301,9 @@ const Staff: React.FC = () => {
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>Dept:</span>
+                        <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
+                          {t('staff.deptPrefix')}
+                        </span>
                         <span
                           style={{
                             fontSize: '12px',

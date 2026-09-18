@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { ClipboardList } from 'lucide-react';
@@ -166,7 +167,7 @@ const MyReview = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="My review · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.myReview'))} />
       <div>
         <SectionHeader
           title={t('performance.myReview.title')}

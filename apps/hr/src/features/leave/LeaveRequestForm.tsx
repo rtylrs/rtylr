@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -151,13 +152,13 @@ const LeaveRequestForm = (): React.JSX.Element => {
     return (
       <Card style={{ textAlign: 'center', padding: 32 }}>
         <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hr-error)', margin: '0 0 8px' }}>
-          Unable to load leave policies
+          {t('leave.policiesUnavailableTitle')}
         </p>
         <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
-          The leave policy service could not be reached. Try again.
+          {t('leave.policiesUnavailableBody')}
         </p>
         <Button variant="secondary" onClick={() => refetchLeaveTypes()}>
-          Retry
+          {t('common.retry')}
         </Button>
       </Card>
     );
@@ -173,7 +174,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
           {t('leave.configureLeaveTypes')}
         </p>
         <Button variant="primary" onClick={() => navigate({ to: '/settings/leave-policy' })}>
-          Configure leave policies
+          {t('leave.configurePolicies')}
         </Button>
       </Card>
     );
@@ -181,7 +182,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Leave request · rtylr" />
+      <HelmetContainer title={pageTitle(t('common.pageTitles.leaveRequest'))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 560 }}>
         <SectionHeader title={t('leave.form.title')} subtitle={t('leave.form.subtitle')} />
 

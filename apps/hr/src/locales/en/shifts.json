@@ -26,6 +26,27 @@
     "conflictsWarning": "Some assignments have scheduling conflicts.",
     "cannotPublishConflicts": "Resolve all scheduling conflicts before publishing the roster.",
     "emptyTitle": "No roster data",
-    "emptyDescription": "Add employees to this location to build the roster."
+    "emptyDescription": "Add employees to this location to build the roster.",
+    "published": "Roster published"
+  },
+  "schedule": {
+    "fillAllFields": "Fill all fields",
+    "shiftSaved": "Shift saved",
+    "shiftRemoved": "Shift removed",
+    "weekPublished": "Week published",
+    "metaTitle": "Shift schedule · rtylr",
+    "title": "Shift Schedule",
+    "subtitle": "Weekly grid view for scheduling shifts",
+    "publishWeek": "Publish week",
+    "newShift": "New shift",
+    "employee": "Employee",
+    "selectPlaceholder": "Select",
+    "start": "Start",
+    "end": "End",
+    "color": "Color",
+    "cancel": "Cancel",
+    "saveShift": "Save shift",
+    "confirmDelete": "Delete shift for {{name}}?",
+    "standardName": "Standard"
   }
 }

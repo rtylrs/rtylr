@@ -14,5 +14,13 @@
     "description": "Description",
     "descriptionPlaceholder": "What does this department do?",
     "submit": "Create Department"
+  },
+  "page": {
+    "metaTitle": "Departments · rtylr",
+    "title": "Departments",
+    "head": "Department Head",
+    "teamSize": "Team Size",
+    "avgSalary": "Avg Salary",
+    "shareOfWorkforce": "Share of total workforce"
   }
 }

@@ -19,7 +19,12 @@
   --delta-up: #10b981;
   --delta-down: #f87171;
   /* Foreground color for solid-accent buttons */
-  --accent-fg: #ffffff;
+  /* Text on an --accent fill. Was --accent-fg: #ffffff, which measures 3.96:1
+     on #4583c4 and fails AA at every size. Renamed as well as recoloured: flow
+     uses --accent-fg for the accent used AS a foreground, so one name meant
+     opposite things in the two apps. Near-black is what deriveOnAccent
+     returns for this accent. */
+  --hub-on-accent: #0a0a0a; /* 4.99:1 on #4583c4 */
   /* Caret AI brand teal - used to make the Caret nav entry read as the app's hero surface */
   --caret-brand: #63d1c4;
   --caret-brand-soft: rgba(99, 209, 196, 0.12);
@@ -28,6 +33,11 @@
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {
+  /* Text on the --accent-muted tint. A separate token because the tint is a
+     different background from the card, and the accent itself fails AA on it:
+     #4583c4 measures 4.00:1 on the muted card and 4.20:1 on the muted surface
+     (rtylr#1217). Measured against both grounds, worst case first. */
+  --accent-on-muted: #6e9ed1; /* dark, 5.64:1 on card, 5.93:1 on surface */
   --hub-bg: #0a0a0a;
   --hub-surface: #111111;
   --hub-card: #161616;
@@ -68,6 +78,9 @@
 
 /* ── Light mode ──────────────────────────────────────────────── */
 :root[data-theme='light'] {
+  /* The light half of the same pair. Kept for the reason given in the dark
+     block above; light is the worse mode, at 3.15:1 unfixed. */
+  --accent-on-muted: #2c5b8b; /* light, 5.61:1 on card, 6.14:1 on surface */
   --hub-bg: #f4f4f5;
   --hub-surface: #ffffff;
   --hub-card: #ffffff;

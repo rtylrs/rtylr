@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useUserStore } from '@voxire/auth';
 import {
@@ -14,7 +15,10 @@ import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const ACCENT = '#3b82f6';
 
-const TIER_ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
+const TIER_ICON_MAP: Record<
+  string,
+  React.ComponentType<{ size?: number; style?: React.CSSProperties }>
+> = {
   Bronze: Award,
   Silver: Star,
   Gold: Trophy,
@@ -32,6 +36,7 @@ const activityColor: Record<string, string> = {
 };
 
 const Loyalty: React.FC = () => {
+  const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
   const { data: config } = useLoyaltyConfig();
@@ -59,16 +64,16 @@ const Loyalty: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Loyalty · rtylr" />
+      <HelmetContainer title={`${t('crm.loyalty.pageTitle')} · rtylr`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              Loyalty Program
+              {t('crm.loyalty.programTitle')}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-              Configure tiers, point rules, and member rewards
+              {t('crm.loyalty.programSubtitle')}
             </p>
           </div>
           {canConfigureLoyalty && (
@@ -120,7 +125,7 @@ const Loyalty: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
             <Gift size={16} style={{ color: ACCENT }} />
             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
-              Program Configuration
+              {t('crm.loyalty.programConfiguration')}
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
@@ -223,7 +228,7 @@ const Loyalty: React.FC = () => {
                 <option value={180}>180 days</option>
                 <option value={365}>1 year</option>
                 <option value={730}>2 years</option>
-                <option value={0}>Never</option>
+                <option value={0}>{t('crm.loyalty.never')}</option>
               </select>
             </div>
             <div>
@@ -238,7 +243,7 @@ const Loyalty: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Redemption rate
+                {t('crm.loyalty.redemptionRate')}
               </label>
               <div style={{ fontSize: '13px', color: 'var(--hub-text)', lineHeight: '36px' }}>
                 {config && config.redemptionRate > 0
@@ -282,7 +287,7 @@ const Loyalty: React.FC = () => {
               marginTop: 0,
             }}
           >
-            Loyalty Tiers
+            {t('nav.loyaltyTiers')}
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
             {tiers.map((tier, i) => {
@@ -321,7 +326,7 @@ const Loyalty: React.FC = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      <Icon size={18} {...({ style: { color: tier.color } } as any)} />
+                      <Icon size={18} style={{ color: tier.color }} />
                     </div>
                   </div>
                   <div>
@@ -401,7 +406,7 @@ const Loyalty: React.FC = () => {
           >
             <Clock size={14} style={{ color: ACCENT }} />
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-              Points Activity Log
+              {t('crm.loyalty.pointsActivityLog')}
             </span>
           </div>
           {activityLog.map((entry, i) => (

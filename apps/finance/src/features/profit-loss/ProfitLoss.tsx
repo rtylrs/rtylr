@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
@@ -124,6 +126,7 @@ const PERIOD_PARAMS: Record<Period, string> = {
 };
 
 const ProfitLoss: React.FC = () => {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<Period>('This Month');
   const [showClose, setShowClose] = useState(false);
   const currency = useSettings((s) => s.currency);
@@ -147,25 +150,33 @@ const ProfitLoss: React.FC = () => {
   // Summary cards
   const summaryItems = [
     {
-      label: 'Revenue',
+      id: 'revenue',
+
+      label: t('finance.profitLoss.revenue'),
       value: data.revenue,
       color: 'var(--finance-accent)',
       Icon: TrendingUp,
     },
     {
-      label: 'Gross Profit',
+      id: 'grossProfit',
+
+      label: t('finance.profitLoss.grossProfit'),
       value: grossProfit,
       color: 'var(--finance-info)',
       Icon: TrendingUp,
     },
     {
-      label: 'Net Profit',
+      id: 'netProfit',
+
+      label: t('finance.profitLoss.netProfit'),
       value: netProfit,
       color: netProfit >= 0 ? 'var(--finance-accent)' : 'var(--finance-danger)',
       Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
     },
     {
-      label: 'Net Margin',
+      id: 'netMargin',
+
+      label: t('finance.profitLoss.netMargin'),
       value: parseFloat(netMargin),
       color: 'var(--finance-warning)',
       Icon: TrendingUp,
@@ -181,12 +192,12 @@ const ProfitLoss: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Profit & loss · rtylr" />
+      <HelmetContainer title={pageTitle(t('nav.pl'))} />
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hub-text)' }}>
-            Profit & Loss
+            {t('finance.profitLoss.title')}
           </h2>
           <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
             Financial statement for {period.toLowerCase()}
@@ -217,10 +228,10 @@ const ProfitLoss: React.FC = () => {
                 netProfit,
               })
             }
-            aria-label="Export profit and loss as CSV"
+            aria-label={t('finance.profitLoss.exportAria')}
           >
             <Download size={14} />
-            Export
+            {t('finance.profitLoss.export')}
           </button>
           <button
             type="button"
@@ -240,7 +251,7 @@ const ProfitLoss: React.FC = () => {
             }}
           >
             <Lock size={13} />
-            Close Fiscal Year
+            {t('finance.profitLoss.closeFiscalYear')}
           </button>
         </div>
       </div>
@@ -281,9 +292,9 @@ const ProfitLoss: React.FC = () => {
 
       {/* Summary cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-        {summaryItems.map(({ label, value, color, Icon, isMeta, display }) => (
+        {summaryItems.map(({ id, label, value, color, Icon, isMeta, display }) => (
           <div
-            key={label}
+            key={id}
             style={{
               background: 'var(--hub-card)',
               border: '1px solid var(--hub-border)',
@@ -343,7 +354,7 @@ const ProfitLoss: React.FC = () => {
               letterSpacing: '0.06em',
             }}
           >
-            P&L Statement
+            {t('finance.profitLoss.statement')}
           </span>
           <span style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{period}</span>
         </div>
@@ -360,9 +371,14 @@ const ProfitLoss: React.FC = () => {
               color: 'var(--hub-text-dim)',
             }}
           >
-            Revenue
+            {t('finance.profitLoss.revenue')}
           </div>
-          <PLRow label="Gross Revenue" value={data.revenue} positive currency={currency} />
+          <PLRow
+            label={t('finance.profitLoss.grossRevenue')}
+            value={data.revenue}
+            positive
+            currency={currency}
+          />
         </div>
 
         {/* COGS */}
@@ -377,10 +393,10 @@ const ProfitLoss: React.FC = () => {
               color: 'var(--hub-text-dim)',
             }}
           >
-            Cost of Goods Sold
+            {t('finance.profitLoss.cogs')}
           </div>
           <PLRow
-            label="Direct costs (COGS)"
+            label={t('finance.profitLoss.directCosts')}
             value={data.cogs}
             indent
             negative
@@ -413,10 +429,10 @@ const ProfitLoss: React.FC = () => {
               color: 'var(--hub-text-dim)',
             }}
           >
-            Operating Expenses
+            {t('finance.profitLoss.operatingExpenses')}
           </div>
           <PLRow
-            label="Total Operating Expenses"
+            label={t('finance.profitLoss.totalOperatingExpenses')}
             value={data.operatingExpenses}
             indent
             negative
@@ -432,7 +448,7 @@ const ProfitLoss: React.FC = () => {
             }}
           >
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text-muted)' }}>
-              Total Operating
+              {t('finance.profitLoss.totalOperating')}
             </span>
             <span
               style={{
@@ -473,10 +489,10 @@ const ProfitLoss: React.FC = () => {
               marginBottom: 12,
             }}
           >
-            Expenses by Category
+            {t('finance.profitLoss.expensesByCategory')}
           </div>
           <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: 0 }}>
-            Category breakdown not available yet.
+            {t('finance.profitLoss.categoryUnavailable')}
           </p>
         </div>
         <PaymentReminderPanel />
@@ -485,10 +501,10 @@ const ProfitLoss: React.FC = () => {
       <ConfirmDialog
         open={showClose}
         onClose={() => setShowClose(false)}
-        onConfirm={() => toast.info('Fiscal year period locking is coming soon')}
-        title="Close fiscal year"
-        message="This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
-        confirmLabel="Close year"
+        onConfirm={() => toast.info(t('finance.profitLoss.lockingComingSoon'))}
+        title={t('finance.profitLoss.closeYear')}
+        message={t('finance.profitLoss.closeYearConfirm')}
+        confirmLabel={t('common.closeYear')}
         destructive
       />
     </motion.div>

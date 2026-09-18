@@ -14,12 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '../../shared/components/ui';
-import {
-  Breadcrumbs,
-  SettingSection,
-  SkeletonList,
-  ConfirmDialog,
-} from '../../shared/components/dash';
+import { SettingSection, SkeletonList, ConfirmDialog } from '../../shared/components/dash';
 import {
   useSecurity,
   useToggleTwoFactor,

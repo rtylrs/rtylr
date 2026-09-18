@@ -52,8 +52,8 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       image: i.imageUrl,
       available: i.isActive,
     }));
-    return [{ id: 'all', name: 'Menu', items }];
-  }, [menu]);
+    return [{ id: 'all', name: t('locationmenu.allItems'), items }];
+  }, [menu, t]);
 
   if (bizLoading || menuLoading) return <FullScreenLoader />;
   if (bizError || !biz) {
@@ -69,9 +69,9 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={SearchX}
-          title={t('businessNotFoundTitle')}
-          description={t('businessNotFoundDescription')}
-          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+          title={t('locationmenu.businessNotFoundTitle')}
+          description={t('locationmenu.businessNotFoundDescription')}
+          action={{ label: t('locationmenu.goBack'), onClick: () => router.history.back() }}
         />
       </div>
     );
@@ -89,10 +89,10 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={MapPinOff}
-          title={t('locationNotFoundTitle')}
-          description={t('locationNotFoundDescription')}
+          title={t('locationmenu.locationNotFoundTitle')}
+          description={t('locationmenu.locationNotFoundDescription')}
           action={{
-            label: t('backToBusiness', { businessName: biz.business.name }),
+            label: t('locationmenu.backToBusiness', { businessName: biz.business.name }),
             onClick: () => void navigate({ to: '/$slug', params: { slug } }),
           }}
         />
@@ -102,7 +102,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   if (menuError) {
     return (
       <div style={{ padding: 32, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Couldn't load the menu</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 600 }}>{t('locationmenu.loadFailedTitle')}</h1>
       </div>
     );
   }
@@ -126,10 +126,10 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       >
         <EmptyState
           icon={UtensilsCrossed}
-          title={t('noItemsTitle')}
-          description={t('noItemsDescription')}
+          title={t('locationmenu.noItemsTitle')}
+          description={t('locationmenu.noItemsDescription')}
           action={{
-            label: t('backToBusiness', { businessName: biz.business.name }),
+            label: t('locationmenu.backToBusiness', { businessName: biz.business.name }),
             onClick: () => void navigate({ to: '/$slug', params: { slug } }),
           }}
         />
@@ -139,7 +139,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Menu · rtylr" />
+      <HelmetContainer title={t('locationmenu.pageTitle')} />
       <GridLayout
         business={businessInfo}
         categories={categories}

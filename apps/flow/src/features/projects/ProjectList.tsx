@@ -43,12 +43,12 @@ interface StatusGroupDef {
 // groups appear only when they hold something, so a list that looked like four
 // groups yesterday still does.
 export const STATUS_GROUP_COLORS: { id: Task['status']; color: string; alwaysShown: boolean }[] = [
-  { id: 'backlog', color: '#6b7280', alwaysShown: false },
-  { id: 'todo', color: '#9ca3af', alwaysShown: true },
+  { id: 'backlog', color: 'var(--flow-neutral-fg)', alwaysShown: false },
+  { id: 'todo', color: 'var(--flow-neutral-fg)', alwaysShown: true },
   { id: 'in_progress', color: 'var(--flow-info-fg)', alwaysShown: true },
-  { id: 'in_review', color: '#f59e0b', alwaysShown: true },
+  { id: 'in_review', color: 'var(--flow-warn-fg)', alwaysShown: true },
   { id: 'done', color: 'var(--flow-status-approved)', alwaysShown: true },
-  { id: 'cancelled', color: '#4b5563', alwaysShown: false },
+  { id: 'cancelled', color: 'var(--flow-neutral-fg)', alwaysShown: false },
 ];
 
 /** Whether a group earns a header: one of the four the list always shows, or non-empty. */
@@ -118,7 +118,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
           borderColor: checked ? 'var(--accent)' : 'var(--flow-border)',
         }}
       >
-        {checked && <Check size={10} strokeWidth={3} color="#0a0a0a" />}
+        {checked && <Check size={10} strokeWidth={3} color="var(--flow-on-accent)" />}
       </button>
 
       {/* The same glyph the board uses for the same task. This was a 6px
@@ -152,7 +152,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       {/* Assignee */}
       <span
         className="h-5 w-5 rounded-full flex items-center justify-center text-meta font-bold shrink-0"
-        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+        style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
       >
         {task.assigneeInitials}
       </span>
@@ -185,7 +185,21 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 export const StatusGroup: React.FC<{
   group: StatusGroupDef;
   tasks: Task[];
-}> = ({ group, tasks }) => {
+  /**
+   * Whether to show the task count beside the status name.
+   *
+   * Off when the list is split into sections. There the count is that
+   * section's, while the board's identically labelled count is the whole
+   * project's, so the two read as a contradiction with nothing on screen
+   * saying which is which: "To Do 28" against "To Do 49" for the same status
+   * (#1166). Both are right. The section total one line above already gives
+   * the number, so the group count is what goes.
+   *
+   * On for an unsectioned list, where the group count and the board's count
+   * are the same number and there is nothing to confuse.
+   */
+  showCount?: boolean;
+}> = ({ group, tasks, showCount = true }) => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -206,9 +220,11 @@ export const StatusGroup: React.FC<{
         <span className="text-meta font-semibold" style={{ color: group.color }}>
           {group.label}
         </span>
-        <span className="text-meta ml-1" style={{ color: 'var(--flow-text-dim)' }}>
-          {tasks.length}
-        </span>
+        {showCount && (
+          <span className="text-meta ml-1 tabular-nums" style={{ color: 'var(--flow-text-dim)' }}>
+            {tasks.length}
+          </span>
+        )}
       </button>
 
       <AnimatePresence>
@@ -284,13 +300,14 @@ const ProjectList: React.FC = () => {
     const blocks: { id: string; title: string; tasks: Task[] }[] = projectSections.map((sec) => ({
       id: sec.id,
       title: sec.name,
-      tasks: projectTasks.filter((t) => t.sectionId === sec.id),
+      tasks: projectTasks.filter((task) => task.sectionId === sec.id),
     }));
     const inSection = new Set(projectSections.map((s) => s.id));
-    const loose = projectTasks.filter((t) => !t.sectionId || !inSection.has(t.sectionId));
-    if (loose.length) blocks.push({ id: '_unsectioned', title: 'Other', tasks: loose });
+    const loose = projectTasks.filter((task) => !task.sectionId || !inSection.has(task.sectionId));
+    if (loose.length)
+      blocks.push({ id: '_unsectioned', title: t('flow.projectList.otherSection'), tasks: loose });
     return blocks;
-  }, [projectSections, projectTasks]);
+  }, [projectSections, projectTasks, t]);
 
   if (projectLoading && !project) {
     return (
@@ -351,7 +368,7 @@ const ProjectList: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-meta font-medium transition-colors"
             style={{
               background: 'var(--accent-muted)',
-              color: 'var(--accent)',
+              color: 'var(--accent-on-muted)',
             }}
           >
             <List size={13} />
@@ -391,7 +408,10 @@ const ProjectList: React.FC = () => {
                   }}
                 >
                   {block.title}
-                  <span className="ml-2 font-normal" style={{ color: 'var(--flow-text-dim)' }}>
+                  <span
+                    className="ml-2 font-normal tabular-nums"
+                    style={{ color: 'var(--flow-text-dim)' }}
+                  >
                     {block.tasks.length}
                   </span>
                 </div>
@@ -399,7 +419,12 @@ const ProjectList: React.FC = () => {
                   const groupTasks = block.tasks.filter((t) => t.status === group.id);
                   if (!groupIsVisible(group, groupTasks.length)) return null;
                   return (
-                    <StatusGroup key={`${block.id}-${group.id}`} group={group} tasks={groupTasks} />
+                    <StatusGroup
+                      key={`${block.id}-${group.id}`}
+                      group={group}
+                      tasks={groupTasks}
+                      showCount={false}
+                    />
                   );
                 })}
               </div>

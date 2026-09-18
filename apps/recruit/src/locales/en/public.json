@@ -1,0 +1,79 @@
+{
+  "errors": {
+    "careersPage": "Failed to load careers page",
+    "jobDetails": "Failed to load job details",
+    "refreshHint": "Please try refreshing the page.",
+    "retry": "Retry"
+  },
+  "apply": {
+    "invalidLink": "Invalid application link.",
+    "loadFailed": "Failed to load application form",
+    "fileType": "Please upload a PDF or Word document",
+    "uploadFailed": "Upload failed",
+    "required": "\"{{label}}\" is required",
+    "tooLong": "\"{{label}}\" exceeds maximum length of {{max}} characters",
+    "consentRequired": "You must agree to data processing to apply",
+    "received": "Application received",
+    "submitFailed": "Couldn't submit. Try again.",
+    "doneTitle": "You're in.",
+    "doneBody": "Thanks for applying to <name>{{title}}</name>. The {{brand}} team will review and reach out if there's a fit.",
+    "backToRoles": "Back to open roles",
+    "backToRole": "Back to role",
+    "heading": "Apply for {{title}}",
+    "remote": "Remote",
+    "fullName": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "resume": "Resume",
+    "uploadCta": "Upload your resume",
+    "uploadHint": "· PDF or Word, up to 10 MB",
+    "uploading": "Uploading…",
+    "uploaded": "Uploaded",
+    "remove": "Remove",
+    "linkInstead": "…or paste a link",
+    "linkHint": "Google Drive, Dropbox, personal site",
+    "whyYou": "Why you",
+    "whyYouPlaceholder": "A short note on why you'd be a great fit.",
+    "uploadingResume": "Uploading resume…",
+    "submitting": "Submitting…",
+    "submit": "Submit application",
+    "select": "Select…",
+    "consent": "I agree to {{brand}}'s processing of my application data.",
+    "consentWithPrivacy": "I agree to {{brand}}'s processing of my application data. See the <privacy>privacy policy</privacy>.",
+    "consentWithTerms": "I agree to {{brand}}'s processing of my application data. See the <terms>terms</terms>.",
+    "consentWithBoth": "I agree to {{brand}}'s processing of my application data. See the <privacy>privacy policy</privacy> and <terms>terms</terms>."
+  },
+  "notFound": {
+    "metaTitle": "Not found · rtylr",
+    "eyebrow": "404 · Not found",
+    "title": "This careers page isn't live.",
+    "body": "Double-check the link, or head back to the main site.",
+    "back": "Back to rtylr"
+  },
+  "landing": {
+    "metaTitle": "Recruit · rtylr",
+    "title": "Hiring pages,\nwithout the careers-site tax.",
+    "body": "Post roles, collect applications, and move candidates through your funnel, all from the same account you run the rest of your business from.",
+    "pricing": "See pricing",
+    "startFree": "Start free"
+  },
+  "job": {
+    "allRoles": "All roles",
+    "requirements": "Requirements",
+    "lookingFor": "What we're looking for",
+    "compensation": "Compensation",
+    "apply": "Apply for this role"
+  },
+  "index": {
+    "openPositions": "Open positions",
+    "openRoles": "Open roles",
+    "careersEyebrow": "Careers",
+    "heroTitle": "Work\nthat moves\nthe needle.",
+    "roleCount_one": "{{count}} role",
+    "roleCount_other": "{{count}} roles"
+  },
+  "sections": {
+    "watchVideo": "Watch video",
+    "getInTouch": "Get in touch"
+  }
+}
