@@ -1,0 +1,5 @@
+{{define "body"}}
+<h1>Access request</h1>
+<p><strong>{{.RequesterName}}</strong> ({{.RequesterEmail}}) is requesting access to <strong>{{.App}}</strong>.</p>
+{{if .TeamLink}}<a href="{{.TeamLink}}" class="btn">Go to Team</a>{{end}}
+{{end}}
