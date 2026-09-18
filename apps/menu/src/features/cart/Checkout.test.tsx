@@ -76,10 +76,18 @@ describe('Checkout form', () => {
     expect(screen.getByRole('button', { name: 'Go back' })).toBeInTheDocument();
   });
 
-  it('places the price beside the translated submit label', () => {
+  // The price is isolated from the label rather than concatenated into it.
+  // In Arabic the concatenated form renders as 11.00$: the currency sign is a
+  // bidi-neutral and takes the direction of the text around it. happy-dom has
+  // no bidi layout, so this pins the structure that prevents it instead.
+  it('places the price beside the translated submit label, in its own bdi', () => {
     render(<Checkout />);
 
-    expect(screen.getByRole('button', { name: 'Place Order · $5.50' })).toBeInTheDocument();
+    const button = screen.getByRole('button', { name: 'Place Order · $5.50' });
+    const isolated = button.querySelector('bdi');
+
+    expect(isolated).not.toBeNull();
+    expect(isolated).toHaveTextContent('$5.50');
   });
 
   it('shows a translated validation message rather than a key', () => {

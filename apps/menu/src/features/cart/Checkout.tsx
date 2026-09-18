@@ -423,9 +423,19 @@ const Checkout = (): React.JSX.Element => {
               gap: 8,
             }}
           >
-            {submitting
-              ? t('checkout.submitting')
-              : `${t('checkout.placeOrder')} · ${formatPrice(total())}`}
+            {submitting ? (
+              t('checkout.submitting')
+            ) : (
+              // The price is isolated from the label. Concatenated into an
+              // Arabic string it renders as 11.00$, because the currency sign
+              // is a bidi-neutral and takes the direction of what surrounds
+              // it. One flex item, so the button's gap still applies once.
+              <span>
+                {t('checkout.placeOrder')}
+                {' · '}
+                <bdi>{formatPrice(total())}</bdi>
+              </span>
+            )}
           </button>
         </form>
       </div>

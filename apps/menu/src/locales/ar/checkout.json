@@ -15,7 +15,7 @@
   "name": "الاسم",
   "namePlaceholder": "اسمك الكامل",
   "phone": "رقم الهاتف",
-  "phonePlaceholder": "مثال: +961 3 123456",
+  "phonePlaceholder": "مثال: \u2066+961 3 123456\u2069",
   "email": "البريد الإلكتروني (اختياري)",
   "emailPlaceholder": "you@example.com",
   "notes": "ملاحظات الطلب (اختياري)",
