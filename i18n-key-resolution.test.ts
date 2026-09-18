@@ -65,9 +65,10 @@ const MINIMUM_KEYS: Record<(typeof ENFORCED_APPS)[number], number> = {
   flow: 500,
   hr: 700,
   insights: 110,
-  // menu is a customer-facing QR menu with six namespaces, so its floor is an
-  // order of magnitude below the admin apps' by nature rather than by neglect.
-  menu: 35,
+  // menu is a customer-facing QR menu, not an admin console, so its floor sits
+  // far below the others by nature rather than by neglect. It was 35 until the
+  // checkout, order status and public menu screens stopped hardcoding English.
+  menu: 85,
   recruit: 250,
 };
 
