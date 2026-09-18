@@ -115,11 +115,7 @@ const Footer: React.FC = () => {
 
           <div className={styles['footer-nav']}>
             {footerSections.map((section) => (
-              <motion.div
-                key={section.id}
-                className={styles['footer-section']}
-                variants={fadeInUp}
-              >
+              <motion.div key={section.id} className={styles['footer-section']} variants={fadeInUp}>
                 {/*
                   A <p>, not an <h3>. These are labels for groups of links,
                   not sections of the document, and as headings they broke
@@ -170,27 +166,6 @@ const Footer: React.FC = () => {
             )}
           </motion.div>
         </div>
-
-        {/*
-          Google's "Add to Preferred Sources" button. Markup is exactly what
-          the Search Central docs specify: an attribute-only div, styled and
-          localised by the publisher.js library loaded in _document. Nothing
-          here is guessed, because the attribute name is the whole contract
-          and a typo in it renders nothing at all rather than erroring.
-
-          Only domain and subdomain level sites are eligible, so rtylr.com
-          qualifies and a subdirectory would not. Selecting rtylr as a
-          preferred source makes our pages more likely to surface in Top
-          Stories, and lets them carry a "preferred" badge in AI Mode and
-          AI Overviews for that user.
-
-          Sitewide because it sits in the footer, which is what the plan
-          decided. See _document.tsx for the consent question the library
-          raises, which is not settled here.
-        */}
-        <motion.div className={styles['preferred-source']} variants={fadeInUp}>
-          <div google-add-preferred-source-btn="" data-theme="light" />
-        </motion.div>
 
         <motion.div className={styles['footer-bottom']} variants={fadeInUp}>
           <div className={styles['footer-legal']}>

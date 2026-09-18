@@ -6,8 +6,8 @@
  * show"). Keyed on the root domain (`.rtylr.com`) so a user who
  * accepts on landing doesn't see the banner again on flow.
  *
- * Consent is irrevocable here for simplicity - you can change it by
- * clearing cookies. A settings-page revoke flow is a fast-follow.
+ * clearConsent reopens the banner; listeners must stop optional tracking
+ * whenever the state is anything other than granted.
  */
 
 export type ConsentState = 'granted' | 'denied' | 'undecided';

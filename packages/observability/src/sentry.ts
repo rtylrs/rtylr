@@ -9,8 +9,8 @@ import * as Sentry from '@sentry/react';
  *
  * Consent: we initialise Sentry eagerly (for error capture) but keep
  * `replays` and session tracking OFF until the user accepts cookies.
- * The `@voxire/consent` package updates Sentry's scope when consent
- * changes, enabling replays.
+ * Generic analytics consent does not enable replays. A separately reviewed
+ * recording feature would need its own disclosure and consent lifecycle.
  */
 interface InitSentryOptions {
   /** App identifier ("flow", "dash", etc.). Surfaces in Sentry `tags.app`. */
@@ -40,8 +40,7 @@ export function initSentry(opts: InitSentryOptions): void {
     // Performance tracing at 10 % - enough to spot regressions without
     // burning the quota on every page view.
     tracesSampleRate: 0.1,
-    // Session Replay is off by default. Enable via consent - see
-    // packages/consent's handler which calls `enableSentryReplay()`.
+    // Session Replay stays off in the shared boot path.
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0,
     // Strip common noisy errors (ResizeObserver, network aborts) so

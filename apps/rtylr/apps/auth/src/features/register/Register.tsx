@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
@@ -277,6 +277,30 @@ const Register: React.FC = (): React.JSX.Element => {
               <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
             </div>
           )}
+
+          <p className="text-xs leading-relaxed text-[#666]">
+            <Trans
+              i18nKey="auth.register.legalNotice"
+              components={{
+                terms: (
+                  <a
+                    href="https://rtylr.com/legal/terms/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#4583C4] underline underline-offset-2"
+                  />
+                ),
+                privacy: (
+                  <a
+                    href="https://rtylr.com/legal/privacy-policy/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#4583C4] underline underline-offset-2"
+                  />
+                ),
+              }}
+            />
+          </p>
 
           {/* Submit */}
           <Button

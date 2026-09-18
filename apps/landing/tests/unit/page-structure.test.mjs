@@ -173,7 +173,7 @@ describe('Open Graph images', () => {
     assert.deepEqual(missing, [], 'pages with no og:image');
   });
 
-  it("every declared og:image exists in the build output", () => {
+  it('every declared og:image exists in the build output', () => {
     const broken = [];
     for (const p of pages) {
       const url = ogOf(read(p));
@@ -281,31 +281,11 @@ describe('translated copy reaches the page', () => {
   });
 });
 
-describe('preferred sources button', () => {
-  // The attribute name IS the contract: Google's library finds the host
-  // element by it, and a typo renders nothing at all rather than erroring.
-  // So assert the exact string, not a fuzzy match.
-  //
-  // What this cannot check is that Google's library still renders into it,
-  // because that needs the network. Verified by hand on 2026-08-23: the
-  // library returned 200, fetched addpreferredsourcebuttoniframe, and
-  // injected a 60px child into the host div.
-  it('every page hosts the button with the documented attribute', () => {
-    const missing = pages.filter((p) => !read(p).includes('google-add-preferred-source-btn'));
-    assert.deepEqual(missing, [], 'pages missing the preferred sources host element');
-  });
-
-  it('every page loads the publisher library', () => {
-    const missing = pages.filter(
-      (p) => !read(p).includes('https://news.google.com/swg/js/v1/publisher.js')
-    );
-    assert.deepEqual(missing, [], 'pages where the button host has no library to render it');
-  });
-
-  it('hosts exactly one button per page', () => {
+describe('optional third-party embeds', () => {
+  it('does not load the Google publisher library before a visitor chooses', () => {
     for (const p of pages) {
-      const n = read(p).split('google-add-preferred-source-btn').length - 1;
-      assert.equal(n, 1, `${p} has ${n} button hosts`);
+      assert.ok(!read(p).includes('https://news.google.com/swg/js/v1/publisher.js'), p);
+      assert.ok(!read(p).includes('google-add-preferred-source-btn'), p);
     }
   });
 });

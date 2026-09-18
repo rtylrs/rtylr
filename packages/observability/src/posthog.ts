@@ -18,7 +18,10 @@ let initialised = false;
 const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
 
 export function initPostHog(opts: InitPostHogOptions): void {
-  if (initialised) return;
+  if (initialised) {
+    posthog.opt_in_capturing({ captureEventName: false });
+    return;
+  }
   const key = (viteEnv.VITE_POSTHOG_KEY as string | undefined) ?? '';
   if (!key) return;
 
@@ -28,14 +31,11 @@ export function initPostHog(opts: InitPostHogOptions): void {
     // here rather than read from env.
     api_host: 'https://us.i.posthog.com',
     ui_host: 'https://us.posthog.com',
-    // We handle consent upstream (strict opt-in). When PostHog
-    // sees `opt_out_persistence_by_default: true`, it won't write
-    // its persistence cookie until we explicitly opt in.
-    opt_out_persistence_by_default: false,
-    // Autocapture captures clicks / page views automatically -
-    // good default for a first-week learning loop. Turn off later
-    // once we have explicit tracking per feature.
-    autocapture: true,
+    // Withdrawal clears persistence as well as stopping capture.
+    opt_out_persistence_by_default: true,
+    // HR, payroll, and recruitment screens can contain sensitive data.
+    // Generic analytics consent is not permission to capture field content.
+    autocapture: false,
     capture_pageview: true,
     capture_pageleave: true,
     // Tag every event with the originating app so we can split
@@ -49,6 +49,12 @@ export function initPostHog(opts: InitPostHogOptions): void {
     disable_session_recording: true,
   });
   initialised = true;
+  posthog.opt_in_capturing({ captureEventName: false });
+}
+
+export function disablePostHog(): void {
+  if (!initialised) return;
+  posthog.opt_out_capturing();
 }
 
 export function identifyUser(userId: string, traits?: Record<string, unknown>): void {

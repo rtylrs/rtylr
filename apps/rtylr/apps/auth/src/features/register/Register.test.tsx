@@ -64,6 +64,19 @@ describe('Register Feature Component', () => {
     expect(screen.getByPlaceholderText(/my coffee shop/i)).toBeInTheDocument();
   });
 
+  it('shows terms and privacy links next to signup without marketing consent', () => {
+    render(<Register />);
+    expect(screen.getByRole('link', { name: 'Terms of Service' })).toHaveAttribute(
+      'href',
+      'https://rtylr.com/legal/terms/'
+    );
+    expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+      'href',
+      'https://rtylr.com/legal/privacy-policy/'
+    );
+    expect(screen.getByText(/This does not subscribe you to marketing/)).toBeInTheDocument();
+  });
+
   it('submits registration form with business name', async () => {
     render(<Register />);
     fireEvent.change(screen.getByPlaceholderText(/jane doe/i), { target: { value: 'Alex Smith' } });
