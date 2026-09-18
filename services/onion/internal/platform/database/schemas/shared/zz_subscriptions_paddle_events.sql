@@ -1,5 +1,5 @@
 -- Paddle webhook integrity (#755): past_due is a real dunning state and must
-# not collapse into "active", and delivered event ids need a durable dedupe
+-- not collapse into "active", and delivered event ids need a durable dedupe
 -- ledger so at-least-once redelivery cannot re-apply a stale transition.
 
 SET @sql := IF(

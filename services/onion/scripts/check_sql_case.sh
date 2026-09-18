@@ -76,6 +76,7 @@ for file in "${SQL_FILES[@]}"; do
     # newlines stay, so reported line numbers still match the real file.
     perl -0777 -pe '
         s{--[^\n]*}{}g;
+        s{^[ \t]*#[^\n]*}{}gm;
         s{/\*(.*?)\*/}{"\n" x (($1 =~ tr/\n//))}gse;
         s{'\''((?:'\'''\''|[^'\''])*)'\''}{"\n" x (($1 =~ tr/\n//))}gse;
         s{"((?:""|[^"])*)"}{"\n" x (($1 =~ tr/\n//))}gse;
