@@ -1,4 +1,7 @@
 {
+  "pageTitle": "Locations · rtylr",
+  "pickLocation": "Pick a location to see its menu",
+  "noLocations": "No active locations yet.",
   "businessNotFoundTitle": "Business not found",
   "businessNotFoundDescription": "The link \"/{{slug}}\" doesn't match any active business. Double-check the QR code or link you used.",
   "goBack": "Go back"

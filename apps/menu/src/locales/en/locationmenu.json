@@ -1,4 +1,7 @@
 {
+  "pageTitle": "Menu · rtylr",
+  "allItems": "Menu",
+  "loadFailedTitle": "Couldn't load the menu",
   "businessNotFoundTitle": "Business not found",
   "businessNotFoundDescription": "This business is no longer active or the link is incorrect.",
   "goBack": "Go back",

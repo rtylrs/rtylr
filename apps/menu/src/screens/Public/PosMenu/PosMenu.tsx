@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
@@ -25,6 +26,7 @@ import { useCartStore } from '../../../shared/stores/cartStore';
 const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED === 'true';
 
 const PosMenu: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation('posmenu');
   const { businessId: raw } = useParams({ strict: false });
   const navigate = useNavigate();
   const parsed = raw != null ? Number(raw) : NaN;
@@ -51,11 +53,11 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     return [
       {
         id: 'all',
-        name: 'Menu',
+        name: t('posmenu.allItems'),
         items,
       },
     ];
-  }, [data]);
+  }, [data, t]);
 
   const business = useMemo<BusinessInfo | null>(() => {
     if (!data) return null;
@@ -91,8 +93,8 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   if (businessId == null) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white">
-        <h2 className="text-lg font-semibold text-gray-800">Invalid menu URL</h2>
-        <p className="text-sm text-gray-500">This link is missing a business ID.</p>
+        <h2 className="text-lg font-semibold text-gray-800">{t('posmenu.invalidUrlTitle')}</h2>
+        <p className="text-sm text-gray-500">{t('posmenu.invalidUrlDescription')}</p>
       </div>
     );
   }
@@ -104,8 +106,8 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   if (isError || !data || !business) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white">
-        <h2 className="text-lg font-semibold text-gray-800">Failed to load menu</h2>
-        <p className="text-sm text-gray-500">Please try refreshing the page.</p>
+        <h2 className="text-lg font-semibold text-gray-800">{t('posmenu.loadFailedTitle')}</h2>
+        <p className="text-sm text-gray-500">{t('posmenu.loadFailedDescription')}</p>
       </div>
     );
   }
@@ -114,12 +116,10 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   if (!hasItems) {
     return (
       <>
-        <HelmetContainer title="Menu · rtylr" />
+        <HelmetContainer title={t('posmenu.pageTitle')} />
         <div className="min-h-screen flex flex-col items-center justify-center gap-2 bg-white px-4 text-center">
-          <h2 className="text-lg font-semibold text-gray-800">No menu items available</h2>
-          <p className="text-sm text-gray-500">
-            This menu is currently empty. Please check back later.
-          </p>
+          <h2 className="text-lg font-semibold text-gray-800">{t('posmenu.noItemsTitle')}</h2>
+          <p className="text-sm text-gray-500">{t('posmenu.noItemsDescription')}</p>
         </div>
       </>
     );
@@ -127,7 +127,7 @@ const PosMenu: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Menu · rtylr" />
+      <HelmetContainer title={t('posmenu.pageTitle')} />
       <GridLayout
         categories={categories}
         business={business}

@@ -1,4 +1,7 @@
 {
+  "pageTitle": "Emplacements · rtylr",
+  "pickLocation": "Choisissez un emplacement pour voir son menu",
+  "noLocations": "Aucun emplacement actif pour le moment.",
   "businessNotFoundTitle": "Commerce introuvable",
   "businessNotFoundDescription": "Le lien « /{{slug}} » ne correspond à aucun commerce actif. Vérifiez le code QR ou le lien utilisé.",
   "goBack": "Retour"
