@@ -8,6 +8,7 @@ packages:
   - 'apps/rtylr'
   - 'apps/rtylr/apps/*'
   - 'apps/landing'
+  - 'apps/pos'
 
 onlyBuiltDependencies:
   - '@parcel/watcher'

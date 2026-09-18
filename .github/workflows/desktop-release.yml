@@ -44,13 +44,14 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.28.2
+          package_json_file: package.json
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -60,7 +61,7 @@ jobs:
       - name: Cache Rust
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: core -> target
+          workspaces: apps/pos/core -> target
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -76,6 +77,7 @@ jobs:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
         with:
+          projectPath: apps/pos
           tagName: pos-v__VERSION__
           releaseName: rtylr POS v__VERSION__
           releaseBody: Internal staging release. Customer-facing desktop downloads are deployed to Cloudflare Pages.
@@ -97,24 +99,27 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.28.2
+          package_json_file: package.json
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Resolve release tag
         id: release
+        working-directory: apps/pos
         run: |
           version=$(node -p "require('./package.json').version")
           echo "tag=pos-v${version}" >> "$GITHUB_OUTPUT"
 
       - name: Download signed desktop assets
+        working-directory: apps/pos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release download "${{ steps.release.outputs.tag }}" --repo "$GITHUB_REPOSITORY" --dir desktop-downloads --clobber
@@ -126,6 +131,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Upload desktop assets to S3
+        working-directory: apps/pos
         run: |
           for file in desktop-downloads/*; do
             [ -f "$file" ] || continue
@@ -150,12 +156,14 @@ jobs:
           done
 
       - name: Prepare public download site
+        working-directory: apps/pos
         env:
           DOWNLOADS_BASE_URL: https://pos-downloads.rtylr.com
           DOWNLOADS_ASSETS_BASE_URL: https://pos-download-assets.rtylr.com
         run: node scripts/prepare-desktop-downloads.mjs desktop-downloads desktop-public
 
       - name: Deploy downloads to Cloudflare Pages
+        working-directory: apps/pos
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

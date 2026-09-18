@@ -1,8 +1,8 @@
-name: Publish public image
+name: Publish public image (pos)
 
 # Builds the PUBLIC self-host image docker.io/rtylr/pos. Triggered by a version
 # bump in tryrtylr/rtylr-version (repository_dispatch "rtylr-release") or manually
-# with a version. NOT on normal pushes — day-to-day CI deploys to Cloudflare
+# with a version. NOT on normal pushes - day-to-day CI deploys to Cloudflare
 # Pages and never publishes an image. Only the web app is built here (no
 # native/Tauri build).
 on:
@@ -28,17 +28,21 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build (web)
+        working-directory: apps/pos
         run: pnpm build
 
       - name: Resolve version
@@ -50,7 +54,7 @@ jobs:
           VERSION="${DISPATCH_VERSION:-$INPUT_VERSION}"
           if [ -z "$VERSION" ]; then echo "no version supplied"; exit 1; fi
           # Restrict to a safe Docker-tag charset (dispatch payload is trusted-org
-          # but validate anyway — no shell metachars reach the build).
+          # but validate anyway - no shell metachars reach the build).
           if ! printf '%s' "$VERSION" | grep -Eq '^[0-9A-Za-z][0-9A-Za-z._-]{0,127}$'; then
             echo "invalid version tag: $VERSION"; exit 1
           fi
@@ -69,6 +73,7 @@ jobs:
         run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
       - name: Build and push public image
+        working-directory: apps/pos
         env:
           VERSION: ${{ steps.v.outputs.version }}
         run: |
