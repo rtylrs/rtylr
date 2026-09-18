@@ -1,9 +1,9 @@
 # email-templates
 
-Transactional HTML email templates for rtylr, plus their assets. Consumed by the
-`onion` backend, which mounts this repo as a git submodule at
-`internal/platform/email/templates` and embeds the `.html` files into the binary
-at build time via `//go:embed templates/*.html`.
+Transactional HTML email templates for rtylr, plus their assets. They live in
+the `onion` backend at `internal/platform/email/templates` and are embedded into
+the binary at build time via the `//go:embed` directives in
+`internal/platform/email/render.go`.
 
 ## Layout
 
@@ -64,17 +64,17 @@ struct. The fields each template expects:
 1. Add `<domain>/<name>.html` here with a single `{{define "body"}}...{{end}}`
    block (create the domain folder if it's new).
 2. In `onion`, add a `Render("<domain>/<name>", data)` call in
-   `internal/platform/email/email.go` with the matching data struct.
-3. Bump the submodule pointer in `onion` (commit there, then commit the pointer).
+   `internal/platform/email/email.go` with the matching data struct, plus a case
+   in `internal/platform/email/render_test.go`.
 
 ## Assets
 
 HTML email clients don't run JS and have spotty support for embedded data URIs,
 so images are referenced by **absolute hosted URL**, not inlined. Keep source
 images under `assets/` for reference; host the served copies on the CDN and point
-the HTML at those URLs. The `//go:embed templates/*.html` pattern in `onion` only
-embeds HTML — if a template ever needs a binary asset embedded into the binary,
-widen that pattern accordingly.
+the HTML at those URLs. The `//go:embed` patterns in
+`internal/platform/email/render.go` only embed HTML — if a template ever needs a
+binary asset embedded into the binary, widen those patterns accordingly.
 
 ## Editing
 

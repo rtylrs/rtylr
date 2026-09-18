@@ -21,9 +21,9 @@ RUN set -eux; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
 
-# Layer 3: copy source tree. The build context must contain the pinned
-# submodules recorded by the checkout; cloning a moving branch here would make
-# identical source commits produce different binaries.
+# Layer 3: copy source tree. voxie is still a pinned submodule recorded by the
+# checkout; cloning a moving branch here would make identical source commits
+# produce different binaries.
 COPY . .
 RUN set -eux; \
     test -f ./voxie/go.mod; \

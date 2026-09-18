@@ -86,15 +86,15 @@ func TestWiredTemplatesExist(t *testing.T) {
 	}
 }
 
-// TestAvailableFromFS confirms the embedded library is discovered (catches a
-// broken embed glob or submodule that didn't get checked out).
+// TestAvailableFromFS confirms the embedded set is discovered (catches a broken
+// embed glob).
 func TestAvailableFromFS(t *testing.T) {
 	all := Available()
-	if len(all) < 100 {
-		t.Fatalf("expected the embedded template library, got only %d", len(all))
+	if len(all) < len(wiredTemplates) {
+		t.Fatalf("expected at least %d embedded templates, got only %d", len(wiredTemplates), len(all))
 	}
-	if !Exists("ecommerce/back_in_stock") {
-		t.Error("expected a non-wired library template to be discoverable")
+	if !Exists(TemplateWelcome) {
+		t.Error("expected a wired template to be discoverable")
 	}
 	if Exists("does/not_exist") || Exists("../etc/passwd") {
 		t.Error("Exists must reject missing/traversal paths")

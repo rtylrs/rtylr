@@ -71,11 +71,10 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: gh api "repos/${{ github.repository }}/releases/tags/$RELEASE_TAG" --silent
 
-      # The schema set is a private submodule, as are voxie and the email
-      # templates. The default GITHUB_TOKEN cannot read another private
-      # repository, so a checkout without PAT_TOKEN fails with "Repository not
-      # found" before anything else runs. deploy-ecs-release.yml passes the same
-      # token for the same reason.
+      # voxie is still a private submodule. The default GITHUB_TOKEN cannot read
+      # another private repository, so a checkout without PAT_TOKEN fails with
+      # "Repository not found" before anything else runs.
+      # deploy-ecs-release.yml passes the same token for the same reason.
       - name: Checkout the release, with schemas
         uses: actions/checkout@v4
         with:
@@ -105,7 +104,7 @@ jobs:
           set -euo pipefail
           dir=internal/platform/database/schemas
           if [ ! -f "$dir/migration_order.sh" ]; then
-            echo "The schemas submodule did not check out; there is nothing to apply." >&2
+            echo "The schema set is missing from the checkout; there is nothing to apply." >&2
             exit 1
           fi
           echo "Schema directories to be applied, in order:"

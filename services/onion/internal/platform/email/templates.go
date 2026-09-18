@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-// Template identifies an email template by its path under the email-templates
-// submodule's templates/ directory, without the .html extension (e.g.
-// "welcome/welcome"). Templates are discovered from the embedded FS at runtime —
-// dropping an .html under templates/<domain>/ registers it automatically, no
-// const needed. The consts below are only the templates wired into Go code (they
-// have typed data structs); everything else is reachable via Available/Exists and
-// the generic SendTemplate/EnqueueTemplate with a data map.
+// Template identifies an email template by its path under the embedded
+// templates/ directory, without the .html extension (e.g. "welcome/welcome").
+// Templates are discovered from the embedded FS at runtime — dropping an .html
+// under templates/<domain>/ registers it automatically, no const needed. The
+// consts below are the templates wired into Go code (they have typed data
+// structs); everything embedded is reachable via Available/Exists and the
+// generic SendTemplate/EnqueueTemplate with a data map.
 type Template string
 
 const (
@@ -30,8 +30,7 @@ const (
 
 // wiredTemplates are the templates referenced from Go code — each has a typed
 // data struct and a render_test case. render_test.go iterates this, so a new
-// const here without a test case fails the build. (The full library is far
-// larger; see Available.)
+// const here without a test case fails the build.
 var wiredTemplates = []Template{
 	TemplateWelcome,
 	TemplateInvitation,
@@ -40,8 +39,8 @@ var wiredTemplates = []Template{
 	TemplateAccessRequest,
 }
 
-// fsTemplateRoot is where body templates live in the embedded FS: the submodule
-// is mounted at templates/ and keeps its own templates/<domain>/ subdir.
+// fsTemplateRoot is where body templates live in the embedded FS: the templates
+// directory keeps its own templates/<domain>/ subdir.
 const fsTemplateRoot = "templates/templates"
 
 // Exists reports whether tmpl resolves to an embedded template file.
