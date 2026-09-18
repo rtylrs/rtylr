@@ -30,6 +30,8 @@ const cardStyle: React.CSSProperties = {
 };
 
 interface StatCardProps {
+  /** Stable id, used as the React key: the label is a translation and changes with the language. */
+  id: string;
   label: string;
   value: string;
   change: string;
@@ -197,6 +199,8 @@ const Dashboard: React.FC = () => {
 
   const statsItems: StatCardProps[] = [
     {
+      id: 'totalRevenueMtd',
+
       label: t('finance.dashboard.totalRevenueMtd'),
       value: loading ? '…' : fmt(revenueMtd),
       change: dashData?.totalRevenueMtdChange ?? '+0%',
@@ -205,6 +209,8 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-accent)',
     },
     {
+      id: 'totalExpensesMtd',
+
       label: t('finance.dashboard.totalExpensesMtd'),
       value: loading ? '…' : fmt(expensesMtd),
       change: dashData?.totalExpensesMtdChange ?? '+0%',
@@ -213,6 +219,8 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-danger)',
     },
     {
+      id: 'netProfitMtd',
+
       label: t('finance.dashboard.netProfitMtd'),
       value: loading ? '…' : fmt(netProfitMtd),
       change: dashData?.netProfitChange ?? '+0%',
@@ -221,6 +229,8 @@ const Dashboard: React.FC = () => {
       color: 'var(--finance-accent)',
     },
     {
+      id: 'outstandingInvoices',
+
       label: t('finance.dashboard.outstandingInvoices'),
       value: loading ? '…' : fmt(dashData?.totalReceivable ?? 0),
       change: dashData?.outstandingInvoicesCount
@@ -287,7 +297,7 @@ const Dashboard: React.FC = () => {
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
         {statsItems.map((s) => (
-          <StatCard key={s.label} {...s} />
+          <StatCard key={s.id} {...s} />
         ))}
       </div>
 

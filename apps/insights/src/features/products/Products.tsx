@@ -68,21 +68,29 @@ const Products: React.FC = (): React.JSX.Element => {
 
   const stats = [
     {
+      id: 'totalSkus',
+
       label: t('insights.products.kpis.totalSkus'),
       value: formatNumber(totalSkus),
       icon: Package,
     },
     {
+      id: 'activeSkus',
+
       label: t('insights.products.kpis.activeSkus'),
       value: formatNumber(activeSkus),
       icon: BarChart3,
     },
     {
+      id: 'outOfStock',
+
       label: t('insights.products.kpis.outOfStock'),
       value: formatNumber(outOfStock),
       icon: TrendingDown,
     },
     {
+      id: 'avgMargin',
+
       label: t('insights.products.kpis.avgMargin'),
       value: `${avgMarginPct.toFixed(1)}%`,
       icon: BarChart3,
@@ -115,7 +123,7 @@ const Products: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}

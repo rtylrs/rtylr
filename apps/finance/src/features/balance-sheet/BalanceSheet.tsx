@@ -33,9 +33,13 @@ const Section: React.FC<{
         <AccountTypeBadge type={(rows[0]?.type ?? 'asset') as AccountType} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {rows.map((r) => (
+        {/* Index, not r.label: most rows carry a server-supplied label, but the
+            inventory row appends a translated one, so keying off the label
+            would remount the section whenever the reader switches language.
+            The list is built in a fixed order and only ever appended to. */}
+        {rows.map((r, i) => (
           <div
-            key={r.label}
+            key={i}
             style={{
               display: 'flex',
               justifyContent: 'space-between',

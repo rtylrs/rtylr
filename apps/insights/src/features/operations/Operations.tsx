@@ -47,21 +47,29 @@ const Operations: React.FC = (): React.JSX.Element => {
 
   const stats = [
     {
+      id: 'activeStaff',
+
       label: t('insights.operations.kpis.activeStaff'),
       value: formatNumber(kpis?.activeStaff ?? 0),
       icon: Users,
     },
     {
+      id: 'shiftsThisWeek',
+
       label: t('insights.operations.kpis.shiftsThisWeek'),
       value: formatNumber(kpis?.shiftsThisWeek ?? 0),
       icon: Calendar,
     },
     {
+      id: 'pendingTimeOff',
+
       label: t('insights.operations.kpis.pendingTimeOff'),
       value: formatNumber(kpis?.pendingTimeOff ?? 0),
       icon: Clock,
     },
     {
+      id: 'openLeaveRequests',
+
       label: t('insights.operations.kpis.openLeaveRequests'),
       value: formatNumber(kpis?.openLeaveRequests ?? 0),
       icon: Activity,
@@ -94,7 +102,7 @@ const Operations: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
