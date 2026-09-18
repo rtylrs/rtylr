@@ -1,0 +1,25 @@
+name: Version
+
+# Main pushes create release metadata only. Builds and production deployment
+# happen later, after tryrtylr/deploy promotes one exact docs release.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: version-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create docs version
+    uses: tryrtylr/pipelines/.github/workflows/create-release.yml@main
+    with:
+      release_tag: rtylr-docs-v0.0.${{ github.run_number }}
+      release_name: rtylr docs v0.0.${{ github.run_number }}
+      version: 0.0.${{ github.run_number }}
+      notes: "Source version at ${{ github.sha }}. Build and deployment are controlled by tryrtylr/deploy."
