@@ -11,12 +11,11 @@ import { useCartStore } from '../../shared/stores/cartStore';
 // STEP_FOR_STATUS below maps each known status onto a display step.
 const POLL_INTERVAL_MS = 30_000;
 
-const STATUS_STEPS: { label: string }[] = [
-  { label: 'Received' },
-  { label: 'Preparing' },
-  { label: 'Ready' },
-  { label: 'Done' },
-];
+// Display steps, in order. These are keys, not copy: each one is looked up
+// under orderstatus.steps.* and orderstatus.messages.*, which keeps them
+// usable as React keys. A translated label cannot be one, because it changes
+// when the reader switches language and remounts the row (rtylr#1324).
+const STATUS_STEPS = ['received', 'preparing', 'ready', 'done'] as const;
 
 // Map each backend status onto one of the 4 display steps.
 const STEP_FOR_STATUS: Record<string, number> = {
@@ -138,7 +137,7 @@ const OrderStatus = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Order status · rtylr" />
+      <HelmetContainer title={t('orderstatus.pageTitle')} />
       <div
         style={{
           maxWidth: 480,
@@ -163,7 +162,7 @@ const OrderStatus = (): React.JSX.Element => {
               textTransform: 'uppercase',
             }}
           >
-            Order
+            {t('orderstatus.orderLabel')}
           </p>
           <h1
             style={{
@@ -181,7 +180,7 @@ const OrderStatus = (): React.JSX.Element => {
         {/* Cancelled / refunded / voided terminal state */}
         {cancelled && !fetchError && (
           <p style={{ textAlign: 'center', fontSize: '18px', fontWeight: 700, color: '#dc2626' }}>
-            {status === 'refunded' ? 'Order refunded' : 'Order cancelled'}
+            {status === 'refunded' ? t('orderstatus.refunded') : t('orderstatus.cancelled')}
           </p>
         )}
 
@@ -192,7 +191,7 @@ const OrderStatus = (): React.JSX.Element => {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               {STATUS_STEPS.map((step, i) => (
                 <span
-                  key={step.label}
+                  key={step}
                   style={{
                     fontSize: '12px',
                     fontWeight: i <= currentIndex ? 700 : 400,
@@ -201,7 +200,7 @@ const OrderStatus = (): React.JSX.Element => {
                     textAlign: 'center',
                   }}
                 >
-                  {step.label}
+                  {t(`orderstatus.steps.${step}`)}
                 </span>
               ))}
             </div>
@@ -234,11 +233,9 @@ const OrderStatus = (): React.JSX.Element => {
                 color: currentIndex === STATUS_STEPS.length - 1 ? '#16a34a' : 'rgba(0,0,0,0.8)',
               }}
             >
-              {currentIndex === 0 && 'Order received!'}
-              {currentIndex === 1 && 'Being prepared...'}
-              {currentIndex === 2 && 'Ready for pickup!'}
-              {currentIndex === 3 && 'Order complete!'}
-              {currentIndex === -1 && `Status: ${status}`}
+              {currentIndex === -1
+                ? t('orderstatus.statusFallback', { status })
+                : t(`orderstatus.messages.${STATUS_STEPS[currentIndex]}`)}
             </p>
           </div>
         )}
@@ -255,14 +252,14 @@ const OrderStatus = (): React.JSX.Element => {
 
         {/* Loading state */}
         {status == null && !fetchError && !notFound && (
-          <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>Loading order status...</p>
+          <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>{t('orderstatus.loading')}</p>
         )}
 
         {/* Error state */}
         {fetchError && (
           <div style={{ textAlign: 'center' }}>
             <p style={{ color: '#dc2626', fontSize: '15px', marginBottom: 12 }}>
-              Could not load order status.
+              {t('orderstatus.loadFailed')}
             </p>
             <button
               type="button"
@@ -277,7 +274,7 @@ const OrderStatus = (): React.JSX.Element => {
                 minHeight: 44,
               }}
             >
-              Retry
+              {t('orderstatus.retry')}
             </button>
           </div>
         )}
@@ -292,7 +289,7 @@ const OrderStatus = (): React.JSX.Element => {
               margin: 0,
             }}
           >
-            Status refreshes automatically every 30 seconds.
+            {t('orderstatus.pollNotice', { seconds: POLL_INTERVAL_MS / 1000 })}
           </p>
         )}
 
@@ -315,7 +312,7 @@ const OrderStatus = (): React.JSX.Element => {
               width: '100%',
             }}
           >
-            Order Another
+            {t('orderstatus.orderAnother')}
           </button>
         )}
       </div>

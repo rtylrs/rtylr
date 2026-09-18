@@ -87,3 +87,78 @@ describe('OrderStatus not-found state', () => {
     expect(apiGet).not.toHaveBeenCalled();
   });
 });
+
+// The four step labels and the four progress messages are looked up with a
+// template key built from the step name, so `i18n-key-resolution.test.ts`,
+// which reads literal keys only, cannot see them. Each family is exercised
+// here instead, through the backend status that selects it.
+describe('OrderStatus progress copy', () => {
+  beforeEach(() => {
+    navigateSpy.mockClear();
+    apiGet.mockReset();
+    searchState.value = '?businessId=1&public_token=tok-abc';
+  });
+
+  it.each([
+    ['pending', 'Order received!'],
+    ['confirmed', 'Order received!'],
+    ['preparing', 'Being prepared...'],
+    ['held', 'Being prepared...'],
+    ['ready', 'Ready for pickup!'],
+    ['served', 'Order complete!'],
+    ['paid', 'Order complete!'],
+  ])('renders the message for %s', async (backendStatus, message) => {
+    apiGet.mockResolvedValue({ status: backendStatus });
+
+    render(<OrderStatus />);
+
+    await waitFor(() => expect(screen.getByText(message)).toBeInTheDocument());
+    for (const label of ['Received', 'Preparing', 'Ready', 'Done']) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+  });
+
+  it('falls back to the raw status for one the display steps do not cover', async () => {
+    apiGet.mockResolvedValue({ status: 'awaiting_courier' });
+
+    render(<OrderStatus />);
+
+    await waitFor(() => expect(screen.getByText('Status: awaiting_courier')).toBeInTheDocument());
+  });
+
+  it.each([
+    ['cancelled', 'Order cancelled'],
+    ['voided', 'Order cancelled'],
+    ['refunded', 'Order refunded'],
+  ])('renders the terminal copy for %s', async (backendStatus, message) => {
+    apiGet.mockResolvedValue({ status: backendStatus });
+
+    render(<OrderStatus />);
+
+    await waitFor(() => expect(screen.getByText(message)).toBeInTheDocument());
+  });
+
+  // Pins the number the notice shows. It does not prove the number came from
+  // POLL_INTERVAL_MS, but changing that constant without the copy now fails
+  // here, which is the drift worth catching.
+  it('states the poll interval', () => {
+    apiGet.mockResolvedValue({ status: 'preparing' });
+
+    render(<OrderStatus />);
+
+    expect(
+      screen.getByText('Status refreshes automatically every 30 seconds.')
+    ).toBeInTheDocument();
+  });
+
+  it('offers a translated retry when the status cannot be read', async () => {
+    apiGet.mockRejectedValue({ response: { status: 500 } });
+
+    render(<OrderStatus />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Could not load order status.')).toBeInTheDocument()
+    );
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+  });
+});
