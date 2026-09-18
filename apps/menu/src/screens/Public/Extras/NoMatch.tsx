@@ -11,7 +11,7 @@ const NoMatch = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Page not found · rtylr" />
+      <HelmetContainer title={t('notfound.pageTitle')} />
       <div className="min-h-screen flex items-center justify-center bg-white">
         <EmptyState
           icon={SearchX}

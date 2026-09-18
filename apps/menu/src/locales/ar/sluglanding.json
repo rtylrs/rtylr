@@ -1,4 +1,7 @@
 {
+  "pageTitle": "المواقع · rtylr",
+  "pickLocation": "اختر موقعًا لعرض قائمته",
+  "noLocations": "لا توجد مواقع نشطة بعد.",
   "businessNotFoundTitle": "المتجر غير موجود",
   "businessNotFoundDescription": "الرابط \"/{{slug}}\" لا يطابق أي متجر نشط. يرجى التحقق من رمز QR أو الرابط الذي استخدمته.",
   "goBack": "رجوع"

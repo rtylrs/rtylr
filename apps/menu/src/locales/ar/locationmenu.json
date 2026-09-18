@@ -1,4 +1,7 @@
 {
+  "pageTitle": "القائمة · rtylr",
+  "allItems": "القائمة",
+  "loadFailedTitle": "تعذّر تحميل القائمة",
   "businessNotFoundTitle": "المتجر غير موجود",
   "businessNotFoundDescription": "هذا المتجر غير نشط أو الرابط غير صحيح.",
   "goBack": "رجوع",

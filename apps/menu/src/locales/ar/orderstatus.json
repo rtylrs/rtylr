@@ -1,4 +1,26 @@
 {
+  "pageTitle": "حالة الطلب · rtylr",
+  "orderLabel": "الطلب",
+  "cancelled": "تم إلغاء الطلب",
+  "refunded": "تم استرداد قيمة الطلب",
+  "steps": {
+    "received": "تم الاستلام",
+    "preparing": "قيد التحضير",
+    "ready": "جاهز",
+    "done": "مكتمل"
+  },
+  "messages": {
+    "received": "تم استلام طلبك!",
+    "preparing": "جاري التحضير...",
+    "ready": "جاهز للاستلام!",
+    "done": "اكتمل الطلب!"
+  },
+  "statusFallback": "الحالة: {{status}}",
+  "loading": "جاري تحميل حالة الطلب...",
+  "loadFailed": "تعذّر تحميل حالة الطلب.",
+  "retry": "إعادة المحاولة",
+  "pollNotice": "يتم تحديث الحالة تلقائيًا كل {{seconds}} ثانية.",
+  "orderAnother": "طلب جديد",
   "notFoundTitle": "الطلب غير موجود",
   "notFoundDescription": "لم نتمكن من العثور على طلب يطابق هذا المعرف. يرجى التحقق من رابط الطلب.",
   "backToMenu": "الرجوع إلى القائمة"

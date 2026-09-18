@@ -33,16 +33,14 @@ const Checkout = (): React.JSX.Element => {
   if (!onlineOrderingEnabled) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
-        <h2 className="text-xl font-semibold">Online Ordering Disabled</h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Online ordering is currently disabled for this menu.
-        </p>
+        <h2 className="text-xl font-semibold">{t('checkout.orderingDisabledTitle')}</h2>
+        <p className="mt-2 text-sm text-gray-600">{t('checkout.orderingDisabledDescription')}</p>
         <button
           type="button"
           onClick={() => navigate({ to: '/' })}
           className="mt-6 rounded-lg bg-black px-4 py-2 text-sm text-white"
         >
-          Back to Menu
+          {t('checkout.backToMenu')}
         </button>
       </div>
     );
@@ -111,7 +109,7 @@ const Checkout = (): React.JSX.Element => {
         to: `/order-status/${orderId}?number=${encodeURIComponent(orderNumber)}${businessQuery}${slugQuery}${tokenQuery}`,
       });
     } catch {
-      setErrorMessage('Failed to place order. Please try again.');
+      setErrorMessage(t('checkout.orderFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -120,7 +118,7 @@ const Checkout = (): React.JSX.Element => {
   if (items.length === 0) {
     return (
       <>
-        <HelmetContainer title="Checkout · rtylr" />
+        <HelmetContainer title={t('checkout.pageTitle')} />
         <div
           style={{
             minHeight: '100vh',
@@ -144,7 +142,7 @@ const Checkout = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Checkout · rtylr" />
+      <HelmetContainer title={t('checkout.pageTitle')} />
       <div
         style={{
           maxWidth: 520,
@@ -158,7 +156,7 @@ const Checkout = (): React.JSX.Element => {
         <button
           type="button"
           onClick={() => window.history.back()}
-          aria-label="Go back"
+          aria-label={t('checkout.goBack')}
           style={{
             background: 'transparent',
             border: 'none',
@@ -171,10 +169,12 @@ const Checkout = (): React.JSX.Element => {
             gap: 4,
           }}
         >
-          &larr; Back
+          &larr; {t('checkout.back')}
         </button>
 
-        <h1 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 24px' }}>Checkout</h1>
+        <h1 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 24px' }}>
+          {t('checkout.title')}
+        </h1>
 
         <form onSubmit={(e) => void handleSubmit(e)} noValidate>
           {/* Cart summary */}
@@ -186,7 +186,9 @@ const Checkout = (): React.JSX.Element => {
               marginBottom: 24,
             }}
           >
-            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>Order Summary</h2>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>
+              {t('checkout.orderSummary')}
+            </h2>
             <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
               {items.map((item) => (
                 <li
@@ -238,17 +240,17 @@ const Checkout = (): React.JSX.Element => {
                     }}
                   >
                     {item.notes
-                      ? 'Edit note'
+                      ? t('checkout.editNote')
                       : expandedItemId === item.menuItemId
-                        ? 'Cancel'
-                        : '+ Add note'}
+                        ? t('checkout.cancelNote')
+                        : t('checkout.addNote')}
                   </button>
 
                   {expandedItemId === item.menuItemId && (
                     <textarea
                       value={item.notes}
                       onChange={(e) => setItemNote(item.menuItemId, e.target.value)}
-                      placeholder="e.g. no pickles, extra sauce..."
+                      placeholder={t('checkout.itemNotePlaceholder')}
                       rows={2}
                       style={{
                         width: '100%',
@@ -274,27 +276,29 @@ const Checkout = (): React.JSX.Element => {
                 fontSize: '16px',
               }}
             >
-              <span>Total</span>
+              <span>{t('checkout.total')}</span>
               <span>{formatPrice(total())}</span>
             </div>
           </section>
 
           {/* Customer info */}
           <section style={{ marginBottom: 24 }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>Your Info</h2>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>
+              {t('checkout.yourInfo')}
+            </h2>
 
             <label
               htmlFor="checkout-name"
               style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
             >
-              Name *
+              {t('checkout.name')} *
             </label>
             <input
               id="checkout-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
+              placeholder={t('checkout.namePlaceholder')}
               required
               style={{
                 width: '100%',
@@ -311,14 +315,14 @@ const Checkout = (): React.JSX.Element => {
               htmlFor="checkout-phone"
               style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
             >
-              Phone *
+              {t('checkout.phone')} *
             </label>
             <input
               id="checkout-phone"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 234 567 8900"
+              placeholder={t('checkout.phonePlaceholder')}
               required
               style={{
                 width: '100%',
@@ -335,14 +339,14 @@ const Checkout = (): React.JSX.Element => {
               htmlFor="checkout-email"
               style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
             >
-              Email <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.4)' }}>(optional)</span>
+              {t('checkout.email')}
             </label>
             <input
               id="checkout-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="john@example.com"
+              placeholder={t('checkout.emailPlaceholder')}
               style={{
                 width: '100%',
                 padding: '10px 12px',
@@ -361,14 +365,13 @@ const Checkout = (): React.JSX.Element => {
               htmlFor="checkout-notes"
               style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
             >
-              Order Notes{' '}
-              <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.4)' }}>(optional)</span>
+              {t('checkout.notes')}
             </label>
             <textarea
               id="checkout-notes"
               value={orderNotes}
               onChange={(e) => setOrderNotes(e.target.value)}
-              placeholder="Any special instructions for the whole order..."
+              placeholder={t('checkout.notesPlaceholder')}
               rows={3}
               style={{
                 width: '100%',
@@ -420,7 +423,19 @@ const Checkout = (): React.JSX.Element => {
               gap: 8,
             }}
           >
-            {submitting ? 'Placing Order...' : `Place Order · ${formatPrice(total())}`}
+            {submitting ? (
+              t('checkout.submitting')
+            ) : (
+              // The price is isolated from the label. Concatenated into an
+              // Arabic string it renders as 11.00$, because the currency sign
+              // is a bidi-neutral and takes the direction of what surrounds
+              // it. One flex item, so the button's gap still applies once.
+              <span>
+                {t('checkout.placeOrder')}
+                {' · '}
+                <bdi>{formatPrice(total())}</bdi>
+              </span>
+            )}
           </button>
         </form>
       </div>

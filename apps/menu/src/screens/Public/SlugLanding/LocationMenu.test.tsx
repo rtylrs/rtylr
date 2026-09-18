@@ -96,6 +96,19 @@ describe('LocationMenu empty states', () => {
     expect(navigateSpy).toHaveBeenCalledWith({ to: '/$slug', params: { slug: 'acme' } });
   });
 
+  it('shows a translated message when the menu itself fails to load', () => {
+    businessQuery.isError = false;
+    businessQuery.data = {
+      business: { id: 1, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
+      locations: [{ id: 5, name: 'Downtown', slug: 'downtown', address: '', timezone: 'UTC' }],
+    };
+    menuQuery.isError = true;
+
+    render(<LocationMenu />);
+
+    expect(screen.getByRole('heading', { name: "Couldn't load the menu" })).toBeInTheDocument();
+  });
+
   it('shows no-items-available and navigates back to the business on the CTA', () => {
     businessQuery.isError = false;
     businessQuery.data = {

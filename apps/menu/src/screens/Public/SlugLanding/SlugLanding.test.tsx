@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 // i18next is deliberately not mocked. An identity `t` makes an assertion and
 // the component agree on a key, so neither notices the key never resolves,
@@ -21,8 +21,13 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children }: { children?: React.ReactNode }) => <a>{children}</a>,
 }));
 
+const businessQuery = vi.hoisted(() => ({
+  data: undefined as unknown,
+  isLoading: false,
+  isError: true,
+}));
 vi.mock('../../../shared/hooks/usePublicMenu', () => ({
-  usePublicBusinessBySlug: () => ({ data: undefined, isLoading: false, isError: true }),
+  usePublicBusinessBySlug: () => businessQuery,
 }));
 
 vi.mock('../Menu/Menu', () => ({
@@ -37,6 +42,13 @@ beforeAll(async () => {
 });
 
 describe('SlugLanding business-not-found state', () => {
+  beforeEach(() => {
+    backSpy.mockClear();
+    businessQuery.data = undefined;
+    businessQuery.isLoading = false;
+    businessQuery.isError = true;
+  });
+
   it('shows the shared EmptyState and goes back on the CTA', () => {
     render(<SlugLanding />);
 
@@ -48,5 +60,39 @@ describe('SlugLanding business-not-found state', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
 
     expect(backSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('SlugLanding location picker', () => {
+  beforeEach(() => {
+    businessQuery.isError = false;
+    businessQuery.isLoading = false;
+  });
+
+  it('prompts for a location and lists the active ones', () => {
+    businessQuery.data = {
+      business: { id: 1, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
+      locations: [
+        { id: 5, name: 'Downtown', slug: 'downtown', address: '1 Main St', timezone: 'UTC' },
+        { id: 6, name: 'Harbour', slug: 'harbour', address: '', timezone: 'UTC' },
+      ],
+    };
+
+    render(<SlugLanding />);
+
+    expect(screen.getByText('Pick a location to see its menu')).toBeInTheDocument();
+    expect(screen.getByText('Downtown')).toBeInTheDocument();
+    expect(screen.getByText('Harbour')).toBeInTheDocument();
+  });
+
+  it('says so when a business has no active location', () => {
+    businessQuery.data = {
+      business: { id: 1, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
+      locations: [],
+    };
+
+    render(<SlugLanding />);
+
+    expect(screen.getByText('No active locations yet.')).toBeInTheDocument();
   });
 });

@@ -48,3 +48,53 @@ describe('Checkout empty cart', () => {
     backSpy.mockRestore();
   });
 });
+
+describe('Checkout form', () => {
+  beforeEach(() => {
+    useCartStore.getState().clearCart();
+    useCartStore.getState().setBusinessId(1);
+    useCartStore.getState().addItem({ menuItemId: 7, name: 'Falafel wrap', unitPrice: 5.5 });
+  });
+
+  // The empty-cart case above renders four strings. Everything else on this
+  // screen, the whole form, sits behind a non-empty cart, so without this the
+  // suite proves nothing about the copy a customer who is actually ordering
+  // reads.
+  it('renders the form copy from the locale files rather than its keys', () => {
+    render(<Checkout />);
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Checkout' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Order Summary' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Your Info' })).toBeInTheDocument();
+    expect(screen.getByText('Total')).toBeInTheDocument();
+    expect(screen.getByLabelText('Name *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Phone Number *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email (optional)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Order Notes (optional)')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Your name')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+ Add note' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Go back' })).toBeInTheDocument();
+  });
+
+  // The price is isolated from the label rather than concatenated into it.
+  // In Arabic the concatenated form renders as 11.00$: the currency sign is a
+  // bidi-neutral and takes the direction of the text around it. happy-dom has
+  // no bidi layout, so this pins the structure that prevents it instead.
+  it('places the price beside the translated submit label, in its own bdi', () => {
+    render(<Checkout />);
+
+    const button = screen.getByRole('button', { name: 'Place Order · $5.50' });
+    const isolated = button.querySelector('bdi');
+
+    expect(isolated).not.toBeNull();
+    expect(isolated).toHaveTextContent('$5.50');
+  });
+
+  it('shows a translated validation message rather than a key', () => {
+    render(<Checkout />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Place Order · $5.50' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Please enter your name.');
+  });
+});

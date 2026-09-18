@@ -52,8 +52,8 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       image: i.imageUrl,
       available: i.isActive,
     }));
-    return [{ id: 'all', name: 'Menu', items }];
-  }, [menu]);
+    return [{ id: 'all', name: t('locationmenu.allItems'), items }];
+  }, [menu, t]);
 
   if (bizLoading || menuLoading) return <FullScreenLoader />;
   if (bizError || !biz) {
@@ -102,7 +102,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   if (menuError) {
     return (
       <div style={{ padding: 32, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Couldn't load the menu</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 600 }}>{t('locationmenu.loadFailedTitle')}</h1>
       </div>
     );
   }
@@ -139,7 +139,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title="Menu · rtylr" />
+      <HelmetContainer title={t('locationmenu.pageTitle')} />
       <GridLayout
         business={businessInfo}
         categories={categories}
