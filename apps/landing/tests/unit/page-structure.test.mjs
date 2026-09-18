@@ -5,7 +5,7 @@ import { globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-import { basePathOf } from '../../apps/landing/lib/locales.ts';
+import { basePathOf } from '../../lib/locales.ts';
 
 // ---------------------------------------------------------------------------
 // Standing gates, asserted against the build output rather than the source.
@@ -250,7 +250,7 @@ describe('translated copy reaches the page', () => {
       }
       return out;
     };
-    const en = JSON.parse(readFileSync(path.join(REPO, 'apps/landing/locales/en.json'), 'utf8'));
+    const en = JSON.parse(readFileSync(path.join(REPO, 'locales/en.json'), 'utf8'));
     return flatten(en);
   })();
 

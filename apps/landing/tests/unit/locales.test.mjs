@@ -16,7 +16,7 @@ import {
   localeFromPath,
   localisePath,
   alternatesFor,
-} from '../../apps/landing/lib/locales.ts';
+} from '../../lib/locales.ts';
 
 // ---------------------------------------------------------------------------
 // The locale contract.
@@ -37,7 +37,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const APP = path.join(REPO, 'apps/landing');
+const APP = REPO;
 const OUT = path.join(REPO, 'dist/landing');
 
 const localeKeys = (code) => {

@@ -29,7 +29,7 @@ const { alternatesFor, basePathOf, shippedLocales } = require('./lib/locales.ts'
 module.exports = {
   siteUrl: 'https://rtylr.com',
   generateRobotsTxt: false, // we maintain robots.txt by hand - it has AI-bot allowances
-  outDir: '../../dist/landing', // matches next.config.js output directory
+  outDir: 'dist/landing', // matches next.config.js output directory
   // Unshipped locale prefixes can never appear here, because no route is
   // exported for them. The exclusion is belt and braces: if one ever leaks
   // into the export, it must not also be advertised.

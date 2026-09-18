@@ -11,7 +11,7 @@ import {
   GA_MEASUREMENT_ID,
   syncConsentMode,
   watchConsentMode,
-} from '../../apps/landing/lib/consentMode.ts';
+} from '../../lib/consentMode.ts';
 
 // ---------------------------------------------------------------------------
 // Why this file exists.
@@ -55,7 +55,7 @@ const indexOfCommand = (calls, kind, subtype) =>
 
 describe('consent cookie contract with @voxire/consent', () => {
   const consentSource = readFileSync(
-    fileURLToPath(new URL('../../packages/consent/src/consent.ts', import.meta.url)),
+    fileURLToPath(new URL('../../../../packages/consent/src/consent.ts', import.meta.url)),
     'utf8'
   );
 

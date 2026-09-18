@@ -1,7 +1,7 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import worker from '../../apps/landing/cloudflare/_worker.js';
-import { htmlCandidates, markdownCandidates, markdownNotFound, jsonError } from '../../apps/landing/cloudflare/_worker.js';
+import worker from '../../cloudflare/_worker.js';
+import { htmlCandidates, markdownCandidates, markdownNotFound, jsonError } from '../../cloudflare/_worker.js';
 
 // ---------------------------------------------------------------------------
 // In-memory ASSETS binding that mimics Cloudflare Pages asset serving.

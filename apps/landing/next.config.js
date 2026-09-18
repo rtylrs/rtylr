@@ -18,8 +18,9 @@ const createNextConfig = (phase) => ({
   reactStrictMode: true,
   output: 'export',
   // Keep dev output app-local so server-side module resolution can find
-  // app dependencies. Production export still lands in the repo-level dist.
-  distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next' : '../../dist/landing',
+  // app dependencies. The production export stays inside this project too, so
+  // the deploy pipeline can read it from the workspace's working directory.
+  distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next' : 'dist/landing',
   trailingSlash: true,
 
   images: {

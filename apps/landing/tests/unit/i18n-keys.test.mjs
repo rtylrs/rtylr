@@ -33,7 +33,7 @@ import path from 'node:path';
 // ---------------------------------------------------------------------------
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const APP = path.join(REPO, 'apps/landing');
+const APP = REPO;
 const LOCALES = path.join(APP, 'locales');
 
 // t('a.b.c') and t("a.b.c"), including the form with interpolation options.

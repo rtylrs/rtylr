@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DIST = join(__dirname, '..', '..', '..', 'dist', 'landing');
+const DIST = join(__dirname, '..', 'dist', 'landing');
 const PORT = Number(process.argv[2] || 8787);
 
 const MIME = {

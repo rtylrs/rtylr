@@ -17,6 +17,14 @@ import { useConsent } from './useConsent';
 interface CookieBannerProps {
   privacyUrl?: string;
   className?: string;
+  /** Copy override. Callers that translate the banner pass their own node;
+   *  everyone else gets the package's English copy. */
+  message?: React.ReactNode;
+  declineLabel?: string;
+  acceptLabel?: string;
+  ariaLabel?: string;
+  /** Stacking order. Some hosts have their own overlays to sit under. */
+  zIndex?: number;
   /** Called after the user accepts - good hook for initialising
    *  analytics that depends on consent. */
   onAccept?: () => void;
@@ -24,9 +32,26 @@ interface CookieBannerProps {
   onDecline?: () => void;
 }
 
+/** Style for the privacy link, exported so a translated banner can render
+ *  its own link without re-stating the visual treatment. */
+export const privacyLinkStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  minHeight: 24,
+  color: 'rgba(255,255,255,0.92)',
+  textDecoration: 'underline',
+  textDecorationColor: 'rgba(255,255,255,0.3)',
+  textUnderlineOffset: 2,
+};
+
 export function CookieBanner({
   privacyUrl = '/legal/privacy-policy',
   className,
+  message,
+  declineLabel = 'Decline',
+  acceptLabel = 'Accept',
+  ariaLabel = 'Cookie consent',
+  zIndex = 9999,
   onAccept,
   onDecline,
 }: CookieBannerProps): React.JSX.Element | null {
@@ -45,7 +70,7 @@ export function CookieBanner({
   return (
     <div
       role="dialog"
-      aria-label="Cookie consent"
+      aria-label={ariaLabel}
       aria-modal="false"
       aria-describedby="cookie-consent-desc"
       className={className}
@@ -53,7 +78,7 @@ export function CookieBanner({
         position: 'fixed',
         bottom: 16,
         left: 16,
-        zIndex: 9999,
+        zIndex,
         maxWidth: 'min(380px, calc(100vw - 32px))',
         padding: '14px 16px',
         borderRadius: 14,
@@ -74,23 +99,16 @@ export function CookieBanner({
       }}
     >
       <div id="cookie-consent-desc" style={{ color: 'rgba(255,255,255,0.78)', fontSize: 12.5 }}>
-        We use essential cookies to run rtylr, and optional analytics to understand which features
-        to build next.{' '}
-        <a
-          href={privacyUrl}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            minHeight: 24,
-            color: 'rgba(255,255,255,0.92)',
-            textDecoration: 'underline',
-            textDecorationColor: 'rgba(255,255,255,0.3)',
-            textUnderlineOffset: 2,
-          }}
-        >
-          Privacy
-        </a>
-        .
+        {message ?? (
+          <>
+            We use essential cookies to run rtylr, and optional analytics to understand which
+            features to build next.{' '}
+            <a href={privacyUrl} style={privacyLinkStyle}>
+              Privacy
+            </a>
+            .
+          </>
+        )}
       </div>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
         <button
@@ -123,7 +141,7 @@ export function CookieBanner({
             (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.72)';
           }}
         >
-          Decline
+          {declineLabel}
         </button>
         <button
           type="button"
@@ -153,7 +171,7 @@ export function CookieBanner({
             (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.95)';
           }}
         >
-          Accept
+          {acceptLabel}
         </button>
       </div>
     </div>

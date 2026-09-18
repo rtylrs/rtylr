@@ -30,7 +30,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const APP_DIR = dirname(SCRIPT_DIR);
-const DIST_DIR = join(APP_DIR, '..', '..', 'dist', 'landing');
+const DIST_DIR = join(APP_DIR, 'dist', 'landing');
 const SITE_URL = 'https://rtylr.com';
 
 // ---------------------------------------------------------------------------

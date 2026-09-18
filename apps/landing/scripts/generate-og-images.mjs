@@ -64,8 +64,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.resolve(HERE, '..');
-const REPO = path.resolve(APP, '../..');
-const EXPORT_DIR = path.join(REPO, 'dist/landing');
+const EXPORT_DIR = path.join(APP, 'dist/landing');
 const OUT_DIR = path.join(APP, 'public/og');
 const MANIFEST = path.join(OUT_DIR, 'manifest.json');
 

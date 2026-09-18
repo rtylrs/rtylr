@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAccept, negotiate } from '../../apps/landing/cloudflare/_worker.js';
+import { parseAccept, negotiate } from '../../cloudflare/_worker.js';
 
 const PRODUCES = ['text/html', 'text/markdown'];
 

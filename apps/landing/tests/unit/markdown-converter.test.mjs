@@ -6,7 +6,7 @@ import {
   extractPageMeta,
   buildPagesIndex,
   buildLlmsTxt,
-} from '../../apps/landing/scripts/generate-agent-artifacts.mjs';
+} from '../../scripts/generate-agent-artifacts.mjs';
 
 const PAGE = (main) => `<!DOCTYPE html><html><head><title>T · rtylr</title></head><body>${main}</body></html>`;
 
