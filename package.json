@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "typecheck": "pnpm -r typecheck",
+    "check:scripts": "node scripts/check-workspace-scripts.mjs",
     "lint": "eslint apps/rtylr/apps packages",
     "lint:fix": "eslint apps/rtylr/apps packages --fix"
   },
