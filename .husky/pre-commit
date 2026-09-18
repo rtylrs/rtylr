@@ -11,6 +11,7 @@
 #
 # Scoped to staged files, nobody inherits anyone else's debt and a direct push
 # cannot poison the gate.
+cd apps/rtylr
 npx lint-staged
 
 echo "Checking OneKit boundary..."

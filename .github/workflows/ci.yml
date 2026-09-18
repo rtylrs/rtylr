@@ -5,6 +5,9 @@ name: Version
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/rtylr/**'
+      - 'packages/**'
   workflow_dispatch:
 
 concurrency:

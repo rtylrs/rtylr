@@ -1,0 +1,58 @@
+@import 'tailwindcss';
+@import '../../../../../packages/tailwind-config/theme.css';
+
+/* v4 auto-detects content relative to this CSS file. We add an
+ * explicit @source for the cross-workspace packages we pull classes
+ * from (shared components, menu package, etc.). The shared
+ * `@voxire/tailwind-config` theme extensions are ported below into
+ * v4's native `@theme` block - JS configs via `@config` break v4's
+ * auto content scanner in monorepo setups. */
+@source '../../../../../packages/**/*.{ts,tsx}';
+
+:root {
+  /* Template tokens - overridden per-business at runtime from the
+     Customization record. Defaults are a neutral editorial palette so a
+     freshly-deployed careers site still looks finished before branding
+     is applied. */
+  --recruit-accent: #111111;
+  --recruit-accent-2: #111111;
+  --recruit-bg: #fafaf9;
+  --recruit-fg: #18181b;
+  --recruit-muted: #6b7280;
+  --recruit-surface: #ffffff;
+  --recruit-border: #e7e5e4;
+
+  /* Typography - swapped per-business by loadFontPairing(). */
+  --recruit-font-body: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  --recruit-font-display: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+
+  /* Admin console chrome - the operator-facing /admin screens are a
+     fixed dark UI, unrelated to the --recruit-* template tokens above
+     (which theme the public careers page and are swapped per business). */
+  --recruit-admin-bg: #0a0a0a;
+  --recruit-admin-surface: #0f0f0f;
+  --recruit-admin-fg: #fafaf9;
+  --recruit-admin-border: #1f1f1f;
+  --recruit-admin-border-strong: #2a2a2a;
+  --recruit-admin-selected-border: #ffffff;
+  --recruit-admin-success: #10b981;
+}
+
+html,
+body {
+  background: var(--recruit-bg);
+  color: var(--recruit-fg);
+  font-family: var(--recruit-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--recruit-font-display);
+}
+
+/* iOS auto-zoom guard. All inputs are 16px+ by default. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}

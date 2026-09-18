@@ -1,15 +1,19 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# Patterns here are deliberately unanchored: the rtylr workspace lives under
+# apps/rtylr, and landing/pos will sit beside it, so a build artifact must be
+# ignored wherever its project sits.
+
 # compiled output
-/dist
-/tmp
-/out-tsc
+dist/
+tmp/
+out-tsc/
 
 # dependencies
 node_modules
 
 # IDEs and editors
-/.idea
+.idea
 .project
 .classpath
 .c9/
@@ -25,14 +29,14 @@ node_modules
 !.vscode/extensions.json
 
 # misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
+.sass-cache
+connect.lock
+coverage/
+libpeerconnection.log
 npm-debug.log
 yarn-error.log
 testem.log
-/typings
+typings/
 
 # System Files
 .DS_Store
@@ -50,9 +54,8 @@ out/
 # Nx
 .nx/cache
 .nx/workspace-data
-dist/
 apps/*/build
-apps/*/.next
+apps/*/apps/*/build
 
 # Turborepo
 .turbo/
@@ -63,8 +66,8 @@ CLAUDE.md
 AGENTS.md
 
 # Playwright artifacts
-/playwright-report/
-/test-results/
+playwright-report/
+test-results/
 
 # AI agent config: local to each machine, never committed
 .opencode/

@@ -10,4 +10,5 @@
 # push. A contract bump that broke two apps reached main that way and needed a
 # human to notice.
 echo "Running tests, typecheck and build before push..."
+cd apps/rtylr
 pnpm test && pnpm build

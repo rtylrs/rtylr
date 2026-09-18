@@ -31,8 +31,13 @@ on:
         default: build
         type: string
       dist_dir:
-        description: Built dist directory
+        description: Built dist directory, resolved relative to working_directory
         required: true
+        type: string
+      working_directory:
+        description: Directory holding the app's pnpm workspace
+        required: false
+        default: '.'
         type: string
       project_name:
         description: Cloudflare Pages project name
@@ -63,6 +68,7 @@ jobs:
       app_filter: ${{ steps.values.outputs.app_filter }}
       build_script: ${{ steps.values.outputs.build_script }}
       dist_dir: ${{ steps.values.outputs.dist_dir }}
+      working_directory: ${{ steps.values.outputs.working_directory }}
       project_name: ${{ steps.values.outputs.project_name }}
       node_version: ${{ steps.values.outputs.node_version }}
       runs_on: ${{ steps.values.outputs.runs_on }}
@@ -82,6 +88,8 @@ jobs:
           INPUT_BUILD_SCRIPT: ${{ inputs.build_script }}
           PAYLOAD_DIST_DIR: ${{ github.event.client_payload.dist_dir }}
           INPUT_DIST_DIR: ${{ inputs.dist_dir }}
+          PAYLOAD_WORKING_DIRECTORY: ${{ github.event.client_payload.working_directory }}
+          INPUT_WORKING_DIRECTORY: ${{ inputs.working_directory }}
           PAYLOAD_PROJECT_NAME: ${{ github.event.client_payload.project_name }}
           INPUT_PROJECT_NAME: ${{ inputs.project_name }}
           PAYLOAD_NODE_VERSION: ${{ github.event.client_payload.node_version }}
@@ -96,6 +104,7 @@ jobs:
           app_filter="${PAYLOAD_APP_FILTER:-$INPUT_APP_FILTER}"
           build_script="${PAYLOAD_BUILD_SCRIPT:-${INPUT_BUILD_SCRIPT:-build}}"
           dist_dir="${PAYLOAD_DIST_DIR:-$INPUT_DIST_DIR}"
+          working_directory="${PAYLOAD_WORKING_DIRECTORY:-${INPUT_WORKING_DIRECTORY:-.}}"
           project_name="${PAYLOAD_PROJECT_NAME:-$INPUT_PROJECT_NAME}"
           node_version="${PAYLOAD_NODE_VERSION:-${INPUT_NODE_VERSION:-22}}"
           runs_on="${PAYLOAD_RUNS_ON:-${INPUT_RUNS_ON:-blacksmith-2vcpu-ubuntu-2404}}"
@@ -111,6 +120,7 @@ jobs:
             echo "app_filter=$app_filter"
             echo "build_script=$build_script"
             echo "dist_dir=$dist_dir"
+            echo "working_directory=$working_directory"
             echo "project_name=$project_name"
             echo "node_version=$node_version"
             echo "runs_on=$runs_on"
@@ -126,6 +136,7 @@ jobs:
       app_filter: ${{ needs.resolve.outputs.app_filter }}
       build_script: ${{ needs.resolve.outputs.build_script }}
       dist_dir: ${{ needs.resolve.outputs.dist_dir }}
+      working_directory: ${{ needs.resolve.outputs.working_directory }}
       project_name: ${{ needs.resolve.outputs.project_name }}
       node_version: ${{ needs.resolve.outputs.node_version }}
       runs_on: ${{ needs.resolve.outputs.runs_on }}
