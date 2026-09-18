@@ -19,39 +19,6 @@ const serverShutdownTimeoutSeconds = 20
 func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	r := chi.NewRouter()
 
-	if accessLogsEnabled() {
-		r.Use(safeRequestLogger())
-	}
-	r.Use(middleware.Recoverer)
-	// Sentry recover runs after chi's Recoverer so we still respond
-	// with a 500, but anything that escapes the handler layer ends
-	// up in Sentry with a proper stack trace and request scope.
-	r.Use(observability.RecoverMiddleware)
-	r.Use(corsMiddleware())
-	r.Use(CrashNotifierMiddleware())
-	r.Use(SecurityHeadersMiddleware())
-	r.Use(SecureErrorMiddleware())
-	r.Use(responseCompressMiddleware())
-	r.Use(RequestBodyLimitMiddleware(DefaultMaxRequestBodyBytes))
-	// Global per-IP guardrail against scraping/abuse only — set very high so it
-	// never throttles real use (a SPA session bursts many calls/sec). Per-route
-	// limits (login/register/AI) stay tight via PerRouteRateLimit.
-	r.Use(RateLimitMiddleware(1000, time.Second))
-	// Tight per-IP budgets on the anonymous auth routes (login, register,
-	// password reset, invite acceptance); no-op on every other path.
-	r.Use(AuthRouteRateLimit)
-	// Hard 15 s request deadline — cancels in-flight DB queries when
-	// the deadline fires. Also logs a warn for requests >5 s.
-	r.Use(RequestTimeoutMiddleware)
-	// Counter-only middleware — /metrics itself skips it so a scrape
-	// doesn't inflate its own numbers.
-	r.Use(MetricsMiddleware)
-	// Reports any call to a Flow v1 route that the workspace-removal Phase 4
-	// deletes. RequestLoggerMiddleware only reports 4xx/5xx, so a successful v1
-	// call was previously invisible and the phase's "zero v1 traffic" gate could
-	// not be answered from logs. Delete with the v1 handlers.
-	r.Use(FlowV1UsageMiddleware)
-
 	runMode.Setup(ctx, r)
 
 	// /metrics is mounted before runMode.Setup's module routes run so
@@ -92,9 +59,16 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
+	middlewares := platformMiddlewares()
+	if provider, ok := runMode.(MiddlewareProvider); ok {
+		middlewares = append(middlewares, provider.Middlewares()...)
+	}
+
+	handler := composeHandler(r, middlewares)
+
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           r,
+		Handler:           handler,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		ReadHeaderTimeout: 10 * time.Second,
@@ -142,4 +116,67 @@ func usesDatabaseHealthCheck(runMode ChiRunMode) bool {
 		return true
 	}
 	return mode.UsesDatabaseHealthCheck()
+}
+
+// composeHandler wraps the bare router with the given middlewares (outermost
+// first) instead of registering them with r.Use. Keeping the chain outside the
+// router is what lets the Partials X-API-KEY bypass send a request straight to
+// the router with no middleware in front of it.
+func composeHandler(r *chi.Mux, middlewares []MiddlewareFunc) http.Handler {
+	var protected http.Handler = r
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		protected = middlewares[i](protected)
+	}
+
+	if partialsAPIKey() == "" {
+		return protected
+	}
+
+	return PartialsBypassHandler(r, protected)
+}
+
+// platformMiddlewares returns the middlewares every runmode gets, outermost
+// first. They are returned as a slice (rather than applied with r.Use) so the
+// server can wrap the router with them and keep the Partials bypass outside the
+// whole chain.
+func platformMiddlewares() []MiddlewareFunc {
+	middlewares := make([]MiddlewareFunc, 0, 16)
+
+	if accessLogsEnabled() {
+		middlewares = append(middlewares, safeRequestLogger())
+	}
+
+	middlewares = append(middlewares,
+		middleware.Recoverer,
+		// Sentry recover runs after chi's Recoverer so we still respond
+		// with a 500, but anything that escapes the handler layer ends
+		// up in Sentry with a proper stack trace and request scope.
+		observability.RecoverMiddleware,
+		corsMiddleware(),
+		CrashNotifierMiddleware(),
+		SecurityHeadersMiddleware(),
+		SecureErrorMiddleware(),
+		responseCompressMiddleware(),
+		RequestBodyLimitMiddleware(DefaultMaxRequestBodyBytes),
+		// Global per-IP guardrail against scraping/abuse only — set very high so
+		// it never throttles real use (a SPA session bursts many calls/sec).
+		// Per-route limits (login/register/AI) stay tight via PerRouteRateLimit.
+		RateLimitMiddleware(1000, time.Second),
+		// Tight per-IP budgets on the anonymous auth routes (login, register,
+		// password reset, invite acceptance); no-op on every other path.
+		AuthRouteRateLimit,
+		// Hard 15 s request deadline — cancels in-flight DB queries when the
+		// deadline fires. Also logs a warn for requests >5 s.
+		RequestTimeoutMiddleware,
+		// Counter-only middleware — /metrics itself skips it so a scrape doesn't
+		// inflate its own numbers.
+		MetricsMiddleware,
+		// Reports any call to a Flow v1 route that the workspace-removal Phase 4
+		// deletes. RequestLoggerMiddleware only reports 4xx/5xx, so a successful
+		// v1 call was previously invisible and the phase's "zero v1 traffic" gate
+		// could not be answered from logs. Delete with the v1 handlers.
+		FlowV1UsageMiddleware,
+	)
+
+	return middlewares
 }

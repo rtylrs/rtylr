@@ -682,7 +682,10 @@ func initializeModules(ctx context.Context) *apiModules {
 	}
 }
 
-func setupRoutes(ctx context.Context, r *chi.Mux) {
+// setupRoutes registers every API route on r and returns the middlewares the
+// server should wrap it with. It does not apply them itself: the HTTP server
+// builds one chain so the Partials X-API-KEY bypass can sit outside it.
+func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	modules := initializeModules(ctx)
 
 	// Start the websocket bus with topic-level authorization backed by
@@ -848,8 +851,6 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		http.LicenseEnforcementMiddleware(licenseValidator, accessPolicy),
 	}
 
-	http.ApplyMiddlewares(r, middlewares)
-
 	http.RegisterCacheRoutes(ctx, r)
 	http.RegisterStatusRoutes(ctx, r)
 	http.RegisterVersionRoutes(r)
@@ -906,16 +907,24 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	http.MountOneKit(r, oneKitMux)
 
 	http.AutoRegisterRoutes(ctx, modules, r)
+
+	return middlewares
 }
 
-type apiServer struct{}
+type apiServer struct {
+	middlewares []http.MiddlewareFunc
+}
 
-func (a apiServer) Setup(ctx context.Context, r *chi.Mux) {
-	setupRoutes(ctx, r)
+func (a *apiServer) Setup(ctx context.Context, r *chi.Mux) {
+	a.middlewares = setupRoutes(ctx, r)
+}
+
+func (a *apiServer) Middlewares() []http.MiddlewareFunc {
+	return a.middlewares
 }
 
 func startAPIServer(ctx context.Context) error {
-	server := apiServer{}
+	server := &apiServer{}
 	return http.Start(ctx, server, platformConfig.ListenPort("9999"))
 }
 

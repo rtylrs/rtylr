@@ -212,6 +212,11 @@ type AppConfig struct {
 	// Internal Auth
 	InternalToken string
 
+	// PartialsAPIKey gates the internal X-API-KEY bypass used by the Partials
+	// tooling to reach internal endpoints without the standard middleware
+	// chain. Empty (the default) disables the bypass entirely.
+	PartialsAPIKey string
+
 	// Metrics Auth
 	MetricsUser string
 	MetricsPass string
@@ -402,6 +407,9 @@ func LoadAndValidate() (*AppConfig, error) {
 
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),
+		// Internal tooling (Partials) access. Trimmed so a stray newline from a
+		// shell export or secret value can't silently break the header compare.
+		PartialsAPIKey: strings.TrimSpace(os.Getenv("PARTIALS_API_KEY")),
 
 		// Metrics Auth
 		MetricsUser: os.Getenv("METRICS_USER"),
