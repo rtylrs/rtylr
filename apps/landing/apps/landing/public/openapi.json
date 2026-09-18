@@ -1,0 +1,285 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "rtylr.com site API",
+    "version": "1.0.0",
+    "summary": "Read-only JSON surface of the rtylr.com marketing site",
+    "description": "Machine-readable metadata endpoints for the rtylr marketing site.\n\nAll responses are JSON (`application/json; charset=utf-8`). Errors always use the structured Error envelope defined below - never HTML.\n\nThe site's human pages additionally support content negotiation: request any page URL with `Accept: text/markdown` to receive a Markdown representation (see https://acceptmarkdown.com). Agents should start from `/llms.txt` or `/sitemap.xml` to discover content.\n\n**Versioning & deprecation policy**: this API is versioned in the URL path (`/api/v1/...`). Breaking changes ship under a new version prefix (`/api/v2/...`) rather than mutating `v1` in place. Before a version is retired, responses on it will carry a `Deprecation` header and, once a removal date is set, a `Sunset` header (RFC 8594) for at least 90 days; the timeline will also be announced here and in `/llms.txt`.\n\n**Rate limits**: every response carries `RateLimit-Limit` / `RateLimit-Remaining` / `RateLimit-Reset` (draft-ietf-httpapi-ratelimit-headers) so agents can self-throttle.",
+    "contact": {
+      "name": "rtylr",
+      "url": "https://rtylr.com/contact/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://rtylr.com",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/api/v1/status": {
+      "get": {
+        "operationId": "getStatus",
+        "summary": "Service liveness and endpoint discovery",
+        "description": "Returns the current service status together with links to the other machine-readable surfaces. Suitable as a health probe.",
+        "tags": ["site"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is live.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Status", "type": "object" },
+                "example": {
+                  "service": "rtylr.com",
+                  "status": "ok",
+                  "time": "2026-08-22T12:00:00.000Z",
+                  "endpoints": {
+                    "openapi": "/openapi.json",
+                    "pages": "/api/v1/pages",
+                    "status": "/api/v1/status",
+                    "sitemap": "/sitemap.xml"
+                  }
+                }
+              }
+            }
+          },
+          "405": { "$ref": "#/components/responses/MethodNotAllowed" }
+        }
+      },
+      "options": {
+        "operationId": "statusOptions",
+        "summary": "Allowed methods for this endpoint",
+        "tags": ["site"],
+        "responses": {
+          "204": {
+            "description": "Allowed methods listed in the `Allow` header.",
+            "headers": {
+              "Allow": {
+                "description": "Comma-separated list of supported HTTP methods.",
+                "schema": { "type": "string", "example": "GET, HEAD, OPTIONS" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pages": {
+      "get": {
+        "operationId": "listPages",
+        "summary": "Index of all public pages",
+        "description": "Returns every public marketing page with its canonical URL, human title and meta description. Regenerated on each deploy. Prefer this (or `/llms.txt`) over crawling for content discovery.",
+        "tags": ["site"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Page index.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PageList", "type": "object" },
+                "example": {
+                  "generatedAt": "2026-08-22T09:41:00.000Z",
+                  "count": 2,
+                  "pages": [
+                    {
+                      "url": "https://rtylr.com/",
+                      "title": "rtylr — retail operating system",
+                      "description": "One platform for POS, ERP, HR, CRM and finance."
+                    },
+                    {
+                      "url": "https://rtylr.com/pricing/",
+                      "title": "Pricing",
+                      "description": "Simple per-seat pricing."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "405": { "$ref": "#/components/responses/MethodNotAllowed" },
+          "500": {
+            "description": "Page index artifact temporarily unavailable - fall back to /sitemap.xml.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "pagesOptions",
+        "summary": "Allowed methods for this endpoint",
+        "tags": ["site"],
+        "responses": {
+          "204": {
+            "description": "Allowed methods listed in the `Allow` header.",
+            "headers": {
+              "Allow": {
+                "description": "Comma-separated list of supported HTTP methods.",
+                "schema": { "type": "string", "example": "GET, HEAD, OPTIONS" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {},
+  "components": {
+    "schemas": {
+      "Status": {
+        "type": "object",
+        "required": ["service", "status", "time", "endpoints"],
+        "properties": {
+          "service": {
+            "type": "string",
+            "const": "rtylr.com"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ok"],
+            "description": "Liveness indicator."
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server time (UTC) at which the response was generated."
+          },
+          "endpoints": {
+            "type": "object",
+            "required": ["openapi", "pages", "status", "sitemap"],
+            "properties": {
+              "openapi": { "type": "string", "format": "uri-reference", "const": "/openapi.json" },
+              "pages": { "type": "string", "format": "uri-reference", "const": "/api/v1/pages" },
+              "status": { "type": "string", "format": "uri-reference", "const": "/api/v1/status" },
+              "sitemap": { "type": "string", "format": "uri-reference", "const": "/sitemap.xml" }
+            }
+          }
+        }
+      },
+      "PageList": {
+        "type": "object",
+        "required": ["generatedAt", "count", "pages"],
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of entries in `pages`."
+          },
+          "pages": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Page" }
+          }
+        }
+      },
+      "Page": {
+        "type": "object",
+        "required": ["url", "title"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Canonical absolute URL of the page."
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable page title (site suffix removed)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Meta description; may be empty."
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Envelope used by every non-2xx API response. Machine-readable `code`, human-readable `message`, and a `hint` describing how to recover.",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["status", "code", "message", "hint", "docs"],
+            "properties": {
+              "status": {
+                "type": "integer",
+                "description": "HTTP status code, duplicated inside the envelope for convenience."
+              },
+              "code": {
+                "type": "string",
+                "enum": ["not_found", "method_not_allowed", "internal_error"],
+                "description": "Stable, machine-readable error identifier."
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable summary of what went wrong."
+              },
+              "hint": {
+                "type": "string",
+                "description": "Resolution hint: what to change or where to look next."
+              },
+              "docs": {
+                "type": "string",
+                "format": "uri",
+                "const": "https://rtylr.com/openapi.json",
+                "description": "Where the API contract lives."
+              }
+            }
+          }
+        },
+        "examples": {
+          "unknownEndpoint": {
+            "summary": "Requesting an endpoint that does not exist",
+            "value": {
+              "error": {
+                "status": 404,
+                "code": "not_found",
+                "message": "Unknown API endpoint: /api/v1/widgets.",
+                "hint": "Fetch /openapi.json for the list of available endpoints.",
+                "docs": "https://rtylr.com/openapi.json"
+              }
+            }
+          },
+          "wrongMethod": {
+            "summary": "Using an unsupported verb",
+            "value": {
+              "error": {
+                "status": 405,
+                "code": "method_not_allowed",
+                "message": "POST is not supported on /api/v1/status.",
+                "hint": "Use GET (or HEAD). Allowed methods: GET, HEAD, OPTIONS.",
+                "docs": "https://rtylr.com/openapi.json"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "MethodNotAllowed": {
+        "description": "Unsupported verb. Includes an `Allow` header and the structured Error envelope.",
+        "headers": {
+          "Allow": {
+            "description": "Comma-separated list of supported HTTP methods.",
+            "schema": { "type": "string", "example": "GET, HEAD, OPTIONS" }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "site",
+      "description": "Metadata about the rtylr.com site itself."
+    }
+  ]
+}

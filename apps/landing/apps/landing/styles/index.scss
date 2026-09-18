@@ -1,0 +1,330 @@
+@use 'sass:color';
+
+@use 'imports';
+@use 'fonts';
+@use 'variables';
+
+:root {
+  font-family: var(--primary-font);
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  // ── Direction primitives ──────────────────────────────────────────────────
+  //
+  // Logical properties (padding-inline-start, inset-inline-end, and the rest)
+  // mirror box geometry on their own, and they are the only way box geometry
+  // should be written here. Two things they cannot do:
+  //
+  //   --dir-x   the sign of a translate along the inline axis. A CTA arrow
+  //             that nudges 2px "forward" on hover has to nudge -2px in RTL,
+  //             and `transform` has no logical form.
+  //   --dir-mirror  the scaleX factor for a glyph that carries direction as
+  //             meaning. An arrow is not mirrored by any layout property.
+  //
+  // Both are plain numbers so they compose inside calc() and scaleX().
+  --dir-x: 1;
+  --dir-mirror: 1;
+}
+
+// :root[dir='rtl'] rather than a bare [dir='rtl'], so this beats the :root
+// block above on specificity rather than on source order.
+:root[dir='rtl'] {
+  --dir-x: -1;
+  --dir-mirror: -1;
+
+  // DM Sans has no Arabic coverage, so an Arabic page rendered in it falls
+  // back per glyph to whatever the OS happens to offer: Geeza Pro on macOS,
+  // something else everywhere else, none of it the site's typography. This
+  // stack keeps Latin runs (the wordmark, "POS", numerals) in DM Sans and
+  // hands the Arabic codepoints to a face that actually has them.
+  //
+  // Scoped to dir='rtl' on the document element, so the Latin pages resolve
+  // --primary-font exactly as before.
+  --primary-font: var(--rtl-font);
+}
+
+// The wrapper div in _app.tsx carries .dir-font-scope. next/font puts DM Sans
+// on that same div through its own generated class, and a font-family
+// inherited from :root or body can never beat a declaration on the element
+// itself, so the RTL switch has to be a rule on the div that outranks the
+// generated one. (0,3,0) against (0,1,0) does that on specificity rather than
+// on source order, which is what makes it independent of how Next orders the
+// next/font styles against this stylesheet.
+:root[dir='rtl'] .dir-font-scope {
+  font-family: var(--rtl-font);
+}
+
+// Opt-in mirror for a directional glyph: <ArrowRight className="rtl-mirror" />.
+// Deliberately opt-in rather than a blanket rule on every svg, because most
+// icons (a cart, a receipt, a padlock) must NOT mirror.
+//
+// A rule that also sets `transform` on the same element wins over this one,
+// so any such rule has to carry scaleX(var(--dir-mirror)) itself. The hover
+// nudges in HeroSection and ProductsSection do.
+.rtl-mirror {
+  transform: scaleX(var(--dir-mirror));
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: var(--app-background);
+}
+
+#__next {
+  background-color: var(--app-background);
+  min-height: 100vh;
+}
+
+* {
+  will-change: auto;
+}
+
+.hero-image img,
+.ticker_wrapper,
+.whatsappBtn {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+a {
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--dark-color);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--secondary-color);
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-background);
+  height: 100vh;
+  font-family: var(--primary-font);
+  color: var(--secondary-color);
+  scroll-behavior: smooth;
+  color: var(--primary-color);
+  scrollbar-gutter: stable;
+}
+
+.MuiInputBase-root {
+  background-color: white;
+}
+
+// Landing-wide button neutralizer. Two intentional flat variants: a solid-ink
+// primary and a flat-outline secondary (see --btn-cream-*/--btn-glass-* in
+// _variables.scss). Excludes a handful of hand-styled local controls.
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']) {
+  background: var(--btn-cream-bg) !important;
+  background-image: var(--btn-cream-bg) !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: var(--btn-cream-shadow) !important;
+  text-shadow: none !important;
+  letter-spacing: 0 !important;
+}
+
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):hover {
+  background: var(--btn-cream-bg-hover) !important;
+  background-image: var(--btn-cream-bg-hover) !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: var(--btn-cream-shadow-hover) !important;
+}
+
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):active {
+  background: #000000 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+:where(
+    button[class*='outlineBtn'],
+    button[class*='ctaSecondary'],
+    button[class*='dark-outline'],
+    button[class*='darkOutline'],
+    button[class*='secondary'],
+    a[class*='outlineBtn'],
+    a[class*='ctaSecondary'],
+    a[class*='dark-outline'],
+    a[class*='darkOutline'],
+    a[class*='secondary']
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']) {
+  background: var(--btn-glass-bg) !important;
+  background-image: none !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--hairline-strong) !important;
+  box-shadow: var(--btn-glass-shadow) !important;
+  text-shadow: none !important;
+}
+
+:where(
+    button[class*='outlineBtn'],
+    button[class*='ctaSecondary'],
+    button[class*='dark-outline'],
+    button[class*='darkOutline'],
+    button[class*='secondary'],
+    a[class*='outlineBtn'],
+    a[class*='ctaSecondary'],
+    a[class*='dark-outline'],
+    a[class*='darkOutline'],
+    a[class*='secondary']
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):hover {
+  background: var(--btn-glass-bg-hover) !important;
+  background-image: none !important;
+  color: var(--ink) !important;
+  border-color: var(--hairline-strong) !important;
+  box-shadow: var(--btn-glass-shadow-hover) !important;
+}
+
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node'])::before,
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node'])::after {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide default scrollbar */
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+#demo {
+  z-index: 10;
+  padding: 5px;
+  background-color: #0a102f;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  bottom: 0;
+}
+
+//maintanance content
+.maintanance {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-color);
+  z-index: 1000;
+
+  h1 {
+    font-size: 3em;
+    font-weight: 100;
+    color: var(--primary-color);
+    margin: 0;
+  }
+  h2 {
+    font-size: 1.5em;
+    font-weight: 100;
+    margin-bottom: 0;
+    font-weight: 200;
+    color: var(--primary-color);
+  }
+  h3 {
+    font-size: 1.5em;
+    font-weight: 100;
+    margin-top: 0;
+    font-weight: 200;
+    color: var(--primary-color);
+  }
+  a {
+    font-size: 1.5em;
+    font-weight: 300;
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// Smooth in-page anchor scrolling; respect reduced motion.
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

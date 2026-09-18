@@ -1,0 +1,24 @@
+node_modules
+.next/
+out/
+/dist
+dist/
+*.tsbuildinfo
+/out-tsc
+/coverage
+.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.*.local
+npm-debug.log
+.turbo
+.vscode/*
+.idea
+playwright-report/
+test-results/
+
+# Agent definitions are local to this machine, per the global rule that
+# CLAUDE.md, .claude/ and other agent config stay untracked.
+.claude/
+.codex/

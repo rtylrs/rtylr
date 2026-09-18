@@ -1,0 +1,709 @@
+// ── ERP landing page, inventory table hero, alternating capabilities ──────
+// Visual direction: warehouse/data-grid, live table with tabular numerics,
+// flow-diagram depletion strip, monospace accents where it reads technical.
+
+.page {
+  background: var(--app-background);
+  color: var(--ink);
+}
+
+// ── HERO ────────────────────────────────────────────────────────────────────
+
+.hero {
+  position: relative;
+  padding: 72px 32px 96px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.heroCopy {
+  max-width: 720px;
+  text-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.heroEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.6);
+  margin-bottom: 22px;
+  padding: 4px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  background: rgba(19, 19, 19, 0.03);
+}
+
+.heroTitle {
+  font-size: clamp(2.6rem, 5.2vw, 4.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 24px;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 32px;
+  max-width: 600px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  box-shadow: var(--btn-cream-shadow);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+.outlineBtn {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+  }
+}
+
+// ── INVENTORY TABLE MOCKUP ─────────────────────────────────────────────────
+
+.tableMock {
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+}
+
+.tableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #141414;
+  gap: 16px;
+}
+
+.tableTabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.tableTab {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 6px 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+  cursor: default;
+}
+
+.tableTabActive {
+  color: #e8e6e1;
+  background: rgba(255, 255, 255, 0.07);
+  font-weight: 500;
+}
+
+.tableSync {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+.tableActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.simulateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  background: #e8e6e1;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: var(--primary-font);
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: progress;
+  }
+
+  svg {
+    color: #0a0a0a;
+  }
+}
+
+.simulatePulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0a0a0a;
+  animation: simPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes simPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+
+.resetBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e8e6e1;
+  }
+}
+
+// Thin horizontal bar under the stock value showing fill level per row
+.stockBar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+  width: 72px;
+  margin-inline-start: auto;
+}
+
+.stockBarFill {
+  height: 100%;
+  border-radius: 2px;
+  transform-origin: left center;
+}
+
+.stockBarOk {
+  background: linear-gradient(90deg, rgba(107, 207, 127, 0.7), #6bcf7f);
+}
+
+.stockBarLow {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.7), #ffd166);
+}
+
+.stockBarCritical {
+  background: linear-gradient(90deg, rgba(232, 138, 138, 0.7), #e88a8a);
+}
+
+.tableSyncDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6bcf7f;
+  animation: syncPulse 2s ease-in-out infinite;
+}
+
+@keyframes syncPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+
+  thead {
+    background: #141414;
+  }
+
+  th {
+    text-align: start;
+    padding: 12px 20px;
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.42);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  td {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.8);
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr {
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.015);
+    }
+  }
+}
+
+.colNum {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.colAction {
+  width: 40px;
+  text-align: end;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.cellSku {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.3px;
+}
+
+.stockValue {
+  font-weight: 600;
+  color: #e8e6e1;
+}
+
+// Status pills
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.badgeOk {
+  background: rgba(107, 207, 127, 0.12);
+  color: #6bcf7f;
+  border: 1px solid rgba(107, 207, 127, 0.22);
+}
+
+.badgeLow {
+  background: rgba(255, 209, 102, 0.12);
+  color: #ffd166;
+  border: 1px solid rgba(255, 209, 102, 0.22);
+}
+
+.badgeCritical {
+  background: rgba(255, 107, 107, 0.12);
+  color: #ff8a8a;
+  border: 1px solid rgba(255, 107, 107, 0.24);
+}
+
+.tableFooter {
+  padding: 14px 20px;
+  background: #141414;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+      color: #ffd166;
+    }
+  }
+}
+
+// ── CAPABILITIES, stacked alternating rows ─────────────────────────────────
+
+.capabilitiesSection {
+  padding: 120px 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.capabilitiesHeader {
+  margin-bottom: 72px;
+  max-width: 640px;
+}
+
+.sectionEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.5);
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.capabilitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.capabilityRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 48px;
+  padding: 44px 0;
+  border-bottom: 1px solid var(--hairline);
+  align-items: flex-start;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+// Reverse alternates the subtle indent only, full text column, no crushing
+.capabilityRowReverse {
+  grid-template-columns: 120px 1fr;
+
+  .capabilityContent {
+    margin-inline-start: auto;
+    max-width: 620px;
+  }
+}
+
+.capabilityNumber {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 1.2rem;
+  color: rgba(19, 19, 19, 0.3);
+  padding-top: 4px;
+  letter-spacing: 0.2px;
+}
+
+.capabilityContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.capabilityIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.capabilityTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.capabilityCopy {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.62);
+  margin: 0;
+}
+
+// ── DEPLETION FLOW STRIP ────────────────────────────────────────────────────
+
+.depletionSection {
+  padding: 0 32px 120px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.depletionInner {
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 56px 48px;
+  max-width: 1080px;
+}
+
+.depletionTitle {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0 0 18px;
+  line-height: 1.15;
+}
+
+.depletionCopy {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.62);
+  margin: 0 0 36px;
+  max-width: 680px;
+}
+
+.depletionFlow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.flowStep {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  align-items: flex-start;
+}
+
+.flowStepIcon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-b);
+  border-radius: 6px;
+  color: var(--ink);
+}
+
+.flowStepTitle {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.flowStepDesc {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: rgba(19, 19, 19, 0.58);
+}
+
+.flowArrow {
+  align-self: center;
+  font-size: 1.2rem;
+  color: rgba(19, 19, 19, 0.4);
+}
+
+// ── CTA ─────────────────────────────────────────────────────────────────────
+
+.ctaBlock {
+  padding: 120px 32px 160px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top: 1px solid var(--hairline);
+}
+
+.ctaTitle {
+  font-size: clamp(2.4rem, 4.2vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 36px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+// ── RESPONSIVE ──────────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .capabilityRow,
+  .capabilityRowReverse {
+    grid-template-columns: 1fr;
+    gap: 16px;
+
+    .capabilityContent {
+      padding-inline-start: 0;
+    }
+  }
+
+  .depletionFlow {
+    grid-template-columns: 1fr;
+
+    .flowArrow {
+      transform: rotate(90deg);
+      text-align: center;
+    }
+  }
+
+  .table {
+    th,
+    td {
+      padding: 10px 14px;
+    }
+
+    .cellSku {
+      display: none;
+    }
+
+    thead th:first-child {
+      display: none;
+    }
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 56px 20px 72px;
+  }
+
+  .capabilitiesSection {
+    padding: 72px 20px;
+  }
+
+  .depletionSection {
+    padding: 0 20px 72px;
+  }
+
+  .depletionInner {
+    padding: 36px 24px;
+  }
+
+  .ctaBlock {
+    padding: 80px 20px 120px;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .primaryBtn,
+  .outlineBtn {
+    width: 100%;
+  }
+}

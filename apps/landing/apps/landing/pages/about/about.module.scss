@@ -1,0 +1,626 @@
+// ── About Page ────────────────────────────────────────────────────────────────
+
+$text-muted: rgba(19, 19, 19, 0.6);
+$text-mid: rgba(19, 19, 19, 0.7);
+
+.aboutPage {
+  background-color: var(--app-background);
+  color: var(--ink);
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+// ── Section shared ────────────────────────────────────────────────────────────
+
+.sectionContainer {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.sectionLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  margin: 0 0 48px;
+  max-width: 680px;
+}
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+
+.hero {
+  display: flex;
+  justify-content: center;
+  padding: 120px 24px 100px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.heroInner {
+  max-width: 860px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline-strong);
+  color: $text-mid;
+  padding: 6px 18px 6px 14px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  margin-bottom: 32px;
+}
+
+.eyebrowDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  flex-shrink: 0;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+}
+
+.heroTitle {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0 0 24px;
+}
+
+.heroSubtitle {
+  font-size: 1.15rem;
+  color: $text-muted;
+  line-height: 1.75;
+  max-width: 600px;
+  margin: 0;
+}
+
+// ── Mission ───────────────────────────────────────────────────────────────────
+
+.missionSection {
+  padding: 96px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.missionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.missionLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.missionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  margin: 0 0 20px;
+  line-height: 1.2;
+}
+
+.missionBody {
+  font-size: 1rem;
+  color: $text-mid;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.missionRight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--hairline);
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  gap: 8px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--bg-surface-b);
+  }
+}
+
+.statNumber {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+// ── Story ─────────────────────────────────────────────────────────────────────
+
+.storySection {
+  padding: 96px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.storyTitle {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  margin: 0 0 40px;
+}
+
+.storyBody {
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  p {
+    font-size: 1rem;
+    color: $text-mid;
+    line-height: 1.85;
+    margin: 0;
+  }
+}
+
+// ── Products ──────────────────────────────────────────────────────────────────
+
+.productsSection {
+  padding: 96px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  border: 1px solid var(--hairline);
+}
+
+.productCard {
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--bg-surface-a);
+  border-right: 1px solid var(--hairline);
+  transition: background 0.2s ease;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &:hover {
+    background: var(--bg-surface-b);
+  }
+}
+
+.productCardTop {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.productCardLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+
+.productPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.appPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: var(--bg-surface-b);
+  color: $text-mid;
+  border: 1px solid var(--hairline-strong);
+  letter-spacing: 0.2px;
+}
+
+.productCardDescription {
+  font-size: 0.9rem;
+  color: $text-muted;
+  line-height: 1.7;
+  margin: 0;
+}
+
+// ── Team ──────────────────────────────────────────────────────────────────────
+
+.teamSection {
+  padding: 96px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 680px;
+}
+
+.founderCard {
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease;
+
+  &:hover {
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-b);
+  }
+}
+
+.avatarWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ink) 0%, rgba(19, 19, 19, 0.75) 50%, rgba(19, 19, 19, 0.6) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--hairline-strong);
+  margin-bottom: 8px;
+}
+
+.avatarInitials {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.founderName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.founderRole {
+  font-size: 0.82rem;
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.founderEmail {
+  font-size: 0.82rem;
+  color: $text-muted;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+// ── Values ────────────────────────────────────────────────────────────────────
+
+.valuesSection {
+  padding: 96px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  border: 1px solid var(--hairline);
+}
+
+.valueCard {
+  padding: 44px 36px;
+  background: var(--bg-surface-a);
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--bg-surface-b);
+  }
+
+  &:nth-child(2n) {
+    border-right: none;
+  }
+
+  &:nth-child(3),
+  &:nth-child(4) {
+    border-bottom: none;
+  }
+}
+
+.valueDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.valueTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.valueBody {
+  font-size: 0.9rem;
+  color: $text-muted;
+  line-height: 1.75;
+  margin: 0;
+}
+
+// ── CTA ───────────────────────────────────────────────────────────────────────
+
+.ctaSection {
+  padding: 96px 0 0;
+}
+
+.ctaInner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 24px;
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  background: var(--bg-surface-a);
+}
+
+.ctaTitle {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  margin: 0 0 16px;
+  max-width: 600px;
+}
+
+.ctaSubtitle {
+  font-size: 1.05rem;
+  color: $text-muted;
+  margin: 0 0 40px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ctaPrimary {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  padding: 14px 38px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--btn-cream-shadow);
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    background: #000;
+    transform: translateY(0);
+  }
+}
+
+.ctaSecondary {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  padding: 14px 38px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+    color: var(--ink);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .heroTitle {
+    font-size: 3.2rem;
+  }
+
+  .missionGrid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .productsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .productCard {
+    border-right: none;
+    border-bottom: 1px solid var(--hairline);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .teamGrid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 80px 20px 72px;
+  }
+
+  .heroTitle {
+    font-size: 2.4rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
+  .missionSection,
+  .storySection,
+  .productsSection,
+  .teamSection,
+  .valuesSection,
+  .ctaSection {
+    padding-top: 72px;
+  }
+
+  .sectionTitle {
+    font-size: 1.9rem;
+  }
+
+  .missionTitle {
+    font-size: 1.7rem;
+  }
+
+  .storyTitle {
+    font-size: 1.9rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .valuesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .valueCard {
+    border-right: none;
+
+    &:nth-child(3),
+    &:nth-child(4) {
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .ctaTitle {
+    font-size: 2rem;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 340px;
+
+    button {
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .teamGrid {
+    max-width: 100%;
+  }
+}

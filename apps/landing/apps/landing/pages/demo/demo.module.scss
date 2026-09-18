@@ -1,0 +1,259 @@
+.demoPage {
+  min-height: calc(100vh - 80px);
+  background: var(--app-background);
+  padding: 80px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+
+  .container {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .formWrapper {
+    background: var(--app-background);
+    padding: 0;
+  }
+
+  .title {
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 0 0 12px 0;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+
+    @media (max-width: 768px) {
+      font-size: 2rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.75rem;
+    }
+  }
+
+  .subtitle {
+    font-size: 1.0625rem;
+    color: rgba(19, 19, 19, 0.7);
+    margin: 0 0 40px 0;
+    line-height: 1.5;
+    font-weight: 400;
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+      margin-bottom: 36px;
+    }
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .formGroup {
+    :global {
+      .voxire-input,
+      .voxire-select {
+        width: 100%;
+      }
+
+      .voxire-input__label,
+      .voxire-select__label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: rgba(19, 19, 19, 0.6);
+        margin-bottom: 8px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        display: block;
+      }
+
+      .voxire-input__field {
+        width: 100%;
+        padding: 14px 16px;
+        font-size: 0.9375rem;
+        color: var(--ink);
+        background: var(--bg-surface-b);
+        border: 1px solid var(--hairline);
+        border-radius: 0;
+        outline: none;
+        transition: all 0.2s;
+
+        &::placeholder {
+          color: rgba(19, 19, 19, 0.35);
+        }
+
+        &:focus {
+          border-color: var(--hairline-strong);
+          background: var(--bg-surface-a);
+          box-shadow: none;
+        }
+
+        &:disabled {
+          background: rgba(19, 19, 19, 0.03);
+          cursor: not-allowed;
+        }
+      }
+
+      // React Select overrides for light theme
+      .voxire-react-select__control {
+        background-color: var(--bg-surface-b) !important;
+        border-color: var(--hairline) !important;
+
+        &:hover {
+          background-color: var(--bg-surface-a) !important;
+          border-color: var(--hairline-strong) !important;
+        }
+      }
+
+      .voxire-react-select__input {
+        color: var(--ink) !important;
+      }
+
+      .voxire-react-select__single-value {
+        color: var(--ink) !important;
+      }
+
+      .voxire-react-select__placeholder {
+        color: rgba(19, 19, 19, 0.4) !important;
+      }
+
+      .voxire-react-select__menu {
+        background-color: var(--bg-surface-a) !important;
+        border: 1px solid var(--hairline) !important;
+        box-shadow: var(--elev-2) !important;
+      }
+
+      .voxire-react-select__option {
+        background-color: transparent !important;
+        color: var(--ink) !important;
+        border-bottom: 1px solid var(--hairline) !important;
+
+        &:hover {
+          background-color: rgba(19, 19, 19, 0.05) !important;
+        }
+
+        &--is-focused {
+          background-color: rgba(19, 19, 19, 0.05) !important;
+        }
+
+        &--is-selected {
+          background-color: rgba(19, 19, 19, 0.1) !important;
+        }
+      }
+
+      .voxire-react-select__dropdown-indicator,
+      .voxire-react-select__clear-indicator {
+        color: rgba(19, 19, 19, 0.5) !important;
+
+        &:hover {
+          color: var(--ink) !important;
+        }
+      }
+
+      .voxire-input__helper,
+      .voxire-select__helper {
+        font-size: 0.8125rem;
+        color: rgba(19, 19, 19, 0.6);
+        margin-top: 6px;
+
+        &--error {
+          color: #ff6b6b;
+        }
+      }
+
+      .voxire-input--error .voxire-input__field {
+        border-color: #ff6b6b;
+
+        &:focus {
+          box-shadow: none;
+        }
+      }
+
+      .voxire-select--error .voxire-react-select__control {
+        border-color: #ff6b6b !important;
+      }
+    }
+  }
+
+  .privacyText {
+    font-size: 0.8125rem;
+    color: rgba(19, 19, 19, 0.6);
+    line-height: 1.5;
+    margin: 20px 0 0 0;
+
+    a {
+      color: rgba(19, 19, 19, 0.75);
+      text-decoration: underline;
+      transition: color 0.2s;
+
+      &:hover {
+        color: var(--ink);
+      }
+    }
+  }
+
+  .submitButton {
+    margin-top: 20px;
+    padding: 16px 32px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.2px !important;
+    text-transform: uppercase !important;
+    border-radius: 100px !important;
+    background: var(--btn-cream-bg) !important;
+    color: #fff !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    box-shadow: var(--btn-cream-shadow) !important;
+
+    &:hover:not(:disabled) {
+      background: var(--btn-cream-bg-hover) !important;
+      transform: translateY(-2px);
+      box-shadow: var(--btn-cream-shadow-hover) !important;
+    }
+
+    &:active:not(:disabled) {
+      background: #000 !important;
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 60px 20px;
+
+    .formWrapper {
+      padding: 0;
+    }
+
+    .form {
+      gap: 28px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 40px 16px;
+
+    .formWrapper {
+      padding: 0;
+    }
+
+    .form {
+      gap: 24px;
+    }
+
+    .submitButton {
+      padding: 16px 28px !important;
+    }
+  }
+}

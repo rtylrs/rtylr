@@ -1,0 +1,820 @@
+// ── POS landing page, split hero with receipt mockup ───────────────────────
+// Visual direction: live-transaction, thermal-printer receipt aesthetic,
+// warm cream + neutral dark, asymmetric hero.
+
+.page {
+  background: var(--app-background);
+  color: var(--ink);
+}
+
+// ── HERO ────────────────────────────────────────────────────────────────────
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 64px;
+  align-items: center;
+  padding: 72px 32px 96px;
+  max-width: 1280px;
+  margin: 0 auto;
+  min-height: 680px;
+}
+
+.heroFrame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.vLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(19, 19, 19, 0.07) 10%,
+    rgba(19, 19, 19, 0.07) 90%,
+    transparent 100%
+  );
+}
+
+.vLineLeft {
+  left: max(24px, calc(50% - 560px));
+}
+
+.vLineRight {
+  right: max(24px, calc(50% - 560px));
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: start;
+}
+
+.heroEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.6);
+  margin-bottom: 24px;
+  padding: 4px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  background: rgba(19, 19, 19, 0.03);
+}
+
+.heroTitle {
+  font-size: clamp(2.6rem, 5vw, 4.6rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 36px;
+  max-width: 520px;
+  letter-spacing: -0.005em;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.primaryBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  box-shadow: var(--btn-cream-shadow);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+.outlineBtn {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+  }
+}
+
+.heroFootnote {
+  font-size: 0.8rem;
+  color: rgba(19, 19, 19, 0.5);
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+// ── Receipt mockup, thermal printer feel ────────────────────────────────────
+
+.receiptMock {
+  position: relative;
+  z-index: 1;
+  background: #faf6ec;
+  color: #1a1a1a;
+  border-radius: 2px;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  transform: rotate(1.5deg);
+  max-width: 360px;
+  margin-inline-start: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.receiptHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #2a2a2a;
+  color: #e8e6e1;
+  font-size: 0.68rem;
+  font-family: var(--primary-font);
+  letter-spacing: 0.3px;
+  border-radius: 2px 2px 0 0;
+}
+
+.receiptDots {
+  display: flex;
+  gap: 4px;
+
+  span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #555;
+
+    &:nth-child(1) {
+      background: #ff6b6b;
+    }
+    &:nth-child(2) {
+      background: #ffd166;
+    }
+    &:nth-child(3) {
+      background: #6bcf7f;
+    }
+  }
+}
+
+.receiptOrder {
+  flex: 1;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.receiptLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #6bcf7f;
+  flex-shrink: 0;
+}
+
+.livePulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6bcf7f;
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+}
+
+.receiptBody {
+  padding: 20px 24px 18px;
+  font-size: 0.82rem;
+}
+
+.receiptTitle {
+  font-family: var(--primary-font);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
+
+.receiptDate {
+  font-size: 0.7rem;
+  color: #6a6a6a;
+  margin-bottom: 10px;
+  letter-spacing: 0.2px;
+}
+
+.receiptDivider {
+  border: none;
+  border-top: 1px dashed #bbb;
+  margin: 8px 0;
+  height: 0;
+}
+
+.receiptList {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.receiptItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.2px;
+}
+
+.receiptQty {
+  color: #6a6a6a;
+  width: 22px;
+}
+
+.receiptName {
+  color: #1a1a1a;
+}
+
+.receiptPrice {
+  color: #1a1a1a;
+  font-variant-numeric: tabular-nums;
+}
+
+.receiptSumRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  padding: 2px 0;
+  font-variant-numeric: tabular-nums;
+  color: #3a3a3a;
+}
+
+.receiptTotal {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  padding-top: 4px;
+}
+
+.receiptPaid {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 5px 10px;
+  background: rgba(107, 207, 127, 0.18);
+  border: 1px solid rgba(107, 207, 127, 0.4);
+  color: #2a6a3c;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-family: var(--primary-font);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+// Jagged tear edge
+.receiptTear {
+  height: 12px;
+  background:
+    linear-gradient(135deg, transparent 50%, #faf6ec 50%) left center / 8px 100%,
+    linear-gradient(45deg, transparent 50%, #faf6ec 50%) right center / 8px 100%;
+  background-repeat: repeat-x;
+  background-position: 0 0;
+}
+
+// ── FEATURE QUAD, 2×2 asymmetric ───────────────────────────────────────────
+
+.featureSection {
+  padding: 96px 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.featureHeader {
+  position: sticky;
+  top: 120px;
+}
+
+.sectionEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.5);
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--hairline);
+}
+
+.featureCard {
+  padding: 32px 28px;
+  border-inline-end: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  transition: background 0.25s ease;
+
+  &:nth-child(2n) {
+    border-inline-end: none;
+  }
+
+  &:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.03);
+  }
+}
+
+.featureIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(19, 19, 19, 0.04);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+.featureTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+
+.featureCopy {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.6);
+  margin: 0;
+}
+
+// ── COMPARISON TABLE ───────────────────────────────────────────────────────
+
+.compareSection {
+  padding: 96px 32px 96px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.compareHeader {
+  max-width: 720px;
+  margin-bottom: 40px;
+}
+
+.compareTableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--bg-surface-a);
+}
+
+.compareTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  min-width: 720px;
+
+  thead th {
+    padding: 20px 18px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(19, 19, 19, 0.6);
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--bg-surface-b);
+
+    &:first-child {
+      text-align: start;
+      padding-inline-start: 24px;
+    }
+  }
+
+  tbody th {
+    text-align: start;
+    padding: 16px 24px 16px 24px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 0.92rem;
+  }
+
+  tbody td {
+    padding: 16px 18px;
+    text-align: center;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--hairline);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.compareHeadLogo {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ink);
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: -0.005em;
+}
+
+.compareUs {
+  background: rgba(19, 19, 19, 0.03);
+  border-inline-start: 1px solid rgba(19, 19, 19, 0.15);
+  border-inline-end: 1px solid rgba(19, 19, 19, 0.15);
+}
+
+// Cell variants
+.cellYes {
+  color: #2f9e48;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.cellNo {
+  color: rgba(19, 19, 19, 0.35);
+}
+
+.cellPartial {
+  color: #b8860b;
+  font-weight: 500;
+}
+
+.cellAddon {
+  color: #c0504d;
+  font-weight: 500;
+}
+
+.cellText {
+  color: rgba(19, 19, 19, 0.75);
+  font-weight: 500;
+}
+
+.compareFootnote {
+  font-size: 0.78rem;
+  color: rgba(19, 19, 19, 0.5);
+  padding: 16px 24px;
+  border-top: 1px solid var(--hairline);
+  background: var(--bg-surface-b);
+  margin: 0;
+  text-align: start;
+
+  a {
+    color: rgba(19, 19, 19, 0.75);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+// ── STATS STRIP (retained for back-compat, no longer rendered) ──────────────
+
+.statsSection {
+  padding: 0 32px 96px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--hairline);
+}
+
+.statCell {
+  padding: 36px 24px;
+  border-inline-end: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+
+  &:last-child {
+    border-inline-end: none;
+  }
+}
+
+.statValue {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  color: rgba(19, 19, 19, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  text-align: center;
+}
+
+// ── INTEGRATED SECTION ──────────────────────────────────────────────────────
+
+.integratedSection {
+  padding: 96px 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.integratedLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.integratedCopy {
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: rgba(19, 19, 19, 0.6);
+  margin: 24px 0 0;
+  max-width: 440px;
+}
+
+.integratedList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--hairline);
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 0.95rem;
+    color: rgba(19, 19, 19, 0.75);
+    line-height: 1.5;
+    transition: background 0.2s ease;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: rgba(19, 19, 19, 0.03);
+    }
+
+    svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: var(--ink);
+      opacity: 0.7;
+    }
+
+    strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+  }
+}
+
+// ── CTA ──────────────────────────────────────────────────────────────────────
+
+.ctaBlock {
+  padding: 120px 32px 160px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top: 1px solid var(--hairline);
+}
+
+.ctaTitle {
+  font-size: clamp(2.4rem, 4.2vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 36px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+// ── RESPONSIVE ──────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 56px;
+    min-height: auto;
+  }
+
+  .receiptMock {
+    margin: 0 auto;
+    transform: rotate(-1deg);
+  }
+
+  .featureSection {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .featureHeader {
+    position: static;
+  }
+
+  .integratedSection {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+
+    .statCell:nth-child(2n) {
+      border-inline-end: none;
+    }
+
+    .statCell:nth-child(n + 3) {
+      border-top: 1px solid var(--hairline);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 56px 20px 72px;
+  }
+
+  .featureSection {
+    padding: 72px 20px;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+
+    .featureCard {
+      border-inline-end: none;
+      border-bottom: 1px solid var(--hairline);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--hairline);
+      }
+    }
+  }
+
+  .statsSection {
+    padding: 0 20px 72px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+
+    .statCell {
+      border-inline-end: none;
+      border-bottom: 1px solid var(--hairline);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:nth-child(n + 3) {
+        border-top: none;
+      }
+    }
+  }
+
+  .integratedSection {
+    padding: 72px 20px;
+  }
+
+  .ctaBlock {
+    padding: 88px 20px 120px;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .primaryBtn,
+  .outlineBtn {
+    width: 100%;
+  }
+}

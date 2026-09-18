@@ -1,0 +1,460 @@
+// ── Contact Page ──────────────────────────────────────────────────────────────
+
+$blue: var(--ink);
+$cyan: var(--ink);
+$border: var(--hairline);
+$text-muted: rgba(19, 19, 19, 0.6);
+$text-mid: rgba(19, 19, 19, 0.72);
+
+.contactPage {
+  background-color: var(--app-background);
+  color: var(--ink);
+  min-height: 100vh;
+  padding-bottom: 0;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 100px 24px 80px;
+  border-bottom: 1px solid $border;
+}
+
+.headerTitle {
+  font-size: 4.5rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 16px;
+  line-height: 1.05;
+}
+
+.headerSubtitle {
+  font-size: 1.1rem;
+  color: $text-muted;
+  margin: 0;
+  line-height: 1.7;
+}
+
+// ── Main section ──────────────────────────────────────────────────────────────
+
+.mainSection {
+  padding: 80px 24px;
+  // .formSection's hidden animation state offsets it 40px off its resting
+  // x position, which extends past the viewport edge and forces a
+  // horizontal scrollbar for as long as the section sits below the fold
+  // (i.e. every mobile load, until whileInView fires it in).
+  overflow-x: hidden;
+}
+
+.mainContainer {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 80px;
+  align-items: start;
+}
+
+// ── Contact info ──────────────────────────────────────────────────────────────
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.infoTitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: $blue;
+  margin: 0;
+}
+
+.channelsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.channelCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 20px;
+  background: var(--bg-surface-a);
+  border: 1px solid $border;
+  border-radius: 12px;
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+
+  &:hover {
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-b);
+  }
+}
+
+.channelIconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $blue;
+  flex-shrink: 0;
+}
+
+.channelContent {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.channelLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.channelValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.channelDescription {
+  font-size: 0.82rem;
+  color: $text-muted;
+}
+
+.hoursBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px 20px;
+  background: var(--bg-surface-a);
+  border: 1px solid $border;
+  border-radius: 12px;
+}
+
+.hoursLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: $blue;
+  margin-bottom: 6px;
+}
+
+.hoursValue {
+  font-size: 0.9rem;
+  color: $text-mid;
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+
+.formSection {
+  background: var(--bg-surface-a);
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 44px 40px;
+}
+
+.formTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 32px;
+  letter-spacing: -0.02em;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.fieldError {
+  .fieldInput,
+  .fieldTextarea {
+    border-color: rgba(255, 80, 80, 0.5) !important;
+
+    &:focus {
+      border-color: rgba(255, 80, 80, 0.8) !important;
+    }
+  }
+}
+
+.fieldLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text-mid;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.required {
+  color: rgba(255, 80, 80, 0.8);
+  margin-inline-start: 2px;
+}
+
+.optional {
+  color: $text-muted;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.75rem;
+}
+
+.fieldInput {
+  background: var(--bg-surface-b);
+  border: 1px solid $border;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  width: 100%;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+  font-family: inherit;
+
+  &::placeholder {
+    color: rgba(19, 19, 19, 0.35);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-a);
+  }
+}
+
+.fieldTextarea {
+  background: var(--bg-surface-b);
+  border: 1px solid $border;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  width: 100%;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+
+  &::placeholder {
+    color: rgba(19, 19, 19, 0.35);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-a);
+  }
+}
+
+.errorMsg {
+  font-size: 0.78rem;
+  color: rgba(255, 100, 100, 0.9);
+  font-weight: 500;
+}
+
+.submitBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: 100%;
+  margin-top: 4px;
+  font-family: inherit;
+  box-shadow: var(--btn-cream-shadow);
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--btn-cream-shadow-hover);
+  }
+
+  &:active {
+    background: #000;
+    transform: translateY(0);
+  }
+}
+
+// ── Success state ─────────────────────────────────────────────────────────────
+
+.successState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.successIcon {
+  color: $cyan;
+  margin-bottom: 8px;
+}
+
+.successTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.successBody {
+  font-size: 0.95rem;
+  color: $text-muted;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 340px;
+}
+
+.successReset {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+
+  &:hover {
+    background: var(--btn-glass-bg-hover);
+    border-color: var(--ink);
+  }
+}
+
+// ── Bottom strip ──────────────────────────────────────────────────────────────
+
+.bottomStrip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px 24px;
+  background: var(--bg-surface-b);
+  border-top: 1px solid var(--hairline);
+  flex-wrap: wrap;
+}
+
+.stripText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0;
+}
+
+.stripBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .mainContainer {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    max-width: 680px;
+  }
+
+  .headerTitle {
+    font-size: 3.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 72px 20px 60px;
+  }
+
+  .headerTitle {
+    font-size: 2.8rem;
+  }
+
+  .mainSection {
+    padding: 60px 20px;
+  }
+
+  .formSection {
+    padding: 32px 24px;
+  }
+
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+
+  .bottomStrip {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerTitle {
+    font-size: 2.2rem;
+  }
+}

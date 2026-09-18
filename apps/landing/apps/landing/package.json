@@ -1,0 +1,42 @@
+{
+  "name": "@rtylr/landing",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack --port 4200",
+    "build": "next build --webpack && next-sitemap --config next-sitemap.config.js && node scripts/generate-agent-artifacts.mjs",
+    "start": "next start",
+    "typecheck": "tsc --build --force tsconfig.app.json"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.99.2",
+    "@voxire/components": "workspace:*",
+    "@voxire/config": "workspace:*",
+    "@voxire/consent": "workspace:*",
+    "@voxire/observability": "workspace:*",
+    "@voxire/utils": "workspace:*",
+    "axios": "^1.15.2",
+    "i18n-iso-countries": "^7.14.0",
+    "i18next": "^26.0.6",
+    "lucide-react": "^1.8.0",
+    "motion": "^12.38.0",
+    "next": "16.2.6",
+    "react": "19.2.7",
+    "react-cookie": "^8.1.0",
+    "react-dom": "19.2.7",
+    "react-dropzone": "^15.0.0",
+    "react-i18next": "^17.0.4",
+    "react-icons": "^5.6.0",
+    "react-select": "^5.10.2",
+    "sonner": "^2.0.7",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "next-sitemap": "^4.2.3",
+    "sass": "1.99.0",
+    "typescript": "^6.0.3"
+  }
+}

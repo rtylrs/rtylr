@@ -1,0 +1,82 @@
+:root {
+  --primary-color: #040428;
+  --secondary-color: #131313;
+  --accent-color: #131313;
+  --dark-green-color: #016b63;
+  --background-color: #ffffff;
+  --bg-color: #fcfaff;
+  // Page background (tamr.link measures #FAFAFA on the underlying page, with
+  // sections explicitly white/salt on top - see --bg-surface-a/-b below).
+  --app-background: #fafafa;
+  --light-color: #fff;
+  --dark-color: #000;
+  --item-background-color: #373737;
+  --text-color: #131313;
+  --subtext-color: #6b6b6b;
+  --light-gray: #d9d9d9;
+  --error-red: #ff0000;
+  --active-color: #e3e4e5;
+  --admin-bg: #eff0f1;
+  --admin-primary: #262626;
+  --vendor-bg: #eff0f1;
+
+  // ── Light palette (tamr.link-inspired) ────────────────────────────────────
+  --ink: #131313;
+  --bg-surface-a: #ffffff;
+  --bg-surface-b: #efefef;
+  // Recurring divider/border color, replaces the old dark-mode #232220 hairline.
+  --hairline: rgba(19, 19, 19, 0.1);
+  // Slightly stronger than --hairline; matches tamr's flat #ccc button borders.
+  --hairline-strong: rgba(19, 19, 19, 0.2);
+
+  // The var(--font-dm-sans, ...) fallback matters: --font-dm-sans is only set
+  // where next/font's wrapper div in _app.tsx actually renders (see there).
+  // Anything outside that subtree (e.g. a future portal to document.body)
+  // gets this literal fallback, which isn't a real font, so the browser
+  // falls through to Inter instead of silently landing on a serif default.
+  --primary-font: var(--font-dm-sans, 'DM Sans Fallback'), 'Inter', ui-sans-serif, system-ui,
+    -apple-system, sans-serif;
+  // The RTL stack, applied by :root[dir='rtl'] in index.scss and by the
+  // wrapper class in _app.tsx. DM Sans stays first so Latin runs inside
+  // Arabic copy keep the site's face; the browser falls through per glyph to
+  // the Arabic face for anything DM Sans does not cover.
+  //
+  // 'IBM Plex Sans Arabic Fallback' is the same sentinel trick as 'DM Sans
+  // Fallback' above: a name no system has, so a missing --font-plex-arabic
+  // falls through to the real families listed after it instead of resolving
+  // silently to something that happens to be installed. Those three are the
+  // platform Arabic UI faces (macOS/iOS, Windows, Android/Linux).
+  --rtl-font: var(--font-dm-sans, 'DM Sans Fallback'),
+    var(--font-plex-arabic, 'IBM Plex Sans Arabic Fallback'), 'Geeza Pro', 'Segoe UI',
+    'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --primary-font-bold: var(--primary-font);
+  --gg-sans: 'Gg-Sans', sans-serif;
+  --secondary-font: var(--primary-font);
+  --tertiary-font: var(--primary-font);
+  --quaternary-font: var(--primary-font);
+  --quinary-font: var(--primary-font);
+
+  // ── Depth & elevation system ──────────────────────────────────────────────
+  // Flat-card direction: cards lean on --hairline borders, not shadow. These
+  // are soft, ink-tinted lifts for the rare element that still wants one.
+  --elev-1: 0 1px 2px rgba(19, 19, 19, 0.06);
+  --elev-2: 0 4px 16px rgba(19, 19, 19, 0.08);
+  --elev-3: 0 10px 30px rgba(19, 19, 19, 0.1);
+
+  // Primary button: flat ink fill (tamr's own primary CTA is a subtle dark
+  // gradient rather than pure flat black - kept here for a touch of depth).
+  --btn-cream-bg: linear-gradient(180deg, #232323 0%, #131313 100%);
+  --btn-cream-bg-hover: linear-gradient(180deg, #2c2c2c 0%, #000000 100%);
+  --btn-cream-shadow: 0 1px 2px rgba(19, 19, 19, 0.12);
+  --btn-cream-shadow-hover: 0 4px 10px rgba(19, 19, 19, 0.16);
+
+  // Outline/secondary button: flat, no glass/blur - only the CTASection's
+  // intentional dark block still wants a translucent glass treatment.
+  --btn-glass-bg: transparent;
+  --btn-glass-bg-hover: rgba(19, 19, 19, 0.04);
+  --btn-glass-shadow: none;
+  --btn-glass-shadow-hover: none;
+
+  // Standard easing for depth/hover transitions.
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}

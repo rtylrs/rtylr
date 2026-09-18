@@ -1,0 +1,1400 @@
+{
+  "common": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "resources": "Ressources",
+      "company": "Entreprise",
+      "signIn": "Se connecter",
+      "signUp": "Créer un compte",
+      "featureLinks": {
+        "pos": {
+          "title": "POS",
+          "desc": "Paiements, tables, commandes et tickets dans une seule caisse."
+        },
+        "erp": {
+          "title": "ERP",
+          "desc": "Stocks, fournisseurs et achats qui restent synchronisés."
+        },
+        "hr": {
+          "title": "HR",
+          "desc": "Équipes, plannings, congés et paie au même endroit."
+        },
+        "crm": {
+          "title": "CRM",
+          "desc": "Fiches clients, fidélité, segments et campagnes."
+        },
+        "finance": {
+          "title": "Finance",
+          "desc": "Factures, dépenses, TVA et un vrai compte de résultat en quelques secondes."
+        },
+        "flow": {
+          "title": "Flow",
+          "desc": "Projets, tâches et espaces d’équipe pour chaque département."
+        }
+      },
+      "resourceLinks": {
+        "hardware": "Matériel",
+        "integrations": "Intégrations",
+        "blog": "Blog",
+        "documentation": "Documentation",
+        "helpCenter": "Centre d’aide",
+        "trustCenter": "Centre de confiance",
+        "security": "Sécurité",
+        "privacyPolicy": "Politique de confidentialité",
+        "termsOfUse": "Conditions d’utilisation",
+        "status": "État des services"
+      },
+      "companyLinks": {
+        "about": "À propos",
+        "partners": "Partenaires",
+        "careers": "Carrières",
+        "contact": "Contact"
+      }
+    },
+    "cta": {
+      "startFree": "Commencer gratuitement",
+      "bookDemo": "Réserver une démo",
+      "getStarted": "Commencer",
+      "seeItLive": "Voir en action"
+    },
+    "a11y": {
+      "home": "Accueil rtylr",
+      "logoAlt": "rtylr",
+      "toggleMenu": "Ouvrir ou fermer le menu mobile",
+      "navMenu": "Menu de navigation",
+      "closeMenu": "Fermer le menu",
+      "languageSwitcher": "Choisir la langue"
+    },
+    "cookieBanner": {
+      "message": "Nous utilisons des cookies essentiels au fonctionnement de rtylr, et une mesure d’audience facultative pour savoir quelles fonctionnalités développer ensuite. Voir notre <privacyLink>politique de confidentialité</privacyLink>.",
+      "decline": "Refuser",
+      "accept": "Accepter",
+      "ariaLabel": "Consentement aux cookies"
+    }
+  },
+  "footer": {
+    "group": {
+      "product": "PRODUIT",
+      "resources": "RESSOURCES",
+      "developers": "DÉVELOPPEURS",
+      "company": "ENTREPRISE"
+    },
+    "link": {
+      "pos": "POS",
+      "erp": "ERP",
+      "hr": "HR",
+      "crm": "CRM",
+      "finance": "Finance",
+      "flow": "Flow",
+      "pricing": "Tarifs",
+      "hardware": "Matériel",
+      "blog": "Blog",
+      "documentation": "Documentation",
+      "selfHost": "Auto-héberger rtylr",
+      "integrations": "Intégrations",
+      "helpCenter": "Centre d’aide",
+      "status": "État des services",
+      "about": "À propos",
+      "careers": "Carrières",
+      "partners": "Partenaires",
+      "contact": "Contact"
+    },
+    "legal": {
+      "terms": "CONDITIONS D’UTILISATION",
+      "privacy": "POLITIQUE DE CONFIDENTIALITÉ",
+      "security": "SÉCURITÉ",
+      "trust": "CENTRE DE CONFIANCE",
+      "cookies": "PRÉFÉRENCES DE COOKIES",
+      "parent": "UNE SOCIÉTÉ VOXIRE"
+    },
+    "logoAlt": "rtylr",
+    "navLabel": "Navigation {{group}}"
+  },
+  "home": {
+    "pricing": {
+      "badge": "Tarifs",
+      "title": "Une seule plateforme.\nToutes les applications incluses.",
+      "description": "Les 7 applications sont incluses dans chaque forfait. Ce qui change, c’est le nombre de personnes et d’établissements que vous gérez. Commencez gratuitement, sans carte bancaire."
+    },
+    "meta": {
+      "title": "rtylr · Toute votre entreprise sur une seule plateforme.",
+      "description": "POS, ERP, HR, CRM, Finance et Flow. Le système d’exploitation d’entreprise tout-en-un, conçu pour les équipes de toute taille. Propulsé par l’IA.",
+      "ogSiteName": "Rtylr",
+      "keywords": "POS, ERP, HR, CRM, Finance, Flow, logiciel de caisse, système de caisse, gestion des stocks, gestion de la paie, programme de fidélité, facturation, gestion de projet, logiciel pour restaurant, logiciel pour commerce, IA",
+      "schemaDescription": "Une seule plateforme d’entreprise pour POS, ERP, CRM, HR, Finance et Flow, sur un modèle de données unique\u00a0: une vente met à jour le stock et la comptabilité sans passer par un export."
+    },
+    "directAnswer": {
+      "label": "Qu’est-ce que rtylr\u00a0?",
+      "body": "rtylr est un système d’exploitation d’entreprise tout-en-un pour les petites et moyennes entreprises\u00a0: caisse, ERP, HR, CRM, finance et gestion de projet sur une seule base de données. Il est conçu pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes, sur un établissement comme sur vingt. L’intérêt n’est pas qu’il y ait sept applications\u00a0: c’est qu’une vente déplace le stock, le chiffre d’affaires et la fidélité sans que personne n’exporte de fichier."
+    },
+    "howItWorks": {
+      "eyebrow": "COMMENT ÇA MARCHE",
+      "title": "Comment passer de l’inscription\nà la mise en service\u00a0?",
+      "steps": [
+        {
+          "title": "Créer le compte",
+          "description": "E-mail, mot de passe, terminé. Sans carte bancaire. Toutes les applications ouvertes dès la première minute."
+        },
+        {
+          "title": "Configurer Hub",
+          "description": "Établissements, équipe, marque, taxes, matériel. Hub est l’endroit unique où vous réglez tout le reste."
+        },
+        {
+          "title": "Attribuer les applications",
+          "description": "POS pour la salle. HR pour les managers. Finance pour votre comptable. Chacun ne voit que les applications qu’il utilise vraiment."
+        },
+        {
+          "title": "Passer en service",
+          "description": "Tous les départements en ligne d’un coup. Sept applications qui se parlent déjà. Aucun projet d’intégration."
+        }
+      ]
+    },
+    "cta": {
+      "title": "À vous\nde construire.",
+      "subtitle": "Gratuit jusqu’à 10 membres. Sans carte bancaire.\nLancez tous vos départements en un après-midi."
+    },
+    "products": {
+      "badge": "LA PLATEFORME",
+      "title": "Sept applications.\nUne base de données.",
+      "subtitle": "Ni regroupées, ni intégrées. Construites dans la même plateforme depuis la première ligne de code\u00a0: une vente dans POS met à jour le stock, la paie et le compte de résultat dans le même mouvement.",
+      "cardsTop": [
+        {
+          "title": "Caisse",
+          "description": "Tickets, tables, additions partagées, pourboires et tous les moyens de paiement. La caisse qui suit le rythme du vrai service."
+        },
+        {
+          "title": "Stocks",
+          "description": "Décrémentation liée aux recettes, gestion des fournisseurs, réassort automatique. Vos étagères parlent à la base de données."
+        },
+        {
+          "title": "Équipes et paie",
+          "description": "Planning, pointage, paie, congés, conformité. Le volet humain, sans la paperasse."
+        },
+        {
+          "title": "Clients et fidélité",
+          "description": "Fiches, segments, campagnes et fidélité, alimentés en direct par chaque ticket que votre caisse écrit."
+        }
+      ],
+      "cardsBottom": [
+        {
+          "title": "Une comptabilité qui se boucle seule",
+          "description": "Factures, dépenses, TVA et un compte de résultat en direct. Chaque vente se rapproche en temps réel."
+        },
+        {
+          "title": "Projets et tâches",
+          "description": "Kanban, automatisations et tâches rattachées à la facture, au client ou au service auquel elles appartiennent vraiment."
+        },
+        {
+          "title": "Des analyses sur l’ensemble",
+          "description": "Tendances du chiffre d’affaires, cohortes de clients, marge sur main-d’œuvre. Chaque chiffre est tiré en direct de toutes les autres applications."
+        }
+      ],
+      "explore": "Découvrir →",
+      "exploreLabel": "Découvrir {{app}}"
+    },
+    "integrations": {
+      "badge": "INTÉGRATIONS",
+      "title": "Se branche sur tout\nce que vous utilisez déjà.",
+      "description": "Stripe pour les paiements. QuickBooks pour votre comptable. Slack pour les alertes. Connexion en quelques minutes. Aucune clé API à aller chercher. Aucun développeur nécessaire.",
+      "footnote": "Consultez le répertoire complet pour tout ce qui est prévu."
+    },
+    "testimonials": {
+      "title": "Ce qu’en disent les exploitants.",
+      "items": [
+        {
+          "quote": "Avant, nous clôturions les comptes le 8 de chaque mois. Aujourd’hui, c’est le 2\u00a0: il n’y a plus rien à rapprocher.",
+          "author": "Layla Ahmed",
+          "role": "Propriétaire, Byblos Kitchen"
+        },
+        {
+          "quote": "À la 20e visite, rtylr a envoyé l’e-mail de remerciement tout seul. Mon responsable m’a demandé si c’était moi qui l’avais paramétré. Non.",
+          "author": "Karim Mansour",
+          "role": "Directeur général, The Terrace"
+        },
+        {
+          "quote": "La connexion est tombée un samedi soir, avec 200 tables à servir. La caisse ne s’est pas arrêtée. Je ne pensais pas qu’un logiciel tiendrait le coup.",
+          "author": "Tarek Zein",
+          "role": "Propriétaire, Mountain Café"
+        },
+        {
+          "quote": "Les plannings vivaient sur WhatsApp. Aujourd’hui, les services partent à l’équipe en quatre clics et la paie se lance toute seule chaque dimanche soir.",
+          "author": "Sara Halabi",
+          "role": "Responsable des opérations, Urban Chain"
+        },
+        {
+          "quote": "Quitter l’ancien système nous fait économiser environ 600\u00a0$US par établissement et par mois. Et c’est avant de compter les modules payants.",
+          "author": "Nadine Farhat",
+          "role": "Fondatrice, Fresh Market"
+        },
+        {
+          "quote": "La tâche est rattachée à la facture, au client, au service. J’ai arrêté d’ouvrir quatre onglets pour quatre applications\u00a0: j’ouvre Flow, c’est tout.",
+          "author": "Jad Maalof",
+          "role": "Gérant, Tech Store Pro"
+        }
+      ]
+    },
+    "truth": {
+      "badge": "Vérifiable",
+      "title": "Ce que nous pouvons prouver.",
+      "description": "Six affirmations que vous pouvez vérifier depuis un onglet de navigateur ou un terminal, et cinq choses que rtylr ne fait pas encore. Rien ici ne demande un appel commercial pour être confirmé.",
+      "limitsTitle": "Ce que rtylr ne fait pas encore",
+      "checkLabel": "À vérifier\u00a0:",
+      "claims": [
+        {
+          "title": "Une base de données, pas sept intégrations",
+          "body": "POS, ERP, CRM, HR, Finance et Flow lisent et écrivent les mêmes enregistrements. Une vente décrémente le stock et arrive au grand livre au moment où elle se produit, parce qu’il n’y a pas de second système avec lequel se synchroniser."
+        },
+        {
+          "title": "Chaque page est lisible par une machine",
+          "body": "Demandez du Markdown plutôt que du HTML à n’importe quelle URL de ce site et vous obtenez du Markdown, avec l’en-tête Vary correct. Sans scraping, sans rendu, sans JavaScript.",
+          "check": "curl -H \"Accept: text/markdown\" https://rtylr.com/pos/"
+        },
+        {
+          "title": "Tout le site est indexé comme une donnée",
+          "body": "Un index lisible par une machine de toutes les pages du site, avec leurs titres et leurs descriptions, généré à la compilation. Il ne peut pas s’écarter du site, puisque c’est le site qui le génère.",
+          "check": "https://rtylr.com/pages.json"
+        },
+        {
+          "title": "Les 7 applications dans chaque forfait",
+          "body": "Aucun module vendu en plus, aucune licence par application. Les forfaits diffèrent par le nombre de personnes et d’établissements que vous gérez, pas par les parties du produit que vous avez le droit d’ouvrir.",
+          "check": "https://rtylr.com/pricing/"
+        },
+        {
+          "title": "Le forfait Free ne demande aucune carte",
+          "body": "Dix membres d’équipe sur un établissement, les 7 applications, aucun moyen de paiement et aucun compte à rebours d’essai. C’est un forfait, pas un décompte.",
+          "check": "https://rtylr.com/pricing/"
+        },
+        {
+          "title": "Un document OpenAPI, publié",
+          "body": "Ce site publie la spécification de ses propres points d’accès au format OpenAPI 3.1. Elle couvre le site vitrine, pas l’API du produit, et elle est indiquée ici pour que personne n’ait à deviner laquelle des deux.",
+          "check": "https://rtylr.com/openapi.json"
+        }
+      ],
+      "limits": [
+        "Les prix ne sont pas publiés. Le forfait Free est gratuit\u00a0; Pro et Scale sont sur devis.",
+        "Aucune intégration n’est encore active. /integrations/ liste ce qui est prévu et marque chaque entrée d’un «\u00a0Coming soon\u00a0».",
+        "Les déclarations de paie ne sont pas de notre ressort. rtylr HR calcule la paie et exporte les fichiers que Gusto, ADP ou Rippling se chargent de déclarer.",
+        "Une comptabilité complexe demande toujours un grand livre. La consolidation multi-entités et les pistes d’audit lourdes sont mieux servies par QuickBooks ou Xero, et rtylr Finance exporte vers les deux.",
+        "L’interface des applications est en anglais uniquement. Le français que vous lisez ici est écrit pour ce site, pas traduit, et ce site est la première chose que nous livrons dans cette langue\u00a0; dans les applications, l’arabe et le français sont encore en cours de rédaction."
+      ]
+    },
+    "hero": {
+      "announcePill": "BÊTA",
+      "announceText": "Caret AI est en version bêta. Décrivez votre activité, regardez-la se construire",
+      "title": "Gérez toute votre entreprise.\nDepuis une seule plateforme.",
+      "promptPlaceholder": "Décrivez votre activité. Caret AI prépare votre caisse, vos stocks, vos équipes et vos factures",
+      "caretLabel": "Caret AI",
+      "moreOptions": "Plus d’options",
+      "submit": "Commencer à construire",
+      "demoLinePrefix": "Parlez à un expert et",
+      "demoLineLink": "réservez une démo",
+      "stats": [
+        {
+          "number": "50\u00a0k+",
+          "label": "Transactions par jour"
+        },
+        {
+          "number": "99,9\u00a0%",
+          "label": "Disponibilité"
+        },
+        {
+          "number": "20+",
+          "label": "Pays"
+        },
+        {
+          "number": "24\u00a0h/24",
+          "label": "Support"
+        },
+        {
+          "number": "Hors ligne",
+          "label": "Toujours opérationnel"
+        },
+        {
+          "number": "IA",
+          "label": "Intégrée"
+        },
+        {
+          "number": "Multi",
+          "label": "Langues"
+        },
+        {
+          "number": "Cloud",
+          "label": "Natif"
+        }
+      ],
+      "promptLabel": "Décrivez votre activité"
+    },
+    "features": {
+      "badge": "LA PLATEFORME",
+      "title": "Que fait chaque application\u00a0?",
+      "titleAccent": "Un écran à la fois.",
+      "openCta": "Ouvrir {{app}}",
+      "showLabel": "Afficher {{app}}",
+      "chooseAppLabel": "Choisir une application de la plateforme",
+      "items": [
+        {
+          "title": "Une caisse qui suit le rythme du vrai service.",
+          "description": "Tickets, tables, additions partagées, pourboires et tous les moyens de paiement\u00a0: carte, Apple Pay, espèces, carte cadeau, offert. Fonctionne hors ligne quand le WiFi lâche. Moins de 200\u00a0ms par encaissement."
+        },
+        {
+          "title": "Un stock qui se compte tout seul.",
+          "description": "Décrémentation liée aux recettes au fil des encaissements. Réassort automatique dès le seuil atteint. Transferts entre établissements avec piste d’audit complète. Ce sont vos étagères qui informent la base de données, pas l’inverse."
+        },
+        {
+          "title": "Le volet humain, sans la paperasse.",
+          "description": "Le planning se publie d’un glisser-déposer. Pointage depuis POS. Une paie qui agrège pourboires, heures et retenues automatiquement. Les manquements sont signalés avant de devenir des infractions."
+        },
+        {
+          "title": "Aucun client oublié.",
+          "description": "Chaque vente encaissée dans POS enrichit la fiche client. Segmentation par dépenses, fréquence de visite, anniversaire, étiquettes. La campagne part de la même application\u00a0: pas de détour par Mailchimp."
+        },
+        {
+          "title": "Un vrai compte de résultat, en temps réel.",
+          "description": "Des factures récurrentes qui s’encaissent toutes seules. Des dépenses saisies à la source. La TVA calculée par juridiction fiscale. Un compte de résultat qui se met à jour à chaque vente, pas à la clôture du mois."
+        },
+        {
+          "title": "Le travail circule entre les applications.",
+          "description": "Tableaux kanban, automatisations et tâches rattachées à la facture, au client ou au service dont elles parlent vraiment. Des opérations qui ne se perdent pas entre deux outils."
+        },
+        {
+          "title": "Le tableau de bord qui voit tout.",
+          "description": "Tendances du chiffre d’affaires, cohortes de clients, performance par produit, marge sur main-d’œuvre. Chaque chiffre est tiré en direct de toutes les autres applications. Ni SQL, ni ETL nocturne."
+        }
+      ],
+      "demos": {
+        "hr": {
+          "scheduleTitle": "Planning",
+          "today": "Aujourd’hui · lun. 5 mai",
+          "onShift_one": "{{count}} en service",
+          "onShift_other": "{{count}} en service",
+          "roles": {
+            "floorManager": "Chef de salle",
+            "barista": "Barista",
+            "chef": "Chef de cuisine",
+            "server": "Serveur"
+          }
+        },
+        "pos": {
+          "menuLabel": "Carte · Sur place",
+          "orderLabel": "Commande · Table 4",
+          "addItems": "Ajoutez des articles…",
+          "total": "Total",
+          "charge": "Encaisser",
+          "chargeAmount": "Encaisser {{amount}}\u00a0$",
+          "items": [
+            "Expresso",
+            "Café latte",
+            "Cappuccino",
+            "Croissant",
+            "Jus d’orange",
+            "Tartine à l’avocat",
+            "Salade grecque",
+            "Cheesecake"
+          ]
+        },
+        "erp": {
+          "inventory": "Stocks",
+          "itemCount_one": "{{count}} article",
+          "itemCount_other": "{{count}} articles",
+          "alertCount_one": "{{count}} alerte",
+          "alertCount_other": "{{count}} alertes",
+          "table": {
+            "item": "Article",
+            "stock": "Stock",
+            "onHand": "En stock",
+            "status": "État"
+          },
+          "status": {
+            "out": "Épuisé",
+            "critical": "Critique",
+            "low": "Faible",
+            "ok": "OK"
+          },
+          "items": [
+            "Huile d’olive 5\u00a0L",
+            "Farine 25\u00a0kg",
+            "Café en grains",
+            "Saumon atlantique",
+            "Huile de truffe",
+            "Crème entière",
+            "Pain au levain"
+          ],
+          "units": {
+            "btl": "bout.",
+            "bag": "sac",
+            "kg": "kg",
+            "L": "L",
+            "pcs": "pces"
+          }
+        },
+        "crm": {
+          "customers": "Clients",
+          "totalCount": "1\u00a0204 au total",
+          "segments": {
+            "all": "Tous",
+            "vip": "★ VIP",
+            "regular": "Régulier",
+            "atRisk": "À risque",
+            "new": "Nouveau"
+          },
+          "table": {
+            "customer": "Client",
+            "tier": "Segment",
+            "spend": "Dépensé",
+            "lastVisit": "Dernière visite"
+          },
+          "visitCount_one": "{{count}} visite",
+          "visitCount_other": "{{count}} visites",
+          "relativeTime": {
+            "yesterday": "Hier",
+            "oneDayAgo": "1\u00a0j",
+            "twoDaysAgo": "2\u00a0j",
+            "threeDaysAgo": "3\u00a0j",
+            "fiveDaysAgo": "5\u00a0j",
+            "oneWeekAgo": "1\u00a0sem.",
+            "threeWeeksAgo": "3\u00a0sem.",
+            "oneMonthAgo": "1\u00a0mois"
+          }
+        },
+        "finance": {
+          "pnl": "Compte de résultat",
+          "monthLabel": "mai 2026",
+          "profitable": "Rentable",
+          "metrics": {
+            "revenue": "Chiffre d’affaires",
+            "expenses": "Dépenses",
+            "netProfit": "Bénéfice net"
+          },
+          "momSuffix": "sur un mois",
+          "months": {
+            "nov": "nov.",
+            "dec": "déc.",
+            "jan": "janv.",
+            "feb": "févr.",
+            "mar": "mars",
+            "apr": "avr.",
+            "may": "mai"
+          }
+        },
+        "flow": {
+          "breadcrumb": {
+            "workspaces": "Espaces de travail",
+            "operations": "Opérations",
+            "sprint": "Sprint hebdo"
+          },
+          "views": {
+            "board": "Tableau",
+            "list": "Liste",
+            "timeline": "Chronologie"
+          },
+          "columns": {
+            "backlog": "À faire",
+            "progress": "En cours",
+            "review": "À valider",
+            "done": "Terminé"
+          },
+          "priorityHigh": "Haute",
+          "tasks": {
+            "t1": "Lancement de la carte de saison, T3",
+            "t2": "Nouveau fournisseur\u00a0: Rossini",
+            "t3": "Couverts du vendredi, planning des équipes",
+            "t4": "Refaire la checklist de mise en place du brunch",
+            "t5": "Campagne e-mail\u00a0: fête des Mères",
+            "t6": "Contrat de maintenance, machine à expresso",
+            "t7": "Déclaration de TVA, T1",
+            "t8": "Firmware POS v4.2"
+          },
+          "tags": {
+            "ops": "Opérations",
+            "erp": "ERP",
+            "hr": "HR",
+            "kitchen": "Cuisine",
+            "crm": "CRM",
+            "vendor": "Fournisseur",
+            "finance": "Finance"
+          }
+        },
+        "insights": {
+          "revenue": "Chiffre d’affaires",
+          "last7Days": "7 derniers jours",
+          "kpis": {
+            "covers": "Couverts",
+            "avgOrder": "Panier moyen",
+            "peakDay": "Jour de pointe"
+          },
+          "vsPrefix": "vs {{day}}",
+          "days": {
+            "mon": "lun.",
+            "tue": "mar.",
+            "wed": "mer.",
+            "thu": "jeu.",
+            "fri": "ven.",
+            "sat": "sam.",
+            "sun": "dim."
+          },
+          "ranges": {
+            "7d": "7\u00a0j",
+            "30d": "30\u00a0j",
+            "90d": "90\u00a0j"
+          }
+        }
+      }
+    }
+  },
+  "pricing": {
+    "meta": {
+      "title": "Tarifs | rtylr",
+      "description": "Ce que comprend chaque forfait rtylr\u00a0: POS, ERP, HR, CRM, Finance et Flow partout. Commencez gratuitement, sans carte. Prix non publiés\u00a0: demandez un devis."
+    },
+    "hero": {
+      "title": "Les 7 applications.\nDans chaque forfait.",
+      "subtitle": "Aucun module vendu en plus, aucune licence par application. Ce qui change d’un forfait à l’autre, c’est l’échelle."
+    },
+    "directAnswer": {
+      "label": "Que comprennent les forfaits rtylr\u00a0?",
+      "body": "Chaque forfait rtylr comprend les sept applications\u00a0: POS, ERP, CRM, HR, Finance, Flow et les intégrations matérielles. Les forfaits diffèrent par l’échelle et non par les fonctionnalités\u00a0: ce qui change, c’est le nombre de personnes et d’établissements que vous gérez, ainsi que les contrôles dont une équipe plus grande a besoin. Free couvre 10 personnes sur un établissement et ne demande aucune carte. rtylr n’a pas encore publié de prix pour Pro et Scale\u00a0: ces deux forfaits sont sur devis."
+    },
+    "plans": {
+      "title": "Que contient chaque forfait\u00a0?",
+      "popular": "Le plus populaire",
+      "free": {
+        "name": "Free",
+        "description": "Tout ce qu’il faut pour faire tourner un seul établissement.",
+        "features": [
+          "Jusqu’à 10 membres d’équipe",
+          "Les 7 applications incluses",
+          "1 établissement",
+          "1\u00a0000 crédits IA / mois",
+          "Aucune carte bancaire requise"
+        ],
+        "cta": "Commencer gratuitement"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Pour les équipes qui grandissent sur plusieurs établissements.",
+        "features": [
+          "Jusqu’à 30 membres d’équipe",
+          "Jusqu’à 5 établissements",
+          "10\u00a0000 crédits IA / mois, plus 500 par utilisateur",
+          "Assistant IA",
+          "Support prioritaire par e-mail et par chat"
+        ],
+        "cta": "Commencer avec Pro"
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Utilisateurs illimités et toutes les fonctionnalités ouvertes.",
+        "features": [
+          "Membres d’équipe illimités",
+          "Établissements illimités",
+          "50\u00a0000 crédits IA / mois, plus 1\u00a0000 par utilisateur",
+          "SSO et journaux d’audit",
+          "Chargé de la réussite client dédié et SLA"
+        ],
+        "cta": "Parler à un commercial"
+      }
+    },
+    "compare": {
+      "title": "Qu’est-ce qui change d’un forfait à l’autre\u00a0?",
+      "feature": "Fonctionnalité",
+      "included": "Inclus",
+      "notIncluded": "Non inclus",
+      "rows": [
+        "Les 7 applications",
+        "Assistant IA",
+        "Support prioritaire",
+        "SSO",
+        "Journaux d’audit",
+        "Accompagnement au démarrage dédié",
+        "Garantie SLA"
+      ]
+    },
+    "bottom": {
+      "title": "Commencez sur Free. Montez de forfait quand vous l’aurez dépassé.",
+      "subtitle": "10 utilisateurs et les 7 applications sont à vous dès le premier jour, sans carte. Réservez une démo si vous préférez d’abord le voir tourner sur vos propres chiffres."
+    }
+  },
+  "pos": {
+    "meta": {
+      "title": "POS · La caisse qui suit le rythme. | rtylr",
+      "description": "Logiciel de caisse complet pour la restauration et le commerce. Tickets, additions partagées, pourboires et un vrai mode hors ligne, dans rtylr.",
+      "schemaDescription": "Logiciel de caisse complet pour la restauration et le commerce. Tickets, additions partagées, pourboires et un vrai mode hors ligne."
+    },
+    "hero": {
+      "eyebrow": "rtylr POS",
+      "title": "La caisse\nqui suit le rythme.",
+      "subtitle": "Envoyez les plats à la bonne station. Partagez une addition en sept. Acceptez Apple Pay, les cartes cadeaux, les comptes clients. Continuez à encaisser quand le WiFi tombe. Conçue pour le rythme du vrai service, pas pour une vidéo de démonstration.",
+      "receipt": {
+        "items": [
+          "Pizza margherita",
+          "Salade maison",
+          "Eau pétillante",
+          "Expresso"
+        ],
+        "order": "Commande n°\u00a0{{orderId}} · Table {{table}}",
+        "live": "DIRECT",
+        "venue": "rtylr · Terrasse",
+        "date": "18 avr.",
+        "server": "Servi par {{name}}",
+        "subtotal": "Sous-total",
+        "tax": "TVA ({{pct}})",
+        "tip": "Pourboire ({{pct}})",
+        "total": "Total",
+        "paid": "Payé · Visa ••4891"
+      }
+    },
+    "directAnswer": {
+      "label": "Qu’est-ce que rtylr POS\u00a0?",
+      "body": "rtylr POS est l’application de caisse de rtylr, conçue pour les restaurants et les commerces qui exploitent aussi bien un seul établissement que vingt. Elle gère les tickets, l’envoi des plats, le partage des additions, les pourboires, les options et les paiements par carte, et elle continue de prendre les commandes quand la connexion tombe. Comme elle écrit dans la même base de données que les stocks, les équipes et la comptabilité, une vente déplace le stock et le chiffre d’affaires sans export."
+    },
+    "features": {
+      "eyebrow": "CE QU’ELLE FAIT",
+      "title": "Que doit réussir\nune caisse\u00a0?",
+      "items": [
+        {
+          "title": "Des tickets qui suivent",
+          "copy": "Partager, fusionner, regrouper. Envoyer chaque plat à la bonne station. Lancer quand vous dites de lancer."
+        },
+        {
+          "title": "Tous les moyens de paiement",
+          "copy": "Carte, Apple Pay, Google Pay, espèces, carte cadeau, offert, compte client. Une seule caisse pour tout."
+        },
+        {
+          "title": "Pourboires, additions ouvertes et partages",
+          "copy": "Partage par couvert. Pourboire automatique. Additions pré-autorisées. Les pourboires arrivent dans la paie le lendemain matin."
+        },
+        {
+          "title": "Fonctionne quand internet ne fonctionne pas",
+          "copy": "Mode hors ligne complet. Les transactions sont mises en file en local et se synchronisent dès que vous êtes de nouveau en ligne."
+        }
+      ]
+    },
+    "compare": {
+      "eyebrow": "FACE AUX AUTRES",
+      "title": "Que font payer en plus\nles autres caisses\u00a0?",
+      "rows": [
+        "Mode hors ligne (service complet, sans internet)",
+        "Prestataire de paiement imposé",
+        "Matériel que vous pouvez acheter ailleurs",
+        "HR et paie inclus",
+        "Le stock se décrémente par recette",
+        "CRM en temps réel lié aux tickets",
+        "API REST publique v1"
+      ],
+      "cell": {
+        "included": "Inclus",
+        "excluded": "-",
+        "partial": "Partiel",
+        "paidAddon": "Option payante"
+      },
+      "footnote": "Comparatif établi d’après les tarifs et la documentation produit accessibles publiquement, avril 2026. Une information n’est plus à jour\u00a0?",
+      "footnoteLink": "Signalez-le-nous"
+    },
+    "cta": {
+      "title": "Votre caisse devrait\nsuivre le rythme. Celle-ci le fait."
+    }
+  },
+  "erp": {
+    "meta": {
+      "title": "ERP · Des stocks qui se comptent tout seuls. | rtylr",
+      "description": "Stocks en temps réel, fournisseurs et achats. Décrémentation liée aux recettes. Transferts entre établissements avec piste d’audit complète.",
+      "schemaDescription": "Stocks en temps réel, fournisseurs, bons de commande et gestion d’entrepôt."
+    },
+    "hero": {
+      "eyebrow": "rtylr ERP · Stocks",
+      "title": "Des stocks qui\nse comptent tout seuls.",
+      "subtitle": "Chaque margherita vendue retire de la farine, de la mozzarella et de l’huile d’olive. Chaque bon de commande approuvé met à jour le stock de l’entrepôt. Chaque alerte de stock bas part avant la rupture, pas après que le coup de feu du samedi s’en est aperçu.",
+      "inventory": {
+        "items": [
+          "Margherita (225\u00a0g de pâte)",
+          "Rouge maison (750\u00a0ml)",
+          "Huile d’olive (5\u00a0L)",
+          "Café en grains (1\u00a0kg)",
+          "Farine 00 (3\u00a0kg)"
+        ]
+      }
+    },
+    "directAnswer": {
+      "label": "Qu’est-ce que rtylr ERP\u00a0?",
+      "body": "rtylr ERP est l’application de gestion des stocks et des approvisionnements de rtylr, pour les entreprises qui détiennent du stock sur un ou plusieurs établissements. Elle couvre les quantités en stock, les fournisseurs, les bons de commande, les transferts entre sites, les alertes de stock bas et le suivi des coûts. Elle lit les ventes de POS au fil de l’eau\u00a0: le stock reste juste sans synchronisation nocturne et un réassort peut être préparé avant que quiconque remarque une étagère vide."
+    },
+    "capabilities": {
+      "eyebrow": "CAPACITÉS",
+      "title": "Que couvre rtylr ERP,\ndu quai de réception\nau compte de résultat\u00a0?",
+      "items": [
+        {
+          "title": "Chaque référence, chaque variante",
+          "copy": "Suivez les ingrédients au gramme près. Décrémentation liée aux recettes. Quantités en temps réel au fil des ventes."
+        },
+        {
+          "title": "Fournisseurs et bons de commande",
+          "copy": "Réassort automatique au seuil. Comparaison des prix entre fournisseurs. Suivi de la date d’arrivée prévue, ligne par ligne."
+        },
+        {
+          "title": "Transferts entre établissements",
+          "copy": "Déplacez du stock entre les sites avec une piste d’audit complète. Reporting par établissement. Aucun rapprochement sur tableur."
+        },
+        {
+          "title": "Le stock bas avant qu’il fasse mal",
+          "copy": "Seuils intelligents fondés sur la vitesse d’écoulement passée. Les alertes partent à la bonne personne. Plus de rupture en plein service."
+        }
+      ]
+    },
+    "depletion": {
+      "eyebrow": "DÉCRÉMENTATION EN DIRECT PAR RECETTE",
+      "title": "Qu’arrive-t-il au stock quand une vente passe\u00a0?",
+      "copy": "Chaque vente encaissée dans POS descend l’arbre de la recette. Farine, levure, mozzarella, basilic, huile d’olive\u00a0: chacun se décrémente au gramme exact. Dès qu’un article franchit son seuil de réassort, un bon de commande est préparé avec votre fournisseur habituel et envoyé pour approbation."
+    },
+    "cta": {
+      "title": "Bouclez vos stocks\npendant que vous dormez."
+    },
+    "mock": {
+      "reset": "Réinitialiser",
+      "resetLabel": "Réinitialiser les stocks",
+      "tabs": {
+        "allSkus": "Toutes les références",
+        "lowStock": "Stock bas · {{count}}",
+        "suppliers": "Fournisseurs",
+        "purchaseOrders": "Bons de commande"
+      },
+      "simulate": "Simuler le service du vendredi",
+      "simulateRunning": "Service en cours…",
+      "table": {
+        "sku": "Référence",
+        "item": "Article",
+        "onHand": "En stock",
+        "min": "Seuil",
+        "status": "État"
+      },
+      "status": {
+        "critical": "Critique",
+        "reorder": "À réassortir",
+        "healthy": "Suffisant"
+      },
+      "footer_one": "Réassort automatique déclenché pour {{count}} article · bon de commande n°\u00a0{{po}} préparé",
+      "footer_other": "Réassort automatique déclenché pour {{count}} articles · bon de commande n°\u00a0{{po}} préparé"
+    },
+    "flow": {
+      "steps": [
+        {
+          "title": "1 margherita vendue",
+          "desc": "POS interroge la fiche recette"
+        },
+        {
+          "title": "7 ingrédients décrémentés",
+          "desc": "Farine, mozza, basilic, huile, sel, levure, pâte"
+        },
+        {
+          "title": "Bon de commande préparé automatiquement",
+          "desc": "Envoyé au responsable pour approbation"
+        }
+      ]
+    }
+  },
+  "contact": {
+    "meta": {
+      "title": "Contact | rtylr",
+      "description": "Contactez l’équipe rtylr. Nous répondons sous 24 heures."
+    },
+    "hero": {
+      "title": "Écrivez-nous. Nous lisons tout.",
+      "subtitle": "Question produit, demande commerciale, sollicitation presse, idée de fonctionnalité\u00a0: chaque message arrive devant un humain. Nous répondons en un jour ouvré, souvent plus vite."
+    },
+    "channels": {
+      "title": "Canaux de contact",
+      "whatsapp": {
+        "label": "Discuter avec nous",
+        "description": "Écrivez-nous directement sur WhatsApp."
+      },
+      "phone": {
+        "label": "Nous appeler",
+        "description": "Du lundi au vendredi, de 9\u00a0h à 17\u00a0h, heure locale."
+      },
+      "email": {
+        "label": "Nous écrire",
+        "description": "Nous répondons sous 24 heures."
+      }
+    },
+    "hours": {
+      "label": "Horaires d’ouverture",
+      "days": "Du lundi au vendredi",
+      "time": "De 9\u00a0h à 17\u00a0h (GMT+3)"
+    },
+    "form": {
+      "title": "Envoyez-nous un message",
+      "name": {
+        "label": "Nom",
+        "placeholder": "Votre nom complet"
+      },
+      "email": {
+        "label": "E-mail",
+        "placeholder": "vous@exemple.com"
+      },
+      "company": {
+        "label": "Entreprise",
+        "placeholder": "Le nom de votre entreprise"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Dites-nous comment nous pouvons vous aider…"
+      },
+      "required": "*",
+      "optional": "(facultatif)",
+      "submit": "Envoyer le message"
+    },
+    "errors": {
+      "nameRequired": "Le nom est obligatoire.",
+      "emailRequired": "L’e-mail est obligatoire.",
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "messageRequired": "Le message est obligatoire."
+    },
+    "success": {
+      "title": "Encore une étape.",
+      "body": "Nous avons ouvert un brouillon prérempli dans votre messagerie. Envoyez-le pour qu’il nous parvienne et nous vous répondrons sous 24 heures. Si rien ne s’est ouvert, écrivez-nous directement à",
+      "reset": "Envoyer un autre message"
+    },
+    "strip": {
+      "text": "Besoin d’aide pour démarrer\u00a0? Réservez une démo personnalisée."
+    }
+  },
+  "faq": {
+    "home": {
+      "title": "Questions sur rtylr",
+      "intro": "Les six questions que les acheteurs posent en premier. Les réponses sont sur la page, pas cachées dans du balisage.",
+      "items": [
+        {
+          "question": "Qu’est-ce que rtylr\u00a0?",
+          "answer": "rtylr est un système d’exploitation d’entreprise tout-en-un pour les petites et moyennes entreprises. Il réunit caisse, ERP, HR, CRM, finance et gestion de projet sur une seule plateforme\u00a0: une équipe cesse d’assembler une caisse, un tableur, un outil comptable et un gestionnaire de tâches. Conçu pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes."
+        },
+        {
+          "question": "Combien coûte rtylr\u00a0?",
+          "answer": "rtylr n’a pas encore publié ses prix. Le forfait Free est réellement gratuit, ne demande aucune carte et couvre 10 membres d’équipe sur un établissement avec les 7 applications\u00a0: vous pouvez faire tourner un établissement dessus dès aujourd’hui. Pro et Scale sont sur devis\u00a0: dites-nous la taille de votre équipe et le nombre de vos établissements. Voir rtylr.com/pricing pour le détail de chaque forfait."
+        },
+        {
+          "question": "Puis-je n’utiliser qu’une seule application rtylr, ou faut-il les prendre toutes\u00a0?",
+          "answer": "Chaque application fonctionne seule. Flow, Finance ou HR s’utilisent séparément, avec leur propre connexion, leurs réglages et leur équipe. La raison d’en faire tourner plusieurs, c’est le partage des données\u00a0: les clients du CRM arrivent dans POS, les employés de HR arrivent dans le planning, et le chiffre d’affaires de POS arrive dans Finance sans export. Ce n’est jamais obligatoire."
+        },
+        {
+          "question": "rtylr remplace-t-il mon logiciel de caisse\u00a0?",
+          "answer": "Oui. rtylr POS est une caisse complète pour la restauration et le commerce. Elle gère les tickets, les partages d’addition, les pourboires, les options, les comptages de stock, le mode hors ligne et l’impression des tickets sur du matériel certifié. Elle tourne sur iPad, tablette Android et ordinateur, et se synchronise en temps réel avec le reste de la plateforme\u00a0: une vente déplace le stock sans export."
+        },
+        {
+          "question": "Mes données sont-elles à moi\u00a0?",
+          "answer": "Oui. Chaque compte rtylr exporte à tout moment des CSV propres de ses clients, commandes, employés, factures et stocks depuis la page des réglages, sans passer par le support. Les données sont hébergées dans la région UE ou US, à votre choix. Voir rtylr.com/trust pour le détail de la conformité et rtylr.com/legal/security pour l’architecture de sécurité."
+        },
+        {
+          "question": "Qu’est-ce que rtylr remplace\u00a0?",
+          "answer": "Chez la plupart des entreprises qui l’adoptent\u00a0: une caisse, une feuille de stock, un outil de planning, un export de paie, une liste de clients et un logiciel de comptabilité. rtylr n’affirme pas que chacun de ces outils est mauvais pris séparément. Il affirme que les faire tourner séparément oblige à saisir le même chiffre plusieurs fois, et que les versions finissent par se contredire."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Questions sur les tarifs rtylr",
+      "items": [
+        {
+          "question": "Combien coûte rtylr\u00a0?",
+          "answer": "rtylr n’a pas encore publié ses prix. Le forfait Free est réellement gratuit et ne demande aucune carte\u00a0: vous pouvez faire tourner un établissement dessus dès aujourd’hui. Pour Pro ou Scale, contactez-nous\u00a0: nous parlerons de la taille de votre équipe et du nombre de vos établissements. Nous préférons vous donner un devis honnête plutôt qu’afficher ici un chiffre que nous pourrions changer."
+        },
+        {
+          "question": "Puis-je changer de forfait à tout moment\u00a0?",
+          "answer": "Oui. Quand vous montez de forfait, les nouvelles fonctionnalités s’ouvrent immédiatement. Quand vous descendez, le changement s’applique à la fin de la période en cours. Vos données, votre équipe et vos réglages restent en place."
+        },
+        {
+          "question": "Existe-t-il un essai gratuit de Pro\u00a0?",
+          "answer": "Chaque nouvel espace de travail démarre avec un essai Pro de 14 jours, sans carte bancaire. Au bout des 14 jours, il repasse automatiquement au forfait Free, sauf indication contraire de votre part. Il n’y a donc rien à annuler pour arrêter l’essai."
+        },
+        {
+          "question": "Que se passe-t-il quand j’atteins 10 utilisateurs sur Free\u00a0?",
+          "answer": "Nous vous invitons à passer à Pro avant d’ajouter le onzième utilisateur. Rien ne casse\u00a0: vos données, vos rapports et vos configurations sont tous conservés, et l’équipe déjà en place continue de travailler normalement."
+        },
+        {
+          "question": "Quand faut-il passer à Scale\u00a0?",
+          "answer": "Scale est conçu pour les équipes qui dépassent 30 utilisateurs actifs. Il lève les limites d’utilisateurs et d’établissements, et ajoute le SSO, les journaux d’audit, un chargé de la réussite client dédié et un SLA."
+        },
+        {
+          "question": "Y a-t-il un engagement ou un verrouillage\u00a0?",
+          "answer": "Aucun. Vous pouvez résilier à tout moment, et vos données restent exportables tant que le compte est ouvert\u00a0: clients, commandes, employés, factures et stocks partent en CSV depuis la page des réglages."
+        }
+      ]
+    },
+    "pos": {
+      "title": "Questions sur rtylr POS",
+      "items": [
+        {
+          "question": "rtylr POS fonctionne-t-il hors ligne\u00a0?",
+          "answer": "Oui. rtylr POS garde une copie locale complète de la carte, des options et des commandes en cours. Quand internet tombe, la caisse continue de prendre les commandes, d’imprimer les tickets et d’encaisser les espèces. Les paiements par carte sont mis en file et se règlent automatiquement au retour de la connexion\u00a0: une coupure un samedi soir n’arrête pas la salle."
+        },
+        {
+          "question": "Quel matériel fonctionne avec rtylr POS\u00a0?",
+          "answer": "rtylr POS tourne sur iPad, tablette Android et ordinateur Windows ou macOS. Il s’associe aux imprimantes de tickets Epson et Star, aux lecteurs de codes-barres standards, aux scanners Zebra et Symbol pour le commerce, et aux terminaux de paiement Stripe Terminal, Clover et Square. Voir rtylr.com/hardware pour la liste du matériel testé."
+        },
+        {
+          "question": "rtylr POS gère-t-il les restaurants à plusieurs établissements\u00a0?",
+          "answer": "Oui, à partir du forfait Pro. Chaque établissement a sa propre carte, ses prix, ses équipes et son reporting, et le propriétaire dispose d’un tableau de bord consolidé sur l’ensemble des sites. Une modification de carte peut être poussée partout d’un coup ou ajustée établissement par établissement."
+        },
+        {
+          "question": "Qu’est-ce que rtylr POS remplace\u00a0?",
+          "answer": "La caisse, et le travail qui se cache derrière\u00a0: le comptage de stock que quelqu’un refait à la main, le tableur des pourboires qui alimente la paie, et l’export de fin de journée vers la comptabilité. Comme POS écrit dans la même base de données que ERP, HR et Finance, une vente met à jour le stock et le chiffre d’affaires au moment où elle se produit, pas dans la nuit."
+        }
+      ]
+    },
+    "erp": {
+      "title": "Questions sur rtylr ERP",
+      "items": [
+        {
+          "question": "Que gère rtylr ERP\u00a0?",
+          "answer": "rtylr ERP couvre les stocks, les fournisseurs, les bons de commande, les transferts de stock entre établissements, les alertes de stock bas et le suivi des coûts. Il lit les ventes d’articles de POS au fil de l’eau\u00a0: les quantités en stock restent justes sans synchronisation nocturne."
+        },
+        {
+          "question": "rtylr ERP gère-t-il les stocks sur plusieurs entrepôts\u00a0?",
+          "answer": "Oui. Chaque article peut être stocké sur plusieurs sites, avec des quantités, des seuils de réassort et un suivi des transferts propres à chaque site. Un bon de commande peut être réparti entre plusieurs entrepôts, et par défaut chaque employé ne voit que le site auquel il est affecté."
+        },
+        {
+          "question": "Qu’est-ce que rtylr ERP remplace\u00a0?",
+          "answer": "Le tableur de stock, et le CSV censé le tenir à jour avec les ventes. Une vente dans POS décrémente les composants de la recette dans ERP au moment où elle se produit\u00a0: «\u00a0combien d’unités d’un composant reste-t-il sur trois établissements\u00a0?\u00a0» devient une question à laquelle vous répondez sans ouvrir un second outil."
+        }
+      ]
+    }
+  },
+  "trust": {
+    "meta": {
+      "title": "Centre de confiance | rtylr",
+      "description": "Sécurité, confidentialité, conformité, disponibilité et transparence sur nos prestataires\u00a0: tout ce qu’il faut savoir avant de vous engager."
+    },
+    "pillars": [
+      {
+        "title": "Programme de sécurité",
+        "copy": "Programme formel de sécurité de l’information aligné sur les normes ISO 27001 et SOC 2. Revu chaque trimestre."
+      },
+      {
+        "title": "Chiffrement",
+        "copy": "TLS 1.2+ en transit, AES-256 au repos. Sauvegardes conservées dans des régions distinctes et secrets gérés dans un coffre à secrets managé."
+      },
+      {
+        "title": "Contrôle des accès",
+        "copy": "SSO et MFA obligatoire en production. Principe du moindre privilège, avec des accès revus chaque trimestre."
+      },
+      {
+        "title": "Infrastructure",
+        "copy": "Cloudflare en périphérie de réseau, services managés Firebase / GCP, sauvegardes multirégions avec restauration à un instant donné (PITR)."
+      },
+      {
+        "title": "Supervision 24\u00a0h/24 et 7\u00a0j/7",
+        "copy": "Surveillance et alertes en continu. Runbook documenté de réponse aux incidents. Notification des violations sous 72 heures."
+      },
+      {
+        "title": "Gestion des vulnérabilités",
+        "copy": "Dépendances analysées à chaque build. Test d’intrusion annuel réalisé par un tiers. CVE critiques corrigées sous 7 jours."
+      }
+    ],
+    "compliance": [
+      {
+        "label": "RGPD / RGPD britannique",
+        "status": "Conforme"
+      },
+      {
+        "label": "CCPA / CPRA",
+        "status": "Conforme"
+      },
+      {
+        "label": "PCI DSS",
+        "status": "Via Paddle (niveau 1)"
+      },
+      {
+        "label": "SOC 2 Type II",
+        "status": "En cours · T4 2026"
+      },
+      {
+        "label": "ISO 27001",
+        "status": "Aligné, pas encore certifié"
+      },
+      {
+        "label": "HIPAA",
+        "status": "Non applicable"
+      }
+    ],
+    "hero": {
+      "eyebrow": "CENTRE DE CONFIANCE",
+      "title": "Un logiciel digne de confiance pour faire tourner votre entreprise.",
+      "securityDocs": "Documentation de sécurité",
+      "privacyPolicy": "Politique de confidentialité",
+      "subtitle": "Sécurité, confidentialité, disponibilité, conformité\u00a0: autant de sujets qui devraient aller de soi, et que nous exposons ici noir sur blanc. De quoi évaluer rtylr avant de vous engager."
+    },
+    "pillarsSection": {
+      "eyebrow": "COMMENT NOUS PROTÉGEONS VOS DONNÉES",
+      "title": "Six sujets que nous prenons\nau sérieux chaque jour.",
+      "learnMore": "En savoir plus →"
+    },
+    "complianceSection": {
+      "eyebrow": "POSTURE DE CONFORMITÉ",
+      "title": "Où nous en sommes.",
+      "copy": "Nous publions notre statut de conformité en toute transparence, qu’il soit certifié, aligné ou en cours."
+    },
+    "residency": {
+      "title": "Où sont hébergées vos données, et comment les emporter avec vous.",
+      "body": "Les Données client sont hébergées dans la région cloud la mieux adaptée aux réglages de votre espace de travail. Un hébergement en région UE est disponible sur demande pour les clients soumis à des exigences de résidence des données. Vous pouvez exporter l’intégralité de votre espace de travail à tout moment depuis les réglages, en CSV, en XLSX ou par extraction via l’API. À la clôture du compte, vos données sont conservées 30 jours afin de permettre une restauration, puis supprimées des systèmes actifs sous 60 jours et des sauvegardes sous 90 jours."
+    },
+    "packet": {
+      "title": "Besoin de notre dossier de sécurité, de notre SIG ou de notre DPA\u00a0?",
+      "body": "Écrivez à <secMail>security@voxire.com</secMail> et nous vous enverrons le dossier à jour sous NDA dans un délai de 7 jours ouvrés, avec le dernier état d’avancement de notre audit SOC 2 Type II."
+    },
+    "status": {
+      "operational": "Tous les systèmes sont opérationnels",
+      "viewLive": "État des services en direct sur <statusLink>status.rtylr.com</statusLink>",
+      "uptimeLabel": "Disponibilité sur 90 jours glissants",
+      "breachLabel": "Engagement de notification des violations",
+      "penTestLabel": "Test d’intrusion annuel réalisé par un tiers",
+      "breachValue": "<\u00a072\u00a0h",
+      "uptimeValue": "99,99\u00a0%"
+    }
+  },
+  "legal": {
+    "terms": {
+      "meta": {
+        "title": "Conditions d’utilisation | rtylr",
+        "description": "Les conditions qui régissent votre utilisation de rtylr, exploité par Voxire.",
+        "schemaDescription": "Les conditions qui régissent votre utilisation de rtylr, exploité par Voxire."
+      },
+      "eyebrow": "JURIDIQUE · CONDITIONS D’UTILISATION",
+      "title": "Conditions d’utilisation",
+      "lastUpdated": "Dernière mise à jour\u00a0: 18 avril 2026 · Entrée en vigueur immédiate pour les nouveaux clients, et 30 jours après notification pour les clients existants.",
+      "tocTitle": "Sur cette page",
+      "tocAriaLabel": "Navigation par section",
+      "sections": {
+        "acceptance": "Acceptation des conditions",
+        "account": "Votre compte",
+        "plans-billing": "Forfaits et facturation",
+        "seat-proration": "Facturation par poste et prorata",
+        "trial-refunds": "Essais, résiliation, remboursements",
+        "acceptable-use": "Utilisation acceptable",
+        "data-ownership": "Vos données",
+        "ip": "Propriété intellectuelle",
+        "third-party": "Services tiers",
+        "disclaimers": "Exclusions de garantie",
+        "liability": "Limitation de responsabilité",
+        "indemnification": "Indemnisation",
+        "termination": "Résiliation",
+        "changes": "Modifications des présentes conditions",
+        "governing-law": "Droit applicable",
+        "contact": "Contact"
+      },
+      "body": {
+        "acceptance": {
+          "p1": "Les présentes conditions d’utilisation («\u00a0<b>Conditions</b>\u00a0») régissent votre accès à la plateforme rtylr, à ses applications et aux services associés (ensemble, «\u00a0<b>rtylr</b>\u00a0» ou le «\u00a0<b>Service</b>\u00a0»), exploités par Voxire («\u00a0<b>nous</b>\u00a0»), ainsi que votre utilisation de ceux-ci. En créant un compte, en cliquant sur «\u00a0Commencer\u00a0» ou en utilisant rtylr de quelque autre manière, vous acceptez les présentes Conditions en votre nom et au nom de toute entreprise, organisation ou entité que vous représentez.",
+          "p2": "Si vous n’acceptez pas les présentes Conditions, n’utilisez pas rtylr. Si vous acceptez les présentes Conditions au nom d’une entreprise, vous déclarez avoir le pouvoir d’engager cette entreprise."
+        },
+        "account": {
+          "p1": "Pour utiliser la plupart des fonctionnalités de rtylr, vous devez créer un compte. Vous vous engagez à fournir des informations exactes, à jour et complètes lors de l’inscription, et à les tenir à jour. Vous êtes responsable\u00a0:",
+          "list1": [
+            "de la confidentialité de votre mot de passe et de vos jetons d’accès\u00a0;",
+            "de toute activité réalisée depuis votre compte, y compris celle des membres d’équipe que vous ajoutez\u00a0;",
+            "de nous signaler sans délai, à l’adresse <secMail>security@voxire.com</secMail>, tout accès non autorisé ou toute violation de sécurité."
+          ],
+          "p2": "Les comptes doivent être détenus par des personnes physiques âgées d’au moins 18 ans, ou par des personnes morales agissant par l’intermédiaire d’un représentant habilité."
+        },
+        "plans-billing": {
+          "p1": "rtylr est proposé sous la forme d’un forfait Free et de forfaits payants (Pro, Scale). Les fonctionnalités, les limites et les prix de chaque forfait sont décrits sur <pricingLink>rtylr.com/pricing</pricingLink>. En souscrivant à un forfait payant, vous nous autorisez, ou autorisez notre prestataire de paiement, à prélever sur le moyen de paiement enregistré les frais récurrents, les taxes et tout dépassement défini sur la page des tarifs.",
+          "p2": "Sauf indication contraire, tous les frais s’entendent hors taxes applicables. Nous faisons appel à Paddle Inc. en qualité de Merchant of Record pour la plupart des transactions\u00a0; les conditions de paiement de Paddle peuvent également s’appliquer à votre achat."
+        },
+        "seat-proration": {
+          "p1": "Les forfaits payants sont facturés par poste actif. Un «\u00a0poste\u00a0» désigne tout utilisateur disposant d’un accès de connexion à votre espace de travail. Les postes sont facturés au prorata journalier\u00a0:",
+          "list1": [
+            "Lorsque vous ajoutez un poste en cours de cycle, vous n’êtes facturé que pour les jours restants de cette période de facturation.",
+            "Lorsque vous supprimez un poste en cours de cycle, les jours restants de ce poste sont crédités sur votre facture suivante.",
+            "La facturation est récapitulée à la fin de chaque période, afin que vous voyiez exactement quels postes étaient actifs et sur quels jours."
+          ],
+          "p2": "Sur le forfait Scale, une tarification par palier s’applique automatiquement lorsque votre espace de travail dépasse 30 postes actifs au cours de la période de facturation."
+        },
+        "trial-refunds": {
+          "p1": "Les nouveaux espaces de travail peuvent démarrer par un essai d’un forfait payant. À la fin de l’essai, l’espace de travail revient automatiquement au forfait Free si aucun moyen de paiement n’a été ajouté. Vous pouvez résilier à tout moment\u00a0; la résiliation prend effet à la fin de la période de facturation en cours.",
+          "p2": "Comme rtylr est facturé au prorata journalier, les jours non utilisés du cycle en cours sont portés au crédit de la période suivante plutôt que remboursés. Nous n’effectuons un remboursement que lorsque le droit de la consommation applicable l’exige."
+        },
+        "acceptable-use": {
+          "p1": "Vous vous engagez à ne pas\u00a0:",
+          "list1": [
+            "utiliser rtylr pour stocker ou transmettre des contenus illicites, des logiciels malveillants ou des éléments portant atteinte aux droits de tiers\u00a0;",
+            "sonder, scanner ou tester la vulnérabilité de rtylr, ni contourner ses contrôles de sécurité, sauf dans le cadre d’un programme public de divulgation responsable\u00a0;",
+            "recourir à des moyens automatisés pour extraire des données du Service au-delà d’un usage raisonnable de l’API, conforme à votre forfait\u00a0;",
+            "revendre rtylr, en accorder une sous-licence ou l’utiliser pour créer un produit concurrent\u00a0;",
+            "utiliser le Service pour envoyer du spam, enfreindre les lois sur la protection de la vie privée des consommateurs ou traiter des données de paiement en dehors des points de terminaison conformes à la norme PCI que nous mettons à disposition."
+          ],
+          "p2": "Nous nous réservons le droit de suspendre l’accès aux espaces de travail dont nous estimons raisonnablement qu’ils enfreignent la présente section Utilisation acceptable."
+        },
+        "data-ownership": {
+          "p1": "Vous conservez l’intégralité des droits sur les données que vous téléversez, stockez ou générez dans rtylr (les «\u00a0<b>Données client</b>\u00a0»). Vous accordez à Voxire une licence limitée, mondiale et exempte de redevance pour héberger, traiter, afficher et transmettre les Données client, aux seules fins de fourniture du Service.",
+          "p2": "Vous pouvez exporter vos Données client à tout moment depuis les réglages de votre espace de travail. À la clôture du compte, les Données client sont conservées 30 jours afin de permettre une restauration, puis supprimées des systèmes actifs dans un délai de 60 jours (les sauvegardes sont purgées selon leur cycle glissant, au plus tard sous 90 jours).",
+          "p3": "La manière dont nous traitons les données à caractère personnel est décrite dans notre <privacyLink>politique de confidentialité</privacyLink>."
+        },
+        "ip": {
+          "p1": "rtylr, y compris l’ensemble des logiciels, designs, marques et documentations, est la propriété de Voxire et de ses concédants de licence. Les présentes Conditions vous confèrent un droit d’utilisation du Service limité, non exclusif et non transférable, tel que ce Service est fourni. Aucun autre droit n’est accordé.",
+          "p2": "Si vous nous transmettez des commentaires ou des suggestions concernant le Service, vous nous accordez une licence perpétuelle et exempte de redevance pour utiliser ces retours afin d’améliorer rtylr."
+        },
+        "third-party": {
+          "p1": "rtylr s’intègre à des services tiers (prestataires de paiement, exports comptables, acheminement des e-mails, par exemple). Votre utilisation de ces intégrations est régie par les conditions de ces tiers. Nous ne sommes pas responsables de la disponibilité, du contenu ni des pratiques des services tiers."
+        },
+        "disclaimers": {
+          "p1": "rtylr est fourni «\u00a0<b>en l’état</b>\u00a0» et «\u00a0<b>selon disponibilité</b>\u00a0». Dans la mesure maximale permise par la loi, nous excluons toute garantie, expresse ou implicite, y compris les garanties de qualité marchande, d’adéquation à un usage particulier et d’absence de contrefaçon. Nous ne garantissons pas que le Service sera ininterrompu ni exempt d’erreurs, ni qu’il répondra à vos besoins particuliers."
+        },
+        "liability": {
+          "p1": "Dans la mesure maximale permise par la loi, Voxire ainsi que ses dirigeants, ses salariés et ses mandataires ne sont pas responsables des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, y compris la perte de bénéfices, la perte de chiffre d’affaires, la perte de données ou les coûts de remplacement, découlant de votre utilisation de rtylr ou liés à celle-ci.",
+          "p2": "Notre responsabilité totale cumulée envers vous, pour toute réclamation née des présentes Conditions, est limitée au plus élevé des deux montants suivants\u00a0: (a) les frais que vous nous avez versés au cours des douze mois précédant le fait générateur de la réclamation, ou (b) cent dollars américains (100 USD)."
+        },
+        "indemnification": {
+          "p1": "Vous vous engagez à défendre, indemniser et garantir Voxire contre toute réclamation découlant de vos Données client, de votre manquement aux présentes Conditions ou de votre violation du droit applicable, sauf lorsque cette réclamation résulte de notre faute lourde ou de notre faute intentionnelle."
+        },
+        "termination": {
+          "p1": "Vous pouvez clôturer votre compte à tout moment depuis les réglages de l’espace de travail. Nous pouvons suspendre ou résilier votre accès en cas de manquement substantiel aux présentes Conditions, si la loi l’exige, ou si votre compte présente un impayé de plus de 30 jours. Les sections qui, par leur nature, doivent survivre à la résiliation (obligations de paiement, limitations de responsabilité, droit applicable) resteront en vigueur."
+        },
+        "changes": {
+          "p1": "Nous pouvons modifier les présentes Conditions de temps à autre. Le cas échéant, nous mettons à jour la date de «\u00a0dernière mise à jour\u00a0» et, pour les modifications substantielles, envoyons un avis à l’adresse e-mail du propriétaire principal enregistrée. La poursuite de l’utilisation de rtylr après l’entrée en vigueur d’une modification vaut acceptation des Conditions mises à jour."
+        },
+        "governing-law": {
+          "p1": "Les présentes Conditions sont régies par le droit du ressort dans lequel Voxire est immatriculée, sans égard aux règles de conflit de lois. Vous et Voxire acceptez la compétence exclusive des tribunaux compétents de ce ressort pour tout litige né des présentes Conditions, étant entendu que chaque partie peut solliciter des mesures d’injonction devant toute juridiction compétente afin de protéger sa propriété intellectuelle ou sa sécurité."
+        },
+        "contact": {
+          "p1": "Des questions sur les présentes Conditions\u00a0? Écrivez à <infoMail>info@voxire.com</infoMail>. Pour les sujets de sécurité en particulier, utilisez <secMail>security@voxire.com</secMail>."
+        }
+      },
+      "contactStrip": {
+        "title": "Une question juridique ou de conformité\u00a0?",
+        "body": "Nous y répondrons volontiers. Écrivez-nous à <infoMail>info@voxire.com</infoMail>, ou contactez-nous sur WhatsApp au +961 3 940 708."
+      }
+    },
+    "privacyPolicy": {
+      "meta": {
+        "title": "Politique de confidentialité | rtylr",
+        "description": "Comment rtylr et Voxire traitent vos données à caractère personnel, au titre du RGPD, du CCPA et des lois équivalentes.",
+        "schemaDescription": "Comment rtylr et Voxire traitent vos données à caractère personnel."
+      },
+      "eyebrow": "JURIDIQUE · POLITIQUE DE CONFIDENTIALITÉ",
+      "title": "Politique de confidentialité",
+      "lastUpdated": "Dernière mise à jour\u00a0: 18 avril 2026 · S’applique à rtylr.com et à la plateforme rtylr.",
+      "tocTitle": "Sur cette page",
+      "tocAriaLabel": "Navigation par section",
+      "sections": {
+        "overview": "Vue d’ensemble",
+        "data-we-collect": "Données que nous collectons",
+        "how-we-use": "Comment nous utilisons les données",
+        "legal-bases": "Bases légales (RGPD)",
+        "sharing": "Partage et sous-traitants ultérieurs",
+        "international": "Transferts internationaux",
+        "retention": "Conservation et suppression",
+        "your-rights": "Vos droits",
+        "cookies": "Cookies",
+        "children": "Enfants",
+        "changes": "Modifications de la présente politique",
+        "contact": "Contacter le DPO"
+      },
+      "body": {
+        "overview": {
+          "p1": "La présente politique de confidentialité décrit la manière dont Voxire («\u00a0<b>nous</b>\u00a0») collecte, utilise, partage et protège les données à caractère personnel dans le cadre de la plateforme rtylr. Nous agissons en qualité de <b>responsable du traitement</b> pour les données personnelles relatives à nos clients et aux visiteurs de notre site, et en qualité de <b>sous-traitant</b> pour les Données client que nos clients traitent dans rtylr pour le compte de leurs propres utilisateurs finaux.",
+          "p2": "Si vous êtes l’utilisateur final d’une entreprise qui utilise rtylr (par exemple un client de restaurant dont l’adresse e-mail est enregistrée dans le CRM de ce restaurant), c’est le client rtylr qui est responsable du traitement de vos données. Adressez-vous d’abord à cette entreprise pour exercer vos droits\u00a0; nous l’aiderons à y répondre."
+        },
+        "data-we-collect": {
+          "subsections": [
+            {
+              "heading": "Données de compte et de facturation",
+              "body": "Lorsque vous créez un espace de travail, nous collectons vos nom, adresse e-mail, nom d’entreprise, fonction, pays et un hachage de votre mot de passe. Lorsque vous souscrivez un abonnement, notre prestataire de paiement (Paddle) collecte l’adresse de facturation, les identifiants fiscaux et les jetons de carte bancaire. Nous ne conservons pas les numéros de carte en clair sur nos serveurs."
+            },
+            {
+              "heading": "Données client",
+              "body": "Il s’agit des données que vous téléversez ou générez dans rtylr\u00a0: articles de menu, factures, plannings, fiches clients, tâches. Vous gardez la maîtrise de ces données\u00a0; nous ne les traitons que pour fournir le Service et selon vos instructions."
+            },
+            {
+              "heading": "Données d’usage et d’appareil",
+              "body": "Nous enregistrons l’adresse IP, le type de navigateur et d’appareil, l’URL de provenance, les pages consultées et les horodatages. Nous nous en servons pour exploiter, sécuriser et améliorer rtylr, ainsi que pour produire des statistiques agrégées."
+            },
+            {
+              "heading": "Cookies et technologies similaires",
+              "body": "Voir la section <cookiesAnchor>Cookies</cookiesAnchor> ci-dessous pour le détail."
+            }
+          ]
+        },
+        "how-we-use": {
+          "p1": "Nous utilisons les données à caractère personnel pour\u00a0:",
+          "list1": [
+            "fournir, sécuriser et maintenir le Service\u00a0;",
+            "gérer la facturation et envoyer les e-mails transactionnels\u00a0;",
+            "répondre aux demandes d’assistance et améliorer la qualité du produit\u00a0;",
+            "détecter et prévenir la fraude, les abus et les incidents de sécurité\u00a0;",
+            "envoyer des annonces produit au propriétaire principal d’un espace de travail (vous pouvez vous désabonner depuis votre profil)\u00a0;",
+            "respecter nos obligations légales et faire appliquer nos Conditions."
+          ]
+        },
+        "legal-bases": {
+          "p1": "Pour les résidents de l’EEE et du Royaume-Uni, nous nous appuyons sur les bases légales suivantes\u00a0:",
+          "list1": [
+            "<b>Contrat</b>, pour fournir le Service et gérer la facturation.",
+            "<b>Intérêts légitimes</b>, pour sécuriser le Service, détecter les abus et améliorer les fonctionnalités. Nous mettons ces intérêts en balance avec vos droits.",
+            "<b>Consentement</b>, pour les cookies non essentiels et certaines communications marketing. Vous pouvez retirer votre consentement à tout moment.",
+            "<b>Obligation légale</b>, lorsque la loi nous impose de conserver ou de divulguer des données."
+          ]
+        },
+        "sharing": {
+          "p1": "Nous ne partageons les données à caractère personnel qu’avec des prestataires (les «\u00a0sous-traitants ultérieurs\u00a0») qui nous aident à exploiter rtylr, dans le cadre de contrats qui leur imposent de protéger ces données. Nos principaux sous-traitants ultérieurs sont\u00a0:",
+          "list1": [
+            "<b>Cloudflare</b>, CDN, DNS, protection anti-DDoS.",
+            "<b>Paddle</b>, traitement des paiements et Merchant of Record.",
+            "<b>Firebase / Google Cloud</b>, infrastructure d’authentification.",
+            "<b>Resend / Postmark</b>, acheminement des e-mails transactionnels.",
+            "<b>PostHog / Axiom</b>, analyse produit et suivi des erreurs (lorsqu’ils sont activés)."
+          ],
+          "p2": "La liste à jour est disponible sur demande à <privacyMail>privacy@voxire.com</privacyMail>. Nous informons les clients avant d’ajouter un nouveau sous-traitant ultérieur ayant accès aux Données client.",
+          "p3": "Nous ne vendons pas de données à caractère personnel. Nous ne partageons pas de données à caractère personnel avec des annonceurs."
+        },
+        "international": {
+          "p1": "rtylr peut traiter des données en dehors de votre pays de résidence. Lorsque nous transférons des données depuis l’EEE, le Royaume-Uni ou la Suisse, nous nous appuyons sur les clauses contractuelles types de la Commission européenne (2021) ou sur un mécanisme équivalent."
+        },
+        "retention": {
+          "list1": [
+            "Les données de compte sont conservées pendant toute la durée de vie du compte, puis 30 jours pour permettre une restauration, avant d’être supprimées dans un délai de 60 jours.",
+            "Les pièces de facturation sont conservées 7 ans pour respecter les règles fiscales et comptables.",
+            "Les journaux de sécurité sont conservés 90 jours\u00a0; les journaux d’audit, 12 mois.",
+            "Les sauvegardes chiffrées suivent un cycle glissant et sont purgées sous 90 jours."
+          ]
+        },
+        "your-rights": {
+          "p1": "Selon votre lieu de résidence, vous pouvez disposer du droit\u00a0:",
+          "list1": [
+            "d’accéder aux données à caractère personnel que nous détenons à votre sujet\u00a0;",
+            "de faire rectifier des données inexactes\u00a0;",
+            "de demander la suppression de vos données\u00a0;",
+            "de vous opposer au traitement ou d’en demander la limitation\u00a0;",
+            "de porter vos données vers un autre service\u00a0;",
+            "de retirer votre consentement à tout moment (lorsque le traitement repose sur le consentement)\u00a0;",
+            "d’introduire une réclamation auprès d’une autorité de contrôle."
+          ],
+          "p2": "Pour exercer l’un de ces droits, écrivez à <privacyMail>privacy@voxire.com</privacyMail>. Nous répondons dans un délai de 30 jours."
+        },
+        "cookies": {
+          "p1": "Nous utilisons trois catégories de cookies\u00a0:",
+          "list1": [
+            "<b>Strictement nécessaires</b>, authentification, répartition de charge, protection CSRF. Ils sont toujours actifs.",
+            "<b>Préférences</b>, mémorisation de votre langue, de votre thème et de l’espace de travail sélectionné.",
+            "<b>Mesure d’audience</b>, pour comprendre quelles pages fonctionnent et lesquelles ne fonctionnent pas. Ils ne se déclenchent qu’avec votre consentement (demandé lors de la première visite)."
+          ],
+          "p2": "Vous pouvez effacer les cookies à tout moment depuis votre navigateur. Cela peut vous déconnecter de rtylr."
+        },
+        "children": {
+          "p1": "rtylr ne s’adresse pas aux enfants de moins de 16 ans. Nous ne collectons pas sciemment de données à caractère personnel auprès d’enfants. Si vous pensez qu’un enfant s’est inscrit, contactez <privacyMail>privacy@voxire.com</privacyMail> et nous supprimerons le compte."
+        },
+        "changes": {
+          "p1": "Nous pouvons mettre à jour la présente politique de confidentialité pour refléter des évolutions du Service ou du droit applicable. Le cas échéant, nous mettons à jour la date de «\u00a0dernière mise à jour\u00a0» et, pour les modifications substantielles, informons les propriétaires principaux par e-mail."
+        },
+        "contact": {
+          "p1": "Notre contact en matière de protection des données est joignable à <privacyMail>privacy@voxire.com</privacyMail>. Courrier postal\u00a0: Voxire, c/o Data Protection, Beyrouth, Liban."
+        }
+      },
+      "contactStrip": {
+        "title": "Une demande d’exercice de droits, une réclamation ou simplement une question\u00a0?",
+        "body": "Écrivez à <privacyMail>privacy@voxire.com</privacyMail>. Nous visons une réponse sous 3 jours ouvrés et un traitement complet sous 30 jours."
+      }
+    },
+    "security": {
+      "meta": {
+        "title": "Sécurité | rtylr",
+        "description": "Comment rtylr protège vos données\u00a0: chiffrement, infrastructure, contrôles d’accès et réponse aux incidents.",
+        "schemaDescription": "Comment rtylr protège vos données\u00a0: chiffrement, infrastructure et réponse aux incidents."
+      },
+      "eyebrow": "JURIDIQUE · SÉCURITÉ",
+      "title": "La sécurité chez rtylr",
+      "lastUpdated": "Dernière mise à jour\u00a0: 18 avril 2026 · Notre programme de sécurité est revu chaque trimestre.",
+      "tocTitle": "Sur cette page",
+      "tocAriaLabel": "Navigation par section",
+      "sections": {
+        "program": "Programme de sécurité",
+        "data-protection": "Protection des données",
+        "infrastructure": "Infrastructure",
+        "access-control": "Contrôle des accès",
+        "application": "Sécurité applicative",
+        "vulnerability": "Gestion des vulnérabilités",
+        "monitoring": "Supervision et réponse aux incidents",
+        "compliance": "Conformité et certifications",
+        "vendor": "Gestion des prestataires",
+        "disclosure": "Divulgation responsable",
+        "contact": "Contacter l’équipe sécurité"
+      },
+      "body": {
+        "program": {
+          "p1": "Voxire applique un programme formel de sécurité de l’information aligné sur les principes des normes ISO 27001 et SOC 2 Type II. Il est maintenu par notre direction technique et revu chaque trimestre. Le programme couvre les contrôles humains, organisationnels et techniques, sur le développement, l’exploitation et le support client."
+        },
+        "data-protection": {
+          "subsections": [
+            {
+              "heading": "Chiffrement en transit",
+              "body": "Tout le trafic entre les appareils des clients et rtylr est chiffré en TLS 1.2+ (suites cryptographiques robustes, confidentialité persistante, HSTS activé). Nous refusons les connexions provenant de versions obsolètes de TLS."
+            },
+            {
+              "heading": "Chiffrement au repos",
+              "body": "Les Données client sont stockées sur des volumes chiffrés (AES-256). Le chiffrement au niveau de la base de données est activé pour tous les espaces de travail. Les sauvegardes sont également chiffrées et conservées dans des régions géographiques distinctes."
+            },
+            {
+              "heading": "Gestion des secrets",
+              "body": "Les clés d’API, les jetons et les identifiants sont conservés dans un coffre à secrets managé, renouvelés à intervalles réguliers et limités aux permissions minimales nécessaires."
+            }
+          ]
+        },
+        "infrastructure": {
+          "p1": "rtylr s’appuie sur des infrastructures cloud reconnues, couvertes par des attestations ISO 27001, SOC 2, PCI DSS et RGPD. Nos principaux fournisseurs sont Cloudflare (edge), Firebase / Google Cloud (authentification et services managés) et un fournisseur de base de données managée avec bascule automatique.",
+          "list1": [
+            "Les environnements de production sont isolés de la préproduction et du développement.",
+            "Sauvegardes multirégions avec restauration à un instant donné jusqu’à 7 jours.",
+            "Planification de la capacité et atténuation des attaques DDoS en périphérie de réseau."
+          ]
+        },
+        "access-control": {
+          "p1": "L’accès aux systèmes de production est réservé à un groupe nommé d’ingénieurs, derrière un SSO avec authentification multifacteur obligatoire. Nous appliquons le principe du moindre privilège\u00a0: chaque ingénieur ne reçoit que les accès dont il a besoin, et ces accès sont revus au moins chaque trimestre.",
+          "p2": "Tous les accès en production sont journalisés avec l’auteur, l’action et l’horodatage. Les journaux d’audit sont conservés 12 mois."
+        },
+        "application": {
+          "list1": [
+            "<b>Authentification.</b> Les mots de passe sont hachés avec des algorithmes standard du secteur\u00a0; le MFA est disponible sur tous les comptes\u00a0; les sessions utilisent des cookies httpOnly, Secure et SameSite à durée de vie courte.",
+            "<b>Autorisation.</b> Permissions par rôle appliquées côté serveur à chaque appel d’API. Aucune logique reposant sur la confiance accordée au client pour les actions sensibles.",
+            "<b>Validation des entrées.</b> Toutes les entrées externes sont validées par des règles de schéma\u00a0; les points d’injection dangereux sont évités.",
+            "<b>CSRF, XSS, injections SQL.</b> Prévenus par les protections standard du framework, des requêtes paramétrées et des en-têtes content-security-policy stricts.",
+            "<b>Limitation de débit.</b> Limites de débit par IP et par utilisateur sur les points de terminaison publics."
+          ]
+        },
+        "vulnerability": {
+          "list1": [
+            "Dépendances analysées à chaque build\u00a0; CVE critiques corrigées sous 7 jours.",
+            "Analyse des conteneurs et des images dans la CI.",
+            "Test d’intrusion annuel réalisé par un tiers\u00a0; résultats et preuves de remédiation disponibles sous NDA pour les clients potentiels du forfait Scale.",
+            "Analyse statique (SAST) sur la base de code principale."
+          ]
+        },
+        "monitoring": {
+          "p1": "Nous assurons une supervision et une alerte 24\u00a0h/24 et 7\u00a0j/7 sur l’infrastructure, les applications et les parcours d’authentification. Les incidents suspectés sont triés selon un runbook documenté de réponse aux incidents. Les clients concernés par un incident de sécurité sont informés conformément au droit applicable et, au minimum, dans les 72 heures suivant la confirmation d’une violation substantielle."
+        },
+        "compliance": {
+          "list1": [
+            "<b>RGPD et RGPD britannique</b>, nous agissons en qualité de sous-traitant pour les Données client, avec un DPA disponible sur demande.",
+            "<b>CCPA/CPRA</b>, respectés pour les résidents de Californie\u00a0; des mécanismes d’opposition sont disponibles.",
+            "<b>PCI DSS</b>, le traitement des paiements est délégué à Paddle, Merchant of Record certifié de niveau 1.",
+            "<b>SOC 2 Type II</b>, en cours\u00a0; achèvement visé au T4 2026."
+          ]
+        },
+        "vendor": {
+          "p1": "Nous évaluons la posture de sécurité des sous-traitants ultérieurs avant leur intégration, exigeons des accords de protection des données et réexaminons nos principaux prestataires chaque année. Une liste à jour des sous-traitants ultérieurs est tenue et disponible via <secMail>security@voxire.com</secMail>."
+        },
+        "disclosure": {
+          "p1": "Nous accueillons volontiers les signalements des chercheurs en sécurité. Si vous pensez avoir découvert une vulnérabilité, écrivez à <secMail>security@voxire.com</secMail> en indiquant\u00a0:",
+          "list1": [
+            "une description claire du problème et de son impact\u00a0;",
+            "les étapes permettant de le reproduire\u00a0;",
+            "tout élément de preuve de concept (merci de ne pas exfiltrer de données au-delà de ce qui est nécessaire pour démontrer le problème)."
+          ],
+          "p2": "Nous nous engageons à accuser réception sous 48 heures, à travailler de bonne foi à un correctif et à vous créditer publiquement une fois le problème résolu (sauf si vous préférez rester anonyme). Nous n’engageons pas de poursuites contre les chercheurs agissant de bonne foi dans le cadre de la présente politique."
+        },
+        "contact": {
+          "p1": "Pour toute question de sécurité, tout signalement ou toute demande de conformité, écrivez à <secMail>security@voxire.com</secMail>. Pour les urgences, WhatsApp au +961 3 940 708."
+        }
+      },
+      "contactStrip": {
+        "title": "Besoin de notre lettre SOC 2, de notre SIG ou de notre DPA\u00a0?",
+        "body": "Écrivez à <secMail>security@voxire.com</secMail> et nous vous enverrons le dossier à jour sous NDA dans un délai de 7 jours ouvrés."
+      }
+    }
+  }
+}

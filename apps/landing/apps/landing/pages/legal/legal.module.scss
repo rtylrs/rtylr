@@ -1,0 +1,265 @@
+// Shared layout for all legal pages, terms, privacy, security, trust.
+// Simple typographic document with a sticky in-page table of contents.
+
+.page {
+  background: var(--app-background);
+  color: var(--ink);
+  padding: 96px 32px 128px;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+
+.header {
+  max-width: 780px;
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.5);
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: clamp(2.2rem, 4.4vw, 3.6rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0 0 18px;
+}
+
+.meta {
+  font-size: 0.92rem;
+  color: rgba(19, 19, 19, 0.5);
+  letter-spacing: 0.1px;
+}
+
+// ── Layout, content + sticky TOC ─────────────────────────────────────────
+
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.toc {
+  position: sticky;
+  top: 120px;
+  font-size: 0.88rem;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  padding-right: 8px;
+
+  // Was `h4`. The element became a <p> so the outline stops jumping from
+  // h1 to h4; the class keeps the styling attached to the right node
+  // rather than to whatever tag happens to be used.
+  .tocTitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(19, 19, 19, 0.4);
+    margin: 0 0 12px;
+  }
+
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    counter-reset: toc;
+  }
+
+  a {
+    color: rgba(19, 19, 19, 0.65);
+    text-decoration: none;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+    display: block;
+    transition: color 0.2s ease;
+    counter-increment: toc;
+    position: relative;
+    padding-left: 26px;
+
+    &::before {
+      content: counter(toc, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: rgba(19, 19, 19, 0.35);
+    }
+
+    &:hover {
+      color: var(--ink);
+
+      &::before {
+        color: var(--ink);
+      }
+    }
+  }
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────
+
+.body {
+  max-width: 740px;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: rgba(19, 19, 19, 0.8);
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin: 56px 0 16px;
+    scroll-margin-top: 120px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 28px 0 10px;
+  }
+
+  p {
+    margin: 0 0 18px;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 18px;
+    padding-left: 22px;
+  }
+
+  li {
+    margin-bottom: 8px;
+  }
+
+  a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(19, 19, 19, 0.35);
+
+    &:hover {
+      text-decoration-color: rgba(19, 19, 19, 0.9);
+    }
+  }
+
+  strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.88em;
+    background: rgba(19, 19, 19, 0.05);
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--hairline);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--hairline);
+    margin: 48px 0;
+  }
+}
+
+// ── Contact strip at bottom ───────────────────────────────────────────────
+
+.contactStrip {
+  margin-top: 72px;
+  padding: 32px 36px;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 10px;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: rgba(19, 19, 19, 0.75);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(19, 19, 19, 0.35);
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .toc {
+    position: static;
+    max-height: none;
+    padding: 18px 20px;
+    background: var(--bg-surface-b);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 64px 20px 96px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .contactStrip {
+    padding: 24px 20px;
+  }
+}

@@ -1,0 +1,117 @@
+# rtylr marketing site at rtylr.com. There is no authenticated area on this
+# domain: the app subdomains handle auth separately, so everything here is
+# crawlable.
+#
+# IMPORTANT: this file is not the whole story. Cloudflare injects a managed
+# block ABOVE this content on the live response, so always check the served
+# file rather than trusting this one:
+#
+#   curl -s https://rtylr.com/robots.txt
+#
+# Cloudflare's block is configured in the dashboard under AI Crawl Control.
+# If a directive here contradicts the injected block, the file states a policy
+# the site does not enforce, which is worse than saying nothing. Keep the two
+# in agreement.
+
+# Nothing is disallowed.
+#
+# /_next/ used to be blocked here on the theory that it leaked build
+# internals. It does not: for a static export it holds only the stylesheets,
+# fonts and JS chunks the browser already downloads. Blocking it stopped
+# Googlebot fetching 3 stylesheets and a webfont on the home page alone, and
+# Google needs those to render the page and judge its layout and mobile
+# friendliness. Because /_next/ is a longer path than /, the Disallow also beat
+# the Allow under Google's most-specific-wins rule. Do not reinstate it.
+User-agent: *
+Allow: /
+
+# AI crawlers.
+#
+# Owner decision, 2026-08-23: allow both inference-time retrieval AND model
+# training for the four crawlers named below. The alternative was to permit
+# citation while reserving training rights via Cloudflare's
+# Content-Signal: ai-train=no. That was considered and declined.
+#
+# Every vendor runs separate bots for separate purposes, and the one most sites
+# name is the training bot rather than the one that governs whether you appear
+# in an AI answer. Both kinds are listed explicitly here so a future reader can
+# see which is which.
+
+# Retrieval at inference time. These decide whether rtylr.com can be surfaced
+# and cited in an AI answer, which is the visibility that actually sends
+# traffic. Previously these were not named at all and worked only by falling
+# through to the wildcard group, so one restrictive change to * would have
+# removed us from AI answers with nothing in this file to show what broke.
+
+# OpenAI: governs appearing in ChatGPT search results.
+User-agent: OAI-SearchBot
+Allow: /
+
+# OpenAI: fetched when a user pastes or asks about a URL. OpenAI notes
+# robots.txt may not apply to it, since a person initiated the request.
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic: indexes content to improve Claude search results.
+User-agent: Claude-SearchBot
+Allow: /
+
+# Anthropic: user-initiated fetches from Claude.
+User-agent: Claude-User
+Allow: /
+
+# Perplexity: surfaces and links sites in Perplexity results. Not used for
+# training, which is the opposite of GPTBot.
+User-agent: PerplexityBot
+Allow: /
+
+# Perplexity: user-initiated. Generally ignores robots.txt.
+User-agent: Perplexity-User
+Allow: /
+
+# Model training. Allowed by owner decision.
+
+# OpenAI: training only. It does not affect ChatGPT search visibility, which is
+# OAI-SearchBot above.
+User-agent: GPTBot
+Allow: /
+
+# Anthropic: training only. Claude search visibility is Claude-SearchBot above.
+User-agent: ClaudeBot
+Allow: /
+
+# Common Crawl: a public corpus used by many downstream systems and by
+# academic research, not a single vendor.
+User-agent: CCBot
+Allow: /
+
+# Google: controls training and grounding in Google systems OTHER than Search.
+# AI Overviews and AI Mode inside Search are governed by Googlebot, so this
+# directive does not affect them either way.
+User-agent: Google-Extended
+Allow: /
+
+# Training NOT allowed. Only the four crawlers above were approved, so these
+# are refused explicitly rather than left to fall through to the wildcard.
+#
+# They have to be named here because Cloudflare's Managed robots.txt is a
+# single zone-wide switch with no per-crawler setting. Turning it off to permit
+# the four above also lifts its block on these, so without these groups the
+# result would be "allow everything", which is not what was decided.
+#
+# Applebot-Extended is training only. Plain Applebot feeds Siri and Spotlight
+# search and is a different agent: it is NOT restricted here.
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+Sitemap: https://rtylr.com/sitemap.xml

@@ -1,0 +1,114 @@
+.useCasesSection {
+  padding: 120px 0;
+  background: var(--app-background);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 50px;
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 60px 0;
+}
+
+.useCasesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.useCaseCard {
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  text-align: start;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+}
+
+.useCaseTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.useCaseDescription {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.useCaseLink {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: auto;
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .useCasesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionTitle {
+    font-size: 2.5rem;
+  }
+
+  .sectionDescription {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .useCasesSection {
+    padding: 80px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .sectionDescription {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+
+  .useCaseCard {
+    padding: 30px;
+  }
+
+  .useCaseTitle {
+    font-size: 1.25rem;
+  }
+}

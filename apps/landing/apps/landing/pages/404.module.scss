@@ -1,0 +1,258 @@
+.page {
+  position: relative;
+  background: var(--app-background);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px 96px;
+  overflow: hidden;
+}
+
+// Retool-style framing rails, match the hero section
+.frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.vLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--hairline) 10%,
+    var(--hairline) 90%,
+    transparent 100%
+  );
+}
+
+.vLineLeft {
+  left: max(24px, calc(50% - 560px));
+}
+
+.vLineRight {
+  right: max(24px, calc(50% - 560px));
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.55);
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 24px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.subtitle {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.6);
+  margin: 0 0 40px;
+  max-width: 520px;
+  letter-spacing: -0.005em;
+}
+
+// Buttons
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 64px;
+}
+
+.primaryBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  box-shadow: var(--btn-cream-shadow);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+.outlineBtn {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+  }
+}
+
+// Suggestions grid, shared-border cells, matches the stats/integrations pattern
+
+.suggestionsGrid {
+  width: 100%;
+  max-width: 720px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid var(--hairline);
+  text-align: left;
+}
+
+.suggestionCell {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'label arrow'
+    'desc  desc';
+  align-items: center;
+  gap: 6px 12px;
+  padding: 20px 22px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  text-decoration: none;
+  transition: background 0.2s ease;
+
+  &:nth-child(2n) {
+    border-right: none;
+  }
+
+  &:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.03);
+
+    .suggestionArrow {
+      color: var(--ink);
+      transform: translateX(3px);
+    }
+  }
+}
+
+.suggestionLabel {
+  grid-area: label;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.suggestionDesc {
+  grid-area: desc;
+  font-size: 0.82rem;
+  color: rgba(19, 19, 19, 0.55);
+  line-height: 1.45;
+}
+
+.suggestionArrow {
+  grid-area: arrow;
+  color: rgba(19, 19, 19, 0.4);
+  font-size: 0.95rem;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 96px 20px 72px;
+  }
+
+  .title {
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 48px;
+  }
+
+  .primaryBtn,
+  .outlineBtn {
+    width: 100%;
+  }
+
+  .suggestionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .suggestionCell {
+    border-right: none;
+
+    &:nth-child(2n) {
+      border-right: none;
+    }
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}

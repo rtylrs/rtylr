@@ -1,0 +1,494 @@
+// ── Partners, program overview, tracks, tiers, perks ───────────────────
+
+.page {
+  background: var(--app-background);
+  color: var(--ink);
+}
+
+.hero {
+  padding: 96px 32px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.heroInner {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 24px;
+  padding: 5px 12px 5px 10px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  background: var(--bg-surface-b);
+
+  svg {
+    color: var(--ink);
+  }
+}
+
+.heroTitle {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 22px;
+}
+
+.heroTitleSoft {
+  color: rgba(19, 19, 19, 0.65);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 32px;
+  max-width: 620px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: var(--btn-cream-shadow);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+.outlineBtn {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+  }
+}
+
+// ── TRACKS ──────────────────────────────────────────────────────────────
+
+.tracksSection {
+  padding: 64px 32px 96px;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.tracksHeader {
+  position: sticky;
+  top: 120px;
+}
+
+.sectionEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.55);
+  margin-bottom: 18px;
+}
+
+.sectionTitle {
+  font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.tracksList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.track {
+  padding: 28px 32px;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease;
+
+  &:hover {
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-b);
+  }
+}
+
+.trackHeader {
+  display: grid;
+  grid-template-columns: 40px 38px 1fr;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.trackNumber {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.92rem;
+  color: rgba(19, 19, 19, 0.4);
+  padding-top: 10px;
+  letter-spacing: 0.3px;
+}
+
+.trackIcon {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 8px;
+  color: var(--ink);
+}
+
+.trackTitles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trackName {
+  font-size: 1.18rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.trackWho {
+  font-size: 0.82rem;
+  color: rgba(19, 19, 19, 0.55);
+  margin: 0;
+  font-style: italic;
+}
+
+.trackSummary {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 16px;
+}
+
+.trackBenefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 18px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: rgba(19, 19, 19, 0.75);
+    line-height: 1.45;
+
+    svg {
+      color: #a2d9af;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+}
+
+// ── TIERS ───────────────────────────────────────────────────────────────
+
+.tiersSection {
+  padding: 0 32px 96px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tiersHeader {
+  margin-bottom: 40px;
+}
+
+.tiersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.tierCard {
+  padding: 32px 28px;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tierBadge {
+  align-self: flex-start;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #1a1612;
+  background: #d6b88e;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.tierCommitment {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  color: rgba(19, 19, 19, 0.6);
+  letter-spacing: 0.2px;
+}
+
+.tierDesc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.68);
+  margin: 0;
+  flex-grow: 1;
+}
+
+.tierProgress {
+  height: 4px;
+  background: var(--hairline);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.tierProgressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #d6b88e, #c9a48a);
+  border-radius: 2px;
+}
+
+// ── PERKS STRIP ─────────────────────────────────────────────────────────
+
+.perksSection {
+  padding: 0 32px 96px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.perksList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  overflow: hidden;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px 20px;
+    border-right: 1px solid var(--hairline);
+
+    &:last-child {
+      border-right: none;
+    }
+
+    svg {
+      color: var(--ink);
+      opacity: 0.7;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      strong {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -0.005em;
+      }
+
+      span {
+        font-size: 0.8rem;
+        color: rgba(19, 19, 19, 0.6);
+        line-height: 1.45;
+      }
+    }
+  }
+}
+
+// ── CTA ─────────────────────────────────────────────────────────────────
+
+.ctaBlock {
+  padding: 72px 32px 160px;
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ctaTitle {
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 40px 0 14px;
+}
+
+.ctaCopy {
+  font-size: 0.98rem;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 28px;
+  max-width: 520px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+// ── RESPONSIVE ─────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .tracksSection {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .tracksHeader {
+    position: static;
+  }
+
+  .perksList {
+    grid-template-columns: repeat(2, 1fr);
+
+    li {
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-child(n + 3) {
+        border-top: 1px solid var(--hairline);
+      }
+    }
+  }
+
+  .tiersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 72px 20px 24px;
+  }
+
+  .tracksSection {
+    padding: 48px 20px 72px;
+  }
+
+  .tiersSection,
+  .perksSection {
+    padding: 0 20px 72px;
+  }
+
+  .track {
+    padding: 22px 22px;
+  }
+
+  .trackBenefits {
+    grid-template-columns: 1fr;
+  }
+
+  .perksList {
+    grid-template-columns: 1fr;
+
+    li {
+      border-right: none !important;
+      border-bottom: 1px solid var(--hairline);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:nth-child(n + 3) {
+        border-top: none;
+      }
+    }
+  }
+
+  .ctaBlock {
+    padding: 56px 20px 120px;
+  }
+}

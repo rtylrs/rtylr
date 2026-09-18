@@ -1,0 +1,569 @@
+// ── HR landing page, warm, schedule-board hero, 3×2 pillar grid ───────────
+// Visual direction: warmer cream tones, avatars with color tints, quote block
+// uses testimonial pattern. Feels human.
+
+.page {
+  background: var(--app-background);
+  color: var(--ink);
+}
+
+// ── HERO ────────────────────────────────────────────────────────────────────
+
+.hero {
+  padding: 72px 32px 96px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 56px;
+}
+
+.heroCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 720px;
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(214, 184, 142, 0.9);
+  margin-bottom: 22px;
+  padding: 5px 12px 5px 10px;
+  border: 1px solid rgba(214, 184, 142, 0.3);
+  border-radius: 999px;
+  background: rgba(214, 184, 142, 0.08);
+
+  svg {
+    color: rgba(214, 184, 142, 0.9);
+  }
+}
+
+.heroTitle {
+  font-size: clamp(2.6rem, 5.2vw, 4.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 24px;
+}
+
+.heroTitleSoft {
+  color: rgba(214, 184, 142, 0.9);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.heroSubtitle {
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 36px;
+  max-width: 580px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primaryBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  box-shadow: var(--btn-cream-shadow);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+.outlineBtn {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+  }
+}
+
+// ── SCHEDULE BOARD MOCKUP ──────────────────────────────────────────────────
+
+.scheduleMock {
+  width: 100%;
+  max-width: 1080px;
+  background: #121110;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.45);
+}
+
+.scheduleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #181715;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 16px;
+}
+
+.scheduleHeaderLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #e8e6e1;
+  letter-spacing: -0.005em;
+
+  svg {
+    color: rgba(214, 184, 142, 0.85);
+  }
+}
+
+.scheduleHeaderRight {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.scheduleChip {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.2px;
+}
+
+.scheduleChipGood {
+  background: rgba(107, 207, 127, 0.12);
+  color: #a2d9af;
+  border: 1px solid rgba(107, 207, 127, 0.22);
+}
+
+.scheduleGrid {
+  display: flex;
+  flex-direction: column;
+}
+
+.scheduleRow {
+  display: grid;
+  grid-template-columns: 200px repeat(7, 1fr);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.scheduleStaff {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: #141312;
+}
+
+.scheduleDayLabel {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+  background: #141312;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.scheduleAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #1a1612;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.scheduleStaffText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+
+.scheduleName {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #e8e6e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.005em;
+}
+
+.scheduleRole {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.scheduleShift {
+  padding: 16px 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #e8e6e1;
+  letter-spacing: -0.005em;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  // Button reset so the motion.button cells look like plain grid cells
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+  background: transparent;
+  font-family: var(--primary-font);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  outline: none;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &:hover {
+    filter: brightness(1.25);
+  }
+
+  &:focus-visible {
+    outline: 1px solid rgba(214, 184, 142, 0.6);
+    outline-offset: -2px;
+  }
+}
+
+.scheduleShiftOff {
+  color: rgba(255, 255, 255, 0.25);
+  background: transparent !important;
+  font-size: 0.7rem;
+}
+
+.scheduleFooter {
+  padding: 12px 20px;
+  background: #181715;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: -0.005em;
+}
+
+// ── PILLAR GRID ─────────────────────────────────────────────────────────────
+
+.pillarsSection {
+  padding: 120px 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.pillarsHeader {
+  max-width: 720px;
+  margin-bottom: 64px;
+}
+
+.sectionEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.55);
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--hairline);
+}
+
+.pillarCard {
+  padding: 36px 32px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: background 0.25s ease;
+
+  &:nth-child(3n) {
+    border-right: none;
+  }
+
+  &:nth-last-child(-n + 3) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.03);
+  }
+}
+
+.pillarIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(214, 184, 142, 0.1);
+  border: 1px solid rgba(214, 184, 142, 0.2);
+  border-radius: 8px;
+  color: rgba(214, 184, 142, 0.9);
+}
+
+.pillarTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.22;
+}
+
+.pillarCopy {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.62);
+  margin: 0;
+}
+
+// ── QUOTE SECTION ──────────────────────────────────────────────────────────
+
+.quoteSection {
+  padding: 0 32px 120px;
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.quoteText {
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 40px;
+  font-style: italic;
+}
+
+.quoteAttribution {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quoteAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a1612;
+  letter-spacing: 0.3px;
+}
+
+.quoteName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  text-align: left;
+}
+
+.quoteRole {
+  font-size: 0.82rem;
+  color: rgba(19, 19, 19, 0.55);
+  text-align: left;
+}
+
+// ── CTA ─────────────────────────────────────────────────────────────────────
+
+.ctaBlock {
+  padding: 120px 32px 160px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top: 1px solid var(--hairline);
+}
+
+.ctaTitle {
+  font-size: clamp(2.4rem, 4.2vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 36px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+// ── RESPONSIVE ──────────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .pillarsGrid {
+    grid-template-columns: repeat(2, 1fr);
+
+    .pillarCard {
+      &:nth-child(3n) {
+        border-right: 1px solid var(--hairline);
+      }
+
+      &:nth-last-child(-n + 3) {
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-last-child(-n + 2) {
+        border-bottom: none;
+      }
+    }
+  }
+
+  // Scrollable schedule mock on smaller screens
+  .scheduleMock {
+    overflow-x: auto;
+  }
+
+  .scheduleGrid {
+    min-width: 780px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 56px 20px 72px;
+  }
+
+  .pillarsSection {
+    padding: 72px 20px;
+  }
+
+  .pillarsGrid {
+    grid-template-columns: 1fr;
+
+    .pillarCard {
+      border-right: none;
+      border-bottom: 1px solid var(--hairline);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:nth-child(3n) {
+        border-right: none;
+      }
+
+      &:nth-last-child(-n + 3) {
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      &:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--hairline);
+      }
+    }
+  }
+
+  .quoteSection {
+    padding: 0 20px 72px;
+  }
+
+  .ctaBlock {
+    padding: 80px 20px 120px;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .primaryBtn,
+  .outlineBtn {
+    width: 100%;
+  }
+}

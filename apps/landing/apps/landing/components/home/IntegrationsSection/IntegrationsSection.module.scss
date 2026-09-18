@@ -1,0 +1,195 @@
+.integrationsSection {
+  padding: 120px 0;
+  background: var(--bg-surface-a);
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 50px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  margin-bottom: 64px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.65);
+  margin-bottom: 20px;
+  padding: 6px 16px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 100px;
+  background: var(--bg-surface-b);
+}
+
+.sectionTitle {
+  font-size: 3rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 20px 0;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.sectionDescription {
+  font-size: 1.125rem;
+  color: rgba(19, 19, 19, 0.6);
+  margin: 0 auto;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+// Shared-border grid, no gaps, single outer border, 1px dividers between cells.
+// Matches the pattern used by StatsSection's logo/stat grid.
+.integrationsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-bottom: 48px;
+  border: 1px solid var(--hairline);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.integrationCard {
+  position: relative;
+  padding: 40px 20px;
+  background: transparent;
+  border-inline-end: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: default;
+  transition: background 0.25s ease;
+
+  // Last column: no right border
+  &:nth-child(4n) {
+    border-inline-end: none;
+  }
+
+  // Last row (assuming 8 items / 2 rows): no bottom border on last row
+  &:nth-last-child(-n + 4) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.02);
+
+    .iconWrapper {
+      border-color: var(--hairline-strong);
+      background: var(--bg-surface-b);
+
+      svg {
+        color: var(--ink);
+      }
+    }
+
+    .integrationName {
+      color: var(--ink);
+    }
+  }
+}
+
+.iconWrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid var(--hairline);
+  background: var(--bg-surface-b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    transform 0.35s var(--ease-out-soft);
+
+  svg {
+    color: rgba(19, 19, 19, 0.65);
+    transition: color 0.3s ease;
+  }
+}
+
+.integrationName {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(19, 19, 19, 0.75);
+  letter-spacing: 0.01em;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.footnote {
+  font-size: 0.9rem;
+  color: rgba(19, 19, 19, 0.5);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 1024px) {
+  .integrationCard {
+    padding: 32px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .integrationsSection {
+    padding: 80px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .sectionDescription {
+    font-size: 1rem;
+  }
+
+  .integrationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // Recalculate border-sharing for a 2-col grid
+  .integrationCard {
+    padding: 28px 16px;
+    border-inline-end: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+
+    &:nth-child(4n) {
+      border-inline-end: 1px solid var(--hairline);
+    }
+
+    &:nth-last-child(-n + 4) {
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    &:nth-child(2n) {
+      border-inline-end: none;
+    }
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: none;
+    }
+  }
+
+  .iconWrapper {
+    width: 48px;
+    height: 48px;
+  }
+}

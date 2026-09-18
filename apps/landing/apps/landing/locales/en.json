@@ -1,0 +1,2075 @@
+{
+  "common": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "resources": "Resources",
+      "company": "Company",
+      "signIn": "Sign In",
+      "signUp": "Sign Up",
+      "featureLinks": {
+        "pos": {
+          "title": "POS",
+          "desc": "Payments, tables, orders, and receipts in one register."
+        },
+        "erp": {
+          "title": "ERP",
+          "desc": "Inventory, suppliers, and purchasing that stay in sync."
+        },
+        "hr": {
+          "title": "HR",
+          "desc": "Staff, schedules, time off, and payroll in one place."
+        },
+        "crm": {
+          "title": "CRM",
+          "desc": "Customer profiles, loyalty, segments, and campaigns."
+        },
+        "finance": {
+          "title": "Finance",
+          "desc": "Invoices, expenses, tax, and a real P&L in seconds."
+        },
+        "flow": {
+          "title": "Flow",
+          "desc": "Projects, tasks, and team workspaces for every department."
+        }
+      },
+      "resourceLinks": {
+        "hardware": "Hardware",
+        "integrations": "Integrations",
+        "blog": "Blog",
+        "documentation": "Documentation",
+        "helpCenter": "Help Center",
+        "trustCenter": "Trust Center",
+        "security": "Security",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfUse": "Terms of Use",
+        "status": "Status"
+      },
+      "companyLinks": {
+        "about": "About",
+        "partners": "Partners",
+        "careers": "Careers",
+        "contact": "Contact"
+      }
+    },
+    "cta": {
+      "startFree": "Start for free",
+      "bookDemo": "Book a demo",
+      "getStarted": "Get started",
+      "seeItLive": "See it live"
+    },
+    "a11y": {
+      "home": "rtylr home",
+      "logoAlt": "rtylr",
+      "toggleMenu": "Toggle mobile menu",
+      "navMenu": "Navigation menu",
+      "closeMenu": "Close menu",
+      "languageSwitcher": "Choose language"
+    },
+    "cookieBanner": {
+      "message": "We use essential cookies to run rtylr, and optional analytics to understand which features to build next. <privacyLink>Privacy</privacyLink>.",
+      "decline": "Decline",
+      "accept": "Accept",
+      "ariaLabel": "Cookie consent"
+    }
+  },
+  "footer": {
+    "group": {
+      "product": "PRODUCT",
+      "resources": "RESOURCES",
+      "developers": "DEVELOPERS",
+      "company": "COMPANY"
+    },
+    "link": {
+      "pos": "POS",
+      "erp": "ERP",
+      "hr": "HR",
+      "crm": "CRM",
+      "finance": "Finance",
+      "flow": "Flow",
+      "pricing": "Pricing",
+      "hardware": "Hardware",
+      "blog": "Blog",
+      "documentation": "Documentation",
+      "selfHost": "Self Host rtylr",
+      "integrations": "Integrations",
+      "helpCenter": "Help Center",
+      "status": "Status",
+      "about": "About",
+      "careers": "Careers",
+      "partners": "Partners",
+      "contact": "Contact"
+    },
+    "legal": {
+      "terms": "TERMS OF USE",
+      "privacy": "PRIVACY POLICY",
+      "security": "SECURITY",
+      "trust": "TRUST CENTER",
+      "cookies": "COOKIE PREFERENCES",
+      "parent": "A VOXIRE COMPANY"
+    },
+    "logoAlt": "rtylr",
+    "navLabel": "{{group}} navigation"
+  },
+  "faq": {
+    "home": {
+      "title": "Questions about rtylr",
+      "intro": "The six things buyers ask first. Answers are on the page, not hidden behind markup.",
+      "items": [
+        {
+          "question": "What is rtylr?",
+          "answer": "rtylr is an all-in-one business operating system for small and mid-sized businesses. It bundles point of sale, ERP, HR, CRM, finance and project management into one platform, so a team stops stitching a register, a spreadsheet, an accounting tool and a task tracker together. Built for restaurants, retail and services businesses running 2 to 200 staff."
+        },
+        {
+          "question": "How much does rtylr cost?",
+          "answer": "rtylr has not published its prices yet. The Free plan is genuinely free, needs no card, and covers 10 team members at one location with all 7 apps, so you can run a location on it today. Pro and Scale are quoted: tell us your team size and how many locations you run. See rtylr.com/pricing for what each plan includes."
+        },
+        {
+          "question": "Can I use only one app from rtylr, or do I need all of them?",
+          "answer": "You can use any single app on its own. Flow, Finance or HR each work standalone, with their own login, settings and team. The reason to run more than one is shared data: customers from CRM reach the POS, staff from HR reach the schedule, and POS revenue reaches Finance without an export. It is never required."
+        },
+        {
+          "question": "Does rtylr replace my point-of-sale system?",
+          "answer": "Yes. rtylr POS is a full-service register for restaurants and retail. It handles tickets, splits, tips, modifiers, inventory counts, offline mode and receipt printing on certified hardware. It runs on iPad, Android tablet and desktop, and it syncs in real time with the rest of the platform, so a sale moves stock without an export."
+        },
+        {
+          "question": "Is my data mine?",
+          "answer": "Yes. Every rtylr account exports clean CSVs of customers, orders, staff, invoices and inventory at any time from the settings page, with no support ticket. Data lives in the EU or US region, your choice. See rtylr.com/trust for compliance detail and rtylr.com/legal/security for the security architecture."
+        },
+        {
+          "question": "What does rtylr replace?",
+          "answer": "For most businesses that adopt it: a register, an inventory sheet, a scheduling tool, a payroll export, a customer list and an accounting package. The claim rtylr makes is not that each of those is worse on its own. It is that running them separately means the same number is entered more than once, and the versions disagree."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Questions about rtylr pricing",
+      "items": [
+        {
+          "question": "How much does rtylr cost?",
+          "answer": "rtylr has not published its prices yet. The Free plan is genuinely free and needs no card, so you can run a location on it today. For Pro or Scale, contact us and we will talk through your team size and locations. We would rather quote you honestly than put a number here we might change."
+        },
+        {
+          "question": "Can I switch plans at any time?",
+          "answer": "Yes. Upgrade and the new features unlock instantly. Downgrade and the change applies at the end of the current period. Your data, team, and settings stay put."
+        },
+        {
+          "question": "Is there a free trial for Pro?",
+          "answer": "Every new workspace starts with a 14-day Pro trial, and it needs no card. At day 14 it reverts to the Free plan automatically unless you tell us otherwise."
+        },
+        {
+          "question": "What happens when I hit 10 seats on Free?",
+          "answer": "You're prompted to move to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over."
+        },
+        {
+          "question": "When does Scale apply?",
+          "answer": "Scale is built for teams past 30 active seats. It removes the seat and location limits and adds SSO, audit logs, a dedicated success manager and an SLA."
+        },
+        {
+          "question": "Any contract or lock-in?",
+          "answer": "None. You can cancel at any time, and your data is exportable while the account is open."
+        }
+      ]
+    },
+    "pos": {
+      "title": "Questions about rtylr POS",
+      "items": [
+        {
+          "question": "Does rtylr POS work offline?",
+          "answer": "Yes. rtylr POS keeps a full local copy of the menu, modifiers and active orders. When the internet drops, the register keeps taking orders, printing tickets and processing cash. Card transactions queue and settle automatically once the connection returns, so a Saturday night outage does not stop the floor."
+        },
+        {
+          "question": "What hardware works with rtylr POS?",
+          "answer": "rtylr POS runs on iPad, Android tablet and Windows or macOS desktop. It pairs with Epson and Star receipt printers, standard barcode scanners, Zebra and Symbol scanners for retail, and Stripe Terminal, Clover and Square card readers. See rtylr.com/hardware for the tested list."
+        },
+        {
+          "question": "Can rtylr POS handle multi-location restaurants?",
+          "answer": "Yes, on the Pro plan and above. Each location gets its own menu, pricing, staff and reporting, and the owner gets one consolidated dashboard across every site. A menu change can be pushed to all locations at once or tuned per location."
+        },
+        {
+          "question": "What does rtylr POS replace?",
+          "answer": "The register, and the work that usually sits behind it: the stock count someone redoes by hand, the tips spreadsheet that feeds payroll, and the end-of-day export into accounting. Because the POS writes to the same database as ERP, HR and Finance, a sale updates stock and revenue as it happens rather than overnight."
+        }
+      ]
+    },
+    "erp": {
+      "title": "Questions about rtylr ERP",
+      "items": [
+        {
+          "question": "What does rtylr ERP manage?",
+          "answer": "rtylr ERP covers inventory, suppliers, purchase orders, stock transfers between locations, low-stock alerts and cost tracking. It reads item sales from the POS as they happen, so on-hand stock stays accurate without a nightly sync."
+        },
+        {
+          "question": "Does rtylr ERP support multi-warehouse inventory?",
+          "answer": "Yes. Every item can be stocked at multiple locations with per-location counts, reorder thresholds and transfer tracking. A purchase order can be split across warehouses, and staff see only their assigned location by default."
+        },
+        {
+          "question": "What does rtylr ERP replace?",
+          "answer": "The stock spreadsheet, and the CSV that was supposed to keep it in step with sales. A sale in the POS depletes the recipe components in ERP at the moment it happens, so \"how many units of one component remain across three locations\" is a question you can answer without opening a second tool."
+        }
+      ]
+    },
+    "crm": {
+      "title": "Questions about rtylr CRM",
+      "items": [
+        {
+          "question": "What does rtylr CRM track?",
+          "answer": "rtylr CRM tracks customers, visits, purchases, loyalty points and campaign touchpoints. For restaurants and retail it captures who ordered what straight from the POS, with no import. For services businesses you can log contacts, notes and deal stages by hand."
+        },
+        {
+          "question": "Does rtylr CRM have email marketing?",
+          "answer": "Yes. Segment customers by purchase history, loyalty tier or custom tags, then send branded email campaigns. Open and click tracking are built in. SMS campaigns are available on the Pro plan through the Twilio integration."
+        },
+        {
+          "question": "What does rtylr CRM replace?",
+          "answer": "The loyalty app, the mailing list, and the export that connects them to what people actually bought. Because CRM shares a database with the POS, a segment like \"spent above average, has not visited in 60 days\" stays current on its own instead of being rebuilt from a CSV each month."
+        }
+      ]
+    },
+    "hr": {
+      "title": "Questions about rtylr HR",
+      "items": [
+        {
+          "question": "What does rtylr HR do?",
+          "answer": "rtylr HR handles employee records, scheduling, shift swaps, time-off requests, payroll runs and compliance documents. It supports restaurant-specific workflows including tip pooling, minor work-hour limits and split shifts, alongside general retail and services HR."
+        },
+        {
+          "question": "Does rtylr HR run payroll for the US?",
+          "answer": "rtylr HR calculates gross-to-net pay, taxes and withholdings, and exports pay files compatible with Gusto, ADP and Rippling for filing. Direct filing through rtylr is on the roadmap. For now rtylr does the calculation and a third-party provider does the IRS filing."
+        },
+        {
+          "question": "Can staff see their schedule on their phone?",
+          "answer": "Yes. Every staff member gets a mobile view of their schedule, time-off balance and shift swap requests. They can request a swap and submit time off from their phone without an admin account."
+        },
+        {
+          "question": "What does rtylr HR replace?",
+          "answer": "The scheduling tool, the time-off inbox, and the double entry that happens when a new hire is created in HR, again in payroll, again in the CRM and again in access control. In rtylr the person is created once and the schedule, the pay run and the POS login all read the same record."
+        }
+      ]
+    },
+    "finance": {
+      "title": "Questions about rtylr Finance",
+      "items": [
+        {
+          "question": "What does rtylr Finance handle?",
+          "answer": "rtylr Finance handles invoicing, expenses, bill payments, bank reconciliation, and profit and loss, balance sheet and cash flow reports. Revenue from the POS, Stripe and other integrations arrives automatically. Expenses can come from a bank feed or be entered by hand."
+        },
+        {
+          "question": "Can rtylr Finance replace QuickBooks?",
+          "answer": "For many small businesses, yes: invoicing, expenses, reconciliation, P&L and tax reports are all covered. A business with complex audit requirements or multi-entity consolidation may still want a dedicated ledger, and rtylr Finance exports to QuickBooks and Xero for exactly that case. That limit is worth knowing before you switch."
+        },
+        {
+          "question": "Does rtylr Finance support multiple currencies?",
+          "answer": "Yes. Invoice in any currency, and rtylr converts using the exchange rate at invoice time. P&L reports can be read in any reporting currency, with FX lines shown explicitly rather than folded into the totals."
+        },
+        {
+          "question": "What does rtylr Finance replace?",
+          "answer": "The month-end export. Revenue, refunds, tips, purchase orders and payroll already live in the same database as the ledger, so the close does not begin with reconciling four systems against each other. That is the difference the page is really claiming, and it is the one a standalone accounting package cannot make."
+        }
+      ]
+    },
+    "flow": {
+      "title": "Questions about rtylr Flow",
+      "items": [
+        {
+          "question": "What is rtylr Flow?",
+          "answer": "Flow is rtylr's project and task management app. It has kanban boards, lists, timeline views, cycles, milestones, custom fields and automations. What makes it different from a standalone tracker is that it reads the rest of your business: who is on shift from HR, which customer a project belongs to from CRM, and which work is billable from Finance."
+        },
+        {
+          "question": "What can Flow do that a standalone task tracker cannot?",
+          "answer": "Assign a task to a staff member who already exists in HR, attach it to a customer who already exists in CRM, and push billable hours onto an invoice in Finance, without copying anything between tools. The tasks, boards, comments and automations you would expect are all there; the connection to real business records is the part a separate tracker cannot have."
+        },
+        {
+          "question": "Does Flow have a free tier?",
+          "answer": "Yes. Flow is included in the Free plan along with the other six apps, covering 10 team members at one location, with unlimited projects, tasks, comments and attachments. Pro and Scale raise the team and location limits and add the controls a larger team needs. rtylr does not publish prices yet, so Pro and Scale are quoted."
+        }
+      ]
+    }
+  },
+  "contact": {
+    "meta": {
+      "title": "Contact | rtylr",
+      "description": "Get in touch with the rtylr team. We respond within 24 hours."
+    },
+    "hero": {
+      "title": "Reach out. We read it all.",
+      "subtitle": "Product question, sales inquiry, press request, feature ask, every message lands in front of a human. We reply within one business day, usually faster."
+    },
+    "channels": {
+      "title": "Contact channels",
+      "whatsapp": {
+        "label": "Chat with us",
+        "value": "WhatsApp +961 3 940 708",
+        "description": "Message us directly on WhatsApp."
+      },
+      "phone": {
+        "label": "Call us",
+        "value": "+961 3 940 708",
+        "description": "Monday to Friday, 9 am to 5 pm local time."
+      },
+      "email": {
+        "label": "Email us",
+        "value": "info@voxire.com",
+        "description": "We reply within 24 hours."
+      }
+    },
+    "hours": {
+      "label": "Business hours",
+      "days": "Monday to Friday",
+      "time": "9 am to 5 pm (GMT+3)"
+    },
+    "form": {
+      "title": "Send us a message",
+      "name": {
+        "label": "Name",
+        "placeholder": "Your full name"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "your@email.com"
+      },
+      "company": {
+        "label": "Company",
+        "placeholder": "Your company name"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Tell us how we can help…"
+      },
+      "required": "*",
+      "optional": "(optional)",
+      "submit": "Send message"
+    },
+    "errors": {
+      "nameRequired": "Name is required.",
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Please enter a valid email address.",
+      "messageRequired": "Message is required."
+    },
+    "success": {
+      "title": "One more step.",
+      "body": "We opened a pre-filled draft in your email app. Hit send to get it to us and we will reply within 24 hours. If nothing opened, email us directly at",
+      "reset": "Send another message"
+    },
+    "strip": {
+      "text": "Need help getting started? Book a personalized demo."
+    }
+  },
+  "pricing": {
+    "meta": {
+      "title": "Pricing | rtylr",
+      "description": "rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card. Prices are not published yet, so talk to us for a quote."
+    },
+    "hero": {
+      "title": "All 7 apps.\nEvery plan.",
+      "subtitle": "No module upsells and no per-app licence. What changes between plans is scale."
+    },
+    "directAnswer": {
+      "label": "What do rtylr plans include?",
+      "body": "Every rtylr plan includes all seven apps: POS, ERP, CRM, HR, Finance, Flow and the hardware integrations. Plans differ by scale rather than by feature, so what changes is how many people and locations you run and the controls a larger team needs. Free covers 10 people at one location and needs no card. rtylr has not published prices for Pro and Scale yet, so those are quoted."
+    },
+    "plans": {
+      "title": "What is in each plan?",
+      "popular": "Most Popular",
+      "free": {
+        "name": "Free",
+        "description": "Everything you need to run a single location.",
+        "features": [
+          "Up to 10 team members",
+          "All 7 apps included",
+          "1 location",
+          "1,000 AI credits / month",
+          "No credit card required"
+        ],
+        "cta": "Start free"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Growing teams scaling across multiple locations.",
+        "features": [
+          "Up to 30 team members",
+          "Up to 5 locations",
+          "10,000 AI credits / month, plus 500 per seat",
+          "AI assistant",
+          "Priority email and chat support"
+        ],
+        "cta": "Start with Pro"
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Unlimited seats and every feature unlocked.",
+        "features": [
+          "Unlimited team members",
+          "Unlimited locations",
+          "50,000 AI credits / month, plus 1,000 per seat",
+          "SSO and audit logs",
+          "Dedicated success manager and SLA"
+        ],
+        "cta": "Talk to sales"
+      }
+    },
+    "compare": {
+      "title": "What changes between plans?",
+      "feature": "Feature",
+      "included": "Included",
+      "notIncluded": "Not included",
+      "rows": [
+        "All 7 apps",
+        "AI assistant",
+        "Priority support",
+        "SSO",
+        "Audit logs",
+        "Dedicated onboarding",
+        "SLA guarantee"
+      ]
+    },
+    "bottom": {
+      "title": "Start on Free. Move up when you outgrow it.",
+      "subtitle": "10 seats and all 7 apps are yours from day one, with no card. Book a demo if you would rather see it running on your own numbers first."
+    }
+  },
+  "home": {
+    "pricing": {
+      "badge": "Pricing",
+      "title": "One platform.\nEvery app included.",
+      "description": "All 7 apps come with every plan. What changes is how many people and locations you run. Start free with no card."
+    },
+    "meta": {
+      "title": "rtylr · Your entire business, one platform.",
+      "description": "POS, ERP, HR, CRM, Finance & Flow. The all-in-one business OS built for modern teams of every size. Powered by AI.",
+      "ogSiteName": "Rtylr",
+      "keywords": "POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI",
+      "schemaDescription": "One business platform covering POS, ERP, CRM, HR, Finance and Flow on a single data model, so a sale updates stock and the books without an export."
+    },
+    "directAnswer": {
+      "label": "What is rtylr?",
+      "body": "rtylr is an all-in-one business operating system for small and mid-sized companies: point of sale, ERP, HR, CRM, finance and project management on a single database. It is built for restaurants, retail and services businesses running 2 to 200 staff, across one location or twenty. The point is not that it is seven apps. It is that a sale moves stock, revenue and loyalty without anyone exporting a file."
+    },
+    "howItWorks": {
+      "eyebrow": "HOW IT WORKS",
+      "title": "How do you get\nfrom sign-up to live?",
+      "steps": [
+        {
+          "title": "Sign up",
+          "description": "Email, password, done. No credit card. Every app unlocked from minute one."
+        },
+        {
+          "title": "Configure Hub",
+          "description": "Locations, team, brand, tax, hardware. Hub is the one place you set everything else."
+        },
+        {
+          "title": "Assign apps",
+          "description": "POS for the floor. HR for managers. Finance for your accountant. Each person sees only the apps they actually use."
+        },
+        {
+          "title": "Go live",
+          "description": "Every department live at once. Seven apps, already talking to each other. No integration project."
+        }
+      ]
+    },
+    "cta": {
+      "title": "It's your turn\nto build.",
+      "subtitle": "Free for up to 10 members. No credit card.\nLaunch every department in an afternoon."
+    },
+    "products": {
+      "badge": "THE PLATFORM",
+      "title": "Seven apps.\nOne database.",
+      "subtitle": "Not bundled. Not integrated. Built into the same platform from the first line of code, so a sale in POS updates inventory, payroll, and the P&L in the same breath.",
+      "cardsTop": [
+        {
+          "title": "Point of sale",
+          "description": "Tickets, tables, splits, tips, and every payment type. The register that keeps up with real service."
+        },
+        {
+          "title": "Inventory",
+          "description": "Recipe-linked depletion, supplier management, auto-reorder. Your shelves tell the database."
+        },
+        {
+          "title": "People & payroll",
+          "description": "Scheduling, clock-in, payroll, time off, compliance. The people side, without the paperwork."
+        },
+        {
+          "title": "Customers & loyalty",
+          "description": "Profiles, segments, campaigns, and loyalty, fed live by every receipt your POS writes."
+        }
+      ],
+      "cardsBottom": [
+        {
+          "title": "Books that close themselves",
+          "description": "Invoices, expenses, sales tax, and a live P&L. Every sale reconciles in real time."
+        },
+        {
+          "title": "Projects & tasks",
+          "description": "Kanban, automations, and tasks linked to the actual invoice, customer, or shift they belong to."
+        },
+        {
+          "title": "Analytics across everything",
+          "description": "Revenue trends, customer cohorts, labor margin. Every number pulled live from every other app."
+        }
+      ],
+      "explore": "Explore →",
+      "exploreLabel": "Explore {{app}}"
+    },
+    "integrations": {
+      "badge": "INTEGRATIONS",
+      "title": "Plugs into everything\nyou already run on.",
+      "description": "Stripe for payments. QuickBooks for your accountant. Slack for alerts. Connect in minutes. No API keys to chase. No engineer required.",
+      "footnote": "See the full directory for everything planned."
+    },
+    "testimonials": {
+      "title": "What operators say about it.",
+      "items": [
+        {
+          "quote": "We used to close the books on the 8th of every month. Now we close them on the 2nd - nothing needs reconciling.",
+          "author": "Layla Ahmed",
+          "role": "Owner, Byblos Kitchen"
+        },
+        {
+          "quote": "A customer hit 20 visits and rtylr sent the thank-you email on its own. My manager asked if I set it up. I didn't.",
+          "author": "Karim Mansour",
+          "role": "General Manager, The Terrace"
+        },
+        {
+          "quote": "The internet went down on a Saturday night with 200 tables. The cashier didn't stop. I didn't expect software to handle that.",
+          "author": "Tarek Zein",
+          "role": "Owner, Mountain Café"
+        },
+        {
+          "quote": "Schedules used to live on WhatsApp. Now shifts go out in four taps and payroll runs automatically every Sunday night.",
+          "author": "Sara Halabi",
+          "role": "Operations Manager, Urban Chain"
+        },
+        {
+          "quote": "Switching from the old system saved us roughly $600 per branch per month. And that's before I count the add-ons.",
+          "author": "Nadine Farhat",
+          "role": "Founder, Fresh Market"
+        },
+        {
+          "quote": "The task is linked to the invoice, the customer, the shift. I stopped opening four tabs for four apps - I just open Flow.",
+          "author": "Jad Maalof",
+          "role": "Manager, Tech Store Pro"
+        }
+      ]
+    },
+    "truth": {
+      "badge": "Checkable",
+      "title": "What we can prove.",
+      "description": "Six claims you can verify from a browser tab or a terminal, and five things rtylr does not do yet. Nothing here needs a sales call to confirm.",
+      "limitsTitle": "What rtylr does not do yet",
+      "checkLabel": "Check it:",
+      "claims": [
+        {
+          "title": "One database, not seven integrations",
+          "body": "POS, ERP, CRM, HR, Finance and Flow read and write the same records. A sale depletes stock and lands in the ledger as it happens, because there is no second system to sync to."
+        },
+        {
+          "title": "Every page is readable by a machine",
+          "body": "Ask any URL on this site for Markdown instead of HTML and you get Markdown, with the correct Vary header. No scraping, no rendering, no JavaScript.",
+          "check": "curl -H \"Accept: text/markdown\" https://rtylr.com/pos/"
+        },
+        {
+          "title": "The whole site is indexed as data",
+          "body": "A machine-readable index of every page on the site, with titles and descriptions, generated at build time. It cannot drift from the site, because the site is what generates it.",
+          "check": "https://rtylr.com/pages.json"
+        },
+        {
+          "title": "All 7 apps on every plan",
+          "body": "No module upsells and no per-app licence. The plans differ by how many people and locations you run, not by which parts of the product you are allowed to open.",
+          "check": "https://rtylr.com/pricing/"
+        },
+        {
+          "title": "The Free plan needs no card",
+          "body": "Ten team members at one location, all 7 apps, no payment method and no trial clock. It is a plan, not a countdown.",
+          "check": "https://rtylr.com/pricing/"
+        },
+        {
+          "title": "An OpenAPI document, published",
+          "body": "This site publishes a spec for its own endpoints as OpenAPI 3.1. It covers the marketing site, not the product API, and it is linked here so nobody has to guess which.",
+          "check": "https://rtylr.com/openapi.json"
+        }
+      ],
+      "limits": [
+        "Prices are not published. The Free plan is free; Pro and Scale are quoted.",
+        "No integration is live yet. /integrations/ lists what is planned and marks every entry Coming soon.",
+        "Payroll filing is not ours. rtylr HR calculates pay and exports files for Gusto, ADP or Rippling to file.",
+        "Complex accounting still wants a ledger. Multi-entity consolidation and heavy audit trails are better served by QuickBooks or Xero, and rtylr Finance exports to both.",
+        "The apps are in English. Arabic and French are being written, not translated, and are not shipped yet."
+      ]
+    },
+    "hero": {
+      "announcePill": "BETA",
+      "announceText": "Caret AI is in beta. Describe your business, watch it build",
+      "title": "Run your entire business.\nFrom a single platform.",
+      "promptPlaceholder": "Describe your business. Caret AI drafts your POS, inventory, staff, and invoices",
+      "caretLabel": "Caret AI",
+      "moreOptions": "More options",
+      "submit": "Start building",
+      "demoLinePrefix": "Talk with an expert and",
+      "demoLineLink": "book a demo",
+      "stats": [
+        {
+          "number": "50K+",
+          "label": "Daily Transactions"
+        },
+        {
+          "number": "99.9%",
+          "label": "Uptime"
+        },
+        {
+          "number": "20+",
+          "label": "Countries"
+        },
+        {
+          "number": "24/7",
+          "label": "Support"
+        },
+        {
+          "number": "Offline",
+          "label": "Always Works"
+        },
+        {
+          "number": "AI",
+          "label": "Powered"
+        },
+        {
+          "number": "Multi",
+          "label": "Language"
+        },
+        {
+          "number": "Cloud",
+          "label": "Native"
+        }
+      ],
+      "promptLabel": "Describe your business"
+    },
+    "features": {
+      "badge": "THE PLATFORM",
+      "title": "What does each app do?",
+      "titleAccent": "One screen at a time.",
+      "openCta": "Open {{app}}",
+      "showLabel": "Show {{app}}",
+      "chooseAppLabel": "Choose a platform app",
+      "items": [
+        {
+          "title": "A register that keeps up with real service.",
+          "description": "Tickets, tables, splits, tips, and every payment type - card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn’t. < 200ms per checkout."
+        },
+        {
+          "title": "Inventory that counts itself.",
+          "description": "Recipe-linked depletion as sales ring up. Auto-reorder at threshold. Multi-location transfers with a full audit trail. Your shelves tell the database, not the other way around."
+        },
+        {
+          "title": "The people side, without the paperwork.",
+          "description": "Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions automatically. Compliance flags before they become violations."
+        },
+        {
+          "title": "Every customer, remembered.",
+          "description": "Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same app - no Mailchimp detour required."
+        },
+        {
+          "title": "A real P&L, in real time.",
+          "description": "Recurring invoices that collect themselves. Expenses captured at source. Sales tax by jurisdiction. A P&L that updates with every sale, not at month-end."
+        },
+        {
+          "title": "Work that moves between apps.",
+          "description": "Kanban boards, automations, and tasks linked to the invoice, customer, or shift they’re actually about. Operations that don’t slip between tools."
+        },
+        {
+          "title": "The dashboard that sees everything.",
+          "description": "Revenue trends, customer cohorts, product performance, labor margin. Every number pulled live from every other app. No SQL, no nightly ETL."
+        }
+      ],
+      "demos": {
+        "hr": {
+          "scheduleTitle": "Schedule",
+          "today": "Today · Mon 5 May",
+          "onShift_one": "{{count}} on shift",
+          "onShift_other": "{{count}} on shift",
+          "roles": {
+            "floorManager": "Floor Manager",
+            "barista": "Barista",
+            "chef": "Chef",
+            "server": "Server"
+          }
+        },
+        "pos": {
+          "menuLabel": "Menu · Dine-in",
+          "orderLabel": "Order · Table 4",
+          "addItems": "Add items…",
+          "total": "Total",
+          "charge": "Charge",
+          "chargeAmount": "Charge ${{amount}}",
+          "items": [
+            "Espresso",
+            "Latte",
+            "Cappuccino",
+            "Croissant",
+            "Orange Juice",
+            "Avo Toast",
+            "Greek Salad",
+            "Cheesecake"
+          ]
+        },
+        "erp": {
+          "inventory": "Inventory",
+          "itemCount_one": "{{count}} item",
+          "itemCount_other": "{{count}} items",
+          "alertCount_one": "{{count}} alert",
+          "alertCount_other": "{{count}} alerts",
+          "table": {
+            "item": "Item",
+            "stock": "Stock",
+            "onHand": "On hand",
+            "status": "Status"
+          },
+          "status": {
+            "out": "Out",
+            "critical": "Critical",
+            "low": "Low",
+            "ok": "OK"
+          },
+          "items": [
+            "Olive Oil 5L",
+            "Flour 25kg",
+            "Espresso Beans",
+            "Atlantic Salmon",
+            "Truffle Oil",
+            "Heavy Cream",
+            "Sourdough"
+          ],
+          "units": {
+            "btl": "btl",
+            "bag": "bag",
+            "kg": "kg",
+            "L": "L",
+            "pcs": "pcs"
+          }
+        },
+        "crm": {
+          "customers": "Customers",
+          "totalCount": "1,204 total",
+          "segments": {
+            "all": "All",
+            "vip": "★ VIP",
+            "regular": "Regular",
+            "atRisk": "At risk",
+            "new": "New"
+          },
+          "table": {
+            "customer": "Customer",
+            "tier": "Tier",
+            "spend": "Spend",
+            "lastVisit": "Last visit"
+          },
+          "visitCount_one": "{{count}} visit",
+          "visitCount_other": "{{count}} visits",
+          "relativeTime": {
+            "yesterday": "Yesterday",
+            "oneDayAgo": "1d ago",
+            "twoDaysAgo": "2d ago",
+            "threeDaysAgo": "3d ago",
+            "fiveDaysAgo": "5d ago",
+            "oneWeekAgo": "1w ago",
+            "threeWeeksAgo": "3w ago",
+            "oneMonthAgo": "1mo ago"
+          }
+        },
+        "finance": {
+          "pnl": "P&L",
+          "monthLabel": "May 2026",
+          "profitable": "Profitable",
+          "metrics": {
+            "revenue": "Revenue",
+            "expenses": "Expenses",
+            "netProfit": "Net profit"
+          },
+          "momSuffix": "MoM",
+          "months": {
+            "nov": "Nov",
+            "dec": "Dec",
+            "jan": "Jan",
+            "feb": "Feb",
+            "mar": "Mar",
+            "apr": "Apr",
+            "may": "May"
+          }
+        },
+        "flow": {
+          "breadcrumb": {
+            "workspaces": "Workspaces",
+            "operations": "Operations",
+            "sprint": "Weekly sprint"
+          },
+          "views": {
+            "board": "Board",
+            "list": "List",
+            "timeline": "Timeline"
+          },
+          "columns": {
+            "backlog": "Backlog",
+            "progress": "In progress",
+            "review": "Review",
+            "done": "Done"
+          },
+          "priorityHigh": "High",
+          "tasks": {
+            "t1": "Seasonal menu rollout, Q3",
+            "t2": "New supplier: Rossini",
+            "t3": "Friday covers, staffing plan",
+            "t4": "Redo brunch prep checklist",
+            "t5": "Email blast: Mother's Day",
+            "t6": "Espresso machine SLA",
+            "t7": "Q1 sales-tax filing",
+            "t8": "POS firmware v4.2"
+          },
+          "tags": {
+            "ops": "Ops",
+            "erp": "ERP",
+            "hr": "HR",
+            "kitchen": "Kitchen",
+            "crm": "CRM",
+            "vendor": "Vendor",
+            "finance": "Finance"
+          }
+        },
+        "insights": {
+          "revenue": "Revenue",
+          "last7Days": "Last 7 days",
+          "kpis": {
+            "covers": "Covers",
+            "avgOrder": "Avg order",
+            "peakDay": "Peak day"
+          },
+          "vsPrefix": "vs {{day}}",
+          "days": {
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat",
+            "sun": "Sun"
+          },
+          "ranges": {
+            "7d": "7d",
+            "30d": "30d",
+            "90d": "90d"
+          }
+        }
+      }
+    }
+  },
+  "pos": {
+    "meta": {
+      "title": "POS · The register that keeps up. | rtylr",
+      "description": "Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform.",
+      "schemaDescription": "Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode."
+    },
+    "hero": {
+      "eyebrow": "rtylr POS",
+      "title": "The register\nthat keeps up.",
+      "subtitle": "Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift cards, house accounts. Keep running when the WiFi goes down. Built for the pace of real service, not a demo video.",
+      "receipt": {
+        "items": [
+          "Margherita Pizza",
+          "House Salad",
+          "Sparkling Water",
+          "Espresso"
+        ],
+        "order": "Order #{{orderId}} · Table {{table}}",
+        "live": "LIVE",
+        "venue": "rtylr · Terrace",
+        "date": "Apr 18",
+        "server": "Server: {{name}}",
+        "subtotal": "Subtotal",
+        "tax": "Tax ({{pct}})",
+        "tip": "Tip ({{pct}})",
+        "total": "Total",
+        "paid": "Paid · Visa ••4891"
+      }
+    },
+    "directAnswer": {
+      "label": "What is rtylr POS?",
+      "body": "rtylr POS is the point-of-sale app inside rtylr, built for restaurants and retail businesses running one location or twenty. It handles tickets, course firing, check splits, tips, modifiers and card payments, and it keeps taking orders when the connection drops. Because it writes to the same database as inventory, staff and accounting, a sale moves stock and revenue without an export."
+    },
+    "features": {
+      "eyebrow": "WHAT IT DOES",
+      "title": "What does a register\nhave to get right?",
+      "items": [
+        {
+          "title": "Tickets that keep up",
+          "copy": "Split, merge, combine. Send courses to the right station. Fire when you say fire."
+        },
+        {
+          "title": "Every payment method",
+          "copy": "Card, Apple Pay, Google Pay, cash, gift, comp, house account. One register handles all of it."
+        },
+        {
+          "title": "Tips, tabs, and splits",
+          "copy": "Seat-level splits. Auto-gratuity. Pre-auth tabs. Tips hit payroll the next morning."
+        },
+        {
+          "title": "Works when the internet doesn’t",
+          "copy": "Full offline mode. Queues transactions locally and syncs the moment you’re back online."
+        }
+      ]
+    },
+    "compare": {
+      "eyebrow": "VS THE OTHERS",
+      "title": "What do other registers\ncharge extra for?",
+      "rows": [
+        "Offline mode (full service, no internet)",
+        "Payment processing locked in",
+        "Hardware you can buy elsewhere",
+        "HR + payroll included",
+        "Inventory depletes per recipe",
+        "Real-time CRM tied to receipts",
+        "Public REST API v1"
+      ],
+      "cell": {
+        "included": "Included",
+        "excluded": "-",
+        "partial": "Partial",
+        "paidAddon": "Paid add-on"
+      },
+      "footnote": "Comparison based on publicly available pricing and product documentation, April 2026. Something out of date?",
+      "footnoteLink": "Let us know"
+    },
+    "cta": {
+      "title": "Your register should\nkeep up. This one does."
+    }
+  },
+  "erp": {
+    "meta": {
+      "title": "ERP · Inventory that counts itself. | rtylr",
+      "description": "Real-time inventory, suppliers, and purchasing. Recipe-linked depletion. Multi-location transfers with full audit trail.",
+      "schemaDescription": "Real-time inventory, suppliers, purchase orders, and warehouse management."
+    },
+    "hero": {
+      "eyebrow": "rtylr ERP · Inventory",
+      "title": "Inventory that\ncounts itself.",
+      "subtitle": "Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved moves the warehouse count. Every low-stock alert fires before you actually run out. Not after the Saturday rush notices.",
+      "inventory": {
+        "items": [
+          "Margherita (225g dough)",
+          "House Red (750ml)",
+          "Olive Oil (5L)",
+          "Espresso Bean (1kg)",
+          "Flour 00 (3kg)"
+        ]
+      }
+    },
+    "directAnswer": {
+      "label": "What is rtylr ERP?",
+      "body": "rtylr ERP is the inventory and supply chain app inside rtylr, for businesses holding stock across one or more locations. It covers on-hand counts, suppliers, purchase orders, transfers between sites, low-stock alerts and cost tracking. It reads sales from the POS as they happen, so stock stays accurate without a nightly sync and a reorder can be drafted before anyone notices an empty shelf."
+    },
+    "capabilities": {
+      "eyebrow": "CAPABILITIES",
+      "title": "What does rtylr ERP\ncover, from the dock\nto the P&L?",
+      "items": [
+        {
+          "title": "Every SKU, every variant",
+          "copy": "Track ingredients down to the gram. Recipe-linked depletion. Real-time counts as sales happen."
+        },
+        {
+          "title": "Suppliers & purchase orders",
+          "copy": "Auto-reorder at threshold. Multi-supplier price comparison. Expected-arrival tracking per line item."
+        },
+        {
+          "title": "Multi-location transfers",
+          "copy": "Move stock between sites with full audit trail. Location-level reporting. No spreadsheet reconciliation."
+        },
+        {
+          "title": "Low-stock before it hurts",
+          "copy": "Smart thresholds based on historical velocity. Alerts route to the right person. Nothing runs out mid-service."
+        }
+      ]
+    },
+    "depletion": {
+      "eyebrow": "LIVE RECIPE DEPLETION",
+      "title": "What happens to stock when a sale goes through?",
+      "copy": "Every POS sale cascades through the recipe tree. Flour, yeast, mozzarella, basil, olive oil, each depletes by exactly the gram. When anything crosses its reorder threshold, a PO is drafted with your preferred supplier and routed for approval."
+    },
+    "cta": {
+      "title": "Close your inventory\nbooks while you sleep."
+    },
+    "mock": {
+      "reset": "Reset",
+      "resetLabel": "Reset inventory",
+      "tabs": {
+        "allSkus": "All SKUs",
+        "lowStock": "Low stock · {{count}}",
+        "suppliers": "Suppliers",
+        "purchaseOrders": "Purchase orders"
+      },
+      "simulate": "Simulate Friday service",
+      "simulateRunning": "Service running…",
+      "table": {
+        "sku": "SKU",
+        "item": "Item",
+        "onHand": "On hand",
+        "min": "Min",
+        "status": "Status"
+      },
+      "status": {
+        "critical": "Critical",
+        "reorder": "Reorder",
+        "healthy": "Healthy"
+      },
+      "footer_one": "Auto-reorder triggered for {{count}} item · PO #{{po}} drafted",
+      "footer_other": "Auto-reorder triggered for {{count}} items · PO #{{po}} drafted"
+    },
+    "flow": {
+      "steps": [
+        {
+          "title": "1 Margherita sold",
+          "desc": "POS fires recipe lookup"
+        },
+        {
+          "title": "7 ingredients depleted",
+          "desc": "Flour, mozz, basil, oil, salt, yeast, dough"
+        },
+        {
+          "title": "PO auto-drafted",
+          "desc": "Routed for manager approval"
+        }
+      ]
+    }
+  },
+  "crm": {
+    "meta": {
+      "title": "CRM · Every customer, remembered. | rtylr",
+      "description": "Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically.",
+      "schemaDescription": "Customer profiles, loyalty programs, and campaign tracking that connect to every other app."
+    },
+    "hero": {
+      "eyebrow": "rtylr CRM",
+      "subtitle": "Every POS sale enriches the profile on its own. Birthday, last visit, favorite dish, server they love, stored, segmented, ready the moment you want to send the right message. No CRM data entry. No forgotten customers at the door.",
+      "titleA": "Every customer,",
+      "titleB": "remembered."
+    },
+    "directAnswer": {
+      "label": "What is rtylr CRM?",
+      "body": "rtylr CRM is the customer app inside rtylr, for restaurants, retail and services businesses that want to know who their regulars are. It holds customer profiles, visit and purchase history, loyalty points, segments and email campaigns. Because it shares a database with the POS, it records what someone actually bought with no import, so a segment stays current on its own."
+    },
+    "campaigns": {
+      "items": [
+        {
+          "title": "Email that reads personal",
+          "copy": "Pre-built templates. Personalisation tokens. Auto-sent on triggers like birthday, lapse, or first-visit."
+        },
+        {
+          "title": "Loyalty that means something",
+          "copy": "Points, tiers, rewards. Auto-applied at checkout. Built into POS, not stapled onto it."
+        },
+        {
+          "title": "Segments that make sense",
+          "copy": "Slice by visit frequency, average spend, last order, dietary preferences. Save as a segment, send a campaign."
+        },
+        {
+          "title": "SMS that doesn\\u2019t feel like spam",
+          "copy": "Short-code, opt-in, transactional or broadcast. Throttled to protect your sender reputation."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Stop forgetting\nyour best customers."
+    }
+  },
+  "hr": {
+    "meta": {
+      "title": "HR · Your team. Looked after. | rtylr",
+      "description": "Scheduling, time & attendance, payroll, time off, onboarding, and compliance. One app that treats your staff like people.",
+      "schemaDescription": "Scheduling, payroll, compliance, and time-off management for modern teams."
+    },
+    "hero": {
+      "eyebrow": "rtylr HR",
+      "subtitle": "Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions on its own. Compliance flags before they become violations. Software that treats staff like people, not line items in a spreadsheet.",
+      "titleA": "Your team.",
+      "titleB": "Looked after."
+    },
+    "directAnswer": {
+      "label": "What is rtylr HR?",
+      "body": "rtylr HR is the people app inside rtylr, for teams with shift workers, hourly staff or both. It covers employee records, scheduling, shift swaps, time off, payroll calculation and compliance documents. A person is created once: the schedule, the pay run and their POS login all read that same record, so a new hire is not entered in four different places."
+    },
+    "pillars": {
+      "items": [
+        {
+          "title": "Schedules that publish themselves",
+          "copy": "Drag, drop, publish. Staff get texts the moment a shift posts. Conflicts caught before they ship."
+        },
+        {
+          "title": "Time & attendance, zero paperwork",
+          "copy": "Clock in from the POS. Biometric, PIN, or geofenced. Auto-rounding and break enforcement built in."
+        },
+        {
+          "title": "Payroll that runs itself",
+          "copy": "Hours, tips, deductions, taxes, rolled up automatically. Direct deposit, pay stubs, filings handled."
+        },
+        {
+          "title": "Time off, clearly",
+          "copy": "One place for requests, approvals, and balances. Blackout dates, accrual rules, and coverage in one glance."
+        },
+        {
+          "title": "Onboarding without friction",
+          "copy": "E-sign offer letters, W-4s and I-9s. Self-service docs, handbook, and training from day one."
+        },
+        {
+          "title": "Compliance that watches itself",
+          "copy": "Overtime rules, break audits, minor labor, fair workweek. Flags before they become violations."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Your staff deserve\nsoftware built for them."
+    }
+  },
+  "finance": {
+    "meta": {
+      "title": "Finance · A real P&L, in real time. | rtylr",
+      "description": "Invoices, expenses, sales tax, and a live profit-and-loss. Every sale and every payroll roll into the books automatically.",
+      "schemaDescription": "Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business."
+    },
+    "hero": {
+      "eyebrow": "rtylr Finance",
+      "subtitle": "Every POS sale, every payroll run, every paid invoice rolls into the books on its own. The P&amp;L you&apos;re looking at right now? That&apos;s what the numbers actually are. No exports. No reconciliation. No month-end surprises."
+    },
+    "directAnswer": {
+      "label": "What is rtylr Finance?",
+      "body": "rtylr Finance is the accounting app inside rtylr, for owners who want a current profit and loss rather than one that arrives weeks late. It covers invoicing, expenses, bill payments, bank reconciliation, and P&L, balance sheet and cash flow reports. Revenue, refunds, tips and payroll already sit in the same database, so the month-end close does not start by reconciling four systems."
+    },
+    "pillars": {
+      "items": [
+        {
+          "title": "Invoices that collect themselves",
+          "copy": "Recurring schedules, auto-reminders, one-click payment. Paid invoices reconcile automatically against the books."
+        },
+        {
+          "title": "Expenses, captured at source",
+          "copy": "Snap the receipt. Policy-aware categorisation. Approved-to-paid in the same app. No more Friday shoeboxes."
+        },
+        {
+          "title": "Real P&L in real time",
+          "copy": "Every POS sale, every invoice, every payroll run rolls into a live profit-and-loss. Not a month-end surprise."
+        },
+        {
+          "title": "Tax prep without the scramble",
+          "copy": "Jurisdiction-aware sales tax. Quarter-end snapshots. One export your accountant will actually thank you for."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Stop closing your books\nwith a spreadsheet."
+    },
+    "chart": {
+      "rangeLabel": "Time range",
+      "metricLabel": "Metric"
+    }
+  },
+  "flow": {
+    "meta": {
+      "title": "Flow · Projects, tasks, and team workspaces. | rtylr",
+      "description": "Kanban boards, automations, templates, and tasks linked to everything else in rtylr. Operations that don't slip.",
+      "schemaDescription": "Kanban boards, automations, and task management that stay connected to every other app."
+    },
+    "hero": {
+      "eyebrow": "rtylr Flow · Work OS",
+      "subtitle": "Drag-drop kanban. Tasks linked to the actual invoice, customer, or shift they care about. Automations that fire when a PO is approved or payroll closes, no Zapier, no duct tape. The work OS your team will actually open.",
+      "titleA": "Work that moves.",
+      "titleB": "Operations that don't slip."
+    },
+    "directAnswer": {
+      "label": "What is rtylr Flow?",
+      "body": "rtylr Flow is the project and task app inside rtylr, for teams tracking work that touches real customers, staff and money. It has boards, lists, timelines, cycles, milestones, custom fields and automations. What a standalone tracker cannot do is read the rest of the business: assign work to a person from HR, attach it to a customer from CRM, push billable hours onto an invoice in Finance."
+    },
+    "features": {
+      "items": [
+        {
+          "title": "Boards for every team",
+          "copy": "Kanban, list, timeline, or calendar. Each team picks their view. Same data underneath."
+        },
+        {
+          "title": "Tasks that link to reality",
+          "copy": "Attach a task to a customer, a supplier, an invoice, or a shift. When it moves, everything updates."
+        },
+        {
+          "title": "Automations without Zapier",
+          "copy": "When a PO is approved → task on purchasing. When payroll closes → reminder on HR. Built in."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Stop losing work\nbetween tools."
+    }
+  },
+  "integrations": {
+    "meta": {
+      "title": "Integrations · Payments, accounting, delivery and hardware | rtylr",
+      "description": "Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
+    },
+    "hero": {
+      "eyebrow": "INTEGRATIONS",
+      "title": "Plug in what you\nalready use.",
+      "subtitle": "rtylr connects to payments, accounting, delivery marketplaces, communications, and hardware out of the box. Everything a real business runs on, ready from day one.",
+      "searchPlaceholder": "Search integrations…"
+    },
+    "categories": {
+      "all": "All",
+      "payments": "Payments",
+      "accounting": "Accounting",
+      "delivery": "Delivery",
+      "comms": "Comms",
+      "hardware": "Hardware",
+      "productivity": "Productivity"
+    },
+    "status": {
+      "live": "Live",
+      "beta": "Beta",
+      "soon": "Coming soon"
+    },
+    "api": {
+      "eyebrow": "BUILD YOUR OWN",
+      "title": "Nothing matching? Build on our API.",
+      "copy": "Full REST API covering every object in rtylr, menu items, orders, invoices, customers, shifts, tasks. Webhooks for every event. OAuth 2.0 for third-party apps. Rate-limited generously. Documented publicly.",
+      "docs": "Read API docs",
+      "contact": "Talk to an engineer"
+    }
+  },
+  "notFound": {
+    "meta": {
+      "title": "Page not found · rtylr",
+      "description": "The page you're looking for doesn't exist. Here's where you can go next."
+    },
+    "links": [
+      {
+        "label": "Homepage",
+        "description": "Back to the start."
+      },
+      {
+        "label": "Pricing",
+        "description": "See plans and per-seat pricing."
+      },
+      {
+        "label": "Products",
+        "description": "POS, ERP, HR, CRM, Finance, Flow."
+      },
+      {
+        "label": "Book a demo",
+        "description": "See rtylr running on your data."
+      },
+      {
+        "label": "Contact",
+        "description": "Talk to someone on our team."
+      }
+    ],
+    "eyebrow": "ERROR · 404",
+    "title": "This page\ndoesn't exist.",
+    "backHome": "Back to home",
+    "startFree": "Start free"
+  },
+  "about": {
+    "meta": {
+      "title": "About rtylr · The All-in-One Business OS for Modern Teams",
+      "description": "We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow, and Insights."
+    },
+    "clusters": [
+      {
+        "label": "Front of House",
+        "description": "Manage every customer touchpoint, point of sale, loyalty, campaigns, and beyond."
+      },
+      {
+        "label": "Operations",
+        "description": "Keep inventory, purchasing, invoices, and P&L tight across every location."
+      },
+      {
+        "label": "People",
+        "description": "Staff scheduling, project management, and analytics all unified in one place."
+      }
+    ],
+    "values": [
+      {
+        "title": "Everything in one place",
+        "body": "No more juggling seven tools. One login, one workspace, one source of truth for your business."
+      },
+      {
+        "title": "Built for teams",
+        "body": "From a two-person shop to a 500-seat enterprise, rtylr scales to fit how your team actually works."
+      },
+      {
+        "title": "AI-first by design",
+        "body": "Every app ships with an embedded AI assistant, not a bolt-on, but part of the core experience."
+      },
+      {
+        "title": "Always available offline",
+        "body": "POS and critical workflows work without internet. Sync happens automatically when you reconnect."
+      }
+    ],
+    "hero": {
+      "eyebrow": "ABOUT VOXIRE & RTYLR",
+      "title": "An operating system\nfor real businesses."
+    },
+    "mission": {
+      "eyebrow": "OUR MISSION",
+      "title": "Stop the CSV life."
+    },
+    "story": {
+      "eyebrow": "THE STORY",
+      "title": "We got tired of the duct tape."
+    },
+    "platform": {
+      "eyebrow": "The Platform",
+      "title": "Seven apps. One platform."
+    },
+    "valuesTitle": "What we stand for.",
+    "cta": {
+      "title": "Join the businesses already using rtylr.",
+      "subtitle": "Free forever for up to 10 members. No credit card required."
+    }
+  },
+  "trust": {
+    "meta": {
+      "title": "Trust Center | rtylr",
+      "description": "Security, privacy, compliance, uptime, and vendor transparency, everything customers need before they commit."
+    },
+    "pillars": [
+      {
+        "title": "Security program",
+        "copy": "Formal information-security program aligned with ISO 27001 and SOC 2. Reviewed quarterly."
+      },
+      {
+        "title": "Encryption",
+        "copy": "TLS 1.2+ in transit. AES-256 at rest. Separate backup regions. Secrets managed in a vault."
+      },
+      {
+        "title": "Access control",
+        "copy": "SSO + mandatory MFA for production. Least-privilege access, quarterly reviews."
+      },
+      {
+        "title": "Infrastructure",
+        "copy": "Cloudflare edge, Firebase / GCP managed services, multi-region backups with PITR."
+      },
+      {
+        "title": "24/7 monitoring",
+        "copy": "Continuous monitoring and alerting. Documented incident-response runbook. 72-hour breach notifications."
+      },
+      {
+        "title": "Vulnerability management",
+        "copy": "Dependencies scanned on every build. Annual third-party pen test. Critical CVEs patched within 7 days."
+      }
+    ],
+    "compliance": [
+      {
+        "label": "GDPR / UK GDPR",
+        "status": "Compliant"
+      },
+      {
+        "label": "CCPA / CPRA",
+        "status": "Compliant"
+      },
+      {
+        "label": "PCI DSS",
+        "status": "Via Paddle (Level 1)"
+      },
+      {
+        "label": "SOC 2 Type II",
+        "status": "In progress · Q4 2026"
+      },
+      {
+        "label": "ISO 27001",
+        "status": "Aligned, not yet certified"
+      },
+      {
+        "label": "HIPAA",
+        "status": "Not applicable"
+      }
+    ],
+    "hero": {
+      "eyebrow": "TRUST CENTER",
+      "title": "Run your business on something trustworthy.",
+      "securityDocs": "Security documentation",
+      "privacyPolicy": "Privacy policy",
+      "subtitle": "Security, privacy, uptime, and compliance: the stuff that should be straightforward, made transparent. Everything you need to evaluate rtylr before you commit."
+    },
+    "pillarsSection": {
+      "eyebrow": "HOW WE PROTECT YOUR DATA",
+      "title": "Six things we take\nseriously every day.",
+      "learnMore": "Learn more →"
+    },
+    "complianceSection": {
+      "eyebrow": "COMPLIANCE POSTURE",
+      "title": "Where we are.",
+      "copy": "We publish our compliance status transparently, certified, aligned, or in progress."
+    },
+    "residency": {
+      "title": "Where your data lives, and how you can take it with you.",
+      "body": "Customer Data is hosted in the cloud region that best matches your workspace settings. EU-region hosting is available on request for customers with data-residency requirements. You can export your full workspace (CSV, XLSX, or API dump) at any time from settings. On account termination, your data is retained for 30 days for recovery, then deleted within 60 days from live systems and within 90 days from backups."
+    },
+    "packet": {
+      "title": "Need our security packet, SIG, or DPA?",
+      "body": "Email <secMail>security@voxire.com</secMail> and we'll send the current packet under NDA within 7 business days, including the latest status of our SOC 2 Type II audit."
+    },
+    "status": {
+      "operational": "All systems operational",
+      "viewLive": "View live status at <statusLink>status.rtylr.com</statusLink>",
+      "uptimeLabel": "Rolling 90-day uptime",
+      "breachLabel": "Breach notification commitment",
+      "penTestLabel": "Annual third-party pen test",
+      "breachValue": "< 72h",
+      "uptimeValue": "99.99%"
+    }
+  },
+  "hardware": {
+    "meta": {
+      "title": "POS Hardware · Terminals, Printers & Scanners | rtylr",
+      "description": "Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
+    },
+    "items": [
+      {
+        "name": "Digital Scale",
+        "description": "Precision weighing for ingredients and products. High-accuracy load cell with backlit LCD display."
+      },
+      {
+        "name": "Cash Drawer",
+        "description": "Secure dual-bill, dual-coin POS cash drawer with heavy-duty steel construction and auto-open trigger."
+      },
+      {
+        "name": "Thermal Receipt Printer",
+        "description": "80mm high-speed receipt printing at 250mm/s. Supports USB, LAN, and Bluetooth connectivity."
+      },
+      {
+        "name": "Barcode Scanner",
+        "description": "1D/2D omnidirectional USB scanner with 360° coverage. Reads damaged and low-contrast barcodes."
+      },
+      {
+        "name": "Card Terminal",
+        "description": "Tap, chip & swipe EMV-certified payments. Supports NFC, Apple Pay, Google Pay, and Visa/MC."
+      },
+      {
+        "name": "Kitchen Display System",
+        "description": "15\" wall-mount order display with real-time ticket management and multi-station routing."
+      },
+      {
+        "name": "Tablet Stand",
+        "description": "Adjustable 360° rotating tablet mount. Compatible with 7\"–13\" tablets. Weighted non-slip base."
+      },
+      {
+        "name": "Customer Display",
+        "description": "Dual-screen customer-facing display. Rear LCD shows order totals, promotions, and loyalty points."
+      },
+      {
+        "name": "Label Printer",
+        "description": "4\" thermal label printer for shelf tags, product labels, and expiry stickers. 203 dpi resolution."
+      }
+    ],
+    "hero": {
+      "eyebrow": "RTYLR HARDWARE",
+      "title": "Plug it in. Ring it up.",
+      "subtitle": "Certified printers, card readers, scanners, and kiosks, paired with rtylr POS out of the box. No drivers to install, no firmware to sideload, no configuration weekend."
+    },
+    "gridTitle": "What you can plug in",
+    "strip": {
+      "badge": "Plug & Play",
+      "text": "All hardware integrates with rtylr POS out of the box. Zero drivers, zero configuration."
+    },
+    "cta": {
+      "title": "Get hardware for your business.",
+      "contactSales": "Contact sales",
+      "subtitle": "Our team will help you spec the right devices for your setup and ship everything pre-configured for your location."
+    }
+  },
+  "partners": {
+    "meta": {
+      "title": "Partner Program | rtylr",
+      "description": "Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
+    },
+    "tracks": [
+      {
+        "benefits": [
+          "Referral fees on first-year revenue",
+          "Co-selling with our account team",
+          "Dedicated partner portal with pre-sales collateral",
+          "rtylr Certified Implementer accreditation"
+        ],
+        "name": "Implementation Partners",
+        "summary": "Consultancies and agencies that set up rtylr for end customers, POS configuration, menu migration, HR onboarding.",
+        "who": "For ops consultancies, restaurant-tech specialists, and digital agencies."
+      },
+      {
+        "benefits": [
+          "Listed in the integrations directory",
+          "Co-marketing on launch",
+          "Joint webinars with our customers",
+          "Priority partner support channel"
+        ],
+        "name": "Technology Partners",
+        "summary": "Software that integrates with rtylr, delivery marketplaces, payment processors, loyalty engines, BI tools.",
+        "who": "For SaaS companies adjacent to commerce, POS, HR, or finance."
+      },
+      {
+        "benefits": [
+          "Revenue share on multi-location deals",
+          "Rtylr Certified Trainer program",
+          "Early access to new apps and APIs",
+          "Feature placement in customer newsletters"
+        ],
+        "name": "Solution Partners",
+        "summary": "Training, enablement, and managed services built around rtylr, franchise rollouts, staff training, compliance audits.",
+        "who": "For training companies, franchise enablement teams, and vertical specialists."
+      },
+      {
+        "benefits": [
+          "Direct inclusion in the rtylr hardware catalog",
+          "Certification program for plug-and-play pairing",
+          "Joint customer fulfillment operations",
+          "SDK access for native driver integration"
+        ],
+        "name": "Hardware Partners",
+        "summary": "Printers, card readers, scanners, kiosk terminals, hardware that rtylr ships to the end customer.",
+        "who": "For hardware OEMs and authorized distributors."
+      }
+    ],
+    "tiers": [
+      {
+        "name": "Registered",
+        "desc": "You\\u2019re in the program. Directory listing, referral tracking, basic co-marketing assets.",
+        "commitment": "0 closed deals"
+      },
+      {
+        "name": "Certified",
+        "desc": "You\\u2019ve completed the product training and closed your first deals. Higher referral rates.",
+        "commitment": "3+ closed deals"
+      },
+      {
+        "name": "Premier",
+        "desc": "Dedicated partner manager, pre-launch access, co-selling motions, feature on the home page.",
+        "commitment": "15+ closed deals"
+      }
+    ],
+    "hero": {
+      "eyebrow": "PARTNER PROGRAM",
+      "title": "Build with rtylr.\nGrow with us.",
+      "apply": "Apply to the program",
+      "email": "Email partners@voxire.com"
+    },
+    "tracksSection": {
+      "eyebrow": "FOUR TRACKS",
+      "title": "Pick the track that fits you."
+    },
+    "tiersSection": {
+      "eyebrow": "HOW YOU LEVEL UP",
+      "title": "Three tiers. Earned, not paid."
+    },
+    "cta": {
+      "title": "Want in?",
+      "apply": "Start an application"
+    }
+  },
+  "demo": {
+    "meta": {
+      "title": "Book a demo | rtylr",
+      "description": "See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it.",
+      "schemaName": "Book a Demo"
+    },
+    "hero": {
+      "title": "See rtylr on your data.",
+      "subtitle": "A 30-minute walkthrough with someone who actually built it. Bring your menu, your SKU list, your PDF of invoices, we'll show you what the switch would look like."
+    },
+    "success": {
+      "title": "One more step.",
+      "body": "We opened a pre-filled draft in your email app. Hit send and someone from the rtylr team will reach out within one business day to schedule the walkthrough. If nothing opened, email us directly at"
+    },
+    "form": {
+      "emailLabel": "WORK EMAIL",
+      "emailPlaceholder": "Your work email",
+      "countryLabel": "WHERE ARE YOU LOCATED?",
+      "countryPlaceholder": "Select your country",
+      "reasonLabel": "REASON FOR DEMO",
+      "reasonPlaceholder": "Select reason",
+      "sizeLabel": "HOW MANY EMPLOYEES WORK AT YOUR COMPANY?",
+      "sizePlaceholder": "Select company size"
+    },
+    "reasons": [
+      "Explore Rtylr Enterprise",
+      "Explore a Rtylr Use Case",
+      "Partnerships",
+      "Professional Services"
+    ],
+    "errors": {
+      "emailRequired": "Work email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "country": "Please select your location",
+      "reason": "Please select a reason for demo",
+      "size": "Please select company size"
+    }
+  },
+  "support": {
+    "meta": {
+      "title": "Help Center · Guides, Billing & Support | rtylr",
+      "description": "Getting started, billing, team, configuration, integrations, security, everything in one place."
+    },
+    "hero": {
+      "eyebrow": "HELP CENTER",
+      "title": "How can we help?",
+      "searchPlaceholder": "Search articles, topics, or settings…"
+    },
+    "topicsTitle": "Browse by topic",
+    "topics": [
+      {
+        "articles": [
+          "Create your rtylr workspace",
+          "Add your first location",
+          "Invite team members and assign apps",
+          "Connect your POS hardware"
+        ],
+        "title": "Getting started",
+        "description": "Create your workspace, configure the first location, invite your team."
+      },
+      {
+        "articles": [
+          "How per-seat proration is calculated",
+          "Upgrade from Free to Pro or Scale",
+          "Download invoices and billing history",
+          "Update your payment method",
+          "Cancel your subscription"
+        ],
+        "title": "Billing and subscriptions",
+        "description": "Plans, invoices, seat proration, upgrades, and cancellation."
+      },
+      {
+        "articles": [
+          "Assign roles to team members",
+          "Give someone access to a specific app",
+          "Remove a member and what it means for billing",
+          "Set up SSO (Scale plan)"
+        ],
+        "title": "Team and permissions",
+        "description": "Roles, app access, seat management, and invites."
+      },
+      {
+        "articles": [
+          "Configure POS for a restaurant",
+          "Configure POS for retail",
+          "Set up payroll policies in HR",
+          "Customize invoice templates in Finance",
+          "Build your first CRM segment"
+        ],
+        "title": "Configuration",
+        "description": "Set up each app for your business type and workflow."
+      },
+      {
+        "articles": [
+          "Connect Stripe for card processing",
+          "Connect Square Reader hardware",
+          "Export data to QuickBooks or Xero",
+          "Generate an API key",
+          "Webhook reference"
+        ],
+        "title": "Integrations",
+        "description": "Payments, hardware, email, accounting, and API access."
+      },
+      {
+        "articles": [
+          "Enable multi-factor authentication",
+          "Reset your password",
+          "Review active sessions",
+          "Download audit logs"
+        ],
+        "title": "Security and account",
+        "description": "Passwords, MFA, device sessions, audit logs."
+      }
+    ],
+    "channelsSection": {
+      "eyebrow": "CAN'T FIND IT?",
+      "title": "Three ways to reach us."
+    },
+    "channels": [
+      {
+        "title": "Live chat",
+        "detail": "In-app, 9am–9pm EST, Mon–Fri",
+        "cta": "Start a chat from your workspace"
+      },
+      {
+        "title": "Email support",
+        "detail": "We respond within 24h on weekdays",
+        "href": "mailto:support@voxire.com",
+        "cta": "support@voxire.com"
+      },
+      {
+        "title": "Status and uptime",
+        "detail": "Live incidents and scheduled maintenance",
+        "href": "https://status.rtylr.com",
+        "cta": "status.rtylr.com"
+      }
+    ],
+    "docs": {
+      "title": "Looking for developer docs?",
+      "link": "Still need a human? Contact us →"
+    }
+  },
+  "blog": {
+    "meta": {
+      "title": "Blog · POS, inventory & operations playbooks | rtylr",
+      "description": "Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform: concrete tactics for restaurants, retail, and grocery.",
+      "schemaDescription": "Operator playbooks on POS, inventory, payroll, and all-in-one business software."
+    },
+    "hero": {
+      "eyebrow": "BLOG",
+      "title": "Playbooks for running the whole business."
+    },
+    "readingTime": "{{minutes}} min read",
+    "readingTimeShort": "{{minutes}} min",
+    "post": {
+      "allPosts": "All posts",
+      "ctaTitle": "See rtylr on your own numbers",
+      "ctaBody": "POS, inventory, HR, CRM, and finance on one platform. Free to start."
+    }
+  },
+  "legal": {
+    "terms": {
+      "meta": {
+        "title": "Terms of Service | rtylr",
+        "description": "The terms that govern your use of rtylr, operated by Voxire.",
+        "schemaDescription": "The terms that govern your use of rtylr, operated by Voxire."
+      },
+      "eyebrow": "LEGAL · TERMS OF SERVICE",
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: April 18, 2026 · Effective immediately for new customers, and 30 days from notification for existing customers.",
+      "tocTitle": "On this page",
+      "tocAriaLabel": "Section navigation",
+      "sections": {
+        "acceptance": "Acceptance of Terms",
+        "account": "Your Account",
+        "plans-billing": "Plans and Billing",
+        "seat-proration": "Per-Seat Billing and Proration",
+        "trial-refunds": "Trials, Cancellation, Refunds",
+        "acceptable-use": "Acceptable Use",
+        "data-ownership": "Your Data",
+        "ip": "Intellectual Property",
+        "third-party": "Third-Party Services",
+        "disclaimers": "Disclaimers",
+        "liability": "Limitation of Liability",
+        "indemnification": "Indemnification",
+        "termination": "Termination",
+        "changes": "Changes to These Terms",
+        "governing-law": "Governing Law",
+        "contact": "Contact"
+      },
+      "body": {
+        "acceptance": {
+          "p1": "These Terms of Service (“<b>Terms</b>”) govern your access to and use of the rtylr platform, applications, and related services (collectively, “<b>rtylr</b>” or the “<b>Service</b>”) operated by Voxire (“<b>we</b>”, “<b>us</b>”). By creating an account, clicking “Get started”, or otherwise using rtylr, you agree to these Terms on behalf of yourself and any business, organization, or entity you represent.",
+          "p2": "If you do not agree to these Terms, do not use rtylr. If you are accepting these Terms on behalf of a business, you represent that you have authority to bind that business."
+        },
+        "account": {
+          "p1": "To use most features of rtylr you must create an account. You agree to provide accurate, current, and complete information during registration and to keep that information up to date. You are responsible for:",
+          "list1": [
+            "maintaining the confidentiality of your password and access tokens;",
+            "any activity that happens under your account, including activity by team members you add;",
+            "promptly notifying us at <secMail>security@voxire.com</secMail> of any unauthorized access or breach."
+          ],
+          "p2": "Accounts must be held by individuals at least 18 years old, or by legal entities acting through an authorized representative."
+        },
+        "plans-billing": {
+          "p1": "rtylr is offered on a Free plan and paid plans (Pro, Scale). Plan features, limits, and prices are described at <pricingLink>rtylr.com/pricing</pricingLink>. By subscribing to a paid plan, you authorize us (or our payment processor) to charge the payment method on file for recurring fees, taxes, and any overages defined on the pricing page.",
+          "p2": "Unless otherwise stated, all fees are exclusive of applicable taxes. We use Paddle Inc. as the Merchant of Record for most transactions; Paddle’s payment terms may also apply to your purchase."
+        },
+        "seat-proration": {
+          "p1": "Paid plans are billed per active seat. A “seat” is any user with login access to your workspace. Seats are billed on a daily-proration basis:",
+          "list1": [
+            "When you add a seat mid-cycle, you are charged only for the days remaining in that billing period.",
+            "When you remove a seat mid-cycle, the remaining days of that seat are credited against your next invoice.",
+            "Billing is summarised at the end of each period so you can see exactly which seats were active on which days."
+          ],
+          "p2": "On the Scale plan, tiered pricing applies automatically when your workspace exceeds 30 active seats during the billing period."
+        },
+        "trial-refunds": {
+          "p1": "New workspaces may start on a trial of a paid plan. At trial end, the workspace automatically reverts to the Free plan unless a payment method is added. You may cancel at any time; cancellation takes effect at the end of the current billing period.",
+          "p2": "Because rtylr is offered on a daily-prorated basis, unused days within the current cycle are credited forward rather than refunded. We will issue a refund only where required by applicable consumer-protection law."
+        },
+        "acceptable-use": {
+          "p1": "You will not:",
+          "list1": [
+            "use rtylr to store or transmit unlawful content, malware, or material that infringes third-party rights;",
+            "probe, scan, or test the vulnerability of rtylr or circumvent its security controls, except under a published responsible-disclosure program;",
+            "use automated means to extract data from the Service beyond reasonable API usage consistent with your plan;",
+            "resell, sublicense, or use rtylr to build a competing product;",
+            "use the Service to send spam, violate consumer privacy laws, or process payment data outside PCI-compliant endpoints we provide."
+          ],
+          "p2": "We reserve the right to suspend access to workspaces that we reasonably believe are in breach of this Acceptable Use section."
+        },
+        "data-ownership": {
+          "p1": "You retain all rights to the data you upload, store, or generate in rtylr (“<b>Customer Data</b>”). You grant Voxire a limited, worldwide, royalty-free license to host, process, display, and transmit Customer Data solely to provide the Service.",
+          "p2": "You can export your Customer Data at any time from your workspace settings. On account termination, Customer Data is retained for 30 days to allow recovery, then deleted from live systems within 60 days (backups are purged on their rolling schedule, no later than 90 days).",
+          "p3": "How we handle personal data is described in our <privacyLink>Privacy Policy</privacyLink>."
+        },
+        "ip": {
+          "p1": "rtylr, including all software, designs, marks, and documentation, is owned by Voxire and its licensors. These Terms grant you a limited, non-exclusive, non-transferable right to use the Service as provided. No other rights are granted.",
+          "p2": "If you provide feedback or suggestions about the Service, you grant us a perpetual, royalty-free license to use that feedback to improve rtylr."
+        },
+        "third-party": {
+          "p1": "rtylr integrates with third-party services (e.g. payment processors, accounting exports, email delivery). Your use of those integrations is governed by their terms. We are not responsible for the availability, content, or practices of third-party services."
+        },
+        "disclaimers": {
+          "p1": "rtylr is provided “<b>as is</b>” and “<b>as available</b>”. To the maximum extent permitted by law, we disclaim all warranties, express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the Service will be uninterrupted, error-free, or that it will meet your specific requirements."
+        },
+        "liability": {
+          "p1": "To the maximum extent permitted by law, Voxire and its officers, employees, and agents are not liable for any indirect, incidental, special, consequential, or punitive damages, including lost profits, lost revenue, lost data, or replacement costs, arising out of or in connection with your use of rtylr.",
+          "p2": "Our total aggregate liability to you for any claim arising out of these Terms is limited to the greater of (a) the fees you paid us in the twelve months preceding the event giving rise to the claim, or (b) one hundred US dollars (USD $100)."
+        },
+        "indemnification": {
+          "p1": "You agree to defend, indemnify, and hold harmless Voxire from any claim arising from your Customer Data, your breach of these Terms, or your violation of applicable law, except where such claim arises from our gross negligence or willful misconduct."
+        },
+        "termination": {
+          "p1": "You may cancel your account at any time from workspace settings. We may suspend or terminate your access if you materially breach these Terms, if required to comply with law, or if your account is delinquent beyond 30 days. Sections that by their nature should survive termination (payment obligations, limitations of liability, governing law) will survive."
+        },
+        "changes": {
+          "p1": "We may update these Terms from time to time. When we do, we will update the “Last updated” date and, for material changes, send notice to the primary owner email on file. Continued use of rtylr after a change takes effect constitutes acceptance of the updated Terms."
+        },
+        "governing-law": {
+          "p1": "These Terms are governed by the laws of the jurisdiction where Voxire is registered, without regard to conflict-of-laws principles. You and Voxire agree to the exclusive jurisdiction of the competent courts of that jurisdiction for any dispute arising under these Terms, except that either party may seek injunctive relief in any court with proper jurisdiction to protect its intellectual property or security."
+        },
+        "contact": {
+          "p1": "Questions about these Terms? Email <infoMail>info@voxire.com</infoMail>. For security issues specifically, use <secMail>security@voxire.com</secMail>."
+        }
+      },
+      "contactStrip": {
+        "title": "Have a legal or compliance question?",
+        "body": "We’re happy to answer. Reach us at <infoMail>info@voxire.com</infoMail>, or via WhatsApp at +961 3 940 708."
+      }
+    },
+    "privacyPolicy": {
+      "meta": {
+        "title": "Privacy Policy | rtylr",
+        "description": "How rtylr and Voxire handle your personal data, under GDPR, CCPA, and equivalent laws.",
+        "schemaDescription": "How rtylr and Voxire handle your personal data."
+      },
+      "eyebrow": "LEGAL · PRIVACY POLICY",
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: April 18, 2026 · Applies to rtylr.com and the rtylr platform.",
+      "tocTitle": "On this page",
+      "tocAriaLabel": "Section navigation",
+      "sections": {
+        "overview": "Overview",
+        "data-we-collect": "Data We Collect",
+        "how-we-use": "How We Use Data",
+        "legal-bases": "Legal Bases (GDPR)",
+        "sharing": "Sharing and Sub-Processors",
+        "international": "International Transfers",
+        "retention": "Retention and Deletion",
+        "your-rights": "Your Rights",
+        "cookies": "Cookies",
+        "children": "Children",
+        "changes": "Changes to This Policy",
+        "contact": "Contact the DPO"
+      },
+      "body": {
+        "overview": {
+          "p1": "This Privacy Policy describes how Voxire (“<b>we</b>”) collects, uses, shares, and protects personal data in connection with the rtylr platform. We act as a <b>data controller</b> for personal data about our customers and website visitors, and as a <b>data processor</b> for Customer Data that our customers process in rtylr on behalf of their own end-users.",
+          "p2": "If you are an end-user of a business that uses rtylr (for example, a diner whose email is captured in a restaurant’s CRM), the rtylr customer is the controller of your data. Please contact that business first to exercise your rights; we will help them do so."
+        },
+        "data-we-collect": {
+          "subsections": [
+            {
+              "heading": "Account and billing data",
+              "body": "When you create a workspace we collect name, email, business name, role, country, and a password hash. When you subscribe, our payment processor (Paddle) collects billing address, tax identifiers, and card tokens. We do not store raw card numbers on our servers."
+            },
+            {
+              "heading": "Customer Data",
+              "body": "This is the data you upload or generate inside rtylr, menu items, invoices, schedules, customer profiles, tasks. You control this data; we process it only to provide the Service and as instructed by you."
+            },
+            {
+              "heading": "Usage and device data",
+              "body": "We log IP address, browser/device type, referring URL, pages accessed, and timestamps. We use this to operate, secure, and improve rtylr, and to generate aggregate analytics."
+            },
+            {
+              "heading": "Cookies and similar technologies",
+              "body": "See the <cookiesAnchor>Cookies</cookiesAnchor> section below for details."
+            }
+          ]
+        },
+        "how-we-use": {
+          "p1": "We use personal data to:",
+          "list1": [
+            "provide, secure, and maintain the Service;",
+            "process billing and send transactional emails;",
+            "respond to support requests and improve product quality;",
+            "detect and prevent fraud, abuse, and security incidents;",
+            "send product announcements to the primary owner on a workspace (you can opt out from your profile);",
+            "comply with legal obligations and enforce our Terms."
+          ]
+        },
+        "legal-bases": {
+          "p1": "For EEA/UK residents, we rely on the following legal bases:",
+          "list1": [
+            "<b>Contract</b>, to provide the Service and manage billing.",
+            "<b>Legitimate interests</b>, to secure the Service, detect abuse, and improve features. We balance these interests against your rights.",
+            "<b>Consent</b>, for non-essential cookies and certain marketing communications. You can withdraw consent at any time.",
+            "<b>Legal obligation</b>, when we are required to retain or disclose data by law."
+          ]
+        },
+        "sharing": {
+          "p1": "We share personal data only with service providers (“sub-processors”) that help us operate rtylr, under contracts that require them to protect the data. Our primary sub-processors include:",
+          "list1": [
+            "<b>Cloudflare</b>, CDN, DNS, DDoS protection.",
+            "<b>Paddle</b>, payment processing and merchant of record.",
+            "<b>Firebase / Google Cloud</b>, authentication infrastructure.",
+            "<b>Resend / Postmark</b>, transactional email delivery.",
+            "<b>PostHog / Axiom</b>, product analytics and error tracking (when enabled)."
+          ],
+          "p2": "A current list is available on request at <privacyMail>privacy@voxire.com</privacyMail>. We notify customers before adding a new sub-processor that has access to Customer Data.",
+          "p3": "We do not sell personal data. We do not share personal data with advertisers."
+        },
+        "international": {
+          "p1": "rtylr may process data outside your country of residence. Where we transfer data from the EEA, UK, or Switzerland, we rely on the European Commission’s Standard Contractual Clauses (2021) or an equivalent mechanism."
+        },
+        "retention": {
+          "list1": [
+            "Account data is retained for the life of the account plus 30 days for recovery, then deleted within 60 days.",
+            "Billing records are retained for 7 years to comply with tax and accounting rules.",
+            "Security logs are retained for 90 days; audit logs for 12 months.",
+            "Encrypted backups are on a rolling schedule and purged within 90 days."
+          ]
+        },
+        "your-rights": {
+          "p1": "Depending on where you live, you may have the right to:",
+          "list1": [
+            "access the personal data we hold about you;",
+            "correct inaccurate data;",
+            "request deletion of your data;",
+            "object to or restrict processing;",
+            "port your data to another service;",
+            "withdraw consent at any time (where processing relies on consent);",
+            "lodge a complaint with a supervisory authority."
+          ],
+          "p2": "To exercise any of these rights, email <privacyMail>privacy@voxire.com</privacyMail>. We respond within 30 days."
+        },
+        "cookies": {
+          "p1": "We use three categories of cookies:",
+          "list1": [
+            "<b>Strictly necessary</b>, authentication, load balancing, CSRF protection. These are always on.",
+            "<b>Preference</b>, remember your language, theme, and workspace selection.",
+            "<b>Analytics</b>, help us understand which pages work and which don’t. These only run with your consent (visible on first visit)."
+          ],
+          "p2": "You can clear cookies at any time from your browser. Doing so may log you out of rtylr."
+        },
+        "children": {
+          "p1": "rtylr is not directed to children under 16. We do not knowingly collect personal data from children. If you believe a child has registered, contact <privacyMail>privacy@voxire.com</privacyMail> and we will delete the account."
+        },
+        "changes": {
+          "p1": "We may update this Privacy Policy to reflect changes to the Service or the law. When we do, we update the “Last updated” date and, for material changes, notify primary owners by email."
+        },
+        "contact": {
+          "p1": "Our Data Protection contact is reachable at <privacyMail>privacy@voxire.com</privacyMail>. Postal mail: Voxire, c/o Data Protection, Beirut, Lebanon."
+        }
+      },
+      "contactStrip": {
+        "title": "Data request, complaint, or just a question?",
+        "body": "Email <privacyMail>privacy@voxire.com</privacyMail>. We aim to respond within 3 business days and fully resolve within 30 days."
+      }
+    },
+    "security": {
+      "meta": {
+        "title": "Security | rtylr",
+        "description": "How rtylr protects your data, encryption, infrastructure, access controls, and incident response.",
+        "schemaDescription": "How rtylr protects your data, encryption, infrastructure, and incident response."
+      },
+      "eyebrow": "LEGAL · SECURITY",
+      "title": "Security at rtylr",
+      "lastUpdated": "Last updated: April 18, 2026 · Our security program is reviewed quarterly.",
+      "tocTitle": "On this page",
+      "tocAriaLabel": "Section navigation",
+      "sections": {
+        "program": "Security Program",
+        "data-protection": "Data Protection",
+        "infrastructure": "Infrastructure",
+        "access-control": "Access Control",
+        "application": "Application Security",
+        "vulnerability": "Vulnerability Management",
+        "monitoring": "Monitoring and Incident Response",
+        "compliance": "Compliance and Certifications",
+        "vendor": "Vendor Management",
+        "disclosure": "Responsible Disclosure",
+        "contact": "Contact Security"
+      },
+      "body": {
+        "program": {
+          "p1": "Voxire runs a formal information-security program aligned with the principles of ISO 27001 and SOC 2 Type II. It is maintained by our engineering leadership and reviewed quarterly. The program covers people, process, and technology controls across development, operations, and customer support."
+        },
+        "data-protection": {
+          "subsections": [
+            {
+              "heading": "Encryption in transit",
+              "body": "All traffic between customer devices and rtylr is encrypted using TLS 1.2+ (strong cipher suites, perfect forward secrecy, HSTS enabled). We reject connections from legacy TLS versions."
+            },
+            {
+              "heading": "Encryption at rest",
+              "body": "Customer Data is stored on encrypted volumes (AES-256). Database-level encryption is enabled for all workspaces. Backups are also encrypted and stored in separate geographical regions."
+            },
+            {
+              "heading": "Secrets management",
+              "body": "API keys, tokens, and credentials are stored in a managed secrets vault, rotated on a regular schedule, and scoped to the minimum permissions required."
+            }
+          ]
+        },
+        "infrastructure": {
+          "p1": "rtylr runs on reputable cloud infrastructure with ISO 27001, SOC 2, PCI DSS, and GDPR attestations. Our primary providers include Cloudflare (edge), Firebase / Google Cloud (auth and managed services), and a managed database provider with automated failover.",
+          "list1": [
+            "Production environments are isolated from staging and development.",
+            "Multi-region backups with point-in-time recovery up to 7 days.",
+            "Capacity planning and DDoS mitigation at the edge."
+          ]
+        },
+        "access-control": {
+          "p1": "Access to production systems is restricted to a named group of engineers, gated behind SSO with mandatory multi-factor authentication. We follow the principle of least privilege: engineers receive only the access they need, and access is reviewed at least quarterly.",
+          "p2": "All production access is logged with actor, action, and timestamp. Audit logs are retained for 12 months."
+        },
+        "application": {
+          "list1": [
+            "<b>Authentication.</b> Passwords are hashed with industry-standard algorithms; MFA is available for all accounts; sessions use httpOnly, Secure, SameSite cookies with short lifetimes.",
+            "<b>Authorization.</b> Role-based permissions enforced server-side on every API call. No trust-the-client logic for sensitive actions.",
+            "<b>Input validation.</b> All external input is validated with schema-level rules; dangerous sinks are avoided.",
+            "<b>CSRF, XSS, SQLi.</b> Prevented through standard framework protections, parameterised queries, and strict content-security-policy headers.",
+            "<b>Rate limiting.</b> Per-IP and per-user rate limits on public endpoints."
+          ]
+        },
+        "vulnerability": {
+          "list1": [
+            "Dependencies scanned on every build; critical CVEs patched within 7 days.",
+            "Container and image scanning in CI.",
+            "Annual third-party penetration test; results and remediation evidence available under NDA for prospective Scale customers.",
+            "Static analysis (SAST) on the main codebase."
+          ]
+        },
+        "monitoring": {
+          "p1": "We maintain 24/7 monitoring and alerting across infrastructure, applications, and authentication flows. Suspected incidents are triaged against a documented incident-response runbook. Customers affected by a security incident are notified in accordance with applicable law and, at minimum, within 72 hours of confirmation for material breaches."
+        },
+        "compliance": {
+          "list1": [
+            "<b>GDPR &amp; UK GDPR</b>, we act as processor for Customer Data, with DPA available on request.",
+            "<b>CCPA/CPRA</b>, honored for California residents; opt-out mechanisms available.",
+            "<b>PCI DSS</b>, payment processing is offloaded to Paddle, a Level-1 certified merchant of record.",
+            "<b>SOC 2 Type II</b>, in progress; target completion Q4 2026."
+          ]
+        },
+        "vendor": {
+          "p1": "We vet sub-processors for security posture before onboarding, require data-protection agreements, and review major vendors annually. A current list of sub-processors is maintained and available via <secMail>security@voxire.com</secMail>."
+        },
+        "disclosure": {
+          "p1": "We welcome reports from security researchers. If you believe you’ve found a vulnerability, please email <secMail>security@voxire.com</secMail> with:",
+          "list1": [
+            "a clear description of the issue and its impact;",
+            "steps to reproduce;",
+            "any proof-of-concept material (please do not exfiltrate data beyond what is needed to demonstrate the issue)."
+          ],
+          "p2": "We commit to acknowledging receipt within 48 hours, working in good faith on a fix, and crediting you publicly once the issue is resolved (unless you prefer to remain anonymous). We do not take legal action against researchers acting in good faith under this policy."
+        },
+        "contact": {
+          "p1": "For security questions, reports, or compliance requests, email <secMail>security@voxire.com</secMail>. For urgent issues, WhatsApp +961 3 940 708."
+        }
+      },
+      "contactStrip": {
+        "title": "Need our SOC 2 letter, SIG, or DPA?",
+        "body": "Email <secMail>security@voxire.com</secMail> and we’ll send the current packet under NDA within 7 business days."
+      }
+    }
+  }
+}

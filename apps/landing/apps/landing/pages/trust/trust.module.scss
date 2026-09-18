@@ -1,0 +1,565 @@
+// ── Trust Center, security summary, compliance status, data location ─────
+
+.page {
+  background: var(--app-background);
+  color: var(--ink);
+}
+
+// ── HERO ───────────────────────────────────────────────────────────────────
+
+.hero {
+  padding: 72px 32px 64px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.heroInner {
+  max-width: 760px;
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #6bcf7f;
+  margin-bottom: 24px;
+  padding: 5px 12px 5px 10px;
+  border: 1px solid rgba(107, 207, 127, 0.28);
+  border-radius: 999px;
+  background: rgba(107, 207, 127, 0.08);
+
+  svg {
+    color: #6bcf7f;
+  }
+}
+
+.heroTitle {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 22px;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 36px;
+  max-width: 620px;
+}
+
+.heroLinks {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: var(--btn-cream-shadow);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+.outlineBtn {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+  }
+}
+
+// ── STATUS STRIP ──────────────────────────────────────────────────────────
+
+.statusSection {
+  padding: 0 32px 72px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.statusCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 28px;
+  border-right: 1px solid var(--hairline);
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6bcf7f;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(107, 207, 127, 0.55);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.statusLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  margin-bottom: 3px;
+}
+
+.statusSub {
+  font-size: 0.78rem;
+  color: rgba(19, 19, 19, 0.6);
+  letter-spacing: -0.005em;
+
+  a {
+    color: rgba(19, 19, 19, 0.8);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(19, 19, 19, 0.35);
+  }
+}
+
+.statusBig {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
+  line-height: 1;
+}
+
+// ── PILLARS ──────────────────────────────────────────────────────────────
+
+.pillarsSection {
+  padding: 48px 32px 96px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.pillarsHeader {
+  margin-bottom: 48px;
+  max-width: 720px;
+}
+
+.sectionEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.55);
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--hairline);
+}
+
+.pillarCard {
+  padding: 32px 28px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &:nth-child(3n) {
+    border-right: none;
+  }
+
+  &:nth-last-child(-n + 3) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--bg-surface-b);
+  }
+}
+
+.pillarIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  color: var(--ink);
+}
+
+.pillarTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pillarCopy {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0;
+  flex-grow: 1;
+}
+
+.pillarLink {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: rgba(19, 19, 19, 0.6);
+  text-decoration: none;
+  padding-top: 4px;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+// ── COMPLIANCE ───────────────────────────────────────────────────────────
+
+.complianceSection {
+  padding: 0 32px 96px;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.complianceHeader {
+  max-width: 400px;
+  position: sticky;
+  top: 120px;
+}
+
+.complianceCopy {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 18px 0 0;
+
+  a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(19, 19, 19, 0.35);
+  }
+}
+
+.contactStrip {
+  margin-top: 22px;
+  padding: 24px 26px;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 8px;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: rgba(19, 19, 19, 0.65);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(19, 19, 19, 0.35);
+  }
+}
+
+.complianceList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.complianceItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--hairline);
+  gap: 16px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--bg-surface-b);
+  }
+}
+
+.complianceLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+.complianceStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: rgba(19, 19, 19, 0.6);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+
+.complianceStatusReady {
+  color: #1f7a3d;
+  background: rgba(107, 207, 127, 0.12);
+  border-color: rgba(107, 207, 127, 0.35);
+
+  svg {
+    color: #1f7a3d;
+  }
+}
+
+// ── DATA SECTION ─────────────────────────────────────────────────────────
+
+.dataSection {
+  padding: 0 32px 120px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dataInner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 56px 48px;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.dataIcon {
+  color: rgba(31, 122, 61, 0.85);
+  margin-bottom: 18px;
+}
+
+.dataTitle {
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0 0 18px;
+  line-height: 1.15;
+}
+
+.dataCopy {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+// ── RESPONSIVE ───────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .statusGrid {
+    grid-template-columns: 1fr 1fr;
+
+    .statusCell {
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-child(n + 3) {
+        border-top: 1px solid var(--hairline);
+      }
+    }
+  }
+
+  .pillarsGrid {
+    grid-template-columns: repeat(2, 1fr);
+
+    .pillarCard {
+      &:nth-child(3n) {
+        border-right: 1px solid var(--hairline);
+      }
+
+      &:nth-last-child(-n + 3) {
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-last-child(-n + 2) {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .complianceSection {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .complianceHeader {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 56px 20px 48px;
+  }
+
+  .statusSection {
+    padding: 0 20px 48px;
+  }
+
+  .statusGrid {
+    grid-template-columns: 1fr;
+
+    .statusCell {
+      border-right: none !important;
+      border-bottom: 1px solid var(--hairline);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:nth-child(n + 3) {
+        border-top: none;
+      }
+    }
+  }
+
+  .pillarsSection {
+    padding: 32px 20px 72px;
+  }
+
+  .pillarsGrid {
+    grid-template-columns: 1fr;
+
+    .pillarCard {
+      border-right: none !important;
+
+      &:nth-last-child(-n + 3),
+      &:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .complianceSection {
+    padding: 0 20px 72px;
+  }
+
+  .dataSection {
+    padding: 0 20px 96px;
+  }
+
+  .dataInner {
+    padding: 40px 24px;
+  }
+}

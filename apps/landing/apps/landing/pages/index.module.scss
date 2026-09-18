@@ -1,0 +1,22 @@
+.Homepage {
+  min-height: 100vh;
+  background-color: var(--app-background);
+  color: white;
+  padding-top: 80px;
+
+  .content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .Homepage {
+    padding-top: 70px;
+
+    .content {
+      padding: 20px 16px;
+    }
+  }
+}

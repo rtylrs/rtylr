@@ -1,0 +1,386 @@
+// ── Pricing Page ─────────────────────────────────────────────────────────────
+
+$blue: var(--ink);
+$cyan: var(--ink);
+$border: var(--hairline);
+$border-subtle: var(--hairline);
+$text-muted: rgba(19, 19, 19, 0.55);
+$text-mid: rgba(19, 19, 19, 0.7);
+
+.pricingPage {
+  background-color: var(--bg-surface-a);
+  color: var(--ink);
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 96px 24px 72px;
+}
+
+.heroTitle {
+  font-size: 3.6rem;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 0 0 20px;
+  max-width: 700px;
+}
+
+.heroSubtitle {
+  font-size: 1.1rem;
+  color: $text-muted;
+  margin: 0 0 48px;
+  line-height: 1.7;
+}
+
+// ── Plans section ─────────────────────────────────────────────────────────────
+
+.plansSection {
+  display: flex;
+  justify-content: center;
+  padding: 0 24px 80px;
+}
+
+.plansContainer {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.plansTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin: 0 0 36px;
+}
+
+// ── Feature comparison table ──────────────────────────────────────────────────
+
+.tableSection {
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 40px;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.tableWrapper {
+  width: 100%;
+  max-width: 900px;
+  overflow-x: auto;
+}
+
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  thead tr {
+    border-bottom: 1px solid $border;
+  }
+
+  thead th {
+    padding: 16px 24px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: $text-muted;
+
+    &:first-child {
+      text-align: left;
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(19, 19, 19, 0.06);
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(19, 19, 19, 0.02);
+    }
+  }
+
+  tbody td {
+    padding: 16px 24px;
+    text-align: center;
+    vertical-align: middle;
+    color: $text-mid;
+
+    &:first-child {
+      text-align: left;
+    }
+  }
+}
+
+.featureCol {
+  width: 40%;
+}
+
+.proCol {
+  background: rgba(19, 19, 19, 0.025);
+}
+
+.featureName {
+  color: rgba(19, 19, 19, 0.85) !important;
+  font-weight: 500;
+}
+
+.checkIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: $cyan;
+}
+
+.dashIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(19, 19, 19, 0.25);
+}
+
+.featureText {
+  color: $text-mid;
+}
+
+// ── FAQ ───────────────────────────────────────────────────────────────────────
+
+.faqSection {
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.faqList {
+  width: 100%;
+  max-width: 740px;
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid $border;
+
+  &:first-child {
+    border-top: 1px solid $border;
+  }
+}
+
+.faqQuestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(19, 19, 19, 0.85);
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+.faqChevron {
+  flex-shrink: 0;
+  color: $text-muted;
+  transition: transform 0.3s ease;
+}
+
+.faqChevronOpen {
+  transform: rotate(180deg);
+  color: $blue;
+}
+
+.faqAnswer {
+  overflow: hidden;
+
+  p {
+    padding: 0 0 22px;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+// ── Bottom CTA ────────────────────────────────────────────────────────────────
+
+.bottomCta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 80px 24px 0;
+  border-top: 1px solid $border;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.bottomCtaTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 16px;
+  letter-spacing: -0.03em;
+}
+
+.bottomCtaSubtitle {
+  font-size: 1.05rem;
+  color: $text-muted;
+  margin: 0 0 40px;
+}
+
+.bottomCtaButtons {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ctaPrimary {
+  background: var(--btn-cream-bg);
+  color: #ffffff;
+  border: none;
+  padding: 14px 38px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0;
+  box-shadow: var(--btn-cream-shadow);
+  transition:
+    background 0.22s var(--ease-out-soft),
+    transform 0.22s var(--ease-out-soft);
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--btn-cream-shadow-hover);
+  }
+
+  &:active {
+    background: #000000;
+    transform: translateY(0);
+  }
+}
+
+.ctaSecondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  padding: 14px 38px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0;
+  box-shadow: none;
+  transition:
+    background 0.22s var(--ease-out-soft),
+    transform 0.22s var(--ease-out-soft);
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.04);
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: rgba(19, 19, 19, 0.07);
+    transform: translateY(0);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .heroTitle {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 72px 20px 48px;
+  }
+
+  .heroTitle {
+    font-size: 2.4rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
+  .plansSection {
+    padding: 0 20px 60px;
+  }
+
+  .tableSection,
+  .faqSection {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .comparisonTable {
+    font-size: 0.82rem;
+
+    thead th,
+    tbody td {
+      padding: 12px 14px;
+    }
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .bottomCtaTitle {
+    font-size: 2.2rem;
+  }
+
+  .bottomCtaButtons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 340px;
+
+    button {
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 2rem;
+  }
+}

@@ -1,0 +1,872 @@
+// ── Flow landing, kanban board hero, features grid, context story ────────
+// Visual direction: project-management, card-based, motion-driven.
+
+.page {
+  background: var(--app-background);
+  color: var(--ink);
+}
+
+// ── HERO ────────────────────────────────────────────────────────────────────
+
+.hero {
+  padding: 72px 32px 96px;
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 56px;
+}
+
+.heroCopy {
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.6);
+  margin-bottom: 22px;
+  padding: 4px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  background: var(--bg-surface-b);
+}
+
+.heroTitle {
+  font-size: clamp(2.6rem, 5.2vw, 4.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 24px;
+}
+
+.heroTitleSoft {
+  color: rgba(214, 184, 142, 0.9);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.65);
+  margin: 0 0 36px;
+  max-width: 600px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primaryBtn {
+  background: var(--btn-cream-bg);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: var(--btn-cream-bg-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
+  }
+}
+
+.outlineBtn {
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+  }
+}
+
+// ── KANBAN BOARD MOCKUP ────────────────────────────────────────────────────
+
+.board {
+  width: 100%;
+  max-width: 1200px;
+  background: #121110;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.45);
+}
+
+.boardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #181715;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 16px;
+}
+
+.boardCrumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  letter-spacing: -0.005em;
+}
+
+.boardCrumb {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.boardCrumbSep {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.boardCrumbActive {
+  color: #e8e6e1;
+  font-weight: 500;
+}
+
+.boardHeaderRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.boardCount {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.boardViews {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.boardView {
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: -0.005em;
+}
+
+.boardViewActive {
+  color: #e8e6e1;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 500;
+}
+
+.boardColumns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.column {
+  background: #121110;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  // Keep empty columns a valid drop target with a visible dashed hint
+  min-height: 260px;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 6px;
+}
+
+.columnTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #e8e6e1;
+  letter-spacing: -0.005em;
+}
+
+.columnDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.columnCount {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.columnCards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taskCard {
+  background: #1a1917;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 12px 12px 10px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.taskTitle {
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: #e8e6e1;
+  letter-spacing: -0.005em;
+  margin-bottom: 10px;
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.taskTag {
+  font-size: 0.66rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+  letter-spacing: 0.2px;
+}
+
+.taskPriority {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #e88a8a;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(232, 138, 138, 0.1);
+  border: 1px solid rgba(232, 138, 138, 0.22);
+  letter-spacing: 0.2px;
+}
+
+.taskAssignee {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #d6b88e, #c9a48a);
+  color: #1a1612;
+}
+
+.taskGhost {
+  padding: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: -0.005em;
+}
+
+// ── AUTOMATION BUILDER ────────────────────────────────────────────────────
+
+.automationSection {
+  padding: 120px 32px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.automationHeader {
+  max-width: 720px;
+  margin-bottom: 48px;
+}
+
+.automationCopy {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(19, 19, 19, 0.62);
+  margin: 18px 0 0;
+  max-width: 620px;
+}
+
+.automationBoard {
+  position: relative;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 56px 56px 40px;
+  overflow: hidden;
+  box-shadow: var(--elev-1);
+}
+
+.automationWire {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 180px 1fr;
+  gap: 0;
+  align-items: center;
+  z-index: 1;
+}
+
+.ruleCard {
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 156px;
+}
+
+.ruleCardHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.ruleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.ruleCardLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: rgba(19, 19, 19, 0.5);
+}
+
+.ruleCardTrigger {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.ruleCardDetail {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(19, 19, 19, 0.6);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 0.1px;
+}
+
+// Wire track between the two cards
+.wireTrack {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wireSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.wireLine {
+  stroke: rgba(214, 184, 142, 0.4);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.wirePulse {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: #d6b88e;
+  box-shadow: 0 0 12px rgba(214, 184, 142, 0.9);
+  z-index: 2;
+}
+
+.wireArrow {
+  position: relative;
+  z-index: 3;
+  color: #d6b88e;
+  background: var(--bg-surface-a);
+  padding: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 184, 142, 0.35);
+  display: inline-flex;
+}
+
+// Rule picker strip beneath the cards
+.rulePicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline);
+}
+
+.playToggle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(214, 184, 142, 0.15);
+  border: 1px solid rgba(214, 184, 142, 0.3);
+  color: #d6b88e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: rgba(214, 184, 142, 0.25);
+    border-color: rgba(214, 184, 142, 0.5);
+  }
+}
+
+.ruleDots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.ruleDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(19, 19, 19, 0.18);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.32);
+    transform: scale(1.2);
+  }
+}
+
+.ruleDotActive {
+  background: #d6b88e;
+  width: 20px;
+  border-radius: 4px;
+
+  &:hover {
+    background: #e8c99a;
+    transform: none;
+  }
+}
+
+.ruleCounter {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.76rem;
+  color: rgba(19, 19, 19, 0.5);
+  letter-spacing: 0.3px;
+}
+
+// Compact features strip, replaces the heavy 3×2 grid
+.featuresStrip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.featureStripCard {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease;
+
+  &:hover {
+    background: var(--bg-surface-b);
+    border-color: var(--hairline-strong);
+  }
+
+  .featureIcon {
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  .featureTitle {
+    margin-bottom: 4px;
+    font-size: 0.98rem;
+  }
+
+  .featureCopy {
+    font-size: 0.84rem;
+  }
+}
+
+// ── FEATURES GRID (legacy, retained for back-compat) ──────────────────────
+
+.featuresSection {
+  padding: 120px 32px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.featuresHeader {
+  max-width: 720px;
+  margin-bottom: 64px;
+}
+
+.sectionEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(19, 19, 19, 0.55);
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--hairline);
+}
+
+.featureCard {
+  padding: 36px 30px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  cursor: default;
+  transition: background 0.25s ease;
+
+  &:nth-child(3n) {
+    border-right: none;
+  }
+
+  &:nth-last-child(-n + 3) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--bg-surface-b);
+  }
+}
+
+.featureIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  color: var(--ink);
+}
+
+.featureTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.featureCopy {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.6);
+  margin: 0;
+}
+
+// ── CONTEXT STORY ─────────────────────────────────────────────────────────
+
+.contextSection {
+  padding: 0 32px 120px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.contextInner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 64px 56px;
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.contextTitle {
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 18px 0 18px;
+  line-height: 1.12;
+}
+
+.contextCopy {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(19, 19, 19, 0.6);
+  margin: 0 auto 32px;
+  max-width: 620px;
+}
+
+.linkedBadges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.linkedBadge {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(19, 19, 19, 0.75);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
+  letter-spacing: 0.1px;
+}
+
+// ── CTA ───────────────────────────────────────────────────────────────────
+
+.ctaBlock {
+  padding: 120px 32px 160px;
+  max-width: 1320px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top: 1px solid var(--hairline);
+}
+
+.ctaTitle {
+  font-size: clamp(2.4rem, 4.2vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 36px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+// ── RESPONSIVE ────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .boardColumns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .automationBoard {
+    padding: 40px 32px 32px;
+  }
+
+  .automationWire {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .wireTrack {
+    height: 56px;
+    transform: rotate(90deg);
+  }
+
+  .featuresStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+
+    .featureCard {
+      &:nth-child(3n) {
+        border-right: 1px solid var(--hairline);
+      }
+
+      &:nth-last-child(-n + 3) {
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-last-child(-n + 2) {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 56px 20px 72px;
+  }
+
+  .boardColumns {
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+
+  .featuresSection {
+    padding: 72px 20px;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+
+    .featureCard {
+      border-right: none;
+
+      &:nth-child(3n),
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-last-child(-n + 3),
+      &:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .contextSection {
+    padding: 0 20px 72px;
+  }
+
+  .contextInner {
+    padding: 44px 28px;
+  }
+
+  .ctaBlock {
+    padding: 80px 20px 120px;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .primaryBtn,
+  .outlineBtn {
+    width: 100%;
+  }
+}

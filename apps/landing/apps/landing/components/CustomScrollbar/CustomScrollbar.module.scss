@@ -1,0 +1,46 @@
+// inset-inline-end, not right: an RTL document puts its scrollbar on the
+// left, and this overlay stands in for the native one (hidden in index.scss).
+.scrollbar {
+  position: fixed;
+  top: 0;
+  inset-inline-end: 0;
+  width: 20px;
+  height: 100vh;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+
+  &.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &.hovered {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.thumb {
+  position: absolute;
+  inset-inline-end: 0;
+  width: 6px;
+  background-color: rgba(233, 235, 223, 0.4);
+  border-radius: 3px;
+  cursor: grab;
+  transition:
+    background-color 0.1s ease,
+    width 0.1s ease;
+
+  &:hover {
+    background-color: rgba(233, 235, 223, 0.7);
+    width: 10px;
+  }
+
+  &:active {
+    cursor: grabbing;
+    background-color: rgba(233, 235, 223, 0.9);
+    width: 10px;
+  }
+}

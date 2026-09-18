@@ -1,0 +1,18 @@
+packages:
+  - 'apps/*'
+  - 'packages/api'
+  - 'packages/auth'
+  - 'packages/config'
+  - 'packages/components'
+  - 'packages/consent'
+  - 'packages/i18n'
+  - 'packages/observability'
+  - 'packages/ui'
+  - 'packages/utils'
+  - 'packages/types'
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - protobufjs

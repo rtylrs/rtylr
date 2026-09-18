@@ -1,0 +1,110 @@
+.faqSection {
+  padding: 80px 20px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 8px 0;
+}
+
+.sectionIntro {
+  font-size: 1rem;
+  color: var(--subtext-color);
+  line-height: 1.6;
+  margin: 0 0 36px 0;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--hairline);
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--hairline);
+}
+
+// The disclosure triangle is replaced by the chevron below. Both the
+// -webkit- prefix and the standard rule are needed: Safari still keys
+// off the pseudo-element rather than `display`.
+.faqSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  // 44px minimum touch target, mobile-first and non-negotiable.
+  min-height: 44px;
+  padding: 20px 4px;
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::marker {
+    content: '';
+  }
+
+  &:hover .faqQuestion {
+    color: var(--ink);
+  }
+
+  // Keyboard focus lands on the summary, so it has to be visible.
+  &:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+// The heading lives inside <summary> so the question is a real heading
+// in the outline, not just clickable text.
+.faqQuestion {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+  margin: 0;
+  transition: color 0.2s ease;
+}
+
+.faqChevron {
+  flex-shrink: 0;
+  color: var(--subtext-color);
+  transition: transform 0.25s ease;
+}
+
+.faqItem[open] .faqChevron {
+  transform: rotate(180deg);
+}
+
+.faqAnswer {
+  margin: 0 0 24px 0;
+  padding-inline-end: 40px;
+  font-size: 0.975rem;
+  color: var(--subtext-color);
+  line-height: 1.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faqChevron {
+    transition: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .faqSection {
+    padding: 110px 32px;
+  }
+
+  .sectionTitle {
+    font-size: 2.125rem;
+  }
+}
