@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/terminal/v1/terminals:
+        get:
+            tags:
+                - TerminalService
+            summary: listTerminals
+            description: Returns terminals for the active business.
+            operationId: TerminalService_listTerminals
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.terminal.v1.ListTerminalsResponse'
+        post:
+            tags:
+                - TerminalService
+            summary: createTerminal
+            description: Registers a new terminal.
+            operationId: TerminalService_createTerminal
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.terminal.v1.CreateTerminalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.terminal.v1.CreateTerminalResponse'
+    /pos/terminal/v1/terminals/{id}:
+        put:
+            tags:
+                - TerminalService
+            summary: updateTerminal
+            description: Updates an existing terminal.
+            operationId: TerminalService_updateTerminal
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.terminal.v1.UpdateTerminalBody'
+                            description: body carries updatable terminal fields bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.terminal.v1.UpdateTerminalResponse'
+    /pos/terminal/v1/terminals/heartbeat:
+        post:
+            tags:
+                - TerminalService
+            summary: heartbeatTerminal
+            description: Records a terminal heartbeat.
+            operationId: TerminalService_heartbeatTerminal
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.terminal.v1.HeartbeatTerminalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.terminal.v1.HeartbeatTerminalResponse'
+components:
+    schemas:
+        pos.terminal.v1.ListTerminalsRequest:
+            type: object
+        pos.terminal.v1.ListTerminalsResponse:
+            type: object
+            properties:
+                terminals:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.terminal.v1.Terminal'
+        pos.terminal.v1.Terminal:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                branch_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                device_id:
+                    type: string
+                is_active:
+                    type: boolean
+                last_seen_at:
+                    type: string
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+            description: Terminal is a registered POS terminal device.
+        pos.terminal.v1.CreateTerminalRequest:
+            type: object
+            properties:
+                branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                device_id:
+                    type: string
+            required:
+                - branch_id
+                - name
+                - device_id
+        pos.terminal.v1.CreateTerminalResponse:
+            type: object
+            properties:
+                terminal_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        pos.terminal.v1.UpdateTerminalRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.terminal.v1.UpdateTerminalBody'
+                    description: body carries updatable terminal fields bound from the HTTP payload.
+        pos.terminal.v1.UpdateTerminalBody:
+            type: object
+            properties:
+                branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                device_id:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - branch_id
+                - name
+                - device_id
+        pos.terminal.v1.UpdateTerminalResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        pos.terminal.v1.HeartbeatTerminalRequest:
+            type: object
+            properties:
+                terminal_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            required:
+                - terminal_id
+        pos.terminal.v1.HeartbeatTerminalResponse:
+            type: object
+            properties:
+                message:
+                    type: string

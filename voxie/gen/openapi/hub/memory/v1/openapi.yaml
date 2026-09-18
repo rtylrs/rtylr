@@ -1,0 +1,211 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/memory/v1/chats:
+        get:
+            tags:
+                - MemoryService
+            summary: listChats
+            operationId: MemoryService_listChats
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.ListChatsResponse'
+    /hub/memory/v1/chats/{session_id}/messages:
+        get:
+            tags:
+                - MemoryService
+            summary: getChatMessages
+            operationId: MemoryService_getChatMessages
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.GetChatMessagesResponse'
+    /hub/memory/v1/chats/{session_id}:
+        put:
+            tags:
+                - MemoryService
+            summary: renameChat
+            operationId: MemoryService_renameChat
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.memory.v1.RenameChatRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.RenameChatResponse'
+        delete:
+            tags:
+                - MemoryService
+            summary: deleteChat
+            operationId: MemoryService_deleteChat
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.DeleteChatResponse'
+    /hub/memory/v1/chats/{session_id}/pin:
+        put:
+            tags:
+                - MemoryService
+            summary: pinChat
+            operationId: MemoryService_pinChat
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.memory.v1.PinChatRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.PinChatResponse'
+components:
+    schemas:
+        hub.memory.v1.ListChatsRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+        hub.memory.v1.ListChatsResponse:
+            type: object
+            properties:
+                chats:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.memory.v1.ChatSummary'
+        hub.memory.v1.ChatSummary:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                summary:
+                    type: string
+                updated_at:
+                    type: string
+                pinned:
+                    type: boolean
+                archived:
+                    type: boolean
+        hub.memory.v1.GetChatMessagesRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+        hub.memory.v1.GetChatMessagesResponse:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.memory.v1.ChatMessage'
+        hub.memory.v1.ChatMessage:
+            type: object
+            properties:
+                id:
+                    type: string
+                role:
+                    type: string
+                content:
+                    type: string
+                created_at:
+                    type: string
+                tokens_used:
+                    type: integer
+                    format: int32
+        hub.memory.v1.DeleteChatRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+        hub.memory.v1.DeleteChatResponse:
+            type: object
+            properties:
+                deleted:
+                    type: boolean
+        hub.memory.v1.RenameChatRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+                title:
+                    type: string
+        hub.memory.v1.RenameChatResponse:
+            type: object
+            properties:
+                updated:
+                    type: boolean
+        hub.memory.v1.PinChatRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+                pinned:
+                    type: boolean
+        hub.memory.v1.PinChatResponse:
+            type: object
+            properties:
+                updated:
+                    type: boolean

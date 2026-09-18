@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/kds/v1/orders:
+        get:
+            tags:
+                - KDSService
+            summary: listKDSOrders
+            description: Returns active kitchen display orders.
+            operationId: KDSService_listKDSOrders
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.kds.v1.ListKDSOrdersResponse'
+    /pos/kds/v1/{order_id}/items/{item_id}:
+        put:
+            tags:
+                - KDSService
+            summary: updateKDSItemStatus
+            description: Updates the status of an order item on the kitchen display.
+            operationId: KDSService_updateKDSItemStatus
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                - name: item_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.kds.v1.UpdateKDSItemStatusBody'
+                            description: body carries the new KDS item status bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.kds.v1.UpdateKDSItemStatusResponse'
+components:
+    schemas:
+        pos.kds.v1.ListKDSOrdersRequest:
+            type: object
+        pos.kds.v1.ListKDSOrdersResponse:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.kds.v1.KDSOrder'
+        pos.kds.v1.KDSOrder:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                order_number:
+                    type: string
+                type:
+                    type: string
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                table_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                kitchen_notes:
+                    type: string
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.kds.v1.KDSItem'
+            description: KDSOrder is an order shown on the kitchen display.
+        pos.kds.v1.KDSItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                order_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                quantity:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+            description: KDSItem is a single line item on a kitchen display order.
+        pos.kds.v1.UpdateKDSItemStatusRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: order_id is the unique identifier for the order.
+                item_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: item_id is the unique identifier for the order item.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.kds.v1.UpdateKDSItemStatusBody'
+                    description: body carries the new KDS item status bound from the HTTP payload.
+        pos.kds.v1.UpdateKDSItemStatusBody:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+            required:
+                - status
+        pos.kds.v1.UpdateKDSItemStatusResponse:
+            type: object
+            properties:
+                message:
+                    type: string

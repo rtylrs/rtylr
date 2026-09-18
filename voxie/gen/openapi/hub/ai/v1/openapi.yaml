@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/ai/v1/usage:
+        get:
+            tags:
+                - AiService
+            summary: getAiUsage
+            operationId: AiService_getAiUsage
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.ai.v1.GetAiUsageResponse'
+    /hub/ai/v1/quota-settings:
+        get:
+            tags:
+                - AiService
+            summary: getAiQuotaSettings
+            operationId: AiService_getAiQuotaSettings
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.ai.v1.GetAiQuotaSettingsResponse'
+        put:
+            tags:
+                - AiService
+            summary: updateAiQuotaSettings
+            operationId: AiService_updateAiQuotaSettings
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.ai.v1.UpdateAiQuotaSettingsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.ai.v1.UpdateAiQuotaSettingsResponse'
+components:
+    schemas:
+        hub.ai.v1.GetAiUsageRequest:
+            type: object
+        hub.ai.v1.GetAiUsageResponse:
+            type: object
+            properties:
+                usage:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.ai.v1.AiQuotaStatus'
+        hub.ai.v1.AiQuotaStatus:
+            type: object
+            properties:
+                plan_slug:
+                    type: string
+                mode:
+                    type: string
+                allowance_tokens:
+                    type: string
+                    format: int64
+                used_tokens:
+                    type: string
+                    format: int64
+                remaining_tokens:
+                    type: string
+                    format: int64
+                overage_tokens:
+                    type: string
+                    format: int64
+                allow_overage:
+                    type: boolean
+                blocked:
+                    type: boolean
+                period_end:
+                    type: string
+        hub.ai.v1.GetAiQuotaSettingsRequest:
+            type: object
+        hub.ai.v1.GetAiQuotaSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.ai.v1.AiQuotaSettings'
+        hub.ai.v1.AiQuotaSettings:
+            type: object
+            properties:
+                mode:
+                    type: string
+        hub.ai.v1.UpdateAiQuotaSettingsRequest:
+            type: object
+            properties:
+                mode:
+                    type: string
+            required:
+                - mode
+        hub.ai.v1.UpdateAiQuotaSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.ai.v1.AiQuotaSettings'

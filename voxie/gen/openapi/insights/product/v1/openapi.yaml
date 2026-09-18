@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /insights/product/v1/best-sellers:
+        get:
+            tags:
+                - ProductService
+            summary: getBestSellers
+            description: Returns top-selling products.
+            operationId: ProductService_getBestSellers
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of products to return.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.product.v1.GetBestSellersResponse'
+    /insights/product/v1/categories:
+        get:
+            tags:
+                - ProductService
+            summary: getCategoryPerformance
+            description: Returns performance by category.
+            operationId: ProductService_getCategoryPerformance
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.product.v1.GetCategoryPerformanceResponse'
+    /insights/product/v1/margins:
+        get:
+            tags:
+                - ProductService
+            summary: getProductMargins
+            description: Returns product margin analysis.
+            operationId: ProductService_getProductMargins
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.product.v1.GetProductMarginsResponse'
+    /insights/product/v1/slow-movers:
+        get:
+            tags:
+                - ProductService
+            summary: getSlowMovers
+            description: Returns slow-moving products.
+            operationId: ProductService_getSlowMovers
+            parameters:
+                - name: days
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: days is the trailing sales window used to detect slow movers.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.product.v1.GetSlowMoversResponse'
+    /insights/product/v1/performance:
+        get:
+            tags:
+                - ProductService
+            summary: getProductPerformance
+            description: Returns aggregate product KPI counters.
+            operationId: ProductService_getProductPerformance
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.product.v1.GetProductPerformanceResponse'
+components:
+    schemas:
+        insights.product.v1.GetBestSellersRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of products to return.
+        insights.product.v1.GetBestSellersResponse:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.product.v1.BestSeller'
+                    description: products is the products value for this contract.
+        insights.product.v1.BestSeller:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                    description: product_id is the product id value for this contract.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                units_sold:
+                    type: number
+                    format: double
+                    description: units_sold is the units sold value for this contract.
+                revenue_minor_units:
+                    type: string
+                    format: int64
+                    description: revenue_minor_units is the revenue minor units value for this contract.
+        insights.product.v1.GetCategoryPerformanceRequest:
+            type: object
+        insights.product.v1.GetCategoryPerformanceResponse:
+            type: object
+            properties:
+                categories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.product.v1.CategorySales'
+                    description: categories is the categories value for this contract.
+        insights.product.v1.CategorySales:
+            type: object
+            properties:
+                category_id:
+                    type: string
+                    format: int64
+                    description: category_id is the category id value for this contract.
+                category_name:
+                    type: string
+                    description: category_name is the category name value for this contract.
+                units_sold:
+                    type: number
+                    format: double
+                    description: units_sold is the units sold value for this contract.
+                revenue_minor_units:
+                    type: string
+                    format: int64
+                    description: revenue_minor_units is the revenue minor units value for this contract.
+        insights.product.v1.GetProductMarginsRequest:
+            type: object
+        insights.product.v1.GetProductMarginsResponse:
+            type: object
+            properties:
+                buckets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.product.v1.MarginBucket'
+                    description: buckets is the buckets value for this contract.
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.product.v1.ProductMargin'
+                    description: |-
+                        products is one row per product sold in the period, so margin per item
+                        is answerable without pulling the ERP catalogue client-side. Absent when
+                        the report is requested at distribution granularity only.
+        insights.product.v1.MarginBucket:
+            type: object
+            properties:
+                label:
+                    type: string
+                    description: label is the label value for this contract.
+                lower_pct:
+                    type: number
+                    format: double
+                    description: lower_pct is the lower pct value for this contract.
+                upper_pct:
+                    type: number
+                    format: double
+                    description: upper_pct is the upper pct value for this contract.
+                product_count:
+                    type: string
+                    format: int64
+                    description: product_count is the product count value for this contract.
+        insights.product.v1.ProductMargin:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                    description: product_id is the ERP product.
+                name:
+                    type: string
+                    description: name is the product name at the time of the report.
+                units_sold:
+                    type: number
+                    format: double
+                    description: units_sold is the quantity sold in the period.
+                revenue_minor_units:
+                    type: string
+                    format: int64
+                    description: |-
+                        revenue_minor_units is gross sales value in the smallest unit of the
+                        reporting currency.
+                cost_minor_units:
+                    type: string
+                    format: int64
+                    description: |-
+                        cost_minor_units is units_sold multiplied by the product's cost price,
+                        in the same minor unit. Absent when the product has no cost price on
+                        record, which is distinct from a cost of zero.
+        insights.product.v1.GetSlowMoversRequest:
+            type: object
+            properties:
+                days:
+                    type: integer
+                    format: int32
+                    description: days is the trailing sales window used to detect slow movers.
+        insights.product.v1.GetSlowMoversResponse:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.product.v1.SlowMover'
+                    description: products is the products value for this contract.
+        insights.product.v1.SlowMover:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                    description: product_id is the product id value for this contract.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                stock_quantity:
+                    type: number
+                    format: double
+                    description: stock_quantity is the stock quantity value for this contract.
+        insights.product.v1.GetProductPerformanceRequest:
+            type: object
+        insights.product.v1.GetProductPerformanceResponse:
+            type: object
+            properties:
+                total_skus:
+                    type: string
+                    format: int64
+                    description: total_skus is the total SKU count.
+                active_skus:
+                    type: string
+                    format: int64
+                    description: active_skus is the active SKU count.
+                out_of_stock:
+                    type: string
+                    format: int64
+                    description: out_of_stock is the out-of-stock SKU count.
+                avg_margin_pct:
+                    type: number
+                    format: double
+                    description: avg_margin_pct is the average margin percentage.

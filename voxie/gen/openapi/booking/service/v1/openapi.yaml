@@ -1,0 +1,195 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /booking/service/v1/services:
+        get:
+            tags:
+                - BookingServiceService
+            summary: listServices
+            operationId: BookingServiceService_listServices
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.service.v1.ListServicesResponse'
+        post:
+            tags:
+                - BookingServiceService
+            summary: createService
+            operationId: BookingServiceService_createService
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.service.v1.CreateServiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.service.v1.CreateServiceResponse'
+    /booking/service/v1/services/{id}:
+        put:
+            tags:
+                - BookingServiceService
+            summary: updateService
+            operationId: BookingServiceService_updateService
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.service.v1.UpdateServiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.service.v1.UpdateServiceResponse'
+        delete:
+            tags:
+                - BookingServiceService
+            summary: deleteService
+            operationId: BookingServiceService_deleteService
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.service.v1.DeleteServiceResponse'
+components:
+    schemas:
+        booking.service.v1.ListServicesRequest:
+            type: object
+        booking.service.v1.ListServicesResponse:
+            type: object
+            properties:
+                services:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/booking.service.v1.BookingService'
+        booking.service.v1.BookingService:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                duration_minutes:
+                    type: integer
+                    format: int32
+                price:
+                    type: number
+                    format: double
+                color:
+                    type: string
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        booking.service.v1.CreateServiceRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                duration_minutes:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+                price:
+                    type: number
+                    minimum: 0
+                    format: double
+                color:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - name
+                - duration_minutes
+        booking.service.v1.CreateServiceResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        booking.service.v1.UpdateServiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                duration_minutes:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+                price:
+                    type: number
+                    minimum: 0
+                    format: double
+                color:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - name
+                - duration_minutes
+        booking.service.v1.UpdateServiceResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        booking.service.v1.DeleteServiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        booking.service.v1.DeleteServiceResponse:
+            type: object
+            properties:
+                message:
+                    type: string

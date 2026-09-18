@@ -1,0 +1,279 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/report/v1/pl:
+        get:
+            tags:
+                - ReportService
+            summary: getPLReport
+            operationId: ReportService_getPLReport
+            parameters:
+                - name: period
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The reporting period label.
+                - name: date
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The report anchor date.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.report.v1.GetPLReportResponse'
+    /finance/report/v1/tax:
+        get:
+            tags:
+                - ReportService
+            summary: getTaxReport
+            operationId: ReportService_getTaxReport
+            parameters:
+                - name: period
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The reporting period label.
+                - name: date
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The report anchor date.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.report.v1.GetTaxReportResponse'
+    /finance/report/v1/expense-categories:
+        get:
+            tags:
+                - ReportService
+            summary: listExpenseCategoryDetails
+            operationId: ReportService_listExpenseCategoryDetails
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.report.v1.ListExpenseCategoryDetailsResponse'
+        post:
+            tags:
+                - ReportService
+            summary: createExpenseCategoryDetail
+            operationId: ReportService_createExpenseCategoryDetail
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.report.v1.CreateExpenseCategoryDetailRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.report.v1.CreateExpenseCategoryDetailResponse'
+    /finance/report/v1/tax-config:
+        get:
+            tags:
+                - ReportService
+            summary: listTaxConfig
+            operationId: ReportService_listTaxConfig
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.report.v1.ListTaxConfigResponse'
+        post:
+            tags:
+                - ReportService
+            summary: createTaxConfig
+            operationId: ReportService_createTaxConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.report.v1.CreateTaxConfigRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.report.v1.CreateTaxConfigResponse'
+components:
+    schemas:
+        finance.report.v1.GetPLReportRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: The reporting period label.
+                date:
+                    type: string
+                    description: The report anchor date.
+            required:
+                - date
+        finance.report.v1.GetPLReportResponse:
+            type: object
+            properties:
+                period:
+                    type: string
+                revenue:
+                    type: number
+                    format: double
+                cogs:
+                    type: number
+                    format: double
+                gross_profit:
+                    type: number
+                    format: double
+                operating_expenses:
+                    type: number
+                    format: double
+                net_profit:
+                    type: number
+                    format: double
+                margin_pct:
+                    type: number
+                    format: double
+        finance.report.v1.GetTaxReportRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: The reporting period label.
+                date:
+                    type: string
+                    description: The report anchor date.
+            required:
+                - date
+        finance.report.v1.GetTaxReportResponse:
+            type: object
+            properties:
+                period:
+                    type: string
+                tax_collected:
+                    type: number
+                    format: double
+                tax_owed:
+                    type: number
+                    format: double
+        finance.report.v1.ListExpenseCategoryDetailsRequest:
+            type: object
+        finance.report.v1.ListExpenseCategoryDetailsResponse:
+            type: object
+            properties:
+                categories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.report.v1.ExpenseCategoryDetail'
+        finance.report.v1.ExpenseCategoryDetail:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Identifies the tenant that owns the resource.
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+                created_at:
+                    type: string
+                    description: When the record was created.
+        finance.report.v1.CreateExpenseCategoryDetailRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+            required:
+                - name
+                - color
+                - icon
+        finance.report.v1.CreateExpenseCategoryDetailResponse:
+            type: object
+            properties:
+                category:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.report.v1.ExpenseCategoryDetail'
+        finance.report.v1.ListTaxConfigRequest:
+            type: object
+        finance.report.v1.ListTaxConfigResponse:
+            type: object
+            properties:
+                configs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.report.v1.TaxConfig'
+        finance.report.v1.TaxConfig:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Identifies the tenant that owns the resource.
+                name:
+                    type: string
+                rate:
+                    type: number
+                    format: double
+                type:
+                    type: string
+                is_default:
+                    type: boolean
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: When the record was created.
+        finance.report.v1.CreateTaxConfigRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                type:
+                    type: string
+                is_default:
+                    type: boolean
+            required:
+                - name
+                - type
+        finance.report.v1.CreateTaxConfigResponse:
+            type: object
+            properties:
+                config:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.report.v1.TaxConfig'

@@ -1,0 +1,45 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/dashboard/v1/dashboard:
+        get:
+            tags:
+                - DashboardService
+            summary: getFinanceDashboard
+            operationId: DashboardService_getFinanceDashboard
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.dashboard.v1.GetFinanceDashboardResponse'
+components:
+    schemas:
+        finance.dashboard.v1.GetFinanceDashboardRequest:
+            type: object
+        finance.dashboard.v1.GetFinanceDashboardResponse:
+            type: object
+            properties:
+                total_revenue_mtd:
+                    type: number
+                    format: double
+                    description: total_revenue_mtd is the total revenue month-to-date value for this contract.
+                total_receivable:
+                    type: number
+                    format: double
+                    description: total_receivable is the total receivable value for this contract.
+                overdue_amount:
+                    type: number
+                    format: double
+                    description: overdue_amount is the overdue amount value for this contract.
+                total_expenses_mtd:
+                    type: number
+                    format: double
+                    description: total_expenses_mtd is the total expenses mtd value for this contract.
+                net_profit_mtd:
+                    type: number
+                    format: double
+                    description: net_profit_mtd is the net profit mtd value for this contract.

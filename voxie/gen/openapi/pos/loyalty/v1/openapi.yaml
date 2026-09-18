@@ -1,0 +1,295 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/loyalty/v1/config:
+        get:
+            tags:
+                - LoyaltyService
+            summary: getLoyaltyConfig
+            description: Returns the loyalty program configuration for the active business.
+            operationId: LoyaltyService_getLoyaltyConfig
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.loyalty.v1.GetLoyaltyConfigResponse'
+        put:
+            tags:
+                - LoyaltyService
+            summary: updateLoyaltyConfig
+            description: Updates the loyalty program configuration.
+            operationId: LoyaltyService_updateLoyaltyConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.loyalty.v1.UpdateLoyaltyConfigRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.loyalty.v1.UpdateLoyaltyConfigResponse'
+    /pos/loyalty/v1/transactions:
+        get:
+            tags:
+                - LoyaltyService
+            summary: listLoyaltyTransactions
+            description: Returns loyalty transactions, optionally filtered by customer.
+            operationId: LoyaltyService_listLoyaltyTransactions
+            parameters:
+                - name: customer_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.loyalty.v1.ListLoyaltyTransactionsResponse'
+    /pos/loyalty/v1/earn:
+        post:
+            tags:
+                - LoyaltyService
+            summary: earnPoints
+            description: Records points earned by a customer for an order.
+            operationId: LoyaltyService_earnPoints
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.loyalty.v1.EarnPointsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.loyalty.v1.EarnPointsResponse'
+    /pos/loyalty/v1/redeem:
+        post:
+            tags:
+                - LoyaltyService
+            summary: redeemPoints
+            description: Redeems loyalty points for a customer.
+            operationId: LoyaltyService_redeemPoints
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.loyalty.v1.RedeemPointsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.loyalty.v1.RedeemPointsResponse'
+    /pos/loyalty/v1/balance:
+        get:
+            tags:
+                - LoyaltyService
+            summary: getLoyaltyBalance
+            description: Returns the loyalty points balance for a customer.
+            operationId: LoyaltyService_getLoyaltyBalance
+            parameters:
+                - name: customer_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.loyalty.v1.GetLoyaltyBalanceResponse'
+components:
+    schemas:
+        pos.loyalty.v1.GetLoyaltyConfigRequest:
+            type: object
+        pos.loyalty.v1.GetLoyaltyConfigResponse:
+            type: object
+            properties:
+                config:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.loyalty.v1.LoyaltyConfig'
+        pos.loyalty.v1.LoyaltyConfig:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                    description: business_id identifies the active business.
+                is_enabled:
+                    type: boolean
+                points_per_dollar:
+                    type: number
+                    format: double
+                redemption_rate:
+                    type: number
+                    format: double
+                min_redeem_points:
+                    type: integer
+                    format: int32
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            description: LoyaltyConfig is the loyalty program configuration for a business.
+        pos.loyalty.v1.UpdateLoyaltyConfigRequest:
+            type: object
+            properties:
+                is_enabled:
+                    type: boolean
+                points_per_dollar:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                redemption_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                min_redeem_points:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+            required:
+                - points_per_dollar
+                - min_redeem_points
+        pos.loyalty.v1.UpdateLoyaltyConfigResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        pos.loyalty.v1.ListLoyaltyTransactionsRequest:
+            type: object
+            properties:
+                customer_id:
+                    type: string
+                    format: int64
+        pos.loyalty.v1.ListLoyaltyTransactionsResponse:
+            type: object
+            properties:
+                transactions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.loyalty.v1.LoyaltyTransaction'
+        pos.loyalty.v1.LoyaltyTransaction:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                    description: business_id identifies the active business.
+                customer_id:
+                    type: string
+                    format: int64
+                    description: customer_id identifies the linked customer when present.
+                order_id:
+                    type: string
+                    format: int64
+                type:
+                    type: string
+                points:
+                    type: integer
+                    format: int32
+                balance_after:
+                    type: integer
+                    format: int32
+                note:
+                    type: string
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+            description: LoyaltyTransaction is a recorded loyalty points earn or redeem event.
+        pos.loyalty.v1.EarnPointsRequest:
+            type: object
+            properties:
+                customer_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                points:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+            required:
+                - customer_id
+                - order_id
+                - points
+        pos.loyalty.v1.EarnPointsResponse:
+            type: object
+            properties:
+                transaction_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        pos.loyalty.v1.RedeemPointsRequest:
+            type: object
+            properties:
+                customer_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                points:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+            required:
+                - customer_id
+                - points
+        pos.loyalty.v1.RedeemPointsResponse:
+            type: object
+            properties:
+                transaction_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        pos.loyalty.v1.GetLoyaltyBalanceRequest:
+            type: object
+            properties:
+                customer_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            required:
+                - customer_id
+        pos.loyalty.v1.GetLoyaltyBalanceResponse:
+            type: object
+            properties:
+                customer_id:
+                    type: string
+                    format: int64
+                balance:
+                    type: integer
+                    format: int32

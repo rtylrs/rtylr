@@ -1,0 +1,141 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/notification/v1/notifications:
+        get:
+            tags:
+                - NotificationService
+            summary: listNotifications
+            description: Returns notifications for the current user.
+            operationId: NotificationService_listNotifications
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Maximum records to return. Defaults to 50 and is capped by the server.
+                - name: cursor
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: Opaque continuation token from a previous response.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.notification.v1.ListNotificationsResponse'
+    /hub/notification/v1/notifications/read-all:
+        patch:
+            tags:
+                - NotificationService
+            summary: markAllRead
+            description: Marks all notifications as read.
+            operationId: NotificationService_markAllRead
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.notification.v1.MarkAllReadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.notification.v1.MarkAllReadResponse'
+    /hub/notification/v1/notifications/{id}/read:
+        patch:
+            tags:
+                - NotificationService
+            summary: markNotificationRead
+            description: Marks a single notification as read.
+            operationId: NotificationService_markNotificationRead
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.notification.v1.MarkNotificationReadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.notification.v1.MarkNotificationReadResponse'
+components:
+    schemas:
+        hub.notification.v1.ListNotificationsRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                    description: Maximum records to return. Defaults to 50 and is capped by the server.
+                cursor:
+                    type: string
+                    description: Opaque continuation token from a previous response.
+        hub.notification.v1.ListNotificationsResponse:
+            type: object
+            properties:
+                notifications:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.notification.v1.Notification'
+                next_cursor:
+                    type: string
+        hub.notification.v1.Notification:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                title:
+                    type: string
+                body:
+                    type: string
+                type:
+                    type: string
+                    description: info, warning, success, error
+                read:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: When the record was created.
+                link:
+                    type: string
+            description: Notification is a single hub notification entry.
+        hub.notification.v1.MarkAllReadRequest:
+            type: object
+        hub.notification.v1.MarkAllReadResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.notification.v1.MarkNotificationReadRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.notification.v1.MarkNotificationReadResponse:
+            type: object
+            properties:
+                message:
+                    type: string

@@ -1,0 +1,205 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /support/knowledge/v1/articles:
+        get:
+            tags:
+                - KnowledgeService
+            summary: listArticles
+            operationId: KnowledgeService_listArticles
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.knowledge.v1.ListArticlesResponse'
+        post:
+            tags:
+                - KnowledgeService
+            summary: createArticle
+            operationId: KnowledgeService_createArticle
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/support.knowledge.v1.CreateArticleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.knowledge.v1.CreateArticleResponse'
+    /support/knowledge/v1/articles/{id}:
+        put:
+            tags:
+                - KnowledgeService
+            summary: updateArticle
+            operationId: KnowledgeService_updateArticle
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/support.knowledge.v1.UpdateArticleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.knowledge.v1.UpdateArticleResponse'
+        delete:
+            tags:
+                - KnowledgeService
+            summary: deleteArticle
+            operationId: KnowledgeService_deleteArticle
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.knowledge.v1.DeleteArticleResponse'
+components:
+    schemas:
+        support.knowledge.v1.ListArticlesRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+        support.knowledge.v1.ListArticlesResponse:
+            type: object
+            properties:
+                articles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/support.knowledge.v1.Article'
+                total:
+                    type: integer
+                    format: int32
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+        support.knowledge.v1.Article:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                title:
+                    type: string
+                slug:
+                    type: string
+                body:
+                    type: string
+                category:
+                    type: string
+                is_published:
+                    type: boolean
+                views:
+                    type: integer
+                    format: int32
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        support.knowledge.v1.CreateArticleRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                slug:
+                    type: string
+                body:
+                    type: string
+                category:
+                    type: string
+                is_published:
+                    type: boolean
+            required:
+                - title
+                - slug
+        support.knowledge.v1.CreateArticleResponse:
+            type: object
+            properties:
+                article_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        support.knowledge.v1.UpdateArticleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                title:
+                    type: string
+                slug:
+                    type: string
+                body:
+                    type: string
+                category:
+                    type: string
+                is_published:
+                    type: boolean
+        support.knowledge.v1.UpdateArticleResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        support.knowledge.v1.DeleteArticleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        support.knowledge.v1.DeleteArticleResponse:
+            type: object
+            properties:
+                message:
+                    type: string

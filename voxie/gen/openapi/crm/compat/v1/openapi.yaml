@@ -1,0 +1,1335 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /crm/dashboard:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getDashboard
+            operationId: CompatibilityService_getDashboard
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listCustomers
+            operationId: CompatibilityService_listCustomers
+            parameters:
+                - name: search
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: tier
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: tag
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateCustomer
+            operationId: CompatibilityService_updateCustomer
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createCustomer
+            operationId: CompatibilityService_createCustomer
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers/detail:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCustomer
+            operationId: CompatibilityService_getCustomer
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers/detail/full:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCustomerFull
+            operationId: CompatibilityService_getCustomerFull
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers/timeline:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCustomerTimeline
+            operationId: CompatibilityService_getCustomerTimeline
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: customer_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: cursor
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers/record-visit:
+        post:
+            tags:
+                - CompatibilityService
+            summary: recordVisit
+            operationId: CompatibilityService_recordVisit
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers/import:
+        post:
+            tags:
+                - CompatibilityService
+            summary: importCustomers
+            operationId: CompatibilityService_importCustomers
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers/merge:
+        post:
+            tags:
+                - CompatibilityService
+            summary: mergeCustomers
+            operationId: CompatibilityService_mergeCustomers
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/customers/export:
+        get:
+            tags:
+                - CompatibilityService
+            summary: exportCustomer
+            operationId: CompatibilityService_exportCustomer
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: customer_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/award:
+        post:
+            tags:
+                - CompatibilityService
+            summary: awardPoints
+            operationId: CompatibilityService_awardPoints
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/redeem:
+        post:
+            tags:
+                - CompatibilityService
+            summary: redeemPoints
+            operationId: CompatibilityService_redeemPoints
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/config:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getLoyaltyConfig
+            operationId: CompatibilityService_getLoyaltyConfig
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateLoyaltyConfig
+            operationId: CompatibilityService_updateLoyaltyConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/transactions:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getLoyaltyTransactions
+            operationId: CompatibilityService_getLoyaltyTransactions
+            parameters:
+                - name: customer_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/members:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getLoyaltyMembers
+            operationId: CompatibilityService_getLoyaltyMembers
+            parameters:
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/rewards:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getLoyaltyRewards
+            operationId: CompatibilityService_getLoyaltyRewards
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/rewards/upsert:
+        post:
+            tags:
+                - CompatibilityService
+            summary: upsertLoyaltyReward
+            operationId: CompatibilityService_upsertLoyaltyReward
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/loyalty/tiers:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getLoyaltyTiers
+            operationId: CompatibilityService_getLoyaltyTiers
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateLoyaltyTier
+            operationId: CompatibilityService_updateLoyaltyTier
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createLoyaltyTier
+            operationId: CompatibilityService_createLoyaltyTier
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/segments:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listSegments
+            operationId: CompatibilityService_listSegments
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateSegment
+            operationId: CompatibilityService_updateSegment
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createSegment
+            operationId: CompatibilityService_createSegment
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/segments/detail:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getSegment
+            operationId: CompatibilityService_getSegment
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/segments/customers:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getSegmentCustomers
+            operationId: CompatibilityService_getSegmentCustomers
+            parameters:
+                - name: segment_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/campaigns:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listCampaigns
+            operationId: CompatibilityService_listCampaigns
+            parameters:
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createCampaign
+            operationId: CompatibilityService_createCampaign
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/campaigns/detail:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCampaign
+            operationId: CompatibilityService_getCampaign
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/campaigns/stats:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCampaignStats
+            operationId: CompatibilityService_getCampaignStats
+            parameters:
+                - name: campaign_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/campaigns/{id}:
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateCampaign
+            operationId: CompatibilityService_updateCampaign
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteCampaign
+            operationId: CompatibilityService_deleteCampaign
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/campaigns/{id}/status:
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateCampaignStatus
+            operationId: CompatibilityService_updateCampaignStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/automations:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listAutomations
+            operationId: CompatibilityService_listAutomations
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createAutomation
+            operationId: CompatibilityService_createAutomation
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/automations/{id}:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getAutomation
+            operationId: CompatibilityService_getAutomation
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateAutomation
+            operationId: CompatibilityService_updateAutomation
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteAutomation
+            operationId: CompatibilityService_deleteAutomation
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/templates:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listTemplates
+            operationId: CompatibilityService_listTemplates
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createTemplate
+            operationId: CompatibilityService_createTemplate
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/feedback:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listFeedback
+            operationId: CompatibilityService_listFeedback
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/settings:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getSettings
+            operationId: CompatibilityService_getSettings
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateSettings
+            operationId: CompatibilityService_updateSettings
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/pipeline:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getSalesPipeline
+            operationId: CompatibilityService_getSalesPipeline
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/leads:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listLeads
+            operationId: CompatibilityService_listLeads
+            parameters:
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createLead
+            operationId: CompatibilityService_createLead
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/leads/{id}:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getLead
+            operationId: CompatibilityService_getLead
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateLead
+            operationId: CompatibilityService_updateLead
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteLead
+            operationId: CompatibilityService_deleteLead
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/leads/{id}/touchpoints:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listTouchpoints
+            operationId: CompatibilityService_listTouchpoints
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/touchpoints:
+        post:
+            tags:
+                - CompatibilityService
+            summary: createTouchpoint
+            operationId: CompatibilityService_createTouchpoint
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/touchpoints/{id}:
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteTouchpoint
+            operationId: CompatibilityService_deleteTouchpoint
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/contacts:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listContacts
+            operationId: CompatibilityService_listContacts
+            parameters:
+                - name: lead_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: customer_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createContact
+            operationId: CompatibilityService_createContact
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/contacts/{id}:
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateContact
+            operationId: CompatibilityService_updateContact
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteContact
+            operationId: CompatibilityService_deleteContact
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/contracts:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listContracts
+            operationId: CompatibilityService_listContracts
+            parameters:
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createContract
+            operationId: CompatibilityService_createContract
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+    /crm/sales/contracts/{id}:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getContract
+            operationId: CompatibilityService_getContract
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateContract
+            operationId: CompatibilityService_updateContract
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.compat.v1.JsonResponse'
+components:
+    schemas:
+        crm.compat.v1.EmptyRequest:
+            type: object
+        crm.compat.v1.JsonResponse: {}
+        crm.compat.v1.CustomerListRequest:
+            type: object
+            properties:
+                search:
+                    type: string
+                tier:
+                    type: string
+                tag:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+        crm.compat.v1.IdQueryRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int32
+        crm.compat.v1.CustomerTimelineRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int32
+                customer_id:
+                    type: integer
+                    format: int32
+                cursor:
+                    type: string
+                limit:
+                    type: integer
+                    format: int32
+        crm.compat.v1.BodyRequest:
+            type: object
+            properties:
+                body: {}
+        crm.compat.v1.ExportCustomerRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int32
+                customer_id:
+                    type: integer
+                    format: int32
+        crm.compat.v1.LoyaltyTransactionsRequest:
+            type: object
+            properties:
+                customer_id:
+                    type: integer
+                    format: int32
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+        crm.compat.v1.PageRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+        crm.compat.v1.SegmentCustomersRequest:
+            type: object
+            properties:
+                segment_id:
+                    type: integer
+                    format: int32
+        crm.compat.v1.CampaignStatsRequest:
+            type: object
+            properties:
+                campaign_id:
+                    type: integer
+                    format: int32
+        crm.compat.v1.PathBodyRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                body: {}
+        crm.compat.v1.PathRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        crm.compat.v1.ContactsRequest:
+            type: object
+            properties:
+                lead_id:
+                    type: integer
+                    format: int32
+                customer_id:
+                    type: integer
+                    format: int32
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32

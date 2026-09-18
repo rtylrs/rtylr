@@ -1,0 +1,351 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/subscription/v1/my:
+        get:
+            tags:
+                - SubscriptionService
+            summary: getMySubscription
+            operationId: SubscriptionService_getMySubscription
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.GetMySubscriptionResponse'
+        post:
+            tags:
+                - SubscriptionService
+            summary: upsertSubscription
+            operationId: SubscriptionService_upsertSubscription
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.subscription.v1.UpsertSubscriptionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.UpsertSubscriptionResponse'
+    /hub/subscription/v1/plans:
+        get:
+            tags:
+                - SubscriptionService
+            summary: listPlans
+            operationId: SubscriptionService_listPlans
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.ListPlansResponse'
+    /hub/subscription/v1/billing:
+        get:
+            tags:
+                - SubscriptionService
+            summary: getBillingDetail
+            operationId: SubscriptionService_getBillingDetail
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.GetBillingDetailResponse'
+    /hub/subscription/v1/billing/history:
+        get:
+            tags:
+                - SubscriptionService
+            summary: getBillingHistory
+            operationId: SubscriptionService_getBillingHistory
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.GetBillingHistoryResponse'
+    /hub/subscription/v1/checkout:
+        post:
+            tags:
+                - SubscriptionService
+            summary: createCheckout
+            operationId: SubscriptionService_createCheckout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.subscription.v1.CreateCheckoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.CreateCheckoutResponse'
+components:
+    schemas:
+        hub.subscription.v1.GetMySubscriptionRequest:
+            type: object
+        hub.subscription.v1.GetMySubscriptionResponse:
+            type: object
+            properties:
+                subscription:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.subscription.v1.Subscription'
+        hub.subscription.v1.Subscription:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                plan_name:
+                    type: string
+                plan_slug:
+                    type: string
+                apps:
+                    type: array
+                    items:
+                        type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                is_granted:
+                    type: boolean
+                seat_count:
+                    type: integer
+                    format: int32
+                included_seat_limit:
+                    type: integer
+                    format: int32
+                included_seat_count:
+                    type: integer
+                    format: int32
+                billable_seat_count:
+                    type: integer
+                    format: int32
+                grant_expires_at:
+                    type: string
+                trial_ends_at:
+                    type: string
+                next_billing_date:
+                    type: string
+                paddle_subscription_id:
+                    type: string
+        hub.subscription.v1.ListPlansRequest:
+            type: object
+        hub.subscription.v1.ListPlansResponse:
+            type: object
+            properties:
+                plans:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.Plan'
+        hub.subscription.v1.Plan:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                slug:
+                    type: string
+                apps:
+                    type: array
+                    items:
+                        type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                annual_price_per_seat_cents:
+                    type: integer
+                    format: int32
+                trial_days:
+                    type: integer
+                    format: int32
+                tagline:
+                    type: string
+                max_seats:
+                    type: integer
+                    format: int32
+                max_locations:
+                    type: integer
+                    format: int32
+                ai_credits_per_month:
+                    type: integer
+                    format: int32
+                features:
+                    type: array
+                    items:
+                        type: string
+                tier_order:
+                    type: integer
+                    format: int32
+                is_solo:
+                    type: boolean
+                is_featured:
+                    type: boolean
+                is_active:
+                    type: boolean
+        hub.subscription.v1.GetBillingDetailRequest:
+            type: object
+        hub.subscription.v1.GetBillingDetailResponse:
+            type: object
+            properties:
+                billing:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.subscription.v1.BillingDetail'
+        hub.subscription.v1.BillingDetail:
+            type: object
+            properties:
+                billing_month:
+                    type: string
+                next_billing_date:
+                    type: string
+                line_items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.BillingLineItem'
+                total_cents:
+                    type: integer
+                    format: int32
+                plan_name:
+                    type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                current_seat_count:
+                    type: integer
+                    format: int32
+                included_seat_limit:
+                    type: integer
+                    format: int32
+                included_seat_count:
+                    type: integer
+                    format: int32
+                billable_seat_count:
+                    type: integer
+                    format: int32
+                seat_discount_cents:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                is_granted:
+                    type: boolean
+                grant_expires_at:
+                    type: string
+                trial_ends_at:
+                    type: string
+                paddle_subscription_id:
+                    type: string
+        hub.subscription.v1.BillingLineItem:
+            type: object
+            properties:
+                period_start:
+                    type: string
+                period_end:
+                    type: string
+                seat_count:
+                    type: integer
+                    format: int32
+                included_seat_limit:
+                    type: integer
+                    format: int32
+                included_seat_count:
+                    type: integer
+                    format: int32
+                billable_seat_count:
+                    type: integer
+                    format: int32
+                included_cents:
+                    type: integer
+                    format: int32
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                amount_cents:
+                    type: integer
+                    format: int32
+                type:
+                    type: string
+                description:
+                    type: string
+                is_granted:
+                    type: boolean
+                grant_expires_at:
+                    type: string
+                addon_id:
+                    type: string
+                quantity:
+                    type: integer
+                    format: int32
+                unit_price_cents:
+                    type: integer
+                    format: int32
+        hub.subscription.v1.GetBillingHistoryRequest:
+            type: object
+        hub.subscription.v1.GetBillingHistoryResponse:
+            type: object
+            properties:
+                history:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.BillingHistoryMonth'
+        hub.subscription.v1.BillingHistoryMonth:
+            type: object
+            properties:
+                month:
+                    type: string
+                total_cents:
+                    type: integer
+                    format: int32
+                line_items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.BillingLineItem'
+                status:
+                    type: string
+        hub.subscription.v1.UpsertSubscriptionRequest:
+            type: object
+            properties:
+                plan_slug:
+                    type: string
+        hub.subscription.v1.UpsertSubscriptionResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.subscription.v1.CreateCheckoutRequest:
+            type: object
+            properties:
+                plan_slug:
+                    type: string
+                email:
+                    type: string
+                billing_cycle:
+                    type: string
+                seat_count:
+                    type: integer
+                    format: int32
+                addons:
+                    type: array
+                    items:
+                        type: string
+        hub.subscription.v1.CreateCheckoutResponse:
+            type: object
+            properties:
+                checkout_url:
+                    type: string

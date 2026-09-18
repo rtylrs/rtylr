@@ -1,0 +1,511 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/feature/v1/features:
+        post:
+            tags:
+                - FeatureService
+            summary: resolveFeatures
+            operationId: FeatureService_resolveFeatures
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.feature.v1.ResolveFeaturesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.ResolveFeaturesResponse'
+    /hub/feature/v1/features/me:
+        post:
+            tags:
+                - FeatureService
+            summary: resolveMyFeatures
+            operationId: FeatureService_resolveMyFeatures
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.feature.v1.ResolveMyFeaturesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.ResolveMyFeaturesResponse'
+    /hub/feature/v1/features/admin/flags:
+        get:
+            tags:
+                - FeatureService
+            summary: listFlags
+            operationId: FeatureService_listFlags
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.ListFlagsResponse'
+        put:
+            tags:
+                - FeatureService
+            summary: upsertFlag
+            operationId: FeatureService_upsertFlag
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.feature.v1.UpsertFlagRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.UpsertFlagResponse'
+    /hub/feature/v1/features/admin/flags/{key}:
+        delete:
+            tags:
+                - FeatureService
+            summary: deleteFlag
+            operationId: FeatureService_deleteFlag
+            parameters:
+                - name: key
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.DeleteFlagResponse'
+    /hub/feature/v1/features/admin/targets:
+        get:
+            tags:
+                - FeatureService
+            summary: listTargets
+            operationId: FeatureService_listTargets
+            parameters:
+                - name: feature_key
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.ListTargetsResponse'
+        put:
+            tags:
+                - FeatureService
+            summary: upsertTarget
+            operationId: FeatureService_upsertTarget
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.feature.v1.UpsertTargetRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.UpsertTargetResponse'
+    /hub/feature/v1/features/admin/targets/{feature_key}/{owner_id}:
+        delete:
+            tags:
+                - FeatureService
+            summary: deleteTarget
+            operationId: FeatureService_deleteTarget
+            parameters:
+                - name: feature_key
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: owner_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.DeleteTargetResponse'
+    /hub/feature/v1/features/admin/rules:
+        get:
+            tags:
+                - FeatureService
+            summary: listRules
+            operationId: FeatureService_listRules
+            parameters:
+                - name: feature_key
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.ListRulesResponse'
+        put:
+            tags:
+                - FeatureService
+            summary: updateRule
+            operationId: FeatureService_updateRule
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.feature.v1.UpdateRuleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.UpdateRuleResponse'
+        post:
+            tags:
+                - FeatureService
+            summary: createRule
+            operationId: FeatureService_createRule
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.feature.v1.CreateRuleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.CreateRuleResponse'
+    /hub/feature/v1/features/admin/rules/{id}:
+        delete:
+            tags:
+                - FeatureService
+            summary: deleteRule
+            operationId: FeatureService_deleteRule
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.feature.v1.DeleteRuleResponse'
+components:
+    schemas:
+        hub.feature.v1.ResolveFeaturesRequest:
+            type: object
+            properties:
+                subject:
+                    type: string
+                attributes:
+                    type: object
+                    additionalProperties:
+                        type: string
+        hub.feature.v1.ResolveFeaturesResponse:
+            type: object
+            properties:
+                features:
+                    type: object
+                    additionalProperties:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureResolution'
+                variant:
+                    type: string
+        hub.feature.v1.FeatureResolution:
+            type: object
+            properties:
+                key:
+                    type: string
+                enabled:
+                    type: boolean
+                variant:
+                    type: string
+        hub.feature.v1.ResolveMyFeaturesRequest:
+            type: object
+            properties:
+                attributes:
+                    type: object
+                    additionalProperties:
+                        type: string
+        hub.feature.v1.ResolveMyFeaturesResponse:
+            type: object
+            properties:
+                features:
+                    type: object
+                    additionalProperties:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureResolution'
+                variant:
+                    type: string
+        hub.feature.v1.ListFlagsRequest:
+            type: object
+        hub.feature.v1.ListFlagsResponse:
+            type: object
+            properties:
+                flags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureFlag'
+        hub.feature.v1.FeatureFlag:
+            type: object
+            properties:
+                key:
+                    type: string
+                description:
+                    type: string
+                enabled:
+                    type: boolean
+                rollout_percentage:
+                    type: integer
+                    format: int32
+                variant_on:
+                    type: string
+                variant_off:
+                    type: string
+        hub.feature.v1.UpsertFlagRequest:
+            type: object
+            properties:
+                key:
+                    type: string
+                description:
+                    type: string
+                enabled:
+                    type: boolean
+                rollout_percentage:
+                    type: integer
+                    format: int32
+                variant_on:
+                    type: string
+                variant_off:
+                    type: string
+            required:
+                - key
+        hub.feature.v1.UpsertFlagResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.feature.v1.DeleteFlagRequest:
+            type: object
+            properties:
+                key:
+                    type: string
+            required:
+                - key
+        hub.feature.v1.DeleteFlagResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.feature.v1.ListTargetsRequest:
+            type: object
+            properties:
+                feature_key:
+                    type: string
+            required:
+                - feature_key
+        hub.feature.v1.ListTargetsResponse:
+            type: object
+            properties:
+                targets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureTarget'
+        hub.feature.v1.FeatureTarget:
+            type: object
+            properties:
+                feature_key:
+                    type: string
+                owner_id:
+                    type: string
+                    format: int64
+                enabled:
+                    type: boolean
+                variant:
+                    type: string
+        hub.feature.v1.UpsertTargetRequest:
+            type: object
+            properties:
+                feature_key:
+                    type: string
+                owner_id:
+                    type: string
+                    format: int64
+                enabled:
+                    type: boolean
+                variant:
+                    type: string
+            required:
+                - feature_key
+        hub.feature.v1.UpsertTargetResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.feature.v1.DeleteTargetRequest:
+            type: object
+            properties:
+                feature_key:
+                    type: string
+                owner_id:
+                    type: string
+                    format: int64
+            required:
+                - feature_key
+        hub.feature.v1.DeleteTargetResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.feature.v1.ListRulesRequest:
+            type: object
+            properties:
+                feature_key:
+                    type: string
+            required:
+                - feature_key
+        hub.feature.v1.ListRulesResponse:
+            type: object
+            properties:
+                rules:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureRule'
+        hub.feature.v1.FeatureRule:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                feature_key:
+                    type: string
+                priority:
+                    type: integer
+                    format: int32
+                description:
+                    type: string
+                variant:
+                    type: string
+                rollout_percentage:
+                    type: integer
+                    format: int32
+                enabled:
+                    type: boolean
+                conditions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureCondition'
+        hub.feature.v1.FeatureCondition:
+            type: object
+            properties:
+                attribute:
+                    type: string
+                operator:
+                    type: string
+                value:
+                    type: string
+        hub.feature.v1.CreateRuleRequest:
+            type: object
+            properties:
+                feature_key:
+                    type: string
+                priority:
+                    type: integer
+                    format: int32
+                description:
+                    type: string
+                variant:
+                    type: string
+                rollout_percentage:
+                    type: integer
+                    format: int32
+                enabled:
+                    type: boolean
+                conditions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureCondition'
+            required:
+                - feature_key
+        hub.feature.v1.CreateRuleResponse:
+            type: object
+            properties:
+                rule_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        hub.feature.v1.UpdateRuleRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                priority:
+                    type: integer
+                    format: int32
+                description:
+                    type: string
+                variant:
+                    type: string
+                rollout_percentage:
+                    type: integer
+                    format: int32
+                enabled:
+                    type: boolean
+                conditions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.feature.v1.FeatureCondition'
+        hub.feature.v1.UpdateRuleResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.feature.v1.DeleteRuleRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+        hub.feature.v1.DeleteRuleResponse:
+            type: object
+            properties:
+                message:
+                    type: string

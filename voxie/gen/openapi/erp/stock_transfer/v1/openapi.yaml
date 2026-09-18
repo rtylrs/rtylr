@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/stock-transfer/v1/stock-transfers:
+        get:
+            tags:
+                - StockTransferService
+            summary: listStockTransfers
+            operationId: StockTransferService_listStockTransfers
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.stock_transfer.v1.ListStockTransfersResponse'
+        post:
+            tags:
+                - StockTransferService
+            summary: createStockTransfer
+            operationId: StockTransferService_createStockTransfer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.stock_transfer.v1.CreateStockTransferRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.stock_transfer.v1.CreateStockTransferResponse'
+    /erp/stock-transfer/v1/stock-transfers/{id}/status:
+        patch:
+            tags:
+                - StockTransferService
+            summary: updateStockTransferStatus
+            operationId: StockTransferService_updateStockTransferStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.stock_transfer.v1.UpdateStockTransferStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.stock_transfer.v1.UpdateStockTransferStatusResponse'
+components:
+    schemas:
+        erp.stock_transfer.v1.ListStockTransfersRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+        erp.stock_transfer.v1.ListStockTransfersResponse:
+            type: object
+            properties:
+                stock_transfers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.stock_transfer.v1.StockTransfer'
+                has_more:
+                    type: boolean
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+        erp.stock_transfer.v1.StockTransfer:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                from_warehouse_id:
+                    type: string
+                    format: int64
+                to_warehouse_id:
+                    type: string
+                    format: int64
+                status:
+                    type: string
+                notes:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.stock_transfer.v1.StockTransferItem'
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        erp.stock_transfer.v1.StockTransferItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                transfer_id:
+                    type: string
+                    format: int64
+                product_id:
+                    type: string
+                    format: int64
+                quantity:
+                    type: number
+                    format: double
+                created_at:
+                    type: string
+        erp.stock_transfer.v1.CreateStockTransferRequest:
+            type: object
+            properties:
+                from_warehouse_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                to_warehouse_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                notes:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.stock_transfer.v1.CreateStockTransferItemRequest'
+                    minItems: 1
+            required:
+                - from_warehouse_id
+                - to_warehouse_id
+        erp.stock_transfer.v1.CreateStockTransferItemRequest:
+            type: object
+            properties:
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                quantity:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+            required:
+                - product_id
+                - quantity
+        erp.stock_transfer.v1.CreateStockTransferResponse:
+            type: object
+            properties:
+                transfer_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        erp.stock_transfer.v1.UpdateStockTransferStatusRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.stock_transfer.v1.UpdateStockTransferStatusBody'
+        erp.stock_transfer.v1.UpdateStockTransferStatusBody:
+            type: object
+            properties:
+                status:
+                    type: string
+            required:
+                - status
+        erp.stock_transfer.v1.UpdateStockTransferStatusResponse:
+            type: object
+            properties:
+                message:
+                    type: string

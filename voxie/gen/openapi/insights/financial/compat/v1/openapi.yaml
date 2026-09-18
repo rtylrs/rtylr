@@ -1,0 +1,56 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /insights/financial/cash-flow:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCashFlow
+            operationId: CompatibilityService_getCashFlow
+            parameters:
+                - name: from
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: to
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.financial.compat.v1.GetCashFlowResponse'
+components:
+    schemas:
+        insights.financial.compat.v1.GetCashFlowRequest:
+            type: object
+            properties:
+                from_date:
+                    type: string
+                to_date:
+                    type: string
+        insights.financial.compat.v1.GetCashFlowResponse:
+            type: object
+            properties:
+                series:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.financial.compat.v1.CashFlowPoint'
+        insights.financial.compat.v1.CashFlowPoint:
+            type: object
+            properties:
+                date:
+                    type: string
+                inflow_minor_units:
+                    type: number
+                    format: double
+                outflow_minor_units:
+                    type: number
+                    format: double

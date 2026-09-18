@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/ws-ticket:
+        post:
+            tags:
+                - RealtimeService
+            summary: issueWebSocketTicket
+            description: Exchanges the authenticated API session for a short-lived WebSocket ticket.
+            operationId: RealtimeService_issueWebSocketTicket
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.realtime.v1.IssueWebSocketTicketRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.realtime.v1.IssueWebSocketTicketResponse'
+components:
+    schemas:
+        flow.realtime.v1.IssueWebSocketTicketRequest:
+            type: object
+        flow.realtime.v1.IssueWebSocketTicketResponse:
+            type: object
+            properties:
+                ticket:
+                    type: string
+                    description: Short-lived, single-use ticket accepted by the Flow WebSocket handshake.

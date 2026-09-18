@@ -1,0 +1,190 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/audit/v1/audit:
+        get:
+            tags:
+                - AuditService
+            summary: listAudit
+            description: Returns audit log entries filtered by action, entity, or date range.
+            operationId: AuditService_listAudit
+            parameters:
+                - name: action
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: entity_type
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: employee_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                - name: start_date
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: end_date
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Maximum records to return. Defaults to 50 and is capped by the server.
+                - name: cursor
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: Opaque continuation token from a previous response.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.audit.v1.ListAuditResponse'
+        post:
+            tags:
+                - AuditService
+            summary: createAudit
+            description: Records a new audit log entry.
+            operationId: AuditService_createAudit
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.audit.v1.CreateAuditRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.audit.v1.CreateAuditResponse'
+components:
+    schemas:
+        pos.audit.v1.ListAuditRequest:
+            type: object
+            properties:
+                action:
+                    type: string
+                entity_type:
+                    type: string
+                employee_id:
+                    type: string
+                    format: int64
+                start_date:
+                    type: string
+                end_date:
+                    type: string
+                limit:
+                    type: integer
+                    format: int32
+                    description: Maximum records to return. Defaults to 50 and is capped by the server.
+                cursor:
+                    type: string
+                    description: Opaque continuation token from a previous response.
+            required:
+                - start_date
+                - end_date
+        pos.audit.v1.ListAuditResponse:
+            type: object
+            properties:
+                logs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.audit.v1.AuditLog'
+                next_cursor:
+                    type: string
+        pos.audit.v1.AuditLog:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                branch_id:
+                    type: string
+                    format: int64
+                terminal_id:
+                    type: string
+                    format: int64
+                employee_id:
+                    type: string
+                    format: int64
+                action:
+                    type: string
+                entity_type:
+                    type: string
+                entity_id:
+                    type: string
+                    format: int64
+                details:
+                    type: string
+                ip_address:
+                    type: string
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+            description: AuditLog is a recorded POS audit event.
+        pos.audit.v1.CreateAuditRequest:
+            type: object
+            properties:
+                branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                terminal_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                action:
+                    type: string
+                entity_type:
+                    type: string
+                entity_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                details:
+                    type: string
+                ip_address:
+                    type: string
+            required:
+                - branch_id
+                - terminal_id
+                - employee_id
+                - action
+                - entity_type
+                - entity_id
+                - details
+                - ip_address
+        pos.audit.v1.CreateAuditResponse:
+            type: object
+            properties:
+                audit_log_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string

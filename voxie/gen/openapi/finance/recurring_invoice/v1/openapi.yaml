@@ -1,0 +1,318 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/recurring-invoice/v1/recurring-invoices:
+        get:
+            tags:
+                - RecurringInvoiceService
+            summary: listRecurringInvoices
+            operationId: RecurringInvoiceService_listRecurringInvoices
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.recurring_invoice.v1.ListRecurringInvoicesResponse'
+        post:
+            tags:
+                - RecurringInvoiceService
+            summary: createRecurringInvoice
+            operationId: RecurringInvoiceService_createRecurringInvoice
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.recurring_invoice.v1.CreateRecurringInvoiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.recurring_invoice.v1.CreateRecurringInvoiceResponse'
+    /finance/recurring-invoice/v1/recurring-invoices/{id}:
+        get:
+            tags:
+                - RecurringInvoiceService
+            summary: getRecurringInvoice
+            operationId: RecurringInvoiceService_getRecurringInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.recurring_invoice.v1.GetRecurringInvoiceResponse'
+        put:
+            tags:
+                - RecurringInvoiceService
+            summary: updateRecurringInvoice
+            operationId: RecurringInvoiceService_updateRecurringInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.recurring_invoice.v1.UpdateRecurringInvoiceResponse'
+    /finance/recurring-invoice/v1/recurring-invoices/{id}/pause:
+        patch:
+            tags:
+                - RecurringInvoiceService
+            summary: pauseRecurringInvoice
+            operationId: RecurringInvoiceService_pauseRecurringInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.recurring_invoice.v1.PauseRecurringInvoiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.recurring_invoice.v1.PauseRecurringInvoiceResponse'
+    /finance/recurring-invoice/v1/recurring-invoices/{id}/resume:
+        patch:
+            tags:
+                - RecurringInvoiceService
+            summary: resumeRecurringInvoice
+            operationId: RecurringInvoiceService_resumeRecurringInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.recurring_invoice.v1.ResumeRecurringInvoiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.recurring_invoice.v1.ResumeRecurringInvoiceResponse'
+components:
+    schemas:
+        finance.recurring_invoice.v1.ListRecurringInvoicesRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+        finance.recurring_invoice.v1.ListRecurringInvoicesResponse:
+            type: object
+            properties:
+                recurring_invoices:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.recurring_invoice.v1.RecurringInvoice'
+                    description: The full set of recurring invoices for the owner.
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+                has_more:
+                    type: boolean
+        finance.recurring_invoice.v1.RecurringInvoice:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: The business owner for this recurring invoice.
+                template_invoice_id:
+                    type: string
+                    format: int64
+                    description: The invoice used as the recurring invoice template.
+                frequency:
+                    type: string
+                    description: How often the recurring invoice should be generated.
+                next_invoice_date:
+                    type: string
+                    description: The next generation date.
+                end_date:
+                    type: string
+                    description: When recurring generation should stop; absent when open-ended.
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: When the record was created.
+        finance.recurring_invoice.v1.CreateRecurringInvoiceRequest:
+            type: object
+            properties:
+                template_invoice_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: The invoice used as the recurring invoice template.
+                frequency:
+                    type: string
+                    description: How often the recurring invoice should be generated.
+                next_invoice_date:
+                    type: string
+                    pattern: ^\d{4}-\d{2}-\d{2}$
+                    description: The next generation date, formatted as YYYY-MM-DD.
+                end_date:
+                    type: string
+                    description: When recurring generation should stop; absent when open-ended.
+                is_active:
+                    type: boolean
+                    description: Whether the recurring invoice should start active.
+            required:
+                - template_invoice_id
+                - frequency
+                - next_invoice_date
+        finance.recurring_invoice.v1.CreateRecurringInvoiceResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: The recurring invoice that was created.
+                message:
+                    type: string
+                    description: The backend confirmation message.
+        finance.recurring_invoice.v1.GetRecurringInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        finance.recurring_invoice.v1.GetRecurringInvoiceResponse:
+            type: object
+            properties:
+                invoice:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.recurring_invoice.v1.RecurringInvoice'
+        finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: The recurring invoice to update.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.recurring_invoice.v1.UpdateRecurringInvoiceBody'
+                    description: Carries updatable recurring invoice fields bound from the HTTP payload.
+        finance.recurring_invoice.v1.UpdateRecurringInvoiceBody:
+            type: object
+            properties:
+                template_invoice_id:
+                    type: string
+                    format: int64
+                    description: The invoice used as the recurring invoice template.
+                frequency:
+                    type: string
+                    description: How often the recurring invoice should be generated.
+                next_invoice_date:
+                    type: string
+                    pattern: ^\d{4}-\d{2}-\d{2}$
+                    description: The next generation date, formatted as YYYY-MM-DD.
+                end_date:
+                    type: string
+                    description: When recurring generation should stop; absent when open-ended.
+                is_active:
+                    type: boolean
+                    description: Whether the recurring invoice is active.
+            required:
+                - frequency
+                - next_invoice_date
+        finance.recurring_invoice.v1.UpdateRecurringInvoiceResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: The backend confirmation message.
+        finance.recurring_invoice.v1.PauseRecurringInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: The recurring invoice to pause.
+        finance.recurring_invoice.v1.PauseRecurringInvoiceResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: The backend confirmation message.
+        finance.recurring_invoice.v1.ResumeRecurringInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: The recurring invoice to resume.
+        finance.recurring_invoice.v1.ResumeRecurringInvoiceResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: The backend confirmation message.

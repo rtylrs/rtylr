@@ -1,0 +1,314 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/menu/v1/menu:
+        get:
+            tags:
+                - MenuService
+            summary: listMenu
+            description: Returns the navigation menu for the current user.
+            operationId: MenuService_listMenu
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.menu.v1.ListMenuResponse'
+        put:
+            tags:
+                - MenuService
+            summary: updateMenu
+            description: Replaces the navigation menu items.
+            operationId: MenuService_updateMenu
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.menu.v1.UpdateMenuRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.menu.v1.UpdateMenuResponse'
+    /hub/menu/v1/menu/banners:
+        get:
+            tags:
+                - MenuService
+            summary: listMenuBanners
+            description: Returns menu banners for the current business.
+            operationId: MenuService_listMenuBanners
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.menu.v1.ListMenuBannersResponse'
+        post:
+            tags:
+                - MenuService
+            summary: createMenuBanner
+            description: Creates a menu banner for the current business.
+            operationId: MenuService_createMenuBanner
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.menu.v1.CreateMenuBannerRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.menu.v1.CreateMenuBannerResponse'
+    /hub/menu/v1/menu/banners/{id}:
+        put:
+            tags:
+                - MenuService
+            summary: updateMenuBanner
+            description: Updates a menu banner for the current business.
+            operationId: MenuService_updateMenuBanner
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.menu.v1.UpdateMenuBannerRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.menu.v1.UpdateMenuBannerResponse'
+        delete:
+            tags:
+                - MenuService
+            summary: deleteMenuBanner
+            description: Deletes a menu banner for the current business.
+            operationId: MenuService_deleteMenuBanner
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.menu.v1.DeleteMenuBannerResponse'
+components:
+    schemas:
+        hub.menu.v1.ListMenuRequest:
+            type: object
+        hub.menu.v1.ListMenuResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
+        pos.menu_item.v1.MenuItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                category_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                sale_price:
+                    type: number
+                    format: double
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+                image_url:
+                    type: string
+                    description: Public storefront image for the menu item.
+                category:
+                    type: string
+                    description: Display category name for the menu item.
+                barcode:
+                    type: string
+                    description: Scanned barcode value for the menu item.
+                description:
+                    type: string
+                    description: Customer-facing menu item description.
+                tax_rate:
+                    type: number
+                    format: double
+                    description: Sale tax rate for the menu item.
+                stock:
+                    type: number
+                    format: double
+                    description: Current tracked stock quantity for the menu item.
+                product_id:
+                    type: string
+                    format: int64
+                    description: |-
+                        product_id is the ERP product this item is sold from; absent for items
+                        that are not stocked as a single product. When it is absent, cost and
+                        ERP-side stock for this item are unknown rather than zero. The server
+                        must verify the referenced product belongs to the caller's business.
+                unit_cost:
+                    type: number
+                    format: double
+                    description: |-
+                        unit_cost is the cost of one unit at the time of the read, copied from
+                        the linked ERP product. Absent when product_id is absent. Reported for
+                        display and margin only: the authoritative value is the ERP product's.
+            description: MenuItem is a sellable item on the POS menu.
+        hub.menu.v1.UpdateMenuRequest:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
+                    minItems: 1
+        hub.menu.v1.UpdateMenuResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        hub.menu.v1.ListMenuBannersRequest:
+            type: object
+        hub.menu.v1.ListMenuBannersResponse:
+            type: object
+            properties:
+                banners:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.menu.v1.MenuBanner'
+        hub.menu.v1.MenuBanner:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                title:
+                    type: string
+                body:
+                    type: string
+                image_url:
+                    type: string
+                link_url:
+                    type: string
+                position:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+                starts_at:
+                    type: string
+                ends_at:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        hub.menu.v1.CreateMenuBannerRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                body:
+                    type: string
+                image_url:
+                    type: string
+                link_url:
+                    type: string
+                position:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+                starts_at:
+                    type: string
+                ends_at:
+                    type: string
+            required:
+                - title
+        hub.menu.v1.CreateMenuBannerResponse:
+            type: object
+            properties:
+                banner:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.menu.v1.MenuBanner'
+        hub.menu.v1.UpdateMenuBannerRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                title:
+                    type: string
+                body:
+                    type: string
+                image_url:
+                    type: string
+                link_url:
+                    type: string
+                position:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+                starts_at:
+                    type: string
+                ends_at:
+                    type: string
+            required:
+                - title
+        hub.menu.v1.UpdateMenuBannerResponse:
+            type: object
+            properties:
+                banner:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.menu.v1.MenuBanner'
+        hub.menu.v1.DeleteMenuBannerRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.menu.v1.DeleteMenuBannerResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean

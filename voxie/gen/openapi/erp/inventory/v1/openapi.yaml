@@ -1,0 +1,279 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/inventory/v1/report:
+        get:
+            tags:
+                - InventoryService
+            summary: getInventoryReport
+            operationId: InventoryService_getInventoryReport
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of inventory rows to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of inventory rows to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.inventory.v1.GetInventoryReportResponse'
+    /erp/inventory/v1/low-stock:
+        get:
+            tags:
+                - InventoryService
+            summary: getLowStock
+            operationId: InventoryService_getLowStock
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of low-stock rows to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of low-stock rows to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.inventory.v1.GetLowStockResponse'
+    /erp/inventory/v1/valuation:
+        get:
+            tags:
+                - InventoryService
+            summary: getValuation
+            operationId: InventoryService_getValuation
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of valuation rows to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of valuation rows to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.inventory.v1.GetValuationResponse'
+    /erp/inventory/v1/adjust:
+        post:
+            tags:
+                - InventoryService
+            summary: adjustInventory
+            operationId: InventoryService_adjustInventory
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.inventory.v1.AdjustInventoryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.inventory.v1.AdjustInventoryResponse'
+components:
+    schemas:
+        erp.inventory.v1.GetInventoryReportRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of inventory rows to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of inventory rows to skip.
+        erp.inventory.v1.GetInventoryReportResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.inventory.v1.InventoryReportItem'
+                total_value:
+                    type: number
+                    format: double
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.inventory.v1.InventoryReportItem:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                product_name:
+                    type: string
+                sku:
+                    type: string
+                unit:
+                    type: string
+                stock_quantity:
+                    type: number
+                    format: double
+                low_stock_threshold:
+                    type: number
+                    format: double
+                reorder_quantity:
+                    type: number
+                    format: double
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_value:
+                    type: number
+                    format: double
+                is_low_stock:
+                    type: boolean
+        erp.inventory.v1.GetLowStockRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of low-stock rows to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of low-stock rows to skip.
+        erp.inventory.v1.GetLowStockResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.inventory.v1.InventoryReportItem'
+                count:
+                    type: integer
+                    format: int64
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.inventory.v1.GetValuationRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of valuation rows to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of valuation rows to skip.
+        erp.inventory.v1.GetValuationResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.inventory.v1.ValuationItem'
+                total_value:
+                    type: number
+                    format: double
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.inventory.v1.ValuationItem:
+            type: object
+            properties:
+                category_name:
+                    type: string
+                warehouse_name:
+                    type: string
+                total_items:
+                    type: string
+                    format: int64
+                total_value:
+                    type: number
+                    format: double
+                total_cost:
+                    type: number
+                    format: double
+        erp.inventory.v1.AdjustInventoryRequest:
+            type: object
+            properties:
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                change:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                type:
+                    type: string
+                notes:
+                    type: string
+            required:
+                - product_id
+                - change
+                - type
+        erp.inventory.v1.AdjustInventoryResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: A human-readable result message.

@@ -1,0 +1,280 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/team/invitations/v1/invitations:
+        post:
+            tags:
+                - InvitationsService
+            summary: inviteUser
+            description: Sends a team invitation.
+            operationId: InvitationsService_inviteUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.team.invitations.v1.InviteUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.invitations.v1.InviteUserResponse'
+    /hub/team/invitations/v1/invitations/bulk:
+        post:
+            tags:
+                - InvitationsService
+            summary: bulkInvite
+            description: Sends team invitations to multiple emails at once.
+            operationId: InvitationsService_bulkInvite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.team.invitations.v1.BulkInviteRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.invitations.v1.BulkInviteResponse'
+    /hub/team/invitations/v1/invitations/verify:
+        post:
+            tags:
+                - InvitationsService
+            summary: verifyInvite
+            description: Validates an invitation token.
+            operationId: InvitationsService_verifyInvite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.team.invitations.v1.VerifyInviteRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.invitations.v1.VerifyInviteResponse'
+    /hub/team/invitations/v1/invitations/accept:
+        post:
+            tags:
+                - InvitationsService
+            summary: acceptInvite
+            description: Accepts a team invitation.
+            operationId: InvitationsService_acceptInvite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.team.invitations.v1.AcceptInviteRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.invitations.v1.AcceptInviteResponse'
+components:
+    schemas:
+        hub.team.invitations.v1.InviteUserRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                full_name:
+                    type: string
+                role:
+                    type: string
+                    description: Legacy global role accepted during the migration window.
+                apps:
+                    type: array
+                    items:
+                        type: string
+                    description: Legacy flat application list accepted during the migration window.
+                dash_role:
+                    type: string
+                    description: Independent Dash role assignment.
+                app_assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.AppRoleAssignment'
+                    description: Independent application role assignments.
+                group_ids:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                    description: Groups that provide inherited access.
+                password:
+                    type: string
+                    description: Optional user-provided secret; omit it to send an invitation link.
+                username:
+                    type: string
+                    description: Direct credential provisioning uses a write-only temporary secret.
+                temporary_password:
+                    type: string
+                    description: Write-only temporary password for direct provisioning.
+                provisioning_mode:
+                    type: string
+                    description: Invitation or direct-credential provisioning mode.
+            required:
+                - email
+                - full_name
+        hub.user.v1.AppRoleAssignment:
+            type: object
+            properties:
+                app_id:
+                    type: string
+                    description: Application receiving the role assignment.
+                role_ids:
+                    type: array
+                    items:
+                        type: string
+                    description: Canonical role identifiers.
+                primary_role_id:
+                    type: string
+                    description: Primary display role identifier.
+                assignment_source:
+                    type: string
+                    description: Server-owned assignment source.
+                status:
+                    type: string
+                    description: Assignment lifecycle status.
+                scopes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.RoleScope'
+                    description: Resource scopes attached to the assignment.
+                group_id:
+                    type: string
+                    description: Group target when the assignment is group-derived.
+        hub.user.v1.RoleScope:
+            type: object
+            properties:
+                scope_type:
+                    type: string
+                    description: Scope resource type, such as location, department, or project.
+                scope_id:
+                    type: string
+                    description: Tenant-owned resource identifier.
+        hub.team.invitations.v1.InviteUserResponse:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        hub.team.invitations.v1.BulkInviteRequest:
+            type: object
+            properties:
+                emails:
+                    type: array
+                    items:
+                        type: string
+                    minItems: 1
+                role:
+                    type: string
+                apps:
+                    type: array
+                    items:
+                        type: string
+                dash_role:
+                    type: string
+                    description: Independent Dash role assignment shared by all invitees.
+                app_assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.AppRoleAssignment'
+                    description: Independent application role assignments shared by all invitees.
+                group_ids:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                    description: Groups that provide inherited access to all invitees.
+                group_id:
+                    type: string
+                    format: int64
+                    description: Identifies an optional group to add invitees to.
+        hub.team.invitations.v1.BulkInviteResponse:
+            type: object
+            properties:
+                results:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.invitations.v1.BulkInviteResult'
+                    description: Per-email invite outcome list.
+                message:
+                    type: string
+        hub.team.invitations.v1.BulkInviteResult:
+            type: object
+            properties:
+                email:
+                    type: string
+                user_id:
+                    type: string
+                    format: int64
+                status:
+                    type: string
+                message:
+                    type: string
+        hub.team.invitations.v1.VerifyInviteRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+                    description: Opaque token used to complete the operation.
+            required:
+                - token
+        hub.team.invitations.v1.VerifyInviteResponse:
+            type: object
+            properties:
+                email:
+                    type: string
+                full_name:
+                    type: string
+                valid:
+                    type: boolean
+                apps:
+                    type: array
+                    items:
+                        type: string
+                    description: |-
+                        Lists the app IDs the invited user will have access to, so the
+                        frontend can redirect to the right app after the invite is accepted.
+                dash_role:
+                    type: string
+                    description: Dash role that will become active after acceptance.
+                app_assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.AppRoleAssignment'
+                    description: Application roles that will become active after acceptance.
+        hub.team.invitations.v1.AcceptInviteRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+                    description: Opaque token used to complete the operation.
+                password:
+                    type: string
+                    description: User-provided secret for authentication.
+            required:
+                - token
+                - password
+        hub.team.invitations.v1.AcceptInviteResponse:
+            type: object
+            properties:
+                message:
+                    type: string

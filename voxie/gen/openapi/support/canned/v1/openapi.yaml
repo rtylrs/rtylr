@@ -1,0 +1,165 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /support/canned/v1/canned-responses:
+        get:
+            tags:
+                - CannedResponseService
+            summary: listCannedResponses
+            operationId: CannedResponseService_listCannedResponses
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.canned.v1.ListCannedResponsesResponse'
+        post:
+            tags:
+                - CannedResponseService
+            summary: createCannedResponse
+            operationId: CannedResponseService_createCannedResponse
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/support.canned.v1.CreateCannedResponseRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.canned.v1.CreateCannedResponseResponse'
+    /support/canned/v1/canned-responses/{id}:
+        put:
+            tags:
+                - CannedResponseService
+            summary: updateCannedResponse
+            operationId: CannedResponseService_updateCannedResponse
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/support.canned.v1.UpdateCannedResponseRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.canned.v1.UpdateCannedResponseResponse'
+        delete:
+            tags:
+                - CannedResponseService
+            summary: deleteCannedResponse
+            operationId: CannedResponseService_deleteCannedResponse
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.canned.v1.DeleteCannedResponseResponse'
+components:
+    schemas:
+        support.canned.v1.ListCannedResponsesRequest:
+            type: object
+        support.canned.v1.ListCannedResponsesResponse:
+            type: object
+            properties:
+                canned_responses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/support.canned.v1.CannedResponse'
+        support.canned.v1.CannedResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                body:
+                    type: string
+                category:
+                    type: string
+                shortcut:
+                    type: string
+                created_at:
+                    type: string
+        support.canned.v1.CreateCannedResponseRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                body:
+                    type: string
+                category:
+                    type: string
+                shortcut:
+                    type: string
+            required:
+                - name
+                - body
+        support.canned.v1.CreateCannedResponseResponse:
+            type: object
+            properties:
+                canned_response_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        support.canned.v1.UpdateCannedResponseRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                body:
+                    type: string
+                category:
+                    type: string
+                shortcut:
+                    type: string
+        support.canned.v1.UpdateCannedResponseResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        support.canned.v1.DeleteCannedResponseRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        support.canned.v1.DeleteCannedResponseResponse:
+            type: object
+            properties:
+                message:
+                    type: string

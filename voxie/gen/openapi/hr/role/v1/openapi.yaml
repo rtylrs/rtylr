@@ -1,0 +1,194 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/role/v1/roles:
+        post:
+            tags:
+                - RoleService
+            summary: createRole
+            description: Creates a new role.
+            operationId: RoleService_createRole
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.role.v1.CreateRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.role.v1.CreateRoleResponse'
+    /hr/role/v1/roles/{id}:
+        put:
+            tags:
+                - RoleService
+            summary: updateRole
+            description: Updates an existing role.
+            operationId: RoleService_updateRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hr.role.v1.UpdateRoleBody'
+                            description: body carries updatable role fields bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.role.v1.UpdateRoleResponse'
+    /hr/role/v1/roles/assign:
+        post:
+            tags:
+                - RoleService
+            summary: assignRole
+            description: Assigns a role to an employee.
+            operationId: RoleService_assignRole
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.role.v1.AssignRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.role.v1.AssignRoleResponse'
+components:
+    schemas:
+        hr.role.v1.CreateRoleRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Display name of the new role.
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.role.v1.PermissionPayload'
+                    minItems: 1
+                    description: Permissions to attach to the new role.
+            required:
+                - name
+        hr.role.v1.PermissionPayload:
+            type: object
+            properties:
+                key:
+                    type: string
+                    description: Machine-readable permission identifier (e.g. "hr.employees.create").
+                label:
+                    type: string
+                    description: Human-readable label shown in the UI.
+                is_granted:
+                    type: boolean
+                    description: Whether this permission is currently granted.
+            description: PermissionPayload is a single grantable permission on a role.
+        hr.role.v1.CreateRoleResponse:
+            type: object
+            properties:
+                role:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.role.v1.RolePayload'
+                    description: The newly created role.
+        hr.role.v1.RolePayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: Unique identifier for the role.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Tenant owner this role belongs to.
+                name:
+                    type: string
+                    description: Display name of the role.
+                is_default:
+                    type: boolean
+                    description: Whether this role is the tenant default assigned to new employees.
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.role.v1.PermissionPayload'
+                    description: Full set of permissions attached to this role.
+                created_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this role was created.
+                updated_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this role was last updated.
+            description: RolePayload is an HR role with its attached permission set.
+        hr.role.v1.UpdateRoleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: ID of the role to update.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.role.v1.UpdateRoleBody'
+                    description: body carries updatable role fields bound from the HTTP payload.
+        hr.role.v1.UpdateRoleBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: New name; absent to keep current.
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.role.v1.PermissionPayload'
+                    minItems: 1
+                    description: New permission set; if provided, replaces all existing permissions.
+        hr.role.v1.UpdateRoleResponse:
+            type: object
+            properties:
+                role:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.role.v1.RolePayload'
+                    description: The updated role.
+        hr.role.v1.AssignRoleRequest:
+            type: object
+            properties:
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: ID of the employee to assign the role to.
+                role_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: ID of the role to assign.
+            required:
+                - employee_id
+                - role_id
+        hr.role.v1.AssignRoleResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the role was assigned successfully.

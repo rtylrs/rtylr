@@ -1,0 +1,57 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/orders/discounts/v1/orders/{order_id}/discount:
+        post:
+            tags:
+                - OrderDiscountService
+            summary: discountOrder
+            operationId: OrderDiscountService_discountOrder
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.orders.discounts.v1.DiscountOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.discounts.v1.DiscountOrderResponse'
+components:
+    schemas:
+        pos.orders.discounts.v1.DiscountOrderRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                discount_type:
+                    type: string
+                discount_value:
+                    type: number
+                    minimum: 0
+                    format: double
+                reason:
+                    type: string
+            required:
+                - discount_type
+                - discount_value
+                - reason
+        pos.orders.discounts.v1.DiscountOrderResponse:
+            type: object
+            properties:
+                message:
+                    type: string

@@ -1,0 +1,207 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/brand/v1/brands:
+        get:
+            tags:
+                - BrandService
+            summary: listBrands
+            operationId: BrandService_listBrands
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of brands to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of brands to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.brand.v1.ListBrandsResponse'
+        post:
+            tags:
+                - BrandService
+            summary: createBrand
+            operationId: BrandService_createBrand
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.brand.v1.CreateBrandRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.brand.v1.CreateBrandResponse'
+    /erp/brand/v1/brands/{id}:
+        put:
+            tags:
+                - BrandService
+            summary: updateBrand
+            operationId: BrandService_updateBrand
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/erp.brand.v1.UpdateBrandBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.brand.v1.UpdateBrandResponse'
+        delete:
+            tags:
+                - BrandService
+            summary: deleteBrand
+            operationId: BrandService_deleteBrand
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.brand.v1.DeleteBrandResponse'
+components:
+    schemas:
+        erp.brand.v1.ListBrandsRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of brands to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of brands to skip.
+        erp.brand.v1.ListBrandsResponse:
+            type: object
+            properties:
+                brands:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.brand.v1.Brand'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.brand.v1.Brand:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                logo_url:
+                    type: string
+                description:
+                    type: string
+                product_count:
+                    type: string
+                    format: int64
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        erp.brand.v1.CreateBrandRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                logo_url:
+                    type: string
+                description:
+                    type: string
+            required:
+                - name
+        erp.brand.v1.CreateBrandResponse:
+            type: object
+            properties:
+                brand_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        erp.brand.v1.UpdateBrandRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.brand.v1.UpdateBrandBody'
+        erp.brand.v1.UpdateBrandBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                logo_url:
+                    type: string
+                description:
+                    type: string
+            required:
+                - name
+        erp.brand.v1.UpdateBrandResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        erp.brand.v1.DeleteBrandRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.brand.v1.DeleteBrandResponse:
+            type: object
+            properties:
+                message:
+                    type: string

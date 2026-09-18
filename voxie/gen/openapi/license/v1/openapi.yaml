@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /license/state:
+        get:
+            tags:
+                - LicenseService
+            summary: getLicenseState
+            operationId: LicenseService_getLicenseState
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/license.v1.GetLicenseStateResponse'
+components:
+    schemas:
+        license.v1.GetLicenseStateRequest:
+            type: object
+        license.v1.GetLicenseStateResponse:
+            allOf:
+                - $ref: '#/components/schemas/license.v1.LicenseState'
+        license.v1.LicenseState:
+            type: object
+            properties:
+                mode:
+                    type: string
+                valid:
+                    type: boolean
+                status:
+                    type: string
+                reason:
+                    type: string
+                expires_at:
+                    type: string
+                grace_until:
+                    type: string
+                checked_at:
+                    type: string
+            description: LicenseState is the public, secret-free status used by admin notices.

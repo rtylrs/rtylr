@@ -1,0 +1,120 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /team/members:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listMembers
+            operationId: CompatibilityService_listMembers
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.compat.v1.ListMembersResponse'
+    /team/invite:
+        post:
+            tags:
+                - CompatibilityService
+            summary: inviteMember
+            operationId: CompatibilityService_inviteMember
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hub.team.compat.v1.InviteMemberBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.compat.v1.EmptyJsonResponse'
+    /team/members/{id}/deactivate:
+        patch:
+            tags:
+                - CompatibilityService
+            summary: deactivateMember
+            operationId: CompatibilityService_deactivateMember
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.compat.v1.EmptyJsonResponse'
+components:
+    schemas:
+        hub.team.compat.v1.ListMembersRequest:
+            type: object
+        hub.team.compat.v1.ListMembersResponse:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.compat.v1.TeamMember'
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.compat.v1.TeamMember'
+        hub.team.compat.v1.TeamMember:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                email:
+                    type: string
+                role:
+                    type: string
+                apps:
+                    type: array
+                    items:
+                        type: string
+                is_active:
+                    type: boolean
+        hub.team.compat.v1.InviteMemberRequest:
+            type: object
+            properties:
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.team.compat.v1.InviteMemberBody'
+        hub.team.compat.v1.InviteMemberBody:
+            type: object
+            properties:
+                email:
+                    type: string
+                full_name:
+                    type: string
+                role:
+                    type: string
+                apps:
+                    type: array
+                    items:
+                        type: string
+        hub.team.compat.v1.EmptyJsonResponse: {}
+        hub.team.compat.v1.DeactivateMemberRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                body: {}

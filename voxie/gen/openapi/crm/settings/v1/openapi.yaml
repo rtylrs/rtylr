@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /crm/settings/v1/settings:
+        get:
+            tags:
+                - SettingsService
+            summary: getSettings
+            operationId: SettingsService_getSettings
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.settings.v1.GetSettingsResponse'
+        put:
+            tags:
+                - SettingsService
+            summary: updateSettings
+            operationId: SettingsService_updateSettings
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.settings.v1.UpdateSettingsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.settings.v1.UpdateSettingsResponse'
+components:
+    schemas:
+        crm.settings.v1.GetSettingsRequest:
+            type: object
+        crm.settings.v1.GetSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.settings.v1.Settings'
+        crm.settings.v1.Settings:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                default_consent:
+                    type: boolean
+                from_email:
+                    type: string
+                from_name:
+                    type: string
+                sms_sender_id:
+                    type: string
+                timezone:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            description: Settings holds CRM-wide messaging defaults for a business.
+        crm.settings.v1.UpdateSettingsRequest:
+            type: object
+            properties:
+                default_consent:
+                    type: boolean
+                from_email:
+                    type: string
+                from_name:
+                    type: string
+                sms_sender_id:
+                    type: string
+                timezone:
+                    type: string
+        crm.settings.v1.UpdateSettingsResponse:
+            type: object
+            properties:
+                message:
+                    type: string

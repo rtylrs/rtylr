@@ -1,0 +1,411 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/team/groups/v1/groups:
+        get:
+            tags:
+                - GroupsService
+            summary: listGroups
+            description: Returns groups for the active business.
+            operationId: GroupsService_listGroups
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.ListGroupsResponse'
+        post:
+            tags:
+                - GroupsService
+            summary: createGroup
+            description: Creates a new group.
+            operationId: GroupsService_createGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.team.groups.v1.CreateGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.CreateGroupResponse'
+    /hub/team/groups/v1/groups/{id}:
+        get:
+            tags:
+                - GroupsService
+            summary: getGroupDetail
+            description: Returns a group with its members.
+            operationId: GroupsService_getGroupDetail
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.GetGroupDetailResponse'
+        put:
+            tags:
+                - GroupsService
+            summary: updateGroup
+            description: Updates an existing group.
+            operationId: GroupsService_updateGroup
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.team.groups.v1.UpdateGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.UpdateGroupResponse'
+        delete:
+            tags:
+                - GroupsService
+            summary: deleteGroup
+            description: Deletes a group.
+            operationId: GroupsService_deleteGroup
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.DeleteGroupResponse'
+    /hub/team/groups/v1/groups/{id}/members:
+        post:
+            tags:
+                - GroupsService
+            summary: addGroupMembers
+            description: Adds users to a group.
+            operationId: GroupsService_addGroupMembers
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.team.groups.v1.AddGroupMembersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.AddGroupMembersResponse'
+    /hub/team/groups/v1/groups/{id}/members/{user_id}:
+        delete:
+            tags:
+                - GroupsService
+            summary: removeGroupMember
+            description: Removes a user from a group.
+            operationId: GroupsService_removeGroupMember
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.RemoveGroupMemberResponse'
+    /hub/team/groups/v1/users/{user_id}/groups:
+        get:
+            tags:
+                - GroupsService
+            summary: getUserGroups
+            description: Returns the groups a user belongs to.
+            operationId: GroupsService_getUserGroups
+            parameters:
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.groups.v1.GetUserGroupsResponse'
+components:
+    schemas:
+        hub.team.groups.v1.ListGroupsRequest:
+            type: object
+        hub.team.groups.v1.ListGroupsResponse:
+            type: object
+            properties:
+                groups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.Group'
+        hub.team.groups.v1.Group:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Identifies the owner of the group.
+                name:
+                    type: string
+                description:
+                    type: string
+                color:
+                    type: string
+                resource_permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.ResourcePermission'
+                member_count:
+                    type: integer
+                    format: int32
+                created_at:
+                    type: string
+                    description: When the record was created.
+                updated_at:
+                    type: string
+                    description: When the record was last updated.
+        hub.team.groups.v1.ResourcePermission:
+            type: object
+            properties:
+                resource_key:
+                    type: string
+                permission_level:
+                    type: string
+        hub.team.groups.v1.CreateGroupRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                color:
+                    type: string
+                resource_permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.ResourcePermission'
+            required:
+                - name
+        hub.team.groups.v1.CreateGroupResponse:
+            type: object
+            properties:
+                group:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.team.groups.v1.Group'
+        hub.team.groups.v1.GetGroupDetailRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.team.groups.v1.GetGroupDetailResponse:
+            type: object
+            properties:
+                group:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.team.groups.v1.GroupDetail'
+        hub.team.groups.v1.GroupDetail:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Identifies the owner of the group.
+                name:
+                    type: string
+                description:
+                    type: string
+                color:
+                    type: string
+                resource_permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.ResourcePermission'
+                member_count:
+                    type: integer
+                    format: int32
+                created_at:
+                    type: string
+                    description: When the record was created.
+                updated_at:
+                    type: string
+                    description: When the record was last updated.
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.GroupMember'
+            description: |-
+                GroupDetail mirrors Group with the member list flattened alongside it
+                (the legacy payload embeds the group fields at the top level).
+        hub.team.groups.v1.GroupMember:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    format: int64
+                    description: Identifies the member user.
+                email:
+                    type: string
+                    description: Email address used for lookup or contact.
+                full_name:
+                    type: string
+                added_at:
+                    type: string
+                    description: When the member was added to the group.
+        hub.team.groups.v1.UpdateGroupRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                color:
+                    type: string
+                resource_permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.ResourcePermission'
+            required:
+                - name
+        hub.team.groups.v1.UpdateGroupResponse:
+            type: object
+            properties:
+                group:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.team.groups.v1.Group'
+        hub.team.groups.v1.DeleteGroupRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.team.groups.v1.DeleteGroupResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.team.groups.v1.AddGroupMembersRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                user_ids:
+                    type: array
+                    items:
+                        type: string
+                        format: int64
+                    minItems: 1
+        hub.team.groups.v1.AddGroupMembersResponse:
+            type: object
+            properties:
+                added:
+                    type: integer
+                    format: int32
+                    description: Number of members added.
+                message:
+                    type: string
+        hub.team.groups.v1.RemoveGroupMemberRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.team.groups.v1.RemoveGroupMemberResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.team.groups.v1.GetUserGroupsRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.team.groups.v1.GetUserGroupsResponse:
+            type: object
+            properties:
+                groups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.GroupSummary'
+        hub.team.groups.v1.GroupSummary:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                color:
+                    type: string

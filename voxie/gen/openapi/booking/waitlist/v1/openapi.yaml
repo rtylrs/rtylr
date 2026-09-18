@@ -1,0 +1,155 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /booking/waitlist/v1/entries:
+        get:
+            tags:
+                - WaitlistService
+            summary: listEntries
+            operationId: WaitlistService_listEntries
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.waitlist.v1.ListEntriesResponse'
+        post:
+            tags:
+                - WaitlistService
+            summary: createEntry
+            operationId: WaitlistService_createEntry
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.waitlist.v1.CreateEntryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.waitlist.v1.CreateEntryResponse'
+    /booking/waitlist/v1/entries/{id}:
+        put:
+            tags:
+                - WaitlistService
+            summary: updateEntry
+            operationId: WaitlistService_updateEntry
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.waitlist.v1.UpdateEntryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.waitlist.v1.UpdateEntryResponse'
+components:
+    schemas:
+        booking.waitlist.v1.ListEntriesRequest:
+            type: object
+        booking.waitlist.v1.ListEntriesResponse:
+            type: object
+            properties:
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/booking.waitlist.v1.WaitlistEntry'
+        booking.waitlist.v1.WaitlistEntry:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                service_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                customer_phone:
+                    type: string
+                preferred_date:
+                    type: string
+                preferred_time:
+                    type: string
+                status:
+                    type: string
+                created_at:
+                    type: string
+        booking.waitlist.v1.CreateEntryRequest:
+            type: object
+            properties:
+                service_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                customer_phone:
+                    type: string
+                preferred_date:
+                    type: string
+                preferred_time:
+                    type: string
+            required:
+                - customer_name
+        booking.waitlist.v1.CreateEntryResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        booking.waitlist.v1.UpdateEntryRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                service_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                customer_phone:
+                    type: string
+                preferred_date:
+                    type: string
+                preferred_time:
+                    type: string
+                status:
+                    type: string
+        booking.waitlist.v1.UpdateEntryResponse:
+            type: object
+            properties:
+                message:
+                    type: string

@@ -1,0 +1,149 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/approval-chain/v1/approval-chains:
+        put:
+            tags:
+                - ApprovalChainService
+            summary: upsertApprovalChain
+            description: UpsertApprovalChain creates or replaces the approval chain configuration.
+            operationId: ApprovalChainService_upsertApprovalChain
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.approval_chain.v1.UpsertApprovalChainRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.approval_chain.v1.UpsertApprovalChainResponse'
+components:
+    schemas:
+        hr.approval_chain.v1.UpsertApprovalChainRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: Chain ID for update; absent (zero) to create a new chain.
+                request_type:
+                    type: string
+                    description: Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
+                name:
+                    type: string
+                    description: Human-readable name for the chain.
+                delegation_enabled:
+                    type: boolean
+                    description: Whether approvers can delegate their approval authority.
+                levels:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.approval_chain.v1.ApprovalChainLevelPayload'
+                    minItems: 1
+                    description: Ordered levels to set on the chain; replaces all existing levels.
+            required:
+                - id
+                - request_type
+                - name
+        hr.approval_chain.v1.ApprovalChainLevelPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: Unique identifier for this approval level.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Tenant owner this level belongs to.
+                chain_id:
+                    type: string
+                    format: int64
+                    description: Parent approval chain this level is part of.
+                level_order:
+                    type: integer
+                    format: int32
+                    description: Position in the approval sequence (1 = first approver).
+                approver_type:
+                    type: string
+                    description: Type of approver (direct_manager | dept_head | hr_admin | role | specific_person).
+                approver_role_id:
+                    type: string
+                    format: int64
+                    description: Role that can approve at this level; absent unless approver_type is role.
+                approver_employee_id:
+                    type: string
+                    format: int64
+                    description: Specific employee who approves; absent unless approver_type is specific_person.
+                threshold_min_value:
+                    type: number
+                    format: double
+                    description: Minimum value that triggers this level; absent if no lower bound.
+                threshold_max_value:
+                    type: number
+                    format: double
+                    description: Maximum value that triggers this level; absent if no upper bound.
+                timeout_days:
+                    type: integer
+                    format: int32
+                    description: Days before the level times out and the timeout_action fires.
+                timeout_action:
+                    type: string
+                    description: What happens on timeout (escalate | auto_approve | do_nothing).
+                created_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            description: ApprovalChainLevelPayload is a single level within an approval chain pipeline.
+        hr.approval_chain.v1.UpsertApprovalChainResponse:
+            type: object
+            properties:
+                chain:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.approval_chain.v1.ApprovalChainPayload'
+                    description: The created or updated approval chain.
+        hr.approval_chain.v1.ApprovalChainPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: Unique identifier for the approval chain.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Tenant owner this chain belongs to.
+                request_type:
+                    type: string
+                    description: Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
+                name:
+                    type: string
+                    description: Human-readable name for the chain.
+                delegation_enabled:
+                    type: boolean
+                    description: Whether approvers can delegate their approval authority.
+                levels:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.approval_chain.v1.ApprovalChainLevelPayload'
+                    description: Ordered levels that make up the approval pipeline.
+                created_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            description: ApprovalChainPayload is the ordered approval pipeline for a request type.

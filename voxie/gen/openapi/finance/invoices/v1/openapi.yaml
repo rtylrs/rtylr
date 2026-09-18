@@ -1,0 +1,791 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/invoices/v1/invoices:
+        get:
+            tags:
+                - InvoicesService
+            summary: listInvoices
+            operationId: InvoicesService_listInvoices
+            parameters:
+                - name: status
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: status filters invoices by lifecycle state.
+                - name: search
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: search filters by customer or invoice number.
+                - name: customer_id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    format: int64
+                    description: |-
+                        customer_id filters by the linked CRM customer; absent to include
+                        invoices for all customers and invoices with no customer link.
+                - name: date_from
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: date_from is the inclusive start date filter.
+                - name: date_to
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: date_to is the inclusive end date filter.
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: page is the one-based page number to return.
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: page_size is the maximum number of invoices to return.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.ListInvoicesResponse'
+        post:
+            tags:
+                - InvoicesService
+            summary: createInvoice
+            operationId: InvoicesService_createInvoice
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.invoices.v1.CreateInvoiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.CreateInvoiceResponse'
+    /finance/invoices/v1/invoices/billable-time:
+        get:
+            tags:
+                - InvoicesService
+            summary: listBillableTimeEntries
+            operationId: InvoicesService_listBillableTimeEntries
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: page is the one-based page number to return.
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: page_size is the maximum number of time entries to return.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.ListBillableTimeEntriesResponse'
+    /finance/invoices/v1/invoices/{id}:
+        get:
+            tags:
+                - InvoicesService
+            summary: getInvoice
+            operationId: InvoicesService_getInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.GetInvoiceResponse'
+        put:
+            tags:
+                - InvoicesService
+            summary: updateInvoice
+            operationId: InvoicesService_updateInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceBody'
+                            description: body carries updatable invoice fields bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceResponse'
+        delete:
+            tags:
+                - InvoicesService
+            summary: deleteInvoice
+            operationId: InvoicesService_deleteInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.DeleteInvoiceResponse'
+    /finance/invoices/v1/invoices/{id}/status:
+        patch:
+            tags:
+                - InvoicesService
+            summary: updateInvoiceStatus
+            operationId: InvoicesService_updateInvoiceStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceStatusBody'
+                            description: body carries status update fields bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceStatusResponse'
+    /finance/invoices/v1/invoices/{id}/send:
+        post:
+            tags:
+                - InvoicesService
+            summary: sendInvoice
+            operationId: InvoicesService_sendInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.invoices.v1.SendInvoiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.v1.SendInvoiceResponse'
+components:
+    schemas:
+        finance.invoices.v1.ListInvoicesRequest:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: status filters invoices by lifecycle state.
+                search:
+                    type: string
+                    description: search filters by customer or invoice number.
+                customer_id:
+                    type: string
+                    format: int64
+                    description: |-
+                        customer_id filters by the linked CRM customer; absent to include
+                        invoices for all customers and invoices with no customer link.
+                date_from:
+                    type: string
+                    description: date_from is the inclusive start date filter.
+                date_to:
+                    type: string
+                    description: date_to is the inclusive end date filter.
+                page:
+                    type: integer
+                    format: int64
+                    description: page is the one-based page number to return.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: page_size is the maximum number of invoices to return.
+        finance.invoices.v1.ListInvoicesResponse:
+            type: object
+            properties:
+                invoices:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.invoices.v1.InvoiceSummary'
+                    description: invoices is the invoices value for this contract.
+                page:
+                    type: integer
+                    format: int64
+                    description: page is the current result page.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: page_size is the number of records requested per page.
+                has_more:
+                    type: boolean
+                    description: has_more indicates whether additional pages are available.
+        finance.invoices.v1.InvoiceSummary:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                invoice_number:
+                    type: string
+                    description: invoice_number is the invoice number value for this contract.
+                client_name:
+                    type: string
+                    description: client_name is the client name value for this contract.
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                issue_date:
+                    type: string
+                    description: issue_date is the issue date value for this contract.
+                due_date:
+                    type: string
+                    description: due_date is the due date value for this contract.
+                paid_date:
+                    type: string
+                    description: paid_date is the paid date value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                total:
+                    type: number
+                    format: double
+                    description: total is the total number of matching records.
+                amount_paid:
+                    type: number
+                    format: double
+                    description: amount_paid is the amount paid value for this contract.
+                amount_due:
+                    type: number
+                    format: double
+                    description: amount_due is the amount due value for this contract.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+            description: InvoiceSummary is a compact invoice row for list views.
+        finance.invoices.v1.ListBillableTimeEntriesRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int64
+                    description: page is the one-based page number to return.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: page_size is the maximum number of time entries to return.
+        finance.invoices.v1.ListBillableTimeEntriesResponse:
+            type: object
+            properties:
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.invoices.v1.BillableTimeEntry'
+                    description: entries contains approved billable time not yet linked to an invoice.
+                total:
+                    type: integer
+                    format: int64
+                    description: total is the number of matching time entries.
+                total_minutes:
+                    type: integer
+                    format: int64
+                    description: total_minutes is the sum of matching entry durations.
+                page:
+                    type: integer
+                    format: int64
+                    description: page is the current result page.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: page_size is the number of records requested per page.
+                has_more:
+                    type: boolean
+                    description: has_more indicates whether additional pages are available.
+        finance.invoices.v1.BillableTimeEntry:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the time entry.
+                employee_id:
+                    type: string
+                    format: int64
+                    description: employee_id identifies the employee who logged the time.
+                project_id:
+                    type: string
+                    format: int64
+                    description: project_id identifies the optional Flow project.
+                task_id:
+                    type: string
+                    format: int64
+                    description: task_id identifies the optional Flow task.
+                date:
+                    type: string
+                    description: date is the day on which the time was logged.
+                duration_minutes:
+                    type: string
+                    format: int64
+                    description: duration_minutes is the approved billable duration.
+                description:
+                    type: string
+                    description: description is the time entry description.
+                is_billable:
+                    type: boolean
+                    description: is_billable is always true for this response.
+                status:
+                    type: string
+                    description: status is always approved for this response.
+                source:
+                    type: string
+                    description: source identifies the system that recorded the time.
+            description: |-
+                BillableTimeEntry is approved billable HR time that has not been linked to
+                a finance invoice yet.
+        finance.invoices.v1.CreateInvoiceRequest:
+            type: object
+            properties:
+                client_name:
+                    type: string
+                    description: client_name is the client name value for this contract.
+                client_email:
+                    type: string
+                    format: email
+                    description: client_email is the client email value for this contract.
+                client_address:
+                    type: string
+                    description: client_address is the client address value for this contract.
+                client_tax_id:
+                    type: string
+                    description: client_tax_id is the client tax id value for this contract.
+                customer_id:
+                    type: string
+                    format: int64
+                    description: |-
+                        customer_id is the CRM customer to issue to. When supplied the server
+                        snapshots that customer's name, email, address and tax id onto the
+                        invoice and the client_* fields above may be omitted. When absent the
+                        server requires client_name and client_email, which is the existing
+                        behaviour. The server must verify the referenced customer belongs to
+                        the caller's business before accepting the link.
+                issue_date:
+                    type: string
+                    description: issue_date is the issue date value for this contract.
+                due_date:
+                    type: string
+                    description: due_date is the due date value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                discount_type:
+                    type: string
+                    description: discount_type is the discount type value for this contract.
+                discount_value:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: discount_value is the discount value value for this contract.
+                tax_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: tax_rate is the tax rate value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+                terms:
+                    type: string
+                    description: terms is the terms value for this contract.
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.invoices.v1.InvoiceItem'
+                    minItems: 1
+                    description: items is the items value for this contract.
+            required:
+                - issue_date
+                - due_date
+                - currency
+                - discount_type
+        finance.invoices.v1.InvoiceItem:
+            type: object
+            properties:
+                description:
+                    type: string
+                    description: description is the description value for this contract.
+                quantity:
+                    type: number
+                    format: double
+                    description: quantity is the quantity value for this contract.
+                unit:
+                    type: string
+                    description: unit is the unit value for this contract.
+                unit_price:
+                    type: number
+                    format: double
+                    description: unit_price is the unit price value for this contract.
+                tax_rate:
+                    type: number
+                    format: double
+                    description: tax_rate is the tax rate value for this contract.
+                discount_pct:
+                    type: number
+                    format: double
+                    description: discount_pct is the discount pct value for this contract.
+                sort_order:
+                    type: string
+                    format: int64
+                    description: sort_order is the sort order value for this contract.
+                total:
+                    type: number
+                    format: double
+                    description: total is the total number of matching records.
+            description: InvoiceItem is a single line item on an invoice.
+        finance.invoices.v1.CreateInvoiceResponse:
+            type: object
+            properties:
+                invoice:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.invoices.v1.InvoiceDetail'
+                    description: invoice is the invoice value for this contract.
+        finance.invoices.v1.InvoiceDetail:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                customer_id:
+                    type: string
+                    format: int64
+                    description: |-
+                        customer_id links to the CRM customer this invoice was issued to; absent
+                        on invoices created before customers were linked, and on one-off invoices
+                        for a party that is not a customer record. The client_* fields stay the
+                        values printed on the document at issue time and are deliberately not
+                        re-derived from the customer record.
+                invoice_number:
+                    type: string
+                    description: invoice_number is the invoice number value for this contract.
+                client_name:
+                    type: string
+                    description: client_name is the client name value for this contract.
+                client_email:
+                    type: string
+                    description: client_email is the client email value for this contract.
+                client_address:
+                    type: string
+                    description: client_address is the client address value for this contract.
+                client_tax_id:
+                    type: string
+                    description: client_tax_id is the client tax id value for this contract.
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                issue_date:
+                    type: string
+                    description: issue_date is the issue date value for this contract.
+                due_date:
+                    type: string
+                    description: due_date is the due date value for this contract.
+                paid_date:
+                    type: string
+                    description: paid_date is the paid date value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                subtotal:
+                    type: number
+                    format: double
+                    description: subtotal is the subtotal value for this contract.
+                discount_type:
+                    type: string
+                    description: discount_type is the discount type value for this contract.
+                discount_value:
+                    type: number
+                    format: double
+                    description: discount_value is the discount value value for this contract.
+                discount_amount:
+                    type: number
+                    format: double
+                    description: discount_amount is the discount amount value for this contract.
+                tax_rate:
+                    type: number
+                    format: double
+                    description: tax_rate is the tax rate value for this contract.
+                tax_amount:
+                    type: number
+                    format: double
+                    description: tax_amount is the tax amount value for this contract.
+                total:
+                    type: number
+                    format: double
+                    description: total is the total number of matching records.
+                amount_paid:
+                    type: number
+                    format: double
+                    description: amount_paid is the amount paid value for this contract.
+                amount_due:
+                    type: number
+                    format: double
+                    description: amount_due is the amount due value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+                terms:
+                    type: string
+                    description: terms is the terms value for this contract.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.invoices.v1.InvoiceItem'
+                    description: items is the items value for this contract.
+            description: InvoiceDetail is the full invoice record.
+        finance.invoices.v1.GetInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        finance.invoices.v1.GetInvoiceResponse:
+            type: object
+            properties:
+                invoice:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.invoices.v1.InvoiceDetail'
+                    description: invoice is the invoice value for this contract.
+                payments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.invoices.v1.Payment'
+                    description: payments is the payments value for this contract.
+        finance.invoices.v1.Payment:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                amount:
+                    type: number
+                    format: double
+                    description: amount is the amount value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                payment_date:
+                    type: string
+                    description: payment_date is the payment date value for this contract.
+                method:
+                    type: string
+                    description: method is the method value for this contract.
+                reference:
+                    type: string
+                    description: reference is the reference value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+            description: Payment is a recorded payment applied to an invoice.
+        finance.invoices.v1.UpdateInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceBody'
+                    description: body carries updatable invoice fields bound from the HTTP payload.
+        finance.invoices.v1.UpdateInvoiceBody:
+            type: object
+            properties:
+                client_name:
+                    type: string
+                    description: client_name is the client name value for this contract.
+                client_email:
+                    type: string
+                    format: email
+                    description: client_email is the client email value for this contract.
+                client_address:
+                    type: string
+                    description: client_address is the client address value for this contract.
+                client_tax_id:
+                    type: string
+                    description: client_tax_id is the client tax id value for this contract.
+                issue_date:
+                    type: string
+                    description: issue_date is the issue date value for this contract.
+                due_date:
+                    type: string
+                    description: due_date is the due date value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                discount_type:
+                    type: string
+                    description: discount_type is the discount type value for this contract.
+                discount_value:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: discount_value is the discount value value for this contract.
+                tax_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: tax_rate is the tax rate value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+                terms:
+                    type: string
+                    description: terms is the terms value for this contract.
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.invoices.v1.InvoiceItem'
+                    minItems: 1
+                    description: items is the items value for this contract.
+            required:
+                - client_name
+                - client_email
+                - issue_date
+                - due_date
+                - currency
+                - discount_type
+        finance.invoices.v1.UpdateInvoiceResponse:
+            type: object
+            properties:
+                invoice:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.invoices.v1.InvoiceDetail'
+                    description: invoice is the invoice value for this contract.
+        finance.invoices.v1.UpdateInvoiceStatusRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceStatusBody'
+                    description: body carries status update fields bound from the HTTP payload.
+        finance.invoices.v1.UpdateInvoiceStatusBody:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+            required:
+                - status
+        finance.invoices.v1.UpdateInvoiceStatusResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        finance.invoices.v1.DeleteInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        finance.invoices.v1.DeleteInvoiceResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        finance.invoices.v1.SendInvoiceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        finance.invoices.v1.SendInvoiceResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.

@@ -1,0 +1,120 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/price-list/v1/price-lists:
+        get:
+            tags:
+                - PriceListService
+            summary: listPriceLists
+            operationId: PriceListService_listPriceLists
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of price lists to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of price lists to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.price_list.v1.ListPriceListsResponse'
+        post:
+            tags:
+                - PriceListService
+            summary: createPriceList
+            operationId: PriceListService_createPriceList
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.price_list.v1.CreatePriceListRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.price_list.v1.CreatePriceListResponse'
+components:
+    schemas:
+        erp.price_list.v1.ListPriceListsRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of price lists to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of price lists to skip.
+        erp.price_list.v1.ListPriceListsResponse:
+            type: object
+            properties:
+                price_lists:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.price_list.v1.PriceList'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.price_list.v1.PriceList:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                currency:
+                    type: string
+                is_default:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        erp.price_list.v1.CreatePriceListRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                currency:
+                    type: string
+                is_default:
+                    type: boolean
+            required:
+                - name
+        erp.price_list.v1.CreatePriceListResponse:
+            type: object
+            properties:
+                price_list_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string

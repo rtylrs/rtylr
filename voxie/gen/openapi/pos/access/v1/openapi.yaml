@@ -1,0 +1,240 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/access/v1/my-locations:
+        get:
+            tags:
+                - AccessService
+            summary: getMyLocations
+            description: Returns the locations assigned to the current staff member.
+            operationId: AccessService_getMyLocations
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.access.v1.GetMyLocationsResponse'
+    /pos/access/v1/member-locations:
+        get:
+            tags:
+                - AccessService
+            summary: getMemberLocations
+            description: Returns the locations assigned to a given staff member.
+            operationId: AccessService_getMemberLocations
+            parameters:
+                - name: user_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.access.v1.GetMemberLocationsResponse'
+    /pos/access/v1/location-roster:
+        get:
+            tags:
+                - AccessService
+            summary: getLocationRoster
+            description: Returns the staff roster for a given location.
+            operationId: AccessService_getLocationRoster
+            parameters:
+                - name: location_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.access.v1.GetLocationRosterResponse'
+    /pos/access/v1/assign:
+        post:
+            tags:
+                - AccessService
+            summary: assignLocation
+            description: Assigns a staff member to a location.
+            operationId: AccessService_assignLocation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.access.v1.AssignLocationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.access.v1.AssignLocationResponse'
+    /pos/access/v1/remove:
+        post:
+            tags:
+                - AccessService
+            summary: removeLocation
+            description: Removes a staff member's location assignment.
+            operationId: AccessService_removeLocation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.access.v1.RemoveLocationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.access.v1.RemoveLocationResponse'
+components:
+    schemas:
+        pos.access.v1.GetMyLocationsRequest:
+            type: object
+        pos.access.v1.GetMyLocationsResponse:
+            type: object
+            properties:
+                locations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.access.v1.MyLocation'
+        pos.access.v1.MyLocation:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                address:
+                    type: string
+                phone:
+                    type: string
+            description: MyLocation is a location entry for the current staff member.
+        pos.access.v1.GetMemberLocationsRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            required:
+                - user_id
+        pos.access.v1.GetMemberLocationsResponse:
+            type: object
+            properties:
+                locations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.access.v1.MemberLocationEntry'
+        pos.access.v1.MemberLocationEntry:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique assignment identifier.
+                location_id:
+                    type: string
+                    format: int64
+                    description: location_id identifies the assigned location.
+                can_manage_pos_users:
+                    type: boolean
+                    description: can_manage_pos_users controls POS staff management.
+                can_manage_terminals:
+                    type: boolean
+                    description: can_manage_terminals controls terminal management.
+                can_view_reports:
+                    type: boolean
+                    description: can_view_reports controls POS reporting access.
+            description: MemberLocationEntry is a location assignment for a staff member.
+        pos.access.v1.GetLocationRosterRequest:
+            type: object
+            properties:
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            required:
+                - location_id
+        pos.access.v1.GetLocationRosterResponse:
+            type: object
+            properties:
+                roster:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.access.v1.RosterEntry'
+        pos.access.v1.RosterEntry:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    format: int64
+                    description: user_id identifies the staff member.
+                name:
+                    type: string
+                has_pin:
+                    type: boolean
+                    description: has_pin tells the terminal whether the staff member can sign in with a PIN.
+                is_manager:
+                    type: boolean
+                    description: is_manager tells whether this staff member can manage POS access.
+                pos_role:
+                    type: string
+                    description: pos_role is the POS-specific role label.
+            description: RosterEntry is a staff member entry within a location roster.
+        pos.access.v1.AssignLocationRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: user_id identifies the user associated with this request.
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                can_manage_pos_users:
+                    type: boolean
+                can_manage_terminals:
+                    type: boolean
+                can_view_reports:
+                    type: boolean
+            required:
+                - user_id
+                - location_id
+        pos.access.v1.AssignLocationResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+        pos.access.v1.RemoveLocationRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            required:
+                - id
+        pos.access.v1.RemoveLocationResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean

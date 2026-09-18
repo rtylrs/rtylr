@@ -1,0 +1,311 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/quote/v1/quotes:
+        get:
+            tags:
+                - QuoteService
+            summary: listQuotes
+            operationId: QuoteService_listQuotes
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: The one-based page number to return.
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: The maximum number of quotes to return.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.quote.v1.ListQuotesResponse'
+        post:
+            tags:
+                - QuoteService
+            summary: createQuote
+            operationId: QuoteService_createQuote
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.quote.v1.CreateQuoteRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.quote.v1.CreateQuoteResponse'
+    /finance/quote/v1/quotes/{id}:
+        get:
+            tags:
+                - QuoteService
+            summary: getQuote
+            operationId: QuoteService_getQuote
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.quote.v1.GetQuoteResponse'
+    /finance/quote/v1/quotes/{id}/status:
+        patch:
+            tags:
+                - QuoteService
+            summary: updateQuoteStatus
+            operationId: QuoteService_updateQuoteStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.quote.v1.UpdateQuoteStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.quote.v1.UpdateQuoteStatusResponse'
+    /finance/quote/v1/quotes/{id}/convert:
+        post:
+            tags:
+                - QuoteService
+            summary: convertQuote
+            operationId: QuoteService_convertQuote
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.quote.v1.ConvertQuoteRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.quote.v1.ConvertQuoteResponse'
+components:
+    schemas:
+        finance.quote.v1.ListQuotesRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int64
+                    description: The one-based page number to return.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: The maximum number of quotes to return.
+        finance.quote.v1.ListQuotesResponse:
+            type: object
+            properties:
+                quotes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.quote.v1.Quote'
+                page:
+                    type: integer
+                    format: int64
+                    description: The current result page.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: The number of records requested per page.
+                has_more:
+                    type: boolean
+                    description: Whether additional pages are available.
+        finance.quote.v1.Quote:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Identifies the tenant that owns the resource.
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                status:
+                    type: string
+                    description: draft, sent, accepted, rejected, expired, converted
+                lines:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.quote.v1.QuoteLine'
+                subtotal:
+                    type: number
+                    format: double
+                tax:
+                    type: number
+                    format: double
+                discount:
+                    type: number
+                    format: double
+                total:
+                    type: number
+                    format: double
+                valid_until:
+                    type: string
+                notes:
+                    type: string
+                created_at:
+                    type: string
+                    description: When the record was created.
+                updated_at:
+                    type: string
+                    description: When the record was last updated.
+        finance.quote.v1.QuoteLine:
+            type: object
+            properties:
+                description:
+                    type: string
+                quantity:
+                    type: integer
+                    format: int32
+                unit_price:
+                    type: number
+                    format: double
+                tax_rate:
+                    type: number
+                    format: double
+                total:
+                    type: number
+                    format: double
+        finance.quote.v1.CreateQuoteRequest:
+            type: object
+            properties:
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                status:
+                    type: string
+                    description: The initial lifecycle state - defaults to "draft" if empty.
+                lines:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.quote.v1.QuoteLine'
+                    minItems: 1
+                subtotal:
+                    type: number
+                    minimum: 0
+                    format: double
+                tax:
+                    type: number
+                    minimum: 0
+                    format: double
+                valid_until:
+                    type: string
+                discount:
+                    type: number
+                    minimum: 0
+                    format: double
+                total:
+                    type: number
+                    minimum: 0
+                    format: double
+                notes:
+                    type: string
+            required:
+                - customer_name
+                - valid_until
+                - discount
+        finance.quote.v1.CreateQuoteResponse:
+            type: object
+            properties:
+                quote:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.quote.v1.Quote'
+        finance.quote.v1.GetQuoteRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        finance.quote.v1.GetQuoteResponse:
+            type: object
+            properties:
+                quote:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.quote.v1.Quote'
+        finance.quote.v1.UpdateQuoteStatusRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.quote.v1.UpdateQuoteStatusBody'
+                    description: Carries status update fields bound from the HTTP payload.
+        finance.quote.v1.UpdateQuoteStatusBody:
+            type: object
+            properties:
+                status:
+                    type: string
+            required:
+                - status
+        finance.quote.v1.UpdateQuoteStatusResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        finance.quote.v1.ConvertQuoteRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        finance.quote.v1.ConvertQuoteResponse:
+            type: object
+            properties:
+                invoice_id:
+                    type: string
+                    format: int64
+                    description: The identifier of the invoice created from this quote.
+                message:
+                    type: string

@@ -1,0 +1,1154 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/dashboard:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getDashboard
+            operationId: CompatibilityService_getDashboard
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/invoices:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listInvoices
+            operationId: CompatibilityService_listInvoices
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateInvoice
+            operationId: CompatibilityService_updateInvoice
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createInvoice
+            operationId: CompatibilityService_createInvoice
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/invoices/detail:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getInvoice
+            operationId: CompatibilityService_getInvoice
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/invoices/status:
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateInvoiceStatus
+            operationId: CompatibilityService_updateInvoiceStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/invoices/payment:
+        post:
+            tags:
+                - CompatibilityService
+            summary: recordPayment
+            operationId: CompatibilityService_recordPayment
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/expenses:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listExpenses
+            operationId: CompatibilityService_listExpenses
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateExpense
+            operationId: CompatibilityService_updateExpense
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createExpense
+            operationId: CompatibilityService_createExpense
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/expense-categories:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listExpenseCategories
+            operationId: CompatibilityService_listExpenseCategories
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createExpenseCategory
+            operationId: CompatibilityService_createExpenseCategory
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/expense-categories/{id}:
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateExpenseCategory
+            operationId: CompatibilityService_updateExpenseCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteExpenseCategory
+            operationId: CompatibilityService_deleteExpenseCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/report/v1/pl:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getPL
+            operationId: CompatibilityService_getPL
+            parameters:
+                - name: period
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: date
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/tax/config:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listTaxConfig
+            operationId: CompatibilityService_listTaxConfig
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createTaxConfig
+            operationId: CompatibilityService_createTaxConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/tax/report:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getTaxReport
+            operationId: CompatibilityService_getTaxReport
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/tax:
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateTaxConfig
+            operationId: CompatibilityService_updateTaxConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/recurring-invoices:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listRecurringInvoices
+            operationId: CompatibilityService_listRecurringInvoices
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateRecurringInvoice
+            operationId: CompatibilityService_updateRecurringInvoice
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createRecurringInvoice
+            operationId: CompatibilityService_createRecurringInvoice
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/recurring-invoices/{id}/trigger:
+        post:
+            tags:
+                - CompatibilityService
+            summary: triggerRecurringInvoice
+            operationId: CompatibilityService_triggerRecurringInvoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/quotes:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listQuotes
+            operationId: CompatibilityService_listQuotes
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateQuote
+            operationId: CompatibilityService_updateQuote
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createQuote
+            operationId: CompatibilityService_createQuote
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/quotes/{id}:
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteQuote
+            operationId: CompatibilityService_deleteQuote
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/bills:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listBills
+            operationId: CompatibilityService_listBills
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateBill
+            operationId: CompatibilityService_updateBill
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createBill
+            operationId: CompatibilityService_createBill
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/bank-accounts:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listBankAccounts
+            operationId: CompatibilityService_listBankAccounts
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createBankAccount
+            operationId: CompatibilityService_createBankAccount
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/reconciliation:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getReconciliation
+            operationId: CompatibilityService_getReconciliation
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/reconciliation/match:
+        post:
+            tags:
+                - CompatibilityService
+            summary: matchTransaction
+            operationId: CompatibilityService_matchTransaction
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/reconcile/match:
+        post:
+            tags:
+                - CompatibilityService
+            summary: matchReconcile
+            operationId: CompatibilityService_matchReconcile
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/bank-feeds:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listBankFeeds
+            operationId: CompatibilityService_listBankFeeds
+            parameters:
+                - name: account_id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/balance-sheet:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getBalanceSheet
+            operationId: CompatibilityService_getBalanceSheet
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/cash-flow:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCashFlow
+            operationId: CompatibilityService_getCashFlow
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/accounts:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listAccounts
+            operationId: CompatibilityService_listAccounts
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createAccount
+            operationId: CompatibilityService_createAccount
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+    /finance/journal:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getJournal
+            operationId: CompatibilityService_getJournal
+            parameters:
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: category
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: end
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createJournalEntry
+            operationId: CompatibilityService_createJournalEntry
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.compat.v1.JsonResponse'
+components:
+    schemas:
+        finance.compat.v1.EmptyRequest:
+            type: object
+        finance.compat.v1.JsonResponse: {}
+        finance.compat.v1.PageRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                category:
+                    type: string
+                start:
+                    type: string
+                end:
+                    type: string
+        finance.compat.v1.IdQueryRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        finance.compat.v1.BodyRequest:
+            type: object
+            properties:
+                body: {}
+        finance.compat.v1.PathBodyRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                body: {}
+        finance.compat.v1.PathRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        finance.compat.v1.ReportRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                date:
+                    type: string
+        finance.compat.v1.BankFeedRequest:
+            type: object
+            properties:
+                account_id:
+                    type: string

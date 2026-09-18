@@ -1,0 +1,258 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/benefit/v1/benefits:
+        get:
+            tags:
+                - BenefitService
+            summary: listBenefits
+            operationId: BenefitService_listBenefits
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.benefit.v1.ListBenefitsResponse'
+        post:
+            tags:
+                - BenefitService
+            summary: createBenefit
+            operationId: BenefitService_createBenefit
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.benefit.v1.CreateBenefitRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.benefit.v1.CreateBenefitResponse'
+    /hr/benefit/v1/benefits/enrollments:
+        post:
+            tags:
+                - BenefitService
+            summary: enrollInBenefit
+            description: Enrolls the calling employee in a benefit plan.
+            operationId: BenefitService_enrollInBenefit
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.benefit.v1.EnrollInBenefitRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.benefit.v1.EnrollInBenefitResponse'
+    /hr/benefit/v1/benefits/enrollments/mine:
+        get:
+            tags:
+                - BenefitService
+            summary: listMyBenefitEnrollments
+            description: Returns the calling employee's own benefit enrollments.
+            operationId: BenefitService_listMyBenefitEnrollments
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: sort_by is the field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.benefit.v1.ListMyBenefitEnrollmentsResponse'
+components:
+    schemas:
+        hr.benefit.v1.ListBenefitsRequest:
+            type: object
+        hr.benefit.v1.ListBenefitsResponse:
+            type: object
+            properties:
+                plans:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.benefit.v1.BenefitPlan'
+        hr.benefit.v1.BenefitPlan:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                type:
+                    type: string
+                provider:
+                    type: string
+                cost_employer:
+                    type: number
+                    format: double
+                cost_employee:
+                    type: number
+                    format: double
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+        hr.benefit.v1.CreateBenefitRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                type:
+                    type: string
+                provider:
+                    type: string
+                cost_employer:
+                    type: number
+                    format: double
+                cost_employee:
+                    type: number
+                    format: double
+                is_active:
+                    type: boolean
+            required:
+                - name
+        hr.benefit.v1.CreateBenefitResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        hr.benefit.v1.EnrollInBenefitRequest:
+            type: object
+            properties:
+                plan_id:
+                    type: string
+                    format: int64
+                    description: plan_id is the BenefitPlan to enroll in. The employee is resolved from auth context, not client-supplied.
+            required:
+                - plan_id
+        hr.benefit.v1.EnrollInBenefitResponse:
+            type: object
+            properties:
+                enrollment:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.benefit.v1.BenefitEnrollment'
+                    description: enrollment is the created BenefitEnrollment record.
+        hr.benefit.v1.BenefitEnrollment:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the enrollment record's unique identifier.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: owner_id is the business that owns the underlying BenefitPlan.
+                employee_id:
+                    type: string
+                    format: int64
+                    description: employee_id is the enrolled employee; always resolved from auth context, never client-supplied.
+                plan_id:
+                    type: string
+                    format: int64
+                    description: plan_id references the BenefitPlan this enrollment is for.
+                status:
+                    type: string
+                    description: status is the enrollment lifecycle state (active | cancelled).
+                enrolled_at:
+                    type: string
+                    description: enrolled_at is when the employee enrolled, in ISO-8601 format.
+                cancelled_at:
+                    type: string
+                    description: cancelled_at is when the enrollment was cancelled, in ISO-8601 format; absent while the enrollment is active.
+        hr.benefit.v1.ListMyBenefitEnrollmentsRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: sort_by is the field to sort results by.
+                sort_dir:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+        hr.benefit.v1.ListMyBenefitEnrollmentsResponse:
+            type: object
+            properties:
+                enrollments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.benefit.v1.BenefitEnrollment'
+                    description: enrollments are the caller's own BenefitEnrollment records.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.

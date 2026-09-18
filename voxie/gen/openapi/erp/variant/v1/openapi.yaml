@@ -1,0 +1,270 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/variant/v1/variants:
+        get:
+            tags:
+                - VariantService
+            summary: listVariants
+            operationId: VariantService_listVariants
+            parameters:
+                - name: product_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of variants to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of variants to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.ListVariantsResponse'
+        post:
+            tags:
+                - VariantService
+            summary: createVariant
+            operationId: VariantService_createVariant
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.variant.v1.CreateVariantRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.CreateVariantResponse'
+    /erp/variant/v1/variants/{id}:
+        put:
+            tags:
+                - VariantService
+            summary: updateVariant
+            operationId: VariantService_updateVariant
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.variant.v1.UpdateVariantRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.UpdateVariantResponse'
+        delete:
+            tags:
+                - VariantService
+            summary: deleteVariant
+            operationId: VariantService_deleteVariant
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.DeleteVariantResponse'
+components:
+    schemas:
+        erp.variant.v1.ListVariantsRequest:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of variants to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of variants to skip.
+        erp.variant.v1.ListVariantsResponse:
+            type: object
+            properties:
+                variants:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.variant.v1.Variant'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.variant.v1.Variant:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                attributes:
+                    type: string
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - product_id
+                - name
+        erp.variant.v1.CreateVariantRequest:
+            type: object
+            properties:
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                attributes:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - product_id
+                - name
+        erp.variant.v1.CreateVariantResponse:
+            type: object
+            properties:
+                variant_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        erp.variant.v1.UpdateVariantRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.variant.v1.UpdateVariantBody'
+        erp.variant.v1.UpdateVariantBody:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                attributes:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - name
+        erp.variant.v1.UpdateVariantResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        erp.variant.v1.DeleteVariantRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.variant.v1.DeleteVariantResponse:
+            type: object
+            properties:
+                message:
+                    type: string

@@ -1,0 +1,107 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/invoices/payments/v1/invoices/{invoice_id}/payment:
+        post:
+            tags:
+                - InvoicePaymentService
+            summary: recordPayment
+            operationId: InvoicePaymentService_recordPayment
+            parameters:
+                - name: invoice_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.invoices.payments.v1.RecordPaymentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.invoices.payments.v1.RecordPaymentResponse'
+components:
+    schemas:
+        finance.invoices.payments.v1.RecordPaymentRequest:
+            type: object
+            properties:
+                invoice_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: invoice_id is the invoice id value for this contract.
+                amount:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: amount is the amount value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                payment_date:
+                    type: string
+                    description: payment_date is the payment date value for this contract.
+                method:
+                    type: string
+                    description: method is the method value for this contract.
+                reference:
+                    type: string
+                    description: reference is the reference value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+            required:
+                - currency
+                - payment_date
+                - method
+                - reference
+        finance.invoices.payments.v1.RecordPaymentResponse:
+            type: object
+            properties:
+                payment:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.invoices.v1.RecordPaymentResponsePayload'
+                    description: payment is the payment value for this contract.
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        finance.invoices.v1.RecordPaymentResponsePayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                invoice_id:
+                    type: string
+                    format: int64
+                    description: invoice_id is the invoice id value for this contract.
+                amount:
+                    type: number
+                    format: double
+                    description: amount is the amount value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                payment_date:
+                    type: string
+                    description: payment_date is the payment date value for this contract.
+                method:
+                    type: string
+                    description: method is the method value for this contract.
+                reference:
+                    type: string
+                    description: reference is the reference value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+            description: RecordPaymentResponsePayload describes a payment just recorded against an invoice.

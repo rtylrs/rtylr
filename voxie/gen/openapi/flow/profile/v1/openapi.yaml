@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/profile/v1/profile/{user_id}:
+        get:
+            tags:
+                - ProfileService
+            summary: getProfile
+            operationId: ProfileService_getProfile
+            parameters:
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.profile.v1.GetProfileResponse'
+components:
+    schemas:
+        flow.profile.v1.GetProfileRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: user_id is the profile's subject.
+        flow.profile.v1.GetProfileResponse:
+            type: object
+            properties:
+                profile:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.profile.v1.Profile'
+        flow.profile.v1.Profile:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    format: int64
+                    description: user_id is the profile's subject.
+                name:
+                    type: string
+                    description: name is the display name.
+                email:
+                    type: string
+                    description: |-
+                        email is the account email. Business members already share a roster;
+                        this echoes it for contact actions.
+                initials:
+                    type: string
+                    description: initials are two-letter uppercase initials derived from name.
+                role_title:
+                    type: string
+                    description: role_title is the person's business role or job title, when set.
+                bio:
+                    type: string
+                    description: bio is what the person says about themselves. Empty if unset.
+                public_projects:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.profile.v1.ProfileProject'
+                    description: |-
+                        public_projects lists the subject's PUBLIC projects - metadata only.
+                        Private projects never appear here regardless of caller; opening any of
+                        them still requires membership or a bypass role.
+            description: |-
+                Profile is the public face of a business member inside Flow: identity plus
+                the projects they chose to make discoverable. It backs the in-app profile
+                page opened from avatars, comment authors and member pickers.
+        flow.profile.v1.ProfileProject:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the project identifier.
+                name:
+                    type: string
+                    description: name is the project display name.
+                icon:
+                    type: string
+                    description: icon is the project icon.
+                color:
+                    type: string
+                    description: color is the project color hex.
+                description:
+                    type: string
+                    description: description is the short project description.
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                task_count:
+                    type: integer
+                    format: int32
+                    description: task_count is the total task count. Display projection.
+                completed_count:
+                    type: integer
+                    format: int32
+                    description: completed_count is the done task count. Display projection.
+            description: |-
+                ProfileProject is the metadata card for one public project. Deliberately
+                carries no task-level fields: public means "discoverable", not "openable".

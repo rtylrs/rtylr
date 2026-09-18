@@ -1,0 +1,109 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/receipt/v1/receipts:
+        get:
+            tags:
+                - ReceiptService
+            summary: listReceipts
+            description: Returns receipts, optionally filtered by date range.
+            operationId: ReceiptService_listReceipts
+            parameters:
+                - name: from
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: to
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.receipt.v1.ListReceiptsResponse'
+    /pos/receipt/v1/receipts/{id}/email:
+        post:
+            tags:
+                - ReceiptService
+            summary: emailReceipt
+            description: Emails a receipt to the given address.
+            operationId: ReceiptService_emailReceipt
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.receipt.v1.EmailReceiptRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.receipt.v1.EmailReceiptResponse'
+components:
+    schemas:
+        pos.receipt.v1.ListReceiptsRequest:
+            type: object
+            properties:
+                from_date:
+                    type: string
+                to_date:
+                    type: string
+        pos.receipt.v1.ListReceiptsResponse:
+            type: object
+            properties:
+                receipts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.receipt.v1.Receipt'
+        pos.receipt.v1.Receipt:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                order_number:
+                    type: string
+                customer_name:
+                    type: string
+                total:
+                    type: number
+                    format: double
+                payment_method:
+                    type: string
+                paid_at:
+                    type: string
+            description: Receipt is a completed order receipt.
+        pos.receipt.v1.EmailReceiptRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the receipt.
+                email:
+                    type: string
+                    description: Recipient email address for the receipt.
+            required:
+                - email
+        pos.receipt.v1.EmailReceiptResponse:
+            type: object
+            properties:
+                message:
+                    type: string

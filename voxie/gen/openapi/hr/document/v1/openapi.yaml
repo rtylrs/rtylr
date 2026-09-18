@@ -1,0 +1,125 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/document/v1/documents:
+        get:
+            tags:
+                - DocumentService
+            summary: listDocuments
+            operationId: DocumentService_listDocuments
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.document.v1.ListDocumentsResponse'
+        post:
+            tags:
+                - DocumentService
+            summary: createDocument
+            operationId: DocumentService_createDocument
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.document.v1.CreateDocumentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.document.v1.CreateDocumentResponse'
+    /hr/document/v1/documents/{id}:
+        delete:
+            tags:
+                - DocumentService
+            summary: deleteDocument
+            operationId: DocumentService_deleteDocument
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.document.v1.DeleteDocumentResponse'
+components:
+    schemas:
+        hr.document.v1.ListDocumentsRequest:
+            type: object
+        hr.document.v1.ListDocumentsResponse:
+            type: object
+            properties:
+                documents:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.document.v1.Document'
+        hr.document.v1.Document:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                staff_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                type:
+                    type: string
+                file_url:
+                    type: string
+                expiry_date:
+                    type: string
+                created_at:
+                    type: string
+        hr.document.v1.CreateDocumentRequest:
+            type: object
+            properties:
+                staff_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                type:
+                    type: string
+                file_url:
+                    type: string
+                expiry_date:
+                    type: string
+            required:
+                - name
+        hr.document.v1.CreateDocumentResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        hr.document.v1.DeleteDocumentRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hr.document.v1.DeleteDocumentResponse:
+            type: object
+            properties:
+                message:
+                    type: string

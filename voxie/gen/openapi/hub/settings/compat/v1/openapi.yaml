@@ -1,0 +1,44 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/settings/email/test:
+        post:
+            tags:
+                - CompatibilityService
+            summary: testEmail
+            operationId: CompatibilityService_testEmail
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hub.settings.compat.v1.TestEmailBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.settings.compat.v1.TestEmailResponse'
+components:
+    schemas:
+        hub.settings.compat.v1.TestEmailRequest:
+            type: object
+            properties:
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.settings.compat.v1.TestEmailBody'
+        hub.settings.compat.v1.TestEmailBody:
+            type: object
+            properties:
+                host:
+                    type: string
+                port:
+                    type: integer
+                    format: int32
+                username:
+                    type: string
+        hub.settings.compat.v1.TestEmailResponse: {}

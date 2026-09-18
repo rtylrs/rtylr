@@ -1,0 +1,86 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/activity/v1/activity:
+        get:
+            tags:
+                - ActivityService
+            summary: listActivity
+            description: Returns recent activity events.
+            operationId: ActivityService_listActivity
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: offset is the number of records to skip, for paging through the feed.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.activity.v1.ListActivityResponse'
+components:
+    schemas:
+        hub.activity.v1.ListActivityRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                offset:
+                    type: integer
+                    format: int32
+                    description: offset is the number of records to skip, for paging through the feed.
+        hub.activity.v1.ListActivityResponse:
+            type: object
+            properties:
+                activities:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.activity.v1.ActivityEntry'
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching activity entries, for pagination math.
+        hub.activity.v1.ActivityEntry:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                app:
+                    type: string
+                entity_type:
+                    type: string
+                entity_id:
+                    type: string
+                    format: int64
+                action:
+                    type: string
+                description:
+                    type: string
+                user_id:
+                    type: string
+                    format: int64
+                user_name:
+                    type: string
+                created_at:
+                    type: string
+                    description: When the record was created.

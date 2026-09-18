@@ -1,0 +1,164 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/payroll/v1/payroll:
+        get:
+            tags:
+                - PayrollService
+            summary: listPayroll
+            operationId: PayrollService_listPayroll
+            parameters:
+                - name: period_label
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.payroll.v1.ListPayrollResponse'
+    /hr/payroll/v1/payroll/run:
+        post:
+            tags:
+                - PayrollService
+            summary: runPayroll
+            operationId: PayrollService_runPayroll
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.payroll.v1.RunPayrollRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.payroll.v1.RunPayrollResponse'
+    /hr/payroll/v1/payroll/{id}/mark-paid:
+        post:
+            tags:
+                - PayrollService
+            summary: markPayrollPaid
+            operationId: PayrollService_markPayrollPaid
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.payroll.v1.MarkPayrollPaidRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.payroll.v1.MarkPayrollPaidResponse'
+components:
+    schemas:
+        hr.payroll.v1.ListPayrollRequest:
+            type: object
+            properties:
+                period_label:
+                    type: string
+        hr.payroll.v1.ListPayrollResponse:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.payroll.v1.PayrollRecord'
+        hr.payroll.v1.PayrollRecord:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                owner_id:
+                    type: integer
+                    format: int64
+                staff_id:
+                    type: integer
+                    format: int64
+                period_start:
+                    type: string
+                period_end:
+                    type: string
+                period_label:
+                    type: string
+                regular_hours:
+                    type: number
+                    format: double
+                overtime_hours:
+                    type: number
+                    format: double
+                base_pay:
+                    type: number
+                    format: double
+                overtime_pay:
+                    type: number
+                    format: double
+                bonuses:
+                    type: number
+                    format: double
+                deductions:
+                    type: number
+                    format: double
+                tax_withheld:
+                    type: number
+                    format: double
+                net_pay:
+                    type: number
+                    format: double
+                status:
+                    type: string
+                paid_at:
+                    type: string
+                notes:
+                    type: string
+                created_at:
+                    type: string
+        hr.payroll.v1.RunPayrollRequest:
+            type: object
+            properties:
+                period_start:
+                    type: string
+                period_end:
+                    type: string
+                period_label:
+                    type: string
+            required:
+                - period_start
+                - period_end
+                - period_label
+        hr.payroll.v1.RunPayrollResponse:
+            type: object
+            properties:
+                records_created:
+                    type: integer
+                    format: int32
+        hr.payroll.v1.MarkPayrollPaidRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+        hr.payroll.v1.MarkPayrollPaidResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean

@@ -1,0 +1,281 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/account/v1/accounts:
+        get:
+            tags:
+                - AccountService
+            summary: listAccounts
+            operationId: AccountService_listAccounts
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.account.v1.ListAccountsResponse'
+        post:
+            tags:
+                - AccountService
+            summary: createAccount
+            operationId: AccountService_createAccount
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.account.v1.CreateAccountRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.account.v1.CreateAccountResponse'
+    /finance/account/v1/accounts/{id}:
+        put:
+            tags:
+                - AccountService
+            summary: updateAccount
+            operationId: AccountService_updateAccount
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/finance.account.v1.UpdateAccountBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.account.v1.UpdateAccountResponse'
+        delete:
+            tags:
+                - AccountService
+            summary: deleteAccount
+            operationId: AccountService_deleteAccount
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.account.v1.DeleteAccountResponse'
+    /finance/account/v1/chart-of-accounts:
+        get:
+            tags:
+                - AccountService
+            summary: getChartOfAccounts
+            operationId: AccountService_getChartOfAccounts
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.account.v1.GetChartOfAccountsResponse'
+components:
+    schemas:
+        finance.account.v1.ListAccountsRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+        finance.account.v1.ListAccountsResponse:
+            type: object
+            properties:
+                accounts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.account.v1.Account'
+                    description: accounts is the accounts value for this contract.
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+                has_more:
+                    type: boolean
+        finance.account.v1.Account:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                type:
+                    type: string
+                    description: type is the type value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                balance:
+                    type: number
+                    format: double
+                    description: balance is the balance value for this contract.
+                is_active:
+                    type: boolean
+                    description: is_active is the is active value for this contract.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                code:
+                    type: string
+                    description: code is the optional account code/number.
+            description: Account is a chart-of-accounts ledger account.
+        finance.account.v1.CreateAccountRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                type:
+                    type: string
+                    description: type is the type value for this contract.
+                currency:
+                    type: string
+                    description: currency is the currency value for this contract.
+                balance:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: balance is the balance value for this contract.
+                is_active:
+                    type: boolean
+                    description: is_active is the is active value for this contract.
+                code:
+                    type: string
+                    description: code is the optional account code/number.
+            required:
+                - name
+                - type
+                - currency
+                - balance
+        finance.account.v1.CreateAccountResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        finance.account.v1.UpdateAccountRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.account.v1.UpdateAccountBody'
+        finance.account.v1.UpdateAccountBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                type:
+                    type: string
+                currency:
+                    type: string
+                balance:
+                    type: number
+                    minimum: 0
+                    format: double
+                is_active:
+                    type: boolean
+                code:
+                    type: string
+                    description: code is the optional account code/number.
+            required:
+                - name
+                - type
+        finance.account.v1.UpdateAccountResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        finance.account.v1.DeleteAccountRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        finance.account.v1.DeleteAccountResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        finance.account.v1.GetChartOfAccountsRequest:
+            type: object
+        finance.account.v1.GetChartOfAccountsResponse:
+            type: object
+            properties:
+                tree:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.account.v1.ChartOfAccountsNode'
+        finance.account.v1.ChartOfAccountsNode:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                code:
+                    type: string
+                type:
+                    type: string
+                children:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.account.v1.ChartOfAccountsNode'
+            description: ChartOfAccountsNode is a node in the hierarchical chart of accounts.

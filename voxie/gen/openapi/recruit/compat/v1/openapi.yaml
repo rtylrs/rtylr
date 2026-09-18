@@ -1,0 +1,589 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /recruit/careers:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listCareers
+            operationId: CompatibilityService_listCareers
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateCareer
+            operationId: CompatibilityService_updateCareer
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createCareer
+            operationId: CompatibilityService_createCareer
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteCareer
+            operationId: CompatibilityService_deleteCareer
+            parameters:
+                - name: id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/customization:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getCustomization
+            operationId: CompatibilityService_getCustomization
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateCustomization
+            operationId: CompatibilityService_updateCustomization
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/submissions:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listSubmissions
+            operationId: CompatibilityService_listSubmissions
+            parameters:
+                - name: slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: submission_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/submissions/status:
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateSubmissionStatus
+            operationId: CompatibilityService_updateSubmissionStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/submissions/resume-url:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getResumeURL
+            operationId: CompatibilityService_getResumeURL
+            parameters:
+                - name: slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: submission_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/sections:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listSections
+            operationId: CompatibilityService_listSections
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateSection
+            operationId: CompatibilityService_updateSection
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createSection
+            operationId: CompatibilityService_createSection
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteSection
+            operationId: CompatibilityService_deleteSection
+            parameters:
+                - name: id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/sections/reorder:
+        put:
+            tags:
+                - CompatibilityService
+            summary: reorderSections
+            operationId: CompatibilityService_reorderSections
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/form-fields:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listFormFields
+            operationId: CompatibilityService_listFormFields
+            parameters:
+                - name: slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: submission_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        put:
+            tags:
+                - CompatibilityService
+            summary: updateFormField
+            operationId: CompatibilityService_updateFormField
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        post:
+            tags:
+                - CompatibilityService
+            summary: createFormField
+            operationId: CompatibilityService_createFormField
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+        delete:
+            tags:
+                - CompatibilityService
+            summary: deleteFormField
+            operationId: CompatibilityService_deleteFormField
+            parameters:
+                - name: id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/public/careers:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listPublicCareers
+            operationId: CompatibilityService_listPublicCareers
+            parameters:
+                - name: slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: submission_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/public/career:
+        get:
+            tags:
+                - CompatibilityService
+            summary: getPublicCareer
+            operationId: CompatibilityService_getPublicCareer
+            parameters:
+                - name: slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_slug
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: career_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: submission_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/public/apply:
+        post:
+            tags:
+                - CompatibilityService
+            summary: submitApplication
+            operationId: CompatibilityService_submitApplication
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+    /recruit/public/resume-upload-url:
+        post:
+            tags:
+                - CompatibilityService
+            summary: requestResumeUploadURL
+            operationId: CompatibilityService_requestResumeUploadURL
+            requestBody:
+                content:
+                    application/json:
+                        schema: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.compat.v1.JsonResponse'
+components:
+    schemas:
+        recruit.compat.v1.EmptyRequest:
+            type: object
+        recruit.compat.v1.JsonResponse: {}
+        recruit.compat.v1.BodyRequest:
+            type: object
+            properties:
+                body: {}
+        recruit.compat.v1.IdQueryRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        recruit.compat.v1.QueryRequest:
+            type: object
+            properties:
+                slug:
+                    type: string
+                career_slug:
+                    type: string
+                career_id:
+                    type: integer
+                    format: int32
+                submission_id:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32

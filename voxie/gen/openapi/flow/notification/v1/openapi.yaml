@@ -1,0 +1,190 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/notification/v1/notifications:
+        get:
+            tags:
+                - NotificationService
+            summary: listNotifications
+            operationId: NotificationService_listNotifications
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.notification.v1.ListNotificationsResponse'
+    /flow/notification/v1/notifications/{id}/read:
+        put:
+            tags:
+                - NotificationService
+            summary: markNotificationRead
+            operationId: NotificationService_markNotificationRead
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.notification.v1.MarkNotificationReadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.notification.v1.MarkNotificationReadResponse'
+    /flow/notification/v1/notifications/read-all:
+        put:
+            tags:
+                - NotificationService
+            summary: markAllNotificationsRead
+            operationId: NotificationService_markAllNotificationsRead
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.notification.v1.MarkAllNotificationsReadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.notification.v1.MarkAllNotificationsReadResponse'
+components:
+    schemas:
+        flow.notification.v1.ListNotificationsRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+        flow.notification.v1.ListNotificationsResponse:
+            type: object
+            properties:
+                notifications:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.notification.v1.Notification'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.notification.v1.Notification:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                type:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                task_id:
+                    type: string
+                task_title:
+                    type: string
+                actor_id:
+                    type: string
+                    format: int64
+                    description: The user whose action caused this notification, when the source recorded one.
+                actor_name:
+                    type: string
+                    description: Display name resolved from the acting user's current profile.
+                actor_initials:
+                    type: string
+                project:
+                    type: string
+                project_color:
+                    type: string
+                read:
+                    type: boolean
+                timestamp:
+                    type: string
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.
+        flow.notification.v1.MarkNotificationReadRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+        flow.notification.v1.MarkNotificationReadResponse:
+            type: object
+        flow.notification.v1.MarkAllNotificationsReadRequest:
+            type: object
+        flow.notification.v1.MarkAllNotificationsReadResponse:
+            type: object

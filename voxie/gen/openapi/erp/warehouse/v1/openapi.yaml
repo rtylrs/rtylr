@@ -1,0 +1,236 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/warehouse/v1/warehouses:
+        get:
+            tags:
+                - WarehouseService
+            summary: listWarehouses
+            operationId: WarehouseService_listWarehouses
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of warehouses to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of warehouses to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.ListWarehousesResponse'
+        post:
+            tags:
+                - WarehouseService
+            summary: createWarehouse
+            operationId: WarehouseService_createWarehouse
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.warehouse.v1.CreateWarehouseRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.CreateWarehouseResponse'
+    /erp/warehouse/v1/warehouses/{id}:
+        put:
+            tags:
+                - WarehouseService
+            summary: updateWarehouse
+            operationId: WarehouseService_updateWarehouse
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseResponse'
+        delete:
+            tags:
+                - WarehouseService
+            summary: deleteWarehouse
+            operationId: WarehouseService_deleteWarehouse
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.DeleteWarehouseResponse'
+components:
+    schemas:
+        erp.warehouse.v1.ListWarehousesRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of warehouses to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of warehouses to skip.
+        erp.warehouse.v1.ListWarehousesResponse:
+            type: object
+            properties:
+                warehouses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.warehouse.v1.Warehouse'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.warehouse.v1.Warehouse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                address:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                manager_name:
+                    type: string
+                capacity:
+                    type: string
+                    format: int64
+                is_default:
+                    type: boolean
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        erp.warehouse.v1.CreateWarehouseRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                address:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                manager_name:
+                    type: string
+                capacity:
+                    type: string
+                    format: int64
+                is_default:
+                    type: boolean
+                is_active:
+                    type: boolean
+            required:
+                - name
+        erp.warehouse.v1.CreateWarehouseResponse:
+            type: object
+            properties:
+                warehouse_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        erp.warehouse.v1.UpdateWarehouseRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseBody'
+        erp.warehouse.v1.UpdateWarehouseBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                address:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                manager_name:
+                    type: string
+                capacity:
+                    type: string
+                    format: int64
+                is_default:
+                    type: boolean
+                is_active:
+                    type: boolean
+            required:
+                - name
+        erp.warehouse.v1.UpdateWarehouseResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        erp.warehouse.v1.DeleteWarehouseRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.warehouse.v1.DeleteWarehouseResponse:
+            type: object
+            properties:
+                message:
+                    type: string

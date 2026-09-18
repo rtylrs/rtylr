@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/statement/v1/balance-sheet:
+        get:
+            tags:
+                - StatementService
+            summary: getBalanceSheet
+            operationId: StatementService_getBalanceSheet
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.statement.v1.GetBalanceSheetResponse'
+    /finance/statement/v1/cash-flow:
+        get:
+            tags:
+                - StatementService
+            summary: getCashFlow
+            operationId: StatementService_getCashFlow
+            parameters:
+                - name: period
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.statement.v1.GetCashFlowResponse'
+components:
+    schemas:
+        finance.statement.v1.GetBalanceSheetRequest:
+            type: object
+        finance.statement.v1.GetBalanceSheetResponse:
+            type: object
+            properties:
+                total_assets:
+                    type: number
+                    format: double
+                total_liabilities:
+                    type: number
+                    format: double
+                total_equity:
+                    type: number
+                    format: double
+                cash_balance:
+                    type: number
+                    format: double
+                accounts_receivable:
+                    type: number
+                    format: double
+                accounts_payable:
+                    type: number
+                    format: double
+        finance.statement.v1.GetCashFlowRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+        finance.statement.v1.GetCashFlowResponse:
+            type: object
+            properties:
+                period:
+                    type: string
+                operating_inflow:
+                    type: number
+                    format: double
+                operating_outflow:
+                    type: number
+                    format: double
+                net_operating:
+                    type: number
+                    format: double
+                net_cash_flow:
+                    type: number
+                    format: double

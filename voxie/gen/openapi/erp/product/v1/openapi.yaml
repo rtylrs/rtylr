@@ -1,0 +1,967 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/product/v1/products:
+        get:
+            tags:
+                - ProductService
+            summary: listProducts
+            operationId: ProductService_listProducts
+            parameters:
+                - name: search
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: Filters products by name or SKU.
+                - name: category_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                    description: Filters products by category.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: The maximum number of products to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: The number of records to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.ListProductsResponse'
+        post:
+            tags:
+                - ProductService
+            summary: createProduct
+            operationId: ProductService_createProduct
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.product.v1.CreateProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.CreateProductResponse'
+    /erp/product/v1/barcodes/{code}/product:
+        get:
+            tags:
+                - ProductService
+            summary: getProductByBarcode
+            operationId: ProductService_getProductByBarcode
+            parameters:
+                - name: code
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.GetProductByBarcodeResponse'
+    /erp/product/v1/products/{id}:
+        get:
+            tags:
+                - ProductService
+            summary: getProduct
+            operationId: ProductService_getProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.GetProductResponse'
+        put:
+            tags:
+                - ProductService
+            summary: updateProduct
+            operationId: ProductService_updateProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/erp.product.v1.UpdateProductBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.UpdateProductResponse'
+        delete:
+            tags:
+                - ProductService
+            summary: deleteProduct
+            operationId: ProductService_deleteProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.DeleteProductResponse'
+    /erp/product/v1/products/{id}/full:
+        get:
+            tags:
+                - ProductService
+            summary: getProductFull
+            operationId: ProductService_getProductFull
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.GetProductFullResponse'
+    /erp/product/v1/products/{id}/attributes:
+        get:
+            tags:
+                - ProductService
+            summary: listProductAttributes
+            operationId: ProductService_listProductAttributes
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.ListProductAttributesResponse'
+    /erp/product/v1/dashboard:
+        get:
+            tags:
+                - ProductService
+            summary: getDashboard
+            operationId: ProductService_getDashboard
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.GetDashboardResponse'
+    /erp/product/v1/reorder-suggestions:
+        get:
+            tags:
+                - ProductService
+            summary: listReorderSuggestions
+            operationId: ProductService_listReorderSuggestions
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of reorder suggestions to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of reorder suggestions to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.ListReorderSuggestionsResponse'
+    /erp/product/v1/expiry:
+        get:
+            tags:
+                - ProductService
+            summary: listExpiringItems
+            operationId: ProductService_listExpiringItems
+            parameters:
+                - name: days_ahead
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of expiring items to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of expiring items to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.product.v1.ListExpiringItemsResponse'
+components:
+    schemas:
+        erp.product.v1.ListProductsRequest:
+            type: object
+            properties:
+                search:
+                    type: string
+                    description: Filters products by name or SKU.
+                category_id:
+                    type: string
+                    format: int64
+                    description: Filters products by category.
+                limit:
+                    type: integer
+                    format: int64
+                    description: The maximum number of products to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: The number of records to skip.
+        erp.product.v1.ListProductsResponse:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.product.v1.Product'
+                has_more:
+                    type: boolean
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.product.v1.Product:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                category_id:
+                    type: string
+                    format: int64
+                supplier_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                description:
+                    type: string
+                unit:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                low_stock_threshold:
+                    type: number
+                    format: double
+                reorder_quantity:
+                    type: number
+                    format: double
+                is_active:
+                    type: boolean
+                track_inventory:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: When the record was created.
+                updated_at:
+                    type: string
+                    description: When the record was last updated.
+                business_id:
+                    type: string
+                    format: int64
+                brand_id:
+                    type: string
+                    format: int64
+                compare_at_price:
+                    type: number
+                    format: double
+                tax_rate:
+                    type: number
+                    format: double
+                currency:
+                    type: string
+                weight:
+                    type: number
+                    format: double
+                weight_unit:
+                    type: string
+                length:
+                    type: number
+                    format: double
+                width:
+                    type: number
+                    format: double
+                height:
+                    type: number
+                    format: double
+                dimension_unit:
+                    type: string
+                country_of_origin:
+                    type: string
+                hs_code:
+                    type: string
+                allow_backorder:
+                    type: boolean
+                lead_time_days:
+                    type: integer
+                    format: int32
+                image_url:
+                    type: string
+        erp.product.v1.CreateProductRequest:
+            type: object
+            properties:
+                category_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                supplier_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                description:
+                    type: string
+                unit:
+                    type: string
+                cost_price:
+                    type: number
+                    minimum: 0
+                    format: double
+                sale_price:
+                    type: number
+                    minimum: 0
+                    format: double
+                low_stock_threshold:
+                    type: number
+                    minimum: 0
+                    format: double
+                reorder_quantity:
+                    type: number
+                    minimum: 0
+                    format: double
+                is_active:
+                    type: boolean
+                track_inventory:
+                    type: boolean
+                stock_quantity:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: The opening tracked quantity for this product.
+                brand_id:
+                    type: string
+                    format: int64
+                    description: Links the product to a brand when present.
+                compare_at_price:
+                    type: number
+                    minimum: 0
+                    format: double
+                tax_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                currency:
+                    type: string
+                weight:
+                    type: number
+                    minimum: 0
+                    format: double
+                weight_unit:
+                    type: string
+                length:
+                    type: number
+                    minimum: 0
+                    format: double
+                width:
+                    type: number
+                    minimum: 0
+                    format: double
+                height:
+                    type: number
+                    minimum: 0
+                    format: double
+                dimension_unit:
+                    type: string
+                country_of_origin:
+                    type: string
+                hs_code:
+                    type: string
+                allow_backorder:
+                    type: boolean
+                lead_time_days:
+                    type: integer
+                    minimum: 0
+                    format: int32
+                image_url:
+                    type: string
+            required:
+                - category_id
+                - supplier_id
+                - name
+                - sku
+                - barcode
+                - description
+                - unit
+        erp.product.v1.CreateProductResponse:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+                    description: A human-readable result message.
+        erp.product.v1.GetProductByBarcodeRequest:
+            type: object
+            properties:
+                code:
+                    type: string
+            required:
+                - code
+        erp.product.v1.GetProductByBarcodeResponse:
+            type: object
+            properties:
+                product:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.product.v1.Product'
+        erp.product.v1.GetProductRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.product.v1.GetProductResponse:
+            type: object
+            properties:
+                product:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.product.v1.Product'
+        erp.product.v1.GetProductFullRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.product.v1.GetProductFullResponse:
+            type: object
+            properties:
+                product:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.product.v1.FullProduct'
+        erp.product.v1.FullProduct:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                category_id:
+                    type: string
+                    format: int64
+                supplier_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                description:
+                    type: string
+                unit:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                low_stock_threshold:
+                    type: number
+                    format: double
+                reorder_quantity:
+                    type: number
+                    format: double
+                is_active:
+                    type: boolean
+                track_inventory:
+                    type: boolean
+                brand_id:
+                    type: string
+                    format: int64
+                compare_at_price:
+                    type: number
+                    format: double
+                tax_rate:
+                    type: number
+                    format: double
+                currency:
+                    type: string
+                weight:
+                    type: number
+                    format: double
+                weight_unit:
+                    type: string
+                length:
+                    type: number
+                    format: double
+                width:
+                    type: number
+                    format: double
+                height:
+                    type: number
+                    format: double
+                dimension_unit:
+                    type: string
+                country_of_origin:
+                    type: string
+                hs_code:
+                    type: string
+                allow_backorder:
+                    type: boolean
+                lead_time_days:
+                    type: integer
+                    format: int32
+                image_url:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        erp.product.v1.ListProductAttributesRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.product.v1.ListProductAttributesResponse:
+            type: object
+            properties:
+                attributes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.product.v1.ProductAttribute'
+        erp.product.v1.ProductAttribute:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                value:
+                    type: string
+                position:
+                    type: integer
+                    format: int32
+        erp.product.v1.UpdateProductRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.product.v1.UpdateProductBody'
+        erp.product.v1.UpdateProductBody:
+            type: object
+            properties:
+                category_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                supplier_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                description:
+                    type: string
+                unit:
+                    type: string
+                cost_price:
+                    type: number
+                    minimum: 0
+                    format: double
+                sale_price:
+                    type: number
+                    minimum: 0
+                    format: double
+                low_stock_threshold:
+                    type: number
+                    minimum: 0
+                    format: double
+                reorder_quantity:
+                    type: number
+                    minimum: 0
+                    format: double
+                is_active:
+                    type: boolean
+                track_inventory:
+                    type: boolean
+                stock_quantity:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: The tracked quantity to store for this product.
+                brand_id:
+                    type: string
+                    format: int64
+                    description: Links the product to a brand when present.
+                compare_at_price:
+                    type: number
+                    minimum: 0
+                    format: double
+                tax_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                currency:
+                    type: string
+                weight:
+                    type: number
+                    minimum: 0
+                    format: double
+                weight_unit:
+                    type: string
+                length:
+                    type: number
+                    minimum: 0
+                    format: double
+                width:
+                    type: number
+                    minimum: 0
+                    format: double
+                height:
+                    type: number
+                    minimum: 0
+                    format: double
+                dimension_unit:
+                    type: string
+                country_of_origin:
+                    type: string
+                hs_code:
+                    type: string
+                allow_backorder:
+                    type: boolean
+                lead_time_days:
+                    type: integer
+                    minimum: 0
+                    format: int32
+                image_url:
+                    type: string
+            required:
+                - category_id
+                - supplier_id
+                - name
+                - sku
+                - barcode
+                - description
+                - unit
+        erp.product.v1.UpdateProductResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        erp.product.v1.DeleteProductRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.product.v1.DeleteProductResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        erp.product.v1.GetDashboardRequest:
+            type: object
+        erp.product.v1.GetDashboardResponse:
+            type: object
+            properties:
+                total_products:
+                    type: integer
+                    format: int32
+                low_stock_count:
+                    type: integer
+                    format: int32
+                pending_orders:
+                    type: integer
+                    format: int32
+                total_suppliers:
+                    type: integer
+                    format: int32
+                inventory_value:
+                    type: number
+                    format: double
+                low_stock_items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.product.v1.DashboardLowStockItem'
+                recent_orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.product.v1.DashboardRecentOrder'
+                top_categories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.product.v1.DashboardTopCategory'
+        erp.product.v1.DashboardLowStockItem:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                current_stock:
+                    type: number
+                    format: double
+                reorder_point:
+                    type: number
+                    format: double
+                warehouse_name:
+                    type: string
+        erp.product.v1.DashboardRecentOrder:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                po_number:
+                    type: string
+                supplier_name:
+                    type: string
+                status:
+                    type: string
+                total:
+                    type: number
+                    format: double
+                created_at:
+                    type: string
+        erp.product.v1.DashboardTopCategory:
+            type: object
+            properties:
+                name:
+                    type: string
+                product_count:
+                    type: integer
+                    format: int32
+        erp.product.v1.ListReorderSuggestionsRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of reorder suggestions to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of reorder suggestions to skip.
+        erp.product.v1.ListReorderSuggestionsResponse:
+            type: object
+            properties:
+                suggestions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.product.v1.ReorderSuggestion'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.product.v1.ReorderSuggestion:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                current_stock:
+                    type: number
+                    format: double
+                reorder_point:
+                    type: number
+                    format: double
+                suggested_quantity:
+                    type: number
+                    format: double
+                avg_daily_sales:
+                    type: number
+                    format: double
+                lead_time_days:
+                    type: integer
+                    format: int32
+                confidence:
+                    type: string
+        erp.product.v1.ListExpiringItemsRequest:
+            type: object
+            properties:
+                days_ahead:
+                    type: integer
+                    format: int32
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of expiring items to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of expiring items to skip.
+        erp.product.v1.ListExpiringItemsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.product.v1.ExpiringItem'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.product.v1.ExpiringItem:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                batch_id:
+                    type: string
+                expiry_date:
+                    type: string
+                quantity:
+                    type: number
+                    format: double
+                warehouse_name:
+                    type: string

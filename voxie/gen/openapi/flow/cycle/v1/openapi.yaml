@@ -1,0 +1,207 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/cycle/v1/cycles:
+        get:
+            tags:
+                - CycleService
+            summary: listCycles
+            operationId: CycleService_listCycles
+            parameters:
+                - name: workspace_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.cycle.v1.ListCyclesResponse'
+        post:
+            tags:
+                - CycleService
+            summary: createCycle
+            operationId: CycleService_createCycle
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.cycle.v1.CreateCycleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.cycle.v1.CreateCycleResponse'
+    /flow/cycle/v1/cycles/{id}:
+        put:
+            tags:
+                - CycleService
+            summary: updateCycle
+            operationId: CycleService_updateCycle
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.cycle.v1.UpdateCycleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.cycle.v1.UpdateCycleResponse'
+components:
+    schemas:
+        flow.cycle.v1.ListCyclesRequest:
+            type: object
+            properties:
+                workspace_id:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+        flow.cycle.v1.ListCyclesResponse:
+            type: object
+            properties:
+                cycles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.cycle.v1.Cycle'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.cycle.v1.Cycle:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                workspace_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                start_date:
+                    type: string
+                end_date:
+                    type: string
+                status:
+                    type: string
+                scope:
+                    type: integer
+                    format: int32
+                completed:
+                    type: integer
+                    format: int32
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.
+        flow.cycle.v1.CreateCycleRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                workspace_id:
+                    type: string
+                start_date:
+                    type: string
+                end_date:
+                    type: string
+            required:
+                - name
+        flow.cycle.v1.CreateCycleResponse:
+            type: object
+            properties:
+                cycle:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.cycle.v1.Cycle'
+        flow.cycle.v1.UpdateCycleRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                status:
+                    type: string
+                end_date:
+                    type: string
+        flow.cycle.v1.UpdateCycleResponse:
+            type: object

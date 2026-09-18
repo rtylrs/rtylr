@@ -1,0 +1,58 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/timesheet/v1/timesheets:
+        get:
+            tags:
+                - TimesheetService
+            summary: listTimesheets
+            operationId: TimesheetService_listTimesheets
+            parameters:
+                - name: week_start
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.timesheet.v1.ListTimesheetsResponse'
+components:
+    schemas:
+        hr.timesheet.v1.ListTimesheetsRequest:
+            type: object
+            properties:
+                week_start:
+                    type: string
+        hr.timesheet.v1.ListTimesheetsResponse:
+            type: object
+            properties:
+                timesheets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.timesheet.v1.TimesheetEntry'
+        hr.timesheet.v1.TimesheetEntry:
+            type: object
+            properties:
+                staff_id:
+                    type: integer
+                    format: int64
+                staff_name:
+                    type: string
+                week_start:
+                    type: string
+                total_hours:
+                    type: number
+                    format: double
+                regular_hours:
+                    type: number
+                    format: double
+                overtime_hours:
+                    type: number
+                    format: double
+            description: TimesheetEntry is a weekly hours summary for a staff member.

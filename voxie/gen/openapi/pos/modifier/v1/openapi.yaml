@@ -1,0 +1,194 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/modifier/v1/modifiers:
+        get:
+            tags:
+                - ModifierService
+            summary: listModifiers
+            description: Returns modifiers for the active business.
+            operationId: ModifierService_listModifiers
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.ListModifiersResponse'
+        post:
+            tags:
+                - ModifierService
+            summary: createModifier
+            description: Creates a new modifier.
+            operationId: ModifierService_createModifier
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.modifier.v1.CreateModifierRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.CreateModifierResponse'
+    /pos/modifier/v1/modifiers/{id}:
+        put:
+            tags:
+                - ModifierService
+            summary: updateModifier
+            description: Updates an existing modifier.
+            operationId: ModifierService_updateModifier
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.modifier.v1.UpdateModifierBody'
+                            description: body carries updatable modifier fields bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.UpdateModifierResponse'
+        delete:
+            tags:
+                - ModifierService
+            summary: deleteModifier
+            description: Removes a modifier by ID.
+            operationId: ModifierService_deleteModifier
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.DeleteModifierResponse'
+components:
+    schemas:
+        pos.modifier.v1.ListModifiersRequest:
+            type: object
+        pos.modifier.v1.ListModifiersResponse:
+            type: object
+            properties:
+                modifiers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.modifier.v1.Modifier'
+        pos.modifier.v1.Modifier:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                name:
+                    type: string
+                price_delta:
+                    type: number
+                    format: double
+                group_name:
+                    type: string
+                is_required:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            description: Modifier is a customization option that can be attached to a menu item.
+        pos.modifier.v1.CreateModifierRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                price_delta:
+                    type: number
+                    minimum: 0
+                    format: double
+                group_name:
+                    type: string
+                is_required:
+                    type: boolean
+            required:
+                - name
+                - group_name
+        pos.modifier.v1.CreateModifierResponse:
+            type: object
+            properties:
+                modifier_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        pos.modifier.v1.UpdateModifierRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the modifier.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.modifier.v1.UpdateModifierBody'
+                    description: body carries updatable modifier fields bound from the HTTP payload.
+        pos.modifier.v1.UpdateModifierBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                price_delta:
+                    type: number
+                    minimum: 0
+                    format: double
+                group_name:
+                    type: string
+                is_required:
+                    type: boolean
+            required:
+                - name
+                - group_name
+        pos.modifier.v1.UpdateModifierResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        pos.modifier.v1.DeleteModifierRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the modifier.
+        pos.modifier.v1.DeleteModifierResponse:
+            type: object
+            properties:
+                message:
+                    type: string

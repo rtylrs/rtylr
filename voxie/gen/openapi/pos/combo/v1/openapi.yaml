@@ -1,0 +1,202 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/combo/v1/combos:
+        get:
+            tags:
+                - ComboService
+            summary: listCombos
+            description: Returns all combos for the active business.
+            operationId: ComboService_listCombos
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.combo.v1.ListCombosResponse'
+        post:
+            tags:
+                - ComboService
+            summary: createCombo
+            description: Creates a new combo.
+            operationId: ComboService_createCombo
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.combo.v1.CreateComboRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.combo.v1.CreateComboResponse'
+    /pos/combo/v1/combos/{id}:
+        put:
+            tags:
+                - ComboService
+            summary: updateCombo
+            description: Updates an existing combo.
+            operationId: ComboService_updateCombo
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.combo.v1.UpdateComboBody'
+                            description: body carries updatable combo fields bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.combo.v1.UpdateComboResponse'
+        delete:
+            tags:
+                - ComboService
+            summary: deleteCombo
+            description: Removes a combo by ID.
+            operationId: ComboService_deleteCombo
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.combo.v1.DeleteComboResponse'
+components:
+    schemas:
+        pos.combo.v1.ListCombosRequest:
+            type: object
+        pos.combo.v1.ListCombosResponse:
+            type: object
+            properties:
+                combos:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.combo.v1.Combo'
+        pos.combo.v1.Combo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                name:
+                    type: string
+                description:
+                    type: string
+                price:
+                    type: number
+                    format: double
+                items:
+                    type: string
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            description: Combo is a bundled set of menu items sold as a single offering.
+        pos.combo.v1.CreateComboRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                price:
+                    type: number
+                    minimum: 0
+                    format: double
+                items:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - name
+                - description
+                - items
+        pos.combo.v1.CreateComboResponse:
+            type: object
+            properties:
+                combo_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        pos.combo.v1.UpdateComboRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the combo.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.combo.v1.UpdateComboBody'
+                    description: body carries updatable combo fields bound from the HTTP payload.
+        pos.combo.v1.UpdateComboBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                price:
+                    type: number
+                    minimum: 0
+                    format: double
+                items:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - name
+                - description
+                - items
+        pos.combo.v1.UpdateComboResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        pos.combo.v1.DeleteComboRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the combo.
+        pos.combo.v1.DeleteComboResponse:
+            type: object
+            properties:
+                message:
+                    type: string

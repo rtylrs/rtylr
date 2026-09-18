@@ -1,0 +1,938 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /console/admin/v1/console/stats:
+        get:
+            tags:
+                - ConsoleAdminService
+            summary: getStats
+            operationId: ConsoleAdminService_getStats
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.GetStatsResponse'
+    /console/admin/v1/console/users:
+        get:
+            tags:
+                - ConsoleAdminService
+            summary: listUsers
+            operationId: ConsoleAdminService_listUsers
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                - name: email
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: name
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.ListUsersResponse'
+        post:
+            tags:
+                - ConsoleAdminService
+            summary: createUser
+            operationId: ConsoleAdminService_createUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.CreateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.CreateUserResponse'
+    /console/admin/v1/console/users/{id}:
+        get:
+            tags:
+                - ConsoleAdminService
+            summary: getUser
+            operationId: ConsoleAdminService_getUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.GetUserResponse'
+        put:
+            tags:
+                - ConsoleAdminService
+            summary: updateUser
+            operationId: ConsoleAdminService_updateUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.UpdateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.UpdateUserResponse'
+        delete:
+            tags:
+                - ConsoleAdminService
+            summary: deleteUser
+            operationId: ConsoleAdminService_deleteUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.DeleteUserResponse'
+    /console/admin/v1/console/users/{id}/ban:
+        post:
+            tags:
+                - ConsoleAdminService
+            summary: banUser
+            operationId: ConsoleAdminService_banUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.BanUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.BanUserResponse'
+    /console/admin/v1/console/users/{id}/unban:
+        post:
+            tags:
+                - ConsoleAdminService
+            summary: unbanUser
+            operationId: ConsoleAdminService_unbanUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.UnbanUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.UnbanUserResponse'
+    /console/admin/v1/console/users/{id}/set-console-admin:
+        post:
+            tags:
+                - ConsoleAdminService
+            summary: setConsoleAdmin
+            operationId: ConsoleAdminService_setConsoleAdmin
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.SetConsoleAdminRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.SetConsoleAdminResponse'
+    /console/admin/v1/console/users/{user_id}/subscription:
+        get:
+            tags:
+                - ConsoleAdminService
+            summary: getUserSubscription
+            operationId: ConsoleAdminService_getUserSubscription
+            parameters:
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.GetUserSubscriptionResponse'
+    /console/admin/v1/console/businesses:
+        get:
+            tags:
+                - ConsoleAdminService
+            summary: listBusinesses
+            operationId: ConsoleAdminService_listBusinesses
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                - name: name
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: owner_id
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.ListBusinessesResponse'
+    /console/admin/v1/console/businesses/{id}:
+        put:
+            tags:
+                - ConsoleAdminService
+            summary: updateBusiness
+            operationId: ConsoleAdminService_updateBusiness
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.UpdateBusinessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.UpdateBusinessResponse'
+        delete:
+            tags:
+                - ConsoleAdminService
+            summary: deleteBusiness
+            operationId: ConsoleAdminService_deleteBusiness
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.DeleteBusinessResponse'
+    /console/admin/v1/console/internal-onboarding/business-owner:
+        post:
+            tags:
+                - ConsoleAdminService
+            summary: createBusinessOwner
+            operationId: ConsoleAdminService_createBusinessOwner
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.CreateBusinessOwnerRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.CreateBusinessOwnerResponse'
+    /console/admin/v1/console/subscriptions:
+        get:
+            tags:
+                - ConsoleAdminService
+            summary: listSubscriptions
+            operationId: ConsoleAdminService_listSubscriptions
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.ListSubscriptionsResponse'
+    /console/admin/v1/console/subscriptions/upsert:
+        post:
+            tags:
+                - ConsoleAdminService
+            summary: upsertSubscription
+            operationId: ConsoleAdminService_upsertSubscription
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.UpsertSubscriptionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.UpsertSubscriptionResponse'
+    /console/admin/v1/console/subscriptions/{id}:
+        delete:
+            tags:
+                - ConsoleAdminService
+            summary: deleteSubscription
+            operationId: ConsoleAdminService_deleteSubscription
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.DeleteSubscriptionResponse'
+    /console/admin/v1/console/plans:
+        get:
+            tags:
+                - ConsoleAdminService
+            summary: listPlans
+            operationId: ConsoleAdminService_listPlans
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.ListPlansResponse'
+    /console/admin/v1/console/plans/{id}:
+        put:
+            tags:
+                - ConsoleAdminService
+            summary: updatePlan
+            operationId: ConsoleAdminService_updatePlan
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/console.admin.v1.UpdatePlanRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/console.admin.v1.UpdatePlanResponse'
+components:
+    schemas:
+        console.admin.v1.GetStatsRequest:
+            type: object
+        console.admin.v1.GetStatsResponse:
+            type: object
+            properties:
+                stats:
+                    allOf:
+                        - $ref: '#/components/schemas/console.admin.v1.Stats'
+        console.admin.v1.Stats:
+            type: object
+            properties:
+                total_users:
+                    type: integer
+                    format: int64
+                banned_users:
+                    type: integer
+                    format: int64
+                active_subscriptions:
+                    type: integer
+                    format: int64
+                total_businesses:
+                    type: integer
+                    format: int64
+                total_grants:
+                    type: integer
+                    format: int64
+                manual_addon_grants:
+                    type: integer
+                    format: int64
+                console_admins:
+                    type: integer
+                    format: int64
+        console.admin.v1.ListUsersRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+                id:
+                    type: integer
+                    format: int64
+                email:
+                    type: string
+                name:
+                    type: string
+        console.admin.v1.ListUsersResponse:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/console.admin.v1.User'
+                total:
+                    type: integer
+                    format: int64
+        console.admin.v1.User:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                email:
+                    type: string
+                full_name:
+                    type: string
+                business_id:
+                    type: integer
+                    format: int64
+                is_console_admin:
+                    type: boolean
+                is_banned:
+                    type: boolean
+                ban_reason:
+                    type: string
+                banned_at:
+                    type: string
+                created_at:
+                    type: string
+        console.admin.v1.GetUserRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+        console.admin.v1.GetUserResponse:
+            type: object
+            properties:
+                user:
+                    allOf:
+                        - $ref: '#/components/schemas/console.admin.v1.User'
+        console.admin.v1.CreateUserRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                password:
+                    type: string
+                full_name:
+                    type: string
+                is_console_admin:
+                    type: boolean
+        console.admin.v1.CreateUserResponse:
+            type: object
+            properties:
+                user:
+                    allOf:
+                        - $ref: '#/components/schemas/console.admin.v1.User'
+                message:
+                    type: string
+        console.admin.v1.UpdateUserRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+                full_name:
+                    type: string
+                email:
+                    type: string
+        console.admin.v1.UpdateUserResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.DeleteUserRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+        console.admin.v1.DeleteUserResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.BanUserRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+                reason:
+                    type: string
+        console.admin.v1.BanUserResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.UnbanUserRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+        console.admin.v1.UnbanUserResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.SetConsoleAdminRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+                is_console_admin:
+                    type: boolean
+        console.admin.v1.SetConsoleAdminResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.GetUserSubscriptionRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+        console.admin.v1.GetUserSubscriptionResponse:
+            type: object
+            properties:
+                subscription:
+                    allOf:
+                        - $ref: '#/components/schemas/console.admin.v1.Subscription'
+        console.admin.v1.Subscription:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                owner_id:
+                    type: integer
+                    format: int64
+                owner_name:
+                    type: string
+                owner_email:
+                    type: string
+                business_id:
+                    type: integer
+                    format: int64
+                business_name:
+                    type: string
+                plan_id:
+                    type: integer
+                    format: int64
+                plan_name:
+                    type: string
+                status:
+                    type: string
+                seat_count:
+                    type: integer
+                    format: int32
+                active_seat_count:
+                    type: integer
+                    format: int32
+                included_seat_limit:
+                    type: integer
+                    format: int32
+                included_seat_count:
+                    type: integer
+                    format: int32
+                billable_seat_count:
+                    type: integer
+                    format: int32
+                trial_ends_at:
+                    type: string
+                next_billing_date:
+                    type: string
+                current_period_ends_at:
+                    type: string
+                paddle_subscription_id:
+                    type: string
+                paddle_customer_id:
+                    type: string
+                days_remaining:
+                    type: integer
+                    format: int32
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        console.admin.v1.ListBusinessesRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+                id:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                owner_id:
+                    type: integer
+                    format: int64
+        console.admin.v1.ListBusinessesResponse:
+            type: object
+            properties:
+                businesses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/console.admin.v1.Business'
+                total:
+                    type: integer
+                    format: int64
+        console.admin.v1.Business:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                owner_id:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                slug:
+                    type: string
+                created_at:
+                    type: string
+        console.admin.v1.UpdateBusinessRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+        console.admin.v1.UpdateBusinessResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.DeleteBusinessRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+        console.admin.v1.DeleteBusinessResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.CreateBusinessOwnerRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                password:
+                    type: string
+                full_name:
+                    type: string
+                business_name:
+                    type: string
+                industry:
+                    type: string
+                country:
+                    type: string
+                timezone:
+                    type: string
+                currency:
+                    type: string
+                grant_plan:
+                    type: boolean
+                plan_id:
+                    type: integer
+                    format: int64
+                subscription_status:
+                    type: string
+                grant_days:
+                    type: integer
+                    format: int32
+        console.admin.v1.CreateBusinessOwnerResponse:
+            type: object
+            properties:
+                owner:
+                    allOf:
+                        - $ref: '#/components/schemas/console.admin.v1.User'
+                business:
+                    allOf:
+                        - $ref: '#/components/schemas/console.admin.v1.Business'
+                subscription:
+                    allOf:
+                        - $ref: '#/components/schemas/console.admin.v1.Subscription'
+                message:
+                    type: string
+        console.admin.v1.ListSubscriptionsRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+        console.admin.v1.ListSubscriptionsResponse:
+            type: object
+            properties:
+                subscriptions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/console.admin.v1.Subscription'
+                total:
+                    type: integer
+                    format: int64
+        console.admin.v1.UpsertSubscriptionRequest:
+            type: object
+            properties:
+                owner_id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+                plan_id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+                status:
+                    type: string
+                seat_count:
+                    type: integer
+                    format: int32
+                trial_ends_at:
+                    type: string
+                next_billing_date:
+                    type: string
+                current_period_ends_at:
+                    type: string
+                total_days:
+                    type: integer
+                    format: int32
+                paddle_subscription_id:
+                    type: string
+                paddle_customer_id:
+                    type: string
+        console.admin.v1.UpsertSubscriptionResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.DeleteSubscriptionRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+        console.admin.v1.DeleteSubscriptionResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        console.admin.v1.ListPlansRequest:
+            type: object
+        console.admin.v1.ListPlansResponse:
+            type: object
+            properties:
+                plans:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/console.admin.v1.Plan'
+        console.admin.v1.Plan:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                annual_price_per_seat_cents:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+        console.admin.v1.UpdatePlanRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                annual_price_per_seat_cents:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+        console.admin.v1.UpdatePlanResponse:
+            type: object
+            properties:
+                message:
+                    type: string

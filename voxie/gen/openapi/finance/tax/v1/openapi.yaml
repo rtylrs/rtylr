@@ -1,0 +1,128 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/tax/v1/tax:
+        get:
+            tags:
+                - TaxService
+            summary: getTaxConfig
+            operationId: TaxService_getTaxConfig
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.tax.v1.GetTaxConfigResponse'
+        put:
+            tags:
+                - TaxService
+            summary: updateTaxConfig
+            operationId: TaxService_updateTaxConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.tax.v1.UpdateTaxConfigRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.tax.v1.UpdateTaxConfigResponse'
+    /finance/tax/v1/pl:
+        get:
+            tags:
+                - TaxService
+            summary: getPLReport
+            operationId: TaxService_getPLReport
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.tax.v1.GetPLReportResponse'
+components:
+    schemas:
+        finance.tax.v1.GetTaxConfigRequest:
+            type: object
+        finance.tax.v1.GetTaxConfigResponse:
+            type: object
+            properties:
+                config:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.tax.v1.TaxConfig'
+        finance.tax.v1.TaxConfig:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                tax_name:
+                    type: string
+                tax_rate:
+                    type: number
+                    format: double
+                is_inclusive:
+                    type: boolean
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            description: |-
+                Renamed from TaxConfig to avoid a name collision with the distinct
+                finance.report.v1.TaxConfig - onk message names are unique across the
+                whole schema tree, unlike proto's per-package scoping.
+        finance.tax.v1.UpdateTaxConfigRequest:
+            type: object
+            properties:
+                tax_name:
+                    type: string
+                tax_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                is_inclusive:
+                    type: boolean
+                is_active:
+                    type: boolean
+            required:
+                - tax_name
+        finance.tax.v1.UpdateTaxConfigResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        finance.tax.v1.GetPLReportRequest:
+            type: object
+            description: |-
+                Renamed from GetPLReportRequest to avoid a name collision with the
+                distinct finance.report.v1.GetPLReportRequest.
+        finance.tax.v1.GetPLReportResponse:
+            type: object
+            properties:
+                total_revenue:
+                    type: number
+                    format: double
+                total_expenses:
+                    type: number
+                    format: double
+                gross_profit:
+                    type: number
+                    format: double
+                net_profit:
+                    type: number
+                    format: double
+            description: |-
+                Renamed from GetPLReportResponse to avoid a name collision with the
+                distinct finance.report.v1.GetPLReportResponse.

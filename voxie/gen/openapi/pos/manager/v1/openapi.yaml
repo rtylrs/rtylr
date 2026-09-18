@@ -1,0 +1,44 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/manager/v1/verify:
+        post:
+            tags:
+                - ManagerService
+            summary: verifyPIN
+            description: Verifies a manager PIN and returns the associated staff member.
+            operationId: ManagerService_verifyPIN
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.manager.v1.VerifyPINRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.manager.v1.VerifyPINResponse'
+components:
+    schemas:
+        pos.manager.v1.VerifyPINRequest:
+            type: object
+            properties:
+                pin:
+                    type: string
+            required:
+                - pin
+        pos.manager.v1.VerifyPINResponse:
+            type: object
+            properties:
+                valid:
+                    type: boolean
+                staff_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string

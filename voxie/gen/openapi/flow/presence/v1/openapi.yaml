@@ -1,0 +1,44 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/presence/today:
+        get:
+            tags:
+                - PresenceService
+            summary: getPresence
+            operationId: PresenceService_getPresence
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.presence.v1.GetPresenceResponse'
+components:
+    schemas:
+        flow.presence.v1.GetPresenceRequest:
+            type: object
+        flow.presence.v1.GetPresenceResponse:
+            type: object
+            properties:
+                presence:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.presence.v1.PresenceEntry'
+                date:
+                    type: string
+        flow.presence.v1.PresenceEntry:
+            type: object
+            properties:
+                employee_id:
+                    type: string
+                user_id:
+                    type: string
+                first_name:
+                    type: string
+                last_name:
+                    type: string
+                status:
+                    type: string

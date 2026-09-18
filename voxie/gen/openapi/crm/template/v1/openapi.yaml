@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /crm/template/v1/templates:
+        get:
+            tags:
+                - TemplateService
+            summary: listTemplates
+            operationId: TemplateService_listTemplates
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.template.v1.ListTemplatesResponse'
+        post:
+            tags:
+                - TemplateService
+            summary: createTemplate
+            operationId: TemplateService_createTemplate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.template.v1.CreateTemplateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.template.v1.CreateTemplateResponse'
+    /crm/template/v1/templates/{id}:
+        put:
+            tags:
+                - TemplateService
+            summary: updateTemplate
+            operationId: TemplateService_updateTemplate
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/crm.template.v1.UpdateTemplateBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.template.v1.UpdateTemplateResponse'
+        delete:
+            tags:
+                - TemplateService
+            summary: deleteTemplate
+            operationId: TemplateService_deleteTemplate
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.template.v1.DeleteTemplateResponse'
+components:
+    schemas:
+        crm.template.v1.ListTemplatesRequest:
+            type: object
+        crm.template.v1.ListTemplatesResponse:
+            type: object
+            properties:
+                templates:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.template.v1.Template'
+        crm.template.v1.Template:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                type:
+                    type: string
+                    description: Template kind, e.g. "email" or "sms".
+                subject:
+                    type: string
+                body:
+                    type: string
+                variables:
+                    type: string
+                    description: 'Arbitrary JSON template variables (source: google.protobuf.Value).'
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            description: Template is a reusable message template for campaigns and notifications.
+        crm.template.v1.CreateTemplateRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                type:
+                    type: string
+                subject:
+                    type: string
+                body:
+                    type: string
+                variables:
+                    type: string
+                    description: 'Arbitrary JSON template variables (source: google.protobuf.Value).'
+                is_active:
+                    type: boolean
+            required:
+                - name
+                - type
+                - body
+        crm.template.v1.CreateTemplateResponse:
+            type: object
+            properties:
+                template_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        crm.template.v1.UpdateTemplateRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.template.v1.UpdateTemplateBody'
+        crm.template.v1.UpdateTemplateBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                type:
+                    type: string
+                subject:
+                    type: string
+                body:
+                    type: string
+                variables:
+                    type: string
+                    description: 'Arbitrary JSON template variables (source: google.protobuf.Value).'
+                is_active:
+                    type: boolean
+            required:
+                - name
+        crm.template.v1.UpdateTemplateResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        crm.template.v1.DeleteTemplateRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+        crm.template.v1.DeleteTemplateResponse:
+            type: object
+            properties:
+                message:
+                    type: string

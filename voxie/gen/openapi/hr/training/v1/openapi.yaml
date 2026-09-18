@@ -1,0 +1,90 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/training/v1/courses:
+        get:
+            tags:
+                - TrainingService
+            summary: listTrainingCourses
+            operationId: TrainingService_listTrainingCourses
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.training.v1.ListTrainingCoursesResponse'
+        post:
+            tags:
+                - TrainingService
+            summary: createTrainingCourse
+            operationId: TrainingService_createTrainingCourse
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.training.v1.CreateTrainingCourseRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.training.v1.CreateTrainingCourseResponse'
+components:
+    schemas:
+        hr.training.v1.ListTrainingCoursesRequest:
+            type: object
+        hr.training.v1.ListTrainingCoursesResponse:
+            type: object
+            properties:
+                courses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.training.v1.TrainingCourse'
+        hr.training.v1.TrainingCourse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                duration_hours:
+                    type: number
+                    format: double
+                is_required:
+                    type: boolean
+                created_at:
+                    type: string
+            description: TrainingCourse is a training course offered to staff.
+        hr.training.v1.CreateTrainingCourseRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                duration_hours:
+                    type: number
+                    format: double
+                is_required:
+                    type: boolean
+            required:
+                - name
+        hr.training.v1.CreateTrainingCourseResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string

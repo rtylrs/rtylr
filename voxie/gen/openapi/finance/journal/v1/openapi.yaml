@@ -1,0 +1,228 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/journal/v1/entries:
+        get:
+            tags:
+                - JournalService
+            summary: listJournalEntries
+            operationId: JournalService_listJournalEntries
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+                - name: from_date
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The inclusive start date filter.
+                - name: to_date
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The inclusive end date filter.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.journal.v1.ListJournalEntriesResponse'
+        post:
+            tags:
+                - JournalService
+            summary: createJournalEntry
+            operationId: JournalService_createJournalEntry
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.journal.v1.CreateJournalEntryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.journal.v1.CreateJournalEntryResponse'
+    /finance/journal/v1/entries/{id}:
+        get:
+            tags:
+                - JournalService
+            summary: getJournalEntry
+            operationId: JournalService_getJournalEntry
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.journal.v1.GetJournalEntryResponse'
+components:
+    schemas:
+        finance.journal.v1.ListJournalEntriesRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+                from_date:
+                    type: string
+                    description: The inclusive start date filter.
+                to_date:
+                    type: string
+                    description: The inclusive end date filter.
+        finance.journal.v1.ListJournalEntriesResponse:
+            type: object
+            properties:
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.journal.v1.JournalEntry'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        finance.journal.v1.JournalEntry:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                number:
+                    type: string
+                date:
+                    type: string
+                description:
+                    type: string
+                lines:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.journal.v1.JournalLine'
+                status:
+                    type: string
+                    description: draft, posted
+                created_at:
+                    type: string
+                    description: When the record was created.
+        finance.journal.v1.JournalLine:
+            type: object
+            properties:
+                account_id:
+                    type: string
+                    format: int64
+                account_name:
+                    type: string
+                debit:
+                    type: number
+                    format: double
+                credit:
+                    type: number
+                    format: double
+                description:
+                    type: string
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.
+        finance.journal.v1.CreateJournalEntryRequest:
+            type: object
+            properties:
+                date:
+                    type: string
+                description:
+                    type: string
+                lines:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.journal.v1.JournalLine'
+                    minItems: 1
+            required:
+                - date
+                - description
+        finance.journal.v1.CreateJournalEntryResponse:
+            type: object
+            properties:
+                entry:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.journal.v1.JournalEntry'
+        finance.journal.v1.GetJournalEntryRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        finance.journal.v1.GetJournalEntryResponse:
+            type: object
+            properties:
+                entry:
+                    allOf:
+                        - $ref: '#/components/schemas/finance.journal.v1.JournalEntry'

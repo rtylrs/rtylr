@@ -1,0 +1,449 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/developer/v1/api-keys:
+        get:
+            tags:
+                - DeveloperService
+            summary: listApiKeys
+            description: Returns API keys for the active business.
+            operationId: DeveloperService_listApiKeys
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.ListApiKeysResponse'
+        post:
+            tags:
+                - DeveloperService
+            summary: createApiKey
+            description: Creates a new API key.
+            operationId: DeveloperService_createApiKey
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.developer.v1.CreateApiKeyRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.CreateApiKeyResponse'
+    /hub/developer/v1/api-keys/revoke:
+        post:
+            tags:
+                - DeveloperService
+            summary: revokeApiKey
+            description: Revokes an existing API key.
+            operationId: DeveloperService_revokeApiKey
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.developer.v1.RevokeApiKeyRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.RevokeApiKeyResponse'
+    /hub/developer/v1/webhooks:
+        get:
+            tags:
+                - DeveloperService
+            summary: listWebhooks
+            description: Returns configured webhooks.
+            operationId: DeveloperService_listWebhooks
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.ListWebhooksResponse'
+        post:
+            tags:
+                - DeveloperService
+            summary: createWebhook
+            description: Registers a new webhook endpoint.
+            operationId: DeveloperService_createWebhook
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.developer.v1.CreateWebhookRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.CreateWebhookResponse'
+    /hub/developer/v1/webhooks/{id}:
+        put:
+            tags:
+                - DeveloperService
+            summary: updateWebhook
+            description: Updates an existing webhook.
+            operationId: DeveloperService_updateWebhook
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.developer.v1.UpdateWebhookRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.UpdateWebhookResponse'
+        delete:
+            tags:
+                - DeveloperService
+            summary: deleteWebhook
+            description: Removes a webhook by ID.
+            operationId: DeveloperService_deleteWebhook
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.DeleteWebhookResponse'
+    /hub/developer/v1/webhooks/deliveries:
+        get:
+            tags:
+                - DeveloperService
+            summary: listWebhookDeliveries
+            description: |-
+                Returns delivery attempts for the business's webhooks, most recent first.
+
+                A registration whose endpoint has started failing is otherwise invisible
+                to the tenant who owns it: deliveries retry, exhaust their attempts and
+                are dead-lettered with nothing surfacing. Filter on status to find those.
+
+                Literal path segment rather than a parameter, so it does not collide with
+                the /webhooks/{id} routes above. Adding a GET /webhooks/{id} later would
+                make this ambiguous.
+            operationId: DeveloperService_listWebhookDeliveries
+            parameters:
+                - name: webhook_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                    description: |-
+                        webhook_id narrows to one registration. Omit for every registration in
+                        the business.
+                - name: status
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: |-
+                        status narrows to one status. "dead" is the one worth watching, since
+                        those events will never arrive without intervention.
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.developer.v1.ListWebhookDeliveriesResponse'
+components:
+    schemas:
+        hub.developer.v1.ListApiKeysRequest:
+            type: object
+        hub.developer.v1.ListApiKeysResponse:
+            type: object
+            properties:
+                keys:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.developer.v1.ApiKey'
+        hub.developer.v1.ApiKey:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                key_prefix:
+                    type: string
+                    description: First 8 chars shown
+                scopes:
+                    type: array
+                    items:
+                        type: string
+                created_at:
+                    type: string
+                last_used_at:
+                    type: string
+                expires_at:
+                    type: string
+                is_active:
+                    type: boolean
+        hub.developer.v1.CreateApiKeyRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                scopes:
+                    type: array
+                    items:
+                        type: string
+                    minItems: 1
+            required:
+                - name
+        hub.developer.v1.CreateApiKeyResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                key:
+                    type: string
+                message:
+                    type: string
+        hub.developer.v1.RevokeApiKeyRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.developer.v1.RevokeApiKeyResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.developer.v1.ListWebhooksRequest:
+            type: object
+        hub.developer.v1.ListWebhooksResponse:
+            type: object
+            properties:
+                webhooks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.developer.v1.Webhook'
+        hub.developer.v1.Webhook:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                url:
+                    type: string
+                events:
+                    type: array
+                    items:
+                        type: string
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                last_triggered_at:
+                    type: string
+        hub.developer.v1.CreateWebhookRequest:
+            type: object
+            properties:
+                url:
+                    type: string
+                events:
+                    type: array
+                    items:
+                        type: string
+                    minItems: 1
+            required:
+                - url
+        hub.developer.v1.CreateWebhookResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        hub.developer.v1.UpdateWebhookRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                url:
+                    type: string
+                events:
+                    type: array
+                    items:
+                        type: string
+                    minItems: 1
+                is_active:
+                    type: boolean
+            required:
+                - url
+        hub.developer.v1.UpdateWebhookResponse:
+            type: object
+            properties:
+                webhook:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.developer.v1.Webhook'
+        hub.developer.v1.DeleteWebhookRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        hub.developer.v1.DeleteWebhookResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.developer.v1.ListWebhookDeliveriesRequest:
+            type: object
+            properties:
+                webhook_id:
+                    type: string
+                    format: int64
+                    description: |-
+                        webhook_id narrows to one registration. Omit for every registration in
+                        the business.
+                status:
+                    type: string
+                    description: |-
+                        status narrows to one status. "dead" is the one worth watching, since
+                        those events will never arrive without intervention.
+                page:
+                    type: integer
+                    format: int32
+                limit:
+                    type: integer
+                    format: int32
+        hub.developer.v1.ListWebhookDeliveriesResponse:
+            type: object
+            properties:
+                deliveries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.developer.v1.WebhookDelivery'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        hub.developer.v1.WebhookDelivery:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                webhook_id:
+                    type: string
+                    format: int64
+                event_id:
+                    type: string
+                    format: int64
+                event_type:
+                    type: string
+                    description: event_type is the event this delivery carries, for example "order_created".
+                status:
+                    type: string
+                    description: |-
+                        status is one of pending, delivering, delivered, failed or dead. A dead
+                        delivery has exhausted its attempts and will not be retried.
+                attempts:
+                    type: integer
+                    format: int32
+                    description: attempts is how many times delivery has been tried.
+                max_attempts:
+                    type: integer
+                    format: int32
+                    description: max_attempts is the cap after which a failing delivery is dead-lettered.
+                response_status:
+                    type: integer
+                    format: int32
+                    description: |-
+                        response_status is the HTTP status the endpoint answered. Zero when the
+                        request never got a response, such as a timeout or a refused connection.
+                last_error:
+                    type: string
+                    description: |-
+                        last_error is why the most recent attempt failed. It includes a short
+                        excerpt of the endpoint's own response body when it sent one, which is
+                        usually the fastest way for the owner to see what their endpoint said.
+                next_attempt_at:
+                    type: string
+                    description: |-
+                        next_attempt_at is when a retryable delivery will be tried again. Empty
+                        for one that is delivered or dead.
+                delivered_at:
+                    type: string
+                    description: delivered_at is when the endpoint accepted the event. Empty until then.
+                created_at:
+                    type: string
+            description: WebhookDelivery is one attempt to deliver one event to one registration.
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.

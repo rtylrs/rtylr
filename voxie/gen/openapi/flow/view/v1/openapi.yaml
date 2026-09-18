@@ -1,0 +1,265 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/view/v1/views:
+        get:
+            tags:
+                - ViewService
+            summary: listViews
+            operationId: ViewService_listViews
+            parameters:
+                - name: workspace_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.view.v1.ListViewsResponse'
+        post:
+            tags:
+                - ViewService
+            summary: createView
+            operationId: ViewService_createView
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.view.v1.CreateViewRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.view.v1.CreateViewResponse'
+    /flow/view/v1/views/{id}:
+        put:
+            tags:
+                - ViewService
+            summary: updateView
+            operationId: ViewService_updateView
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.view.v1.UpdateViewRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.view.v1.UpdateViewResponse'
+        delete:
+            tags:
+                - ViewService
+            summary: deleteView
+            operationId: ViewService_deleteView
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.view.v1.DeleteViewResponse'
+components:
+    schemas:
+        flow.view.v1.ListViewsRequest:
+            type: object
+            properties:
+                workspace_id:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+        flow.view.v1.ListViewsResponse:
+            type: object
+            properties:
+                views:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.view.v1.View'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.view.v1.View:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                icon:
+                    type: string
+                visibility:
+                    type: string
+                    description: |-
+                        visibility is "shared" (every colleague in the business can use this view)
+                        or "private" (only its creator). Empty on create means "shared", which is
+                        how every view behaved before this field existed, so an older client keeps
+                        its current behaviour rather than silently making views private.
+                filters:
+                    type: string
+                    description: JSON-encoded filter criteria for this saved view.
+                group_by:
+                    type: string
+                sort_by:
+                    type: string
+                sort_dir:
+                    type: string
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.
+        flow.view.v1.CreateViewRequest:
+            type: object
+            properties:
+                workspace_id:
+                    type: string
+                name:
+                    type: string
+                icon:
+                    type: string
+                visibility:
+                    type: string
+                    description: |-
+                        visibility is "shared" (every colleague in the business can use this view)
+                        or "private" (only its creator). Empty on create means "shared", which is
+                        how every view behaved before this field existed, so an older client keeps
+                        its current behaviour rather than silently making views private.
+                filters:
+                    type: string
+                    description: JSON-encoded filter criteria for this saved view.
+                group_by:
+                    type: string
+                sort_by:
+                    type: string
+                sort_dir:
+                    type: string
+            required:
+                - name
+        flow.view.v1.CreateViewResponse:
+            type: object
+            properties:
+                view:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.view.v1.View'
+        flow.view.v1.UpdateViewRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                icon:
+                    type: string
+                visibility:
+                    type: string
+                    description: |-
+                        visibility is "shared" (every colleague in the business can use this view)
+                        or "private" (only its creator). Empty on create means "shared", which is
+                        how every view behaved before this field existed, so an older client keeps
+                        its current behaviour rather than silently making views private.
+                filters:
+                    type: string
+                    description: JSON-encoded filter criteria for this saved view.
+                group_by:
+                    type: string
+                sort_by:
+                    type: string
+                sort_dir:
+                    type: string
+        flow.view.v1.UpdateViewResponse:
+            type: object
+        flow.view.v1.DeleteViewRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+        flow.view.v1.DeleteViewResponse:
+            type: object

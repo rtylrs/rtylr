@@ -1,0 +1,199 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/category/v1/categories:
+        get:
+            tags:
+                - CategoryService
+            summary: listCategories
+            operationId: CategoryService_listCategories
+            parameters:
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of categories to return.
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of categories to skip.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.ListCategoriesResponse'
+        post:
+            tags:
+                - CategoryService
+            summary: createCategory
+            operationId: CategoryService_createCategory
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.category.v1.CreateCategoryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.CreateCategoryResponse'
+    /erp/category/v1/categories/{id}:
+        put:
+            tags:
+                - CategoryService
+            summary: updateCategory
+            operationId: CategoryService_updateCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/erp.category.v1.UpdateCategoryBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.UpdateCategoryResponse'
+        delete:
+            tags:
+                - CategoryService
+            summary: deleteCategory
+            operationId: CategoryService_deleteCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.DeleteCategoryResponse'
+components:
+    schemas:
+        erp.category.v1.ListCategoriesRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of categories to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of categories to skip.
+        erp.category.v1.ListCategoriesResponse:
+            type: object
+            properties:
+                categories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.category.v1.Category'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        erp.category.v1.Category:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        erp.category.v1.CreateCategoryRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+            required:
+                - name
+        erp.category.v1.CreateCategoryResponse:
+            type: object
+            properties:
+                category_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        erp.category.v1.UpdateCategoryRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.category.v1.UpdateCategoryBody'
+        erp.category.v1.UpdateCategoryBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+            required:
+                - name
+        erp.category.v1.UpdateCategoryResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        erp.category.v1.DeleteCategoryRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        erp.category.v1.DeleteCategoryResponse:
+            type: object
+            properties:
+                message:
+                    type: string

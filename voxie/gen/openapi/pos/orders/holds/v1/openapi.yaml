@@ -1,0 +1,185 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/orders/holds/v1/orders/{order_id}/hold:
+        post:
+            tags:
+                - OrderHoldService
+            summary: holdOrder
+            operationId: OrderHoldService_holdOrder
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.orders.holds.v1.HoldOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.holds.v1.HoldOrderResponse'
+    /pos/orders/holds/v1/orders/held:
+        get:
+            tags:
+                - OrderHoldService
+            summary: listHeldOrders
+            operationId: OrderHoldService_listHeldOrders
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.holds.v1.ListHeldOrdersResponse'
+components:
+    schemas:
+        pos.orders.holds.v1.HoldOrderRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                reason:
+                    type: string
+            required:
+                - reason
+        pos.orders.holds.v1.HoldOrderResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        pos.orders.holds.v1.ListHeldOrdersRequest:
+            type: object
+        pos.orders.holds.v1.ListHeldOrdersResponse:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.orders.v1.Order'
+        pos.orders.v1.Order:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                session_id:
+                    type: string
+                    format: int64
+                table_id:
+                    type: string
+                    format: int64
+                location_id:
+                    type: string
+                    format: int64
+                order_number:
+                    type: string
+                type:
+                    type: string
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                customer_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                staff_id:
+                    type: string
+                    format: int64
+                subtotal:
+                    type: number
+                    format: double
+                discount_amount:
+                    type: number
+                    format: double
+                tax_amount:
+                    type: number
+                    format: double
+                total:
+                    type: number
+                    format: double
+                payment_method:
+                    type: string
+                payment_status:
+                    type: string
+                amount_paid:
+                    type: number
+                    format: double
+                change_due:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+                kitchen_notes:
+                    type: string
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+                paid_at:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.orders.v1.OrderItem'
+        pos.orders.v1.OrderItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                order_id:
+                    type: string
+                    format: int64
+                menu_item_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                quantity:
+                    type: number
+                    format: double
+                unit_price:
+                    type: number
+                    format: double
+                discount_pct:
+                    type: number
+                    format: double
+                discount_amount:
+                    type: number
+                    format: double
+                tax_rate:
+                    type: number
+                    format: double
+                total:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.

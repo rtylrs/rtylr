@@ -1,0 +1,103 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/one-on-one/v1/one-on-ones:
+        get:
+            tags:
+                - OneOnOneService
+            summary: listOneOnOnes
+            operationId: OneOnOneService_listOneOnOnes
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.one_on_one.v1.ListOneOnOnesResponse'
+        post:
+            tags:
+                - OneOnOneService
+            summary: createOneOnOne
+            operationId: OneOnOneService_createOneOnOne
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.one_on_one.v1.CreateOneOnOneRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.one_on_one.v1.CreateOneOnOneResponse'
+components:
+    schemas:
+        hr.one_on_one.v1.ListOneOnOnesRequest:
+            type: object
+        hr.one_on_one.v1.ListOneOnOnesResponse:
+            type: object
+            properties:
+                one_on_ones:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.one_on_one.v1.OneOnOne'
+        hr.one_on_one.v1.OneOnOne:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                manager_id:
+                    type: string
+                    format: int64
+                staff_id:
+                    type: string
+                    format: int64
+                scheduled_at:
+                    type: string
+                notes:
+                    type: string
+                action_items:
+                    type: string
+                status:
+                    type: string
+                created_at:
+                    type: string
+        hr.one_on_one.v1.CreateOneOnOneRequest:
+            type: object
+            properties:
+                manager_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                staff_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                scheduled_at:
+                    type: string
+                notes:
+                    type: string
+                action_items:
+                    type: string
+                status:
+                    type: string
+            required:
+                - manager_id
+                - staff_id
+                - scheduled_at
+        hr.one_on_one.v1.CreateOneOnOneResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string

@@ -1,0 +1,317 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/insights/v2/overview:
+        get:
+            tags:
+                - InsightsService
+            summary: getInsights
+            operationId: InsightsService_getInsights
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.insights.v2.GetInsightsResponse'
+    /flow/insights/v2/team/workload:
+        get:
+            tags:
+                - InsightsService
+            summary: getTeamWorkload
+            operationId: InsightsService_getTeamWorkload
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.insights.v2.GetTeamWorkloadResponse'
+    /flow/insights/v2/roadmap:
+        get:
+            tags:
+                - InsightsService
+            summary: getRoadmap
+            operationId: InsightsService_getRoadmap
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.insights.v2.GetRoadmapResponse'
+components:
+    schemas:
+        flow.insights.v2.GetInsightsRequest:
+            type: object
+        flow.insights.v2.GetInsightsResponse:
+            type: object
+            properties:
+                velocity:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.insights.v2.VelocityPoint'
+                burndown:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.insights.v2.BurndownPoint'
+                cycle_time:
+                    type: number
+                    format: double
+                time_by_member:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.insights.v2.MemberTime'
+                throughput:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.insights.v2.ThroughputPoint'
+                total_tasks:
+                    type: integer
+                    format: int32
+                done_tasks:
+                    type: integer
+                    format: int32
+        flow.insights.v2.VelocityPoint:
+            type: object
+            properties:
+                cycle:
+                    type: string
+                completed:
+                    type: integer
+                    format: int32
+                total:
+                    type: integer
+                    format: int32
+                completion_rate:
+                    type: number
+                    format: double
+        flow.insights.v2.BurndownPoint:
+            type: object
+            properties:
+                day:
+                    type: integer
+                    format: int32
+                ideal:
+                    type: number
+                    format: double
+                actual:
+                    type: number
+                    format: double
+        flow.insights.v2.MemberTime:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                hours:
+                    type: number
+                    format: double
+        flow.insights.v2.ThroughputPoint:
+            type: object
+            properties:
+                week:
+                    type: string
+                completed:
+                    type: integer
+                    format: int32
+        flow.insights.v2.GetTeamWorkloadRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+        flow.insights.v2.GetTeamWorkloadResponse:
+            type: object
+            properties:
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.insights.v2.TeamMemberWorkload'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.insights.v2.TeamMemberWorkload:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                initials:
+                    type: string
+                capacity:
+                    type: integer
+                    format: int32
+                assigned_hours:
+                    type: number
+                    format: double
+                load:
+                    type: number
+                    format: double
+                tasks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.insights.v2.TeamTaskSummary'
+        flow.insights.v2.TeamTaskSummary:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                status:
+                    type: string
+                priority:
+                    type: string
+                due_date:
+                    type: string
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.
+        flow.insights.v2.GetRoadmapRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+        flow.insights.v2.GetRoadmapResponse:
+            type: object
+            properties:
+                projects:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.insights.v2.RoadmapProject'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.insights.v2.RoadmapProject:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                color:
+                    type: string
+                start_date:
+                    type: string
+                target_date:
+                    type: string
+                progress:
+                    type: integer
+                    format: int32
+                done_count:
+                    type: integer
+                    format: int32
+                task_count:
+                    type: integer
+                    format: int32
+                description:
+                    type: string
+            description: |-
+                RoadmapProject is one project row on the timeline view. v2 drops the
+                workspace field; visibility filtering (which projects a caller sees named
+                here) is applied server-side per the business's policy.

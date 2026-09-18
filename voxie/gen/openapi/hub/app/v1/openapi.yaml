@@ -1,0 +1,196 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/app/v1/apps:
+        get:
+            tags:
+                - AppService
+            summary: listApps
+            description: Returns installed apps for the active business.
+            operationId: AppService_listApps
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.app.v1.ListAppsResponse'
+    /hub/app/v1/addons:
+        get:
+            tags:
+                - AppService
+            summary: listAddons
+            description: Returns available addons.
+            operationId: AppService_listAddons
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.app.v1.ListAddonsResponse'
+    /hub/app/v1/addons/{addon_id}/status:
+        get:
+            tags:
+                - AppService
+            summary: addonStatus
+            description: Returns the enabled state of an addon.
+            operationId: AppService_addonStatus
+            parameters:
+                - name: addon_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.app.v1.AddonStatusResponse'
+    /hub/app/v1/addons/{addon_id}/enable:
+        patch:
+            tags:
+                - AppService
+            summary: enableAddon
+            description: Enables an addon for the active business.
+            operationId: AppService_enableAddon
+            parameters:
+                - name: addon_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.app.v1.EnableAddonRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.app.v1.EnableAddonResponse'
+    /hub/app/v1/addons/{addon_id}/disable:
+        patch:
+            tags:
+                - AppService
+            summary: disableAddon
+            description: Disables an addon for the active business.
+            operationId: AppService_disableAddon
+            parameters:
+                - name: addon_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.app.v1.DisableAddonRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.app.v1.DisableAddonResponse'
+components:
+    schemas:
+        hub.app.v1.ListAppsRequest:
+            type: object
+        hub.app.v1.ListAppsResponse:
+            type: object
+            properties:
+                apps:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.app.v1.App'
+        hub.app.v1.App:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                icon:
+                    type: string
+                is_enabled:
+                    type: boolean
+        hub.app.v1.ListAddonsRequest:
+            type: object
+        hub.app.v1.ListAddonsResponse:
+            type: object
+            properties:
+                addons:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.app.v1.Addon'
+        hub.app.v1.Addon:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                icon:
+                    type: string
+                price:
+                    type: number
+                    format: double
+                is_free:
+                    type: boolean
+                is_enabled:
+                    type: boolean
+                enabled_at:
+                    type: string
+                disabled_at:
+                    type: string
+        hub.app.v1.AddonStatusRequest:
+            type: object
+            properties:
+                addon_id:
+                    type: string
+            required:
+                - addon_id
+        hub.app.v1.AddonStatusResponse:
+            type: object
+            properties:
+                is_enabled:
+                    type: boolean
+        hub.app.v1.EnableAddonRequest:
+            type: object
+            properties:
+                addon_id:
+                    type: string
+            required:
+                - addon_id
+        hub.app.v1.EnableAddonResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        hub.app.v1.DisableAddonRequest:
+            type: object
+            properties:
+                addon_id:
+                    type: string
+            required:
+                - addon_id
+        hub.app.v1.DisableAddonResponse:
+            type: object
+            properties:
+                message:
+                    type: string

@@ -1,0 +1,44 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/dashboard/v1/kpis:
+        get:
+            tags:
+                - DashboardService
+            summary: getKPIs
+            description: Returns key performance indicators for the active business.
+            operationId: DashboardService_getKPIs
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.dashboard.v1.GetKPIsResponse'
+components:
+    schemas:
+        hub.dashboard.v1.GetKPIsRequest:
+            type: object
+        hub.dashboard.v1.GetKPIsResponse:
+            type: object
+            properties:
+                revenue:
+                    type: number
+                    format: double
+                order_count:
+                    type: string
+                    format: int64
+                staff_count:
+                    type: string
+                    format: int64
+                customer_count:
+                    type: string
+                    format: int64
+                low_stock_count:
+                    type: string
+                    format: int64
+                active_apps:
+                    type: string
+                    format: int64

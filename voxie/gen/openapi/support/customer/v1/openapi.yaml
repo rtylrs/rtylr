@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /support/customer/v1/customers:
+        get:
+            tags:
+                - CustomerService
+            summary: listCustomers
+            operationId: CustomerService_listCustomers
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.customer.v1.ListCustomersResponse'
+    /support/customer/v1/customers/{id}:
+        get:
+            tags:
+                - CustomerService
+            summary: getCustomer
+            operationId: CustomerService_getCustomer
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.customer.v1.GetCustomerResponse'
+components:
+    schemas:
+        support.customer.v1.ListCustomersRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+        support.customer.v1.ListCustomersResponse:
+            type: object
+            properties:
+                customers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/support.customer.v1.Customer'
+                total:
+                    type: integer
+                    format: int32
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+        support.customer.v1.Customer:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+                customer_id:
+                    type: string
+                    format: int64
+                    description: |-
+                        customer_id is the CRM customer this support record refers to; absent
+                        when the party has not been matched to one. It is nullable because
+                        support conversations arrive by email from people who may not be
+                        customers yet: matching on email alone is not reliable enough to assert
+                        the link, so the server sets it only on a confident match or when a human
+                        confirms one.
+                total_tickets:
+                    type: integer
+                    format: int32
+                last_ticket_at:
+                    type: string
+                created_at:
+                    type: string
+        support.customer.v1.GetCustomerRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        support.customer.v1.GetCustomerResponse:
+            type: object
+            properties:
+                customer:
+                    allOf:
+                        - $ref: '#/components/schemas/support.customer.v1.Customer'

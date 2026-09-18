@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/settings/v1/settings:
+        get:
+            tags:
+                - SettingsService
+            summary: getErpSettings
+            operationId: SettingsService_getErpSettings
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.settings.v1.GetErpSettingsResponse'
+        put:
+            tags:
+                - SettingsService
+            summary: updateErpSettings
+            operationId: SettingsService_updateErpSettings
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.settings.v1.UpdateErpSettingsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.settings.v1.UpdateErpSettingsResponse'
+components:
+    schemas:
+        erp.settings.v1.GetErpSettingsRequest:
+            type: object
+        erp.settings.v1.GetErpSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.settings.v1.ErpBusinessSettings'
+            required:
+                - settings
+        erp.settings.v1.ErpBusinessSettings:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                currency:
+                    type: string
+                tax_rate:
+                    type: number
+                    maximum: 100
+                    minimum: 0
+                    format: double
+                low_stock_threshold:
+                    type: number
+                    minimum: 0
+                    format: double
+                default_warehouse_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                notify_on_low_stock:
+                    type: boolean
+                notify_on_expiry:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - currency
+                - tax_rate
+                - low_stock_threshold
+                - default_warehouse_id
+            description: ErpBusinessSettings stores tenant-level ERP defaults shared by operators.
+        erp.settings.v1.UpdateErpSettingsRequest:
+            type: object
+            properties:
+                currency:
+                    type: string
+                tax_rate:
+                    type: number
+                    maximum: 100
+                    minimum: 0
+                    format: double
+                low_stock_threshold:
+                    type: number
+                    minimum: 0
+                    format: double
+                default_warehouse_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                notify_on_low_stock:
+                    type: boolean
+                notify_on_expiry:
+                    type: boolean
+            required:
+                - currency
+                - tax_rate
+                - low_stock_threshold
+                - default_warehouse_id
+        erp.settings.v1.UpdateErpSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.settings.v1.ErpBusinessSettings'
+                message:
+                    type: string
+            required:
+                - settings

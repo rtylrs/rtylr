@@ -1,0 +1,170 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /booking/resource/v1/resources:
+        get:
+            tags:
+                - ResourceService
+            summary: listResources
+            operationId: ResourceService_listResources
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.resource.v1.ListResourcesResponse'
+        post:
+            tags:
+                - ResourceService
+            summary: createResource
+            operationId: ResourceService_createResource
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.resource.v1.CreateResourceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.resource.v1.CreateResourceResponse'
+    /booking/resource/v1/resources/{id}:
+        put:
+            tags:
+                - ResourceService
+            summary: updateResource
+            operationId: ResourceService_updateResource
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.resource.v1.UpdateResourceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.resource.v1.UpdateResourceResponse'
+        delete:
+            tags:
+                - ResourceService
+            summary: deleteResource
+            operationId: ResourceService_deleteResource
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.resource.v1.DeleteResourceResponse'
+components:
+    schemas:
+        booking.resource.v1.ListResourcesRequest:
+            type: object
+        booking.resource.v1.ListResourcesResponse:
+            type: object
+            properties:
+                resources:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/booking.resource.v1.Resource'
+        booking.resource.v1.Resource:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                type:
+                    type: string
+                capacity:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+        booking.resource.v1.CreateResourceRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                type:
+                    type: string
+                capacity:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+            required:
+                - name
+        booking.resource.v1.CreateResourceResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        booking.resource.v1.UpdateResourceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                type:
+                    type: string
+                capacity:
+                    type: integer
+                    format: int32
+                is_active:
+                    type: boolean
+        booking.resource.v1.UpdateResourceResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        booking.resource.v1.DeleteResourceRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        booking.resource.v1.DeleteResourceResponse:
+            type: object
+            properties:
+                message:
+                    type: string

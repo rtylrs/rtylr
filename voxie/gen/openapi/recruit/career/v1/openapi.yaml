@@ -1,0 +1,141 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /recruit/career/v1/submissions:
+        get:
+            tags:
+                - RecruitCareerService
+            summary: listSubmissions
+            description: Returns one page of submissions for this business.
+            operationId: RecruitCareerService_listSubmissions
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.career.v1.ListSubmissionsResponse'
+    /recruit/career/v1/submissions/status:
+        patch:
+            tags:
+                - RecruitCareerService
+            summary: updateSubmissionStatus
+            description: Advances a candidate through the hiring funnel.
+            operationId: RecruitCareerService_updateSubmissionStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/recruit.career.v1.UpdateSubmissionStatusBody'
+                            description: body carries the new status bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/recruit.career.v1.UpdateSubmissionStatusResponse'
+components:
+    schemas:
+        recruit.career.v1.ListSubmissionsRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+            description: ListSubmissionsRequest selects submissions for this business.
+        recruit.career.v1.ListSubmissionsResponse:
+            type: object
+            properties:
+                submissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/recruit.career.v1.Submission'
+                total:
+                    type: integer
+                    format: int64
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+            description: ListSubmissionsResponse returns one page of submissions.
+        recruit.career.v1.Submission:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                career_id:
+                    type: string
+                    format: int64
+                candidate_name:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+                resume_url:
+                    type: string
+                cover_letter:
+                    type: string
+                status:
+                    type: string
+                career_title:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            description: Submission is a candidate's application to one career.
+        recruit.career.v1.UpdateSubmissionStatusRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/recruit.career.v1.UpdateSubmissionStatusBody'
+                    description: body carries the new status bound from the HTTP payload.
+            required:
+                - id
+            description: UpdateSubmissionStatusRequest advances a candidate through the funnel.
+        recruit.career.v1.UpdateSubmissionStatusBody:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: 'status is one of: pending | reviewing | interview | offer | hired | rejected.'
+            required:
+                - status
+            description: UpdateSubmissionStatusBody carries the status transition.
+        recruit.career.v1.UpdateSubmissionStatusResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result.
+            description: UpdateSubmissionStatusResponse confirms the transition.

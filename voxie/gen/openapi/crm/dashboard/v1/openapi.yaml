@@ -1,0 +1,60 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /crm/dashboard/v1/dashboard:
+        get:
+            tags:
+                - DashboardService
+            summary: getDashboard
+            description: Returns CRM summary metrics for the active business.
+            operationId: DashboardService_getDashboard
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.dashboard.v1.GetDashboardResponse'
+components:
+    schemas:
+        crm.dashboard.v1.GetDashboardRequest:
+            type: object
+        crm.dashboard.v1.GetDashboardResponse:
+            type: object
+            properties:
+                total_customers:
+                    type: string
+                    format: int64
+                new_this_month:
+                    type: string
+                    format: int64
+                active_loyalty_members:
+                    type: string
+                    format: int64
+                top_customers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.dashboard.v1.TopCustomer'
+        crm.dashboard.v1.TopCustomer:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                first_name:
+                    type: string
+                last_name:
+                    type: string
+                email:
+                    type: string
+                total_spent:
+                    type: number
+                    format: double
+                loyalty_points:
+                    type: string
+                    format: int64
+                loyalty_tier:
+                    type: string
+            description: TopCustomer is a customer ranked by spend for dashboard summaries.

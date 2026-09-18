@@ -1,0 +1,89 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /support/settings/v1/settings:
+        get:
+            tags:
+                - SettingsService
+            summary: getSettings
+            operationId: SettingsService_getSettings
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.settings.v1.GetSettingsResponse'
+        put:
+            tags:
+                - SettingsService
+            summary: updateSettings
+            operationId: SettingsService_updateSettings
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/support.settings.v1.UpdateSettingsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/support.settings.v1.UpdateSettingsResponse'
+components:
+    schemas:
+        support.settings.v1.GetSettingsRequest:
+            type: object
+        support.settings.v1.GetSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/support.settings.v1.Settings'
+        support.settings.v1.Settings:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                auto_assign:
+                    type: boolean
+                sla_hours:
+                    type: integer
+                    format: int32
+                business_hours:
+                    type: string
+                notification_email:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        support.settings.v1.UpdateSettingsRequest:
+            type: object
+            properties:
+                auto_assign:
+                    type: boolean
+                sla_hours:
+                    exclusiveMinimum: 0
+                    type: integer
+                    maximum: 1000
+                    format: int32
+                business_hours:
+                    type: string
+                notification_email:
+                    type: string
+            required:
+                - sla_hours
+        support.settings.v1.UpdateSettingsResponse:
+            type: object
+            properties:
+                message:
+                    type: string

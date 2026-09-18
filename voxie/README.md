@@ -29,8 +29,11 @@ make typecheck  # typechecks the generated TypeScript output
 ```
 
 OpenAPI generation is enabled by `[generate.openapi]` in `onekit.toml`.
-`make generate` writes both `gen/openapi/openapi.yaml` and
-`gen/openapi/openapi.json`, describing the same combined API.
+`make generate` writes YAML/JSON specs per service under the matching schema
+directory, for example `gen/openapi/hub/business/v1/openapi.yaml` and
+`openapi.json`. Each document includes that service’s routes and its referenced
+types, including shared types. Directories with multiple services use
+`<ServiceName>.openapi.yaml` and `<ServiceName>.openapi.json`.
 
 ## Adding or Changing Contracts
 

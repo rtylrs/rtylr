@@ -1,0 +1,86 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/dashboard/v2/dashboard:
+        get:
+            tags:
+                - DashboardService
+            summary: getFlowDashboard
+            operationId: DashboardService_getFlowDashboard
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.dashboard.v2.GetFlowDashboardResponse'
+components:
+    schemas:
+        flow.dashboard.v2.GetFlowDashboardRequest:
+            type: object
+        flow.dashboard.v2.GetFlowDashboardResponse:
+            type: object
+            properties:
+                open_tasks:
+                    type: string
+                    format: int64
+                    description: open_tasks is the open tasks value for this contract.
+                in_progress_tasks:
+                    type: string
+                    format: int64
+                    description: in_progress_tasks is the in progress tasks value for this contract.
+                completed_this_week:
+                    type: string
+                    format: int64
+                    description: completed_this_week is the completed this week value for this contract.
+                overdue_tasks:
+                    type: string
+                    format: int64
+                    description: overdue_tasks is the overdue tasks value for this contract.
+                my_tasks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.dashboard.v2.DashboardTask'
+                    description: |-
+                        my_tasks lists tasks assigned to the caller across their visible
+                        projects. With workspaces gone there is exactly one scope, so v1's
+                        workspace-scoped my-tasks concern dissolves.
+        flow.dashboard.v2.DashboardTask:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                title:
+                    type: string
+                    description: title is the title value for this contract.
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                priority:
+                    type: string
+                    description: priority is the priority value for this contract.
+                due_date:
+                    type: string
+                    description: due_date is the due date value for this contract.
+                project_name:
+                    type: string
+                    description: project_name is the denormalised project display name.
+                project_color:
+                    type: string
+                    description: project_color is the project color hex for inline badges.
+                assignee_name:
+                    type: string
+                    description: assignee_name is the assignee display name. Empty if unassigned.
+                assignee_initials:
+                    type: string
+                    description: assignee_initials are two-letter uppercase initials. Empty if unassigned.
+            description: |-
+                DashboardTask is the compact task shape the dashboard's my-tasks widget
+                renders. v1 reused the fat Task message from the task domain; with both
+                task.v1 and task.v2 in circulation a plain-name reference became ambiguous,
+                and the dashboard never needed most of those fields anyway. Deliberately
+                local to this package.

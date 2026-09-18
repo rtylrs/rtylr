@@ -1,0 +1,153 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/location/v1/locations:
+        post:
+            tags:
+                - LocationService
+            summary: createLocation
+            description: CreateLocation creates a new location.
+            operationId: LocationService_createLocation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.location.v1.CreateLocationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.location.v1.CreateLocationResponse'
+    /hr/location/v1/locations/{id}:
+        put:
+            tags:
+                - LocationService
+            summary: updateLocation
+            description: UpdateLocation updates an existing location.
+            operationId: LocationService_updateLocation
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hr.location.v1.UpdateLocationBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.location.v1.UpdateLocationResponse'
+components:
+    schemas:
+        hr.location.v1.CreateLocationRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Human-readable name of the location.
+                address:
+                    type: string
+                    description: Full street address of the location.
+                timezone:
+                    type: string
+                    description: IANA timezone identifier; absent to use tenant default.
+                slug:
+                    type: string
+                    description: Optional URL-safe slug; auto-generated from name if absent.
+            required:
+                - name
+        hr.location.v1.CreateLocationResponse:
+            type: object
+            properties:
+                location:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.location.v1.LocationPayload'
+                    description: The newly created location.
+        hr.location.v1.LocationPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: Unique identifier for the location.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: Tenant owner this location belongs to.
+                name:
+                    type: string
+                    description: Human-readable name of the location (e.g. "Downtown Office").
+                address:
+                    type: string
+                    description: Full street address of the location.
+                timezone:
+                    type: string
+                    description: IANA timezone identifier (e.g. "America/New_York"); absent if using tenant default.
+                is_active:
+                    type: boolean
+                    description: Whether this location is currently active and assignable.
+                created_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this location was created.
+                updated_at:
+                    type: string
+                    format: int64
+                    description: Unix timestamp when this location was last updated.
+                slug:
+                    type: string
+                    description: |-
+                        URL-safe slug, scoped per business. Powers public URLs like
+                        menu.rtylr.com/<business-slug>/<location-slug>.
+            description: LocationPayload is a physical work location for a tenant.
+        hr.location.v1.UpdateLocationRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: ID of the location to update.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.location.v1.UpdateLocationBody'
+        hr.location.v1.UpdateLocationBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: New name; absent to keep current.
+                address:
+                    type: string
+                    description: New address; absent to keep current.
+                timezone:
+                    type: string
+                    description: New timezone; absent to keep current.
+                is_active:
+                    type: boolean
+                    description: New active status; absent to keep current.
+                slug:
+                    type: string
+                    description: New slug; absent to keep current.
+            description: UpdateLocationBody carries updatable location fields bound from the HTTP payload.
+        hr.location.v1.UpdateLocationResponse:
+            type: object
+            properties:
+                location:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.location.v1.LocationPayload'
+                    description: The updated location.

@@ -1,0 +1,411 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /crm/campaign/v1/campaigns:
+        get:
+            tags:
+                - CampaignService
+            summary: listCampaigns
+            description: Returns campaigns for the active business.
+            operationId: CampaignService_listCampaigns
+            parameters:
+                - name: status
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: Filters campaigns by lifecycle state.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+                - name: offset
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.campaign.v1.ListCampaignsResponse'
+        post:
+            tags:
+                - CampaignService
+            summary: createCampaign
+            description: Creates a new marketing campaign.
+            operationId: CampaignService_createCampaign
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.campaign.v1.CreateCampaignRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.campaign.v1.CreateCampaignResponse'
+    /crm/campaign/v1/campaigns/{id}:
+        get:
+            tags:
+                - CampaignService
+            summary: getCampaignDetail
+            description: Returns a campaign and its stats.
+            operationId: CampaignService_getCampaignDetail
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.campaign.v1.GetCampaignDetailResponse'
+        put:
+            tags:
+                - CampaignService
+            summary: updateCampaign
+            description: Updates campaign fields.
+            operationId: CampaignService_updateCampaign
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignResponse'
+    /crm/campaign/v1/campaigns/stats:
+        get:
+            tags:
+                - CampaignService
+            summary: getCampaignStats
+            description: Returns stats for a single campaign.
+            operationId: CampaignService_getCampaignStats
+            parameters:
+                - name: campaign_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: |-
+                        The live route is GET /campaigns/stats?campaign_id=... (query param,
+                        not a path segment).
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.campaign.v1.GetCampaignStatsResponse'
+    /crm/campaign/v1/campaigns/{id}/status:
+        put:
+            tags:
+                - CampaignService
+            summary: updateCampaignStatus
+            description: |-
+                Changes the campaign lifecycle status. The id is taken from the path;
+                only the status travels in the body (matches PUT /crm/campaigns/{id}/status).
+            operationId: CampaignService_updateCampaignStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignStatusBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignStatusResponse'
+components:
+    schemas:
+        crm.campaign.v1.ListCampaignsRequest:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: Filters campaigns by lifecycle state.
+                limit:
+                    type: string
+                    format: int64
+                offset:
+                    type: string
+                    format: int64
+        crm.campaign.v1.ListCampaignsResponse:
+            type: object
+            properties:
+                campaigns:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.campaign.v1.Campaign'
+                total:
+                    type: string
+                    format: int64
+                limit:
+                    type: string
+                    format: int64
+                offset:
+                    type: string
+                    format: int64
+        crm.campaign.v1.Campaign:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                channel:
+                    type: string
+                    description: Delivery channel, e.g. "email" or "sms".
+                status:
+                    type: string
+                    description: Current lifecycle state.
+                segment_id:
+                    type: string
+                    format: int64
+                subject:
+                    type: string
+                content:
+                    type: string
+                scheduled_at:
+                    type: string
+                sent_at:
+                    type: string
+                audience_count:
+                    type: string
+                    format: int64
+                sent_count:
+                    type: string
+                    format: int64
+                delivered_count:
+                    type: string
+                    format: int64
+                opened_count:
+                    type: string
+                    format: int64
+                clicked_count:
+                    type: string
+                    format: int64
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            description: Campaign is a marketing campaign sent to a segment or the full customer base.
+        crm.campaign.v1.CreateCampaignRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                    description: |-
+                        Free-text summary. Optional: the server does not require it, and a
+                        campaign entered without one is valid.
+                channel:
+                    type: string
+                segment_id:
+                    type: string
+                    format: int64
+                subject:
+                    type: string
+                    description: |-
+                        Subject line. Optional because it is channel-specific: an SMS campaign has
+                        no subject, so requiring it made that channel impossible to save.
+                content:
+                    type: string
+                scheduled_at:
+                    type: string
+                    description: |-
+                        Absent for a draft or an immediate send. A draft has no scheduled time, so
+                        requiring one forced callers to invent a value, and the server already
+                        treats an empty scheduled_at as "not scheduled".
+            required:
+                - name
+                - channel
+                - content
+        crm.campaign.v1.CreateCampaignResponse:
+            type: object
+            properties:
+                campaign_id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        crm.campaign.v1.GetCampaignDetailRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        crm.campaign.v1.GetCampaignDetailResponse:
+            type: object
+            properties:
+                campaign:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.campaign.v1.Campaign'
+                stats:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.campaign.v1.CampaignStats'
+        crm.campaign.v1.CampaignStats:
+            type: object
+            properties:
+                campaign_id:
+                    type: string
+                    format: int64
+                audience_count:
+                    type: string
+                    format: int64
+                sent_count:
+                    type: string
+                    format: int64
+                delivered_count:
+                    type: string
+                    format: int64
+                opened_count:
+                    type: string
+                    format: int64
+                clicked_count:
+                    type: string
+                    format: int64
+                bounced_count:
+                    type: string
+                    format: int64
+                failed_count:
+                    type: string
+                    format: int64
+            description: CampaignStats holds delivery and engagement counters for a campaign.
+        crm.campaign.v1.GetCampaignStatsRequest:
+            type: object
+            properties:
+                campaign_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: |-
+                        The live route is GET /campaigns/stats?campaign_id=... (query param,
+                        not a path segment).
+            required:
+                - campaign_id
+        crm.campaign.v1.GetCampaignStatsResponse:
+            type: object
+            properties:
+                stats:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.campaign.v1.CampaignStats'
+        crm.campaign.v1.UpdateCampaignRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignBody'
+        crm.campaign.v1.UpdateCampaignBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                    description: |-
+                        Free-text summary. Optional: the server does not require it, and a
+                        campaign entered without one is valid.
+                channel:
+                    type: string
+                segment_id:
+                    type: string
+                    format: int64
+                subject:
+                    type: string
+                    description: |-
+                        Subject line. Optional because it is channel-specific: an SMS campaign has
+                        no subject, so requiring it made that channel impossible to save.
+                content:
+                    type: string
+                scheduled_at:
+                    type: string
+                    description: |-
+                        Absent for a draft or an immediate send. A draft has no scheduled time, so
+                        requiring one forced callers to invent a value, and the server already
+                        treats an empty scheduled_at as "not scheduled".
+            required:
+                - name
+                - channel
+                - content
+        crm.campaign.v1.UpdateCampaignResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        crm.campaign.v1.UpdateCampaignStatusRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignStatusBody'
+        crm.campaign.v1.UpdateCampaignStatusBody:
+            type: object
+            properties:
+                status:
+                    type: string
+            required:
+                - status
+        crm.campaign.v1.UpdateCampaignStatusResponse:
+            type: object
+            properties:
+                message:
+                    type: string

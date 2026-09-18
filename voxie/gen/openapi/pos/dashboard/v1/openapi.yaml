@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/dashboard/v1/dashboard:
+        get:
+            tags:
+                - DashboardService
+            summary: dashboard
+            description: Returns aggregate sales metrics for the POS dashboard.
+            operationId: DashboardService_dashboard
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.dashboard.v1.DashboardResponse'
+components:
+    schemas:
+        pos.dashboard.v1.DashboardRequest:
+            type: object
+        pos.dashboard.v1.DashboardResponse:
+            type: object
+            properties:
+                total_sales:
+                    type: number
+                    format: double
+                order_count:
+                    type: integer
+                    format: int32
+                avg_order:
+                    type: number
+                    format: double
+                table_turnover:
+                    type: number
+                    format: double

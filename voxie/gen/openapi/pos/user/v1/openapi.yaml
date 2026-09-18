@@ -1,0 +1,360 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/user/v1/users:
+        get:
+            tags:
+                - UserService
+            summary: listPOSUsers
+            description: Returns POS roster operators for a location.
+            operationId: UserService_listPOSUsers
+            parameters:
+                - name: location_id
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.user.v1.ListPOSUsersResponse'
+        post:
+            tags:
+                - UserService
+            summary: createPOSUser
+            description: Creates a new POS roster operator.
+            operationId: UserService_createPOSUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.user.v1.CreatePOSUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.user.v1.CreatePOSUserResponse'
+    /pos/user/v1/users/update:
+        patch:
+            tags:
+                - UserService
+            summary: updatePOSUser
+            description: Updates an existing POS roster operator.
+            operationId: UserService_updatePOSUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.user.v1.UpdatePOSUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.user.v1.UpdatePOSUserResponse'
+    /pos/user/v1/users/deactivate:
+        patch:
+            tags:
+                - UserService
+            summary: deactivatePOSUser
+            description: Deactivates a POS roster operator.
+            operationId: UserService_deactivatePOSUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.user.v1.DeactivatePOSUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.user.v1.DeactivatePOSUserResponse'
+    /pos/user/v1/users/verify-pin:
+        post:
+            tags:
+                - UserService
+            summary: verifyPOSUserPIN
+            description: Verifies an operator PIN for terminal sign-in.
+            operationId: UserService_verifyPOSUserPIN
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.user.v1.VerifyPOSUserPINRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.user.v1.VerifyPOSUserPINResponse'
+    /pos/user/v1/users/set-pin:
+        post:
+            tags:
+                - UserService
+            summary: setPIN
+            description: Sets or resets an operator PIN.
+            operationId: UserService_setPIN
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.user.v1.SetPINRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.user.v1.SetPINResponse'
+components:
+    schemas:
+        pos.user.v1.ListPOSUsersRequest:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    format: int64
+        pos.user.v1.ListPOSUsersResponse:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.user.v1.POSUser'
+        pos.user.v1.POSUser:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                location_id:
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                role:
+                    type: string
+                    description: role is the role value for this contract.
+                is_active:
+                    type: boolean
+                max_discount_pct:
+                    type: number
+                    format: double
+                can_void:
+                    type: boolean
+                can_refund:
+                    type: boolean
+                can_open_drawer:
+                    type: boolean
+                can_apply_discount:
+                    type: boolean
+                role_management:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
+                    description: role_management identifies the authoritative Dash control-plane surface.
+            description: POSUser is a POS roster operator.
+        pos.user.v1.RoleManagementManagedInDash:
+            type: object
+            properties:
+                code:
+                    type: string
+                dash_url:
+                    type: string
+            required:
+                - code
+                - dash_url
+            description: |-
+                RoleManagementManagedInDash explains that POS role and capability changes
+                must be completed in Dash.
+        pos.user.v1.CreatePOSUserRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                pin:
+                    type: string
+                    description: pin is the pin value for this contract.
+                hourly_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+            required:
+                - user_id
+                - location_id
+                - name
+                - pin
+        pos.user.v1.CreatePOSUserResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                role_management:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
+            required:
+                - role_management
+        pos.user.v1.UpdatePOSUserRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                pin:
+                    type: string
+                    description: Optional replacement PIN. Omit it to preserve the current PIN.
+                is_active:
+                    type: boolean
+                hourly_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+            required:
+                - id
+                - name
+        pos.user.v1.UpdatePOSUserResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                role_management:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
+            required:
+                - role_management
+        pos.user.v1.DeactivatePOSUserRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+            required:
+                - id
+        pos.user.v1.DeactivatePOSUserResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        pos.user.v1.VerifyPOSUserPINRequest:
+            type: object
+            properties:
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: location_id is the POS location where the operator is signing in.
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: user_id is the hub user id of the roster operator.
+                pin:
+                    type: string
+                    description: 'pin is the operator PIN. Sensitive: do not log this field.'
+            required:
+                - location_id
+                - user_id
+                - pin
+        pos.user.v1.VerifyPOSUserPINResponse:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    format: int64
+                    description: user_id is the hub user id for the verified operator.
+                pos_user_id:
+                    type: string
+                    format: int64
+                    description: pos_user_id is the POS roster row id.
+                location_id:
+                    type: string
+                    format: int64
+                    description: location_id is the location where the operator signed in.
+                role:
+                    type: string
+                    description: role is the operator role at this location.
+                display_name:
+                    type: string
+                    description: display_name is the operator name shown on receipts and session UI.
+                can_void:
+                    type: boolean
+                    description: can_void grants void permission for this session.
+                can_refund:
+                    type: boolean
+                    description: can_refund grants refund permission for this session.
+                can_open_drawer:
+                    type: boolean
+                    description: can_open_drawer grants cash drawer access for this session.
+                can_apply_discount:
+                    type: boolean
+                    description: can_apply_discount grants discount permission for this session.
+                max_discount_pct:
+                    type: number
+                    format: double
+                authorization_version:
+                    type: string
+                    format: int64
+                    description: authorization_version changes whenever Dash authorization changes.
+                role_management:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
+            required:
+                - role_management
+        pos.user.v1.SetPINRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                name:
+                    type: string
+                pin:
+                    type: string
+                    description: 'pin is the pin value for this contract. Sensitive: do not log this field.'
+            required:
+                - user_id
+                - location_id
+                - name
+                - pin
+        pos.user.v1.SetPINResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean

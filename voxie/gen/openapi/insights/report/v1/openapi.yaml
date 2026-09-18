@@ -1,0 +1,592 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /insights/report/v1/templates:
+        get:
+            tags:
+                - ReportService
+            summary: listReportTemplates
+            description: Returns saved report templates.
+            operationId: ReportService_listReportTemplates
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: sort_by is the field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+                - name: type
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: type is the type value for this contract.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.ListReportTemplatesResponse'
+        post:
+            tags:
+                - ReportService
+            summary: createReportTemplate
+            description: Creates a report template.
+            operationId: ReportService_createReportTemplate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/insights.report.v1.CreateReportTemplateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.CreateReportTemplateResponse'
+    /insights/report/v1/templates/{id}:
+        get:
+            tags:
+                - ReportService
+            summary: getReportTemplate
+            description: Returns a report template by ID.
+            operationId: ReportService_getReportTemplate
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.GetReportTemplateResponse'
+    /insights/report/v1/scheduled:
+        get:
+            tags:
+                - ReportService
+            summary: listScheduledReports
+            description: Returns scheduled reports.
+            operationId: ReportService_listScheduledReports
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: sort_by is the field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.ListScheduledReportsResponse'
+        post:
+            tags:
+                - ReportService
+            summary: createScheduledReport
+            description: Creates a scheduled report.
+            operationId: ReportService_createScheduledReport
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/insights.report.v1.CreateScheduledReportRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.CreateScheduledReportResponse'
+    /insights/report/v1/scheduled/{id}:
+        put:
+            tags:
+                - ReportService
+            summary: updateScheduledReport
+            description: Updates a scheduled report.
+            operationId: ReportService_updateScheduledReport
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/insights.report.v1.UpdateScheduledReportRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.UpdateScheduledReportResponse'
+        delete:
+            tags:
+                - ReportService
+            summary: deleteScheduledReport
+            description: Removes a scheduled report.
+            operationId: ReportService_deleteScheduledReport
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.DeleteScheduledReportResponse'
+    /insights/report/v1/reports/revenue/generate:
+        post:
+            tags:
+                - ReportService
+            summary: generateRevenueReport
+            description: Queues a revenue report export.
+            operationId: ReportService_generateRevenueReport
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/insights.report.v1.GenerateRevenueReportRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.GenerateRevenueReportResponse'
+    /insights/report/v1/reports/revenue/export:
+        get:
+            tags:
+                - ReportService
+            summary: exportRevenueReport
+            description: Returns a CSV export for a revenue date range.
+            operationId: ReportService_exportRevenueReport
+            parameters:
+                - name: from
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: from_date is the inclusive start date (YYYY-MM-DD).
+                - name: to
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: to_date is the inclusive end date (YYYY-MM-DD).
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.report.v1.ExportRevenueReportResponse'
+components:
+    schemas:
+        insights.report.v1.ListReportTemplatesRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: sort_by is the field to sort results by.
+                sort_dir:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+                type:
+                    type: string
+                    description: type is the type value for this contract.
+        insights.report.v1.ListReportTemplatesResponse:
+            type: object
+            properties:
+                templates:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.report.v1.ReportTemplate'
+                    description: templates is the templates value for this contract.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+                    description: pagination is the pagination value for this contract.
+        insights.report.v1.ReportTemplate:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                description:
+                    type: string
+                    description: description is the description value for this contract.
+                type:
+                    type: string
+                    description: |-
+                        type is the type value for this contract.
+                        revenue, customers, products, operations, financial
+                metrics:
+                    type: array
+                    items:
+                        type: string
+                    description: metrics is the metrics value for this contract.
+                format:
+                    type: string
+                    description: |-
+                        format is the format value for this contract.
+                        pdf, csv, xlsx
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.
+        insights.report.v1.CreateReportTemplateRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                description:
+                    type: string
+                    description: description is the description value for this contract.
+                type:
+                    type: string
+                    description: type is the type value for this contract.
+                metrics:
+                    type: array
+                    items:
+                        type: string
+                    minItems: 1
+                    description: metrics is the metrics value for this contract.
+                format:
+                    type: string
+                    description: format is the format value for this contract.
+            required:
+                - name
+                - description
+                - type
+                - format
+        insights.report.v1.CreateReportTemplateResponse:
+            type: object
+            properties:
+                template:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.report.v1.ReportTemplate'
+                    description: template is the template value for this contract.
+        insights.report.v1.GetReportTemplateRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        insights.report.v1.GetReportTemplateResponse:
+            type: object
+            properties:
+                template:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.report.v1.ReportTemplate'
+                    description: template is the template value for this contract.
+        insights.report.v1.ListScheduledReportsRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: sort_by is the field to sort results by.
+                sort_dir:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+        insights.report.v1.ListScheduledReportsResponse:
+            type: object
+            properties:
+                reports:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.report.v1.ScheduledReport'
+                    description: reports is the reports value for this contract.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+                    description: pagination is the pagination value for this contract.
+        insights.report.v1.ScheduledReport:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                template_id:
+                    type: string
+                    format: int64
+                    description: template_id is the template id value for this contract.
+                template_name:
+                    type: string
+                    description: template_name is the template name value for this contract.
+                frequency:
+                    type: string
+                    description: |-
+                        frequency is the frequency value for this contract.
+                        daily, weekly, monthly
+                recipient_email:
+                    type: string
+                    description: recipient_email is the recipient email value for this contract.
+                channel:
+                    type: string
+                    description: channel is the delivery channel (email, slack).
+                is_active:
+                    type: boolean
+                    description: is_active is the is active value for this contract.
+                last_sent_at:
+                    type: string
+                    description: last_sent_at is the last sent at value for this contract.
+                next_send_at:
+                    type: string
+                    description: next_send_at is the next send at value for this contract.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+        insights.report.v1.CreateScheduledReportRequest:
+            type: object
+            properties:
+                template_slug:
+                    type: string
+                    description: template_slug is the template slug (e.g. revenue-monthly).
+                frequency:
+                    type: string
+                    description: frequency is the delivery frequency (daily, weekly, monthly).
+                channel:
+                    type: string
+                    description: channel is the delivery channel (email, slack).
+                recipient_email:
+                    type: string
+                    format: email
+                    description: recipient_email is the delivery recipient.
+                is_active:
+                    type: boolean
+                    description: is_active toggles whether the schedule is active.
+            required:
+                - template_slug
+                - frequency
+                - channel
+                - recipient_email
+        insights.report.v1.CreateScheduledReportResponse:
+            type: object
+            properties:
+                report:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.report.v1.ScheduledReport'
+                    description: report is the report value for this contract.
+        insights.report.v1.UpdateScheduledReportRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the scheduled report identifier.
+                template_slug:
+                    type: string
+                    description: template_slug is the template slug (e.g. revenue-monthly).
+                frequency:
+                    type: string
+                    description: frequency is the delivery frequency (daily, weekly, monthly).
+                channel:
+                    type: string
+                    description: channel is the delivery channel (email, slack).
+                recipient_email:
+                    type: string
+                    format: email
+                    description: recipient_email is the delivery recipient.
+                is_active:
+                    type: boolean
+                    description: is_active toggles whether the schedule is active.
+            required:
+                - template_slug
+                - frequency
+                - channel
+                - recipient_email
+        insights.report.v1.UpdateScheduledReportResponse:
+            type: object
+            properties:
+                report:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.report.v1.ScheduledReport'
+                    description: report is the updated scheduled report.
+        insights.report.v1.DeleteScheduledReportRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the scheduled report identifier.
+        insights.report.v1.DeleteScheduledReportResponse:
+            type: object
+            properties:
+                deleted:
+                    type: boolean
+                    description: deleted confirms the schedule was removed.
+        insights.report.v1.GenerateRevenueReportRequest:
+            type: object
+            properties:
+                from_date:
+                    type: string
+                    description: from_date is the inclusive start date (YYYY-MM-DD).
+                to_date:
+                    type: string
+                    description: to_date is the inclusive end date (YYYY-MM-DD).
+                format:
+                    type: string
+                    description: format is the export format (csv, pdf).
+        insights.report.v1.GenerateRevenueReportResponse:
+            type: object
+            properties:
+                report_id:
+                    type: string
+                    description: report_id is the queued report identifier.
+                url:
+                    type: string
+                    description: url is the download URL when ready.
+                status:
+                    type: string
+                    description: status is the queue status.
+        insights.report.v1.ExportRevenueReportRequest:
+            type: object
+            properties:
+                from_date:
+                    type: string
+                    description: from_date is the inclusive start date (YYYY-MM-DD).
+                to_date:
+                    type: string
+                    description: to_date is the inclusive end date (YYYY-MM-DD).
+        insights.report.v1.ExportRevenueReportResponse:
+            type: object
+            properties:
+                filename:
+                    type: string
+                    description: filename is the suggested download filename.
+                content_type:
+                    type: string
+                    description: content_type is the MIME type for the export payload.
+                csv:
+                    type: string
+                    description: csv is the CSV document body.
+                rows:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.report.v1.ExportRevenueRow'
+                    description: rows is the structured export rows.
+        insights.report.v1.ExportRevenueRow:
+            type: object
+            properties:
+                date:
+                    type: string
+                    description: date is the revenue date (YYYY-MM-DD).
+                amount_minor_units:
+                    type: string
+                    format: int64
+                    description: amount_minor_units is the revenue amount in minor units.

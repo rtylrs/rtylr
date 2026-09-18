@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/billing/v1/summary:
+        get:
+            tags:
+                - BillingService
+            summary: getBillingSummary
+            description: Returns billing summary for the active business.
+            operationId: BillingService_getBillingSummary
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.billing.v1.GetBillingSummaryResponse'
+    /hub/billing/v1/invoices:
+        get:
+            tags:
+                - BillingService
+            summary: listInvoices
+            description: Returns billing invoices.
+            operationId: BillingService_listInvoices
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.billing.v1.ListInvoicesResponse'
+components:
+    schemas:
+        hub.billing.v1.GetBillingSummaryRequest:
+            type: object
+        hub.billing.v1.GetBillingSummaryResponse:
+            type: object
+            properties:
+                summary:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.billing.v1.BillingSummary'
+        hub.billing.v1.BillingSummary:
+            type: object
+            properties:
+                plan:
+                    type: string
+                status:
+                    type: string
+                current_usage:
+                    type: number
+                    format: double
+                usage_limit:
+                    type: number
+                    format: double
+                next_billing_date:
+                    type: string
+        hub.billing.v1.ListInvoicesRequest:
+            type: object
+        hub.billing.v1.ListInvoicesResponse:
+            type: object
+            properties:
+                invoices:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.billing.v1.Invoice'
+        hub.billing.v1.Invoice:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                amount:
+                    type: number
+                    format: double
+                currency:
+                    type: string
+                status:
+                    type: string
+                issued_at:
+                    type: string
+                paid_at:
+                    type: string

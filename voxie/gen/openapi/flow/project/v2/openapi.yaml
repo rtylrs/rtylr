@@ -1,0 +1,1296 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/project/v2/projects/{id}:
+        get:
+            tags:
+                - ProjectService
+            summary: getProject
+            operationId: ProjectService_getProject
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.GetProjectResponse'
+        put:
+            tags:
+                - ProjectService
+            summary: updateProject
+            operationId: ProjectService_updateProject
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/flow.project.v2.UpdateProjectBody'
+                            description: body carries updatable project fields bound from the HTTP payload.
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.UpdateProjectResponse'
+        delete:
+            tags:
+                - ProjectService
+            summary: archiveProject
+            description: |-
+                archiveProject moves the project to the recycle bin. It is reversible via
+                restoreProject until purge_at passes.
+            operationId: ProjectService_archiveProject
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.ArchiveProjectResponse'
+    /flow/project/v2/projects:
+        get:
+            tags:
+                - ProjectService
+            summary: listProjects
+            operationId: ProjectService_listProjects
+            parameters:
+                - name: status
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: |-
+                        status filters by lifecycle state ("active", "archived", "completed").
+                        Empty returns active projects only, matching the sidebar's default view.
+                - name: visibility
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: |-
+                        visibility filters by "private" or "public". Empty returns both kinds
+                        the caller can reach.
+                - name: q
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: q narrows results by name substring. Empty disables the filter.
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.ListProjectsResponse'
+        post:
+            tags:
+                - ProjectService
+            summary: createProject
+            operationId: ProjectService_createProject
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.CreateProjectRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.CreateProjectResponse'
+    /flow/project/v2/projects/visibility:
+        put:
+            tags:
+                - ProjectService
+            summary: setProjectVisibility
+            operationId: ProjectService_setProjectVisibility
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.SetProjectVisibilityRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.SetProjectVisibilityResponse'
+    /flow/project/v2/projects/archived:
+        get:
+            tags:
+                - ProjectService
+            summary: listArchivedProjects
+            operationId: ProjectService_listArchivedProjects
+            parameters:
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.ListArchivedProjectsResponse'
+    /flow/project/v2/projects/archived/restore:
+        put:
+            tags:
+                - ProjectService
+            summary: restoreProject
+            operationId: ProjectService_restoreProject
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.RestoreProjectRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.RestoreProjectResponse'
+    /flow/project/v2/projects/purged/{id}:
+        delete:
+            tags:
+                - ProjectService
+            summary: purgeProject
+            description: |-
+                purgeProject immediately and irreversibly deletes an archived project and
+                everything inside it, including attachment files. Server-gated to the
+                project creator and business admins.
+            operationId: ProjectService_purgeProject
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.PurgeProjectResponse'
+    /flow/project/v2/projects/columns:
+        get:
+            tags:
+                - ProjectService
+            summary: listProjectColumns
+            operationId: ProjectService_listProjectColumns
+            parameters:
+                - name: project_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.ListProjectColumnsResponse'
+        post:
+            tags:
+                - ProjectService
+            summary: createProjectColumn
+            operationId: ProjectService_createProjectColumn
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.CreateProjectColumnRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.CreateProjectColumnResponse'
+    /flow/project/v2/projects/columns/{id}:
+        put:
+            tags:
+                - ProjectService
+            summary: updateProjectColumn
+            operationId: ProjectService_updateProjectColumn
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.UpdateProjectColumnRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.UpdateProjectColumnResponse'
+        delete:
+            tags:
+                - ProjectService
+            summary: deleteProjectColumn
+            operationId: ProjectService_deleteProjectColumn
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.DeleteProjectColumnResponse'
+    /flow/project/v2/projects/columns/move:
+        put:
+            tags:
+                - ProjectService
+            summary: moveTaskToColumn
+            operationId: ProjectService_moveTaskToColumn
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.MoveTaskToColumnRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.MoveTaskToColumnResponse'
+    /flow/project/v2/projects/members:
+        get:
+            tags:
+                - ProjectService
+            summary: listProjectMembers
+            operationId: ProjectService_listProjectMembers
+            parameters:
+                - name: project_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  required: true
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.ListProjectMembersResponse'
+        post:
+            tags:
+                - ProjectService
+            summary: addProjectMember
+            operationId: ProjectService_addProjectMember
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.AddProjectMemberRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.AddProjectMemberResponse'
+        delete:
+            tags:
+                - ProjectService
+            summary: removeProjectMember
+            operationId: ProjectService_removeProjectMember
+            parameters:
+                - name: project_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                - name: user_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: user_id identifies the user associated with this request.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.RemoveProjectMemberResponse'
+    /flow/project/v2/projects/members/role:
+        put:
+            tags:
+                - ProjectService
+            summary: updateProjectMemberRole
+            operationId: ProjectService_updateProjectMemberRole
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.UpdateProjectMemberRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.UpdateProjectMemberRoleResponse'
+    /flow/project/v2/projects/members/invite:
+        post:
+            tags:
+                - ProjectService
+            summary: inviteProjectMember
+            operationId: ProjectService_inviteProjectMember
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.InviteProjectMemberRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.InviteProjectMemberResponse'
+    /flow/project/v2/projects/transfer:
+        put:
+            tags:
+                - ProjectService
+            summary: transferProjectOwnership
+            operationId: ProjectService_transferProjectOwnership
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.project.v2.TransferProjectOwnershipRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.TransferProjectOwnershipResponse'
+    /flow/project/v2/projects/{id}/labour-cost:
+        get:
+            tags:
+                - ProjectService
+            summary: getProjectLabourCost
+            description: |-
+                getProjectLabourCost returns the labour cost of billable logged time on a
+                project. Requires admin on the project: it exposes aggregate spend, and
+                the aggregate is derived from HR rates that must not leak through Flow.
+            operationId: ProjectService_getProjectLabourCost
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.project.v2.GetProjectLabourCostResponse'
+components:
+    schemas:
+        flow.project.v2.GetProjectRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        flow.project.v2.GetProjectResponse:
+            type: object
+            properties:
+                project:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.Project'
+                    description: project is the project value for this contract.
+        flow.project.v2.Project:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                owner_id:
+                    type: string
+                    format: int64
+                    description: |-
+                        owner_id is the user who created the project. Not the tenant: the
+                        business is implicit from the caller's auth context.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                description:
+                    type: string
+                    description: description is the description value for this contract.
+                icon:
+                    type: string
+                    description: icon is the icon value for this contract.
+                color:
+                    type: string
+                    description: color is the color value for this contract.
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                visibility:
+                    type: string
+                    description: |-
+                        visibility controls discoverability. "private" (default) limits the
+                        project to its creator and members; "public" additionally exposes the
+                        fields of this message on the owner's profile to business colleagues.
+                        Public never grants task access by itself.
+                is_personal:
+                    type: boolean
+                    description: |-
+                        is_personal marks the caller's auto-provisioned My Tasks bucket. The
+                        bucket is hidden from shared lists and exempt from manager-visibility
+                        policies unless its owner explicitly shares it.
+                start_date:
+                    type: string
+                    description: start_date is the start date value for this contract.
+                due_date:
+                    type: string
+                    description: due_date is the due date value for this contract.
+                created_by:
+                    type: string
+                    format: int64
+                    description: created_by is the created by value for this contract.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+                task_count:
+                    type: integer
+                    format: int32
+                    description: Total task count for this project. Display projection, ignored on writes.
+                completed_count:
+                    type: integer
+                    format: int32
+                    description: Number of tasks with status="done". Display projection, ignored on writes.
+                member_count:
+                    type: integer
+                    format: int32
+                    description: Count of project members, for the "+N" avatar stack. Display projection, ignored on writes.
+                code:
+                    type: string
+                    description: Short project code used to build Task.identifier (e.g. "FLW" -> "FLW-42").
+                archived_at:
+                    type: string
+                    description: archived_at is when the project moved to the recycle bin. Empty while active.
+                purge_at:
+                    type: string
+                    description: |-
+                        purge_at is when the recycle bin will permanently delete this project and
+                        everything inside it. Stamped at archive time from the business's
+                        retention setting; later retention changes affect future archives only.
+                visible_via_report:
+                    type: boolean
+                    description: |-
+                        visible_via_report is true when the caller can see this project ONLY
+                        because they manage someone involved in it (the dept-manager proxy), and
+                        not because they created it, own it, or are a member.
+
+                        It exists so a client can group these separately without asking per
+                        project why each one is visible. It is a per-caller projection, not a
+                        property of the project: the same project is false for its own members and
+                        true for their manager. Never persist it.
+            description: |-
+                Project is a business-scoped container of tasks. The workspace layer is
+                gone in v2: every project belongs directly to the caller's business,
+                resolved server-side from auth, and no request carries a tenant or
+                workspace identifier.
+        flow.project.v2.ListProjectsRequest:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: |-
+                        status filters by lifecycle state ("active", "archived", "completed").
+                        Empty returns active projects only, matching the sidebar's default view.
+                visibility:
+                    type: string
+                    description: |-
+                        visibility filters by "private" or "public". Empty returns both kinds
+                        the caller can reach.
+                q:
+                    type: string
+                    description: q narrows results by name substring. Empty disables the filter.
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+        flow.project.v2.ListProjectsResponse:
+            type: object
+            properties:
+                projects:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.project.v2.Project'
+                    description: projects is the projects value for this contract.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            description: Standard pagination response metadata.
+        flow.project.v2.CreateProjectRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                description:
+                    type: string
+                    description: description is the description value for this contract.
+                icon:
+                    type: string
+                    description: icon is the icon value for this contract.
+                color:
+                    type: string
+                    description: color is the color value for this contract.
+                visibility:
+                    type: string
+                    description: |-
+                        visibility is the initial exposure. Empty means "private", which is also
+                        the schema default; public makes the project metadata-discoverable via
+                        profiles but grants no access by itself.
+                start_date:
+                    type: string
+                    description: start_date is an optional start date; an empty value leaves it unset.
+                due_date:
+                    type: string
+                    description: due_date is an optional due date; an empty value leaves it unset.
+            required:
+                - name
+                - description
+                - icon
+                - color
+        flow.project.v2.CreateProjectResponse:
+            type: object
+            properties:
+                project:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.Project'
+                    description: project is the project value for this contract.
+        flow.project.v2.UpdateProjectRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.UpdateProjectBody'
+                    description: body carries updatable project fields bound from the HTTP payload.
+        flow.project.v2.UpdateProjectBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                description:
+                    type: string
+                    description: description is the description value for this contract.
+                icon:
+                    type: string
+                    description: icon is the icon value for this contract.
+                color:
+                    type: string
+                    description: color is the color value for this contract.
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                start_date:
+                    type: string
+                    description: |-
+                        start_date is an optional start date; an empty value leaves it unset,
+                        matching CreateProjectRequest - a project created with no dates (a
+                        documented, valid state there) could otherwise never be saved again.
+                due_date:
+                    type: string
+                    description: |-
+                        due_date is an optional due date; an empty value leaves it unset, for
+                        the same reason as start_date above.
+            required:
+                - name
+                - description
+                - icon
+                - color
+                - status
+        flow.project.v2.UpdateProjectResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.ArchiveProjectRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        flow.project.v2.ArchiveProjectResponse:
+            type: object
+            properties:
+                project:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.Project'
+                    description: |-
+                        project is the archived project, carrying archived_at and the purge_at
+                        deadline computed from the business's retention setting. Clients should
+                        surface purge_at wherever they show the archive confirmation.
+        flow.project.v2.SetProjectVisibilityRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                visibility:
+                    type: string
+                    description: 'visibility is the target visibility: "private" or "public".'
+            required:
+                - visibility
+        flow.project.v2.SetProjectVisibilityResponse:
+            type: object
+            properties:
+                project:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.Project'
+                    description: project is the updated project.
+        flow.project.v2.ListArchivedProjectsRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+        flow.project.v2.ListArchivedProjectsResponse:
+            type: object
+            properties:
+                projects:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.project.v2.Project'
+                    description: |-
+                        projects lists the caller's visible projects currently sitting in the
+                        recycle bin, ordered by soonest purge_at first.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.project.v2.RestoreProjectRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        flow.project.v2.RestoreProjectResponse:
+            type: object
+            properties:
+                project:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.Project'
+                    description: project is the restored project with cleared archive timestamps.
+        flow.project.v2.PurgeProjectRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the resource.
+        flow.project.v2.PurgeProjectResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.ListProjectColumnsRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            required:
+                - project_id
+        flow.project.v2.ListProjectColumnsResponse:
+            type: object
+            properties:
+                columns:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.project.v2.ProjectColumn'
+                    description: columns is the project columns for this contract.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.project.v2.ProjectColumn:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the column.
+                project_id:
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                name:
+                    type: string
+                    description: name is the column name.
+                color:
+                    type: string
+                    description: color is the column color.
+                sort_order:
+                    type: integer
+                    format: int32
+                    description: sort_order is the column sort order.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+        flow.project.v2.CreateProjectColumnRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                name:
+                    type: string
+                    description: name is the column name.
+                color:
+                    type: string
+                    description: color is the column color.
+                sort_order:
+                    type: integer
+                    format: int32
+                    description: sort_order is the column sort order.
+            required:
+                - project_id
+                - name
+        flow.project.v2.CreateProjectColumnResponse:
+            type: object
+            properties:
+                column:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.ProjectColumn'
+                    description: column is the created column.
+        flow.project.v2.UpdateProjectColumnRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the column identifier.
+                name:
+                    type: string
+                    description: name is the column name.
+                color:
+                    type: string
+                    description: color is the column color.
+                sort_order:
+                    type: integer
+                    format: int32
+                    description: sort_order is the column sort order.
+            required:
+                - name
+        flow.project.v2.UpdateProjectColumnResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.DeleteProjectColumnRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the column identifier.
+        flow.project.v2.DeleteProjectColumnResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.MoveTaskToColumnRequest:
+            type: object
+            properties:
+                task_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: task_id is the task identifier.
+                column_id:
+                    type: string
+                    format: int64
+                    description: column_id is the destination column identifier.
+            required:
+                - task_id
+        flow.project.v2.MoveTaskToColumnResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.ListProjectMembersRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            required:
+                - project_id
+        flow.project.v2.ListProjectMembersResponse:
+            type: object
+            properties:
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.project.v2.ProjectMember'
+                    description: members is the project members for this contract.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+        flow.project.v2.ProjectMember:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                    description: id is the unique identifier for the membership record.
+                project_id:
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                user_id:
+                    type: string
+                    format: int64
+                    description: user_id identifies the user associated with this request.
+                name:
+                    type: string
+                    description: name is the member display name.
+                email:
+                    type: string
+                    description: email is the member email address.
+                role:
+                    type: string
+                    description: role is the role value for this contract.
+                added_by:
+                    type: string
+                    format: int64
+                    description: added_by is the user id of the inviter, if any.
+                added_at:
+                    type: string
+                    description: added_at is when the member joined the project.
+        flow.project.v2.AddProjectMemberRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: user_id identifies the user associated with this request.
+                role:
+                    type: string
+                    description: role is the role value for this contract.
+            required:
+                - project_id
+                - user_id
+        flow.project.v2.AddProjectMemberResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.RemoveProjectMemberRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: user_id identifies the user associated with this request.
+            required:
+                - project_id
+                - user_id
+        flow.project.v2.RemoveProjectMemberResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.UpdateProjectMemberRoleRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: user_id identifies the user associated with this request.
+                role:
+                    type: string
+                    description: role is the role value for this contract.
+            required:
+                - project_id
+                - user_id
+                - role
+        flow.project.v2.UpdateProjectMemberRoleResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.InviteProjectMemberRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                email:
+                    type: string
+                    description: email is the invitee email address.
+                role:
+                    type: string
+                    description: role is the role value for this contract.
+            required:
+                - project_id
+                - email
+        flow.project.v2.InviteProjectMemberResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.TransferProjectOwnershipRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: project_id is the project id value for this contract.
+                new_owner_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: new_owner_id is the new owner user id.
+            required:
+                - project_id
+                - new_owner_id
+        flow.project.v2.TransferProjectOwnershipResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+        flow.project.v2.GetProjectLabourCostRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                    description: id is the Flow project id path parameter.
+        flow.project.v2.GetProjectLabourCostResponse:
+            type: object
+            properties:
+                cost:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.project.v2.ProjectLabourCost'
+                    description: cost is the aggregate for the requested project.
+        flow.project.v2.ProjectLabourCost:
+            type: object
+            properties:
+                project_id:
+                    type: string
+                    format: int64
+                    description: project_id is the project the cost was computed for.
+                cost_minor_units:
+                    type: string
+                    format: int64
+                    description: |-
+                        cost_minor_units is the labour cost of billable logged time in the
+                        smallest unit of the business currency, so no rounding happens before
+                        the caller sees it.
+                costed_minutes:
+                    type: string
+                    format: int64
+                    description: |-
+                        costed_minutes is billable logged time whose contributor had a rate on
+                        record; it is the time included in cost_minor_units.
+                uncosted_minutes:
+                    type: string
+                    format: int64
+                    description: |-
+                        uncosted_minutes is billable logged time whose contributor has no rate
+                        on record. A total with uncosted_minutes above zero understates true
+                        labour cost and must be labelled as partial where it is displayed.
+                uncosted_employee_count:
+                    type: integer
+                    format: int32
+                    description: |-
+                        uncosted_employee_count is how many distinct contributors have no rate
+                        on record.

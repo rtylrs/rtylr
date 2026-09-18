@@ -1,0 +1,240 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /booking/appointment/v1/appointments:
+        get:
+            tags:
+                - AppointmentService
+            summary: listAppointments
+            operationId: AppointmentService_listAppointments
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.appointment.v1.ListAppointmentsResponse'
+        post:
+            tags:
+                - AppointmentService
+            summary: createAppointment
+            operationId: AppointmentService_createAppointment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.appointment.v1.CreateAppointmentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.appointment.v1.CreateAppointmentResponse'
+    /booking/appointment/v1/appointments/today:
+        get:
+            tags:
+                - AppointmentService
+            summary: listTodayAppointments
+            operationId: AppointmentService_listTodayAppointments
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.appointment.v1.ListTodayAppointmentsResponse'
+    /booking/appointment/v1/appointments/{id}:
+        put:
+            tags:
+                - AppointmentService
+            summary: updateAppointment
+            operationId: AppointmentService_updateAppointment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/booking.appointment.v1.UpdateAppointmentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.appointment.v1.UpdateAppointmentResponse'
+        delete:
+            tags:
+                - AppointmentService
+            summary: deleteAppointment
+            operationId: AppointmentService_deleteAppointment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.appointment.v1.DeleteAppointmentResponse'
+components:
+    schemas:
+        booking.appointment.v1.ListAppointmentsRequest:
+            type: object
+        booking.appointment.v1.ListAppointmentsResponse:
+            type: object
+            properties:
+                appointments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/booking.appointment.v1.Appointment'
+        booking.appointment.v1.Appointment:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                owner_id:
+                    type: string
+                    format: int64
+                business_id:
+                    type: string
+                    format: int64
+                service_id:
+                    type: string
+                    format: int64
+                resource_id:
+                    type: string
+                    format: int64
+                staff_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                customer_phone:
+                    type: string
+                start_time:
+                    type: string
+                end_time:
+                    type: string
+                status:
+                    type: string
+                notes:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        booking.appointment.v1.ListTodayAppointmentsRequest:
+            type: object
+        booking.appointment.v1.ListTodayAppointmentsResponse:
+            type: object
+            properties:
+                appointments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/booking.appointment.v1.Appointment'
+        booking.appointment.v1.CreateAppointmentRequest:
+            type: object
+            properties:
+                service_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                resource_id:
+                    type: string
+                    format: int64
+                staff_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                customer_phone:
+                    type: string
+                start_time:
+                    type: string
+                end_time:
+                    type: string
+                status:
+                    type: string
+                notes:
+                    type: string
+            required:
+                - service_id
+                - customer_name
+                - start_time
+                - end_time
+        booking.appointment.v1.CreateAppointmentResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: int64
+                message:
+                    type: string
+        booking.appointment.v1.UpdateAppointmentRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+                service_id:
+                    type: string
+                    format: int64
+                resource_id:
+                    type: string
+                    format: int64
+                staff_id:
+                    type: string
+                    format: int64
+                customer_name:
+                    type: string
+                customer_email:
+                    type: string
+                customer_phone:
+                    type: string
+                start_time:
+                    type: string
+                end_time:
+                    type: string
+                status:
+                    type: string
+                notes:
+                    type: string
+        booking.appointment.v1.UpdateAppointmentResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        booking.appointment.v1.DeleteAppointmentRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    format: int64
+        booking.appointment.v1.DeleteAppointmentResponse:
+            type: object
+            properties:
+                message:
+                    type: string
