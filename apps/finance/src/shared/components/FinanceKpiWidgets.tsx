@@ -6,6 +6,8 @@ import { cardStyle } from '../lib/tokens';
 import { useFinanceDashboard } from '../hooks/queries/useFinanceDashboard';
 
 interface Kpi {
+  /** Stable id, used as the React key: the label is a translation and changes with the language. */
+  id: string;
   label: string;
   value: React.ReactNode;
   hint?: string;
@@ -28,6 +30,8 @@ const FinanceKpiWidgets: React.FC = () => {
 
   const kpis: Kpi[] = [
     {
+      id: 'receivable',
+
       label: t('finance.kpi.receivable'),
       value:
         isLoading || !dash ? (
@@ -40,6 +44,8 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-receivable',
     },
     {
+      id: 'expensesMtd',
+
       label: t('finance.kpi.expensesMtd'),
       value:
         isLoading || !dash ? (
@@ -52,6 +58,8 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-expenses',
     },
     {
+      id: 'netProfitMtd',
+
       label: t('finance.kpi.netProfitMtd'),
       value:
         isLoading || !dash ? '-' : <MoneyDisplay amount={dash.netProfitMtd} fractionDigits={0} />,
@@ -60,6 +68,8 @@ const FinanceKpiWidgets: React.FC = () => {
       colorVar: '--finance-profit',
     },
     {
+      id: 'overdue',
+
       label: t('finance.kpi.overdue'),
       value:
         isLoading || !dash ? '-' : <MoneyDisplay amount={dash.overdueAmount} fractionDigits={0} />,
@@ -75,7 +85,7 @@ const FinanceKpiWidgets: React.FC = () => {
         const Icon = k.icon;
         const color = `var(${k.colorVar})`;
         return (
-          <div key={k.label} style={{ ...cardStyle, padding: 18 }}>
+          <div key={k.id} style={{ ...cardStyle, padding: 18 }}>
             <div
               style={{
                 display: 'flex',

@@ -150,24 +150,32 @@ const ProfitLoss: React.FC = () => {
   // Summary cards
   const summaryItems = [
     {
+      id: 'revenue',
+
       label: t('finance.profitLoss.revenue'),
       value: data.revenue,
       color: 'var(--finance-accent)',
       Icon: TrendingUp,
     },
     {
+      id: 'grossProfit',
+
       label: t('finance.profitLoss.grossProfit'),
       value: grossProfit,
       color: 'var(--finance-info)',
       Icon: TrendingUp,
     },
     {
+      id: 'netProfit',
+
       label: t('finance.profitLoss.netProfit'),
       value: netProfit,
       color: netProfit >= 0 ? 'var(--finance-accent)' : 'var(--finance-danger)',
       Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
     },
     {
+      id: 'netMargin',
+
       label: t('finance.profitLoss.netMargin'),
       value: parseFloat(netMargin),
       color: 'var(--finance-warning)',
@@ -284,9 +292,9 @@ const ProfitLoss: React.FC = () => {
 
       {/* Summary cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-        {summaryItems.map(({ label, value, color, Icon, isMeta, display }) => (
+        {summaryItems.map(({ id, label, value, color, Icon, isMeta, display }) => (
           <div
-            key={label}
+            key={id}
             style={{
               background: 'var(--hub-card)',
               border: '1px solid var(--hub-border)',

@@ -129,18 +129,29 @@ const Customers: React.FC = (): React.JSX.Element => {
       ) : (
         <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: t('insights.customers.kpis.total'), value: formatNumber(total), icon: Users },
             {
+              id: 'total',
+              label: t('insights.customers.kpis.total'),
+              value: formatNumber(total),
+              icon: Users,
+            },
+            {
+              id: 'newThisMonth',
+
               label: t('insights.customers.kpis.newThisMonth'),
               value: formatNumber(newThisMonth),
               icon: UserPlus,
             },
             {
+              id: 'active',
+
               label: t('insights.customers.kpis.active'),
               value: formatNumber(active),
               icon: Star,
             },
             {
+              id: 'churned',
+
               label: t('insights.customers.kpis.churned'),
               value: formatNumber(churned),
               icon: UserMinus,
@@ -149,7 +160,7 @@ const Customers: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}

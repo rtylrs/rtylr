@@ -159,20 +159,24 @@ const Tax: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
         {[
           {
+            id: 'collected',
+
             label: t('tax.collected'),
             value: taxCollected,
             color: 'var(--finance-accent)',
             note: 'From invoices',
           },
           {
+            id: 'owed',
+
             label: t('tax.owed'),
             value: taxOwed,
             color: 'var(--finance-warning)',
             note: 'Net payable',
           },
-        ].map(({ label, value, color, note }) => (
+        ].map(({ id, label, value, color, note }) => (
           <div
-            key={label}
+            key={id}
             style={{
               background: 'var(--hub-card)',
               border: '1px solid var(--hub-border)',

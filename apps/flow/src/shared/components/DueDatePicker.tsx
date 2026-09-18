@@ -23,11 +23,11 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
   const overdue = isOverdue(value);
 
   const quickOptions = [
-    { label: t('common.datePicker.today'), days: 0 },
-    { label: t('common.datePicker.tomorrow'), days: 1 },
-    { label: t('common.datePicker.in3Days'), days: 3 },
-    { label: t('common.datePicker.nextWeek'), days: 7 },
-    { label: t('common.datePicker.in2Weeks'), days: 14 },
+    { id: 'today', label: t('common.datePicker.today'), days: 0 },
+    { id: 'tomorrow', label: t('common.datePicker.tomorrow'), days: 1 },
+    { id: 'in3Days', label: t('common.datePicker.in3Days'), days: 3 },
+    { id: 'nextWeek', label: t('common.datePicker.nextWeek'), days: 7 },
+    { id: 'in2Weeks', label: t('common.datePicker.in2Weeks'), days: 14 },
   ];
 
   return (
@@ -75,7 +75,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
             return (
               <button
                 type="button"
-                key={o.label}
+                key={o.id}
                 onClick={() => {
                   onChange(iso);
                   setOpen(false);

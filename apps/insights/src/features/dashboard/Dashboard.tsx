@@ -109,6 +109,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
 
   const stats = [
     {
+      id: 'revenue',
+
       label: t('insights.dashboard.cards.revenue'),
       value: data ? formatMoney(data.revenue.value, currency) : '-',
       deltaPct: data?.revenue.deltaPct ?? 0,
@@ -116,6 +118,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       sparkline: true,
     },
     {
+      id: 'customers',
+
       label: t('insights.dashboard.cards.customers'),
       value: data ? formatNumber(data.customers.value) : '-',
       deltaPct: data?.customers.deltaPct ?? 0,
@@ -123,6 +127,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       sparkline: false,
     },
     {
+      id: 'orders',
+
       label: t('insights.dashboard.cards.orders'),
       value: data ? formatNumber(data.orders.value) : '-',
       deltaPct: data?.orders.deltaPct ?? 0,
@@ -130,6 +136,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       sparkline: false,
     },
     {
+      id: 'margin',
+
       label: t('insights.dashboard.cards.margin'),
       value: data ? `${data.margin.value.toFixed(1)}%` : '-',
       deltaPct: data?.margin.deltaPct ?? 0,
@@ -174,7 +182,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
             const Icon = stat.icon;
             return (
               <motion.div
-                key={stat.label}
+                key={stat.id}
                 variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{
