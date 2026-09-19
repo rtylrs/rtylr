@@ -15,14 +15,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     concurrency:
-      group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}
+      group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.issue.number || github.event.pull_request.number }}
       cancel-in-progress: true
     permissions:
       contents: write
       pull-requests: write
       issues: write
     steps:
-      - name: Checkout repository
+      - name: Checkout PR (inline review comment)
+        if: github.event_name == 'pull_request_review_comment'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+          fetch-depth: 0
+
+      - name: Checkout PR (issue comment on PR)
+        if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/merge
+          fetch-depth: 0
+
+      - name: Checkout repository (plain issue)
+        if: github.event_name == 'issue_comment' && !github.event.issue.pull_request
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 1
