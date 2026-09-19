@@ -35,7 +35,7 @@ func NewGeminiProvider(ctx context.Context) (*GeminiProvider, error) {
 
 	return &GeminiProvider{
 		client: client,
-		models: []string{"gemini-1.5-flash", "gemini-1.5-pro"},
+		models: []string{"gemini-3.5-flash-lite", "gemini-3.5-flash"},
 	}, nil
 }
 
