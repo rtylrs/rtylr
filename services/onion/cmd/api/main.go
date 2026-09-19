@@ -540,6 +540,11 @@ func initializeModules(ctx context.Context) *apiModules {
 	supportTicketsModule := supporttickets.NewModule(ctx, dbclient.Pool())
 	taxModule := tax.NewModule(ctx, dbclient.Pool())
 
+	s1FormsExecutor, s1FormsErr := echo.NewFormMappingToolExecutor(platformConfig.GlobalConfig.FormMappingCheckpointPath)
+	if s1FormsErr != nil {
+		logger.Ctx(ctx).Warn("Caret document mapping checkpoint unavailable; using lexical fallback", logger.Error(s1FormsErr))
+	}
+
 	return &apiModules{
 		Accounts:              accountsModule,
 		Activity:              activity.NewModule(ctx, dbclient.Pool()),
@@ -574,7 +579,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, memoryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, memoryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule, s1FormsExecutor),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),

@@ -120,6 +120,11 @@ type AppConfig struct {
 	NvidiaNIMAPIKey   string
 	AIPrimaryProvider string
 
+	// FormMappingCheckpointPath points the Caret document-to-form mapping tool at
+	// a form-mapping classifier checkpoint (directory, .safetensors, or .json).
+	// The hosted image bundles one and sets this; empty uses the lexical matcher.
+	FormMappingCheckpointPath string
+
 	// Redis & Cache
 	RedisURL               string
 	RedisHosts             []string
@@ -326,6 +331,9 @@ func LoadAndValidate() (*AppConfig, error) {
 		DeepSeekAPIKey:    os.Getenv(DeepSeekAPIKeyEnvVar),
 		NvidiaNIMAPIKey:   os.Getenv(NvidiaNIMAPIKeyEnvVar),
 		AIPrimaryProvider: os.Getenv(AIPrimaryProviderEnvVar),
+
+		// Caret document-to-form mapping specialist (optional)
+		FormMappingCheckpointPath: strings.TrimSpace(os.Getenv("FORM_MAPPING_CHECKPOINT_PATH")),
 
 		// Redis & Cache
 		RedisURL:               os.Getenv("REDIS_URL"),

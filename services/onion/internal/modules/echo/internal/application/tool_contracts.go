@@ -68,6 +68,13 @@ func contractForTool(tool ToolDef) toolContract {
 			Freshness:  "live at request time",
 			SideEffect: "read-only; no business data is changed",
 		}
+	case "documents.map_form_fields":
+		return toolContract{
+			Input:      `{"document":"text containing Label: value lines","fields":[{"id":"optional","label":"Phone number","role":"Edit|Checkbox|Button","value":"optional current value"}],"form":"optional form name","threshold":0.5,"allow_submit":false}` + " (limits: 8 KB document, 32 fields, 64 values, 1200 field-value pairs; threshold defaults to 0.5 when omitted or 0)",
+			Output:     "A per-field plan with the chosen action (fill, check, click, or skip), the value to use, a probability, and a needs_review flag; fields are ordered for application (fills, then checks, then any approved submit click). It maps values that already exist in the supplied document and never invents data; plan values may contain the document's personal data and are returned only to the requesting user.",
+			Freshness:  "computed from the supplied document and field list at request time",
+			SideEffect: "read-only; no business data is changed",
+		}
 	case "erp.list_reorder_suggestions":
 		return toolContract{
 			Input:      `{}`,

@@ -62,6 +62,9 @@ RUN addgroup -S app && adduser -S -G app app
 WORKDIR /app
 
 COPY --from=builder /app/api /app/api
+COPY --chown=app:app internal/ai/classifier/models/cua-s1-forms /app/models/cua-s1-forms
+
+ENV FORM_MAPPING_CHECKPOINT_PATH=/app/models/cua-s1-forms
 
 EXPOSE 9999
 

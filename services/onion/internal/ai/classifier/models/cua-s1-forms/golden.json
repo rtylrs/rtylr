@@ -1,0 +1,107 @@
+{
+  "config": {
+    "context_tokens": 224,
+    "encoder": "tinyx",
+    "heads": 4,
+    "layers": 2,
+    "option_tokens": 96,
+    "rank": 128,
+    "width": 128
+  },
+  "examples": [
+    {
+      "context": "TASK fill the form from the document, then submit\nFORM Northwind Clinic - New Patient Registration\nELEMENT Edit \"Phone number\" value=\"\"",
+      "label": 0,
+      "logits": [
+        31.47140884399414,
+        2.4796299934387207,
+        -0.7853202223777771,
+        -2.5064873695373535,
+        21.039745330810547
+      ],
+      "options": [
+        "fill Tel: (503) 555-0142",
+        "fill DOB: 03/14/1987",
+        "check",
+        "click",
+        "skip"
+      ],
+      "reference_argmax": 0
+    },
+    {
+      "context": "TASK fill the form from the document, then submit\nFORM عيادة الشفاء - تسجيل مريض جديد\nELEMENT Edit \"الاسم الكامل\" value=\"\"",
+      "label": 0,
+      "logits": [
+        -3.0765223503112793,
+        -6.8995256423950195,
+        -9.206992149353027,
+        23.834144592285156
+      ],
+      "options": [
+        "fill الاسم: محمد أحمد",
+        "fill 名称：王小明",
+        "fill Name: José García 🧑‍⚕️",
+        "skip"
+      ],
+      "reference_argmax": 3
+    },
+    {
+      "context": "TASK fill the form from the document, then submit\nFORM Very Long Department Name Very Long Department Name Very Long Department Name Very Long Department Name Very Long Department Name Very Long Department Name Very Long Department Name Very Long Department Name Very Long Department Name Very Long Department Name \nELEMENT Edit \"Emergency contact phone\" value=\"\"",
+      "label": 1,
+      "logits": [
+        -6.394700527191162,
+        1.9991439580917358,
+        23.96520233154297
+      ],
+      "options": [
+        "fill Phone: +1 633 208 1384",
+        "fill Emergency: +1 633 208 9999",
+        "skip"
+      ],
+      "reference_argmax": 2
+    },
+    {
+      "context": "TASK fill the form from the document, then submit\nFORM Demo\nELEMENT Button \"Submit Form\" value=\"\"",
+      "label": 0,
+      "logits": [
+        32.66389846801758,
+        20.90174674987793
+      ],
+      "options": [
+        "click",
+        "skip"
+      ],
+      "reference_argmax": 0
+    },
+    {
+      "context": "TASK fill the form from the document, then submit\nFORM Demo\nELEMENT Edit \"Legal name\" value=\"Sofia Larsson\"",
+      "label": 2,
+      "logits": [
+        0.9955511689186096,
+        0.6905254125595093,
+        29.349491119384766
+      ],
+      "options": [
+        "fill Legal name: Sofia Larsson",
+        "fill Legal name: Liam Fischer",
+        "skip"
+      ],
+      "reference_argmax": 2
+    },
+    {
+      "context": "TASK fill the form from the document, then submit\nFORM Demo\nELEMENT Checkbox \"Has insurance\" value=\"unchecked\"",
+      "label": 1,
+      "logits": [
+        -7.658751010894775,
+        11.227670669555664,
+        19.543983459472656
+      ],
+      "options": [
+        "fill Insurance: yes",
+        "check",
+        "skip"
+      ],
+      "reference_argmax": 2
+    }
+  ]
+}

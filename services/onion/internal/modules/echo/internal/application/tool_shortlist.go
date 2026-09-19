@@ -16,6 +16,10 @@ var promptToolGlobalNames = map[string]struct{}{
 var promptToolModuleKeywords = map[string][]string{
 	"booking": {"appointment", "booking", "calendar", "service", "resource", "waitlist", "reminder"},
 	"crm":     {"customer", "crm", "campaign", "segment", "lead", "marketing"},
+	"documents": {
+		"document", "documents", "form", "forms", "fill", "filled", "filling", "fill out", "fill in",
+		"paperwork", "pdf", "scan", "scanned", "extract", "transcribe", "intake", "onboarding sheet",
+	},
 	"erp":     {"inventory", "stock", "supplier", "warehouse", "purchase", "transfer", "brand", "category", "product", "reorder"},
 	"finance": {"invoice", "expense", "bank", "payment", "bill", "quote", "tax", "cash", "balance", "profit", "loss", "revenue", "payable", "receivable"},
 	"flow":    {"task", "project", "roadmap", "workload", "flow", "milestone"},
