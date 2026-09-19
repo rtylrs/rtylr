@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/config"
 )
 
@@ -41,18 +42,36 @@ func hasValidPartialsAPIKey(r *http.Request) bool {
 	return subtle.ConstantTimeCompare([]byte(actual), []byte(expected)) == 1
 }
 
+// partialsActor is the identity the X-API-KEY bypass acts as. The console
+// endpoints read the authenticated user from the request context, so the bypass
+// has to supply one; it always assumes the console_admin role.
+func partialsActor() *authPkg.AuthUser {
+	var userID int64
+	if config.GlobalConfig != nil {
+		userID = config.GlobalConfig.PartialsActorUserID
+	}
+
+	return &authPkg.AuthUser{
+		UserID: userID,
+		Role:   "console_admin",
+		Token:  "partials-api-key",
+	}
+}
+
 // PartialsBypassHandler sends requests that present a valid X-API-KEY straight
 // to the bare router, skipping every global middleware (security, rate limit,
-// auth, subscription, license, idempotency). Requests without the key — or with
-// a wrong one — go through the normal middleware-protected handler.
+// auth, subscription, license, idempotency), and attaches a console_admin
+// identity so console endpoints can authorize. Requests without the key — or
+// with a wrong one — go through the normal middleware-protected handler.
 //
-// The bypass is only active while PARTIALS_API_KEY is configured, and it is
-// intended for internal endpoints only: it grants the caller the same reach as
-// an unauthenticated request to every route, with no user identity attached.
+// The bypass is only active while PARTIALS_API_KEY is configured. The actor id
+// comes from PARTIALS_ACTOR_USER_ID (0 when unset), which is what audit and
+// license writes record.
 func PartialsBypassHandler(bare, protected http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if hasValidPartialsAPIKey(r) {
-			bare.ServeHTTP(w, r)
+			ctx := authPkg.WithAuthUser(r.Context(), partialsActor())
+			bare.ServeHTTP(w, r.WithContext(ctx))
 
 			return
 		}

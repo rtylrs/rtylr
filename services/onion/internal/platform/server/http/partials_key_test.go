@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/config"
 )
 
@@ -104,5 +105,23 @@ func TestHasValidPartialsAPIKeyReadsEnvWhenConfigMissing(t *testing.T) {
 
 	if !hasValidPartialsAPIKey(req) {
 		t.Fatalf("expected env-configured key to validate")
+	}
+}
+
+func TestPartialsBypassAttachesConsoleAdminActor(t *testing.T) {
+	withPartialsAPIKey(t, "pka_test_key")
+	config.GlobalConfig.PartialsActorUserID = 42
+
+	var got *authPkg.AuthUser
+	bare := http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		got, _ = authPkg.GetAuthUser(r.Context())
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/console/admin/v1/console/plans", nil)
+	req.Header.Set(PartialsAPIKeyHeader, "pka_test_key")
+	PartialsBypassHandler(bare, http.NotFoundHandler()).ServeHTTP(httptest.NewRecorder(), req)
+
+	if got == nil || got.Role != "console_admin" || got.UserID != 42 {
+		t.Fatalf("expected console_admin actor 42, got %+v", got)
 	}
 }

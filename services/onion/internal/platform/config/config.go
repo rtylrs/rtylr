@@ -216,6 +216,10 @@ type AppConfig struct {
 	// tooling to reach internal endpoints without the standard middleware
 	// chain. Empty (the default) disables the bypass entirely.
 	PartialsAPIKey string
+	// PartialsActorUserID is the user the X-API-KEY bypass acts as. The bypass
+	// always assumes the console_admin role so internal tooling can reach the
+	// console endpoints; this id is what audit and license writes record.
+	PartialsActorUserID int64
 
 	// Metrics Auth
 	MetricsUser string
@@ -410,6 +414,14 @@ func LoadAndValidate() (*AppConfig, error) {
 		// Internal tooling (Partials) access. Trimmed so a stray newline from a
 		// shell export or secret value can't silently break the header compare.
 		PartialsAPIKey: strings.TrimSpace(os.Getenv("PARTIALS_API_KEY")),
+		PartialsActorUserID: func() int64 {
+			if raw := strings.TrimSpace(os.Getenv("PARTIALS_ACTOR_USER_ID")); raw != "" {
+				if parsed, err := strconv.ParseInt(raw, 10, 64); err == nil {
+					return parsed
+				}
+			}
+			return 0
+		}(),
 
 		// Metrics Auth
 		MetricsUser: os.Getenv("METRICS_USER"),
