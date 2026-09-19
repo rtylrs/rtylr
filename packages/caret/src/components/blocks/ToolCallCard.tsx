@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, ChevronDown, ChevronRight, Check, X, AlertCircle } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 import Spinner from '../../ui/Spinner';
+import FormMappingPlan from './FormMappingPlan';
 import type { ToolCallBlock } from '../../types/message';
 
 export interface ToolCallCardProps {
@@ -34,6 +35,7 @@ function actionForTool(name: string): string {
     [/^erp\.delete_product$/, 'delete a product'],
     [/^erp\.set_stock$/, 'adjust product stock'],
     [/^erp\.list_reorder_suggestions$/, 'review reorder suggestions'],
+    [/^documents\.map_form_fields$/, 'map a document onto the form'],
     [/^.*\.create_/, 'create a business record'],
     [/^.*\.delete_/, 'delete a business record'],
     [/^.*\.update_/, 'update a business record'],
@@ -65,6 +67,9 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
   const isRunning = call.status === 'running' || call.status === 'approved';
   const quiet = !isPending && call.status !== 'error';
   const ActivityIcon = call.status === 'error' ? AlertCircle : Search;
+  const showFormMappingPlan =
+    call.name.trim().toLowerCase() === 'documents.map_form_fields' &&
+    (call.status === 'success' || call.status === 'running');
 
   return (
     <div
@@ -133,6 +138,8 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
               <div style={summaryStyle}>{call.summary}</div>
             </div>
           )}
+
+          {showFormMappingPlan && <FormMappingPlan output={call.output} />}
 
           {call.error && (
             <div

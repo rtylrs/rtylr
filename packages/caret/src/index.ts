@@ -20,8 +20,8 @@ export type { IntroCardsProps } from './components/IntroCards';
 export { default as SettingsPanel } from './components/SettingsPanel';
 export { default as ApprovalDialog } from './components/ApprovalDialog';
 
-export { Markdown, CodeBlock, ToolCallCard, StreamingDot } from './components/blocks';
-export type { MarkdownProps, CodeBlockProps, ToolCallCardProps } from './components/blocks';
+export { Markdown, CodeBlock, ToolCallCard, StreamingDot, FormMappingPlan } from './components/blocks';
+export type { MarkdownProps, CodeBlockProps, ToolCallCardProps, FormMappingPlanProps } from './components/blocks';
 // Note: ThinkingBlock is re-exported only as a value (the message block type
 // of the same name lives in ./types).
 export { ThinkingBlock as ThinkingBlockView } from './components/blocks';
