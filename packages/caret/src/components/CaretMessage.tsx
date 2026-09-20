@@ -1,6 +1,6 @@
 import React from 'react';
 import MessageBlocks from './MessageBlocks';
-import StreamingDot from './blocks/StreamingDot';
+import { StreamingOrb } from './CaretOrb';
 import { caretTokens } from '../ui/tokens';
 import type { CaretMessage as CaretMessageType } from '../stores/caretStore';
 import type { ContentBlock } from '../types/message';
@@ -55,7 +55,7 @@ const CaretMessage = ({ message, isStreaming = false }: CaretMessageProps): Reac
         }}
       >
         {isUser ? text : <MessageBlocks blocks={blocks} />}
-        {isStreaming && <StreamingDot />}
+        {isStreaming && <StreamingOrb hasText={text.trim().length > 0} />}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import CaretOrb, { orbStateForTool } from './CaretOrb';
+import CaretOrb, { orbStateForTool, StreamingOrb } from './CaretOrb';
 
 describe('orbStateForTool', () => {
   it('maps read, analysis, write and memory tools to distinct states', () => {
@@ -27,5 +27,16 @@ describe('CaretOrb', () => {
     render(<CaretOrb state="listening" />);
 
     expect(screen.getByRole('img', { name: 'Listening…' })).not.toBeNull();
+  });
+});
+
+describe('StreamingOrb', () => {
+  it('thinks before the first token and composes once text arrives', () => {
+    const { unmount } = render(<StreamingOrb hasText={false} />);
+    expect(screen.getByRole('img', { name: 'Thinking…' })).not.toBeNull();
+    unmount();
+
+    render(<StreamingOrb hasText />);
+    expect(screen.getByRole('img', { name: 'Composing…' })).not.toBeNull();
   });
 });

@@ -7,7 +7,6 @@ import MicButton, { type VoiceInputStatus } from './MicButton';
 import AttachButton from './AttachButton';
 import SendButton from './SendButton';
 import StopButton from './StopButton';
-import CaretOrb from '../CaretOrb';
 import { useAutosize } from '../../hooks/useAutosize';
 import { CARET_FOCUS_COMPOSER_EVENT } from '../../lib/focusComposer';
 import { filterCaretSlashCommands, type CaretSlashCommand } from '../../lib/slashCommands';
@@ -325,7 +324,6 @@ export const Composer: React.FC<ComposerProps> = ({
           {voiceEnabled && (
             <MicButton onTranscript={appendTranscript} onStatusChange={updateVoiceStatus} />
           )}
-          {isStreaming && <CaretOrb state="composing" />}
           {isStreaming ? (
             <StopButton onStop={onStop} size={size} />
           ) : (
