@@ -536,6 +536,13 @@
   outline-offset: -2px;
 }
 
+/* The command palette focuses its input on open, so the global ring drew a
+ * box inside the dialog on every launch. The caret and the dialog chrome
+ * carry that state instead, as dash's palette already does. */
+.flow-focus-none:focus-visible {
+  outline: none;
+}
+
 /* Add Hours' own submitting spinner: 0.7s reads faster than the shared
  * animate-spin-slow (0.8s), appropriately for a control this small.
  * currentColor so it inherits the accent button's foreground - no new
