@@ -5,13 +5,13 @@ import { caretTokens } from '../ui/tokens';
 import CaretButton, { caretButtonStyle } from './CaretButton';
 
 describe('caretButtonStyle', () => {
-  it('matches the header button size and stays neutral when closed', () => {
+  it('matches the header button size and keeps the brand color when closed', () => {
     const style = caretButtonStyle(false, false);
 
     expect(style.height).toBe('28px');
     expect(style.backgroundColor).toBe('transparent');
-    expect(style.border).toBe(`1px solid ${caretTokens.border}`);
-    expect(style.color).toBe(caretTokens.textMuted);
+    expect(style.border).toBe(`1px solid ${caretTokens.accentBorder}`);
+    expect(style.color).toBe(caretTokens.accent);
   });
 
   it('shows the accent treatment while the panel is open', () => {
@@ -22,11 +22,11 @@ describe('caretButtonStyle', () => {
     expect(style.color).toBe(caretTokens.accent);
   });
 
-  it('tints on hover without the open accent', () => {
+  it('tints on hover without the open fill', () => {
     const style = caretButtonStyle(false, true);
 
     expect(style.backgroundColor).toBe(caretTokens.hover);
-    expect(style.color).toBe(caretTokens.textMuted);
+    expect(style.color).toBe(caretTokens.accent);
   });
 });
 
