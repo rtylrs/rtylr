@@ -56,7 +56,7 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
           const path = '/' + segments.slice(0, i + 1).join('/');
           const isLast = i === segments.length - 1;
           const key = ROUTE_KEYS[seg];
-          const label = key ? t(`nav.${key}`) : seg;
+          const label = key ? t(`common.nav.${key}`) : seg;
           return (
             <React.Fragment key={path}>
               <ChevronRight size={11} className="shrink-0 rtl:rotate-180" />

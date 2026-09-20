@@ -40,7 +40,7 @@ function resolves(tree: Record<string, unknown>, dotted: string): boolean {
 
 /** Each family: the keys it can produce, derived from the code that produces them. */
 const FAMILIES: Record<string, string[]> = {
-  // DefaultLayout and Breadcrumbs: t(`nav.${key}`)
+  // DefaultLayout and Breadcrumbs: t(`common.nav.${key}`)
   nav: [
     ...rawNavItems.map((i) => i.key),
     ...rawMenuSubItems.map((i) => i.key),

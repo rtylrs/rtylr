@@ -127,7 +127,7 @@ function getPageTitle(pathname: string, t: TFunction<'common', undefined>): stri
 
   if (matchEntry) {
     if (matchEntry === 'chat') return '__caret__';
-    return t(`nav.${matchEntry}`);
+    return t(`common.nav.${matchEntry}`);
   }
   return 'Dash';
 }
@@ -446,12 +446,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   const navItems = rawNavItems.map((item) => ({
     ...item,
-    label: t(`nav.${item.key}`),
+    label: t(`common.nav.${item.key}`),
   }));
 
   const menuSubItems = rawMenuSubItems.map((item) => ({
     ...item,
-    label: t(`nav.${item.key}`),
+    label: t(`common.nav.${item.key}`),
   }));
   const userEmail = user?.email || null;
   const userName = user?.fullName || 'User';
