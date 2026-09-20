@@ -638,7 +638,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           >
             {shouldUseRealtime && <RealtimeConnectionIndicator status={realtimeStatus} />}
             <SidebarLink to="/settings" icon={Settings} label={t('nav.settings')} />
-            <CaretButton className="w-full justify-start" />
+            <CaretButton size="md" className="w-full justify-start" />
 
             <div className="relative" ref={userMenuRef}>
               <button

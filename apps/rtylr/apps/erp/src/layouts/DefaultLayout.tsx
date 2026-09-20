@@ -401,7 +401,7 @@ const DefaultLayout: React.FC = () => {
             >
               <SettingsIcon size={12} /> Settings
             </Link>
-            <CaretButton className="w-full justify-start mb-1" />
+            <CaretButton size="md" className="w-full justify-start mb-1" />
             <div className="relative">
               <button
                 type="button"

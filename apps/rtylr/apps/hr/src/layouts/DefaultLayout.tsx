@@ -857,7 +857,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             <Settings size={14} />
             {t('nav.settings')}
           </Link>
-          <CaretButton className="w-full justify-start" />
+          <CaretButton size="md" className="w-full justify-start" />
           <UserMenu theme={theme} setTheme={setTheme} />
         </div>
       </aside>
