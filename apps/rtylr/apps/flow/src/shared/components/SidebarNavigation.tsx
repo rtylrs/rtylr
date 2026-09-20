@@ -235,7 +235,7 @@ const SidebarItemRow: React.FC<{
     // overflow:hidden for its slide transition, which clips a ring drawn at a
     // positive offset on every row.
     'flow-focus-inset',
-    'group relative flex min-h-10 items-center gap-2 rounded-md px-2 text-meta font-medium transition-[background,box-shadow,opacity,transform] duration-150 lg:min-h-0 lg:py-1.5',
+    'group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-meta font-medium transition-[background,box-shadow,opacity,transform] duration-150 lg:min-h-0',
     active ? '' : 'hover:bg-[var(--flow-hover)]',
     isDragging && 'scale-[0.98] opacity-45',
     isDropTarget && 'z-10'
@@ -451,10 +451,10 @@ const SidebarGroup: React.FC<{
           type="button"
           onClick={() => update((draft) => toggleGroup(draft, group.id))}
           aria-expanded={!group.collapsed}
-          className="flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-start hover:bg-[var(--flow-hover)]"
+          className="flex min-h-10 min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2 text-start hover:bg-[var(--flow-hover)] lg:min-h-0"
         >
           <span
-            className="min-w-0 flex-1 truncate text-body font-bold leading-tight"
+            className="min-w-0 flex-1 truncate text-meta font-semibold leading-tight"
             style={{ color: 'var(--flow-text)' }}
           >
             {groupLabel}
@@ -517,7 +517,7 @@ const SidebarGroup: React.FC<{
       {!group.collapsed && group.id === 'projects' && (
         <div
           className={cn(
-            'ms-7 flex flex-col gap-px border-s ps-1 pt-px',
+            'ms-5 flex flex-col gap-px border-s ps-2 pt-px',
             isGroupDropTarget && 'rounded-md border-dashed'
           )}
           style={{ borderInlineStartColor: 'var(--flow-border)' }}
@@ -536,7 +536,7 @@ const SidebarGroup: React.FC<{
                 to="/p/$projectId"
                 params={{ projectId: project.id }}
                 className={cn(
-                  'relative flex min-h-10 items-center gap-2 px-3 py-1.5 rounded-md text-meta',
+                  'relative flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-meta lg:min-h-0',
                   active ? '' : 'hover:bg-[var(--flow-hover)]'
                 )}
                 style={{ color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
@@ -732,7 +732,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   };
 
   return (
-    <div ref={sidebarRef} className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto py-2">
+    <div ref={sidebarRef} className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 py-2">
       <nav
         className={cn(
           'flex flex-col gap-px rounded-lg transition-[background,box-shadow] duration-150',

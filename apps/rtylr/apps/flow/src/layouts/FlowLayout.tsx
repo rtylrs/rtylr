@@ -94,7 +94,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
       to={to}
       search={search}
       className={cn(
-        'relative flex min-h-[40px] items-center gap-2.5 px-3 py-2 rounded-md text-meta font-medium transition-colors duration-150 lg:min-h-0 lg:py-1.5',
+        'relative flex min-h-[40px] items-center gap-3 rounded-lg px-3 py-2 text-meta font-medium transition-colors duration-150 lg:min-h-0',
         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
       )}
       style={{ color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
@@ -633,10 +633,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
           {/* Footer */}
           <div
-            className={cn('flex flex-col gap-1.5 py-2', sx)}
+            className="flex flex-col gap-1.5 px-2 py-2"
             style={{ borderTop: '1px solid var(--flow-border)' }}
           >
-            {shouldUseRealtime && <RealtimeConnectionIndicator status={realtimeStatus} />}
             <SidebarLink to="/settings" icon={Settings} label={t('nav.settings')} />
             <CaretButton size="md" className="w-full justify-start" />
 
