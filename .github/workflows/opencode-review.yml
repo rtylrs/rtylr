@@ -33,5 +33,6 @@ jobs:
             - Check for code quality issues, potential bugs, and security concerns
             - Suggest concrete improvements with file:line references
             - Flag missing tests or edge cases
+            - Skip lockfiles (pnpm-lock.yaml and friends), generated artifacts, and snapshots; read the source and tests instead
             - Be concise and avoid nitpicks unless they hint at a larger issue
             - If everything looks good, say LGTM with a brief summary
