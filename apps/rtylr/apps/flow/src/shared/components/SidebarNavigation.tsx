@@ -235,7 +235,7 @@ const SidebarItemRow: React.FC<{
     // overflow:hidden for its slide transition, which clips a ring drawn at a
     // positive offset on every row.
     'flow-focus-inset',
-    'group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-meta font-medium transition-[background,box-shadow,opacity,transform] duration-150 lg:min-h-0',
+    'group relative flex items-center gap-3 rounded-lg px-3 py-1.5 text-meta font-medium transition-[background,box-shadow,opacity,transform] duration-150',
     active ? '' : 'hover:bg-[var(--flow-hover)]',
     isDragging && 'scale-[0.98] opacity-45',
     isDropTarget && 'z-10'
@@ -274,7 +274,7 @@ const SidebarItemRow: React.FC<{
       <button
         type="button"
         aria-label={t('flow.sidebar.itemActions', { label })}
-        className="flow-reveal-on-hover relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
+        className="flow-reveal-on-hover relative flex h-6 w-6 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
         style={{ color: 'var(--flow-text-muted)' }}
         onClick={(event) => {
           event.preventDefault();
@@ -282,7 +282,7 @@ const SidebarItemRow: React.FC<{
           setActionsOpen((open) => !open);
         }}
       >
-        <MoreHorizontal size={15} />
+        <MoreHorizontal size={14} />
       </button>
       {actionsOpen && (
         <SidebarItemActions
@@ -439,7 +439,7 @@ const SidebarGroup: React.FC<{
         onDragOver={handleGroupDragOver}
         onDrop={handleGroupDrop}
         onDragEnd={onDragEnd}
-        className="group flex min-h-10 items-center gap-1"
+        className="group flex items-center gap-1"
       >
         <GripVertical
           size={15}
@@ -451,7 +451,7 @@ const SidebarGroup: React.FC<{
           type="button"
           onClick={() => update((draft) => toggleGroup(draft, group.id))}
           aria-expanded={!group.collapsed}
-          className="flex min-h-10 min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2 text-start hover:bg-[var(--flow-hover)] lg:min-h-0"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-1.5 text-start hover:bg-[var(--flow-hover)]"
         >
           <span
             className="min-w-0 flex-1 truncate text-meta font-semibold leading-tight"
@@ -471,7 +471,7 @@ const SidebarGroup: React.FC<{
             title={t('flow.shell.newProject')}
             aria-label={t('flow.shell.newProject')}
             onClick={onNewProject}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <Plus size={15} />
@@ -483,7 +483,7 @@ const SidebarGroup: React.FC<{
             label: group.kind === 'custom' ? group.label : t(group.label),
           })}
           onClick={() => setGroupActionsOpen((open) => !open)}
-          className="flow-reveal-on-hover flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
+          className="flow-reveal-on-hover flex h-6 w-6 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <MoreHorizontal size={15} />
@@ -536,7 +536,7 @@ const SidebarGroup: React.FC<{
                 to="/p/$projectId"
                 params={{ projectId: project.id }}
                 className={cn(
-                  'relative flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-meta lg:min-h-0',
+                  'relative flex items-center gap-2 rounded-lg px-3 py-1.5 text-meta',
                   active ? '' : 'hover:bg-[var(--flow-hover)]'
                 )}
                 style={{ color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}

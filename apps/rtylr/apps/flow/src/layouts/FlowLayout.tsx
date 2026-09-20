@@ -94,7 +94,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
       to={to}
       search={search}
       className={cn(
-        'relative flex min-h-[40px] items-center gap-3 rounded-lg px-3 py-2 text-meta font-medium transition-colors duration-150 lg:min-h-0',
+        'relative flex items-center gap-3 rounded-lg px-3 py-2 text-meta font-medium transition-colors duration-150',
         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
       )}
       style={{ color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
