@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import IconButton from '../../ui/IconButton';
 import Tooltip from '../../ui/Tooltip';
+import CaretOrb from '../CaretOrb';
 import { useSpeechToText } from '../../hooks/useSpeechToText';
 import { caretTokens } from '../../ui/tokens';
 
@@ -73,7 +74,7 @@ export const MicButton: React.FC<MicButtonProps> = ({ onTranscript, onStatusChan
             : undefined
         }
       >
-        <Mic size={14} />
+        {listening ? <CaretOrb state="listening" /> : <Mic size={14} />}
       </IconButton>
     </Tooltip>
   );

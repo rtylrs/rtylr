@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, ChevronDown, ChevronRight, Check, X, AlertCircle } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
-import Spinner from '../../ui/Spinner';
+import CaretOrb, { orbStateForTool } from '../CaretOrb';
 import FormMappingPlan from './FormMappingPlan';
 import type { ToolCallBlock } from '../../types/message';
 
@@ -98,8 +98,10 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
         }}
       >
         {open ? <ChevronDown size={quiet ? 12 : 13} /> : <ChevronRight size={quiet ? 12 : 13} />}
-        {isRunning ? (
-          <Spinner size={quiet ? 10 : 12} />
+        {isPending ? (
+          <CaretOrb state="shaping" />
+        ) : isRunning ? (
+          <CaretOrb state={orbStateForTool(call.name)} />
         ) : (
           <ActivityIcon size={quiet ? 12 : 14} style={{ flex: '0 0 auto' }} />
         )}

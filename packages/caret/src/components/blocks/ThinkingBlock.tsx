@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Brain, ChevronDown, ChevronRight } from 'lucide-react';
-import { ThinkingOrb } from 'thinking-orbs';
+import CaretOrb from '../CaretOrb';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 
 export interface ThinkingBlockProps {
@@ -46,13 +46,7 @@ export const ThinkingBlock: React.FC<ThinkingBlockProps> = ({
         }}
       >
         {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        {isLive ? (
-          // The panel chrome is a fixed dark surface, so the orb is pinned dark
-          // rather than following the host app's data-theme.
-          <ThinkingOrb state="breathing" size={20} theme="dark" />
-        ) : (
-          <Brain size={12} />
-        )}
+        {isLive ? <CaretOrb state="breathing" /> : <Brain size={12} />}
         <span>{isLive ? 'Thinking…' : 'Thought process'}</span>
         {!isLive && typeof durationMs === 'number' && (
           <span style={{ marginLeft: 'auto', color: caretTokens.textMuted, fontSize: 11 }}>
