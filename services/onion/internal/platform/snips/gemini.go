@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/iterator"
@@ -225,31 +226,34 @@ func (c *GeminiProvider) processModelIteration(ctx context.Context, iter *genai.
 	}
 }
 
+// processResponse emits every text part in the chunk. Gemini streams
+// interleave non-text parts (thought summaries, usage metadata) and can
+// deliver several parts per chunk; treating one of them as a failure
+// abandoned the model mid-answer and restarted the next one.
 func (c *GeminiProvider) processResponse(ctx context.Context, resp *genai.GenerateContentResponse, tokenChan chan<- StreamToken) bool {
-	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
-		return false
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
+		return true
 	}
 
-	part := resp.Candidates[0].Content.Parts[0]
+	for _, part := range resp.Candidates[0].Content.Parts {
+		textPart, ok := part.(genai.Text)
+		if !ok {
+			continue
+		}
+		text := string(textPart)
+		if strings.TrimSpace(text) == "" {
+			continue
+		}
 
-	textPart, ok := part.(genai.Text)
-	if !ok {
-		return false
-	}
+		logger.Global().Debug("Gemini returned text chunk",
+			logger.String("text_preview", text[:min(len(text), 50)]),
+			logger.Int("length", len(text)))
 
-	text := string(textPart)
-	if text == "" {
-		return false
-	}
-
-	logger.Global().Debug("Gemini returned text chunk",
-		logger.String("text_preview", text[:min(len(text), 50)]),
-		logger.Int("length", len(text)))
-
-	select {
-	case tokenChan <- StreamToken{Text: text, Done: false}:
-	case <-ctx.Done():
-		return false
+		select {
+		case tokenChan <- StreamToken{Text: text, Done: false}:
+		case <-ctx.Done():
+			return false
+		}
 	}
 
 	return true
