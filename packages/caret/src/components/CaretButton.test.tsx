@@ -6,7 +6,7 @@ import CaretButton, { caretButtonStyle } from './CaretButton';
 
 describe('caretButtonStyle', () => {
   it('matches the header button size and keeps the brand color when closed', () => {
-    const style = caretButtonStyle(false, false);
+    const style = caretButtonStyle('sm', false, false);
 
     expect(style.height).toBe('28px');
     expect(style.backgroundColor).toBe('transparent');
@@ -14,8 +14,16 @@ describe('caretButtonStyle', () => {
     expect(style.color).toBe(caretTokens.accent);
   });
 
+  it('sizes the sidebar variant like the rows beside it', () => {
+    const style = caretButtonStyle('md', false, false);
+
+    expect(style.height).toBe('36px');
+    expect(style.borderRadius).toBe('6px');
+    expect(style.fontSize).toBe('12px');
+  });
+
   it('shows the accent treatment while the panel is open', () => {
-    const style = caretButtonStyle(true, false);
+    const style = caretButtonStyle('sm', true, false);
 
     expect(style.backgroundColor).toBe(caretTokens.accentSoft);
     expect(style.border).toBe(`1px solid ${caretTokens.accentBorder}`);
@@ -23,7 +31,7 @@ describe('caretButtonStyle', () => {
   });
 
   it('tints on hover without the open fill', () => {
-    const style = caretButtonStyle(false, true);
+    const style = caretButtonStyle('sm', false, true);
 
     expect(style.backgroundColor).toBe(caretTokens.hover);
     expect(style.color).toBe(caretTokens.accent);

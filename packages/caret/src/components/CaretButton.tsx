@@ -3,13 +3,34 @@ import { useCaretStore } from '../stores/caretStore';
 import CaretLogo from './CaretLogo';
 import { caretTokens } from '../ui/tokens';
 
+export type CaretButtonSize = 'sm' | 'md';
+
 interface CaretButtonProps {
   className?: string;
+  size?: CaretButtonSize;
   style?: React.CSSProperties;
   'data-tour'?: string;
 }
 
+const sizeStyles: Record<CaretButtonSize, React.CSSProperties> = {
+  sm: {
+    gap: '6px',
+    height: '28px',
+    padding: '0 12px',
+    borderRadius: '8px',
+    fontSize: '11px',
+  },
+  md: {
+    gap: '8px',
+    height: '36px',
+    padding: '0 12px',
+    borderRadius: '6px',
+    fontSize: '12px',
+  },
+};
+
 export function caretButtonStyle(
+  size: CaretButtonSize,
   isOpen: boolean,
   hovered: boolean,
   style?: React.CSSProperties,
@@ -17,15 +38,11 @@ export function caretButtonStyle(
   return {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '6px',
-    height: '28px',
-    padding: '0 12px',
-    borderRadius: '8px',
+    ...sizeStyles[size],
     backgroundColor: isOpen ? caretTokens.accentSoft : hovered ? caretTokens.hover : 'transparent',
     border: `1px solid ${caretTokens.accentBorder}`,
     color: caretTokens.accent,
     cursor: 'pointer',
-    fontSize: '11px',
     fontWeight: 600,
     boxShadow: 'none',
     transition: 'background-color 0.15s, border-color 0.15s',
@@ -35,6 +52,7 @@ export function caretButtonStyle(
 
 const CaretButton = ({
   className,
+  size = 'sm',
   style,
   'data-tour': dataTour,
 }: CaretButtonProps): React.JSX.Element => {
@@ -49,11 +67,11 @@ const CaretButton = ({
       aria-expanded={isOpen}
       data-tour={dataTour}
       className={className}
-      style={caretButtonStyle(isOpen, hovered, style)}
+      style={caretButtonStyle(size, isOpen, hovered, style)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <CaretLogo variant="teal" size={21} scale={1.18} />
+      <CaretLogo variant="teal" size={size === 'md' ? 22 : 21} scale={1.18} />
       Caret AI
     </button>
   );
