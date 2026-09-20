@@ -516,7 +516,7 @@
     "noDepartment": "No department"
   },
   "leave": {
-    "heading": "Leave",
+    "heading": "Time off",
     "balanceHeading": "Your balance",
     "noBalances": "No leave balances yet. Ask HR to set up your leave types and entitlement.",
     "loadBalancesFailedTitle": "Couldn't load your leave balances",
