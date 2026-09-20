@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Brain, ChevronDown, ChevronRight } from 'lucide-react';
+import CaretOrb from '../CaretOrb';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 
 export interface ThinkingBlockProps {
   content: string;
   durationMs?: number;
-  /** Whether the model is still thinking. Shows a pulsing dot when true. */
+  /** Whether the model is still thinking. Shows a live orb when true. */
   isLive?: boolean;
   defaultOpen?: boolean;
 }
@@ -45,20 +46,8 @@ export const ThinkingBlock: React.FC<ThinkingBlockProps> = ({
         }}
       >
         {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        <Brain size={12} />
+        {isLive ? <CaretOrb state="breathing" /> : <Brain size={12} />}
         <span>{isLive ? 'Thinking…' : 'Thought process'}</span>
-        {isLive && (
-          <span
-            aria-hidden="true"
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 3,
-              background: caretTokens.thinking,
-              animation: 'caret-pulse 1.2s ease-in-out infinite',
-            }}
-          />
-        )}
         {!isLive && typeof durationMs === 'number' && (
           <span style={{ marginLeft: 'auto', color: caretTokens.textMuted, fontSize: 11 }}>
             {Math.max(1, Math.round(durationMs / 100) / 10)}s

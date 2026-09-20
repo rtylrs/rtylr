@@ -19,6 +19,8 @@ export { default as IntroCards } from './components/IntroCards';
 export type { IntroCardsProps } from './components/IntroCards';
 export { default as SettingsPanel } from './components/SettingsPanel';
 export { default as ApprovalDialog } from './components/ApprovalDialog';
+export { default as CaretOrb, orbStateForTool } from './components/CaretOrb';
+export type { CaretOrbProps, CaretOrbState } from './components/CaretOrb';
 
 export { Markdown, CodeBlock, ToolCallCard, StreamingDot, FormMappingPlan } from './components/blocks';
 export type { MarkdownProps, CodeBlockProps, ToolCallCardProps, FormMappingPlanProps } from './components/blocks';
