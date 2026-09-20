@@ -237,8 +237,7 @@
     "truth": {
       "badge": "Vérifiable",
       "title": "Ce que nous pouvons prouver.",
-      "description": "Six affirmations que vous pouvez vérifier depuis un onglet de navigateur ou un terminal, et cinq choses que rtylr ne fait pas encore. Rien ici ne demande un appel commercial pour être confirmé.",
-      "limitsTitle": "Ce que rtylr ne fait pas encore",
+      "description": "Six affirmations que vous pouvez vérifier depuis un onglet de navigateur ou un terminal. Rien ici ne demande un appel commercial pour être confirmé.",
       "checkLabel": "À vérifier\u00a0:",
       "claims": [
         {
@@ -270,13 +269,6 @@
           "body": "Ce site publie la spécification de ses propres points d’accès au format OpenAPI 3.1. Elle couvre le site vitrine, pas l’API du produit, et elle est indiquée ici pour que personne n’ait à deviner laquelle des deux.",
           "check": "https://rtylr.com/openapi.json"
         }
-      ],
-      "limits": [
-        "Les prix ne sont pas publiés. Le forfait Free est gratuit\u00a0; Pro et Scale sont sur devis.",
-        "Aucune intégration n’est encore active. /integrations/ liste ce qui est prévu et marque chaque entrée d’un «\u00a0Coming soon\u00a0».",
-        "Les déclarations de paie ne sont pas de notre ressort. rtylr HR calcule la paie et exporte les fichiers que Gusto, ADP ou Rippling se chargent de déclarer.",
-        "Une comptabilité complexe demande toujours un grand livre. La consolidation multi-entités et les pistes d’audit lourdes sont mieux servies par QuickBooks ou Xero, et rtylr Finance exporte vers les deux.",
-        "L’interface des applications est en anglais uniquement. Le français que vous lisez ici est écrit pour ce site, pas traduit, et ce site est la première chose que nous livrons dans cette langue\u00a0; dans les applications, l’arabe et le français sont encore en cours de rédaction."
       ]
     },
     "hero": {

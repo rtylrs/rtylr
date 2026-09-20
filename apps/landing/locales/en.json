@@ -554,8 +554,7 @@
     "truth": {
       "badge": "Checkable",
       "title": "What we can prove.",
-      "description": "Six claims you can verify from a browser tab or a terminal, and five things rtylr does not do yet. Nothing here needs a sales call to confirm.",
-      "limitsTitle": "What rtylr does not do yet",
+      "description": "Six claims you can verify from a browser tab or a terminal. Nothing here needs a sales call to confirm.",
       "checkLabel": "Check it:",
       "claims": [
         {
@@ -587,13 +586,6 @@
           "body": "This site publishes a spec for its own endpoints as OpenAPI 3.1. It covers the marketing site, not the product API, and it is linked here so nobody has to guess which.",
           "check": "https://rtylr.com/openapi.json"
         }
-      ],
-      "limits": [
-        "Prices are not published. The Free plan is free; Pro and Scale are quoted.",
-        "No integration is live yet. /integrations/ lists what is planned and marks every entry Coming soon.",
-        "Payroll filing is not ours. rtylr HR calculates pay and exports files for Gusto, ADP or Rippling to file.",
-        "Complex accounting still wants a ledger. Multi-entity consolidation and heavy audit trails are better served by QuickBooks or Xero, and rtylr Finance exports to both.",
-        "The apps are in English. Arabic and French are being written, not translated, and are not shipped yet."
       ]
     },
     "hero": {
