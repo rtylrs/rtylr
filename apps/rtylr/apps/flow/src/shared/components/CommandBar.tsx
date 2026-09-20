@@ -315,7 +315,7 @@ export const CommandBar: React.FC = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('flow.commandBar.searchPlaceholder')}
-                className="flex-1 bg-transparent text-body"
+                className="flex-1 bg-transparent text-body flow-focus-none"
                 style={{ color: 'var(--flow-text)' }}
               />
               <span
@@ -330,7 +330,7 @@ export const CommandBar: React.FC = () => {
             </div>
 
             {/* Results */}
-            <div className="max-h-[min(50vh,360px)] overflow-y-auto py-1 sm:max-h-[60vh]">
+            <div className="max-h-[min(50vh,360px)] overflow-y-auto px-1 py-1 sm:max-h-[60vh]">
               {filtered.length === 0 && (
                 <div
                   className="text-meta text-center py-8"
@@ -360,7 +360,7 @@ export const CommandBar: React.FC = () => {
                           key={item.id}
                           onMouseEnter={() => setSelected(idx)}
                           onClick={() => run(item)}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-meta"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-meta rounded-lg"
                           style={{
                             // The accent tint, not the neutral hover grey. This
                             // row is what Enter will run, and a grey that also
