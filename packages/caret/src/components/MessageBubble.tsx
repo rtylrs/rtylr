@@ -3,7 +3,7 @@ import { caretTokens } from '../ui/tokens';
 import MessageBlocks from './MessageBlocks';
 import MessageActions from './MessageActions';
 import FollowUpChips from './FollowUpChips';
-import StreamingDot from './blocks/StreamingDot';
+import { StreamingOrb } from './CaretOrb';
 import type { CaretStarter } from '../lib/suggestions';
 import type { CaretMessage, ContentBlock } from '../types/message';
 
@@ -95,7 +95,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           onDeny={onDenyTool}
           showThinking={showThinking}
         />
-        {isStreaming && <StreamingDot />}
+        {isStreaming && <StreamingOrb hasText={text.trim().length > 0} />}
       </div>
       {!isStreaming && blocks.some((b) => b.type === 'text') && (
         <MessageActions text={text} onRetry={onRetry} />

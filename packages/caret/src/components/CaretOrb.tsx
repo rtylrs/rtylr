@@ -35,4 +35,11 @@ export function orbStateForTool(name: string): CaretOrbState {
   return 'working';
 }
 
+/** Inline status orb for a streaming assistant turn. */
+export const StreamingOrb: React.FC<{ hasText: boolean }> = ({ hasText }) => (
+  <span style={{ display: 'inline-flex', verticalAlign: 'text-bottom', marginLeft: 4 }}>
+    <CaretOrb state={hasText ? 'composing' : 'breathing'} />
+  </span>
+);
+
 export default CaretOrb;
