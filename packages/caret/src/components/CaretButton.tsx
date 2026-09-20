@@ -1,47 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCaretStore } from '../stores/caretStore';
 import CaretLogo from './CaretLogo';
 import { caretTokens } from '../ui/tokens';
 
 interface CaretButtonProps {
   className?: string;
+  style?: React.CSSProperties;
   'data-tour'?: string;
 }
 
-const CaretButton = ({ className, 'data-tour': dataTour }: CaretButtonProps): React.JSX.Element => {
+export function caretButtonStyle(
+  isOpen: boolean,
+  hovered: boolean,
+  style?: React.CSSProperties,
+): React.CSSProperties {
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    height: '28px',
+    padding: '0 12px',
+    borderRadius: '8px',
+    backgroundColor: isOpen ? caretTokens.accentSoft : hovered ? caretTokens.hover : 'transparent',
+    border: `1px solid ${isOpen ? caretTokens.accentBorder : caretTokens.border}`,
+    color: isOpen ? caretTokens.accent : caretTokens.textMuted,
+    cursor: 'pointer',
+    fontSize: '11px',
+    fontWeight: 600,
+    boxShadow: 'none',
+    transition: 'background-color 0.15s, border-color 0.15s, color 0.15s',
+    ...style,
+  };
+}
+
+const CaretButton = ({
+  className,
+  style,
+  'data-tour': dataTour,
+}: CaretButtonProps): React.JSX.Element => {
   const toggle = useCaretStore((state) => state.toggle);
+  const isOpen = useCaretStore((state) => state.isOpen);
+  const [hovered, setHovered] = useState(false);
 
   return (
     <button
       onClick={toggle}
       aria-label="Open Caret AI"
+      aria-expanded={isOpen}
       data-tour={dataTour}
       className={className}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '6px',
-        minHeight: '44px',
-        minWidth: '44px',
-        padding: '0 12px',
-        borderRadius: '4px',
-        background: caretTokens.accentSoft,
-        border: `1px solid ${caretTokens.accentBorder}`,
-        color: caretTokens.accent,
-        cursor: 'pointer',
-        fontSize: '11px',
-        fontWeight: 600,
-        boxShadow: 'none',
-        transition: 'background 0.15s, border-color 0.15s',
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = caretTokens.accentSoft;
-        (e.currentTarget as HTMLButtonElement).style.borderColor = caretTokens.accentBorder;
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = caretTokens.accentSoft;
-        (e.currentTarget as HTMLButtonElement).style.borderColor = caretTokens.accentBorder;
-      }}
+      style={caretButtonStyle(isOpen, hovered, style)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <CaretLogo variant="teal" size={21} scale={1.18} />
       Caret AI
