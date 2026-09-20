@@ -5,7 +5,7 @@ import styles from './ProductTruthSection.module.scss';
 
 /**
  * Product truth: claims about rtylr that a reader can check without
- * talking to us, plus the things rtylr does not do yet.
+ * talking to us.
  *
  * This sits next to the testimonials on purpose. A quote is a claim the
  * reader has to take on trust; everything below is a claim they can
@@ -23,10 +23,6 @@ import styles from './ProductTruthSection.module.scss';
  *     site's own API and has two paths. It is not the product API, so it
  *     is described below as exactly what it is.
  *
- * The limits list is not modesty. A page that wins on every line reads
- * as marketing and gets cited by nobody, and every item in it is a
- * question a buyer will otherwise ask on a call.
- *
  * Rule for editing: if you cannot tell a reader how to check it, it does
  * not belong in the grid. Move it to the copy above, or leave it out.
  */
@@ -41,7 +37,6 @@ interface Claim {
 const ProductTruthSection = (): React.JSX.Element => {
   const { t } = useTranslation();
   const claims = t('home.truth.claims', { returnObjects: true }) as unknown as Claim[];
-  const limits = t('home.truth.limits', { returnObjects: true }) as unknown as string[];
 
   return (
     <section className={styles.truthSection}>
@@ -71,17 +66,6 @@ const ProductTruthSection = (): React.JSX.Element => {
               )}
             </div>
           ))}
-        </div>
-
-        <div className={styles.limits}>
-          <h3 className={styles.limitsTitle}>{t('home.truth.limitsTitle')}</h3>
-          <ul className={styles.limitsList}>
-            {limits.map((limit) => (
-              <li key={limit} className={styles.limitsItem}>
-                {limit}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </section>
