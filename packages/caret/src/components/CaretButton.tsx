@@ -22,13 +22,13 @@ export function caretButtonStyle(
     padding: '0 12px',
     borderRadius: '8px',
     backgroundColor: isOpen ? caretTokens.accentSoft : hovered ? caretTokens.hover : 'transparent',
-    border: `1px solid ${isOpen ? caretTokens.accentBorder : caretTokens.border}`,
-    color: isOpen ? caretTokens.accent : caretTokens.textMuted,
+    border: `1px solid ${caretTokens.accentBorder}`,
+    color: caretTokens.accent,
     cursor: 'pointer',
     fontSize: '11px',
     fontWeight: 600,
     boxShadow: 'none',
-    transition: 'background-color 0.15s, border-color 0.15s, color 0.15s',
+    transition: 'background-color 0.15s, border-color 0.15s',
     ...style,
   };
 }
