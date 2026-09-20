@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Brain, ChevronDown, ChevronRight } from 'lucide-react';
+import { ThinkingOrb } from 'thinking-orbs';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 
 export interface ThinkingBlockProps {
   content: string;
   durationMs?: number;
-  /** Whether the model is still thinking. Shows a pulsing dot when true. */
+  /** Whether the model is still thinking. Shows a live orb when true. */
   isLive?: boolean;
   defaultOpen?: boolean;
 }
@@ -45,20 +46,14 @@ export const ThinkingBlock: React.FC<ThinkingBlockProps> = ({
         }}
       >
         {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        <Brain size={12} />
-        <span>{isLive ? 'Thinking…' : 'Thought process'}</span>
-        {isLive && (
-          <span
-            aria-hidden="true"
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 3,
-              background: caretTokens.thinking,
-              animation: 'caret-pulse 1.2s ease-in-out infinite',
-            }}
-          />
+        {isLive ? (
+          // The panel chrome is a fixed dark surface, so the orb is pinned dark
+          // rather than following the host app's data-theme.
+          <ThinkingOrb state="breathing" size={20} theme="dark" />
+        ) : (
+          <Brain size={12} />
         )}
+        <span>{isLive ? 'Thinking…' : 'Thought process'}</span>
         {!isLive && typeof durationMs === 'number' && (
           <span style={{ marginLeft: 'auto', color: caretTokens.textMuted, fontSize: 11 }}>
             {Math.max(1, Math.round(durationMs / 100) / 10)}s
