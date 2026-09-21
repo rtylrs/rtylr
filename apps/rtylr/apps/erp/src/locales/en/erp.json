@@ -225,7 +225,11 @@
     "goToPurchasing": "Go to Purchase Orders",
     "orderSummary": "{{count}} items / Expected {{date}}",
     "validation": {
-      "overReceived": "Cannot receive more units than ordered"
+      "overReceived": "Cannot receive more units than ordered",
+      "noItems": "No line items available to receive"
+    },
+    "error": {
+      "loadFailed": "Failed to load order items"
     },
     "toast": {
       "completed": "Receipt completed, all items received",

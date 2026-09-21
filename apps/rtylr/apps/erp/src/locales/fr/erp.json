@@ -227,7 +227,11 @@
     "goToPurchasing": "Aller aux bons de commande",
     "orderSummary": "{{count}} articles / Prévu le {{date}}",
     "validation": {
-      "overReceived": "Impossible de recevoir plus d'unités que commandé"
+      "overReceived": "Impossible de recevoir plus d'unités que commandé",
+      "noItems": "Aucune ligne à réceptionner"
+    },
+    "error": {
+      "loadFailed": "Échec du chargement des lignes de commande"
     },
     "toast": {
       "completed": "Réception terminée, tous les articles reçus",
