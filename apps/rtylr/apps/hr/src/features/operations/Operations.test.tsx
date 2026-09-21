@@ -60,6 +60,7 @@ vi.mock('../staff/useStaff', () => ({
 }));
 
 import Operations from './Operations';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 
 function role(r: string): void {
   mocks.useUserStore.mockImplementation(
@@ -133,5 +134,62 @@ describe('Operations empty states', () => {
     fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
 
     expect(mocks.refetchOvertimeAlerts).toHaveBeenCalledOnce();
+  });
+});
+
+describe('Operations department labor cost', () => {
+  beforeEach(() => {
+    Object.values(mocks).forEach((m) => {
+      if (typeof m === 'function' && 'mockReset' in m) m.mockReset();
+    });
+
+    role('owner');
+    mocks.useStaff.mockReturnValue({
+      data: [
+        { id: 101, name: 'Ada', department: 'Sales' },
+        { id: 102, name: 'Grace', department: 'Engineering' },
+      ],
+    });
+    mocks.usePayroll.mockReturnValue({
+      data: [
+        {
+          id: 7,
+          staffId: 101,
+          name: 'Ada',
+          role: '',
+          hoursWorked: 40,
+          basePay: 1000,
+          overtime: 0,
+          deductions: 0,
+        },
+        {
+          id: 8,
+          staffId: 102,
+          name: 'Grace',
+          role: '',
+          hoursWorked: 40,
+          basePay: 2000,
+          overtime: 0,
+          deductions: 0,
+        },
+      ],
+    });
+    mocks.useSwaps.mockReturnValue({ data: [], refetch: mocks.refetchSwaps });
+    mocks.useBreaks.mockReturnValue({ data: [] });
+    mocks.useOvertimeAlerts.mockReturnValue({ data: [], refetch: mocks.refetchOvertimeAlerts });
+    mocks.useHrSettings.mockReturnValue({ data: { currency: 'USD' } });
+    mocks.useAvailability.mockReturnValue({ data: [], refetch: mocks.refetchAvailability });
+  });
+
+  // Payroll rows carry the payroll record's own id, which is distinct from the
+  // staff id. Matching them by `id` dropped or mixed rows, so the department
+  // totals disagreed with the All view.
+  it('matches payroll rows to the department through the staff id', () => {
+    render(<Operations />);
+
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'Sales' } });
+
+    expect(screen.getByText(formatCurrency(1000, 'USD'))).toBeInTheDocument();
+    expect(screen.queryByText(formatCurrency(2000, 'USD'))).not.toBeInTheDocument();
   });
 });

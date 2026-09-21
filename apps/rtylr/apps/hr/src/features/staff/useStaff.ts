@@ -78,6 +78,8 @@ export function useSetStaffManager() {
           emergencyContactPhone: staff.emergencyContactPhone ?? '',
           apps: staff.apps ?? '',
           notes: staff.notes ?? '',
+          photoUrl: staff.photoUrl ?? '',
+          bio: staff.bio ?? '',
         },
       }),
     onSuccess: () => {

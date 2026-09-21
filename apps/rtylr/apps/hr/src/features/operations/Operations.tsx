@@ -104,7 +104,7 @@ const Operations: React.FC = () => {
   const filteredPayroll = useMemo(() => {
     if (deptFilter === 'All') return payroll;
     const ids = new Set(staff.filter((s) => s.department === deptFilter).map((s) => s.id));
-    return payroll.filter((p) => ids.has(p.id));
+    return payroll.filter((p) => ids.has(p.staffId));
   }, [payroll, staff, deptFilter]);
   const weeklyCost = filteredPayroll.reduce(
     (sum, p) => sum + p.basePay + p.overtime - p.deductions,

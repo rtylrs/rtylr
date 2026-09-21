@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCreateTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
 import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
@@ -39,6 +39,24 @@ const TimeEntryForm = ({
   const [description, setDescription] = useState(prefill?.description ?? '');
   const [isBillable, setIsBillable] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // The form stays mounted while the modal is closed, so the state initialisers
+  // run only once. Re-seed on every open, or the timer's prefill never reaches
+  // the fields and the previous entry's values reappear on the next open.
+  const prefillMinutes = prefill?.durationMinutes;
+  const prefillDescription = prefill?.description;
+  useEffect(() => {
+    if (!open) return;
+    setDate(todayIso());
+    setHours(prefillMinutes ? String(Math.floor(prefillMinutes / 60)) : '');
+    setMinutes(prefillMinutes ? String(prefillMinutes % 60) : '');
+    setStartTime('');
+    setEndTime('');
+    setUseStartEnd(false);
+    setDescription(prefillDescription ?? '');
+    setIsBillable(false);
+    setErrors({});
+  }, [open, prefillMinutes, prefillDescription]);
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();

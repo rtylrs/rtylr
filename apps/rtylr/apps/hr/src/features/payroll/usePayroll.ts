@@ -33,6 +33,7 @@ export function usePayroll(params?: {
         const staff = staffById.get(r.staffId ?? 0);
         return {
           id: r.id ?? 0,
+          staffId: Number(r.staffId ?? 0),
           name: staff ? `${staff.firstName} ${staff.lastName}`.trim() : `Staff #${r.staffId}`,
           role: staff?.role ?? '',
           hoursWorked: (r.regularHours ?? 0) + (r.overtimeHours ?? 0),
