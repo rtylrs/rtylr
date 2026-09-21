@@ -105,6 +105,22 @@ describe('structured data', () => {
     assert.deepEqual(offenders, [], 'the FAQ rich result was removed by Google in May 2026');
   });
 
+  // The WebSite schema used to advertise a SearchAction pointing at
+  // /search?q={search_term_string}. No such route is exported, so Google
+  // followed the markup and logged a 404. Sitelinks search box, the only
+  // feature the block fed, was retired, so there is nothing to restore.
+  it('no page advertises a search endpoint', () => {
+    const offenders = [];
+    for (const p of pages) {
+      for (const block of jsonLd(read(p))) {
+        for (const needle of ['SearchAction', '/search?']) {
+          if (block.includes(needle)) offenders.push([p, needle]);
+        }
+      }
+    }
+    assert.deepEqual(offenders, [], 'structured data must not point at a route the export lacks');
+  });
+
   it('a legal page is not a software application', () => {
     const types = jsonLd(read('legal/privacy-policy/index.html'))
       .flatMap((b) => {

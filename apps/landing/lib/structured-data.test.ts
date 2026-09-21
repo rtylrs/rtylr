@@ -188,14 +188,6 @@ describe('webSiteSchema', () => {
     expect(out.url).toBe('https://rtylr.com');
   });
 
-  it('includes a SearchAction for sitelinks search', () => {
-    const out = webSiteSchema() as {
-      potentialAction: { '@type': string; 'query-input': string };
-    };
-    expect(out.potentialAction['@type']).toBe('SearchAction');
-    expect(out.potentialAction['query-input']).toContain('search_term_string');
-  });
-
   it('includes the site name and description', () => {
     const out = webSiteSchema();
     expect(out.name).toBe('rtylr');
