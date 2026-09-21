@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCreateCustomer } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
@@ -64,11 +63,7 @@ const CreateCustomer: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success(t('crm.customers.created'));
           navigate({ to: '/customers' });
-        },
-        onError: () => {
-          toast.error(t('crm.customers.createFailed'));
         },
       }
     );
@@ -230,7 +225,6 @@ const CreateCustomer: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
           <Button
             variant="outline"
-            disabled={step === 0}
             onClick={() => (step > 0 ? setStep(step - 1) : navigate({ to: '/customers' }))}
           >
             <ArrowLeft size={13} />
