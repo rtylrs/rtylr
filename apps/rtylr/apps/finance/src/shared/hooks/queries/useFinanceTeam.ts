@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
 import { teamInvitationsClient, teamMembersClient } from '../../lib/clients';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface FinanceTeamMember {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
   role: string;
   apps: string[];
@@ -17,8 +18,8 @@ export interface FinanceTeamMember {
 }
 
 interface ListMembersResponse {
-  users?: FinanceTeamMember[];
-  members?: FinanceTeamMember[];
+  users?: StaffUserPayload[];
+  members?: StaffUserPayload[];
 }
 
 interface InvitePayload {
@@ -36,8 +37,15 @@ export const useFinanceTeam = (): UseQueryResult<FinanceTeamMember[]> =>
       const res = (await unwrap(
         oneKitResult(() => teamMembersClient.listTeam({}))
       )) as ListMembersResponse;
-      const raw: FinanceTeamMember[] = res?.users ?? res?.members ?? [];
-      return raw.map((m) => ({ ...m, name: (m.name as string) || (m.email as string) }));
+      const raw = res?.users ?? res?.members ?? [];
+      return raw.map((m) => ({
+        id: m.id ?? '',
+        fullName: m.fullName || m.email || '',
+        email: m.email ?? '',
+        role: m.role ?? '',
+        apps: m.apps ?? [],
+        isActive: m.isActive ?? false,
+      }));
     },
     staleTime: 30_000,
   });

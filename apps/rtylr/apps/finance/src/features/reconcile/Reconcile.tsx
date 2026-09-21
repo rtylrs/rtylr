@@ -58,12 +58,10 @@ const Reconcile: React.FC = () => {
       );
       for (const item of exactMatches) {
         await unwrap(financeApi.matchReconcile(item.transactionId, item.candidate.id));
+        // Record each match as it lands. A later call failing must not hide
+        // the matches the server already accepted.
+        setMatches((prev) => ({ ...prev, [item.transactionId]: item.candidate.id }));
       }
-      setMatches((prev) => {
-        const next = { ...prev };
-        for (const item of exactMatches) next[item.transactionId] = item.candidate.id;
-        return next;
-      });
       toast.success(t('reconcile.autoMatched'));
     } catch (error) {
       toast.error(getOneKitErrorMessage(error, 'Auto-match failed'));

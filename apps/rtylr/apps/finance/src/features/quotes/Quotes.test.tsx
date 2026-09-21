@@ -49,8 +49,21 @@ vi.mock('../../shared/components/MoneyDisplay', () => ({
 
 vi.mock('../../shared/components/Skeleton', () => ({ SkeletonRow: () => null }));
 vi.mock('../../shared/components/Modal', () => ({
-  default: ({ open, title }: { open?: boolean; title?: string }) =>
-    open ? <div role="dialog">{title}</div> : null,
+  default: ({
+    open,
+    title,
+    children,
+  }: {
+    open?: boolean;
+    title?: string;
+    children?: React.ReactNode;
+  }) =>
+    open ? (
+      <div role="dialog">
+        {title}
+        {children}
+      </div>
+    ) : null,
 }));
 vi.mock('../../shared/components/CurrencyInput', () => ({ default: () => null }));
 
@@ -89,5 +102,15 @@ describe('Quotes empty state', () => {
     fireEvent.click(newQuoteButtons[1]);
 
     expect(screen.getByRole('dialog')).toHaveTextContent('New Quote');
+  });
+
+  it('does not offer an Issue Date the create contract cannot store', () => {
+    render(<Quotes />);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'New Quote' })[1]);
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('Expires');
+    expect(dialog).not.toHaveTextContent('Issue Date');
   });
 });

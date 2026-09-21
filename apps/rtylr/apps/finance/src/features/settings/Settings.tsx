@@ -14,6 +14,7 @@ import {
   Users,
   UserPlus,
   UserMinus,
+  AlertTriangle,
 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
@@ -270,7 +271,7 @@ const GeneralTab: React.FC = () => {
 
 const TeamTab: React.FC = () => {
   const { t } = useTranslation();
-  const { data: members = [], isLoading, refetch: refetchMembers } = useFinanceTeam();
+  const { data: members = [], isLoading, isError, refetch: refetchMembers } = useFinanceTeam();
   const invite = useFinanceInviteMember();
   const deactivate = useFinanceDeactivateMember();
   const { data: sub } = useFinanceSubscription();
@@ -407,6 +408,28 @@ const TeamTab: React.FC = () => {
             />
           ))}
         </div>
+      ) : isError ? (
+        <div
+          role="alert"
+          style={{
+            ...cardStyle,
+            padding: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 12,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlertTriangle size={16} style={{ color: 'var(--finance-danger)' }} />
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+              {t('settings.teamLoadFailed')}
+            </div>
+          </div>
+          <button type="button" style={ghostBtn} onClick={() => void refetchMembers()}>
+            <RotateCcw size={13} /> {t('common.refresh')}
+          </button>
+        </div>
       ) : members.length === 0 ? (
         <EmptyState
           icon={Users}
@@ -446,7 +469,7 @@ const TeamTab: React.FC = () => {
                   color: ACCENT,
                 }}
               >
-                {m.name.charAt(0).toUpperCase()}
+                {m.fullName.charAt(0).toUpperCase()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
@@ -460,7 +483,7 @@ const TeamTab: React.FC = () => {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {m.name}
+                  {m.fullName}
                 </p>
                 <p
                   style={{
@@ -491,12 +514,12 @@ const TeamTab: React.FC = () => {
               {canRemoveMember && (
                 <button
                   type="button"
-                  aria-label={`Remove ${m.name}`}
+                  aria-label={`Remove ${m.fullName}`}
                   onClick={() => {
                     deactivate.mutate(m.id, {
-                      onSuccess: () => toast.success(`${m.name} removed`),
+                      onSuccess: () => toast.success(`${m.fullName} removed`),
                       onError: (error) =>
-                        toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
+                        toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.fullName}`)),
                     });
                   }}
                   style={{

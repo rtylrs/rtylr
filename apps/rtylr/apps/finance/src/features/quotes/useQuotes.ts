@@ -59,11 +59,11 @@ export function useQuotes(params: UseQuotesParams = {}) {
   });
 }
 
+// finance.quote.v1 CreateQuoteRequest has no issued_date or currency field,
+// so the form must not collect values the contract cannot carry.
 interface CreateQuotePayload {
   client: string;
   amount: number;
-  currency: string;
-  issuedDate: string;
   expiresAt: string;
   description?: string;
 }
