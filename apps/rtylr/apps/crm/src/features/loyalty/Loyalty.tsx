@@ -39,7 +39,7 @@ const Loyalty: React.FC = () => {
   const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
-  const { data: config } = useLoyaltyConfig();
+  const { data: config, isError: configError } = useLoyaltyConfig();
   const { data: transactions } = useLoyaltyTransactions();
   const { data: tiersData } = useLoyaltyTiers();
   const updateConfig = useUpdateLoyaltyConfig();
@@ -79,6 +79,7 @@ const Loyalty: React.FC = () => {
           {canConfigureLoyalty && (
             <button
               type="button"
+              disabled={!config || updateConfig.isPending}
               onClick={() => {
                 const next = !programEnabled;
                 updateConfig.mutate(
@@ -100,7 +101,8 @@ const Loyalty: React.FC = () => {
                 background: programEnabled ? 'rgba(16,185,129,0.12)' : 'var(--hub-card)',
                 color: programEnabled ? '#10b981' : 'var(--hub-text-muted)',
                 border: `1px solid ${programEnabled ? 'rgba(16,185,129,0.3)' : 'var(--hub-border)'}`,
-                cursor: 'pointer',
+                cursor: !config || updateConfig.isPending ? 'not-allowed' : 'pointer',
+                opacity: !config || updateConfig.isPending ? 0.7 : 1,
                 transition: 'all 0.2s',
               }}
             >
@@ -128,6 +130,11 @@ const Loyalty: React.FC = () => {
               {t('crm.loyalty.programConfiguration')}
             </span>
           </div>
+          {configError && (
+            <div role="alert" style={{ marginBottom: '16px', fontSize: '12px', color: '#ef4444' }}>
+              {t('crm.loyalty.configLoadFailed')}
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
             <div>
               <label
@@ -257,7 +264,7 @@ const Loyalty: React.FC = () => {
               <button
                 type="button"
                 onClick={() => updateConfig.mutate({ pointsPerDollar, pointsExpiry })}
-                disabled={updateConfig.isPending}
+                disabled={!config || updateConfig.isPending}
                 style={{
                   padding: '8px 20px',
                   borderRadius: '8px',
@@ -266,8 +273,8 @@ const Loyalty: React.FC = () => {
                   background: ACCENT,
                   color: '#fff',
                   border: 'none',
-                  cursor: updateConfig.isPending ? 'not-allowed' : 'pointer',
-                  opacity: updateConfig.isPending ? 0.7 : 1,
+                  cursor: !config || updateConfig.isPending ? 'not-allowed' : 'pointer',
+                  opacity: !config || updateConfig.isPending ? 0.7 : 1,
                 }}
               >
                 {updateConfig.isPending ? 'Saving…' : 'Save'}

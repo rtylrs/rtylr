@@ -82,6 +82,47 @@ describe('crmApi', () => {
     });
   });
 
+  it('carries the birthday, address and consent the customer form collects', async () => {
+    vi.clearAllMocks();
+    // useCustomers' wire input emits `dateOfBirth` (the generated contract's
+    // name); `birthday` is only the schema's display alias. The mapper used to
+    // read only `birthday`, so the whole second step of the create form was
+    // dropped on create and update (B50-R04).
+    const formInput = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@test.com',
+      dateOfBirth: '1990-01-01',
+      gender: 'female',
+      address: '12 Main St',
+      city: 'Austin',
+      country: 'US',
+      consent: { email: true, sms: false, marketing: false },
+    };
+
+    await crmApi.createCustomer(formInput);
+    expect(mockClients.compatibility.createCustomer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dateOfBirth: '1990-01-01',
+        gender: 'female',
+        address: '12 Main St',
+        city: 'Austin',
+        country: 'US',
+        consent: { email: true, sms: false, marketing: false },
+      })
+    );
+
+    await crmApi.updateCustomer(5, formInput);
+    expect(mockClients.compatibility.updateCustomer).toHaveBeenCalledWith({
+      id: '5',
+      body: expect.objectContaining({
+        dateOfBirth: '1990-01-01',
+        address: '12 Main St',
+        consent: { email: true, sms: false, marketing: false },
+      }),
+    });
+  });
+
   it('uses canonical generated delete contracts where they exist', async () => {
     crmApi.deleteCustomer(3);
     crmApi.deleteSegment(4);
