@@ -10,6 +10,7 @@ import {
   useBulkUpdateArchive,
   useBulkDelete,
   useTasks,
+  useTaskDetails,
 } from '../../features/tasks/useTasks';
 import { useMostRestrictiveProjectRole } from '../lib/currentUser';
 import { canEditTask, canDelete } from '../lib/roleUtils';
@@ -24,6 +25,14 @@ export const BulkEditBar: React.FC = () => {
   // permanently [], no selected task could ever be resolved, and the guard
   // below fell through to "no role" for every user.
   const { data: taskList = [] } = useTasks({});
+  // The unfiltered list is a single page (the server caps it), so a task
+  // selected on a project board past that page is missing from it. Resolve the
+  // rest by id rather than failing the whole selection closed.
+  const unresolvedIds = useMemo(
+    () => selectedTaskIds.filter((id) => !taskList.some((task) => String(task.id) === String(id))),
+    [selectedTaskIds, taskList]
+  );
+  const taskDetails = useTaskDetails(unresolvedIds);
   const bulkStatus = useBulkUpdateStatus();
   const bulkPriority = useBulkUpdatePriority();
   const bulkArchive = useBulkUpdateArchive();
@@ -35,20 +44,28 @@ export const BulkEditBar: React.FC = () => {
   // selected task can't be resolved to a project - a missing task must not
   // quietly shrink the set of projects being checked.
   const { projectIds, allResolved } = useMemo(() => {
+    const projectIdByTask = new Map<string, string>(
+      taskList.map((task): [string, string] => [String(task.id), String(task.projectId)])
+    );
+    unresolvedIds.forEach((id, index) => {
+      const detail = taskDetails[index]?.data;
+      if (detail) projectIdByTask.set(String(id), String(detail.task.projectId));
+    });
+
     const ids = new Set<string>();
     let resolved = true;
     for (const taskId of selectedTaskIds) {
       // Ids are compared as strings: the wire sends int64 task and project ids
       // as numbers even where the hand-rolled ApiTask types them as strings.
-      const task = taskList.find((candidate) => String(candidate.id) === String(taskId));
-      if (!task) {
+      const projectId = projectIdByTask.get(String(taskId));
+      if (projectId === undefined) {
         resolved = false;
         continue;
       }
-      ids.add(String(task.projectId));
+      ids.add(projectId);
     }
     return { projectIds: [...ids].sort(), allResolved: resolved };
-  }, [selectedTaskIds, taskList]);
+  }, [selectedTaskIds, taskList, taskDetails, unresolvedIds]);
 
   const restrictingRole = useMostRestrictiveProjectRole(projectIds);
   const effectiveRole = allResolved ? restrictingRole : undefined;

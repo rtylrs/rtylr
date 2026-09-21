@@ -1,8 +1,9 @@
 import { unwrap } from '@voxire/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import i18next from '../../shared/services/i18next';
 import { flowApi, ApiAttachment, ApiTask } from '../../shared/services/flowApi';
+import type { ApiTaskDetail } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 const t = (key: string, opts?: Record<string, unknown>): string => i18next.t(key, opts) as string;
@@ -49,6 +50,24 @@ export function useTaskDetail(id: string | undefined) {
     queryKey: ['task', id],
     queryFn: () => unwrap(flowApi.getTaskDetail(id!)),
     enabled: !!id,
+  });
+}
+
+/**
+ * Task details for exactly the ids a list query did not return.
+ *
+ * The bulk-edit selection is global, but the business-wide task list is a
+ * single page (the server caps it), so a task selected on a project board
+ * beyond that page is absent from it. Resolving those ids individually
+ * completes the selection without the caller having to page the whole
+ * business. Shares `['task', id]` with useTaskDetail/useTask.
+ */
+export function useTaskDetails(ids: string[]) {
+  return useQueries({
+    queries: ids.map((id) => ({
+      queryKey: ['task', id],
+      queryFn: async (): Promise<ApiTaskDetail> => unwrap(flowApi.getTaskDetail(id)),
+    })),
   });
 }
 
