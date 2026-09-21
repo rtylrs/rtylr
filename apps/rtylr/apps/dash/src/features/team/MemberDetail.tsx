@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from '@tanstack/react-router';
@@ -47,6 +47,7 @@ import {
   useMemberLocations,
   useAssignPOSLocation,
   useRemovePOSLocation,
+  type MemberLocation,
 } from '../../shared/hooks/queries/usePOSAccess';
 import { toast } from 'sonner';
 import type { GroupSummary } from '../../shared/hooks/queries/useGroups';
@@ -89,6 +90,10 @@ const ALL_APPS = [
 
 const ROLE_IDS = ['admin', 'manager', 'member', 'viewer'] as const;
 
+// Stable identity: useMemberLocations returns undefined while disabled, and a
+// fresh fallback array on every render would retrigger the seeding effect.
+const EMPTY_MEMBER_LOCATIONS: MemberLocation[] = [];
+
 function getInitials(name?: string | null): string {
   if (!name) return '?';
   return name
@@ -120,7 +125,9 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const assignLocation = useAssignPOSLocation();
   const removeLocation = useRemovePOSLocation();
   const { data: allLocations = [] } = usePOSLocations(isEditing && posSelected);
-  const { data: memberLocations = [] } = useMemberLocations(id, isEditing && posSelected);
+  const memberLocationsQuery = useMemberLocations(id, isEditing && posSelected);
+  const memberLocations = memberLocationsQuery.data ?? EMPTY_MEMBER_LOCATIONS;
+  const seededLocationsRef = useRef(false);
 
   const { data: memberGroups = [] } = useQuery<GroupSummary[]>({
     queryKey: ['user-groups', id],
@@ -171,10 +178,17 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     );
   }, [member]);
 
-  // Seed the location selection from the member's current assignments when they load.
+  // Seed the location selection from query data once per edit session, when it
+  // first arrives. Re-seeding on later refetches would discard in-progress edits.
   useEffect(() => {
-    setLocationsDraft(memberLocations.map((l) => l.locationId));
-  }, [memberLocations]);
+    if (!isEditing) {
+      seededLocationsRef.current = false;
+      return;
+    }
+    if (seededLocationsRef.current || memberLocationsQuery.data === undefined) return;
+    seededLocationsRef.current = true;
+    setLocationsDraft(memberLocationsQuery.data.map((l) => l.locationId));
+  }, [isEditing, memberLocationsQuery.data]);
 
   if (isLoading) {
     return (

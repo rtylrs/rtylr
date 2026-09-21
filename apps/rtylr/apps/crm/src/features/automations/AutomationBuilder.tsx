@@ -11,7 +11,14 @@ import {
   actionTypeFor,
   triggerTypeFor,
 } from '../../shared/hooks/queries/useAutomations';
-import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  Input,
+  PageHeader,
+  SkeletonList,
+} from '../../shared/components/ui';
 import { AutomationNode } from '../../shared/components/crm';
 
 interface Node {
@@ -52,7 +59,11 @@ const AutomationBuilder: React.FC = () => {
   const isEditing = !!automationId;
   const create = useCreateAutomation();
   const update = useUpdateAutomation();
-  const { data: existing } = useGetAutomation(automationId);
+  const { data: existing, isLoading } = useGetAutomation(automationId);
+  // An edit must not render (or save) the create-form defaults while the
+  // detail query is still loading or has failed: the payload would replace the
+  // stored trigger and actions with those defaults (B25-R06).
+  const isEditPending = isEditing && !existing;
   const [name, setName] = useState('');
   const [nodes, setNodes] = useState<Node[]>([
     {
@@ -166,7 +177,7 @@ const AutomationBuilder: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleSave}
-              disabled={!name || create.isPending || update.isPending}
+              disabled={!name || isEditPending || create.isPending || update.isPending}
             >
               <Save size={13} />
               {create.isPending || update.isPending ? 'Saving…' : 'Save'}
@@ -174,76 +185,48 @@ const AutomationBuilder: React.FC = () => {
           }
         />
 
-        <Input
-          label={t('common.name')}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t('crm.automationBuilder.namePlaceholder')}
-          style={{ maxWidth: '320px', marginBottom: '16px' }}
-        />
+        {!isEditPending && (
+          <Input
+            label={t('common.name')}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('crm.automationBuilder.namePlaceholder')}
+            style={{ maxWidth: '320px', marginBottom: '16px' }}
+          />
+        )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '16px' }}>
-          {/* Palette */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <Card>
-              <h4
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 700,
-                  margin: '0 0 10px',
-                }}
-              >
-                {t('crm.automationBuilder.triggers')}
-              </h4>
-              {triggers.map((trigger) => (
-                <button
-                  type="button"
-                  key={trigger.type}
-                  onClick={() => addTrigger(trigger)}
+        {isEditPending ? (
+          <Card style={{ minHeight: '500px' }}>
+            {isLoading ? (
+              <SkeletonList count={4} />
+            ) : (
+              <p style={{ color: 'var(--hub-text-muted)', fontSize: '13px', margin: 0 }}>
+                {t('crm.automationBuilder.loadFailed')}
+              </p>
+            )}
+          </Card>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '16px' }}>
+            {/* Palette */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <Card>
+                <h4
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
-                    background: 'var(--hub-hover)',
-                    border: '1px solid var(--hub-border)',
-                    color: 'var(--hub-text)',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    marginBottom: '6px',
-                    textAlign: 'left',
+                    fontSize: '11px',
+                    color: 'var(--hub-text-dim)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 700,
+                    margin: '0 0 10px',
                   }}
                 >
-                  <Zap size={12} style={{ color: '#10b981', flexShrink: 0 }} />
-                  {t(`crm.automationTriggers.${trigger.type}`)}
-                </button>
-              ))}
-            </Card>
-            <Card>
-              <h4
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 700,
-                  margin: '0 0 10px',
-                }}
-              >
-                {t('common.actions')}
-              </h4>
-              {actions.map((action) => {
-                const Icon = action.icon;
-                return (
+                  {t('crm.automationBuilder.triggers')}
+                </h4>
+                {triggers.map((trigger) => (
                   <button
                     type="button"
-                    key={action.type}
-                    onClick={() => addAction(action)}
+                    key={trigger.type}
+                    onClick={() => addTrigger(trigger)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -260,72 +243,114 @@ const AutomationBuilder: React.FC = () => {
                       textAlign: 'left',
                     }}
                   >
-                    <Icon size={12} style={{ color: '#3b82f6', flexShrink: 0 }} />
-                    {t(`crm.automationActions.${action.type}`)}
+                    <Zap size={12} style={{ color: '#10b981', flexShrink: 0 }} />
+                    {t(`crm.automationTriggers.${trigger.type}`)}
                   </button>
-                );
-              })}
-            </Card>
-          </div>
+                ))}
+              </Card>
+              <Card>
+                <h4
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--hub-text-dim)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 700,
+                    margin: '0 0 10px',
+                  }}
+                >
+                  {t('common.actions')}
+                </h4>
+                {actions.map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <button
+                      type="button"
+                      key={action.type}
+                      onClick={() => addAction(action)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        background: 'var(--hub-hover)',
+                        border: '1px solid var(--hub-border)',
+                        color: 'var(--hub-text)',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        marginBottom: '6px',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <Icon size={12} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                      {t(`crm.automationActions.${action.type}`)}
+                    </button>
+                  );
+                })}
+              </Card>
+            </div>
 
-          {/* Canvas */}
-          <Card style={{ minHeight: '500px' }}>
-            <h4
-              style={{
-                fontSize: '11px',
-                color: 'var(--hub-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 700,
-                margin: '0 0 14px',
-              }}
-            >
-              {t('crm.automationBuilder.workflow')}
-            </h4>
-            <div
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
-            >
-              {nodes.map((node, i) => (
-                <React.Fragment key={node.id}>
-                  <AutomationNode
-                    type={node.type}
-                    label={
-                      node.type === 'trigger'
-                        ? t(`crm.automationTriggers.${node.automationType}`, node.label)
-                        : t(`crm.automationActions.${node.automationType}`, node.label)
-                    }
-                    description={
-                      node.type === 'trigger'
-                        ? t(`crm.automationTriggerDescriptions.${node.automationType}`, '')
-                        : t(`crm.automationActionDescriptions.${node.automationType}`, '')
-                    }
-                    onRemove={i > 0 ? () => removeNode(node.id) : undefined}
-                  />
-                  {i < nodes.length - 1 && (
-                    <div
-                      style={{ width: '2px', height: '18px', background: 'var(--hub-border)' }}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-              <div style={{ width: '2px', height: '18px', background: 'var(--hub-border)' }} />
-              <div
+            {/* Canvas */}
+            <Card style={{ minHeight: '500px' }}>
+              <h4
                 style={{
-                  padding: '10px 18px',
-                  border: '1px dashed var(--hub-border)',
-                  borderRadius: '12px',
-                  color: 'var(--hub-text-muted)',
-                  fontSize: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
+                  fontSize: '11px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 700,
+                  margin: '0 0 14px',
                 }}
               >
-                <Plus size={12} /> Click an action to add
+                {t('crm.automationBuilder.workflow')}
+              </h4>
+              <div
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
+              >
+                {nodes.map((node, i) => (
+                  <React.Fragment key={node.id}>
+                    <AutomationNode
+                      type={node.type}
+                      label={
+                        node.type === 'trigger'
+                          ? t(`crm.automationTriggers.${node.automationType}`, node.label)
+                          : t(`crm.automationActions.${node.automationType}`, node.label)
+                      }
+                      description={
+                        node.type === 'trigger'
+                          ? t(`crm.automationTriggerDescriptions.${node.automationType}`, '')
+                          : t(`crm.automationActionDescriptions.${node.automationType}`, '')
+                      }
+                      onRemove={i > 0 ? () => removeNode(node.id) : undefined}
+                    />
+                    {i < nodes.length - 1 && (
+                      <div
+                        style={{ width: '2px', height: '18px', background: 'var(--hub-border)' }}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+                <div style={{ width: '2px', height: '18px', background: 'var(--hub-border)' }} />
+                <div
+                  style={{
+                    padding: '10px 18px',
+                    border: '1px dashed var(--hub-border)',
+                    borderRadius: '12px',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <Plus size={12} /> Click an action to add
+                </div>
               </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
       </div>
     </>
   );

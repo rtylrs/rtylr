@@ -30,7 +30,8 @@
     "dnsTitle": "Instructions de configuration DNS",
     "dnsPropagation": "La propagation DNS peut prendre jusqu’à 48 heures.",
     "invalid": "Saisissez un domaine valide, par exemple menu.yourbrand.com",
-    "saved": "Domaine personnalisé enregistré. La propagation DNS peut prendre jusqu’à 24 heures."
+    "saved": "Domaine personnalisé enregistré. La propagation DNS peut prendre jusqu’à 24 heures.",
+    "saveFailed": "Échec de l'enregistrement du domaine personnalisé"
   },
   "general": {
     "pageTitle": "Paramètres généraux",
@@ -110,6 +111,7 @@
     "weeklySummaryDescription": "Un résumé hebdomadaire des commandes, revenus et tendances.",
     "feedback": "Avis clients",
     "feedbackDescription": "Recevez un e-mail quand un client publie un avis.",
+    "notificationsUnavailable": "Les préférences de notification ne sont pas encore enregistrées. Les modifications ici n'atteignent pas le serveur.",
     "senderRequired": "Un e-mail d'expéditeur est requis",
     "smtpVerified": "Connexion SMTP à {{host}}:{{port}} vérifiée",
     "smtpTestFailed": "Échec du test de connexion SMTP",

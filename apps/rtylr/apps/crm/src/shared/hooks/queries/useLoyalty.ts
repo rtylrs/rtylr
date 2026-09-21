@@ -67,7 +67,10 @@ function toLoyaltyTierRequest(tier: Partial<LoyaltyTier>): Record<string, unknow
   return {
     name: tier.name ?? '',
     minPoints: String(Math.max(1, tier.threshold ?? 1)),
-    discountPct: Math.max(1, tier.discountPct ?? tier.multiplier ?? 1),
+    // The tier form edits `multiplier` (labelled "Discount (%)") and the cache
+    // merge keeps the old `discountPct` alongside it, so preferring the stale
+    // schema-derived copy discarded the edit (B45-R03).
+    discountPct: Math.max(1, tier.multiplier ?? tier.discountPct ?? 1),
     perks: JSON.stringify(tier.perks ?? []),
     sortOrder: String(Math.max(1, tier.sortOrder ?? 1)),
   };
@@ -137,7 +140,14 @@ export const useUpdateLoyaltyConfig = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<LoyaltyConfig, unknown, Partial<LoyaltyConfig>>({
     mutationFn: async (config: Partial<LoyaltyConfig>): Promise<LoyaltyConfig> => {
-      const current = qc.getQueryData<LoyaltyConfig>(['crm-loyalty-config']) ?? {};
+      // The update is a full replacement on the server. Without loaded config
+      // there is nothing to merge into, and toUpdateLoyaltyConfigRequest would
+      // fill every field with hard-coded defaults - disabling the program and
+      // resetting the tier thresholds (B60-R06). Refuse instead.
+      const current = qc.getQueryData<LoyaltyConfig>(['crm-loyalty-config']);
+      if (!current) {
+        throw new Error('loyalty config has not loaded');
+      }
       const request = toUpdateLoyaltyConfigRequest({ ...current, ...config });
       await unwrap(crmApi.updateLoyaltyConfig(request));
       return loyaltyConfigSchema.parse({ ...current, ...config });

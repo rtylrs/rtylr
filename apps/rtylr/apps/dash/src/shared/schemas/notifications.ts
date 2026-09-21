@@ -9,7 +9,9 @@ export const notificationSchema = z.object({
   body: z.string(),
   app: appEnum.catch('dash'),
   type: notifTypeEnum.catch('info'),
-  read: z.boolean(),
+  // The backend writes `read` with `omitempty`, so an unread notification
+  // arrives without the key. Absence means unread, not invalid.
+  read: z.boolean().default(false),
   createdAt: z.string(),
   href: z.string().optional(),
 });

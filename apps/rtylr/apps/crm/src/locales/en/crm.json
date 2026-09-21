@@ -59,6 +59,7 @@
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
+    "configLoadFailed": "Unable to load the loyalty configuration. Saving is disabled until it loads.",
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
@@ -595,6 +596,7 @@
   },
   "automationBuilder": {
     "subtitle": "Drag triggers and actions to build a workflow",
+    "loadFailed": "Unable to load this automation. Check your connection and try again.",
     "namePlaceholder": "Welcome series",
     "triggers": "Triggers",
     "workflow": "Workflow",

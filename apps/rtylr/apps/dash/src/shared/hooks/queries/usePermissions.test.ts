@@ -38,10 +38,20 @@ describe('usePermissions', () => {
   });
 
   it('fetches permissions matrix successfully', async () => {
+    // The wire shape is {matrix: {rows, roles}} with roleValues per row; the
+    // hook translates it into the list/lookup shape the matrix renders.
     mockPermissionClient.getPermissions.mockResolvedValue({
-      permissions: [{ key: 'orders.view', label: 'View Orders', group: 'Orders', description: '' }],
-      roles: ['admin', 'staff'],
-      values: { admin: { 'orders.view': true } },
+      matrix: {
+        rows: [
+          {
+            key: 'orders.view',
+            label: 'View Orders',
+            category: 'Orders',
+            roleValues: { admin: true, staff: false },
+          },
+        ],
+        roles: ['admin', 'staff'],
+      },
     });
 
     const client = new QueryClient({
@@ -51,8 +61,11 @@ describe('usePermissions', () => {
     const { result } = renderHook(() => usePermissions(), { wrapper });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.permissions).toHaveLength(1);
+    expect(result.current.data?.permissions).toEqual([
+      { key: 'orders.view', label: 'View Orders', group: 'Orders' },
+    ]);
     expect(result.current.data?.values.admin['orders.view']).toBe(true);
+    expect(result.current.data?.values.staff['orders.view']).toBe(false);
   });
 
   it('fetches custom roles successfully', async () => {

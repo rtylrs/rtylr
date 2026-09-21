@@ -29,7 +29,9 @@ export function useCreateExpenseCategory() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: { name: string; color: string; icon?: string; budget?: number }) => {
+    mutationFn: async (data: { name: string; color: string; icon?: string }) => {
+      // finance.report.v1.CreateExpenseCategoryDetailRequest carries no budget
+      // column, so a budget typed here would be silently dropped.
       const response = await reportClient.createExpenseCategoryDetail({
         name: data.name,
         color: data.color,
@@ -56,13 +58,12 @@ export function useUpdateExpenseCategory() {
       data,
     }: {
       id: number;
-      data: { name: string; color: string; budget?: number; icon?: string };
+      data: { name: string; color: string; icon?: string };
     }) => {
       return unwrap(
         financeApi.updateExpenseCategory(id, {
           name: data.name,
           color: data.color,
-          budget: data.budget,
           icon: data.icon ?? 'tag',
         })
       );

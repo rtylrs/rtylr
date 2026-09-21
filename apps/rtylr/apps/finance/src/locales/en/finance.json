@@ -138,7 +138,9 @@
   },
   "clients": {
     "search": "Search clients",
-    "none": "No clients found"
+    "none": "No clients found",
+    "loadError": "Couldn't load clients",
+    "retry": "Try again"
   },
   "pdf": {
     "download": "Download PDF",

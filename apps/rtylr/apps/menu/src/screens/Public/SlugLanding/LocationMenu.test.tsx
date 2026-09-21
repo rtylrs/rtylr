@@ -40,14 +40,19 @@ vi.mock('../../../shared/hooks/usePublicMenu', () => ({
   usePublicMenu: () => menuQuery,
 }));
 
-vi.mock('../../../shared/stores/cartStore', () => ({
-  useCartStore: () => ({
-    clearCart: vi.fn(),
-    setBusinessId: vi.fn(),
-    setLocationId: vi.fn(),
-    addItem: vi.fn(),
-    updateQuantity: vi.fn(),
+const cartStoreMock = vi.hoisted(() => ({
+  businessId: 0,
+  clearCart: vi.fn(),
+  setBusinessId: vi.fn((id: number) => {
+    cartStoreMock.businessId = id;
   }),
+  setLocationId: vi.fn(),
+  addItem: vi.fn(),
+  updateQuantity: vi.fn(),
+}));
+
+vi.mock('../../../shared/stores/cartStore', () => ({
+  useCartStore: () => cartStoreMock,
 }));
 
 import LocationMenu from './LocationMenu';
@@ -130,5 +135,58 @@ describe('LocationMenu empty states', () => {
     fireEvent.click(cta);
 
     expect(navigateSpy).toHaveBeenCalledWith({ to: '/$slug', params: { slug: 'acme' } });
+  });
+});
+
+describe('LocationMenu cart reconciliation', () => {
+  const acmeBusiness = {
+    business: { id: 1, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
+    locations: [{ id: 5, name: 'Downtown', slug: 'downtown', address: '', timezone: 'UTC' }],
+  };
+  const acmeMenu = {
+    business: { id: 1, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
+    items: [{ id: 10, name: 'Falafel wrap', salePrice: 5, isActive: true }],
+  };
+
+  beforeEach(() => {
+    businessQuery.isLoading = false;
+    businessQuery.isError = false;
+    businessQuery.data = acmeBusiness;
+    menuQuery.isLoading = false;
+    menuQuery.isError = false;
+    menuQuery.data = acmeMenu;
+    cartStoreMock.businessId = 0;
+    cartStoreMock.clearCart.mockClear();
+    cartStoreMock.setBusinessId.mockClear();
+    cartStoreMock.setLocationId.mockClear();
+  });
+
+  it('clears a persisted cart from another business before adopting this business', () => {
+    cartStoreMock.businessId = 99; // abandoned checkout at a different restaurant
+
+    render(<LocationMenu />);
+
+    expect(cartStoreMock.clearCart).toHaveBeenCalledTimes(1);
+    expect(cartStoreMock.clearCart.mock.invocationCallOrder[0]).toBeLessThan(
+      cartStoreMock.setBusinessId.mock.invocationCallOrder[0]
+    );
+    expect(cartStoreMock.setBusinessId).toHaveBeenCalledWith(1);
+  });
+
+  it('keeps the persisted cart when it already belongs to this business', () => {
+    cartStoreMock.businessId = 1;
+
+    render(<LocationMenu />);
+
+    expect(cartStoreMock.clearCart).not.toHaveBeenCalled();
+    expect(cartStoreMock.setBusinessId).toHaveBeenCalledWith(1);
+  });
+
+  it('does not clear an empty cart', () => {
+    cartStoreMock.businessId = 0;
+
+    render(<LocationMenu />);
+
+    expect(cartStoreMock.clearCart).not.toHaveBeenCalled();
   });
 });

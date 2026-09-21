@@ -10,11 +10,20 @@
 //
 // Test files (*.test.ts, *.test.tsx) are excluded: mocks are not requests.
 
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const ROOT = new URL('../..', import.meta.url).pathname;
 const OUT = join(ROOT, 'docs/cross-app/inventory/endpoints.csv');
+// The shared packages stayed at the monorepo root when this workspace moved
+// under apps/rtylr; only the workspace's own apps live under ROOT.
+const PACKAGES = existsSync(join(ROOT, 'packages'))
+  ? join(ROOT, 'packages')
+  : join(ROOT, '..', '..', 'packages');
+if (!existsSync(PACKAGES)) {
+  console.error(`shared packages not found at ${PACKAGES}; expected a full checkout`);
+  process.exit(1);
+}
 
 function walk(dir) {
   const out = [];
@@ -126,21 +135,21 @@ const rows = [
 ];
 
 const scopes = [];
-for (const app of readdirSync(join(ROOT, 'apps'))) scopes.push(['apps/' + app, app]);
-for (const pkg of readdirSync(join(ROOT, 'packages'))) {
-  const p = join(ROOT, 'packages', pkg);
+for (const app of readdirSync(join(ROOT, 'apps')))
+  scopes.push({ app, dir: join(ROOT, 'apps', app), rel: 'apps/' + app });
+for (const pkg of readdirSync(PACKAGES)) {
+  const p = join(PACKAGES, pkg);
   try {
     if (readdirSync(p).includes('src'))
-      scopes.push(['packages/' + pkg + '/src', 'packages/' + pkg]);
+      scopes.push({ app: 'packages/' + pkg, dir: join(p, 'src'), rel: 'packages/' + pkg + '/src' });
   } catch {
     /* not a directory */
   }
 }
 // Round two: the pos terminal repo is swept as a pseudo-app when cloned.
-import { existsSync as _exists } from 'node:fs';
 import { homedir as _homedir } from 'node:os';
 const POS_ROOT = process.env.CROSS_APP_POS || join(_homedir(), 'Development', 'pos');
-if (_exists(join(POS_ROOT, 'src'))) scopes.push([null, 'pos']);
+if (existsSync(join(POS_ROOT, 'src'))) scopes.push({ app: 'pos', dir: POS_ROOT, rel: 'pos' });
 
 // ---- Constant folding for <dynamic:...> paths (round two) -----------------
 // Two passes: first collect every module-scope const whose initializer is a
@@ -253,18 +262,17 @@ function resolveIdent(expr, constMap) {
 }
 
 let unresolvedOnekit = 0;
-for (const [scope, app] of scopes) {
-  const scopeAbs = scope ? join(ROOT, scope) : POS_ROOT;
+for (const { app, dir, rel: relRoot } of scopes) {
   let files;
   try {
-    files = walk(scopeAbs);
+    files = walk(dir);
   } catch {
     continue;
   }
   // Per-scope constant table for folding dynamic paths.
-  const { consts: constMap, onekitClients } = buildConstMap(scopeAbs);
+  const { consts: constMap, onekitClients } = buildConstMap(dir);
   for (const file of files) {
-    const rel = scope ? relative(ROOT, file) : 'pos/' + relative(POS_ROOT, file);
+    const rel = join(relRoot, relative(dir, file));
     // Blank out full-line comments so documentation examples (e.g. the
     // api.get('/user/me') sample in AppGuard's JSDoc) are not counted as
     // requests. Offsets are preserved so file:line citations stay exact.

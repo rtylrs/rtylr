@@ -277,6 +277,9 @@ const Customers: React.FC = () => {
                 setOffset(0);
                 setLoadedCustomers([]);
                 setSelected(new Set());
+                // A new query starts pagination over; without this a page that
+                // was previously exhausted keeps "Load more" hidden forever.
+                setExhausted(false);
               }}
               placeholder={t('crm.customers.searchPlaceholder')}
               style={{
@@ -406,6 +409,7 @@ const Customers: React.FC = () => {
                         setOffset(0);
                         setLoadedCustomers([]);
                         setSelected(new Set());
+                        setExhausted(false);
                       },
                     }
                   : {

@@ -55,7 +55,13 @@ const Reports: React.FC = () => {
   const [dateTo, setDateTo] = useState<string>(todayISO);
   const [departmentId, setDepartmentId] = useState<string>('');
   const [locationId, setLocationId] = useState<string>('');
-  const [report, setReport] = useState<ReportPayload | null>(null);
+  // The payload and the filters it was generated with travel together: editing
+  // the date inputs after Generate must not relabel the exported PDF.
+  const [generated, setGenerated] = useState<{
+    report: ReportPayload;
+    dateFrom: string;
+    dateTo: string;
+  } | null>(null);
 
   const generateMutation = useGenerateReport();
 
@@ -71,7 +77,7 @@ const Reports: React.FC = () => {
       },
       {
         onSuccess: (data) => {
-          setReport(data);
+          setGenerated({ report: data, dateFrom, dateTo });
           toast.success(t('reports.generated'));
         },
         onError: () => {
@@ -147,7 +153,7 @@ const Reports: React.FC = () => {
                     key={type}
                     onClick={() => {
                       setSelectedType(type);
-                      setReport(null);
+                      setGenerated(null);
                     }}
                     style={{
                       display: 'flex',
@@ -297,17 +303,17 @@ const Reports: React.FC = () => {
             )}
 
             {/* Results */}
-            {report && !generateMutation.isPending && (
+            {generated && !generateMutation.isPending && (
               <ReportTable
-                report={report}
-                dateFrom={dateFrom}
-                dateTo={dateTo}
+                report={generated.report}
+                dateFrom={generated.dateFrom}
+                dateTo={generated.dateTo}
                 onRefresh={handleGenerate}
               />
             )}
 
             {/* Empty state */}
-            {!report && !generateMutation.isPending && (
+            {!generated && !generateMutation.isPending && (
               <div
                 style={{
                   padding: 48,

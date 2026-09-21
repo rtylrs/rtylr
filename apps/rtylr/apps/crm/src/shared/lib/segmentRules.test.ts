@@ -14,12 +14,10 @@ describe('segment rules', () => {
   });
 
   it('keeps the canonical field list stable for every segment builder', () => {
-    expect([...SEGMENT_RULE_FIELDS]).toEqual([
-      'totalSpent',
-      'visits',
-      'lastVisitDays',
-      'loyaltyPoints',
-      'tier',
-    ]);
+    // lastVisitDays is deliberately absent: onion's segmentrules evaluator has
+    // no entry for it, so a saved rule is silently dropped and the segment
+    // falls back to every active customer (B42-R07). Add it back only with
+    // evaluator support.
+    expect([...SEGMENT_RULE_FIELDS]).toEqual(['totalSpent', 'visits', 'loyaltyPoints', 'tier']);
   });
 });

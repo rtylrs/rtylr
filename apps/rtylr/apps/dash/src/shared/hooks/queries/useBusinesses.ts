@@ -75,12 +75,14 @@ export const useRenameBusiness = () => {
       const currentUser = useUserStore.getState().user;
       if (currentUser && Number(currentUser.businessId) === variables.businessId) {
         useUserStore.getState().setUser({ ...currentUser, businessName: variables.name });
+        // websiteData holds the current business's config; writing another
+        // business's name into it would relabel the current one.
+        const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
+        useConfigStore.getState().setWebsiteData({
+          ...currentWebsiteData,
+          siteName: variables.name,
+        });
       }
-      const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
-      useConfigStore.getState().setWebsiteData({
-        ...currentWebsiteData,
-        siteName: variables.name,
-      });
     },
   });
 };
@@ -103,12 +105,13 @@ export const useSetBusinessLogo = () => {
       const currentUser = useUserStore.getState().user;
       if (currentUser && Number(currentUser.businessId) === variables.businessId) {
         useUserStore.getState().setUser({ ...currentUser, logo: variables.logoUrl });
+        // Same as rename: only the current business's cached config may change.
+        const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
+        useConfigStore.getState().setWebsiteData({
+          ...currentWebsiteData,
+          logoUrl: variables.logoUrl,
+        });
       }
-      const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
-      useConfigStore.getState().setWebsiteData({
-        ...currentWebsiteData,
-        logoUrl: variables.logoUrl,
-      });
     },
   });
 };

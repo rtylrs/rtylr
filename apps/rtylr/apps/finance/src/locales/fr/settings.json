@@ -2,6 +2,7 @@
   "teamEmptyTitle": "Aucun membre d'équipe pour le moment",
   "teamEmptyDescription": "Invitez des personnes pour leur donner accès à Finance.",
   "teamEmptyCta": "Inviter un membre",
+  "teamLoadFailed": "Impossible de charger les membres de l'équipe",
   "title": "Paramètres",
   "reset": "Paramètres réinitialisés",
   "saved": "Paramètres enregistrés",

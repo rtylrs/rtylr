@@ -8,6 +8,7 @@
   "approved": "Feuille de temps validée",
   "rejected": "Feuille de temps rejetée",
   "rejectionReason": "Motif du rejet",
+  "rejectionReasonUnavailable": "Non affiché dans cette vue",
   "noReasonProvided": "Aucun motif fourni",
   "entriesTitle": "Entrées de temps",
   "noEntries": "Aucune entrée de temps pour cette période.",

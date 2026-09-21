@@ -5,6 +5,7 @@ import React from 'react';
 
 const mockStaffClient = vi.hoisted(() => ({
   listStaff: vi.fn(),
+  updateStaff: vi.fn(),
 }));
 const mockDepartmentClient = vi.hoisted(() => ({
   listDepartments: vi.fn(),
@@ -37,6 +38,7 @@ vi.mock('@voxire/api', () => ({
 
 import {
   useStaff,
+  useSetStaffManager,
   useCreateStaff,
   useUpdateStaff,
   useDeleteStaff,
@@ -101,6 +103,43 @@ describe('useStaff', () => {
       wrapper: createWrapper(),
     });
     expect(result.current.isLoading).toBe(true);
+  });
+});
+
+describe('useSetStaffManager', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // UpdateStaffBody is a full replacement: a field the body omits is written as
+  // NULL. photoUrl and bio were the only profile fields not echoed back, so
+  // saving a reporting line silently erased them.
+  it('echoes photoUrl and bio in the replacement body', async () => {
+    mockStaffClient.updateStaff.mockResolvedValue({ staff: { id: 1 } });
+    const staff = {
+      id: 1,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      email: 'ada@example.com',
+      photoUrl: 'https://example.com/ada.png',
+      bio: 'Analytical engines',
+    };
+
+    const { result } = renderHook(() => useSetStaffManager(), {
+      wrapper: createWrapper(),
+    });
+    await act(() => result.current.mutateAsync({ staff, managerStaffId: 2 }));
+
+    expect(mockStaffClient.updateStaff).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: '1',
+        body: expect.objectContaining({
+          managerStaffId: '2',
+          photoUrl: 'https://example.com/ada.png',
+          bio: 'Analytical engines',
+        }),
+      })
+    );
   });
 });
 

@@ -27,7 +27,8 @@ export function useScrollToBottom<T extends HTMLElement>(
 ): React.RefObject<T | null> {
   const ref = useRef<T>(null);
   const activeKeyRef = useRef(scrollKey);
-  const previousKeyRef = useRef(scrollKey);
+  // null so the first run after a remount takes the key-changed restore path.
+  const previousKeyRef = useRef<string | null>(null);
   const pinnedToBottomRef = useRef(true);
 
   useEffect(() => {

@@ -18,9 +18,16 @@ const DocumentUpload: React.FC<Props> = ({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLInputElement>(null);
+  // The click handler checks `uploading`, but a drop or a file-input change
+  // can arrive while a request is in flight. Refs update synchronously, so a
+  // second gesture cannot start an overlapping upload that calls `onFile`
+  // twice.
+  const inFlight = useRef(false);
 
   const handleFile = useCallback(
     async (f: File) => {
+      if (inFlight.current) return;
+      inFlight.current = true;
       setUploading(true);
       setError(null);
       try {
@@ -34,6 +41,7 @@ const DocumentUpload: React.FC<Props> = ({
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Upload failed');
       } finally {
+        inFlight.current = false;
         setUploading(false);
         if (ref.current) ref.current.value = '';
       }

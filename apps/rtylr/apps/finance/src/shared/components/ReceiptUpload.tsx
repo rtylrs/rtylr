@@ -17,7 +17,9 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File | undefined | null): Promise<void> => {
-    if (!file) return;
+    // Ignore drops while an upload is in flight, as the click path already
+    // does; otherwise a stale upload's result can land after a newer one.
+    if (!file || uploading) return;
     setUploading(true);
     setError(null);
     try {

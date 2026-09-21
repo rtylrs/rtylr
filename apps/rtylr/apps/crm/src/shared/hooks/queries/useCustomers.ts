@@ -215,7 +215,7 @@ export const useCreateCustomer = (): UseMutationResult<
       toast.success(t('crm.customers.created'));
     },
     onError: (): void => {
-      toast.error(t('errors.generic'));
+      toast.error(t('crm.customers.createFailed'));
     },
   });
 };

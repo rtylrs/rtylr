@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Globe, Copy, Check, ChevronDown, ChevronUp, ShieldCheck, AlertCircle } from 'lucide-react';
@@ -18,7 +18,10 @@ import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { useConfigStore } from '../../../../../shared/stores/configStore';
 
-import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
+import {
+  useCustomDomain,
+  useRegisterCustomDomain,
+} from '../../../../../shared/hooks/queries/useBusiness';
 import { toast } from 'sonner';
 
 const DOMAIN_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/;
@@ -26,10 +29,9 @@ const DOMAIN_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA
 const Domain: React.FC = () => {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
-  const websiteData = useConfigStore((s) => s.websiteData) as
-    | { slug?: string; domain?: string; customDomain?: string }
-    | undefined;
-  const updateBusiness = useUpdateBusiness();
+  const websiteData = useConfigStore((s) => s.websiteData) as { slug?: string } | undefined;
+  const { data: registeredDomain } = useCustomDomain();
+  const registerDomain = useRegisterCustomDomain();
   const fallbackSlug =
     user?.businessName
       ?.toLowerCase()
@@ -38,12 +40,17 @@ const Domain: React.FC = () => {
   const slug = websiteData?.slug || fallbackSlug;
   const menuUrl = `menu.rtylr.com/${slug}`;
 
-  const configuredDomain = websiteData?.customDomain || websiteData?.domain;
+  const configuredDomain = registeredDomain || '';
   const isConfigured = Boolean(configuredDomain && DOMAIN_REGEX.test(configuredDomain));
 
   const [copied, setCopied] = useState(false);
   const [dnsOpen, setDnsOpen] = useState(true);
-  const [customDomainInput, setCustomDomainInput] = useState(configuredDomain || '');
+  const [customDomainInput, setCustomDomainInput] = useState('');
+
+  // The registered domain arrives with the query, after the input mounted.
+  useEffect(() => {
+    if (registeredDomain) setCustomDomainInput(registeredDomain);
+  }, [registeredDomain]);
 
   const handleCopy = async () => {
     try {
@@ -68,16 +75,7 @@ const Domain: React.FC = () => {
       toast.error(t('settings.domain.invalid'));
       return;
     }
-    updateBusiness.mutate(
-      {
-        data: { customDomain: domain, website: domain },
-      },
-      {
-        onSuccess: () => {
-          toast.success(t('settings.domain.saved'));
-        },
-      }
-    );
+    registerDomain.mutate(domain);
   };
 
   return (
@@ -157,7 +155,12 @@ const Domain: React.FC = () => {
                     onChange={(e) => setCustomDomainInput(e.target.value)}
                     className="flex-1"
                   />
-                  <Button size="sm" onClick={handleConnectDomain} className="shrink-0">
+                  <Button
+                    size="sm"
+                    onClick={handleConnectDomain}
+                    disabled={registerDomain.isPending}
+                    className="shrink-0"
+                  >
                     Connect Domain
                   </Button>
                 </div>

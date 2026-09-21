@@ -6,7 +6,9 @@ import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
 import { unwrap, getOneKitErrorMessage } from '@voxire/api';
 import { rest } from '../../../../../shared/lib/clients';
+import { cn } from '../../../../../shared/lib/utils';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
+import UnavailableNotice from '../../../../../shared/components/dash/UnavailableNotice';
 import {
   Card,
   CardContent,
@@ -25,17 +27,22 @@ interface ToggleSwitchProps {
   onChange: (next: boolean) => void;
   id?: string;
   label?: string;
+  disabled?: boolean;
 }
 
-const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, id, label }) => (
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, id, label, disabled }) => (
   <button
     id={id}
     type="button"
     role="switch"
     aria-checked={checked}
     aria-label={label || 'Toggle switch'}
+    disabled={disabled}
     onClick={() => onChange(!checked)}
-    className="relative shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4583C4]/50 rounded-full min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-1"
+    className={cn(
+      'relative shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4583C4]/50 rounded-full min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-1',
+      disabled && 'opacity-50 cursor-not-allowed'
+    )}
   >
     <span
       className="inline-block rounded-full"
@@ -101,6 +108,7 @@ interface NotificationRowProps {
   description: string;
   checked: boolean;
   onChange: (next: boolean) => void;
+  disabled?: boolean;
 }
 
 const NotificationRow: React.FC<NotificationRowProps> = ({
@@ -109,6 +117,7 @@ const NotificationRow: React.FC<NotificationRowProps> = ({
   description,
   checked,
   onChange,
+  disabled,
 }) => (
   <div className="flex items-center justify-between gap-4 py-3">
     <div className="flex-1 min-w-0">
@@ -119,7 +128,7 @@ const NotificationRow: React.FC<NotificationRowProps> = ({
         {description}
       </p>
     </div>
-    <ToggleSwitch id={id} checked={checked} onChange={onChange} />
+    <ToggleSwitch id={id} checked={checked} onChange={onChange} disabled={disabled} />
   </div>
 );
 
@@ -140,12 +149,33 @@ interface SmtpForm {
   encryption: Encryption;
 }
 
-interface NotificationState {
-  newOrder: boolean;
-  statusUpdates: boolean;
-  weeklySummary: boolean;
-  feedback: boolean;
-}
+/** Mirrors the UI's intended defaults while the prefs cannot be persisted. */
+const NOTIFICATION_ROWS = [
+  {
+    id: 'notif-new-order',
+    labelKey: 'settings.email.newOrder',
+    descriptionKey: 'settings.email.newOrderDescription',
+    checked: true,
+  },
+  {
+    id: 'notif-status',
+    labelKey: 'settings.email.orderStatus',
+    descriptionKey: 'settings.email.orderStatusDescription',
+    checked: true,
+  },
+  {
+    id: 'notif-weekly',
+    labelKey: 'settings.email.weeklySummary',
+    descriptionKey: 'settings.email.weeklySummaryDescription',
+    checked: false,
+  },
+  {
+    id: 'notif-feedback',
+    labelKey: 'settings.email.feedback',
+    descriptionKey: 'settings.email.feedbackDescription',
+    checked: false,
+  },
+] as const;
 
 const Email: React.FC = () => {
   const { t } = useTranslation();
@@ -163,14 +193,6 @@ const Email: React.FC = () => {
     username: '',
     password: '',
     encryption: 'TLS',
-  });
-
-  // Notifications
-  const [notifications, setNotifications] = useState<NotificationState>({
-    newOrder: true,
-    statusUpdates: true,
-    weeklySummary: false,
-    feedback: false,
   });
 
   const handleSenderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,14 +258,6 @@ const Email: React.FC = () => {
         smtpPassword: smtp.password,
         smtpFrom: sender.fromEmail,
       },
-    });
-  };
-
-  const toggleNotification = (key: keyof NotificationState) => (next: boolean) => {
-    const nextState = { ...notifications, [key]: next };
-    setNotifications(nextState);
-    updateBusiness.mutate({
-      data: { notificationPreferences: nextState },
     });
   };
 
@@ -417,35 +431,24 @@ const Email: React.FC = () => {
             </div>
             <CardDescription>{t('settings.email.notificationsDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="pt-0 divide-y" style={{ borderColor: 'var(--dash-border)' }}>
-            <NotificationRow
-              id="notif-new-order"
-              label={t('settings.email.newOrder')}
-              description={t('settings.email.newOrderDescription')}
-              checked={notifications.newOrder}
-              onChange={toggleNotification('newOrder')}
-            />
-            <NotificationRow
-              id="notif-status"
-              label={t('settings.email.orderStatus')}
-              description={t('settings.email.orderStatusDescription')}
-              checked={notifications.statusUpdates}
-              onChange={toggleNotification('statusUpdates')}
-            />
-            <NotificationRow
-              id="notif-weekly"
-              label={t('settings.email.weeklySummary')}
-              description={t('settings.email.weeklySummaryDescription')}
-              checked={notifications.weeklySummary}
-              onChange={toggleNotification('weeklySummary')}
-            />
-            <NotificationRow
-              id="notif-feedback"
-              label={t('settings.email.feedback')}
-              description={t('settings.email.feedbackDescription')}
-              checked={notifications.feedback}
-              onChange={toggleNotification('feedback')}
-            />
+          <CardContent className="pt-0 space-y-3">
+            {/* The config contract has no per-event preference fields, so a
+                toggle here cannot persist anything. Saying so is honest until
+                a notification-preferences endpoint exists. */}
+            <UnavailableNotice>{t('settings.email.notificationsUnavailable')}</UnavailableNotice>
+            <div className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
+              {NOTIFICATION_ROWS.map((row) => (
+                <NotificationRow
+                  key={row.id}
+                  id={row.id}
+                  label={t(row.labelKey)}
+                  description={t(row.descriptionKey)}
+                  checked={row.checked}
+                  onChange={() => undefined}
+                  disabled
+                />
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

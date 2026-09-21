@@ -4,6 +4,7 @@ import { Rocket, CheckCircle, Upload } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import {
   useGetEmployeeChecklist,
+  useListChecklistTemplates,
   useCompleteChecklistItem,
 } from '../../shared/hooks/queries/useOnboarding';
 import type { EmployeeChecklistItemPayload } from '@voxire/voxie/hr/onboarding/v1/types';
@@ -37,12 +38,24 @@ interface Props {
 const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
   const { t } = useTranslation();
   const { data, isLoading, refetch } = useGetEmployeeChecklist(employeeId);
+  const { data: templatesData } = useListChecklistTemplates();
   const complete = useCompleteChecklistItem();
   const [attachmentItem, setAttachmentItem] = useState<EmployeeChecklistItemPayload | null>(null);
 
   const checklists = data?.checklists ?? [];
   const checklist = checklists[0];
   const items = checklist?.items ?? [];
+  const templateItems =
+    (templatesData?.templates ?? []).find((template) => template.id === checklist?.templateId)
+      ?.items ?? [];
+
+  const requiresAttachment = (item: EmployeeChecklistItemPayload): boolean => {
+    const templateItem = templateItems.find((i) => i.id === item.checklistItemId);
+    // Without the template (its query failed or the checklist was deleted),
+    // keep the attachment step rather than completing an item that may need a
+    // file.
+    return templateItem?.requiresAttachment ?? true;
+  };
 
   const completedCount = items.filter((i) => i.status === 'complete').length;
   const totalCount = items.length;
@@ -193,8 +206,7 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
                         variant="primary"
                         icon={<CheckCircle size={13} />}
                         onClick={() => {
-                          const templateItem = items.find((i) => i.id === item.id);
-                          if (templateItem) {
+                          if (requiresAttachment(item)) {
                             setAttachmentItem(item);
                           } else {
                             handleComplete(item);

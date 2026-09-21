@@ -37,14 +37,26 @@ const Settings: React.FC = (): React.JSX.Element => {
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
   const [fiscalYearStart, setFiscalYearStart] = useState<string>('');
   const [timezone, setTimezone] = useState<string>('');
+  const [dirty, setDirty] = useState(false);
 
+  // Re-seed from the server only while the form is untouched. Saving invalidates
+  // ['insights-settings'], and fiscal year/timezone have no server field
+  // (see useInsightsSettings), so the refetched defaults would otherwise wipe
+  // the values the user just entered.
   useEffect(() => {
-    if (settings) {
+    if (settings && !dirty) {
       setDefaultCurrency(settings.defaultCurrency);
       setFiscalYearStart(settings.fiscalYearStart);
       setTimezone(settings.timezone);
     }
-  }, [settings]);
+  }, [settings, dirty]);
+
+  const handleEdit =
+    (setter: (value: string) => void) =>
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      setDirty(true);
+      setter(e.target.value);
+    };
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
@@ -95,7 +107,7 @@ const Settings: React.FC = (): React.JSX.Element => {
                 id="insights-default-currency"
                 type="text"
                 value={defaultCurrency}
-                onChange={(e) => setDefaultCurrency(e.target.value)}
+                onChange={handleEdit(setDefaultCurrency)}
                 className="mt-1 w-full px-3 py-2 rounded-lg text-base outline-none"
                 style={{
                   background: 'var(--hub-input-bg)',
@@ -117,7 +129,7 @@ const Settings: React.FC = (): React.JSX.Element => {
                 id="insights-fiscal-year"
                 type="text"
                 value={fiscalYearStart}
-                onChange={(e) => setFiscalYearStart(e.target.value)}
+                onChange={handleEdit(setFiscalYearStart)}
                 placeholder="MM-DD"
                 className="mt-1 w-full px-3 py-2 rounded-lg outline-none"
                 style={{
@@ -140,7 +152,7 @@ const Settings: React.FC = (): React.JSX.Element => {
                 id="insights-timezone"
                 type="text"
                 value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
+                onChange={handleEdit(setTimezone)}
                 className="mt-1 w-full px-3 py-2 rounded-lg outline-none"
                 style={{
                   background: 'var(--hub-input-bg)',

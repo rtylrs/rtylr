@@ -85,6 +85,9 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Bumped on every pick/clear so an upload that was removed (or replaced)
+  // can't write its key into state after the candidate's decision.
+  const uploadEpochRef = useRef(0);
 
   if (!slug || !careerSlug) {
     return <div>{t('public.apply.invalidLink')}</div>;
@@ -107,25 +110,31 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
     setUploadedKey(null);
     setUploadError(null);
     setUploading(true);
+    const epoch = ++uploadEpochRef.current;
     try {
       const key = await uploadResume({ file, slug, careerSlug });
+      if (uploadEpochRef.current !== epoch) return;
       setUploadedKey(key);
       // Clear the manual URL input - we'll use the uploaded key instead.
       setResumeUrl('');
     } catch (err) {
+      if (uploadEpochRef.current !== epoch) return;
       const msg = err instanceof Error ? err.message : t('public.apply.uploadFailed');
       setUploadError(msg);
       setResumeFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } finally {
-      setUploading(false);
+      if (uploadEpochRef.current === epoch) setUploading(false);
     }
   }
 
   function clearFile() {
+    // Invalidate a still-in-flight upload so its resolved key is dropped.
+    uploadEpochRef.current += 1;
     setResumeFile(null);
     setUploadedKey(null);
     setUploadError(null);
+    setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 

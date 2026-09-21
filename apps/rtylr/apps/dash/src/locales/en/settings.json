@@ -30,7 +30,8 @@
     "dnsTitle": "DNS setup instructions",
     "dnsPropagation": "DNS changes can take up to 48 hours to propagate.",
     "invalid": "Enter a valid domain, for example menu.yourbrand.com",
-    "saved": "Custom domain saved. DNS propagation may take up to 24 hours."
+    "saved": "Custom domain saved. DNS propagation may take up to 24 hours.",
+    "saveFailed": "Failed to save the custom domain"
   },
   "general": {
     "pageTitle": "General settings",
@@ -110,6 +111,7 @@
     "weeklySummaryDescription": "A weekly digest of orders, revenue, and trends.",
     "feedback": "Customer feedback",
     "feedbackDescription": "Receive an email when a customer submits a review.",
+    "notificationsUnavailable": "Notification preferences are not saved yet. Changes here do not reach the server.",
     "senderRequired": "A sender email is required",
     "smtpVerified": "SMTP connection to {{host}}:{{port}} verified",
     "smtpTestFailed": "Failed to test the SMTP connection",

@@ -3,7 +3,7 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-const { storeState, tasksResult, restrictingRole } = vi.hoisted(() => ({
+const { storeState, tasksResult, detailsState, roleQuery, restrictingRole } = vi.hoisted(() => ({
   storeState: {
     selectedTaskIds: [] as string[],
     clearSelection: vi.fn(),
@@ -13,6 +13,12 @@ const { storeState, tasksResult, restrictingRole } = vi.hoisted(() => ({
     tasks: [] as unknown[],
   },
   tasksResult: { data: [] as { id: string; projectId: string }[] },
+  // What useTaskDetails returns for the ids absent from tasksResult.data.
+  detailsState: {
+    ids: [] as string[],
+    value: [] as { data?: { task: { projectId: string } } }[],
+  },
+  roleQuery: { ids: [] as string[] },
   restrictingRole: { value: undefined as string | undefined },
 }));
 
@@ -22,6 +28,10 @@ vi.mock('../stores/flowStore', () => ({
 
 vi.mock('../../features/tasks/useTasks', () => ({
   useTasks: () => tasksResult,
+  useTaskDetails: (ids: string[]) => {
+    detailsState.ids = ids;
+    return detailsState.value;
+  },
   useBulkUpdateStatus: () => ({ isPending: false, mutateAsync: vi.fn() }),
   useBulkUpdatePriority: () => ({ isPending: false, mutateAsync: vi.fn() }),
   useBulkUpdateArchive: () => ({ isPending: false, mutateAsync: vi.fn() }),
@@ -29,7 +39,10 @@ vi.mock('../../features/tasks/useTasks', () => ({
 }));
 
 vi.mock('../lib/currentUser', () => ({
-  useMostRestrictiveProjectRole: () => restrictingRole.value,
+  useMostRestrictiveProjectRole: (projectIds: string[]) => {
+    roleQuery.ids = projectIds;
+    return restrictingRole.value;
+  },
 }));
 
 vi.mock('../services/i18next', () => ({
@@ -57,6 +70,9 @@ describe('BulkEditBar resolves its selection from the task query (#1042)', () =>
     storeState.selectedTaskIds = ['1', '2'];
     storeState.tasks = [];
     tasksResult.data = [];
+    detailsState.ids = [];
+    detailsState.value = [];
+    roleQuery.ids = [];
     restrictingRole.value = undefined;
   });
 
@@ -93,6 +109,36 @@ describe('BulkEditBar resolves its selection from the task query (#1042)', () =>
     render(<BulkEditBar />);
 
     expect(markDone()).not.toBeDisabled();
+  });
+
+  it('resolves a selected task the first page of the list does not contain (#01329)', () => {
+    // The business-wide list is one page (the server caps it at 50 rows), so a
+    // task selected on its project board past that page is not in
+    // tasksResult.data. Its detail is fetched by id instead of leaving every
+    // bulk action disabled with the "unresolved" tooltip.
+    tasksResult.data = [{ id: '1', projectId: '900' }];
+    detailsState.value = [{ data: { task: { projectId: '901' } } }];
+    storeState.selectedTaskIds = ['1', '2'];
+    restrictingRole.value = 'admin';
+
+    render(<BulkEditBar />);
+
+    expect(markDone()).not.toBeDisabled();
+    expect(deleteButton()).not.toBeDisabled();
+    expect(detailsState.ids).toEqual(['2']);
+    expect(roleQuery.ids).toEqual(['900', '901']);
+  });
+
+  it('still fails closed when a selected task resolves neither way', () => {
+    tasksResult.data = [{ id: '1', projectId: '900' }];
+    detailsState.value = [{ data: undefined }];
+    storeState.selectedTaskIds = ['1', '2'];
+    restrictingRole.value = 'admin';
+
+    render(<BulkEditBar />);
+
+    expect(markDone()).toBeDisabled();
+    expect(markDone().getAttribute('title')).toBe('flow.bulkEdit.unresolved');
   });
 
   it('blames the data, not the role, when a selected task is not in the list', () => {

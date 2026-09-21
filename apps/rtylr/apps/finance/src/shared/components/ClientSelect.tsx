@@ -1,9 +1,17 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Search } from 'lucide-react';
 import { unwrap } from '@voxire/api';
 import { listCrmCustomers } from '../lib/clients';
 import { parseClientsResponse } from '../schemas/clients';
+import { ACCENT } from '../lib/tokens';
+
+const statusStyle: React.CSSProperties = {
+  padding: 10,
+  textAlign: 'center',
+  fontSize: 12,
+  color: 'var(--hub-text-dim)',
+};
 
 export interface Client {
   /** CRM customer id when this client came from the CRM directory; absent
@@ -26,12 +34,25 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [clients, setClients] = useState<Client[]>([]);
+  // Distinguishing a failed load from an empty CRM: the picker used to render
+  // 'No clients found' for loading, failure and truly-empty alike, which read
+  // as a definitive empty directory and blocked NewInvoice step 1 with no
+  // retry path.
+  const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading');
+
+  const loadClients = useCallback(() => {
+    setLoadState('loading');
+    void unwrap(listCrmCustomers())
+      .then((data) => {
+        setClients(parseClientsResponse(data));
+        setLoadState('ready');
+      })
+      .catch(() => setLoadState('error'));
+  }, []);
 
   useEffect(() => {
-    void unwrap(listCrmCustomers())
-      .then((data) => setClients(parseClientsResponse(data)))
-      .catch(() => {});
-  }, []);
+    loadClients();
+  }, [loadClients]);
 
   const filtered = useMemo(
     () => clients.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())),
@@ -132,17 +153,31 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
               <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{c.email}</div>
             </button>
           ))}
-          {filtered.length === 0 && (
-            <div
-              style={{
-                padding: 10,
-                textAlign: 'center',
-                fontSize: 12,
-                color: 'var(--hub-text-dim)',
-              }}
-            >
-              {t('finance.clients.none')}
+          {loadState === 'loading' && <div style={statusStyle}>{t('common.loading')}</div>}
+          {loadState === 'error' && (
+            <div role="alert" style={statusStyle}>
+              <div>{t('finance.clients.loadError')}</div>
+              <button
+                type="button"
+                onClick={loadClients}
+                style={{
+                  marginTop: 6,
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
+                  color: ACCENT,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                {t('finance.clients.retry')}
+              </button>
             </div>
+          )}
+          {loadState === 'ready' && filtered.length === 0 && (
+            <div style={statusStyle}>{t('finance.clients.none')}</div>
           )}
         </div>
       )}

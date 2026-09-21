@@ -1,12 +1,11 @@
 // Ids only. This is module scope, evaluated before i18next has a language, so
 // the labels live at crm.segmentFields.<id> and are read where they render.
-export const SEGMENT_RULE_FIELDS = [
-  'totalSpent',
-  'visits',
-  'lastVisitDays',
-  'loyaltyPoints',
-  'tier',
-] as const;
+//
+// Only fields onion's segmentrules package evaluates belong here. A field it
+// has no column for is dropped from the WHERE fragment, and with no other rule
+// present the segment falls back to listing every active customer (B42-R07),
+// so offering an unevaluated field silently returns the wrong audience.
+export const SEGMENT_RULE_FIELDS = ['totalSpent', 'visits', 'loyaltyPoints', 'tier'] as const;
 
 export type SegmentRuleField = (typeof SEGMENT_RULE_FIELDS)[number];
 
@@ -19,7 +18,6 @@ export const SEGMENT_RULE_OPERATORS_BY_FIELD: Record<
 > = {
   totalSpent: ['>', '<', '=', '!='],
   visits: ['>', '<', '=', '!='],
-  lastVisitDays: ['>', '<', '=', '!='],
   loyaltyPoints: ['>', '<', '=', '!='],
   tier: ['=', '!='],
 };
@@ -27,7 +25,6 @@ export const SEGMENT_RULE_OPERATORS_BY_FIELD: Record<
 export const SEGMENT_RULE_VALUES: Record<SegmentRuleField, readonly string[]> = {
   totalSpent: ['100', '250', '500', '1000', '2500'],
   visits: ['1', '3', '5', '10', '20'],
-  lastVisitDays: ['7', '14', '30', '60', '90'],
   loyaltyPoints: ['100', '250', '500', '1000', '2500'],
   tier: ['Bronze', 'Silver', 'Gold', 'Platinum'],
 };

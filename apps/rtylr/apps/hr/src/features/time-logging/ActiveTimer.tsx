@@ -40,9 +40,14 @@ const ActiveTimer = ({ onStop }: ActiveTimerProps): React.JSX.Element => {
 
   const updateElapsed = useCallback((): void => {
     const state = readTimerState();
-    if (state) {
-      setElapsed(Math.floor((Date.now() - state.startedAt) / 1000));
+    if (!state) {
+      // Another tab can stop the timer; drop back to the idle input instead of
+      // freezing on a record that no longer exists.
+      setTimerState(null);
+      setElapsed(0);
+      return;
     }
+    setElapsed(Math.floor((Date.now() - state.startedAt) / 1000));
   }, []);
 
   useEffect(() => {
@@ -57,6 +62,17 @@ const ActiveTimer = ({ onStop }: ActiveTimerProps): React.JSX.Element => {
     return undefined;
   }, [timerState, updateElapsed]);
 
+  // The record lives in localStorage, so a timer stopped in another tab removes
+  // it without telling this one. `storage` fires in the tabs that did not write.
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent): void => {
+      if (event.key !== null && event.key !== TIMER_KEY) return;
+      setTimerState(readTimerState());
+    };
+    window.addEventListener('storage', handleStorage);
+    return (): void => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   const handleStart = (): void => {
     const state: TimerState = { startedAt: Date.now(), description: desc };
     localStorage.setItem(TIMER_KEY, JSON.stringify(state));
@@ -66,7 +82,11 @@ const ActiveTimer = ({ onStop }: ActiveTimerProps): React.JSX.Element => {
 
   const handleStop = (): void => {
     const state = readTimerState();
-    if (!state) return;
+    if (!state) {
+      setTimerState(null);
+      setElapsed(0);
+      return;
+    }
     const durationMinutes = Math.max(1, Math.round((Date.now() - state.startedAt) / 60000));
     localStorage.removeItem(TIMER_KEY);
     onStop(durationMinutes, state.description);

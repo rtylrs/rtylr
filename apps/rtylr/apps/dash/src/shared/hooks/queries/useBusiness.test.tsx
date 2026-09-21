@@ -2,15 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useUpdateBusiness } from './useBusiness';
+import { useCustomDomain, useRegisterCustomDomain, useUpdateBusiness } from './useBusiness';
 import { useConfigStore } from '../../stores/configStore';
 
-const mockConfigClient = vi.hoisted(() => ({ updateConfig: vi.fn() }));
+const mockConfigClient = vi.hoisted(() => ({
+  updateConfig: vi.fn(),
+  getCustomDomain: vi.fn(),
+  registerCustomDomain: vi.fn(),
+}));
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((v) => v),
+  getOneKitErrorMessage: vi.fn((_err, fallback) => fallback),
 }));
 
 vi.mock('../../lib/clients', () => ({ configClient: mockConfigClient }));
@@ -93,5 +98,40 @@ describe('useUpdateBusiness', () => {
       contactEmail: 'suplabstore@gmail.com',
       contactNumber: '+961000000',
     });
+  });
+});
+
+describe('useCustomDomain', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('reads the registered domain record', async () => {
+    mockConfigClient.getCustomDomain.mockResolvedValue({
+      domain: { domain: 'menu.acme.com', status: 'pending' },
+    });
+
+    const { result } = renderHook(() => useCustomDomain(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toBe('menu.acme.com');
+  });
+});
+
+describe('useRegisterCustomDomain', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('registers through the custom-domain RPC, not the config update', async () => {
+    mockConfigClient.registerCustomDomain.mockResolvedValue({
+      domain: { domain: 'menu.acme.com' },
+    });
+
+    const { result } = renderHook(() => useRegisterCustomDomain(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate('menu.acme.com');
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockConfigClient.registerCustomDomain).toHaveBeenCalledWith({ domain: 'menu.acme.com' });
+    expect(mockConfigClient.updateConfig).not.toHaveBeenCalled();
+    expect(mockToastSuccess).toHaveBeenCalled();
   });
 });

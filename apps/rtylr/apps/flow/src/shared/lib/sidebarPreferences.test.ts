@@ -34,6 +34,7 @@ import {
   sidebarSettingsQueryKey,
   updatePreferencesCopy,
   useSidebarPreferences,
+  type SidebarPreferences,
 } from './sidebarPreferences';
 
 describe('sidebar preferences', () => {
@@ -142,8 +143,7 @@ describe('useSidebarPreferences save does not clobber the cache (#1059)', () => 
 
     // The cache entry must still describe the settings, not the empty response.
     const cached = queryClient.getQueryData(sidebarSettingsQueryKey) as
-      | { sidebarPreferences?: string }
-      | undefined;
+      { sidebarPreferences?: string } | undefined;
     expect(cached?.sidebarPreferences).toBeTruthy();
     expect(Object.keys(cached ?? {})).not.toEqual([]);
 
@@ -169,8 +169,7 @@ describe('useSidebarPreferences save does not clobber the cache (#1059)', () => 
     await waitFor(() => expect(updateUserSettings).toHaveBeenCalledTimes(1));
 
     const cached = queryClient.getQueryData(sidebarSettingsQueryKey) as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     expect(cached).toMatchObject({
       taskAssigned: true,
       taskComments: true,
@@ -271,5 +270,115 @@ describe('sidebar defaults keep projects above the fold (#1076)', () => {
     const order = parseSidebarPreferences(stored).groupOrder;
     expect(order[0]).toBe('plan');
     expect([...order].sort()).toEqual([...SIDEBAR_GROUP_IDS].sort());
+  });
+});
+
+describe('useSidebarPreferences keeps one shared document (#1484)', () => {
+  const settingsBody = (preferences: SidebarPreferences): Record<string, unknown> => ({
+    taskAssigned: true,
+    taskComments: true,
+    mentions: true,
+    statusChanges: false,
+    weeklyDigest: true,
+    emailNotifications: false,
+    sidebarPreferences: serializeSidebarPreferences(preferences),
+  });
+
+  // The settings section hiding the Plan group is the concrete change from the
+  // report: it is made on one instance while the layout's autosave is in flight.
+  const hidePlanGroup = (draft: SidebarPreferences): SidebarPreferences => {
+    const plan = draft.groups.find((group) => group.id === 'plan');
+    if (plan) plan.visible = false;
+    return draft;
+  };
+
+  const isPlanVisible = (preferences: SidebarPreferences): boolean =>
+    preferences.groups.find((group) => group.id === 'plan')?.visible !== false;
+
+  const renderInstances = async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }): React.JSX.Element =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+    const layout = renderHook(() => useSidebarPreferences(), { wrapper });
+    const settings = renderHook(() => useSidebarPreferences(), { wrapper });
+    await waitFor(() => {
+      expect(layout.result.current.isLoading).toBe(false);
+      expect(settings.result.current.isLoading).toBe(false);
+    });
+    return { layout, settings, queryClient };
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getUserSettings.mockResolvedValue(settingsBody(createDefaultSidebarPreferences()));
+  });
+
+  it('sends the change another instance made while its own save was in flight', async () => {
+    let releaseFirst: () => void = () => undefined;
+    const first = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    let calls = 0;
+    updateUserSettings.mockImplementation(async () => {
+      calls += 1;
+      if (calls === 1) await first;
+      return {};
+    });
+
+    const { layout, settings } = await renderInstances();
+
+    await act(async () => {
+      settings.result.current.update(hidePlanGroup);
+    });
+    await waitFor(() => expect(updateUserSettings).toHaveBeenCalledTimes(1));
+
+    // The layout instance must already read the settings instance's change...
+    await waitFor(() => expect(isPlanVisible(layout.result.current.preferences)).toBe(false));
+
+    // ...so its own recent-page autosave cannot send a document without it.
+    await act(async () => {
+      layout.result.current.update((draft) => recordRecentSidebarPage(draft, '/inbox', 'Inbox'));
+    });
+    releaseFirst();
+    await waitFor(() => expect(updateUserSettings).toHaveBeenCalledTimes(2));
+
+    const sent = parseSidebarPreferences(
+      (updateUserSettings.mock.calls[1][0] as { sidebarPreferences: string }).sidebarPreferences
+    );
+    expect(isPlanVisible(sent)).toBe(false);
+    expect(sent.groups.find((group) => group.id === 'recent')?.itemIds).toContain('recent:/inbox');
+  });
+
+  it('rolls back to the document from before the failed write', async () => {
+    let rejectSave: (error: Error) => void = () => undefined;
+    updateUserSettings.mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectSave = reject;
+        })
+    );
+
+    const { layout, queryClient } = await renderInstances();
+    await act(async () => {
+      layout.result.current.update(hidePlanGroup);
+    });
+    await waitFor(() => expect(updateUserSettings).toHaveBeenCalledTimes(1));
+
+    // Optimistic: the hook and the shared cache both hold the new document.
+    expect(isPlanVisible(layout.result.current.preferences)).toBe(false);
+    const optimistic = queryClient.getQueryData(sidebarSettingsQueryKey) as {
+      sidebarPreferences?: string;
+    };
+    expect(isPlanVisible(parseSidebarPreferences(optimistic.sidebarPreferences))).toBe(false);
+
+    await act(async () => {
+      rejectSave(new Error('500'));
+    });
+
+    await waitFor(() => expect(isPlanVisible(layout.result.current.preferences)).toBe(true));
+    const restored = queryClient.getQueryData(sidebarSettingsQueryKey) as {
+      sidebarPreferences?: string;
+    };
+    expect(isPlanVisible(parseSidebarPreferences(restored.sidebarPreferences))).toBe(true);
   });
 });

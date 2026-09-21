@@ -54,6 +54,23 @@ export function usePurchaseOrders(params: UsePurchaseOrdersParams = {}) {
   });
 }
 
+/**
+ * Detail fetch for one purchase order. The list response carries no line
+ * items, so screens that need the lines (Receiving) must load the order
+ * through getPurchaseOrder.
+ */
+export function usePurchaseOrder(id: string | undefined) {
+  return useQuery<PurchaseOrder | null>({
+    queryKey: ['purchase-orders', 'detail', id],
+    enabled: !!id,
+    queryFn: async () => {
+      if (!id) return null;
+      const response = await purchaseOrderClient.getPurchaseOrder({ id });
+      return response.purchaseOrder ?? null;
+    },
+  });
+}
+
 export function useAllPurchaseOrders() {
   return useQuery<PurchaseOrder[]>({
     queryKey: ['purchase-orders', 'all'],

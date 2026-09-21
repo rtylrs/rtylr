@@ -2,6 +2,7 @@
   "teamEmptyTitle": "لا يوجد أعضاء فريق حتى الآن",
   "teamEmptyDescription": "قم بدعوة أشخاص لمنحهم الوصول إلى Finance.",
   "teamEmptyCta": "دعوة عضو",
+  "teamLoadFailed": "تعذّر تحميل أعضاء الفريق",
   "title": "الإعدادات",
   "reset": "تمت إعادة ضبط الإعدادات",
   "saved": "تم حفظ الإعدادات",

@@ -308,10 +308,21 @@ function useTheme(): [Theme, (t: Theme) => void] {
 }
 
 /* -- Sidebar nav item -- */
-const SidebarNavItem: React.FC<NavItem> = ({ i18nKey, path, icon: Icon }) => {
+/**
+ * Whether `path` is the destination for `pathname` or an ancestor of it.
+ * `/staff/123` still belongs to the `/staff` section, so the section stays lit
+ * for detail routes that have no nav item of their own.
+ */
+const navPathMatches = (pathname: string, path: string): boolean =>
+  path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(path + '/');
+
+const SidebarNavItem: React.FC<NavItem & { isActive: boolean }> = ({
+  i18nKey,
+  path,
+  icon: Icon,
+  isActive,
+}) => {
   const { t } = useTranslation();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
   const label = t(i18nKey);
 
   return (
@@ -595,6 +606,24 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const config = useHRConfigStore((s) => s.config);
   const timeTrackingModel = config?.timeTrackingModel ?? 'both';
 
+  const visibleNavItems = navSections.flatMap((section) =>
+    section.items.filter(
+      (item) =>
+        (!item.configGuard || item.configGuard(timeTrackingModel, config)) &&
+        (!item.permission || canHrPermission(role, item.permission))
+    )
+  );
+  const visibleNavPaths = new Set(visibleNavItems.map((item) => item.path));
+  // Only the most specific matching item is active, otherwise `/performance/goals`
+  // lights up `/performance` too and two items share `layoutId="sidebar-active"`.
+  const activeNavPath = visibleNavItems.reduce<string | undefined>(
+    (best, item) =>
+      navPathMatches(pathname, item.path) && (!best || item.path.length > best.length)
+        ? item.path
+        : best,
+    undefined
+  );
+
   const sidebarRef = useRef<HTMLElement | null>(null);
   useForesightLinks(sidebarRef, {
     '/': () => import('../features/dashboard/Dashboard'),
@@ -751,11 +780,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           }}
         >
           {navSections.map((section) => {
-            const visibleItems = section.items.filter(
-              (item) =>
-                (!item.configGuard || item.configGuard(timeTrackingModel, config)) &&
-                (!item.permission || canHrPermission(role, item.permission))
-            );
+            const visibleItems = section.items.filter((item) => visibleNavPaths.has(item.path));
             if (visibleItems.length === 0) return null;
             const isCollapsed = collapsedSections[section.i18nKey] ?? false;
             return (
@@ -814,7 +839,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                       }}
                     >
                       {visibleItems.map((item) => (
-                        <SidebarNavItem key={item.path} {...item} />
+                        <SidebarNavItem
+                          key={item.path}
+                          {...item}
+                          isActive={item.path === activeNavPath}
+                        />
                       ))}
                     </motion.div>
                   )}

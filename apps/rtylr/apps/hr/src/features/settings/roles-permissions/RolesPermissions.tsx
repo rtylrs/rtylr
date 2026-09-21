@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { pageTitle } from '../../../shared/lib/pageTitle';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
@@ -42,6 +42,14 @@ const RoleCard = ({
   const { t } = useTranslation();
   const updateRole = useUpdateRole();
   const [pending, setPending] = useState<Record<string, boolean>>(role.permissions);
+  // The card is keyed by role.id, so a refetch (after any mutation invalidates
+  // ['roles']) updates the prop without remounting. Re-seed the buffer then, or
+  // a save would PUT the mount-time permissions and revert another admin's
+  // change. React Query's structural sharing keeps the reference stable when
+  // the refetched payload is unchanged, so in-progress edits survive.
+  useEffect(() => {
+    setPending(role.permissions);
+  }, [role.permissions]);
   const grantedCount = Object.values(pending).filter(Boolean).length;
   const isDirty = JSON.stringify(pending) !== JSON.stringify(role.permissions);
 

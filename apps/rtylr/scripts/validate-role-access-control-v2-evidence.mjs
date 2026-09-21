@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { homedir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -37,7 +38,13 @@ if (
   fail('public Menu classification does not match the approved two-row set');
 }
 
-const onionRoot = path.join(root, '..', 'onion');
+// The onion checkout lives outside this repository, as in
+// scripts/cross-app/sweep-backend-modules.mjs; ONION_DIR points the gate at it.
+const onionRoot = process.env.ONION_DIR ?? path.join(homedir(), 'Development', 'onion');
+if (!fs.existsSync(onionRoot)) {
+  console.error(`onion checkout not found at ${onionRoot}; set ONION_DIR to its path`);
+  process.exit(1);
+}
 const directHarnessPath = path.join(onionRoot, 'internal/testutil/direct_authorization.go');
 const directHarness = fs.existsSync(directHarnessPath)
   ? fs.readFileSync(directHarnessPath, 'utf8')

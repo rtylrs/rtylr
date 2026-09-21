@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from '@tanstack/react-router';
 import { PackageCheck, Check, X as XIcon, Plus, Minus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
-import { usePurchaseOrders, useUpdatePurchaseOrderStatus } from './usePurchaseOrders';
+import {
+  usePurchaseOrder,
+  usePurchaseOrders,
+  useUpdatePurchaseOrderStatus,
+} from './usePurchaseOrders';
 import type { PurchaseOrder } from './usePurchaseOrders';
 import { useSuppliers } from '../suppliers/useSuppliers';
 import PageHeader from '../../shared/components/PageHeader';
@@ -37,11 +41,21 @@ const Receiving: React.FC = () => {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lines, setLines] = useState<ReceiveLine[]>([]);
+  // The list payload has no line items, so the panel is seeded from the detail
+  // fetch. Seed once per order so a background refetch cannot clobber edits.
+  const seededOrderId = useRef<string | null>(null);
+  const {
+    data: orderDetail,
+    isLoading: isDetailLoading,
+    isError: isDetailError,
+  } = usePurchaseOrder(selectedId ?? undefined);
 
-  const handleSelectOrder = (order: PurchaseOrder): void => {
-    setSelectedId(order.id ?? null);
+  useEffect(() => {
+    if (!selectedId || seededOrderId.current === selectedId) return;
+    if (!orderDetail || orderDetail.id !== selectedId) return;
+    seededOrderId.current = selectedId;
     setLines(
-      (order.items ?? []).map((item) => ({
+      (orderDetail.items ?? []).map((item) => ({
         id: item.id,
         sku: item.productId ?? '',
         name: `Product #${item.productId ?? ''}`,
@@ -49,12 +63,24 @@ const Receiving: React.FC = () => {
         received: item.quantityReceived ?? item.quantityOrdered ?? 0,
       }))
     );
+  }, [selectedId, orderDetail]);
+
+  const closeDetails = (): void => {
+    seededOrderId.current = null;
+    setLines([]);
+    setSelectedId(null);
   };
 
-  const adjust = (sku: string, delta: number) => {
+  const handleSelectOrder = (order: PurchaseOrder): void => {
+    seededOrderId.current = null;
+    setLines([]);
+    setSelectedId(order.id ?? null);
+  };
+
+  const adjust = (lineKey: string, delta: number) => {
     setLines((prev) =>
       prev.map((l) =>
-        l.sku === sku
+        (l.id ?? l.sku) === lineKey
           ? { ...l, received: Math.min(l.expected, Math.max(0, l.received + delta)) }
           : l
       )
@@ -62,36 +88,47 @@ const Receiving: React.FC = () => {
   };
 
   const completeReceipt = () => {
+    // The list rows carry no items. Submitting items: [] would let the backend
+    // default every line to its ordered quantity and receive the whole order.
+    if (lines.length === 0) {
+      toast.error(t('erp.receiving.validation.noItems'));
+      return;
+    }
     const overReceived = lines.filter((l) => l.received > l.expected);
     if (overReceived.length > 0) {
       toast.error(t('erp.receiving.validation.overReceived'));
       return;
     }
     const hasReceivedItems = lines.some((line) => line.received > 0);
-    const isFullyReceived = lines.every((line) => line.received === line.expected);
-    const status = isFullyReceived ? 'received' : hasReceivedItems ? 'partial' : 'approved';
+    // The backend derives partial vs received from the submitted quantities,
+    // and only reads them for the received status.
+    const status = hasReceivedItems ? 'received' : 'approved';
     const variance = lines.reduce((sum, l) => sum + (l.expected - l.received), 0);
-    toast.success(
-      variance === 0
-        ? t('erp.receiving.toast.completed')
-        : t('erp.receiving.toast.completedVariance', { count: variance })
-    );
-    if (selectedId !== null) {
-      updateStatus.mutate(
-        {
-          id: selectedId,
-          body: {
-            status,
-            items: lines.map((line) => ({
-              id: line.id,
-              quantityReceived: line.received,
-            })),
-          },
+    if (selectedId === null) return;
+    updateStatus.mutate(
+      {
+        id: selectedId,
+        body: {
+          status,
+          items: lines.map((line) => ({
+            id: line.id,
+            quantityOrdered: line.expected,
+            quantityReceived: line.received,
+          })),
         },
-        { onError: () => toast.error(t('erp.receiving.toast.updateFailed')) }
-      );
-    }
-    setSelectedId(null);
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            variance === 0
+              ? t('erp.receiving.toast.completed')
+              : t('erp.receiving.toast.completedVariance', { count: variance })
+          );
+          closeDetails();
+        },
+        onError: () => toast.error(t('erp.receiving.toast.updateFailed')),
+      }
+    );
   };
 
   return (
@@ -116,7 +153,7 @@ const Receiving: React.FC = () => {
             </h3>
             <button
               type="button"
-              onClick={() => setSelectedId(null)}
+              onClick={closeDetails}
               aria-label={t('erp.receiving.closeDetails')}
               className="h-11 w-11 rounded-lg flex items-center justify-center"
             >
@@ -124,70 +161,84 @@ const Receiving: React.FC = () => {
             </button>
           </div>
           <div className="space-y-2 mb-4">
-            {lines.map((line) => {
-              const variance = line.received - line.expected;
-              return (
-                <div
-                  key={line.sku}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg"
-                  style={{ background: 'var(--hub-hover)' }}
-                >
-                  <div className="flex-1">
-                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                      {line.name}
-                    </p>
-                    <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
-                      {line.sku} / {t('erp.receiving.expected', { count: line.expected })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => adjust(line.sku, -1)}
-                      aria-label={`Decrease received quantity for ${line.name}`}
-                      className="h-11 w-11 rounded flex items-center justify-center"
-                      style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <span
-                      className="text-sm font-semibold min-w-[40px] text-center"
-                      style={{ color: 'var(--hub-text)' }}
-                    >
-                      {line.received}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => adjust(line.sku, 1)}
-                      aria-label={`Increase received quantity for ${line.name}`}
-                      className="h-11 w-11 rounded flex items-center justify-center"
-                      style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-                  <span
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-full min-w-[48px] text-center"
-                    style={{
-                      background:
-                        variance === 0
-                          ? 'color-mix(in srgb, var(--erp-success) 10%, transparent)'
-                          : 'color-mix(in srgb, var(--erp-danger) 10%, transparent)',
-                      color: variance === 0 ? 'var(--erp-success)' : 'var(--erp-danger)',
-                    }}
+            {isDetailLoading ? (
+              <Skeleton className="h-14 w-full rounded-lg" />
+            ) : isDetailError || !orderDetail ? (
+              <p className="text-xs" style={{ color: 'var(--erp-danger)' }}>
+                {t('erp.receiving.error.loadFailed')}
+              </p>
+            ) : lines.length === 0 ? (
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                {t('erp.receiving.validation.noItems')}
+              </p>
+            ) : (
+              lines.map((line) => {
+                const lineKey = line.id ?? line.sku;
+                const variance = line.received - line.expected;
+                return (
+                  <div
+                    key={lineKey}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                    style={{ background: 'var(--hub-hover)' }}
                   >
-                    {variance === 0
-                      ? t('erp.receiving.ok')
-                      : `${variance > 0 ? '+' : ''}${variance}`}
-                  </span>
-                </div>
-              );
-            })}
+                    <div className="flex-1">
+                      <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                        {line.name}
+                      </p>
+                      <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
+                        {line.sku} / {t('erp.receiving.expected', { count: line.expected })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => adjust(lineKey, -1)}
+                        aria-label={`Decrease received quantity for ${line.name}`}
+                        className="h-11 w-11 rounded flex items-center justify-center"
+                        style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <span
+                        className="text-sm font-semibold min-w-[40px] text-center"
+                        style={{ color: 'var(--hub-text)' }}
+                      >
+                        {line.received}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => adjust(lineKey, 1)}
+                        aria-label={`Increase received quantity for ${line.name}`}
+                        className="h-11 w-11 rounded flex items-center justify-center"
+                        style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                    <span
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full min-w-[48px] text-center"
+                      style={{
+                        background:
+                          variance === 0
+                            ? 'color-mix(in srgb, var(--erp-success) 10%, transparent)'
+                            : 'color-mix(in srgb, var(--erp-danger) 10%, transparent)',
+                        color: variance === 0 ? 'var(--erp-success)' : 'var(--erp-danger)',
+                      }}
+                    >
+                      {variance === 0
+                        ? t('erp.receiving.ok')
+                        : `${variance > 0 ? '+' : ''}${variance}`}
+                    </span>
+                  </div>
+                );
+              })
+            )}
           </div>
           <button
             type="button"
             onClick={completeReceipt}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
+            disabled={lines.length === 0 || updateStatus.isPending}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Check size={14} /> {t('erp.receiving.markReceived')}

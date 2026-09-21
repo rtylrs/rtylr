@@ -11,6 +11,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ApplyPage from './ApplyPage';
+import { uploadResume } from '../../shared/hooks/queries/usePublic';
 import { initTestI18n } from '../../shared/testing/i18n';
 import type { Customization, RecruitCareer } from '../../shared/lib/types';
 
@@ -188,5 +189,56 @@ describe('ApplyPage integration', () => {
     // Required inputs block form submission at the DOM level - the
     // mutate shouldn't fire.
     expect(submitMutate).not.toHaveBeenCalled();
+  });
+
+  it('drops a resume upload that resolves after the file was removed', async () => {
+    submitMutate.mockReset();
+    const uploadResumeMock = vi.mocked(uploadResume);
+    let resolveUpload: (key: string) => void = () => {};
+    uploadResumeMock.mockReset();
+    uploadResumeMock.mockImplementation(
+      () =>
+        new Promise<string>((resolve) => {
+          resolveUpload = resolve;
+        })
+    );
+
+    await renderAt('/acme/backend-engineer/apply');
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(fileInput, {
+      target: { files: [new File(['%PDF-1.4'], 'resume.pdf', { type: 'application/pdf' })] },
+    });
+
+    // The card shows the file while the PUT is still in flight.
+    expect(screen.getByText('resume.pdf')).toBeInTheDocument();
+    expect(screen.getByText('Uploading…')).toBeInTheDocument();
+
+    // Remove it before the upload resolves.
+    fireEvent.click(screen.getByTitle('Remove'));
+    expect(screen.queryByText('resume.pdf')).toBeNull();
+
+    await act(async () => {
+      resolveUpload('resumes/removed.pdf');
+    });
+
+    // The stale key must not restore the card or hide the picker.
+    expect(screen.queryByText('resume.pdf')).toBeNull();
+    expect(screen.queryByText('Uploaded')).toBeNull();
+    expect(screen.getByText('Upload your resume')).toBeInTheDocument();
+
+    // ...and the removed resume must not be submitted with the application.
+    fireEvent.change(screen.getByRole('textbox', { name: /full name/i }), {
+      target: { value: 'Jamie Doe' },
+    });
+    fireEvent.change(screen.getByRole('textbox', { name: /^email/i }), {
+      target: { value: 'jamie@example.com' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /submit application/i }));
+
+    await waitFor(() => {
+      expect(submitMutate).toHaveBeenCalledTimes(1);
+    });
+    expect(submitMutate.mock.calls[0][0].resumeUrl).toBeUndefined();
   });
 });

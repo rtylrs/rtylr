@@ -102,6 +102,7 @@
       "saved": "Variant updated",
       "deleted": "Variant deleted",
       "created": "{{count}} variants created",
+      "createPartial": "Created {{count}} of {{total}} variants; retry the remaining rows",
       "createFailed": "Failed to create variants",
       "allExist": "All combinations already exist",
       "optionName": "Option name (e.g. Size, Color)",
@@ -146,7 +147,8 @@
     "search": "Search products…",
     "empty": "No products found.",
     "clearSearch": "Clear Search",
-    "adjustFailed": "Failed to adjust inventory"
+    "adjustFailed": "Failed to adjust inventory",
+    "decreaseUnsupported": "Decreasing stock is not supported by the inventory API yet"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -225,7 +227,11 @@
     "goToPurchasing": "Go to Purchase Orders",
     "orderSummary": "{{count}} items / Expected {{date}}",
     "validation": {
-      "overReceived": "Cannot receive more units than ordered"
+      "overReceived": "Cannot receive more units than ordered",
+      "noItems": "No line items available to receive"
+    },
+    "error": {
+      "loadFailed": "Failed to load order items"
     },
     "toast": {
       "completed": "Receipt completed, all items received",

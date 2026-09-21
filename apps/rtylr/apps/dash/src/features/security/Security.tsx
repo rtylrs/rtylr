@@ -82,7 +82,7 @@ const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }>
 
 const Security: React.FC = () => {
   const { t } = useTranslation('common');
-  const { data, isLoading } = useSecurity();
+  const { data, isLoading, isError, refetch } = useSecurity();
   const currentUser = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const toggle2fa = useToggleTwoFactor();
@@ -210,6 +210,25 @@ const Security: React.FC = () => {
       toast.error(t('common.mfaChallenge.invalidCode'));
     }
   };
+
+  if (isError) {
+    return (
+      <div className="space-y-5 max-w-3xl">
+        <div
+          className="rounded-xl p-8 flex flex-col items-center justify-center gap-3"
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+        >
+          <Shield size={28} style={{ color: 'var(--dash-text-dim)' }} />
+          <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+            Failed to load security settings.
+          </p>
+          <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+            Try again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (

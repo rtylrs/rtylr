@@ -58,6 +58,7 @@ export interface UpdateShiftInput extends Partial<CreateShiftInput> {
 
 export interface PayrollRow {
   id: number;
+  staffId: number;
   name: string;
   role: string;
   hoursWorked: number;

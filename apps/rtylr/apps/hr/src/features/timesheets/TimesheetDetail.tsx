@@ -129,7 +129,9 @@ const TimesheetDetail = (): React.JSX.Element => {
           }
         />
 
-        {/* Rejection reason */}
+        {/* Rejection reason. The reason the approver typed is stored
+            server-side but is not part of TimesheetPayload yet, so the card
+            must not claim that none was given. */}
         {timesheet.status === 'rejected' && (
           <Card
             style={{
@@ -147,7 +149,7 @@ const TimesheetDetail = (): React.JSX.Element => {
             />
             <div style={{ fontSize: 12, color: 'var(--hr-text)' }}>
               <span style={{ fontWeight: 600 }}>{t('timesheets.rejectionReason')}:</span>{' '}
-              {t('timesheets.noReasonProvided')}
+              {t('timesheets.rejectionReasonUnavailable')}
             </div>
           </Card>
         )}

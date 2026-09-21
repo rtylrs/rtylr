@@ -74,4 +74,22 @@ describe('useScrollToBottom', () => {
     rerender(<Harness scrollKey="scroll-test-first" contentVersion={1} scrollHeight={1000} />);
     expect(container.scrollTop).toBe(180);
   });
+
+  it('restores a scrolled-up position when remounting with the same key', () => {
+    const scrollKey = 'scroll-test-remount';
+    const { getByTestId, unmount } = render(
+      <Harness scrollKey={scrollKey} contentVersion={1} scrollHeight={1000} />
+    );
+    const container = getByTestId('scroll-container');
+
+    container.scrollTop = 180;
+    fireEvent.scroll(container);
+
+    unmount();
+
+    const { getByTestId: getByTestIdAfterRemount } = render(
+      <Harness scrollKey={scrollKey} contentVersion={1} scrollHeight={1000} />
+    );
+    expect(getByTestIdAfterRemount('scroll-container').scrollTop).toBe(180);
+  });
 });

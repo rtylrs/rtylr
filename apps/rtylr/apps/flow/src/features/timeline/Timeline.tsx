@@ -5,6 +5,7 @@ import { useFlowStore, type Project, type Milestone } from '../../shared/stores/
 import { useProjects } from '../projects/useProjects';
 import { useMilestones } from '../milestones/useMilestones';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
+import { apiProjectToProject } from '../../shared/lib/projectMapper';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 
 function parseDate(d: string): number {
@@ -19,7 +20,9 @@ const Timeline: React.FC = () => {
   const storeMilestones = useFlowStore((s) => s.milestones);
   const { data: apiProjects } = useProjects();
   const { data: apiMilestones } = useMilestones();
-  const projects = (apiProjects ?? storeProjects) as Project[];
+  // API rows carry dueDate and no progress, so they need the same mapping the
+  // rest of Flow uses before their bar geometry and label can be read.
+  const projects: Project[] = apiProjects ? apiProjects.map(apiProjectToProject) : storeProjects;
   const milestones = (apiMilestones ?? storeMilestones) as Milestone[];
 
   const { start, end, days } = useMemo(() => {

@@ -88,3 +88,53 @@ describe('Settings empty state', () => {
     expect(screen.queryByText('No scheduled reports yet')).not.toBeInTheDocument();
   });
 });
+
+describe('Settings form seeding', () => {
+  const settings = (defaultCurrency: string, fiscalYearStart: string, timezone: string): void => {
+    mocks.useInsightsSettings.mockReturnValue({
+      data: { defaultCurrency, fiscalYearStart, timezone },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+  };
+
+  it('keeps the values the user entered when the save-triggered refetch returns defaults', () => {
+    const mutate = vi.fn();
+    mocks.useUpdateInsightsSettings.mockReturnValue({ mutate, isPending: false });
+    settings('USD', '01-01', 'UTC');
+
+    const { rerender } = render(<Settings />);
+
+    fireEvent.change(screen.getByLabelText('Default Currency'), { target: { value: 'EUR' } });
+    fireEvent.change(screen.getByLabelText('Timezone'), { target: { value: 'Africa/Cairo' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
+    expect(mutate).toHaveBeenCalledWith({
+      defaultCurrency: 'EUR',
+      fiscalYearStart: '01-01',
+      timezone: 'Africa/Cairo',
+    });
+
+    // onSuccess invalidates ['insights-settings']; timezone has no server field,
+    // so the refetched object carries the default again.
+    settings('EUR', '01-01', 'UTC');
+    rerender(<Settings />);
+
+    expect(screen.getByLabelText('Default Currency')).toHaveValue('EUR');
+    expect(screen.getByLabelText('Timezone')).toHaveValue('Africa/Cairo');
+  });
+
+  it('re-seeds untouched fields when the refetched settings differ', () => {
+    settings('USD', '01-01', 'UTC');
+
+    const { rerender } = render(<Settings />);
+    expect(screen.getByLabelText('Default Currency')).toHaveValue('USD');
+
+    settings('GBP', '04-01', 'Europe/London');
+    rerender(<Settings />);
+
+    expect(screen.getByLabelText('Default Currency')).toHaveValue('GBP');
+    expect(screen.getByLabelText('Fiscal Year Start')).toHaveValue('04-01');
+    expect(screen.getByLabelText('Timezone')).toHaveValue('Europe/London');
+  });
+});

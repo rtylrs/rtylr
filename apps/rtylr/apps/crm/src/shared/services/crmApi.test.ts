@@ -82,6 +82,47 @@ describe('crmApi', () => {
     });
   });
 
+  it('carries the birthday, address and consent the customer form collects', async () => {
+    vi.clearAllMocks();
+    // useCustomers' wire input emits `dateOfBirth` (the generated contract's
+    // name); `birthday` is only the schema's display alias. The mapper used to
+    // read only `birthday`, so the whole second step of the create form was
+    // dropped on create and update (B50-R04).
+    const formInput = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@test.com',
+      dateOfBirth: '1990-01-01',
+      gender: 'female',
+      address: '12 Main St',
+      city: 'Austin',
+      country: 'US',
+      consent: { email: true, sms: false, marketing: false },
+    };
+
+    await crmApi.createCustomer(formInput);
+    expect(mockClients.compatibility.createCustomer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dateOfBirth: '1990-01-01',
+        gender: 'female',
+        address: '12 Main St',
+        city: 'Austin',
+        country: 'US',
+        consent: { email: true, sms: false, marketing: false },
+      })
+    );
+
+    await crmApi.updateCustomer(5, formInput);
+    expect(mockClients.compatibility.updateCustomer).toHaveBeenCalledWith({
+      id: '5',
+      body: expect.objectContaining({
+        dateOfBirth: '1990-01-01',
+        address: '12 Main St',
+        consent: { email: true, sms: false, marketing: false },
+      }),
+    });
+  });
+
   it('uses canonical generated delete contracts where they exist', async () => {
     crmApi.deleteCustomer(3);
     crmApi.deleteSegment(4);
@@ -214,5 +255,67 @@ describe('campaign mutation payload (rtylr#938)', () => {
       scheduledAt: '2026-09-01T10:00:00Z',
     } as never);
     expect(sent().scheduled_at).toBe('2026-09-01T10:00:00Z');
+  });
+});
+
+/**
+ * Automation mutation payload. The automations hook converts the UI record to
+ * the canonical backend shape (triggerType/triggerConfig/actions/isActive)
+ * before calling these methods (B53-R02). While this mapper only read the
+ * legacy trigger/nodes/status keys, every create/update PUT collapsed to
+ * {name, trigger_config:{}, is_active:false}: JSON.stringify dropped the
+ * undefined trigger_type and actions, and onion's automations handler rejected
+ * the body with 400 "Trigger type is required".
+ */
+describe('automation mutation payload (B53-R02)', () => {
+  const canonical = {
+    name: 'Welcome series',
+    triggerType: 'customer_signup',
+    triggerConfig: { sendDelayMinutes: 30 },
+    actions: [{ type: 'send_email', template: 'welcome' }],
+    isActive: true,
+  };
+
+  it('sends trigger_type and actions from the canonical payload on create', async () => {
+    vi.clearAllMocks();
+    await crmApi.createAutomation(canonical);
+    expect(mockClients.compatibility.createAutomation).toHaveBeenCalledWith({
+      name: 'Welcome series',
+      trigger_type: 'customer_signup',
+      trigger_config: { send_delay_minutes: 30 },
+      actions: [{ type: 'send_email', template: 'welcome' }],
+      is_active: true,
+    });
+  });
+
+  it('sends trigger_type and actions from the canonical payload on update', async () => {
+    vi.clearAllMocks();
+    await crmApi.updateAutomation(9, canonical);
+    expect(mockClients.compatibility.updateAutomation).toHaveBeenCalledWith({
+      id: '9',
+      body: {
+        name: 'Welcome series',
+        trigger_type: 'customer_signup',
+        trigger_config: { send_delay_minutes: 30 },
+        actions: [{ type: 'send_email', template: 'welcome' }],
+        is_active: true,
+      },
+    });
+  });
+
+  it('still maps a legacy UI record', async () => {
+    vi.clearAllMocks();
+    await crmApi.updateAutomation(9, {
+      status: 'paused',
+      trigger: 'Birthday',
+      nodes: [{ id: 'n2', type: 'action', label: 'Send email', x: 0, y: 80 }],
+    });
+    const call = (mockClients.compatibility.updateAutomation as ReturnType<typeof vi.fn>).mock
+      .calls[0][0] as { body: Record<string, unknown> };
+    expect(call.body.trigger_type).toBe('Birthday');
+    expect(call.body.actions).toEqual([
+      { id: 'n2', type: 'action', label: 'Send email', x: 0, y: 80 },
+    ]);
+    expect(call.body.is_active).toBe(false);
   });
 });

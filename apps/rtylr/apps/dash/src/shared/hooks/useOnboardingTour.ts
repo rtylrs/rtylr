@@ -99,6 +99,8 @@ export function useOnboardingTour() {
     if (localStorage.getItem(storageKey) === '1') return;
     if (tourRef.current) return;
 
+    let detachCancelListener: (() => void) | null = null;
+
     // Small delay to let the DOM render
     const timer = setTimeout(() => {
       const tour = new Shepherd.Tour({
@@ -120,6 +122,9 @@ export function useOnboardingTour() {
 
       tour.on('complete', persistCompletion);
       tour.on('cancel', persistCompletion);
+      detachCancelListener = () => {
+        tour.off('cancel', persistCompletion);
+      };
 
       tour.start();
       tourRef.current = tour;
@@ -127,6 +132,9 @@ export function useOnboardingTour() {
 
     return () => {
       clearTimeout(timer);
+      // Teardown is not a user cancel: stop persisting completion before the
+      // cancel below, so a route change does not mark onboarding as done.
+      detachCancelListener?.();
       const activeTour = tourRef.current;
       tourRef.current = null;
       activeTour?.cancel();

@@ -27,6 +27,10 @@ const SMSCampaign: React.FC = () => {
   const search = useSearch({ from: '/layout/campaigns/sms' });
   const campaignId = search.id;
   const isEditing = !!campaignId;
+  // Set after a create that could not be activated, so clicking "Save & activate"
+  // again updates that campaign instead of creating a duplicate.
+  const [createdId, setCreatedId] = useState<number | undefined>(undefined);
+  const savedCampaignId = campaignId ?? createdId;
 
   const create = useCreateCampaign();
   const update = useUpdateCampaign();
@@ -76,13 +80,14 @@ const SMSCampaign: React.FC = () => {
           navigate({ to: '/campaigns' });
           return;
         }
-        const createdId = result.campaignId ?? result.campaign_id;
-        if (!createdId && !campaignId) {
+        const id = savedCampaignId ?? result.campaignId ?? result.campaign_id;
+        if (!id) {
           toast.error(t('crm.campaigns.savedNotActivated'));
           return;
         }
+        if (!savedCampaignId) setCreatedId(id);
         updateStatus.mutate(
-          { id: campaignId ?? createdId!, status: 'active' },
+          { id, status: 'active' },
           {
             onSuccess: () => {
               toast.success(t('crm.campaigns.smsActivated'));
@@ -97,8 +102,8 @@ const SMSCampaign: React.FC = () => {
       },
     };
 
-    if (campaignId) {
-      update.mutate({ id: campaignId, data: payload }, callbacks);
+    if (savedCampaignId) {
+      update.mutate({ id: savedCampaignId, data: payload }, callbacks);
       return;
     }
 

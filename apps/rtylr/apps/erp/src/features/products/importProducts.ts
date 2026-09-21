@@ -95,9 +95,12 @@ export async function importProducts(
   rows: ProductImportRow[],
   createProduct: CreateProduct
 ): Promise<number> {
+  // Validate every row before creating anything so one bad row cannot leave earlier rows behind.
+  const inputs = rows.map((row, index) => toCreateProductInput(row, index + 2));
+
   let created = 0;
-  for (const [index, row] of rows.entries()) {
-    await createProduct(toCreateProductInput(row, index + 2));
+  for (const input of inputs) {
+    await createProduct(input);
     created += 1;
   }
   return created;

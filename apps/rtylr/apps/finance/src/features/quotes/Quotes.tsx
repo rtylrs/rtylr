@@ -13,9 +13,8 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
-import { formatDate, toLocalIso, todayIso } from '../../shared/lib/date';
+import { formatDate, toLocalIso } from '../../shared/lib/date';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
-import { useSettings } from '../../shared/lib/settings';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
@@ -28,7 +27,6 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
 interface NewQuoteForm {
   client: string;
   amount: number;
-  issuedDate: string;
   expiresAt: string;
   description: string;
 }
@@ -36,11 +34,9 @@ interface NewQuoteForm {
 const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { t } = useTranslation();
   const createQuote = useCreateQuote();
-  const currency = useSettings((s) => s.currency);
   const [form, setForm] = useState<NewQuoteForm>({
     client: '',
     amount: 0,
-    issuedDate: todayIso(),
     expiresAt: toLocalIso(new Date(Date.now() + 30 * 86400000)),
     description: '',
   });
@@ -59,8 +55,6 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       {
         client: form.client,
         amount: form.amount,
-        currency,
-        issuedDate: form.issuedDate,
         expiresAt: form.expiresAt,
         description: form.description || undefined,
       },
@@ -71,7 +65,6 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
           setForm({
             client: '',
             amount: 0,
-            issuedDate: todayIso(),
             expiresAt: toLocalIso(new Date(Date.now() + 30 * 86400000)),
             description: '',
           });
@@ -121,15 +114,6 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
           />
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle}>{t('quotes.issueDate')}</label>
-            <input
-              type="date"
-              value={form.issuedDate}
-              onChange={(e) => setForm((f) => ({ ...f, issuedDate: e.target.value }))}
-              style={inputStyle}
-            />
-          </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>{t('quotes.expires')}</label>
             <input

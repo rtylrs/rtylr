@@ -2,6 +2,7 @@
   "teamEmptyTitle": "No team members yet",
   "teamEmptyDescription": "Invite people to give them access to Finance.",
   "teamEmptyCta": "Invite member",
+  "teamLoadFailed": "Couldn't load team members",
   "title": "Settings",
   "reset": "Settings reset",
   "saved": "Settings saved",

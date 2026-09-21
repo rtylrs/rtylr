@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { useCaretStore } from '../stores/caretStore';
 import { useCaretSettingsStore } from '../stores/settingsStore';
 import { consumeSse } from '../protocol/sse';
@@ -24,21 +24,26 @@ interface OpenThinking {
   startedAt: number;
 }
 
+/**
+ * A stream outlives the hook instance that started it when the panel unmounts
+ * mid-response (navigating between layouts/routes), so the controllers are
+ * shared at module scope. A remounted instance can then still stop the stream.
+ */
+const streamControllers = new Map<string, AbortController>();
+
 export function useCaretStream({
   userId,
   apiBaseUrl,
   systemContext,
   pageContext,
 }: UseCaretStreamParams): UseCaretStreamResult {
-  const abortRef = useRef<Map<string, AbortController>>(new Map());
-
   const stopStreaming = useCallback((tabId?: string): void => {
     const store = useCaretStore.getState();
     const targetTabId = tabId ?? store.activeTabId;
-    const controller = abortRef.current.get(targetTabId);
+    const controller = streamControllers.get(targetTabId);
     controller?.abort();
-    if (abortRef.current.get(targetTabId) === controller) {
-      abortRef.current.delete(targetTabId);
+    if (streamControllers.get(targetTabId) === controller) {
+      streamControllers.delete(targetTabId);
     }
     store.setStreaming(false, targetTabId);
   }, []);
@@ -69,7 +74,7 @@ export function useCaretStream({
       const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
       const url = `${baseUrl}ai/generate-text-stream`;
       const controller = new AbortController();
-      abortRef.current.set(tabId, controller);
+      streamControllers.set(tabId, controller);
 
       const openThinking: Record<string, OpenThinking> = {};
 
@@ -121,8 +126,8 @@ export function useCaretStream({
           tabId
         );
       } finally {
-        if (abortRef.current.get(tabId) === controller) {
-          abortRef.current.delete(tabId);
+        if (streamControllers.get(tabId) === controller) {
+          streamControllers.delete(tabId);
           useCaretStore.getState().setStreaming(false, tabId);
         }
       }

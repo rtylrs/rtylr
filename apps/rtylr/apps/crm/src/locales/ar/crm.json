@@ -71,6 +71,7 @@
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
+    "configLoadFailed": "تعذّر تحميل إعدادات الولاء. يبقى الحفظ معطّلاً حتى يتم التحميل.",
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
@@ -619,6 +620,7 @@
   },
   "automationBuilder": {
     "subtitle": "اسحب المشغّلات والإجراءات لبناء سير عمل",
+    "loadFailed": "تعذّر تحميل هذه الأتمتة. تحقّق من اتصالك وحاول مرة أخرى.",
     "namePlaceholder": "سلسلة الترحيب",
     "triggers": "المشغّلات",
     "workflow": "سير العمل",

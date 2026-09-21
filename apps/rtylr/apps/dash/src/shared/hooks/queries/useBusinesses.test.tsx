@@ -7,14 +7,18 @@ import {
   useDeleteBusiness,
   useListMyBusinesses,
   useRenameBusiness,
+  useSetBusinessLogo,
   useSwitchBusiness,
 } from './useBusinesses';
+import { useConfigStore } from '../../stores/configStore';
+import { useUserStore } from '../../stores/userStore';
 
 const mockBusinessClient = vi.hoisted(() => ({
   listMyBusinesses: vi.fn(),
   renameBusiness: vi.fn(),
   deleteBusiness: vi.fn(),
   createSubBusiness: vi.fn(),
+  setLogo: vi.fn(),
 }));
 const mockUserClient = vi.hoisted(() => ({ switchBusiness: vi.fn() }));
 
@@ -119,5 +123,77 @@ describe('business queries', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockUserClient.switchBusiness).toHaveBeenCalledWith({ businessId: '42' });
+  });
+});
+
+describe('business cache updates', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useUserStore.setState({ user: null });
+    useConfigStore.setState({ websiteData: null });
+  });
+
+  it('leaves the current business cache alone when renaming another business', async () => {
+    useUserStore.setState({ user: { id: 1, businessId: 1, businessName: 'Acme' } });
+    useConfigStore.setState({ websiteData: { siteName: 'Acme' } });
+    mockBusinessClient.renameBusiness.mockResolvedValue({
+      business: { id: '42', name: 'Beta 2' },
+    });
+
+    const { result } = renderHook(() => useRenameBusiness(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate({ businessId: 42, name: 'Beta 2' });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(useUserStore.getState().user?.businessName).toBe('Acme');
+    expect(useConfigStore.getState().websiteData).toMatchObject({ siteName: 'Acme' });
+  });
+
+  it('updates the cache when renaming the current business', async () => {
+    useUserStore.setState({ user: { id: 1, businessId: 42, businessName: 'Acme' } });
+    useConfigStore.setState({ websiteData: { siteName: 'Acme' } });
+    mockBusinessClient.renameBusiness.mockResolvedValue({
+      business: { id: '42', name: 'Acme 2' },
+    });
+
+    const { result } = renderHook(() => useRenameBusiness(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate({ businessId: 42, name: 'Acme 2' });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(useUserStore.getState().user?.businessName).toBe('Acme 2');
+    expect(useConfigStore.getState().websiteData).toMatchObject({ siteName: 'Acme 2' });
+  });
+
+  it('leaves the current business cache alone when setting another business logo', async () => {
+    useUserStore.setState({ user: { id: 1, businessId: 1, logo: 'logo-a' } });
+    useConfigStore.setState({ websiteData: { logoUrl: 'logo-a' } });
+    mockBusinessClient.setLogo.mockResolvedValue({});
+
+    const { result } = renderHook(() => useSetBusinessLogo(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate({ businessId: 42, logoUrl: 'logo-b' });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(useUserStore.getState().user?.logo).toBe('logo-a');
+    expect(useConfigStore.getState().websiteData).toMatchObject({ logoUrl: 'logo-a' });
+  });
+
+  it('updates the cache when setting the current business logo', async () => {
+    useUserStore.setState({ user: { id: 1, businessId: 42, logo: 'logo-a' } });
+    useConfigStore.setState({ websiteData: { logoUrl: 'logo-a' } });
+    mockBusinessClient.setLogo.mockResolvedValue({});
+
+    const { result } = renderHook(() => useSetBusinessLogo(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate({ businessId: 42, logoUrl: 'logo-b' });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(useUserStore.getState().user?.logo).toBe('logo-b');
+    expect(useConfigStore.getState().websiteData).toMatchObject({ logoUrl: 'logo-b' });
   });
 });

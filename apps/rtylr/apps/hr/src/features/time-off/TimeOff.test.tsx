@@ -71,6 +71,26 @@ describe('TimeOff empty state', () => {
     expect(mocks.navigate).toHaveBeenCalledWith({ to: '/time-off/new' });
   });
 
+  it('shows a retryable error instead of the empty state when the fetch fails', () => {
+    const refetch = vi.fn();
+    mocks.useTimeOff.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      isFetching: false,
+      refetch,
+    });
+
+    render(<TimeOff />);
+
+    expect(screen.queryByText('timeOff.emptyTitle')).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('common.loadError');
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.retry' }));
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
   it('does not render the empty state once requests exist', () => {
     mocks.useTimeOff.mockReturnValue({
       data: [

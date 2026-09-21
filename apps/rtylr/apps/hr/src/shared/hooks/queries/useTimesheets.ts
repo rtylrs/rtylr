@@ -79,8 +79,9 @@ export const useSubmitTimesheet = () => {
       );
       return res as SubmitTimesheetResponse;
     },
-    onSuccess: () => {
+    onSuccess: (_data: SubmitTimesheetResponse, variables: SubmitTimesheetRequest) => {
       queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+      queryClient.invalidateQueries({ queryKey: ['timesheet', variables.timesheetId] });
       toast.success(t('timesheets.submitted'));
     },
     onError: () => {

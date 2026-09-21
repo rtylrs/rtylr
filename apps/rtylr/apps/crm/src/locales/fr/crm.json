@@ -62,6 +62,7 @@
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
+    "configLoadFailed": "Impossible de charger la configuration de fidélité. L'enregistrement reste désactivé jusqu'au chargement.",
     "tierSaved": "Tier saved",
     "rewardSaved": "Reward saved",
     "pointsAwarded": "Points awarded",
@@ -601,6 +602,7 @@
   },
   "automationBuilder": {
     "subtitle": "Glissez des déclencheurs et des actions pour construire un flux",
+    "loadFailed": "Impossible de charger cette automatisation. Vérifiez votre connexion et réessayez.",
     "namePlaceholder": "Série de bienvenue",
     "triggers": "Déclencheurs",
     "workflow": "Flux",

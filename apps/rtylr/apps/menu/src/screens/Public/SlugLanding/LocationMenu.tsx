@@ -34,12 +34,25 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     isLoading: menuLoading,
     isError: menuError,
   } = usePublicMenu(businessId, location?.id ?? null);
-  const { clearCart, setBusinessId, setLocationId, addItem, updateQuantity } = useCartStore();
+  const {
+    clearCart,
+    setBusinessId,
+    setLocationId,
+    addItem,
+    updateQuantity,
+    businessId: cartBusinessId,
+  } = useCartStore();
 
   React.useEffect(() => {
-    if (businessId) setBusinessId(businessId);
+    if (businessId) {
+      // A persisted cart from another business must not be re-labelled: its
+      // items and prices belong to that menu, while /checkout submits the
+      // store's items under whatever businessId is set here.
+      if (cartBusinessId !== 0 && cartBusinessId !== businessId) clearCart();
+      setBusinessId(businessId);
+    }
     if (location?.id) setLocationId(location.id);
-  }, [businessId, location?.id, setBusinessId, setLocationId]);
+  }, [businessId, cartBusinessId, location?.id, clearCart, setBusinessId, setLocationId]);
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!menu) return [];

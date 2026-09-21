@@ -32,6 +32,7 @@ import {
   useTasks,
   useMyTasks,
   useTaskDetail,
+  useTaskDetails,
   useCreateTask,
   useUpdateTask,
   useDeleteTask,
@@ -114,6 +115,29 @@ describe('useTaskDetail', () => {
     });
     expect(result.current.fetchStatus).toBe('idle');
     expect(flowApi.getTaskDetail).not.toHaveBeenCalled();
+  });
+});
+
+describe('useTaskDetails', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // #01329: the business-wide list is one page, so BulkEditBar resolves the
+  // selected ids it is missing by fetching their details individually.
+  it('fetches the detail of every unresolved id', async () => {
+    (flowApi.getTaskDetail as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      (id: string) => Promise.resolve({ task: { id, projectId: 'p-9' } })
+    );
+
+    const { result } = renderHook(() => useTaskDetails(['t-1', 't-2']), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.every((q) => q.isSuccess)).toBe(true));
+    expect(flowApi.getTaskDetail).toHaveBeenCalledWith('t-1');
+    expect(flowApi.getTaskDetail).toHaveBeenCalledWith('t-2');
+    expect(result.current.map((q) => q.data?.task.projectId)).toEqual(['p-9', 'p-9']);
   });
 });
 

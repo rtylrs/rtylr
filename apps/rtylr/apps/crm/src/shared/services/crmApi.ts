@@ -184,6 +184,11 @@ export interface Automation {
   completed: number;
   createdAt: string;
   nodes?: Array<{ id: string; type: string; label: string; x: number; y: number }>;
+  /** Canonical backend fields, sent by the automations hook as the mutation payload. */
+  triggerType?: string;
+  triggerConfig?: Record<string, unknown> | string;
+  actions?: unknown[];
+  isActive?: boolean;
 }
 
 export interface Template {
@@ -349,13 +354,25 @@ interface CustomerMutationPayload {
   email?: string;
   phone?: string;
   dateOfBirth?: string;
+  gender?: string;
+  address?: string;
+  city?: string;
+  country?: string;
   tags?: string[];
   notes?: string;
+  isActive?: boolean;
+  consent?: Record<string, boolean>;
 }
 
 type CustomerMutationInput = Partial<Customer> & {
   firstName?: string;
   lastName?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  isActive?: boolean;
 };
 
 function splitCustomerName(name?: string): { firstName: string; lastName: string } {
@@ -370,14 +387,24 @@ function toCustomerMutationPayload(data: CustomerMutationInput): CustomerMutatio
   const firstName = data.firstName?.trim() ?? '';
   const lastName = data.lastName?.trim() ?? '';
   const names = firstName || lastName ? { firstName, lastName } : splitCustomerName(data.name);
+  // useCustomers' wire input emits `dateOfBirth` (matching the generated
+  // contract); `birthday` is the schema's display alias. Reading only
+  // `birthday` dropped the birthday, address and consent the create form
+  // collects (B50-R04).
   return {
     firstName: names.firstName,
     lastName: names.lastName,
     email: data.email,
     phone: data.phone,
-    dateOfBirth: data.birthday,
+    dateOfBirth: data.dateOfBirth ?? data.birthday,
+    gender: data.gender,
+    address: data.address,
+    city: data.city,
+    country: data.country,
     tags: data.tags,
     notes: data.notes,
+    isActive: data.isActive,
+    consent: data.consent,
   };
 }
 
@@ -444,17 +471,26 @@ interface AutomationMutationPayload {
   name?: string;
   triggerType?: string;
   triggerConfig?: Record<string, unknown>;
-  actions?: Array<{ id: string; type: string; label: string; x: number; y: number }>;
+  actions?: unknown[];
   isActive?: boolean;
 }
 
+/**
+ * The automations hook already converts its legacy UI record into the backend
+ * shape (triggerType/triggerConfig/actions/isActive). Reading only the legacy
+ * fields here dropped trigger_type and actions from every PUT, which onion
+ * rejects with 400. Prefer the canonical fields and keep the legacy ones as a
+ * fallback for callers that still send the UI record.
+ */
 function toAutomationMutationPayload(data: Partial<Automation>): AutomationMutationPayload {
+  const triggerConfig =
+    data.triggerConfig && typeof data.triggerConfig === 'object' ? data.triggerConfig : {};
   return {
     name: data.name,
-    triggerType: data.trigger,
-    triggerConfig: {},
-    actions: data.nodes,
-    isActive: data.status === 'active',
+    triggerType: data.triggerType ?? data.trigger,
+    triggerConfig,
+    actions: data.actions ?? data.nodes,
+    isActive: data.isActive ?? data.status === 'active',
   };
 }
 
