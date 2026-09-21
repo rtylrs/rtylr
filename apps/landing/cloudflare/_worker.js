@@ -449,6 +449,20 @@ export default {
       return fetchAsset(env, '/version.json', request);
     }
 
+    // 4. One URL per document. The export is directory-style, so /trust and
+    //    /trust/ both used to return 200 with identical bodies. The canonical
+    //    tag pointed at the slashed form and Google honoured it, but it still
+    //    spent a crawl on the duplicate first, on a site it is already slow to
+    //    crawl.
+    //
+    //    Everything that must not be redirected has already returned above:
+    //    /api/*, any path matching STATIC_EXT, and /version. The extension
+    //    test is the remaining guard, so an unknown extension such as
+    //    /foo.bar is left alone rather than sent to /foo.bar/.
+    if (!pathname.endsWith('/') && !/\.[a-z0-9]+$/i.test(pathname)) {
+      return Response.redirect(new URL(pathname + '/' + url.search, url.origin).toString(), 301);
+    }
+
     const accept = request.headers.get('accept');
     const chosen = negotiate(accept, DOCUMENT_TYPES);
 
@@ -463,7 +477,7 @@ export default {
       return res;
     }
 
-    // 4. Markdown representation.
+    // 5. Markdown representation.
     if (chosen === 'text/markdown') {
       const md = await findAsset(env, request, markdownCandidates(pathname), isMarkdownResponse);
       if (md) {
@@ -477,7 +491,7 @@ export default {
       // the 404 flow picks the representation the client prefers.
     }
 
-    // 5. HTML representation (or markdown-preferred fallthrough).
+    // 6. HTML representation (or markdown-preferred fallthrough).
     const html = await findAsset(env, request, htmlCandidates(pathname), isHtmlResponse);
 
     if (html) {
@@ -494,7 +508,7 @@ export default {
       return res;
     }
 
-    // 6. Real HTTP 404: markdown body for agents, styled HTML for browsers.
+    // 7. Real HTTP 404: markdown body for agents, styled HTML for browsers.
     const notFoundChoice = negotiate(accept, DOCUMENT_TYPES);
     if (notFoundChoice === 'text/markdown') {
       const res = new Response(markdownNotFound(pathname), {

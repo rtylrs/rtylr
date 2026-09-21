@@ -297,10 +297,41 @@ describe('routing', () => {
     assert.ok((await res.text()).startsWith('User-agent'));
   });
 
-  it('extensionless URLs resolve directory-style exports (/pricing)', async () => {
+  // This used to assert a 200 with the page body. Serving both /pricing and
+  // /pricing/ is what #1359 removes: two URLs, one document, and a crawl
+  // budget spent proving they are the same. The directory export is still
+  // what answers, one redirect later.
+  it('extensionless URLs redirect to the directory-style export (/pricing)', async () => {
     const res = await worker.fetch(req('/pricing'), env);
+    assert.equal(res.status, 301);
+    assert.equal(res.headers.get('location'), `${SITE}/pricing/`);
+
+    const followed = await worker.fetch(req('/pricing/'), env);
+    assert.equal(followed.status, 200);
+    assert.ok((await followed.text()).includes('<main>'));
+  });
+
+  it('the trailing-slash redirect keeps the query string', async () => {
+    const res = await worker.fetch(req('/trust?utm_source=newsletter&a=b'), env);
+    assert.equal(res.status, 301);
+    assert.equal(res.headers.get('location'), `${SITE}/trust/?utm_source=newsletter&a=b`);
+  });
+
+  it('the API is never trailing-slash redirected', async () => {
+    const res = await worker.fetch(req('/api/v1/status'), env);
     assert.equal(res.status, 200);
-    assert.ok((await res.text()).includes('<main>'));
+    assert.equal(res.headers.get('content-type'), 'application/json; charset=utf-8');
+  });
+
+  it('/version is not trailing-slash redirected', async () => {
+    const res = await worker.fetch(req('/version'), env);
+    assert.equal(res.status, 200);
+    assert.equal(await res.text(), VERSION_JSON);
+  });
+
+  it('an unknown extension is left alone rather than redirected', async () => {
+    const res = await worker.fetch(req('/whatever.bar'), env);
+    assert.notEqual(res.status, 301);
   });
 
   it('explicit /index.html still serves the page', async () => {
