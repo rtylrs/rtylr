@@ -200,6 +200,54 @@ function varyOnNegotiation(headers) {
 }
 
 // ---------------------------------------------------------------------------
+// Security headers
+// ---------------------------------------------------------------------------
+
+/**
+ * Applied to every document response this worker builds. Static assets go out
+ * through env.ASSETS untouched, so they are deliberately not covered here.
+ *
+ * No `preload` on the HSTS value. Preloading commits the whole *.rtylr.com
+ * estate to HTTPS-only and the app subdomains are not in this repo, so it is
+ * not ours to promise.
+ */
+const SECURITY_HEADERS = {
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+};
+
+/**
+ * Report-only on purpose. Turning this enforcing is a separate issue, once the
+ * report endpoint has been quiet for two weeks.
+ *
+ * `'unsafe-inline'` in script-src is not laziness, and a nonce cannot replace
+ * it here: the export is static HTML served from a bucket, so there is no
+ * per-request value to stamp into it. Two kinds of inline script are in the
+ * markup by design, the Consent Mode bootstrap in pages/_document.tsx, which
+ * has to run before anything else can set a consent default, and every
+ * application/ld+json block.
+ */
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com",
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+  "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
+].join('; ');
+
+function applySecurityHeaders(headers) {
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) headers.set(name, value);
+  headers.set('Content-Security-Policy-Report-Only', CONTENT_SECURITY_POLICY);
+}
+
+// ---------------------------------------------------------------------------
 // Error envelope (structured JSON — agents parse this, not HTML)
 // ---------------------------------------------------------------------------
 
@@ -411,6 +459,7 @@ export default {
         { status: 406, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
       );
       varyOnNegotiation(res.headers);
+      applySecurityHeaders(res.headers);
       return res;
     }
 
@@ -421,6 +470,7 @@ export default {
         const res = new Response(md.response.body, md.response);
         res.headers.set('Content-Type', 'text/markdown; charset=utf-8');
         varyOnNegotiation(res.headers);
+        applySecurityHeaders(res.headers);
         return res;
       }
       // No markdown sibling: continue to HTML below; if that also misses,
@@ -433,6 +483,7 @@ export default {
     if (html) {
       const res = new Response(html.response.body, html.response);
       varyOnNegotiation(res.headers);
+      applySecurityHeaders(res.headers);
       // Advertise the markdown alternate for discovery-style agents.
       const md = await findAsset(env, request, markdownCandidates(pathname), isMarkdownResponse);
       if (md) {
@@ -443,7 +494,7 @@ export default {
       return res;
     }
 
-    // 6. Real HTTP 404 — markdown body for agents, styled HTML for browsers.
+    // 6. Real HTTP 404: markdown body for agents, styled HTML for browsers.
     const notFoundChoice = negotiate(accept, DOCUMENT_TYPES);
     if (notFoundChoice === 'text/markdown') {
       const res = new Response(markdownNotFound(pathname), {
@@ -455,6 +506,7 @@ export default {
         },
       });
       varyOnNegotiation(res.headers);
+      applySecurityHeaders(res.headers);
       return res;
     }
 
@@ -464,6 +516,7 @@ export default {
     if (styled && isHtmlResponse(styled)) {
       const res = new Response(styled.body, { status: 404, headers: styled.headers });
       varyOnNegotiation(res.headers);
+      applySecurityHeaders(res.headers);
       return res;
     }
 
@@ -472,6 +525,7 @@ export default {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
     varyOnNegotiation(res.headers);
+    applySecurityHeaders(res.headers);
     return res;
   },
 };
