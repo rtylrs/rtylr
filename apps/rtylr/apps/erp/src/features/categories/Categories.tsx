@@ -32,6 +32,7 @@ const Categories: React.FC = () => {
   const newNameInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreate = async (): Promise<void> => {
+    if (createMut.isPending) return;
     if (!newName.trim()) {
       toast.error(t('erp.categories.nameRequired'));
       return;
@@ -77,6 +78,7 @@ const Categories: React.FC = () => {
         <button
           type="button"
           onClick={handleCreate}
+          disabled={createMut.isPending}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
           style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
         >

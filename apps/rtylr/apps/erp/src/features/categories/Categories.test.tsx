@@ -1,11 +1,13 @@
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Categories from './Categories';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useCategories: vi.fn(),
+  createCategory: vi.fn(),
+  createState: { isPending: false },
 }));
 
 // i18next is deliberately not mocked. An identity `t` makes an assertion and
@@ -24,7 +26,13 @@ vi.mock('motion/react', () => ({
 
 vi.mock('./useCategories', () => ({
   useCategories: mocks.useCategories,
-  useCreateCategory: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useCreateCategory: () => ({
+    mutateAsync: mocks.createCategory,
+    // The real mutation object is stable and reports live pending state.
+    get isPending() {
+      return mocks.createState.isPending;
+    },
+  }),
   useDeleteCategory: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useUpdateCategory: () => ({ mutate: vi.fn(), isPending: false }),
 }));
@@ -36,6 +44,8 @@ beforeAll(async () => {
 describe('Categories empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.createCategory.mockReset();
+    mocks.createState.isPending = false;
     mocks.useCategories.mockReturnValue({ data: [], isLoading: false });
   });
 
@@ -61,5 +71,36 @@ describe('Categories empty state', () => {
     render(<Categories />);
 
     expect(screen.queryByText('No categories yet')).not.toBeInTheDocument();
+  });
+});
+
+describe('Categories create submission', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.createCategory.mockReset();
+    mocks.createState.isPending = false;
+    mocks.useCategories.mockReturnValue({ data: [], isLoading: false });
+  });
+
+  it('creates only one category when Enter is pressed again while the first create is in flight', async () => {
+    let resolveCreate!: (value: unknown) => void;
+    mocks.createCategory.mockImplementation(() => {
+      mocks.createState.isPending = true;
+      return new Promise((resolve) => {
+        resolveCreate = resolve;
+      });
+    });
+
+    render(<Categories />);
+    const input = screen.getByPlaceholderText('New category name…');
+    fireEvent.change(input, { target: { value: 'Beverages' } });
+
+    fireEvent.keyDown(input, { key: 'Enter' });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(mocks.createCategory).toHaveBeenCalledTimes(1);
+
+    resolveCreate({ categoryId: 'c2' });
+    await waitFor(() => expect(input).toHaveValue(''));
   });
 });

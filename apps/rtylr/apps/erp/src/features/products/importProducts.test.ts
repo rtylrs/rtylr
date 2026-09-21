@@ -41,4 +41,16 @@ describe('product CSV import', () => {
     ).rejects.toThrow('Row 2: supplier_id must be a positive numeric ID');
     expect(createProduct).not.toHaveBeenCalled();
   });
+
+  it('validates every row before creating anything, so a later bad row leaves no partial import', async () => {
+    const createProduct = vi.fn().mockResolvedValue({ productId: '101' });
+
+    await expect(
+      importProducts(
+        [row, { ...row, sku: 'ESP-02' }, { ...row, sku: 'ESP-03', supplier_id: 'North Roast' }],
+        createProduct
+      )
+    ).rejects.toThrow('Row 4: supplier_id must be a positive numeric ID');
+    expect(createProduct).not.toHaveBeenCalled();
+  });
 });
