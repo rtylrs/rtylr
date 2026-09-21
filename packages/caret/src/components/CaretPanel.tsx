@@ -175,10 +175,22 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
     const tabId = activeTab.id;
     const tabSessionId = activeTab.sessionId;
+    // A prompt can be sent while the history is still in flight. Never let the
+    // loaded transcript replace those messages, but do mark the tab loaded so
+    // the effect doesn't retry the fetch forever.
+    const applyHistory = (loaded: CaretMessage[]): void => {
+      const tab = useCaretStore.getState().tabs.find((candidate) => candidate.id === tabId);
+      if (tab && tab.sessionId === tabSessionId && !tab.isStreaming && tab.messages.length === 0) {
+        caret.setMessages(loaded, tabId);
+      } else {
+        caret.setTabLoaded(true, tabId);
+      }
+    };
+
     caret.setTabLoading(true, tabId);
     void loadChat(tabSessionId)
-      .then((loaded) => caret.setMessages(loaded, tabId))
-      .catch(() => caret.setMessages([], tabId))
+      .then(applyHistory)
+      .catch(() => applyHistory([]))
       .finally(() => caret.setTabLoading(false, tabId));
   }, [activeTab, caret, loadChat]);
 

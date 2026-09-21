@@ -40,6 +40,7 @@ interface CaretActions {
   closeTab: (id: string) => void;
   setTabTitle: (title: string, tabId?: string) => void;
   setTabLoading: (loading: boolean, tabId?: string) => void;
+  setTabLoaded: (loaded: boolean, tabId?: string) => void;
   setSessionId: (id: string | null, tabId?: string) => void;
   setMessages: (messages: CaretMessage[], tabId?: string) => void;
   addMessage: (msg: CaretMessage, tabId?: string) => void;
@@ -233,6 +234,9 @@ export const useCaretStore = create<CaretStore>()(
 
       setTabLoading: (isLoading, tabId) =>
         set((state) => updateTab(state, tabId, (tab) => ({ ...tab, isLoading }))),
+
+      setTabLoaded: (isLoaded, tabId) =>
+        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, isLoaded }))),
 
       setSessionId: (id, tabId) =>
         set((state) => updateTab(state, tabId, (tab) => ({ ...tab, sessionId: id }))),
