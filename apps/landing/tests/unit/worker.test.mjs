@@ -297,10 +297,41 @@ describe('routing', () => {
     assert.ok((await res.text()).startsWith('User-agent'));
   });
 
-  it('extensionless URLs resolve directory-style exports (/pricing)', async () => {
+  // This used to assert a 200 with the page body. Serving both /pricing and
+  // /pricing/ is what #1359 removes: two URLs, one document, and a crawl
+  // budget spent proving they are the same. The directory export is still
+  // what answers, one redirect later.
+  it('extensionless URLs redirect to the directory-style export (/pricing)', async () => {
     const res = await worker.fetch(req('/pricing'), env);
+    assert.equal(res.status, 301);
+    assert.equal(res.headers.get('location'), `${SITE}/pricing/`);
+
+    const followed = await worker.fetch(req('/pricing/'), env);
+    assert.equal(followed.status, 200);
+    assert.ok((await followed.text()).includes('<main>'));
+  });
+
+  it('the trailing-slash redirect keeps the query string', async () => {
+    const res = await worker.fetch(req('/trust?utm_source=newsletter&a=b'), env);
+    assert.equal(res.status, 301);
+    assert.equal(res.headers.get('location'), `${SITE}/trust/?utm_source=newsletter&a=b`);
+  });
+
+  it('the API is never trailing-slash redirected', async () => {
+    const res = await worker.fetch(req('/api/v1/status'), env);
     assert.equal(res.status, 200);
-    assert.ok((await res.text()).includes('<main>'));
+    assert.equal(res.headers.get('content-type'), 'application/json; charset=utf-8');
+  });
+
+  it('/version is not trailing-slash redirected', async () => {
+    const res = await worker.fetch(req('/version'), env);
+    assert.equal(res.status, 200);
+    assert.equal(await res.text(), VERSION_JSON);
+  });
+
+  it('an unknown extension is left alone rather than redirected', async () => {
+    const res = await worker.fetch(req('/whatever.bar'), env);
+    assert.notEqual(res.status, 301);
   });
 
   it('explicit /index.html still serves the page', async () => {
@@ -327,5 +358,84 @@ describe('routing', () => {
     assert.match(res.headers.get('content-type'), /application\/json/);
     const { error } = await res.json();
     assert.equal(error.code, 'not_found');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Security headers
+// ---------------------------------------------------------------------------
+
+describe('security headers', () => {
+  const REQUIRED = {
+    'strict-transport-security': 'max-age=31536000; includeSubDomains',
+    'x-content-type-options': 'nosniff',
+    'referrer-policy': 'strict-origin-when-cross-origin',
+    'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+  };
+
+  const assertSecured = (res, what) => {
+    for (const [name, value] of Object.entries(REQUIRED)) {
+      assert.equal(res.headers.get(name), value, `${what} is missing ${name}`);
+    }
+    assert.ok(
+      res.headers.get('content-security-policy-report-only'),
+      `${what} is missing the report-only CSP`
+    );
+  };
+
+  it('the HTML response carries them', async () => {
+    const res = await worker.fetch(req('/pricing/'), env);
+    assert.equal(res.status, 200);
+    assertSecured(res, 'the HTML response');
+  });
+
+  it('the markdown response carries them', async () => {
+    const res = await worker.fetch(req('/pricing/', { accept: 'text/markdown' }), env);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get('content-type'), /text\/markdown/);
+    assertSecured(res, 'the markdown response');
+  });
+
+  it('the styled 404 carries them', async () => {
+    const res = await worker.fetch(req('/nope/'), env);
+    assert.equal(res.status, 404);
+    assertSecured(res, 'the styled 404');
+  });
+
+  it('the markdown 404 carries them', async () => {
+    const res = await worker.fetch(req('/nope/', { accept: 'text/markdown' }), env);
+    assert.equal(res.status, 404);
+    assertSecured(res, 'the markdown 404');
+  });
+
+  it('the 406 carries them', async () => {
+    const res = await worker.fetch(req('/pricing/', { accept: 'text/html;q=0, text/markdown;q=0' }), env);
+    assert.equal(res.status, 406);
+    assertSecured(res, 'the 406');
+  });
+
+  // Assets are served straight off the bucket by env.ASSETS. Asserting the
+  // headers are absent keeps the boundary honest: if that ever changes, this
+  // test says so rather than the coverage quietly shifting.
+  it('static assets are left untouched', async () => {
+    env = makeEnv(new Map([['/robots.txt', 'User-agent: *\n']]));
+    const res = await worker.fetch(req('/robots.txt'), env);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('strict-transport-security'), null);
+  });
+
+  it('HSTS does not claim preload', async () => {
+    const res = await worker.fetch(req('/pricing/'), env);
+    // Preload commits every *.rtylr.com subdomain to HTTPS-only, and the app
+    // subdomains are not in this repo.
+    assert.ok(!/preload/i.test(res.headers.get('strict-transport-security')));
+  });
+
+  it('the CSP is report-only, not enforcing', async () => {
+    const res = await worker.fetch(req('/pricing/'), env);
+    assert.equal(res.headers.get('content-security-policy'), null);
+    const policy = res.headers.get('content-security-policy-report-only');
+    assert.match(policy, /default-src 'self'/);
+    assert.match(policy, /https:\/\/www\.googletagmanager\.com/);
   });
 });
