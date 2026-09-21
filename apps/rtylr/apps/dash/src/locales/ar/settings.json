@@ -30,7 +30,8 @@
     "dnsTitle": "تعليمات إعداد DNS",
     "dnsPropagation": "قد يستغرق انتشار تغييرات DNS حتى 48 ساعة.",
     "invalid": "أدخل نطاقًا صحيحًا، مثل menu.yourbrand.com",
-    "saved": "تم حفظ النطاق المخصص. قد يستغرق انتشار DNS حتى 24 ساعة."
+    "saved": "تم حفظ النطاق المخصص. قد يستغرق انتشار DNS حتى 24 ساعة.",
+    "saveFailed": "فشل حفظ النطاق المخصص"
   },
   "general": {
     "pageTitle": "الإعدادات العامة",
@@ -110,6 +111,7 @@
     "weeklySummaryDescription": "ملخص أسبوعي للطلبات والإيرادات والاتجاهات.",
     "feedback": "ملاحظات العملاء",
     "feedbackDescription": "استلم بريدًا عند إضافة عميل لمراجعة.",
+    "notificationsUnavailable": "لم تُحفظ تفضيلات الإشعارات بعد. لا تصل التغييرات هنا إلى الخادم.",
     "senderRequired": "بريد المُرسل مطلوب",
     "smtpVerified": "تم التحقق من الاتصال بـ {{host}}:{{port}}",
     "smtpTestFailed": "فشل اختبار اتصال SMTP",

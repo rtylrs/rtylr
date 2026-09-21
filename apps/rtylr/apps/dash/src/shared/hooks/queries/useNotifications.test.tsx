@@ -107,6 +107,28 @@ describe('useNotifications', () => {
     expect(result.current.data).toHaveLength(3);
   });
 
+  it('parses an omitted read flag as unread', async () => {
+    // The Go contract writes `read` with `omitempty`, so an unread
+    // notification arrives without the key.
+    mockNotificationClient.listNotifications.mockResolvedValue({
+      notifications: [
+        {
+          id: '1',
+          title: 'New order',
+          body: 'Order #123',
+          app: 'pos',
+          type: 'info',
+          createdAt: '2026-01-01',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useNotifications(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.[0].read).toBe(false);
+  });
+
   it('calls the correct endpoint', async () => {
     mockNotificationClient.listNotifications.mockResolvedValue({ notifications: [] });
 
@@ -151,6 +173,26 @@ describe('useNotificationPages', () => {
       limit: 100,
       cursor: 'next-page',
     });
+  });
+
+  it('parses an omitted read flag as unread', async () => {
+    mockNotificationClient.listNotifications.mockResolvedValue({
+      notifications: [
+        {
+          id: '1',
+          title: 'New order',
+          body: 'Order #123',
+          app: 'pos',
+          type: 'info',
+          createdAt: '2026-01-01',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useNotificationPages(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.pages[0].notifications[0].read).toBe(false);
   });
 });
 

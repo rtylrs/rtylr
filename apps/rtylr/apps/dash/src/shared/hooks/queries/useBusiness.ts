@@ -1,4 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { businessClient, configClient } from '../../lib/clients';
 import { toast } from 'sonner';
 import { normalizeConfigData, useConfigStore } from '../../stores/configStore';
@@ -23,6 +24,40 @@ export const useSetBusinessSlug = () => {
       const err = error as { message?: string };
       toast.error(
         err.message || i18next.t('common.toasts.failedUpdateSlug', 'Failed to update slug')
+      );
+    },
+  });
+};
+
+export const useCustomDomain = () => {
+  return useQuery({
+    queryKey: ['custom-domain'],
+    queryFn: async () => {
+      const res = await configClient.getCustomDomain({});
+      return res.domain?.domain ?? '';
+    },
+  });
+};
+
+export const useRegisterCustomDomain = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (domain: string) => configClient.registerCustomDomain({ domain }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-domain'] });
+      toast.success(
+        i18next.t(
+          'settings.domain.saved',
+          'Custom domain saved. DNS propagation may take up to 24 hours.'
+        )
+      );
+    },
+    onError: (error: unknown) => {
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('settings.domain.saveFailed', 'Failed to save the custom domain')
+        )
       );
     },
   });

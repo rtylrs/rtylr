@@ -1,30 +1,17 @@
 import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { uploadAsset } from '@voxire/api';
+import { uploadAsset, getOneKitErrorMessage } from '@voxire/api';
 import { Palette, Upload } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import { Button, Input, Label } from '../../shared/components/ui';
 import { SettingSection } from '../../shared/components/dash';
 import { useUpdateBusiness } from '../../shared/hooks/queries/useBusiness';
 import { useConfigStore } from '../../shared/stores/configStore';
 
-const COLORS = [
-  '#4583C4',
-  '#64C5B9',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#ec4899',
-  '#06b6d4',
-];
-
 const ThemeCustomizer: React.FC = () => {
-  const navigate = useNavigate();
   const updateBusiness = useUpdateBusiness();
   const websiteData = useConfigStore((s) => s.websiteData);
 
-  const [accent, setAccent] = useState((websiteData?.primaryColor as string) || '#4583C4');
   const [brandName, setBrandName] = useState(
     (websiteData?.brandName as string) || (websiteData?.siteName as string) || 'My Business'
   );
@@ -39,7 +26,7 @@ const ThemeCustomizer: React.FC = () => {
       const uploaded = await uploadAsset(file);
       setLogoUrl(uploaded.url);
     } catch (err) {
-      console.error(err);
+      toast.error(getOneKitErrorMessage(err, 'Logo upload failed'));
     } finally {
       setUploadingLogo(false);
       if (logoInputRef.current) logoInputRef.current.value = '';
@@ -47,11 +34,11 @@ const ThemeCustomizer: React.FC = () => {
   };
 
   const handleSave = () => {
-    document.documentElement.style.setProperty('--dash-accent', accent);
+    // The config contract has no brand_name or primary_color fields, so only
+    // the fields it can carry are sent. The business name maps to siteName.
     updateBusiness.mutate({
       data: {
-        primaryColor: accent,
-        brandName,
+        storeName: brandName,
         logoUrl,
       },
     });
@@ -82,57 +69,6 @@ const ThemeCustomizer: React.FC = () => {
             {updateBusiness.isPending ? 'Saving...' : 'Save Theme'}
           </Button>
         </div>
-
-        <SettingSection
-          title="Accent color"
-          description="Applied to primary buttons, links, and highlights."
-          footer={
-            <Button size="sm" onClick={() => navigate({ to: '/design' })}>
-              Open full design editor
-            </Button>
-          }
-        >
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              {COLORS.map((c) => (
-                <button
-                  type="button"
-                  key={c}
-                  onClick={() => setAccent(c)}
-                  className="h-9 w-9 rounded-lg transition-all"
-                  style={{
-                    background: c,
-                    border:
-                      accent === c ? '2px solid var(--dash-text)' : '1px solid var(--dash-border)',
-                    transform: accent === c ? 'scale(1.1)' : 'scale(1)',
-                  }}
-                  aria-label={`Select ${c}`}
-                />
-              ))}
-            </div>
-            <div
-              className="flex items-center gap-3 px-4 py-3 rounded-lg"
-              style={{ background: 'var(--dash-hover)' }}
-            >
-              <div className="h-10 w-10 rounded-lg" style={{ background: accent }} />
-              <div className="flex-1">
-                <p className="text-xs font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  Preview
-                </p>
-                <code className="text-[11px] font-mono" style={{ color: 'var(--dash-text-dim)' }}>
-                  {accent}
-                </code>
-              </div>
-              <button
-                type="button"
-                className="px-4 py-2 rounded-lg text-xs font-semibold"
-                style={{ background: accent, color: 'white' }}
-              >
-                Sample button
-              </button>
-            </div>
-          </div>
-        </SettingSection>
 
         <SettingSection title="Brand" description="Your business name and logo.">
           <div className="space-y-3">

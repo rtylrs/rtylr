@@ -1,5 +1,6 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { canEffectiveAccess } from '@voxire/permissions';
 import { Shield, Lock } from 'lucide-react';
 import { PermissionCheckbox, RoleBadge, SkeletonList } from '../../shared/components/dash';
@@ -8,13 +9,28 @@ import { useUserStore } from '../../shared/stores/userStore';
 
 const Permissions: React.FC = () => {
   const user = useUserStore((s) => s.user);
-  const { data, isLoading } = usePermissions();
+  const { data, isLoading, isError, refetch } = usePermissions();
   const updatePermissions = useUpdatePermissions();
 
   const canEditRoles = user?.effectiveAccess
     ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:edit') ||
       canEffectiveAccess(user.effectiveAccess, 'hub:roles:create')
     : user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
+
+  // A failed request settles with isLoading false and data undefined, which
+  // the guard below reads as loading and leaves the skeleton on screen.
+  if (isError) {
+    return (
+      <div className="space-y-5 max-w-5xl">
+        <EmptyState
+          icon={Shield}
+          title="Couldn't load permissions"
+          description="The permission matrix could not be loaded."
+          action={{ label: 'Refresh', onClick: () => void refetch() }}
+        />
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (
