@@ -24,12 +24,20 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
   const settingsCurrency = useSettings((s) => s.currency);
   const c = currency ?? settingsCurrency;
   const symbol = getCurrencySymbol(c);
+  // While the operator is typing, show the raw text. Rendering the parsed
+  // number straight back deleted a trailing separator ("1." -> 1 -> "1"), so
+  // typing "1.50" became 15 -> 150. The draft is dropped on blur, when the
+  // normalised value from the prop is shown again.
+  const [draft, setDraft] = React.useState<string | null>(null);
 
   const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/[^0-9.\-]/g, '');
+    setDraft(raw);
     const n = parseFloat(raw);
     onChange(isNaN(n) ? 0 : majorToMinor(n, c));
   };
+
+  const formatted = value === 0 ? '' : String(minorToMajor(Number(value), c));
 
   return (
     <div style={{ position: 'relative', width: '100%' }}>
@@ -50,8 +58,9 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
       <input
         type="text"
         inputMode="decimal"
-        value={value === 0 ? '' : String(minorToMajor(Number(value), c))}
+        value={draft ?? formatted}
         onChange={handle}
+        onBlur={() => setDraft(null)}
         placeholder={placeholder}
         disabled={disabled}
         style={{
