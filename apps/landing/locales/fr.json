@@ -536,8 +536,8 @@
   },
   "pricing": {
     "meta": {
-      "title": "Tarifs | rtylr",
-      "description": "Ce que comprend chaque forfait rtylr\u00a0: POS, ERP, HR, CRM, Finance et Flow partout. Commencez gratuitement, sans carte. Prix non publiés\u00a0: demandez un devis."
+      "title": "Tarifs rtylr\u00a0: POS, ERP, CRM, HR et Finance | rtylr",
+      "description": "Ce que comprend chaque forfait rtylr\u00a0: POS, ERP, HR, CRM, Finance et Flow partout. Commencez gratuitement, sans carte, puis demandez un devis."
     },
     "hero": {
       "title": "Les 7 applications.\nDans chaque forfait.",
@@ -781,8 +781,8 @@
   },
   "contact": {
     "meta": {
-      "title": "Contact | rtylr",
-      "description": "Contactez l’équipe rtylr. Nous répondons sous 24 heures."
+      "title": "Contacter rtylr\u00a0: ventes et support au Liban | rtylr",
+      "description": "Contactez l’équipe rtylr pour les ventes, le support, la presse ou les partenariats. Chaque message est lu par une personne et la réponse arrive sous un jour ouvré."
     },
     "hero": {
       "title": "Écrivez-nous. Nous lisons tout.",
@@ -946,8 +946,8 @@
   },
   "trust": {
     "meta": {
-      "title": "Centre de confiance | rtylr",
-      "description": "Sécurité, confidentialité, conformité, disponibilité et transparence sur nos prestataires\u00a0: tout ce qu’il faut savoir avant de vous engager."
+      "title": "Centre de confiance\u00a0: sécurité et disponibilité | rtylr",
+      "description": "Sécurité, confidentialité, conformité, disponibilité et transparence sur nos prestataires\u00a0: tout ce qu’il faut savoir avant de vous engager, pour qui évalue."
     },
     "pillars": [
       {
@@ -1039,8 +1039,8 @@
   "legal": {
     "terms": {
       "meta": {
-        "title": "Conditions d’utilisation | rtylr",
-        "description": "Les conditions qui régissent votre utilisation de rtylr, exploité par Voxire.",
+        "title": "Conditions d’utilisation et usage acceptable | rtylr",
+        "description": "Les conditions qui régissent votre utilisation de rtylr, exploité par Voxire\u00a0: compte, forfaits et facturation, essais et remboursements, usage acceptable.",
         "schemaDescription": "Les conditions qui régissent votre utilisation de rtylr, exploité par Voxire."
       },
       "eyebrow": "JURIDIQUE · CONDITIONS D’UTILISATION",
@@ -1156,8 +1156,8 @@
     },
     "privacyPolicy": {
       "meta": {
-        "title": "Politique de confidentialité | rtylr",
-        "description": "Comment rtylr et Voxire traitent vos données à caractère personnel, au titre du RGPD, du CCPA et des lois équivalentes.",
+        "title": "Politique de confidentialité rtylr et vos données | rtylr",
+        "description": "Comment rtylr et Voxire traitent vos données à caractère personnel, au titre du RGPD, du CCPA et des lois équivalentes\u00a0: collecte, partage, conservation, droits.",
         "schemaDescription": "Comment rtylr et Voxire traitent vos données à caractère personnel."
       },
       "eyebrow": "JURIDIQUE · POLITIQUE DE CONFIDENTIALITÉ",
@@ -1287,8 +1287,8 @@
     },
     "security": {
       "meta": {
-        "title": "Sécurité | rtylr",
-        "description": "Signalement des problèmes de sécurité, traitement des données et informations sur les garanties de rtylr.",
+        "title": "Sécurité chez rtylr\u00a0: signalement et garanties | rtylr",
+        "description": "Signalement des problèmes de sécurité, traitement des données et informations sur les garanties de rtylr, avec la réponse aux incidents et la divulgation.",
         "schemaDescription": "Signalement des problèmes de sécurité, traitement des données et informations sur les garanties de rtylr."
       },
       "eyebrow": "JURIDIQUE · SÉCURITÉ",
@@ -1334,6 +1334,42 @@
         "title": "Besoin d’informations sur la sécurité ou le traitement des données ?",
         "body": "Écrivez à <secMail>security@voxire.com</secMail> pour demander les documents à jour et confirmer leur disponibilité pour votre déploiement."
       }
+    }
+  },
+  "demo": {
+    "meta": {
+      "title": "Réserver une démo rtylr sur vos données | rtylr",
+      "description": "Voyez rtylr tourner sur des données réelles pendant une démo de 30 minutes avec ceux qui l’ont construit. Posez vos questions sur la caisse, les stocks et la paie."
+    }
+  },
+  "integrations": {
+    "meta": {
+      "title": "Intégrations\u00a0: paiements, comptabilité, livraison | rtylr",
+      "description": "Tous les services auxquels rtylr se connecte\u00a0: paiements, comptabilité, livraison, communication, matériel et productivité, avec le statut de chacun."
+    }
+  },
+  "crm": {
+    "meta": {
+      "title": "CRM\u00a0: chaque client, gardé en mémoire | rtylr",
+      "description": "Fiches clients, fidélité, segments et campagnes. Chaque vente en caisse enrichit la fiche automatiquement. Pensé pour la restauration, le commerce et les services."
+    }
+  },
+  "hardware": {
+    "meta": {
+      "title": "Matériel de caisse\u00a0: terminaux, imprimantes, scanners | rtylr",
+      "description": "Un écosystème de matériel testé et certifié pour la caisse rtylr. Chaque appareil fonctionne dès le branchement\u00a0: imprimantes, lecteurs, scanners et bornes."
+    }
+  },
+  "support": {
+    "meta": {
+      "title": "Centre d’aide\u00a0: guides, facturation et support | rtylr",
+      "description": "Démarrage, facturation, équipe, configuration, intégrations et sécurité, au même endroit. Des guides et des réponses pour ceux qui font tourner rtylr."
+    }
+  },
+  "partners": {
+    "meta": {
+      "title": "Programme partenaires rtylr | rtylr",
+      "description": "Construisez avec rtylr. Partenaires d’intégration, technologiques, de solutions et matériels\u00a0: les conditions, les niveaux et comment se porter candidat."
     }
   }
 }
