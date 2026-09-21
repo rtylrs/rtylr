@@ -102,6 +102,7 @@
       "saved": "تم تحديث المتغير",
       "deleted": "تم حذف المتغير",
       "created": "تم إنشاء {{count}} متغير",
+      "createPartial": "تم إنشاء {{count}} من {{total}} متغيرات؛ أعد محاولة الصفوف المتبقية",
       "createFailed": "فشل إنشاء المتغيرات",
       "allExist": "جميع التركيبات موجودة بالفعل",
       "optionName": "اسم الخيار (مثل المقاس، اللون)",
@@ -150,7 +151,8 @@
     "search": "Search products…",
     "empty": "No products found.",
     "clearSearch": "مسح البحث",
-    "adjustFailed": "تعذر تعديل المخزون"
+    "adjustFailed": "تعذر تعديل المخزون",
+    "decreaseUnsupported": "تقليل المخزون غير مدعوم في واجهة برمجة المخزون بعد"
   },
   "suppliers": {
     "title": "Suppliers",

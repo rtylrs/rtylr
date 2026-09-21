@@ -293,8 +293,10 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
 
   const createAll = async (): Promise<void> => {
     if (drafts.length === 0) return;
+    const batch = drafts;
+    let created = 0;
     try {
-      for (const d of drafts) {
+      for (const d of batch) {
         await createMut.mutateAsync({
           productId,
           name: d.name.trim() || Object.values(d.attributes).join(' / '),
@@ -306,13 +308,23 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
           attributes: JSON.stringify(d.attributes),
           isActive: true,
         });
+        created += 1;
+        // Drop each row as soon as it exists server-side so a retry after a
+        // partial failure cannot create it again.
+        setDrafts((rows) =>
+          rows.filter((row) => attrSignature(row.attributes) !== attrSignature(d.attributes))
+        );
       }
-      toast.success(t('erp.products.variants.created', { count: drafts.length }));
+      toast.success(t('erp.products.variants.created', { count: created }));
       setDrafts([]);
       setGroups([]);
       setValueDraft({});
     } catch {
-      toast.error(t('erp.products.variants.createFailed'));
+      toast.error(
+        created > 0
+          ? t('erp.products.variants.createPartial', { count: created, total: batch.length })
+          : t('erp.products.variants.createFailed')
+      );
     }
   };
 

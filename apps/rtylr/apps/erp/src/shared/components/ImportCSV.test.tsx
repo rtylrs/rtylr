@@ -41,6 +41,30 @@ describe('ImportCSV', () => {
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Imported 2 rows'));
   });
 
+  it('keeps quoted commas, escaped quotes and embedded newlines in one field', async () => {
+    const user = userEvent.setup();
+    const onImport = vi.fn().mockResolvedValue(undefined);
+
+    render(<ImportCSV onImport={onImport} />);
+    const input = screen.getByTestId('csv-file-input');
+    await user.upload(
+      input,
+      new File(
+        ['name,description,sku\n"Widget, Large","Say ""hi""\nsecond line",COF-1'],
+        'products.csv',
+        { type: 'text/csv' }
+      )
+    );
+    await screen.findByText('Preview (1 rows)');
+
+    await user.click(screen.getByRole('button', { name: 'Import 1 rows' }));
+    await waitFor(() =>
+      expect(onImport).toHaveBeenCalledWith([
+        { name: 'Widget, Large', description: 'Say "hi"\nsecond line', sku: 'COF-1' },
+      ])
+    );
+  });
+
   it('keeps the preview and reports a failed mutation', async () => {
     const user = userEvent.setup();
     const onImport = vi.fn().mockRejectedValue(new Error('Row 2: supplier_id is required'));

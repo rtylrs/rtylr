@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAdjustInventory } from '../../features/inventory/useInventory';
 import { toast } from 'sonner';
 
@@ -14,6 +15,7 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
   currentStock,
   onChange,
 }) => {
+  const { t } = useTranslation();
   const [stock, setStock] = useState(currentStock);
   const adjust = useAdjustInventory();
 
@@ -42,12 +44,15 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
       className="inline-flex items-center gap-1 rounded-lg p-0.5"
       style={{ background: 'var(--hub-hover)' }}
     >
+      {/* The adjust endpoint only accepts change > 0, so decreases stay
+          disabled until the contract supports signed adjustments. */}
       <button
         type="button"
-        onClick={() => bump(-1)}
+        disabled
         aria-label="Decrease stock"
+        title={t('erp.inventory.decreaseUnsupported')}
         className="h-11 w-11 rounded flex items-center justify-center"
-        style={{ color: 'var(--hub-text-muted)' }}
+        style={{ color: 'var(--hub-text-muted)', opacity: 0.4 }}
       >
         <Minus size={16} />
       </button>

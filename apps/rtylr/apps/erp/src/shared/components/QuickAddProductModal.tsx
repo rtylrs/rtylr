@@ -83,6 +83,15 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const [uploadingImage, setUploadingImage] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+  // Seed the form only for the product currently being edited. A late first
+  // response or a focus refetch of the same product must not overwrite what the
+  // user has already typed, so payloads are applied only while untouched.
+  const editedProductIdRef = useRef<string | undefined>(undefined);
+  const formTouchedRef = useRef(false);
+  const markFormTouched = (): void => {
+    formTouchedRef.current = true;
+  };
+
   // Prefill custom attributes when editing an existing product.
   const { data: attributesData } = useProductAttributes(editing?.id);
   useEffect(() => {
@@ -103,6 +112,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   useEffect(() => {
     const p = fullProduct;
     if (!p) return;
+    if (editedProductIdRef.current !== p.id) {
+      editedProductIdRef.current = p.id;
+      formTouchedRef.current = false;
+    }
+    if (formTouchedRef.current) return;
     setName(p.name ?? '');
     setSku(p.sku ?? '');
     setCategoryId(p.categoryId !== '0' ? (p.categoryId ?? '') : '');
@@ -144,6 +158,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   // Re-seed local state when a different product is loaded for editing.
   useEffect(() => {
     if (editing) {
+      if (editedProductIdRef.current !== editing.id) {
+        editedProductIdRef.current = editing.id;
+        formTouchedRef.current = false;
+      }
+      if (formTouchedRef.current) return;
       setName(editing.name ?? '');
       setSku(editing.sku ?? '');
       setCategoryId(
@@ -298,6 +317,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       style={{ background: 'var(--hub-overlay-heavy)' }}
       tabIndex={-1}
       onClick={onClose}
+      onChange={markFormTouched}
     >
       <div
         onClick={(e) => e.stopPropagation()}

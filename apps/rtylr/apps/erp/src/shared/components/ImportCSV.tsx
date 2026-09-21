@@ -7,12 +7,64 @@ interface ImportCSVProps {
   expectedColumns?: string[];
 }
 
+// Quote-aware so exports from ExportButton (which quotes fields containing
+// commas, quotes or newlines) can be re-imported without shifting columns.
 function parseCSV(text: string): Array<Record<string, string>> {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map((h) => h.trim().replace(/^"(.*)"$/, '$1'));
-  return lines.slice(1).map((line) => {
-    const values = line.split(',').map((v) => v.trim().replace(/^"(.*)"$/, '$1'));
+  const records: string[][] = [];
+  let record: string[] = [];
+  let field = '';
+  let quoted = false;
+  let fieldQuoted = false;
+
+  const endField = (): void => {
+    record.push(fieldQuoted ? field : field.trim());
+    field = '';
+    fieldQuoted = false;
+  };
+
+  const endRecord = (): void => {
+    endField();
+    if (record.some((value) => value !== '')) records.push(record);
+    record = [];
+  };
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    if (quoted) {
+      if (char === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i += 1;
+        } else {
+          quoted = false;
+        }
+      } else {
+        field += char;
+      }
+      continue;
+    }
+    if (char === '"' && field.trim() === '') {
+      quoted = true;
+      fieldQuoted = true;
+      field = '';
+      continue;
+    }
+    if (char === ',') {
+      endField();
+      continue;
+    }
+    if (char === '\n' || char === '\r') {
+      if (char === '\r' && text[i + 1] === '\n') i += 1;
+      endRecord();
+      continue;
+    }
+    field += char;
+  }
+  if (field !== '' || record.length > 0) endRecord();
+
+  if (records.length < 2) return [];
+  const headers = records[0];
+  return records.slice(1).map((values) => {
     const row: Record<string, string> = {};
     headers.forEach((h, i) => {
       row[h] = values[i] ?? '';

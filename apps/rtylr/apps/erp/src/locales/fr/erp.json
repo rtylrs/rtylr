@@ -102,6 +102,7 @@
       "saved": "Variante mise à jour",
       "deleted": "Variante supprimée",
       "created": "{{count}} variantes créées",
+      "createPartial": "{{count}} variantes sur {{total}} créées ; réessayez les lignes restantes",
       "createFailed": "Échec de la création des variantes",
       "allExist": "Toutes les combinaisons existent déjà",
       "optionName": "Nom de l'option (ex. Taille, Couleur)",
@@ -147,7 +148,8 @@
     "search": "Search products…",
     "empty": "No products found.",
     "clearSearch": "Effacer la recherche",
-    "adjustFailed": "Échec de l'ajustement du stock"
+    "adjustFailed": "Échec de l'ajustement du stock",
+    "decreaseUnsupported": "La diminution du stock n'est pas encore prise en charge par l'API d'inventaire"
   },
   "suppliers": {
     "title": "Suppliers",
