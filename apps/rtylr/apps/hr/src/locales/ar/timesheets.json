@@ -8,6 +8,7 @@
   "approved": "تم اعتماد سجل الدوام",
   "rejected": "تم رفض سجل الدوام",
   "rejectionReason": "سبب الرفض",
+  "rejectionReasonUnavailable": "غير معروض في هذا العرض",
   "noReasonProvided": "لم يُقدَّم سبب",
   "entriesTitle": "إدخالات الوقت",
   "noEntries": "لا توجد إدخالات وقت في هذه الفترة.",

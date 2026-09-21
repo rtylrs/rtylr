@@ -113,6 +113,42 @@ describe('RolesPermissions', () => {
     });
   });
 
+  it('re-seeds the permission buffer when a refetch reports a newer snapshot', () => {
+    const { rerender } = render(<RolesPermissions />);
+
+    // Another admin granted a permission while this card was open. Every
+    // mutation invalidates ['roles'], so the list refetches and updates the
+    // prop without remounting the card (keyed by role.id).
+    mocks.useListRoles.mockReturnValue({
+      data: [{ ...roles[0], permissions: { approve_time_off: true, manage_employees: true } }],
+      isLoading: false,
+      isError: false,
+    });
+    rerender(<RolesPermissions />);
+
+    expect(screen.getByText('2/2 permissions')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Manager'));
+
+    expect(screen.getByRole('checkbox', { name: 'Manage employees' })).toBeChecked();
+    // Nothing was edited locally, so Save must not be offered: a click would
+    // PUT the mount-time buffer and revert the other admin's grant.
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('keeps in-progress edits when a refetch returns the same snapshot', () => {
+    const { rerender } = render(<RolesPermissions />);
+
+    fireEvent.click(screen.getByText('Manager'));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Manage employees' }));
+    expect(screen.getByRole('checkbox', { name: 'Manage employees' })).toBeChecked();
+
+    rerender(<RolesPermissions />);
+
+    expect(screen.getByRole('checkbox', { name: 'Manage employees' })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
   it('creating a role calls createRole with the entered name', () => {
     const createMutate = vi.fn();
     mocks.useCreateRole.mockReturnValue({ mutate: createMutate, isPending: false });

@@ -8,6 +8,7 @@
   "approved": "Timesheet approved",
   "rejected": "Timesheet rejected",
   "rejectionReason": "Rejection reason",
+  "rejectionReasonUnavailable": "Not shown in this view",
   "noReasonProvided": "No reason provided",
   "entriesTitle": "Time Entries",
   "noEntries": "No time entries in this period.",

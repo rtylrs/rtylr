@@ -8,7 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Calendar } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useTimeOff, useApproveTimeOff } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, Button, Skeleton, Tabs } from '../../shared/components/ui';
+import {
+  Card,
+  SectionHeader,
+  Button,
+  Skeleton,
+  Tabs,
+  QueryError,
+} from '../../shared/components/ui';
 import TimeOffBadge from '../../shared/components/TimeOffBadge';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
@@ -19,7 +26,7 @@ const STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
 const TimeOff: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data, isLoading } = useTimeOff();
+  const { data, isLoading, isError, isFetching, refetch } = useTimeOff();
   const approve = useApproveTimeOff();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canApprove = canHrPermission(role, 'hr:time_off:approve');
@@ -47,7 +54,9 @@ const TimeOff: React.FC = () => {
 
         <Tabs tabs={[...STATUSES]} active={tab} onChange={(t) => setTab(t as typeof tab)} />
 
-        {isLoading ? (
+        {isError ? (
+          <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
+        ) : isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} height={72} />

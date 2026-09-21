@@ -18,6 +18,7 @@ import DefaultLayout from './DefaultLayout';
 
 const mocks = vi.hoisted(() => ({
   role: 'admin' as string | null,
+  pathname: '/staff',
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -28,7 +29,7 @@ vi.mock('@tanstack/react-router', () => ({
   ),
   Outlet: () => <div data-testid="outlet" />,
   useRouterState: ({ select }: { select: (s: { location: { pathname: string } }) => unknown }) =>
-    select({ location: { pathname: '/staff' } }),
+    select({ location: { pathname: mocks.pathname } }),
 }));
 
 vi.mock('@voxire/auth', () => ({
@@ -98,6 +99,7 @@ const reportingLink = (): HTMLElement | null =>
 describe('DefaultLayout reporting-lines nav entry', () => {
   beforeEach(() => {
     mocks.role = 'admin';
+    mocks.pathname = '/staff';
   });
 
   it('links to the reporting-lines screen for a role that can manage staff', () => {
@@ -118,6 +120,7 @@ describe('DefaultLayout time tracking nav entries (#1068)', () => {
 
   beforeEach(() => {
     mocks.role = 'admin';
+    mocks.pathname = '/staff';
     hrConfig.value = null;
   });
 
@@ -165,5 +168,46 @@ describe('DefaultLayout time tracking nav entries (#1068)', () => {
     // must keep its default. Removing the sidebar's fallback outright would
     // have hidden a working screen.
     expect(linkTo('/attendance')).not.toBeNull();
+  });
+});
+
+describe('DefaultLayout sidebar active item', () => {
+  const linkTo = (href: string): HTMLElement | null =>
+    screen.queryAllByRole('link').find((a) => a.getAttribute('href') === href) ?? null;
+  const isActive = (href: string): boolean => linkTo(href)?.style.color === 'var(--hr-text)';
+
+  beforeEach(() => {
+    mocks.role = 'admin';
+    hrConfig.value = null;
+    mocks.pathname = '/performance/goals';
+  });
+
+  it('marks only the most specific nav item active for a nested route', () => {
+    render(<DefaultLayout />);
+
+    expect(isActive('/performance/goals')).toBe(true);
+    // `/performance` is a prefix of `/performance/goals`; both used to render
+    // the active pill and the same `layoutId="sidebar-active"`.
+    expect(isActive('/performance')).toBe(false);
+  });
+
+  it('keeps a section active for a detail route that has no nav item', () => {
+    mocks.pathname = '/staff/123';
+
+    render(<DefaultLayout />);
+
+    expect(isActive('/staff')).toBe(true);
+    expect(isActive('/staff/reporting-lines')).toBe(false);
+  });
+
+  it('marks the dashboard active only on the root path', () => {
+    mocks.pathname = '/performance/goals';
+    const { rerender } = render(<DefaultLayout />);
+    expect(isActive('/')).toBe(false);
+
+    mocks.pathname = '/';
+    rerender(<DefaultLayout />);
+    expect(isActive('/')).toBe(true);
+    expect(isActive('/performance/goals')).toBe(false);
   });
 });

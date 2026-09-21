@@ -7,9 +7,13 @@ import { useAnniversaries } from '../hooks/useHrExtras';
 function daysUntil(monthDay: string) {
   const [m, d] = monthDay.split('-').map(Number);
   const now = new Date();
+  // Compare calendar days, not timestamps: `now` carries the current time of
+  // day, so an anniversary dated today would compare as past and roll to next
+  // year instead of rendering 'Today'.
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   let next = new Date(now.getFullYear(), m - 1, d);
-  if (next < now) next = new Date(now.getFullYear() + 1, m - 1, d);
-  return Math.ceil((next.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (next < today) next = new Date(now.getFullYear() + 1, m - 1, d);
+  return Math.round((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 const AnniversaryWidget: React.FC = () => {
