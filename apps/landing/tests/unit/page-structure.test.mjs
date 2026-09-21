@@ -359,6 +359,56 @@ describe('optional third-party embeds', () => {
   });
 });
 
+// lastmod was `new Date()` for every URL, so all 23 entries carried the build
+// time and Google had no way to tell the day's new post from the legal page
+// nobody touched. Two assertions, because either alone can pass on a broken
+// sitemap: that the values are not uniform, and that the blog values are the
+// dates the posts actually declare.
+describe('sitemap lastmod', () => {
+  const SITEMAP = path.join(OUT, 'sitemap-0.xml');
+  let entries = [];
+
+  before(() => {
+    assert.ok(existsSync(SITEMAP), `no sitemap at ${SITEMAP}. Run \`pnpm build\` first.`);
+    const xml = readFileSync(SITEMAP, 'utf8');
+    entries = [...xml.matchAll(/<url>(.*?)<\/url>/gs)].map((m) => ({
+      loc: /<loc>(.*?)<\/loc>/s.exec(m[1])?.[1] ?? '',
+      lastmod: /<lastmod>(.*?)<\/lastmod>/s.exec(m[1])?.[1] ?? '',
+    }));
+    // Same guard as the page fixture: a zero-length parse would make every
+    // assertion below vacuously true.
+    assert.ok(entries.length >= 20, `expected 20+ sitemap URLs, found ${entries.length}`);
+  });
+
+  it('every URL carries a lastmod', () => {
+    const missing = entries.filter((e) => !e.lastmod).map((e) => e.loc);
+    assert.deepEqual(missing, [], 'sitemap URLs with no lastmod');
+  });
+
+  it('lastmod is not one uniform build timestamp', () => {
+    const distinct = new Set(entries.map((e) => e.lastmod));
+    assert.ok(
+      distinct.size >= 2,
+      `every URL shares lastmod ${[...distinct][0]}, which is the build time bug`
+    );
+  });
+
+  it('each blog post carries the date it declares', () => {
+    const posts = JSON.parse(readFileSync(path.join(REPO, 'lib/blog/posts.json'), 'utf8'));
+    assert.ok(posts.length > 0, 'no posts to check');
+    const offenders = [];
+    for (const post of posts) {
+      const entry = entries.find((e) => e.loc.endsWith(`/blog/${post.slug}/`));
+      assert.ok(entry, `${post.slug} is missing from the sitemap`);
+      const expected = new Date(post.dateModified || post.date).toISOString().slice(0, 10);
+      if (entry.lastmod.slice(0, 10) !== expected) {
+        offenders.push([post.slug, entry.lastmod, expected]);
+      }
+    }
+    assert.deepEqual(offenders, [], 'blog lastmod does not match posts.json');
+  });
+});
+
 describe('canonical URLs', () => {
   // /404/ is the one page that should not claim a canonical, because it
   // is not a page anyone should land on deliberately. It is excluded here

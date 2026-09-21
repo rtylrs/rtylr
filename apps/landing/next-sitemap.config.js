@@ -25,6 +25,105 @@
 // file with the CommonJS loader. Node strips the types.
 const { alternatesFor, basePathOf, shippedLocales } = require('./lib/locales.ts');
 
+// lastmod used to be `new Date()` for every URL, so all 23 entries carried the
+// build time. Google uses lastmod to prioritise recrawls and stops trusting it
+// on sites where it is uniform, which means a daily build would re-stamp every
+// page and the one genuinely new page, the day's post, would get no priority.
+//
+// There are exactly two sources of truth here, and hand-maintaining a dates
+// file is not one of them:
+//
+//   posts   for /blog/<slug>/, the post's own dateModified, or date until
+//           #1353 adds dateModified.
+//   git     for everything else, the last commit that touched the page file.
+//
+// The three legal routes are the exception: pages/legal/*.tsx are thin
+// wrappers around LegalPageLayout and the actual document lives in the locale
+// files, so a terms rewrite never touches the page file. They take the last
+// commit on locales/en.json instead.
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
+const nodePath = require('node:path');
+
+const posts = require('./lib/blog/posts.json');
+
+const BUILD_TIME = new Date().toISOString();
+
+/** Run git in apps/landing, returning null rather than throwing. */
+function git(args) {
+  try {
+    const out = execSync(`git ${args}`, {
+      cwd: __dirname,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return out.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A shallow clone answers `git log -1 -- <file>` with the tip commit for every
+ * file, which would put the build time back on all 23 URLs while every local
+ * check still passed. The build host is not this repo's CI (the landing is
+ * built from tryrtylr/deploy), so this cannot be asserted here. Say so loudly
+ * instead of shipping a sitemap that silently lost its signal.
+ */
+const SHALLOW = git('rev-parse --is-shallow-repository') === 'true';
+if (SHALLOW) {
+  console.warn(
+    '[next-sitemap] shallow clone: per-file git dates are unavailable, so every ' +
+      'lastmod will collapse to the tip commit. Fetch full history to restore it.'
+  );
+}
+
+const lastCommitIso = (relative) => git(`log -1 --format=%cI -- ${relative}`);
+
+const LOCALE_SOURCE = 'locales/en.json';
+const LEGAL_ROUTES = new Set(['/legal/terms/', '/legal/privacy-policy/', '/legal/security/']);
+
+/** pages/pricing/index.tsx -> /pricing/, pages/legal/terms.tsx -> /legal/terms/. */
+function routeOf(relative) {
+  const withoutExt = relative.replace(/^pages\//, '').replace(/\.tsx$/, '');
+  // Dynamic segments are not real routes: [slug] is covered by posts.json and
+  // [locale] is not exported while only English ships.
+  if (withoutExt.includes('[') || withoutExt.startsWith('_') || withoutExt === '404') return null;
+  const route = withoutExt === 'index' ? '/' : `/${withoutExt.replace(/\/index$/, '')}/`;
+  return route;
+}
+
+function pageFiles(dir = 'pages') {
+  return fs.readdirSync(nodePath.join(__dirname, dir), { withFileTypes: true }).flatMap((e) => {
+    const relative = `${dir}/${e.name}`;
+    if (e.isDirectory()) return pageFiles(relative);
+    return e.name.endsWith('.tsx') ? [relative] : [];
+  });
+}
+
+/** route -> ISO date of the last commit that touched the page behind it. */
+const ROUTE_LASTMOD = new Map();
+for (const file of pageFiles()) {
+  const route = routeOf(file);
+  if (!route) continue;
+  const iso = lastCommitIso(LEGAL_ROUTES.has(route) ? LOCALE_SOURCE : file);
+  if (iso) ROUTE_LASTMOD.set(route, iso);
+}
+
+/** slug -> ISO date, from the post's own front matter. */
+const POST_LASTMOD = new Map(
+  posts
+    .filter((post) => post.slug && (post.dateModified || post.date))
+    .map((post) => [post.slug, new Date(post.dateModified || post.date).toISOString()])
+);
+
+/** The build time is the last resort, not the default. */
+function lastmodFor(norm) {
+  const post = norm.match(/^\/blog\/([^/]+)\/$/);
+  if (post) return POST_LASTMOD.get(post[1]) ?? ROUTE_LASTMOD.get('/blog/') ?? BUILD_TIME;
+  return ROUTE_LASTMOD.get(norm) ?? BUILD_TIME;
+}
+
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: 'https://rtylr.com',
@@ -94,7 +193,7 @@ module.exports = {
       loc: path,
       changefreq,
       priority,
-      lastmod: new Date().toISOString(),
+      lastmod: lastmodFor(norm),
       ...(alternateRefs.length ? { alternateRefs } : {}),
     };
   },
