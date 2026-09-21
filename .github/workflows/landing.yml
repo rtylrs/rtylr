@@ -1,26 +1,96 @@
-name: Version (landing)
+name: Landing
 
-# A source push creates release metadata only, exactly like the rtylr
-# workspace's Version workflow. Builds and production deployment happen later,
-# and only for a release promoted in tryrtylr/deploy.
+# Two jobs, in order.
+#
+#   checks   every gate the landing has, run on pushes and on pull requests.
+#   version  release metadata, only once checks is green and never on a PR.
+#
+# The gate is the tag. There is no branch protection on this repo, so nothing
+# stops a red merge, but a red run produces no tag and tryrtylr/deploy can
+# only promote a tag. A daily automated publish therefore cannot reach
+# production on a broken build.
 on:
   push:
     branches: [main]
     paths:
       - 'apps/landing/**'
       - 'packages/**'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    paths:
+      - 'apps/landing/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
 
 concurrency:
-  group: version-landing-${{ github.ref }}
+  group: landing-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
+  checks:
+    name: checks
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @rtylr/landing typecheck
+
+      # build comes before test:unit, and it is not an ordering preference.
+      # tests/unit reads the static export out of dist/landing and its before()
+      # hook aborts when that directory is absent, so a unit run on a fresh
+      # checkout fails for want of a build rather than for want of a bug. The
+      # og-images check scans the same export.
+      - name: Build
+        run: pnpm --filter @rtylr/landing build
+
+      - name: Unit tests
+        run: pnpm --filter @rtylr/landing test:unit
+
+      - name: Open Graph images are current
+        run: node apps/landing/scripts/generate-og-images.mjs --check
+
+      - name: Install Playwright chromium
+        run: pnpm --filter @rtylr/landing exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm --filter @rtylr/landing test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/landing/playwright-report
+          retention-days: 7
+
   version:
     name: Calculate next landing version
+    needs: checks
+    if: github.event_name != 'pull_request'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
       version: ${{ steps.next.outputs.version }}
