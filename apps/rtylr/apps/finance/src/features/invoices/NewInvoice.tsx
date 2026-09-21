@@ -61,6 +61,10 @@ const NewInvoice: React.FC = () => {
   const createInvoice = useCreateInvoice();
   const updateInvoiceStatus = useUpdateInvoiceStatus();
   const { data: sourceInvoice } = useInvoiceDetail(clone);
+  // Create and the Sent transition are one save flow: the invoice-create route
+  // is not idempotent, so a second submit before both settle persists a
+  // duplicate. Keep the footer disabled until the whole flow is done.
+  const saving = createInvoice.isPending || updateInvoiceStatus.isPending;
 
   useEffect(() => {
     if (sourceInvoice) {
@@ -152,6 +156,7 @@ const NewInvoice: React.FC = () => {
   };
 
   const handleSave = (status: 'Draft' | 'Sent'): void => {
+    if (saving) return;
     if (!client) {
       toast.error(t('invoices.new.selectClientFirst'));
       return;
@@ -470,19 +475,19 @@ const NewInvoice: React.FC = () => {
             <>
               <button
                 type="button"
-                style={{ ...ghostBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
+                style={{ ...ghostBtn, opacity: saving ? 0.6 : 1 }}
                 onClick={() => handleSave('Draft')}
-                disabled={createInvoice.isPending}
+                disabled={saving}
               >
-                <Save size={13} /> {createInvoice.isPending ? 'Saving...' : 'Save as Draft'}
+                <Save size={13} /> {saving ? 'Saving...' : 'Save as Draft'}
               </button>
               <button
                 type="button"
-                style={{ ...primaryBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
+                style={{ ...primaryBtn, opacity: saving ? 0.6 : 1 }}
                 onClick={() => handleSave('Sent')}
-                disabled={createInvoice.isPending}
+                disabled={saving}
               >
-                {createInvoice.isPending ? 'Saving...' : 'Save & Send'}
+                {saving ? 'Saving...' : 'Save & Send'}
               </button>
             </>
           )}

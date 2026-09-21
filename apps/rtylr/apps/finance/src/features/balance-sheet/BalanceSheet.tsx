@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
@@ -10,7 +10,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useBalanceSheet } from './useBalanceSheet';
 import { useErpInventoryValuation } from '../../shared/hooks/queries/useErpInventoryValuation';
 import { cardStyle, ACCENT } from '../../shared/lib/tokens';
-import { todayIso } from '../../shared/lib/date';
+import { toLocalIso } from '../../shared/lib/date';
 
 const Section: React.FC<{
   title: string;
@@ -75,8 +75,7 @@ const Section: React.FC<{
 
 const BalanceSheet: React.FC = () => {
   const { t } = useTranslation('finance');
-  const [asOfDate, setAsOfDate] = useState(todayIso());
-  const { data, isLoading } = useBalanceSheet(asOfDate);
+  const { data, isLoading, dataUpdatedAt } = useBalanceSheet();
   // ERP->FIN-02: the Inventory line exists only when ERP answers. A tenant
   // without ERP gets no section at all, never a zero: a balance sheet that
   // silently reports 0 inventory misstates the business (#845).
@@ -108,31 +107,12 @@ const BalanceSheet: React.FC = () => {
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.balanceSheet'))} />
+      {/* The API is point-in-time only, so the only honest date to show is
+          when these figures were fetched. */}
       <PageHeader
         title={t('finance.balanceSheet.title')}
-        subtitle={`As of ${asOfDate}`}
+        subtitle={`${t('finance.balanceSheet.asOf')} ${toLocalIso(new Date(dataUpdatedAt))}`}
         breadcrumbs={[{ label: t('nav.reports') }, { label: t('nav.balanceSheet') }]}
-        actions={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <label style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>
-              {t('finance.balanceSheet.asOf')}
-            </label>
-            <input
-              type="date"
-              value={asOfDate}
-              max={todayIso()}
-              onChange={(e) => setAsOfDate(e.target.value)}
-              style={{
-                padding: '5px 10px',
-                borderRadius: 8,
-                border: '1px solid var(--hub-border)',
-                background: 'var(--hub-surface)',
-                color: 'var(--hub-text)',
-                fontSize: 12,
-              }}
-            />
-          </div>
-        }
       />
 
       <div
