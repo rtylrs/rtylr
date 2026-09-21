@@ -35,6 +35,10 @@ const memberState = vi.hoisted(() => ({
   refetch: vi.fn(),
 }));
 
+// Counts MemberDetail renders across the test; the disabled-locations bug
+// re-rendered until React threw "Maximum update depth exceeded".
+const renderState = vi.hoisted(() => ({ memberDetailRenders: 0 }));
+
 const userState = vi.hoisted(() => ({
   user: { role: '', isOwner: false } as {
     role: string;
@@ -48,7 +52,14 @@ const groupsState = vi.hoisted(() => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useTeam', () => ({
-  useMember: () => memberState,
+  useMember: () => {
+    renderState.memberDetailRenders += 1;
+    // A render loop would otherwise spin until Vitest kills the worker.
+    if (renderState.memberDetailRenders > 25) {
+      throw new Error('MemberDetail render loop detected');
+    }
+    return memberState;
+  },
   useDeactivateMember: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useUpdateMember: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
@@ -69,16 +80,19 @@ vi.mock('../../shared/hooks/queries/useSubscription', () => ({
 // `useEffect(..., [memberLocations])` would re-fire forever.
 
 // Stable identities for the same reason: these feed a
-// useEffect dependency.
+// useEffect dependency. `undefined` models the hook while its query is
+// disabled and no cached data exists.
 const posState = vi.hoisted(() => ({
   locations: [] as { id: number; name: string }[],
-  memberLocations: [] as {
-    id: number;
-    locationId: number;
-    canManagePosUsers: boolean;
-    canManageTerminals: boolean;
-    canViewReports: boolean;
-  }[],
+  memberLocations: undefined as
+    | {
+        id: number;
+        locationId: number;
+        canManagePosUsers: boolean;
+        canManageTerminals: boolean;
+        canViewReports: boolean;
+      }[]
+    | undefined,
 }));
 const assignLocationMock = vi.hoisted(() => vi.fn());
 const removeLocationMock = vi.hoisted(() => vi.fn());
@@ -117,8 +131,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   memberState.data = undefined;
   memberState.isLoading = false;
+  renderState.memberDetailRenders = 0;
   posState.locations = [];
-  posState.memberLocations = [];
+  posState.memberLocations = undefined;
   userState.user = {
     role: 'owner',
     isOwner: true,
@@ -271,6 +286,51 @@ describe('MemberDetail: POS location capabilities (#1028)', () => {
         canManageTerminals: true,
         canViewReports: false,
       })
+    );
+  });
+});
+
+describe('MemberDetail: member-locations query with no data', () => {
+  it('renders a bounded number of times when the query is disabled and empty', () => {
+    posState.memberLocations = undefined;
+    memberState.data = makeMember({ apps: ['pos'] });
+
+    render(<MemberDetail />);
+
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    // Pre-fix, the `= []` destructuring default gave the seeding effect a new
+    // dependency on every render, so the page looped until React threw
+    // "Maximum update depth exceeded" and never settled.
+    expect(renderState.memberDetailRenders).toBeLessThan(10);
+  });
+
+  it('keeps location edits made before a background refetch', async () => {
+    posState.locations = [
+      { id: 9001, name: 'Downtown' },
+      { id: 9002, name: 'Uptown' },
+    ];
+    const assigned = {
+      id: 501,
+      locationId: 9001,
+      canManagePosUsers: false,
+      canManageTerminals: false,
+      canViewReports: false,
+    };
+    posState.memberLocations = [assigned];
+    memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
+
+    const { rerender } = render(<MemberDetail />);
+    fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Uptown' }));
+
+    // A refetch resolves with structurally equal data under a new identity.
+    posState.memberLocations = [{ ...assigned }];
+    rerender(<MemberDetail />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.save' }));
+
+    await waitFor(() =>
+      expect(assignLocationMock).toHaveBeenCalledWith(expect.objectContaining({ locationId: 9002 }))
     );
   });
 });
