@@ -74,6 +74,59 @@ describe('heading structure', () => {
   });
 });
 
+// Snippet bands. A title outside 25 to 65 characters or a description
+// outside 110 to 170 gets rewritten or truncated by Google, so the two lines
+// a searcher actually reads stop being the two lines we wrote.
+//
+// Two traps are baked in deliberately. Next stamps `data-next-head` on every
+// head tag it owns, so a `<title>` pattern without an attribute allowance
+// matches nothing and the whole gate passes on an empty set. And the served
+// HTML is entity-encoded, so `&#x27;` has to be decoded before anything is
+// counted or every description holding an apostrophe is measured wrong.
+// Both are asserted below rather than assumed.
+const TITLE = /<title[^>]*>(.*?)<\/title>/s;
+const DESCRIPTION = /<meta name="description" content="(.*?)"/s;
+
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+const decode = (s) =>
+  s
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+    .replace(/&(amp|lt|gt|quot|apos|nbsp);/g, (_, n) => ENTITIES[n]);
+
+// /404/ is not indexable and has no snippet to win.
+const SNIPPET_PAGES = () => pages.filter((p) => p !== '404/index.html');
+
+describe('snippet lengths', () => {
+  it('every indexable page has a non-empty title and description', () => {
+    const missing = SNIPPET_PAGES().filter((p) => {
+      const html = read(p);
+      return !TITLE.exec(html)?.[1] || !DESCRIPTION.exec(html)?.[1];
+    });
+    assert.deepEqual(missing, [], 'a page with no title or description measures as zero, not as a failure');
+  });
+
+  it('every title is 25 to 65 characters', () => {
+    const offenders = [];
+    for (const p of SNIPPET_PAGES()) {
+      const title = decode(TITLE.exec(read(p))?.[1] ?? '');
+      const n = [...title].length;
+      if (n < 25 || n > 65) offenders.push([p, n, title]);
+    }
+    assert.deepEqual(offenders, [], 'titles outside the 25 to 65 character band');
+  });
+
+  it('every meta description is 110 to 170 characters', () => {
+    const offenders = [];
+    for (const p of SNIPPET_PAGES()) {
+      const desc = decode(DESCRIPTION.exec(read(p))?.[1] ?? '');
+      const n = [...desc].length;
+      if (n < 110 || n > 170) offenders.push([p, n, desc]);
+    }
+    assert.deepEqual(offenders, [], 'descriptions outside the 110 to 170 character band');
+  });
+});
+
 describe('structured data', () => {
   it('every page emits at least one JSON-LD block', () => {
     const missing = pages.filter((p) => jsonLd(read(p)).length === 0);
