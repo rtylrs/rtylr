@@ -288,8 +288,8 @@
   },
   "contact": {
     "meta": {
-      "title": "Contact | rtylr",
-      "description": "Get in touch with the rtylr team. We respond within 24 hours."
+      "title": "Contact rtylr Sales and Support in Lebanon | rtylr",
+      "description": "Reach the rtylr team for sales, support, press or partnerships. Every message lands with a human and we reply within one business day, usually faster."
     },
     "hero": {
       "title": "Reach out. We read it all.",
@@ -357,8 +357,8 @@
   },
   "pricing": {
     "meta": {
-      "title": "Pricing | rtylr",
-      "description": "rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card. Prices are not published yet, so talk to us for a quote."
+      "title": "rtylr Pricing: POS, ERP, CRM, HR and Finance in One Plan | rtylr",
+      "description": "rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card, then talk to us for a quote."
     },
     "hero": {
       "title": "All 7 apps.\nEvery plan.",
@@ -1026,7 +1026,7 @@
   "crm": {
     "meta": {
       "title": "CRM · Every customer, remembered. | rtylr",
-      "description": "Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically.",
+      "description": "Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically. Built for restaurants, retail and services.",
       "schemaDescription": "Customer profiles, loyalty programs, and campaign tracking that connect to every other app."
     },
     "hero": {
@@ -1191,8 +1191,8 @@
   },
   "integrations": {
     "meta": {
-      "title": "Integrations · Payments, accounting, delivery and hardware | rtylr",
-      "description": "Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
+      "title": "Integrations: Payments, Accounting, Delivery, Hardware | rtylr",
+      "description": "Every service rtylr connects to: payment gateways, accounting, delivery platforms, communications, hardware and productivity tools, with the status of each."
     },
     "hero": {
       "eyebrow": "INTEGRATIONS",
@@ -1315,8 +1315,8 @@
   },
   "trust": {
     "meta": {
-      "title": "Trust Center | rtylr",
-      "description": "Security, privacy, compliance, uptime, and vendor transparency, everything customers need before they commit."
+      "title": "Trust Center: Security, Privacy and Uptime at rtylr | rtylr",
+      "description": "Security, privacy, compliance, uptime, and vendor transparency, everything customers need before they commit. Written for the people running the review."
     },
     "pillars": [
       {
@@ -1408,7 +1408,7 @@
   "hardware": {
     "meta": {
       "title": "POS Hardware · Terminals, Printers & Scanners | rtylr",
-      "description": "Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
+      "description": "Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box: printers, card readers, scanners and kiosks."
     },
     "items": [
       {
@@ -1466,7 +1466,7 @@
   },
   "partners": {
     "meta": {
-      "title": "Partner Program | rtylr",
+      "title": "Partner Program: Build and Co-Sell with rtylr | rtylr",
       "description": "Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
     },
     "tracks": [
@@ -1553,8 +1553,8 @@
   },
   "demo": {
     "meta": {
-      "title": "Book a demo | rtylr",
-      "description": "See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it.",
+      "title": "Book a Live rtylr Demo for Your Business | rtylr",
+      "description": "See rtylr running against real data in a live 30 minute walkthrough with someone who built it. Bring your questions about POS, inventory, payroll and books.",
       "schemaName": "Book a Demo"
     },
     "hero": {
@@ -1592,7 +1592,7 @@
   "support": {
     "meta": {
       "title": "Help Center · Guides, Billing & Support | rtylr",
-      "description": "Getting started, billing, team, configuration, integrations, security, everything in one place."
+      "description": "Getting started, billing, team, configuration, integrations, security, everything in one place. Guides and answers for the people running rtylr day to day."
     },
     "hero": {
       "eyebrow": "HELP CENTER",
@@ -1714,8 +1714,8 @@
   "legal": {
     "terms": {
       "meta": {
-        "title": "Terms of Service | rtylr",
-        "description": "The terms that govern your use of rtylr, operated by Voxire.",
+        "title": "rtylr Terms of Service and Acceptable Use | rtylr",
+        "description": "The terms that govern your use of rtylr, operated by Voxire: your account, plans and billing, per-seat proration, trials and refunds, acceptable use and your data.",
         "schemaDescription": "The terms that govern your use of rtylr, operated by Voxire."
       },
       "eyebrow": "LEGAL · TERMS OF SERVICE",
@@ -1831,8 +1831,8 @@
     },
     "privacyPolicy": {
       "meta": {
-        "title": "Privacy Policy | rtylr",
-        "description": "How rtylr and Voxire handle your personal data, under GDPR, CCPA, and equivalent laws.",
+        "title": "rtylr Privacy Policy: How Voxire Handles Your Data | rtylr",
+        "description": "How rtylr and Voxire handle your personal data, under GDPR, CCPA, and equivalent laws: what we collect, who we share it with, retention and your rights.",
         "schemaDescription": "How rtylr and Voxire handle your personal data."
       },
       "eyebrow": "LEGAL · PRIVACY POLICY",
@@ -1962,8 +1962,8 @@
     },
     "security": {
       "meta": {
-        "title": "Security | rtylr",
-        "description": "Security reporting, data-processing considerations, and assurance information for rtylr.",
+        "title": "Security at rtylr: Reporting and Assurance | rtylr",
+        "description": "Security reporting, data-processing considerations, and assurance information for rtylr, with monitoring and incident response and how to disclose a flaw.",
         "schemaDescription": "Security reporting, data-processing considerations, and assurance information for rtylr."
       },
       "eyebrow": "LEGAL · SECURITY",
