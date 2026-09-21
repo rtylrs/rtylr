@@ -2,7 +2,9 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
@@ -234,5 +236,42 @@ func TestSessions_Close_UnknownIDReturnsNotFound(t *testing.T) {
 	})
 	if !errors.Is(err, domain.ErrSessionNotFound) {
 		t.Fatalf("expected ErrSessionNotFound, got %v", err)
+	}
+}
+
+// Regression: the deferred RELEASE_LOCK ran after tx.Commit(), where
+// database/sql returns ErrTxDone without sending the statement, so the MySQL
+// named lock stayed on the pooled connection and a later Open for the same
+// staff failed with a misleading "already open" after the 5s GET_LOCK timeout.
+func TestSessions_Open_ReleasesAdvisoryLock(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	staffID := int64(4298)
+	id, err := repo.Open(ctx, domain.OpenSessionInput{
+		OwnerID:      testutil.OwnerID,
+		BusinessID:   testutil.BusinessID,
+		StaffID:      &staffID,
+		OpeningFloat: 10.0,
+	})
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, `DELETE FROM pos_sessions WHERE id = ?`, id)
+	})
+
+	assertAdvisoryLockReleased(t, db, fmt.Sprintf("pos_session:%d:%d", testutil.BusinessID, staffID))
+}
+
+func assertAdvisoryLockReleased(t *testing.T, db *sql.DB, lockName string) {
+	t.Helper()
+	var holder sql.NullInt64
+	if err := db.QueryRowContext(context.Background(), "SELECT IS_USED_LOCK(?)", lockName).Scan(&holder); err != nil {
+		t.Fatalf("check advisory lock %q: %v", lockName, err)
+	}
+	if holder.Valid {
+		t.Fatalf("advisory lock %q is still held by connection %d", lockName, holder.Int64)
 	}
 }

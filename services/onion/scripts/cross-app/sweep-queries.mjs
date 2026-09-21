@@ -52,8 +52,14 @@ function addQueryFile(file, module) {
     const kind = m[2];
     const body = m[3];
     const { reads, writes } = tablesIn(body);
-    const seg = body.match(/where[\s\S]*?(?:$|\n\n)/i);
-    const predText = body;
+    // Only occurrences inside the WHERE clause are tenant *filters*: a SELECT
+    // column list, a DISTINCT, an ORDER BY or an INSERT column list mentions
+    // business_id without scoping anything. Trailing GROUP BY / ORDER BY /
+    // HAVING / LIMIT clauses are not predicates either.
+    const seg = body.match(/\bwhere\b[\s\S]*?(?:$|\n\n)/i);
+    const predText = seg
+      ? seg[0].replace(/\b(?:group\s+by|order\s+by|having|limit)\b[\s\S]*$/i, '')
+      : '';
     rows.push({
       module,
       query_name: name,

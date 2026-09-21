@@ -10,10 +10,16 @@ ORDER BY created_at ASC, id ASC;
 -- name: GetOrderItemStatus :one
 SELECT status FROM pos_order_items WHERE id = ? AND order_id = ?;
 
+-- name: OrderExists :one
+SELECT COUNT(*) FROM pos_orders WHERE business_id = ? AND id = ?;
+
+-- name: OrderItemExists :one
+SELECT COUNT(*) FROM pos_order_items WHERE order_id = ? AND id = ?;
+
 -- name: FreeTableByID :exec
 UPDATE pos_tables SET status = 'available' WHERE id = ? AND business_id = ?;
 
--- name: OccupyTableByID :exec
+-- name: OccupyTableByID :execresult
 UPDATE pos_tables SET status = 'occupied' WHERE id = ? AND business_id = ?;
 
 -- name: MoveOrderToTable :exec

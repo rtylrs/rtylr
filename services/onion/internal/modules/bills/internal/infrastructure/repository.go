@@ -153,6 +153,9 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return err
 	}
 	input.Status = nextStatus
+	// The update body is partial: fields the caller omitted keep the stored
+	// value instead of clearing the vendor snapshot or the order link.
+	mergeBillInput(&input, current)
 
 	dueDate, err := time.Parse("2006-01-02", input.DueDate)
 	if err != nil && input.DueDate != "" {
@@ -182,10 +185,30 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return err
 	}
 	if rows == 0 {
-		return domain.ErrBillNotFound
+		// MySQL reports changed rows, not matched rows: storing identical
+		// values matches the row but affects none. The pre-read above already
+		// proved the bill exists for this business, so only report a missing
+		// bill when it has actually disappeared since.
+		if _, getErr := r.Get(ctx, businessID, id); getErr != nil {
+			return getErr
+		}
 	}
 
 	return nil
+}
+
+// mergeBillInput keeps the stored supplier link, vendor snapshot and purchase
+// order link when the caller omitted them from the partial update body.
+func mergeBillInput(input *domain.BillInput, current domain.Bill) {
+	if input.SupplierID == 0 {
+		input.SupplierID = current.SupplierID
+	}
+	if input.SupplierName == "" {
+		input.SupplierName = current.SupplierName
+	}
+	if input.PurchaseOrderID == nil {
+		input.PurchaseOrderID = current.PurchaseOrderID
+	}
 }
 
 // SumByStatus returns the total bill amount for a given status and owner.

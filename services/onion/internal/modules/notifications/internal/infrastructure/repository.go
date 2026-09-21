@@ -74,10 +74,11 @@ func nullInt64(value *int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: *value, Valid: true}
 }
 
-func (r *Repository) MarkRead(ctx context.Context, userID, notificationID int64) error {
+func (r *Repository) MarkRead(ctx context.Context, businessID, userID, notificationID int64) error {
 	err := r.queries.MarkNotificationRead(ctx, sqlc.MarkNotificationReadParams{
-		ID:     notificationID,
-		UserID: userID,
+		ID:         notificationID,
+		BusinessID: businessID,
+		UserID:     userID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to mark notification as read", logger.Error(err))
@@ -87,8 +88,11 @@ func (r *Repository) MarkRead(ctx context.Context, userID, notificationID int64)
 	return nil
 }
 
-func (r *Repository) MarkAllRead(ctx context.Context, userID int64) error {
-	err := r.queries.MarkAllNotificationsRead(ctx, userID)
+func (r *Repository) MarkAllRead(ctx context.Context, businessID, userID int64) error {
+	err := r.queries.MarkAllNotificationsRead(ctx, sqlc.MarkAllNotificationsReadParams{
+		BusinessID: businessID,
+		UserID:     userID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to mark all notifications as read", logger.Error(err))
 		return err

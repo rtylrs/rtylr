@@ -209,7 +209,11 @@ func (r *Repository) ListSessions(ctx context.Context, businessID, locationID in
 	}
 
 	if dateTo != "" {
-		builder = builder.Where(sq.LtOrEq{"opened_at": dateTo})
+		// date_to is a calendar day and dateFrom already includes the whole
+		// start day; comparing the DATETIME column with a date-only string
+		// would cut the end day off at 00:00:00. Use the exclusive next-day
+		// boundary, matching applyPOSOrderListFilters.
+		builder = builder.Where("opened_at < DATE_ADD(?, INTERVAL 1 DAY)", dateTo)
 	}
 
 	query, args, err := builder.
@@ -271,7 +275,15 @@ func (r *Repository) OpenSession(ctx context.Context, businessID, staffID, locat
 	if acquired != 1 {
 		return 0, domain.ErrSessionAlreadyOpen
 	}
-	defer tx.ExecContext(ctx, `SELECT RELEASE_LOCK(?)`, lockName)
+	// MySQL named locks are connection-scoped: COMMIT/ROLLBACK do not release
+	// them, and database/sql refuses to run statements on a finished Tx, so a
+	// deferred RELEASE_LOCK after Commit never reaches the server and leaks
+	// the lock onto the pooled connection. Keep a deferred best-effort release
+	// for the early-return paths and release explicitly (with the result
+	// checked) while the transaction is still open on the success path below.
+	defer func() {
+		_ = releaseNamedLock(ctx, tx, lockName)
+	}()
 	var exists int
 	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM pos_sessions WHERE business_id = ? AND staff_id = ? AND status = 'open')`, businessID, staffID).Scan(&exists); err != nil {
 		return 0, err
@@ -290,18 +302,45 @@ func (r *Repository) OpenSession(ctx context.Context, businessID, staffID, locat
 	if err != nil {
 		return 0, err
 	}
+	if err := releaseNamedLock(ctx, tx, lockName); err != nil {
+		logger.Ctx(ctx).Error("Failed to release session lock", logger.Error(err))
+		return 0, err
+	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (r *Repository) CloseSessionForStaff(ctx context.Context, businessID, staffID, sessionID int64, closingCash, expectedCash, cashDiff float64, notes string) error {
+// releaseNamedLock releases a MySQL named lock held by tx. It must be called
+// while tx is still open: MySQL releases named locks at connection close, not
+// at COMMIT/ROLLBACK, and a finished *sql.Tx returns ErrTxDone without sending
+// the statement, which would leak the lock on the pooled connection.
+func releaseNamedLock(ctx context.Context, tx *sql.Tx, name string) error {
+	var released sql.NullInt64
+	if err := tx.QueryRowContext(ctx, `SELECT RELEASE_LOCK(?)`, name).Scan(&released); err != nil {
+		return err
+	}
+	if !released.Valid || released.Int64 != 1 {
+		return fmt.Errorf("mysql lock %q was not held by this connection", name)
+	}
+	return nil
+}
+
+// CloseSessionForStaff closes the session and writes its aggregate totals in
+// one UPDATE. The totals are computed before the call from the session's
+// orders (GetSessionTotals), so folding them in keeps the close atomic: a
+// failure leaves the session open and retryable instead of reporting an error
+// for a session that is already closed but carries stale totals.
+func (r *Repository) CloseSessionForStaff(ctx context.Context, businessID, staffID, sessionID int64, closingCash, expectedCash, cashDiff float64, notes string, totalSales, cashSales, cardSales, onlineSales float64, totalOrders int) error {
 	result, err := r.pool.ExecContext(ctx, `
 		UPDATE pos_sessions
-		SET status = 'closed', closing_cash = ?, expected_cash = ?, cash_difference = ?, closed_at = NOW(), notes = ?
+		SET status = 'closed', closing_cash = ?, expected_cash = ?, cash_difference = ?, closed_at = NOW(), notes = ?,
+		    total_sales = ?, total_cash_sales = ?, total_card_sales = ?, total_online_sales = ?, total_orders = ?
 		WHERE business_id = ? AND id = ? AND staff_id = ? AND status = 'open'`,
-		sqlutil.FloatToDecimal(closingCash), sqlutil.FloatToDecimal(expectedCash), sqlutil.FloatToDecimal(cashDiff), notes, businessID, sessionID, staffID)
+		sqlutil.FloatToDecimal(closingCash), sqlutil.FloatToDecimal(expectedCash), sqlutil.FloatToDecimal(cashDiff), notes,
+		sqlutil.FloatToDecimal(totalSales), sqlutil.FloatToDecimal(cashSales), sqlutil.FloatToDecimal(cardSales),
+		sqlutil.FloatToDecimal(onlineSales), totalOrders, businessID, sessionID, staffID)
 	if err != nil {
 		return err
 	}

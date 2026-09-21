@@ -196,11 +196,12 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, businessID int64, 
 		return 0, err
 	}
 
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
-	}()
+	// Always roll back when the function exits; after a successful commit the
+	// rollback is a no-op (sql.ErrTxDone), and every early return is covered
+	// even if it does not assign the outer err. The previous conditional defer
+	// keyed on the outer err, which the reference-validation path below never
+	// assigned, so a validation failure leaked the transaction's connection.
+	defer func() { _ = tx.Rollback() }()
 
 	qtx := r.queries.WithTx(tx)
 	if err := validatePurchaseOrderReferences(ctx, qtx, businessID, input); err != nil {
@@ -412,11 +413,10 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		return err
 	}
 
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
-	}()
+	// Always roll back when the function exits; after a successful commit the
+	// rollback is a no-op (sql.ErrTxDone), and every early return is covered
+	// even if it does not assign the outer err.
+	defer func() { _ = tx.Rollback() }()
 
 	qtx := r.queries.WithTx(tx)
 
@@ -453,10 +453,14 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		return err
 	}
 
+	// Index the submitted quantities by line id. They are range-checked below
+	// against each line's stored quantity_ordered: the request's own
+	// quantity_ordered is client-supplied and must never widen the bound.
 	receivedByID := make(map[int64]float64, len(submitted))
 	for _, item := range submitted {
-		if item.QuantityReceived < 0 || item.QuantityReceived > item.QuantityOrdered {
-			return fmt.Errorf("received quantity for item %d must be between zero and ordered quantity", item.ID)
+		if item.QuantityReceived < 0 {
+			err = fmt.Errorf("received quantity for item %d must not be negative", item.ID)
+			return err
 		}
 		receivedByID[item.ID] = item.QuantityReceived
 	}
@@ -473,7 +477,8 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		if it.QuantityReceived.Valid {
 			parsed, parseErr := strconv.ParseFloat(it.QuantityReceived.String, 64)
 			if parseErr != nil {
-				return parseErr
+				err = parseErr
+				return err
 			}
 			previous = parsed
 		}
@@ -482,7 +487,15 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			var ok bool
 			qty, ok = receivedByID[it.ID]
 			if !ok {
-				return fmt.Errorf("missing received quantity for item %d", it.ID)
+				err = fmt.Errorf("missing received quantity for item %d", it.ID)
+				return err
+			}
+			// Bound the received quantity by the stored ordered quantity, not
+			// by the request's quantity_ordered, so a submitted value cannot
+			// inflate stock beyond what was actually ordered.
+			if qty > ordered {
+				err = fmt.Errorf("received quantity for item %d cannot exceed the ordered quantity %v", it.ID, ordered)
+				return err
 			}
 		}
 		if qty < ordered {
@@ -490,7 +503,8 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		}
 		delta := qty - previous
 		if delta < 0 {
-			return fmt.Errorf("received quantity for item %d cannot decrease from %v", it.ID, previous)
+			err = fmt.Errorf("received quantity for item %d cannot decrease from %v", it.ID, previous)
+			return err
 		}
 		receiptLines = append(receiptLines, purchaseOrderReceiptLine{item: it, delta: delta})
 		receivedUpdates = append(receivedUpdates, purchaseOrderItemReceivedUpdate{

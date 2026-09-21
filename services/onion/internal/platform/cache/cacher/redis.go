@@ -267,6 +267,14 @@ func logRedisError(ctx context.Context, msg, key, hashField string, err error) {
 
 // Put stores a key-value pair in Redis.
 func (r *redisCache) Put(ctx context.Context, key string, val []byte, ttl time.Duration) {
+	r.PutConfirmed(ctx, key, val, ttl)
+}
+
+// PutConfirmed stores a key-value pair in Redis and reports whether the write
+// succeeded. Callers that must not mistake a lost write for success (the
+// idempotency reservation) use this instead of Put, which cannot report
+// failure.
+func (r *redisCache) PutConfirmed(ctx context.Context, key string, val []byte, ttl time.Duration) bool {
 	ctx, cancel := getTimeoutContext(ctx)
 	defer cancel()
 
@@ -278,7 +286,11 @@ func (r *redisCache) Put(ctx context.Context, key string, val []byte, ttl time.D
 			logger.String("key", key),
 			logger.Error(redisError),
 		)
+
+		return false
 	}
+
+	return true
 }
 
 // HSet sets the value of a field in a Redis hash set.

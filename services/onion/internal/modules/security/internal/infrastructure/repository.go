@@ -57,24 +57,32 @@ func (r *Repository) GetSecuritySettings(ctx context.Context, userID int64) (dom
 
 func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled bool) error {
 	// cross-schema write to users — two_factor_enabled is owned by the user/auth module.
-	err := r.queries.SetTwoFactor(ctx, sqlc.SetTwoFactorParams{
-		TwoFactorEnabled: enabled,
-		ID:               userID,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to set 2FA", logger.Error(err))
-	}
+	// Both flags must flip together: the auth gate reads mfa_required from
+	// user_provisioning_states while users.two_factor_enabled drives the security
+	// settings, so a second-statement failure must not leave them disagreeing.
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
-	_, stateErr := r.db.ExecContext(ctx, `
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		return cause
+	}
+	if err := sqlc.New(tx).SetTwoFactor(ctx, sqlc.SetTwoFactorParams{
+		TwoFactorEnabled: enabled,
+		ID:               userID,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to set 2FA", logger.Error(err))
+		return rollback(err)
+	}
+	_, stateErr := tx.ExecContext(ctx, `
 		UPDATE user_provisioning_states
 		SET mfa_required = ?, updated_at = NOW()
 		WHERE user_id = ?`, enabled, userID)
 	if stateErr != nil && !authorizationSchemaUnavailable(stateErr) {
-		return stateErr
+		return rollback(stateErr)
 	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) BeginMFAEnrollment(ctx context.Context, userID int64, encryptedSecret []byte) error {

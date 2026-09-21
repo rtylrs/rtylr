@@ -53,12 +53,13 @@ func recurringInvoiceToProto(row domain.RecurringInvoice) *financerecurringinvoi
 	}
 }
 
-func recurringInvoiceInput(templateID int64, frequency, nextInvoiceDate, endDate string, isActive bool) (domain.RecurringInvoiceInput, error) {
+func recurringInvoiceInput(templateID *int64, frequency, nextInvoiceDate string, endDate *string, isActive *bool) (domain.RecurringInvoiceInput, error) {
 	frequency = strings.TrimSpace(frequency)
 	nextInvoiceDate = strings.TrimSpace(nextInvoiceDate)
-	endDate = strings.TrimSpace(endDate)
-	if templateID == 0 {
-		return domain.RecurringInvoiceInput{}, onekiterrors.New(http.StatusBadRequest, "template_invoice_id is required")
+	// A nil template_invoice_id means the update did not include it; the
+	// repository then keeps the stored template.
+	if templateID != nil && *templateID <= 0 {
+		return domain.RecurringInvoiceInput{}, onekiterrors.New(http.StatusBadRequest, "template_invoice_id must be greater than zero")
 	}
 	if frequency == "" {
 		return domain.RecurringInvoiceInput{}, onekiterrors.New(http.StatusBadRequest, "frequency is required")
@@ -68,6 +69,18 @@ func recurringInvoiceInput(templateID int64, frequency, nextInvoiceDate, endDate
 	}
 	if _, err := time.Parse("2006-01-02", nextInvoiceDate); err != nil {
 		return domain.RecurringInvoiceInput{}, onekiterrors.New(http.StatusBadRequest, "next_invoice_date must be in YYYY-MM-DD format")
+	}
+	// end_date stays nil when the caller omitted it, so update keeps the stored
+	// bound instead of widening the schedule to open-ended. A malformed value
+	// is rejected rather than silently dropped.
+	if endDate != nil {
+		trimmed := strings.TrimSpace(*endDate)
+		if trimmed != "" {
+			if _, err := time.Parse("2006-01-02", trimmed); err != nil {
+				return domain.RecurringInvoiceInput{}, onekiterrors.New(http.StatusBadRequest, "end_date must be in YYYY-MM-DD format")
+			}
+		}
+		endDate = &trimmed
 	}
 	return domain.RecurringInvoiceInput{
 		TemplateInvoiceID: templateID,
@@ -99,7 +112,11 @@ func (a *RecurringInvoiceAPI) CreateRecurringInvoice(ctx context.Context, req *f
 	if err != nil {
 		return nil, err
 	}
-	input, err := recurringInvoiceInput(req.GetTemplateInvoiceId(), req.GetFrequency(), req.GetNextInvoiceDate(), req.GetEndDate(), req.GetIsActive())
+	// template_invoice_id is optional on update but required to create.
+	if req.TemplateInvoiceId == nil || *req.TemplateInvoiceId <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "template_invoice_id is required")
+	}
+	input, err := recurringInvoiceInput(req.TemplateInvoiceId, req.GetFrequency(), req.GetNextInvoiceDate(), req.EndDate, req.IsActive)
 	if err != nil {
 		return nil, err
 	}
@@ -133,11 +150,17 @@ func (a *RecurringInvoiceAPI) UpdateRecurringInvoice(ctx context.Context, req *f
 		return nil, err
 	}
 	body := req.GetBody()
-	input, err := recurringInvoiceInput(body.GetTemplateInvoiceId(), body.GetFrequency(), body.GetNextInvoiceDate(), body.GetEndDate(), body.GetIsActive())
+	if body == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Recurring invoice body is required")
+	}
+	input, err := recurringInvoiceInput(body.TemplateInvoiceId, body.GetFrequency(), body.GetNextInvoiceDate(), body.EndDate, body.IsActive)
 	if err != nil {
 		return nil, err
 	}
 	if err := a.Service.Update(ctx, businessID, req.GetId(), input); err != nil {
+		if errors.Is(err, domain.ErrRecurringInvoiceNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Recurring invoice not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update recurring invoice")
 	}
 	return &financerecurringinvoicev1.UpdateRecurringInvoiceResponse{Message: "Recurring invoice updated successfully"}, nil

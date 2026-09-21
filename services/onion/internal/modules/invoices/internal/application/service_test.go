@@ -932,3 +932,83 @@ func TestCreateInvoice_RejectsOverDiscount(t *testing.T) {
 		t.Error("over-discounted invoice reached the repository")
 	}
 }
+
+// ---- CRM customer link ----
+
+type fakeCustomerSnapshots struct {
+	name    string
+	email   string
+	address string
+	err     error
+	calls   int
+}
+
+func (f *fakeCustomerSnapshots) CustomerSnapshot(_ context.Context, _, _ int64) (string, string, string, error) {
+	f.calls++
+	return f.name, f.email, f.address, f.err
+}
+
+func TestCreateInvoice_PersistsVerifiedCustomerLink(t *testing.T) {
+	repo := &mockRepo{generatedID: 77}
+	provider := &fakeCustomerSnapshots{name: "Acme Ltd", email: "billing@acme.test", address: "1 Test Way"}
+	s := &Service{repo: repo}
+	s.SetCustomerSnapshotProvider(provider)
+
+	inv, err := s.CreateInvoice(context.Background(), 1001, domain.InvoiceInput{
+		CustomerID: 42,
+		IssueDate:  "2024-06-15",
+		DueDate:    "2024-06-30",
+		Items: []domain.InvoiceItemInput{
+			{Description: "Widget", Quantity: 1, UnitPrice: 10},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CreateInvoice() error = %v", err)
+	}
+	if provider.calls != 1 {
+		t.Fatalf("snapshot provider calls = %d, want 1", provider.calls)
+	}
+	if repo.created == nil {
+		t.Fatal("invoice never reached the repository")
+	}
+	if repo.created.CustomerID == nil || *repo.created.CustomerID != 42 {
+		t.Fatalf("persisted customer_id = %v, want 42", repo.created.CustomerID)
+	}
+	if inv.ClientName != "Acme Ltd" || inv.ClientEmail != "billing@acme.test" || inv.ClientAddress != "1 Test Way" {
+		t.Fatalf("snapshot not applied: name=%q email=%q address=%q", inv.ClientName, inv.ClientEmail, inv.ClientAddress)
+	}
+}
+
+func TestCreateInvoice_RejectsUnverifiableCustomerLink(t *testing.T) {
+	baseInput := domain.InvoiceInput{
+		CustomerID: 42,
+		IssueDate:  "2024-06-15",
+		DueDate:    "2024-06-30",
+		Items: []domain.InvoiceItemInput{
+			{Description: "Widget", Quantity: 1, UnitPrice: 10},
+		},
+	}
+
+	// No provider wired: the link cannot be verified, so the invoice must not
+	// be written.
+	unwired := &mockRepo{}
+	s := &Service{repo: unwired}
+	if _, err := s.CreateInvoice(context.Background(), 1001, baseInput); !errors.Is(err, ErrCustomerVerificationUnavailable) {
+		t.Fatalf("unwired provider error = %v, want ErrCustomerVerificationUnavailable", err)
+	}
+	if unwired.created != nil {
+		t.Error("invoice persisted without a customer snapshot provider")
+	}
+
+	// Unknown/foreign customer: the provider error surfaces as
+	// ErrCustomerNotFound and the invoice must not be written.
+	failing := &mockRepo{}
+	s = &Service{repo: failing}
+	s.SetCustomerSnapshotProvider(&fakeCustomerSnapshots{err: errors.New("no rows")})
+	if _, err := s.CreateInvoice(context.Background(), 1001, baseInput); !errors.Is(err, ErrCustomerNotFound) {
+		t.Fatalf("failed lookup error = %v, want ErrCustomerNotFound", err)
+	}
+	if failing.created != nil {
+		t.Error("invoice persisted with an unverified customer link")
+	}
+}

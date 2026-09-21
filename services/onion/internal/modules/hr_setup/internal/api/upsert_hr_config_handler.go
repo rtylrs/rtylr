@@ -34,6 +34,31 @@ type UpsertHRConfigRequest struct {
 	OvertimeMultiplier    float64 `json:"overtime_multiplier"`
 	DirectoryEnabled      bool    `json:"directory_enabled"`
 	hasCoreConfigFields   bool
+	// presentCoreFields records which HR-core keys the payload actually
+	// carried (under either their snake_case or camelCase spelling). A key
+	// that was omitted must keep its stored value, not be written as the
+	// zero value of its Go type.
+	presentCoreFields map[string]bool
+}
+
+// coreConfigFieldKeys maps each HR-core config field to every JSON key it can
+// arrive under. The canonical name is the snake_case column.
+var coreConfigFieldKeys = []struct {
+	field string
+	keys  []string
+}{
+	{"company_name", []string{"company_name", "companyName"}},
+	{"fiscal_year_start_month", []string{"fiscal_year_start_month", "fiscalYearStartMonth"}},
+	{"default_currency", []string{"default_currency", "defaultCurrency"}},
+	{"default_timezone", []string{"default_timezone", "defaultTimezone"}},
+	{"default_work_schedule_id", []string{"default_work_schedule_id", "defaultWorkScheduleId"}},
+	{"overtime_enabled", []string{"overtime_enabled", "overtimeEnabled"}},
+	{"overtime_multiplier", []string{"overtime_multiplier", "overtimeMultiplier"}},
+	{"directory_enabled", []string{"directory_enabled", "directoryEnabled"}},
+}
+
+func (r *UpsertHRConfigRequest) coreFieldPresent(field string) bool {
+	return r.presentCoreFields[field]
 }
 
 type UpsertHRConfigResponse struct {
@@ -61,34 +86,82 @@ func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRe
 		return UpsertHRConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	cfg, err := h.Service.UpsertHRConfig(ctx, device.User.UserID, req.SetupCompletedAt)
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to upsert hr config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return UpsertHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update HR config")
-	}
-
 	var coreCfg *hrcore.Config
 	if req.hasCoreConfigFields {
 		if h.CoreService == nil {
 			return UpsertHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "HR core configuration is unavailable")
 		}
-		coreCfg, err = h.CoreService.UpsertConfig(ctx, businessID, hrcore.ConfigInput{
-			CompanyName:           req.CompanyName,
-			FiscalYearStartMonth:  req.FiscalYearStartMonth,
-			DefaultCurrency:       req.DefaultCurrency,
-			DefaultTimezone:       req.DefaultTimezone,
-			DefaultWorkScheduleID: req.DefaultWorkScheduleID,
-			OvertimeEnabled:       req.OvertimeEnabled,
-			OvertimeMultiplier:    req.OvertimeMultiplier,
-			DirectoryEnabled:      req.DirectoryEnabled,
-		})
+		// The core write runs before the setup marker so a core failure cannot
+		// leave hr_configs.setup_completed_at persisted behind a 500.
+		current, err := h.CoreService.GetConfig(ctx, businessID)
+		if err != nil && !hrcore.IsConfigNotFound(err) {
+			logger.Ctx(ctx).Error("failed to load hr core config", logger.Any("business_id", businessID), logger.Error(err))
+			return UpsertHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update HR config")
+		}
+		coreCfg, err = h.CoreService.UpsertConfig(ctx, businessID, mergeCoreConfigInput(current, req))
 		if err != nil {
 			logger.Ctx(ctx).Error("failed to upsert hr core config", logger.Any("business_id", businessID), logger.Error(err))
 			return UpsertHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update HR config")
 		}
 	}
 
+	cfg, err := h.Service.UpsertHRConfig(ctx, device.User.UserID, req.SetupCompletedAt)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to upsert hr config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		return UpsertHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update HR config")
+	}
+
 	return UpsertHRConfigResponse{Config: toConfigPayload(cfg, coreCfg)}, nil
+}
+
+// mergeCoreConfigInput overlays the fields the request actually carried onto
+// the stored HR-core config, so a partial payload keeps the settings it
+// omitted instead of writing their Go zero values. A business with no stored
+// config yet is seeded with the schema defaults rather than zero values.
+func mergeCoreConfigInput(current *hrcore.Config, req *UpsertHRConfigRequest) hrcore.ConfigInput {
+	input := hrcore.ConfigInput{
+		FiscalYearStartMonth: 1,
+		DefaultCurrency:      "USD",
+		DefaultTimezone:      "UTC",
+		OvertimeMultiplier:   1.5,
+	}
+	if current != nil {
+		input = hrcore.ConfigInput{
+			CompanyName:           current.CompanyName,
+			FiscalYearStartMonth:  current.FiscalYearStartMonth,
+			DefaultCurrency:       current.DefaultCurrency,
+			DefaultTimezone:       current.DefaultTimezone,
+			DefaultWorkScheduleID: current.DefaultWorkScheduleID,
+			OvertimeEnabled:       current.OvertimeEnabled,
+			OvertimeMultiplier:    current.OvertimeMultiplier,
+			DirectoryEnabled:      current.DirectoryEnabled,
+		}
+	}
+	if req.coreFieldPresent("company_name") {
+		input.CompanyName = req.CompanyName
+	}
+	if req.coreFieldPresent("fiscal_year_start_month") {
+		input.FiscalYearStartMonth = req.FiscalYearStartMonth
+	}
+	if req.coreFieldPresent("default_currency") {
+		input.DefaultCurrency = req.DefaultCurrency
+	}
+	if req.coreFieldPresent("default_timezone") {
+		input.DefaultTimezone = req.DefaultTimezone
+	}
+	if req.coreFieldPresent("default_work_schedule_id") {
+		input.DefaultWorkScheduleID = req.DefaultWorkScheduleID
+	}
+	if req.coreFieldPresent("overtime_enabled") {
+		input.OvertimeEnabled = req.OvertimeEnabled
+	}
+	if req.coreFieldPresent("overtime_multiplier") {
+		input.OvertimeMultiplier = req.OvertimeMultiplier
+	}
+	if req.coreFieldPresent("directory_enabled") {
+		input.DirectoryEnabled = req.DirectoryEnabled
+	}
+	return input
 }
 
 func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
@@ -176,15 +249,14 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 		OvertimeMultiplier:    firstFloat64(payload.MultiplierSnake, multiplierCamel),
 		DirectoryEnabled:      payload.DirectorySnake || directoryCamel,
 	}
-	for _, key := range []string{
-		"company_name", "companyName", "fiscal_year_start_month", "fiscalYearStartMonth",
-		"default_currency", "defaultCurrency", "default_timezone", "defaultTimezone",
-		"default_work_schedule_id", "defaultWorkScheduleId", "overtime_enabled", "overtimeEnabled",
-		"overtime_multiplier", "overtimeMultiplier", "directory_enabled", "directoryEnabled",
-	} {
-		if _, ok := fields[key]; ok {
-			r.hasCoreConfigFields = true
-			break
+	r.presentCoreFields = make(map[string]bool, len(coreConfigFieldKeys))
+	for _, entry := range coreConfigFieldKeys {
+		for _, key := range entry.keys {
+			if _, ok := fields[key]; ok {
+				r.presentCoreFields[entry.field] = true
+				r.hasCoreConfigFields = true
+				break
+			}
 		}
 	}
 	return nil

@@ -238,6 +238,41 @@ func TestGetPayrollRunByID_4301(t *testing.T) {
 	}
 }
 
+// ExportPayrollToFinance posts the re-read run's BusinessID as the finance
+// journal's tenant scope, and the journal rejects business_id 0. The read-back
+// must carry the column for a run created outside the fixture tenant too.
+func TestGetPayrollRun_CarriesBusinessIDForFinanceExport(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const businessID int64 = 9100107
+	const periodStart = "2027-03-01"
+	const periodEnd = "2027-03-31"
+
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(),
+			"DELETE FROM hr_payroll_runs WHERE business_id = ? AND period_start = ? AND period_end = ?",
+			businessID, periodStart, periodEnd)
+	})
+
+	created, _, err := repo.CreatePayrollRunWithEntries(ctx, businessID, domain.PayrollRunRecord{
+		PeriodStart: periodStart,
+		PeriodEnd:   periodEnd,
+		Status:      domain.PayrollStatusApproved,
+	}, []domain.PayrollEntryRecord{})
+	if err != nil {
+		t.Fatalf("CreatePayrollRunWithEntries: %v", err)
+	}
+
+	run, err := repo.GetPayrollRun(ctx, businessID, created.ID)
+	if err != nil {
+		t.Fatalf("GetPayrollRun: %v", err)
+	}
+	if run.BusinessID != businessID {
+		t.Errorf("BusinessID = %d, want %d; the finance journal poster rejects business_id 0", run.BusinessID, businessID)
+	}
+}
+
 func TestGetPayrollRunByID_NotFound_Errors(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/config"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
@@ -39,6 +41,22 @@ func invalidateBusinessTeamScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
 	}
+}
+
+// invalidateSeatSubscriptionScope drops the owner's cached subscription
+// payload after a seat-affecting team change. Seat counts are embedded in that
+// payload, so without this GET /hub/subscription/me keeps serving the
+// pre-change seat usage until the 10-minute subscription cache TTL expires.
+// The local replica is cleared synchronously; the published pattern clears the
+// other processes' replicas and the Redis entry.
+func invalidateSeatSubscriptionScope(ctx context.Context, ownerID int64) {
+	// The exact payload key carries no suffix, so pair it with the derived-key
+	// wildcard instead of relying on one pattern to match both.
+	local := cacher.GetInMemoryCache(ctx)
+	for _, pattern := range []string{cacheKeys.Subscription(ownerID), cacheKeys.SubscriptionPrefix(ownerID)} {
+		local.DeleteByPattern(ctx, pattern)
+	}
+	cacheInvalidate.InvalidateAsync(ctx, cacheKeys.InvalidateSubscription, strconv.FormatInt(ownerID, 10))
 }
 
 type Service struct {
@@ -534,16 +552,43 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 		return 0, err
 	}
 
-	if err := s.repo.SetPassword(ctx, userID, hash); err != nil {
-		return 0, err
+	// The token is now claimed. A failure past this point must release the
+	// claim: a consumed token plus a pending/email-unverified account is
+	// unrecoverable for the invitee (sign-in is rejected as unverified and
+	// re-accepting fails with ErrTokenAlreadyUsed), so the accept has to stay
+	// retryable.
+	failAccept := func(cause error) (int64, error) {
+		if releaseErr := s.repo.ReleaseInviteToken(ctx, token); releaseErr != nil {
+			logger.Ctx(ctx).Error("failed to release invite token after failed accept",
+				logger.Int("user_id", int(userID)), logger.Error(releaseErr))
+		}
+		return 0, cause
 	}
-	if businessID, businessErr := s.repo.GetBusinessIDByOwnerID(ctx, ownerID); businessErr == nil {
-		if stateErr := s.repo.UpsertProvisioningState(ctx, userID, businessID, "invitation", "active", true, false); stateErr != nil {
-			return 0, stateErr
+
+	if err := s.repo.SetPassword(ctx, userID, hash); err != nil {
+		return failAccept(err)
+	}
+
+	// Resolve the business to activate the member in. The owner lookup is the
+	// primary source; the member's own users.business_id is the fallback,
+	// because it carries the same tenant and is set at invite time. Skipping
+	// activation when the lookup fails used to surface as a successful accept
+	// with the invitee stuck in pending_invitation.
+	businessID, businessErr := s.repo.GetBusinessIDByOwnerID(ctx, ownerID)
+	if businessErr != nil {
+		if fallbackID, fallbackErr := s.repo.GetUserBusinessID(ctx, userID); fallbackErr == nil && fallbackID != 0 {
+			businessID = fallbackID
+		} else {
+			logger.Ctx(ctx).Error("failed to resolve business for accepted invitation",
+				logger.Int("user_id", int(userID)), logger.Int("owner_id", int(ownerID)), logger.Error(businessErr))
+			return failAccept(fmt.Errorf("resolve business for accepted invitation: %w", businessErr))
 		}
-		if activateErr := s.repo.ActivateNormalizedAuthorization(ctx, businessID, userID); activateErr != nil {
-			return 0, activateErr
-		}
+	}
+	if stateErr := s.repo.UpsertProvisioningState(ctx, userID, businessID, "invitation", "active", true, false); stateErr != nil {
+		return failAccept(stateErr)
+	}
+	if activateErr := s.repo.ActivateNormalizedAuthorization(ctx, businessID, userID); activateErr != nil {
+		return failAccept(activateErr)
 	}
 	invalidateUserScope(ctx, userID)
 
@@ -945,16 +990,35 @@ func (s *Service) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (
 	return s.repo.GetOwnerSubscriptionInfo(ctx, ownerID)
 }
 
-// RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
-// It is invoked asynchronously so it never blocks team operations, but it returns its error so the
-// caller can log billing failures instead of silently discarding them (which would corrupt billing).
-func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64) error {
-	newCount, err := s.repo.CountActiveMembers(ctx, ownerID)
+// seatChangeStore is the repository surface needed to record a seat change.
+// Keeping it as an interface lets the record-then-invalidate flow be tested
+// without a database.
+type seatChangeStore interface {
+	CountActiveMembers(ctx context.Context, ownerID int64) (int, error)
+	RecordSeatChange(ctx context.Context, ownerID int64, newCount int) error
+}
+
+// recordSeatChange persists the owner's current active-member count as the
+// billable seat count and then invalidates the cached subscription payload.
+func recordSeatChange(ctx context.Context, store seatChangeStore, ownerID int64) error {
+	newCount, err := store.CountActiveMembers(ctx, ownerID)
 	if err != nil {
 		return err
 	}
 
-	return s.repo.RecordSeatChange(ctx, ownerID, newCount)
+	if err := store.RecordSeatChange(ctx, ownerID, newCount); err != nil {
+		return err
+	}
+
+	invalidateSeatSubscriptionScope(ctx, ownerID)
+	return nil
+}
+
+// RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
+// It is invoked asynchronously so it never blocks team operations, but it returns its error so the
+// caller can log billing failures instead of silently discarding them (which would corrupt billing).
+func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64) error {
+	return recordSeatChange(ctx, s.repo, ownerID)
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────
@@ -1001,7 +1065,7 @@ func (s *Service) DeleteGroup(ctx context.Context, ownerID, groupID int64) error
 	return nil
 }
 
-func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, callerID int64, userIDs []int64) error {
+func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, businessID, callerID int64, userIDs []int64) error {
 	if len(userIDs) == 0 {
 		return errors.New("no user IDs provided")
 	}
@@ -1010,7 +1074,9 @@ func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, callerI
 	if _, err := s.repo.GetGroup(ctx, ownerID, groupID); err != nil {
 		return err
 	}
-	if err := s.repo.AddGroupMembers(ctx, ownerID, groupID, callerID, userIDs); err != nil {
+	// businessID is the tenant the group's grants are resolved in; a membership
+	// row without it is invisible to the authorization snapshot readers.
+	if err := s.repo.AddGroupMembers(ctx, ownerID, groupID, businessID, callerID, userIDs); err != nil {
 		return err
 	}
 	s.invalidateMemberScopes(ctx, ownerID, userIDs)
@@ -1093,7 +1159,7 @@ func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, inp
 		}
 		groupAssignmentFailed := false
 		for _, groupID := range positiveInt64s(append(append([]int64{}, input.GroupIDs...), input.GroupID)) {
-			if groupErr := s.AddGroupMembers(ctx, ownerID, groupID, ownerID, []int64{userID}); groupErr != nil {
+			if groupErr := s.AddGroupMembers(ctx, ownerID, groupID, businessID, ownerID, []int64{userID}); groupErr != nil {
 				results = append(results, domain.BulkInviteResult{
 					Email:   email,
 					UserID:  userID,

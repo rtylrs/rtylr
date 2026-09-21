@@ -488,6 +488,69 @@ func TestCreateTemplate_TriggerTypeStored(t *testing.T) {
 	}
 }
 
+func TestGetLatestEmployeeChecklist_ResolvesChecklistByEmployee(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
+		Name:        "Latest Checklist Template",
+		TriggerType: "hire",
+	})
+	if err != nil {
+		t.Fatalf("CreateTemplate: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, err := db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID); err != nil {
+			t.Errorf("cleanup template: %v", err)
+		}
+	})
+	if _, err := repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
+		Title:         "Latest task",
+		AssigneeRole:  "employee",
+		DueOffsetDays: 1,
+	}); err != nil {
+		t.Fatalf("CreateTemplateItem: %v", err)
+	}
+
+	const employeeID int64 = 4110
+	if _, err := repo.TriggerChecklist(ctx, testutil.OwnerID, employeeID, tmpl.ID, time.Now().Add(-time.Hour)); err != nil {
+		t.Fatalf("TriggerChecklist (older): %v", err)
+	}
+	latest, err := repo.TriggerChecklist(ctx, testutil.OwnerID, employeeID, tmpl.ID, time.Now())
+	if err != nil {
+		t.Fatalf("TriggerChecklist (latest): %v", err)
+	}
+
+	got, err := repo.GetLatestEmployeeChecklist(ctx, testutil.OwnerID, employeeID)
+	if err != nil {
+		t.Fatalf("GetLatestEmployeeChecklist: %v", err)
+	}
+	if got.ID != latest.ID {
+		t.Errorf("checklist id = %d, want the latest %d", got.ID, latest.ID)
+	}
+	if got.ID == employeeID {
+		t.Errorf("employee id %d was used as the checklist id", employeeID)
+	}
+	if got.EmployeeID != employeeID {
+		t.Errorf("employee id = %d, want %d", got.EmployeeID, employeeID)
+	}
+	if len(got.Items) != 1 {
+		t.Errorf("items = %d, want the 1 item copied from the template", len(got.Items))
+	}
+}
+
+func TestGetLatestEmployeeChecklist_NoChecklistReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetLatestEmployeeChecklist(ctx, testutil.OwnerID, 419999999)
+	if !errors.Is(err, domain.ErrChecklistNotFound) {
+		t.Errorf("expected ErrChecklistNotFound, got %v", err)
+	}
+}
+
 func TestTriggerChecklist_StatusIsInProgress(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

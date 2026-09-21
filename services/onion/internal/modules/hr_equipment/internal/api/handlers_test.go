@@ -7,6 +7,9 @@ import (
 	"testing"
 
 	onekithttp "github.com/corezio/onekit/http"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
 // --- CreateEquipmentRequestHandler ---
@@ -197,5 +200,30 @@ func TestAssignAssetHandler_Validate_ValidRequest(t *testing.T) {
 	se := h.Validate(context.Background(), &AssignAssetRequest{EmployeeID: 5})
 	if se != nil {
 		t.Errorf("expected nil for valid request, got %v", se)
+	}
+}
+
+// --- EquipmentAPI.ApproveEquipment ---
+
+func authenticatedCtx() context.Context {
+	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: 7, BusinessID: 5, Role: "owner"})
+}
+
+func TestEquipmentAPIApproveEquipmentRejectsMissingBody(t *testing.T) {
+	api := &EquipmentAPI{}
+	_, err := api.ApproveEquipment(authenticatedCtx(), &hrequipmentv1.ApproveEquipmentRequest{EquipmentRequestId: 7})
+	if err == nil || oneKitStatus(err) != http.StatusBadRequest {
+		t.Fatalf("expected 400 for a missing approval body, got %v", err)
+	}
+}
+
+func TestEquipmentAPIApproveEquipmentPassesBodyCheck(t *testing.T) {
+	api := &EquipmentAPI{}
+	_, err := api.ApproveEquipment(authenticatedCtx(), &hrequipmentv1.ApproveEquipmentRequest{
+		EquipmentRequestId: 7,
+		Body:               &hrequipmentv1.ApproveEquipmentBody{Approved: true},
+	})
+	if err != nil && oneKitStatus(err) == http.StatusBadRequest {
+		t.Fatalf("a body carrying an explicit decision must pass the body check, got %v", err)
 	}
 }

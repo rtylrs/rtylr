@@ -38,11 +38,13 @@ WHERE slug = ? AND is_active = TRUE
 LIMIT 1;
 
 -- cross-schema read from hr_core — expose active HR locations in the public business profile.
--- name: ListPublicLocationsByOwner :many
+-- hr_locations is business-scoped (hr_core writes owner_id = business_id), so
+-- a storefront must list its own business_id, not every location of its owner.
+-- name: ListPublicLocationsByBusiness :many
 SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(address, '') AS address,
        COALESCE(timezone, '') AS timezone, is_active
 FROM hr_locations
-WHERE owner_id = ? AND is_active = TRUE
+WHERE business_id = ? AND is_active = TRUE
 ORDER BY is_default DESC, name ASC
 LIMIT 100;
 

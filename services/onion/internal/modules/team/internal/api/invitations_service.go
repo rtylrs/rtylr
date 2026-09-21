@@ -172,11 +172,23 @@ func (a *InvitationsAPI) BulkInvite(ctx context.Context, req *hubteaminvitations
 
 	payloads := make([]*hubteaminvitationsv1.BulkInviteResult, 0, len(results))
 	for _, r := range results {
+		message := r.Message
+		// Newly invited members are created with an empty password, so the
+		// emailed invite link is their only way in. Enqueue it per address the
+		// same way the single-invite path does; existing members need no email.
+		if r.Status == "invited" && r.Token != "" {
+			inviteLink := config.AuthAppURL + "/invite/" + r.Token
+			if emailErr := a.Service.EnqueueInviteEmail(ctx, r.Email, inviteLink); emailErr != nil {
+				logger.Ctx(ctx).Warn("failed to enqueue bulk invite email",
+					logger.String("email", r.Email), logger.Error(emailErr))
+				message = "invitation created but the invitation email could not be sent"
+			}
+		}
 		payloads = append(payloads, &hubteaminvitationsv1.BulkInviteResult{
 			Email:   r.Email,
 			UserId:  r.UserID,
 			Status:  r.Status,
-			Message: r.Message,
+			Message: message,
 		})
 	}
 

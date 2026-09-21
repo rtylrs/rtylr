@@ -2,11 +2,40 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/kpis/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func TestGetKPIs_QueryFailure_ReturnsError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	// A failing database must surface as an error instead of a zero-filled
+	// summary, which the application service would otherwise cache for 2
+	// minutes as if the business had no activity.
+	if err := db.Close(); err != nil {
+		t.Fatalf("close db: %v", err)
+	}
+
+	if _, err := repo.GetKPIs(context.Background(), testutil.OwnerID); err == nil {
+		t.Fatal("GetKPIs error = nil, want query failure to be returned")
+	}
+}
+
+func TestGetKPIs_CanceledContext_ReturnsError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if _, err := repo.GetKPIs(ctx, testutil.OwnerID); !errors.Is(err, context.Canceled) {
+		t.Fatalf("GetKPIs error = %v, want context.Canceled", err)
+	}
+}
 
 func TestGetKPIs_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)

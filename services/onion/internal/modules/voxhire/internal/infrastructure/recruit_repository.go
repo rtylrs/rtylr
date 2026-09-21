@@ -208,7 +208,7 @@ JOIN voxire_career_applications a ON a.id = t.application_id
 JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 SET t.title = CASE WHEN ? <> '' THEN ? ELSE t.title END,
     t.status = CASE WHEN ? <> '' THEN ? ELSE t.status END,
-    t.due_at = ?,
+    t.due_at = CASE WHEN ? THEN ? ELSE t.due_at END,
     t.completed_at = CASE
       WHEN ? = 'done' THEN COALESCE(t.completed_at, CURRENT_TIMESTAMP)
       WHEN ? = 'open' THEN NULL

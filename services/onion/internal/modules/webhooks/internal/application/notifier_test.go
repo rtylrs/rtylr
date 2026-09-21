@@ -140,6 +140,50 @@ func TestNotifyFailingTellsTheOwnerOncePerDay(t *testing.T) {
 	}
 }
 
+// One pass is capped at deadNotifyBatch and every pass runs the same query, so
+// the batch has to move past registrations it has already told today. Without
+// that, a failing set larger than the batch starves everything beyond the head.
+func TestNotifyFailingAdvancesPastAlreadyNotifiedRegistrations(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+
+	seedFailing(t, db, "active", 1, 1)
+
+	const (
+		secondHook  int64 = notifyHook + 1
+		secondEvent int64 = 885100
+		secondDead  int64 = 885101
+	)
+	exec := func(query string, args ...any) {
+		t.Helper()
+		if _, err := db.ExecContext(ctx, query, args...); err != nil {
+			t.Fatalf("seed (%s): %v", query, err)
+		}
+	}
+	exec(`INSERT INTO hub_webhooks (id, owner_id, business_id, url, events, secret, is_active)
+	      VALUES (?, ?, ?, 'https://example.test/hook-two', JSON_ARRAY('order_created'), 's', TRUE)`,
+		secondHook, notifyCreator, notifyTenant)
+	exec(`INSERT INTO platform_events (id, business_id, event_type, subject_type, subject_id, payload, dedupe_key)
+	      VALUES (?, ?, 'order_created', 'order', 777, JSON_OBJECT('order_id', 777), 'notify-key-second')`,
+		secondEvent, notifyTenant)
+	exec(`INSERT INTO webhook_deliveries (id, business_id, webhook_id, event_id, status, attempts, updated_at)
+	      VALUES (?, ?, ?, ?, 'dead', 5, DATE_SUB(NOW(), INTERVAL 1 HOUR))`,
+		secondDead, notifyTenant, secondHook, secondEvent)
+
+	notifier := NewNotifier(db)
+	notifier.batchSize = 1
+
+	for pass := 1; pass <= 2; pass++ {
+		if err := notifier.NotifyFailing(ctx); err != nil {
+			t.Fatalf("pass %d: %v", pass, err)
+		}
+	}
+
+	if got := queuedNotifications(t, db); got != 2 {
+		t.Fatalf("%d notifications after two one-per-pass batches, want 2 (tail starved)", got)
+	}
+}
+
 // A registration that broke long ago and was never fixed still has dead rows.
 // Without the window it would generate a notification every day forever.
 func TestNotifyFailingIgnoresFailuresOutsideTheWindow(t *testing.T) {

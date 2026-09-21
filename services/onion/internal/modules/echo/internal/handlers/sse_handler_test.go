@@ -249,6 +249,79 @@ func TestStreamTokensToClientRecordsPartialFailedUsage(t *testing.T) {
 	}
 }
 
+// failAfterMarkerWriter accepts writes until the recorded body contains marker,
+// then fails every write. It models a client that disconnects right after the
+// answer finished streaming but before the closing SSE events are written.
+type failAfterMarkerWriter struct {
+	*httptest.ResponseRecorder
+	marker  string
+	failing bool
+}
+
+func (w *failAfterMarkerWriter) Write(p []byte) (int, error) {
+	if w.failing {
+		return 0, errors.New("client disconnected")
+	}
+	n, err := w.ResponseRecorder.Write(p)
+	if strings.Contains(w.Body.String(), w.marker) {
+		w.failing = true
+	}
+	return n, err
+}
+
+// A client can disconnect after the provider stream completed and the answer
+// was persisted but before the closing events are written. The tokens were
+// consumed, so the deferred settle(0) must not refund the whole reservation.
+func TestStreamTokensToClientSettlesObservedUsageWhenClosingWritesFail(t *testing.T) {
+	quota := &recordingQuotaService{recorded: make(chan int, 1)}
+	handler := &GenerateTextStreamHandler{
+		QuotaService:  quota,
+		MemoryService: &detachedMemoryFake{},
+	}
+	w := &failAfterMarkerWriter{
+		ResponseRecorder: httptest.NewRecorder(),
+		marker:           `"delta":"answer"`,
+	}
+	tokens := make(chan snips.StreamToken, 2)
+	tokens <- snips.StreamToken{Text: "answer"}
+	tokens <- snips.StreamToken{Done: true}
+	close(tokens)
+
+	plan := cacheWritePlan{Mode: string(ModeAsk), PromptChars: 40, StartedAt: time.Now()}
+	observedTokens := streamUsageTokens(snips.StreamToken{}, plan.PromptChars, len("answer"))
+	reservation := &quotaReservation{
+		handler: handler, ctx: context.Background(), businessID: 1, userID: 2,
+		reservedTokens: 4000,
+	}
+
+	func() {
+		// Mirrors ServeHTTP's deferred protection against a leaked reservation.
+		defer reservation.settle(0)
+		handler.streamTokensToClient(
+			context.Background(),
+			w,
+			tokens,
+			make(chan bool),
+			&GenerateTextStreamRequest{SessionID: "session-1", UserID: 2},
+			1,
+			2,
+			plan,
+			reservation,
+		)
+	}()
+
+	select {
+	case got := <-quota.recorded:
+		want := int64(observedTokens) - reservation.reservedTokens
+		if int64(got) != want {
+			t.Fatalf("recorded delta = %d, want %d (observed %d, reserved %d)",
+				got, want, observedTokens, reservation.reservedTokens)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("completed stream usage was not recorded")
+	}
+}
+
 func TestStreamRendererExtractsSplitThinkingMarker(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}

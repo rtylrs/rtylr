@@ -2,6 +2,8 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
+	"sync"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
@@ -586,5 +588,71 @@ func TestUpdateAttendanceRecord_ReturnsUpdatedRecord(t *testing.T) {
 	}
 	if updated.ID != created.ID {
 		t.Errorf("ID mismatch after update: got %d, want %d", updated.ID, created.ID)
+	}
+}
+
+// Regression: ClockIn used to check for an active record and insert in two
+// separate statements, so two overlapping clock-ins (kiosk double-tap, retry,
+// two devices) both inserted an open row. ClockOut then closed only the newest
+// row and the orphan made every later ClockIn return ErrAlreadyClockedIn. The
+// guarded create must serialize the check and the insert.
+func TestCreateAttendanceRecord_ConcurrentClockInsCreateOneOpenRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const employeeID int64 = 4101
+	if _, err := db.ExecContext(ctx, "DELETE FROM hr_attendance_records WHERE business_id = ? AND employee_id = ?", testutil.BusinessID, employeeID); err != nil {
+		t.Fatalf("clear attendance records for employee %d: %v", employeeID, err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_attendance_records WHERE business_id = ? AND employee_id = ?", testutil.BusinessID, employeeID)
+	})
+
+	const attempts = 4
+	start := make(chan struct{})
+	results := make([]error, attempts)
+	var wg sync.WaitGroup
+	for i := 0; i < attempts; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			<-start
+			_, results[i] = repo.CreateAttendanceRecord(ctx, testutil.BusinessID, domain.AttendanceRecordRecord{
+				EmployeeID:    employeeID,
+				Date:          "2026-06-01",
+				ClockInMethod: "pin",
+				Status:        "clocked_in",
+			})
+		}(i)
+	}
+	close(start)
+	wg.Wait()
+
+	created := 0
+	for i, err := range results {
+		switch {
+		case err == nil:
+			created++
+		case errors.Is(err, domain.ErrAlreadyClockedIn):
+			// The loser of the race must be told the employee is already
+			// clocked in, not served a generic 500.
+		default:
+			t.Fatalf("attempt %d: unexpected error: %v", i, err)
+		}
+	}
+	if created != 1 {
+		t.Fatalf("concurrent clock-ins succeeded %d times, want exactly 1", created)
+	}
+
+	var open int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM hr_attendance_records
+		WHERE business_id = ? AND employee_id = ? AND clock_out_at IS NULL`,
+		testutil.BusinessID, employeeID).Scan(&open); err != nil {
+		t.Fatalf("count open attendance records: %v", err)
+	}
+	if open != 1 {
+		t.Fatalf("found %d open attendance records, want exactly 1", open)
 	}
 }

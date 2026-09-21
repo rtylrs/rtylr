@@ -276,11 +276,23 @@ func filterStockMovementsForTool(movements []domain.StockMovement, input listSto
 	return out
 }
 
-func paginateStockMovementsForTool(items []domain.StockMovement, page, limit int64) ([]domain.StockMovement, bool) {
-	start := int((page - 1) * limit)
-	if start > len(items) {
-		start = len(items)
+// posStockToolPageStart converts a 1-based page number into a slice offset,
+// saturating at itemCount. Multiplying (page-1)*limit directly can overflow
+// int64 for very large page numbers (JSON numbers decode to float64, so
+// page=2^62 is accepted by parsePOSStockToolPage), wrapping to a negative
+// offset and panicking on the slice below.
+func posStockToolPageStart(page, limit int64, itemCount int) int {
+	if page <= 1 || limit <= 0 {
+		return 0
 	}
+	if page-1 > int64(itemCount)/limit {
+		return itemCount
+	}
+	return int((page - 1) * limit)
+}
+
+func paginateStockMovementsForTool(items []domain.StockMovement, page, limit int64) ([]domain.StockMovement, bool) {
+	start := posStockToolPageStart(page, limit, len(items))
 	end := start + int(limit)
 	if end > len(items) {
 		end = len(items)
@@ -289,10 +301,7 @@ func paginateStockMovementsForTool(items []domain.StockMovement, page, limit int
 }
 
 func paginateBranchInventoryForTool(items []domain.BranchInventory, page, limit int64) ([]domain.BranchInventory, bool) {
-	start := int((page - 1) * limit)
-	if start > len(items) {
-		start = len(items)
-	}
+	start := posStockToolPageStart(page, limit, len(items))
 	end := start + int(limit)
 	if end > len(items) {
 		end = len(items)

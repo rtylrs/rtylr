@@ -165,6 +165,11 @@ type ExportSubmissionsResponse struct {
 	CSV         string `json:"csv"`
 }
 
+// submissionsExportPageSize is how many submissions the CSV export pulls per
+// query. The export must contain every row, so it walks pages instead of
+// reusing ListSubmissions, which is capped at the UI's first 100 rows.
+const submissionsExportPageSize = 200
+
 func (h *ExportSubmissionsHandler) Serve(ctx context.Context, req *ExportSubmissionsRequest) (ExportSubmissionsResponse, error) {
 	authUser, err := requireRecruitPermission(ctx, "recruit:candidates:export")
 	if err != nil {
@@ -178,28 +183,42 @@ func (h *ExportSubmissionsHandler) Serve(ctx context.Context, req *ExportSubmiss
 	if req != nil {
 		status = req.Status
 	}
-	submissions, err := h.CareersService.ListSubmissions(ctx, businessID, status)
-	if err != nil {
-		return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
-	}
 
 	var body bytes.Buffer
 	w := csv.NewWriter(&body)
 	if err := w.Write([]string{"id", "career_id", "candidate_name", "email", "phone", "resume_url", "status", "created_at"}); err != nil {
 		return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
 	}
-	for _, submission := range submissions {
-		if err := w.Write([]string{
-			strconv.FormatInt(submission.ID, 10),
-			strconv.FormatInt(submission.CareerID, 10),
-			submission.CandidateName,
-			submission.Email,
-			submission.Phone,
-			submission.ResumeURL,
-			submission.Status,
-			submission.CreatedAt.Format(time.RFC3339),
-		}); err != nil {
+	writeRows := func(submissions []domain.Submission) error {
+		for _, submission := range submissions {
+			if err := w.Write([]string{
+				strconv.FormatInt(submission.ID, 10),
+				strconv.FormatInt(submission.CareerID, 10),
+				submission.CandidateName,
+				submission.Email,
+				submission.Phone,
+				submission.ResumeURL,
+				submission.Status,
+				submission.CreatedAt.Format(time.RFC3339),
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Page until a short page proves the end of the result set. Without this
+	// the export silently stopped at ListSubmissions' LIMIT 100.
+	for offset := int32(0); ; offset += submissionsExportPageSize {
+		page, listErr := h.CareersService.ListSubmissionsPage(ctx, businessID, status, submissionsExportPageSize, offset)
+		if listErr != nil {
 			return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
+		}
+		if err := writeRows(page); err != nil {
+			return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
+		}
+		if len(page) < submissionsExportPageSize {
+			break
 		}
 	}
 	w.Flush()

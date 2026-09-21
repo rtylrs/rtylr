@@ -2,7 +2,9 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/domain"
@@ -486,5 +488,37 @@ func TestLoyalty_UpsertConfig_Idempotent(t *testing.T) {
 	}
 	if cfg.MinRedeemPoints != 25 {
 		t.Errorf("MinRedeemPoints = %d, want 25", cfg.MinRedeemPoints)
+	}
+}
+
+// Regression: the deferred RELEASE_LOCK ran after tx.Commit(), where
+// database/sql returns ErrTxDone without sending the statement, so the MySQL
+// named lock stayed on the pooled connection and a concurrent earn/redeem for
+// the same customer could fail on a 5s GET_LOCK timeout.
+func TestLoyalty_CreateBalanceTransaction_ReleasesAdvisoryLock(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const customerID int64 = 8899
+	orderID := int64(77001)
+	if _, err := repo.CreateBalanceTransaction(ctx, fixtureBusinessID, customerID, &orderID, "earn", 10, "lock release test"); err != nil {
+		t.Fatalf("CreateBalanceTransaction: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, `DELETE FROM pos_loyalty_transactions WHERE business_id = ? AND customer_id = ?`, fixtureBusinessID, customerID)
+	})
+
+	assertAdvisoryLockReleased(t, db, fmt.Sprintf("pos_loyalty:%d:%d", fixtureBusinessID, customerID))
+}
+
+func assertAdvisoryLockReleased(t *testing.T, db *sql.DB, lockName string) {
+	t.Helper()
+	var holder sql.NullInt64
+	if err := db.QueryRowContext(context.Background(), "SELECT IS_USED_LOCK(?)", lockName).Scan(&holder); err != nil {
+		t.Fatalf("check advisory lock %q: %v", lockName, err)
+	}
+	if holder.Valid {
+		t.Fatalf("advisory lock %q is still held by connection %d", lockName, holder.Int64)
 	}
 }

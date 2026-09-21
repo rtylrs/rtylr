@@ -101,7 +101,7 @@ func (r *Repository) LookupBySlug(ctx context.Context, slug string) (domain.Slug
 	}
 
 	// cross-schema read from hr_locations (hr_core) — active storefront locations
-	rows, err := r.queries.ListPublicLocationsByOwner(ctx, biz.OwnerID)
+	rows, err := r.queries.ListPublicLocationsByBusiness(ctx, biz.ID)
 	if err != nil {
 		return out, err
 	}

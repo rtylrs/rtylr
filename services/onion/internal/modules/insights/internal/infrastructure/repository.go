@@ -124,8 +124,8 @@ func (r *Repository) GetProductMarginRows(ctx context.Context, businessID int64)
 	}
 	out := make([]domain.ProductMarginRow, 0, len(rows))
 	for _, row := range rows {
-		units := ifaceToFloat64(row.UnitsSold)
-		revenue := ifaceToInt64(row.RevenueMinorUnitsX100)
+		units := decimalToFloat(row.UnitsSold)
+		revenue := row.RevenueMinorUnitsX100
 		var cost *int64
 		if row.CostMinorUnitsX100 != 0 {
 			v := row.CostMinorUnitsX100
@@ -142,13 +142,37 @@ func (r *Repository) GetProductMarginRows(ctx context.Context, businessID int64)
 	return out, nil
 }
 
-func ifaceToFloat64(v interface{}) float64 {
+// decimalToFloat converts a DECIMAL column value (which the MySQL driver
+// returns as []byte) or a numeric value into float64. Unlike
+// decimalToMinorUnits it keeps the source scale, so DECIMAL(8,3) quantities
+// do not round to two places.
+func decimalToFloat(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	var s string
 	switch n := v.(type) {
 	case int64:
 		return float64(n)
 	case float64:
 		return n
+	case []byte:
+		s = string(n)
+	case string:
+		s = n
 	default:
 		return 0
 	}
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("insights: failed to parse decimal value",
+			logger.String("value", s),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return f
 }

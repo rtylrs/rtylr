@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"slices"
 	"testing"
 
@@ -461,6 +462,63 @@ func TestUpdateStoreProduct_ChangesPrice(t *testing.T) {
 		if p.ID == id && p.Price != 125.00 {
 			t.Errorf("expected price 125.00, got %f", p.Price)
 		}
+	}
+}
+
+// Regression: a stale editor (the storefront row was deleted in another tab)
+// must not be able to rewrite the shared ERP catalog row and still be told the
+// update succeeded. Update has to report the missing storefront row and leave
+// erp_products untouched.
+func TestUpdateStoreProduct_MissingRowReportsNotFoundAndLeavesCatalogIntact(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const businessID int64 = 9200180
+
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM erp_product_images WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM store_products WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM erp_products WHERE business_id = ?", businessID)
+	})
+
+	catalogID := insertCatalogProduct(ctx, t, db, businessID, "Catalog before update")
+
+	result, err := db.ExecContext(ctx, `
+		INSERT INTO store_products (owner_id, business_id, product_id, title, price, sort_order)
+		VALUES (?, ?, ?, 'Store row to delete', 10, 1)
+	`, testutil.OwnerID, businessID, catalogID)
+	if err != nil {
+		t.Fatalf("insert store product: %v", err)
+	}
+	storeID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("store product id: %v", err)
+	}
+
+	// The stale list the caller is holding still references storeID.
+	if _, err := db.ExecContext(ctx, "DELETE FROM store_products WHERE business_id = ? AND id = ?", businessID, storeID); err != nil {
+		t.Fatalf("delete store product: %v", err)
+	}
+
+	err = repo.Update(ctx, businessID, storeID, domain.StoreProductInput{
+		ProductID: catalogID,
+		Title:     "Catalog after stale update",
+		Slug:      "stale-update",
+		Price:     999.99,
+	})
+	if !errors.Is(err, domain.ErrStoreProductNotFound) {
+		t.Fatalf("Update on deleted store product error = %v, want ErrStoreProductNotFound", err)
+	}
+
+	var name, salePrice string
+	if err := db.QueryRowContext(ctx,
+		"SELECT name, sale_price FROM erp_products WHERE business_id = ? AND id = ?",
+		businessID, catalogID,
+	).Scan(&name, &salePrice); err != nil {
+		t.Fatalf("read catalog product: %v", err)
+	}
+	if name != "Catalog before update" || salePrice != "10.00" {
+		t.Fatalf("stale update mutated the ERP catalog row: name=%q sale_price=%q", name, salePrice)
 	}
 }
 

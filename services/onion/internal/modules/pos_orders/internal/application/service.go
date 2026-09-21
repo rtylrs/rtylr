@@ -197,11 +197,12 @@ func (s *Service) CloseSession(ctx context.Context, ownerID, staffID int64, inpu
 	expectedCash := sess.OpeningCash + cashSales + cashMovements - refunds
 	cashDiff := input.ClosingCash - expectedCash
 
-	if err := s.repo.CloseSessionForStaff(ctx, ownerID, staffID, input.SessionID, input.ClosingCash, expectedCash, cashDiff, input.Notes); err != nil {
-		return err
-	}
-
-	return s.repo.UpdateSessionTotals(ctx, input.SessionID, totalSales, cashSales, cardSales, onlineSales, totalOrders)
+	// Close and totals travel in one UPDATE so a failed close leaves the
+	// session open and retryable; a separate total write after the close
+	// committed could fail and strand a closed session with stale counters.
+	return s.repo.CloseSessionForStaff(ctx, ownerID, staffID, input.SessionID,
+		input.ClosingCash, expectedCash, cashDiff, input.Notes,
+		totalSales, cashSales, cardSales, onlineSales, totalOrders)
 }
 
 // ─── Orders ──────────────────────────────────────────────────────────────────
@@ -287,6 +288,15 @@ func (s *Service) CreateOrder(ctx context.Context, businessID, ownerID, staffID 
 }
 
 func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64, status domain.OrderStatus) error {
+	if !domain.IsOrderStatus(status) {
+		return domain.ErrInvalidOrderStatus
+	}
+	if !domain.CanSetOrderStatusDirectly(status) {
+		// paid/refunded/voided carry companion writes; writing the status
+		// alone would leave payment_status, refunds, or the void trail
+		// inconsistent.
+		return domain.ErrOrderStatusRequiresWorkflow
+	}
 	if err := s.repo.UpdateOrderStatus(ctx, ownerID, orderID, status); err != nil {
 		return err
 	}
@@ -295,6 +305,9 @@ func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64,
 }
 
 func (s *Service) UpdateOrderItemStatus(ctx context.Context, ownerID, orderID, itemID int64, status domain.ItemStatus) error {
+	if !domain.IsItemStatus(status) {
+		return domain.ErrInvalidItemStatus
+	}
 	// The underlying item-status query isn't owner-scoped, so verify the order
 	// belongs to this owner first — otherwise a caller could flip KDS item
 	// status on another tenant's order.

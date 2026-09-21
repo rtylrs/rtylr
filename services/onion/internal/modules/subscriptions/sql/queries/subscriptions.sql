@@ -69,7 +69,11 @@ FROM (
     SELECT u.id AS user_id
     FROM users u
     JOIN businesses b ON b.id = u.business_id
+    LEFT JOIN user_app_permissions p ON p.owner_id = b.owner_id AND p.user_id = u.id
     WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+      -- Deactivated members keep users.business_id, so the permission row decides
+      -- whether they still occupy a seat. A missing row still counts (legacy data).
+      AND COALESCE(p.is_active, TRUE) = TRUE
 ) active_users;
 
 -- name: GetOwnerApps :one

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -16,6 +17,11 @@ type purgeRequest struct {
 	ID  string `json:"id"`
 	URL string `json:"url"`
 }
+
+// errBadPurgeInput marks purge targets the caller can fix (unparseable URL,
+// unsupported target shape). Handlers answer those with 400; every other
+// failure is an infrastructure error and must not leak into the response.
+var errBadPurgeInput = errors.New("invalid purge target")
 
 type purgeResponse struct {
 	Scope          string `json:"scope"`
@@ -81,8 +87,7 @@ func (c *CDN) purgeUploadURL(w http.ResponseWriter, r *http.Request) {
 	}
 	deleted, err := c.purgeUploadURLFamily(r, raw)
 	if err != nil {
-		logger.Ctx(r.Context()).Error("cdn: upload-url purge failed", logger.String("url", raw), logger.Error(err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writePurgeUploadURLError(w, r, raw, err)
 		return
 	}
 	writePurgeResponse(w, purgeResponse{
@@ -121,8 +126,7 @@ func (c *CDN) purgeControl(w http.ResponseWriter, r *http.Request) {
 	case req.URL != "":
 		deleted, err := c.purgeUploadURLFamily(r, req.URL)
 		if err != nil {
-			logger.Ctx(r.Context()).Error("cdn: upload-url purge failed", logger.String("url", req.URL), logger.Error(err))
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			writePurgeUploadURLError(w, r, req.URL, err)
 			return
 		}
 		writePurgeResponse(w, purgeResponse{
@@ -164,7 +168,7 @@ func (c *CDN) purgeFileVariantFamily(r *http.Request, id string) (int, int64, er
 func (c *CDN) purgeUploadURLFamily(r *http.Request, raw string) (int, error) {
 	source, err := c.resolveUploadURLSource(raw, r.Host)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %v", errBadPurgeInput, err)
 	}
 	seed := ""
 	switch {
@@ -179,7 +183,7 @@ func (c *CDN) purgeUploadURLFamily(r *http.Request, raw string) (int, error) {
 		}
 	}
 	if seed == "" {
-		return 0, errors.New("unsupported purge target")
+		return 0, fmt.Errorf("%w: unsupported target", errBadPurgeInput)
 	}
 	if c.storage == nil {
 		return 0, nil
@@ -189,6 +193,23 @@ func (c *CDN) purgeUploadURLFamily(r *http.Request, raw string) (int, error) {
 		return deleted, err
 	}
 	return deleted, nil
+}
+
+// writePurgeUploadURLError maps a purgeUploadURLFamily failure onto the same
+// status codes the by-id purge routes use: 404 for a missing file, 400 for
+// input the caller can fix, and a generic 500 otherwise. Driver and storage
+// errors are logged, never echoed — they carry backend details the caller must
+// not see.
+func writePurgeUploadURLError(w http.ResponseWriter, r *http.Request, raw string, err error) {
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		http.Error(w, "file not found", http.StatusNotFound)
+	case errors.Is(err, errBadPurgeInput):
+		http.Error(w, "invalid purge request", http.StatusBadRequest)
+	default:
+		logger.Ctx(r.Context()).Error("cdn: upload-url purge failed", logger.String("url", raw), logger.Error(err))
+		http.Error(w, "purge failed", http.StatusInternalServerError)
+	}
 }
 
 func fileUUIDFromCanonicalURL(raw string) (string, bool) {

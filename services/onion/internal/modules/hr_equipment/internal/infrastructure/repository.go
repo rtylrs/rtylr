@@ -177,35 +177,35 @@ func (r *Repository) GetAsset(ctx context.Context, businessID, id int64) (*domai
 	return &record, nil
 }
 
-func (r *Repository) ListAssets(ctx context.Context, businessID int64, params domain.ListAssetsParams) ([]domain.AssetRecord, error) {
-	var rows []sqlc.HrAsset
-	var err error
-
-	hasLocation := params.LocationID != nil && *params.LocationID != 0
-	hasStatus := params.Status != nil && *params.Status != ""
-
-	switch {
-	case hasLocation && hasStatus:
-		rows, err = r.queries.ListAssetsByLocationAndStatus(ctx, sqlc.ListAssetsByLocationAndStatusParams{
-			BusinessID: businessID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true}, Status: *params.Status,
-			Limit: params.Limit, Offset: params.Offset,
-		})
-	case hasLocation:
-		rows, err = r.queries.ListAssetsByLocation(ctx, sqlc.ListAssetsByLocationParams{
-			BusinessID: businessID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true},
-			Limit: params.Limit, Offset: params.Offset,
-		})
-	case hasStatus:
-		rows, err = r.queries.ListAssetsByStatus(ctx, sqlc.ListAssetsByStatusParams{
-			BusinessID: businessID, Status: *params.Status, Limit: params.Limit, Offset: params.Offset,
-		})
-	default:
-		rows, err = r.queries.ListAssets(ctx, sqlc.ListAssetsParams{
-			BusinessID: businessID, Limit: params.Limit, Offset: params.Offset,
-		})
+func (r *Repository) ListAssets(ctx context.Context, businessID int64, params domain.ListAssetsParams) ([]domain.AssetRecord, int64, error) {
+	filters := sqlc.ListAssetsFilteredParams{
+		BusinessID: businessID,
+		Limit:      params.Limit,
+		Offset:     params.Offset,
 	}
+	if params.LocationID != nil && *params.LocationID != 0 {
+		filters.LocationID = sql.NullInt64{Int64: *params.LocationID, Valid: true}
+	}
+	if params.Status != nil && *params.Status != "" {
+		filters.Status = sql.NullString{String: *params.Status, Valid: true}
+	}
+	if params.AssignedTo != nil && *params.AssignedTo != 0 {
+		filters.AssignedTo = sql.NullInt64{Int64: *params.AssignedTo, Valid: true}
+	}
+
+	total, err := r.queries.CountAssetsFiltered(ctx, sqlc.CountAssetsFilteredParams{
+		BusinessID: filters.BusinessID,
+		LocationID: filters.LocationID,
+		Status:     filters.Status,
+		AssignedTo: filters.AssignedTo,
+	})
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListAssetsFiltered(ctx, filters)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	records := make([]domain.AssetRecord, 0, len(rows))
@@ -213,7 +213,7 @@ func (r *Repository) ListAssets(ctx context.Context, businessID int64, params do
 		records = append(records, assetFromRow(row))
 	}
 
-	return records, nil
+	return records, total, nil
 }
 
 func (r *Repository) AssignAssetToEmployee(ctx context.Context, businessID, assetID, employeeID int64) error {

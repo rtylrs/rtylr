@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -474,6 +475,12 @@ func (a *TaskAPIV2) CreateSubtask(ctx context.Context, req *flowtaskv2.CreateSub
 	if err != nil {
 		return nil, err
 	}
+	// Handing the subtask to someone else is the same elevated operation as on
+	// create/update; without this a member holding only flow:tasks:create could
+	// assign a colleague and grant them project membership.
+	if err := requireTaskAssignmentPermission(ctx, req.AssigneeId, caller.UserID); err != nil {
+		return nil, err
+	}
 
 	parentID := req.GetParentTaskId()
 	parent, err := a.Service.GetTaskDetail(ctx, parentID)
@@ -567,6 +574,12 @@ func (a *TaskAPIV2) DeleteComment(ctx context.Context, req *flowtaskv2.DeleteCom
 		return nil, onekiterrors.PermissionDenied()
 	}
 	if err := a.Service.DeleteComment(ctx, req.GetId(), caller.UserID); err != nil {
+		// The delete is scoped to the comment's author, so a comment written by
+		// someone else reports ErrUnauthorized: the caller may administer the
+		// project but not this row. That is a permission answer, not an outage.
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete comment")
 	}
 	return &flowtaskv2.DeleteCommentResponse{Message: "Comment deleted successfully"}, nil
@@ -693,6 +706,11 @@ func (a *TaskAPIV2) DeleteTimeLog(ctx context.Context, req *flowtaskv2.DeleteTim
 		return nil, onekiterrors.PermissionDenied()
 	}
 	if err := a.Service.DeleteTimeLogFlat(ctx, req.GetId(), caller.UserID); err != nil {
+		// Same shape as DeleteComment: a log written by someone else is a
+		// permission answer from the row-scoped delete, not an outage.
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete time log")
 	}
 	return &flowtaskv2.DeleteTimeLogResponse{Message: "Time log deleted successfully"}, nil

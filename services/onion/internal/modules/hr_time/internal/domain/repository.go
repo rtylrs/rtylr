@@ -16,9 +16,10 @@ type Repository interface {
 	ListTimesheets(ctx context.Context, businessID int64, params ListTimesheetsParams) ([]TimesheetRecord, int64, error)
 
 	SubmitTimesheet(ctx context.Context, businessID, timesheetID int64) (*TimesheetRecord, error)
-	AdvanceApprovalLevel(ctx context.Context, businessID, timesheetID, approverID int64) (*TimesheetRecord, error)
+	AdvanceApprovalLevel(ctx context.Context, businessID, timesheetID int64, expectedLevel int32, approverID int64) (*TimesheetRecord, error)
 	RejectTimesheet(ctx context.Context, businessID, timesheetID int64, reason string) (*TimesheetRecord, error)
 	LockTimesheet(ctx context.Context, businessID, timesheetID int64) error
+	LockTimesheetWithApprovalAction(ctx context.Context, businessID, timesheetID, approverID int64, level int32) (*TimesheetRecord, error)
 
 	CreateApprovalAction(ctx context.Context, businessID int64, action ApprovalActionRecord) error
 

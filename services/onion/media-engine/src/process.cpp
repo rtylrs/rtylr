@@ -20,8 +20,10 @@ constexpr int kProcessTimeoutSeconds = 120;
 constexpr size_t kMaxCapturedOutput = 1 << 20; // 1 MiB
 
 // reapWithTimeout waits for the child, killing it (then SIGKILL) once the
-// deadline passes. Returns true if the child was reaped.
-bool reapWithTimeout(pid_t pid, int status) {
+// deadline passes. The wait status is written through the reference so the
+// caller can read the child's real exit code. Returns true if the child was
+// reaped.
+bool reapWithTimeout(pid_t pid, int& status) {
     for (int elapsed = 0; elapsed < kProcessTimeoutSeconds; ++elapsed) {
         const pid_t r = waitpid(pid, &status, WNOHANG);
         if (r == pid) {
@@ -97,7 +99,12 @@ ProcResult runProcess(const std::vector<std::string>& args) {
     ::close(pipefd[0]);
 
     int status = 0;
-    reapWithTimeout(pid, status);
+    if (!reapWithTimeout(pid, status)) {
+        // waitpid failed for a reason other than EINTR, so the child's status is
+        // unknown: report failure rather than the zero-initialized status.
+        result.exitCode = -1;
+        return result;
+    }
     result.exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
     return result;
 }

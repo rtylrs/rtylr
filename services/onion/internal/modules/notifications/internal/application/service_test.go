@@ -12,17 +12,28 @@ type mockRepo struct {
 	list  []domain.Notification
 	mrErr error
 	maErr error
+
+	markReadBusinessID     int64
+	markReadUserID         int64
+	markReadNotificationID int64
+	markAllBusinessID      int64
+	markAllUserID          int64
 }
 
 func (m *mockRepo) List(_ context.Context, _, _ int64) ([]domain.Notification, error) {
 	return m.list, nil
 }
 
-func (m *mockRepo) MarkRead(_ context.Context, _, _ int64) error {
+func (m *mockRepo) MarkRead(_ context.Context, businessID, userID, notificationID int64) error {
+	m.markReadBusinessID = businessID
+	m.markReadUserID = userID
+	m.markReadNotificationID = notificationID
 	return m.mrErr
 }
 
-func (m *mockRepo) MarkAllRead(_ context.Context, _ int64) error {
+func (m *mockRepo) MarkAllRead(_ context.Context, businessID, userID int64) error {
+	m.markAllBusinessID = businessID
+	m.markAllUserID = userID
 	return m.maErr
 }
 
@@ -46,5 +57,31 @@ func TestMarkAllRead_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	if err := s.MarkAllRead(context.Background(), 1, 1); err != nil {
 		t.Errorf("unexpected: %v", err)
+	}
+}
+
+// The tenant resolved by the handler has to reach the statement: without it
+// the update matches the caller's rows in every business they belong to.
+func TestMarkRead_ForwardsBusinessScope(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+	if err := s.MarkRead(context.Background(), 42, 7, 5); err != nil {
+		t.Fatalf("MarkRead: %v", err)
+	}
+	if repo.markReadBusinessID != 42 || repo.markReadUserID != 7 || repo.markReadNotificationID != 5 {
+		t.Errorf("MarkRead called with business=%d user=%d notification=%d, want 42/7/5",
+			repo.markReadBusinessID, repo.markReadUserID, repo.markReadNotificationID)
+	}
+}
+
+func TestMarkAllRead_ForwardsBusinessScope(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+	if err := s.MarkAllRead(context.Background(), 42, 7); err != nil {
+		t.Fatalf("MarkAllRead: %v", err)
+	}
+	if repo.markAllBusinessID != 42 || repo.markAllUserID != 7 {
+		t.Errorf("MarkAllRead called with business=%d user=%d, want 42/7",
+			repo.markAllBusinessID, repo.markAllUserID)
 	}
 }

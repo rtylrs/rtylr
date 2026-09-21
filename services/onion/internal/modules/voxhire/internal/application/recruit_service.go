@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
 	"github.com/voxire/onion/internal/platform/config"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/storage"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
@@ -18,6 +19,11 @@ const (
 	adminJWTIssuer = "voxhire-admin"
 	adminTokenTTL  = 7 * 24 * time.Hour
 	cvURLTTL       = 10 * time.Minute
+
+	// careerApplicationNotifyTimeout bounds the background notification that
+	// follows a public application submission, so a stalled email provider
+	// cannot pin the goroutine and its connection.
+	careerApplicationNotifyTimeout = 10 * time.Second
 
 	minAdminPasswordLen = 6
 )
@@ -214,7 +220,23 @@ func (s *Service) ListApplications(ctx context.Context, f domain.ApplicationFilt
 	if err != nil {
 		return nil, 0, err
 	}
-	opening, _ := s.repo.GetOpening(ctx, f.JobID)
+	opening, err := s.repo.GetOpening(ctx, f.JobID)
+	if err != nil {
+		// The applications are valid even when the opening lookup fails, but
+		// scoring them against a nil opening would silently report every
+		// applicant as a poor match. Leave them unscored and log the cause.
+		if errors.Is(err, domain.ErrCareerNotFound) {
+			logger.Ctx(ctx).Info("voxhire application match enrichment skipped for unknown opening",
+				logger.Any("job_id", f.JobID),
+			)
+		} else {
+			logger.Ctx(ctx).Error("voxhire application match enrichment skipped: get opening failed",
+				logger.Any("job_id", f.JobID),
+				logger.Error(err),
+			)
+		}
+		return apps, total, nil
+	}
 	return enrichApplicationMatches(apps, opening), total, nil
 }
 
@@ -306,7 +328,7 @@ func (s *Service) UpsertTask(ctx context.Context, in domain.TaskInput) (*domain.
 func (s *Service) UpdateTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error) {
 	in.Title = strings.TrimSpace(in.Title)
 	in.Status = strings.ToLower(strings.TrimSpace(in.Status))
-	if in.ID <= 0 || (in.Status == "" && in.Title == "" && in.DueAt == nil) {
+	if in.ID <= 0 || (in.Status == "" && in.Title == "" && !in.DueAtSet) {
 		return nil, domain.ErrInvalidInput
 	}
 	return s.repo.UpdateTask(ctx, in)
@@ -366,6 +388,20 @@ func (s *Service) SubmitCareerApplication(ctx context.Context, in domain.CareerA
 	if err != nil {
 		return 0, err
 	}
-	go s.notifyCareerApplication(context.WithoutCancel(ctx), id, in)
+
+	// Detach from the request context — the goroutine outlives the handler — but
+	// bound it, so a stalled email provider cannot hold the goroutine forever.
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("voxhire career application notification panicked", logger.Any("panic", r))
+			}
+		}()
+
+		notifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), careerApplicationNotifyTimeout)
+		defer cancel()
+		s.notifyCareerApplication(notifyCtx, id, in)
+	}()
+
 	return id, nil
 }

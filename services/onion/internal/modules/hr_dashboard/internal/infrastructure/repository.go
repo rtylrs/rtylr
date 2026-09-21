@@ -82,7 +82,7 @@ func (r *Repository) UpsertWidgets(ctx context.Context, businessID int64, widget
 				_ = tx.Rollback()
 				return err
 			}
-			insert = insert.Values(businessID, businessID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
+			insert = insert.Values(w.OwnerID, businessID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
 		}
 
 		query, args, err := insert.PlaceholderFormat(sq.Question).ToSql()

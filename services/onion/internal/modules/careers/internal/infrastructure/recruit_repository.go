@@ -62,6 +62,23 @@ func (r *Repository) GetCareerBySlug(ctx context.Context, businessID int64, slug
 	return recruitCareerFromGetRow(row), nil
 }
 
+// GetCareerByID reads a single career by primary key inside the tenant. The
+// create handler needs the stored row back (slug may be server-generated),
+// and id is unambiguous where slug is only unique per owner.
+func (r *Repository) GetCareerByID(ctx context.Context, businessID, careerID int64) (domain.RecruitCareer, error) {
+	row, err := r.queries.GetRecruitCareerByID(ctx, sqlc.GetRecruitCareerByIDParams{
+		ID:         careerID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.RecruitCareer{}, ErrCareerNotFound
+		}
+		return domain.RecruitCareer{}, err
+	}
+	return recruitCareerFromIDRow(row), nil
+}
+
 func (r *Repository) CreateCareer(ctx context.Context, in domain.RecruitCareerInput) (int64, error) {
 	result, err := r.queries.CreateRecruitCareer(ctx, sqlc.CreateRecruitCareerParams{
 		OwnerID:        in.OwnerID,
@@ -208,6 +225,35 @@ func (r *Repository) ListSubmissions(ctx context.Context, businessID int64, stat
 	return submissionsFromRows(rows), nil
 }
 
+// ListSubmissionsPage is the paged form of ListSubmissions for callers that
+// must see every row rather than the first UI page (e.g. the CSV export). Rows
+// are ordered newest-first with id as the tie-breaker so OFFSET paging is
+// stable when rows share a created_at.
+func (r *Repository) ListSubmissionsPage(ctx context.Context, businessID int64, status string, limit, offset int32) ([]domain.Submission, error) {
+	if status != "" {
+		rows, err := r.queries.ListCareerSubmissionsByStatusPage(ctx, sqlc.ListCareerSubmissionsByStatusPageParams{
+			BusinessID: businessID,
+			Status:     status,
+			Limit:      limit,
+			Offset:     offset,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return submissionsFromStatusPageRows(rows), nil
+	}
+
+	rows, err := r.queries.ListCareerSubmissionsPage(ctx, sqlc.ListCareerSubmissionsPageParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return submissionsFromPageRows(rows), nil
+}
+
 func (r *Repository) GetSubmissionResumeURL(ctx context.Context, businessID, submissionID int64) (string, error) {
 	return r.queries.GetCareerSubmissionResumeURL(ctx, sqlc.GetCareerSubmissionResumeURLParams{
 		ID:         submissionID,
@@ -269,6 +315,13 @@ func recruitCareerFromGetRow(row sqlc.GetRecruitCareerBySlugRow) domain.RecruitC
 		CreatedAt:      nullTimeValue(row.CreatedAt),
 		UpdatedAt:      nullTimeValue(row.UpdatedAt),
 	}
+}
+
+// GetRecruitCareerByIDRow selects the same columns as
+// GetRecruitCareerBySlugRow, so it shares the slug row's mapper (struct tags
+// are ignored for the conversion).
+func recruitCareerFromIDRow(row sqlc.GetRecruitCareerByIDRow) domain.RecruitCareer {
+	return recruitCareerFromGetRow(sqlc.GetRecruitCareerBySlugRow(row))
 }
 
 func customizationFromBusinessRow(row sqlc.GetCustomizationByBusinessRow) domain.Customization {
@@ -351,6 +404,24 @@ func submissionsFromStatusRows(rows []sqlc.ListCareerSubmissionsByStatusRow) []d
 	out := make([]domain.Submission, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, submissionFromStatusRow(row))
+	}
+	return out
+}
+
+// The paged rows select the same columns as their unpaged siblings, so they
+// convert (struct tags are ignored) and share the same mapper.
+func submissionsFromPageRows(rows []sqlc.ListCareerSubmissionsPageRow) []domain.Submission {
+	out := make([]domain.Submission, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, submissionFromRow(sqlc.ListCareerSubmissionsRow(row)))
+	}
+	return out
+}
+
+func submissionsFromStatusPageRows(rows []sqlc.ListCareerSubmissionsByStatusPageRow) []domain.Submission {
+	out := make([]domain.Submission, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, submissionFromStatusRow(sqlc.ListCareerSubmissionsByStatusRow(row)))
 	}
 	return out
 }

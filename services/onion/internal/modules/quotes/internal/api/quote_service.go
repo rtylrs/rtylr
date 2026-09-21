@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
@@ -61,32 +62,33 @@ func (a *QuoteAPI) CreateQuote(ctx context.Context, req *financequotev1.CreateQu
 		return nil, errModel
 	}
 
-	if req.GetCustomerName() == "" {
-		return nil, onekiterrors.New(http.StatusBadRequest, "customer_name is required")
-	}
-
 	status := req.GetStatus()
 	if status == "" {
 		status = "draft"
 	}
 
-	itemsJSON, err := marshalQuoteLines(req.GetLines())
-	if err != nil {
-		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid quote lines")
-	}
-
-	id, err := a.Service.Create(ctx, businessID, domain.QuoteInput{
+	input := domain.QuoteInput{
 		CustomerName:  req.GetCustomerName(),
 		CustomerEmail: req.GetCustomerEmail(),
 		Status:        status,
-		Items:         itemsJSON,
 		Subtotal:      req.GetSubtotal(),
 		Tax:           req.GetTax(),
 		Discount:      req.GetDiscount(),
 		Total:         req.GetTotal(),
 		ValidUntil:    req.GetValidUntil(),
 		Notes:         req.GetNotes(),
-	})
+	}
+	if err := domain.ValidateQuoteInput(input); err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+
+	itemsJSON, err := marshalQuoteLines(req.GetLines())
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid quote lines")
+	}
+	input.Items = itemsJSON
+
+	id, err := a.Service.Create(ctx, businessID, input)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create quote")
 	}
@@ -128,6 +130,9 @@ func (a *QuoteAPI) UpdateQuoteStatus(ctx context.Context, req *financequotev1.Up
 	}
 
 	if err := a.Service.UpdateStatus(ctx, businessID, req.GetId(), body.GetStatus()); err != nil {
+		if errors.Is(err, domain.ErrQuoteNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Quote not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update quote status")
 	}
 

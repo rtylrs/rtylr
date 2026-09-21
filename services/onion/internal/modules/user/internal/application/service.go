@@ -134,6 +134,22 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 		return 0, err
 	}
 
+	// businesses.name is globally UNIQUE, so check the requested name before the
+	// user row exists. Failing afterwards left an account behind whose password
+	// the user chose while the form reported an error, and retrying the same
+	// email then hit ErrUserAlreadyExists forever. OnboardCreateBusiness
+	// pre-checks the same way.
+	businessName := strings.TrimSpace(data.BusinessName)
+	if businessName != "" {
+		exists, nameErr := s.repo.BusinessNameExists(ctx, businessName)
+		if nameErr != nil {
+			return 0, nameErr
+		}
+		if exists {
+			return 0, ErrBusinessNameTaken
+		}
+	}
+
 	hash, err := passwordutils.HashPassword(data.Password)
 	if err != nil {
 		return 0, err
@@ -152,7 +168,7 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 		return 0, err
 	}
 
-	if businessName := strings.TrimSpace(data.BusinessName); businessName != "" {
+	if businessName != "" {
 		if err := s.CreateBusinessForUser(ctx, userID, businessName); err != nil {
 			return 0, fmt.Errorf("create registration business: %w", err)
 		}

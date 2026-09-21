@@ -16,6 +16,25 @@ WHERE business_id = ?
 ORDER BY name ASC
 LIMIT ? OFFSET ?;
 
+-- name: ListAssetsFiltered :many
+SELECT id, owner_id, business_id, name, category, serial_number, location_id, assigned_to, status,
+       purchase_date, purchase_price, notes, created_at, updated_at
+FROM hr_assets
+WHERE business_id = sqlc.arg(business_id)
+  AND (sqlc.narg(location_id) IS NULL OR location_id = sqlc.narg(location_id))
+  AND (sqlc.narg(status) IS NULL OR status = sqlc.narg(status))
+  AND (sqlc.narg(assigned_to) IS NULL OR assigned_to = sqlc.narg(assigned_to))
+ORDER BY name ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountAssetsFiltered :one
+SELECT COUNT(*) AS total
+FROM hr_assets
+WHERE business_id = sqlc.arg(business_id)
+  AND (sqlc.narg(location_id) IS NULL OR location_id = sqlc.narg(location_id))
+  AND (sqlc.narg(status) IS NULL OR status = sqlc.narg(status))
+  AND (sqlc.narg(assigned_to) IS NULL OR assigned_to = sqlc.narg(assigned_to));
+
 -- name: ListAssetsByStatus :many
 SELECT id, owner_id, business_id, name, category, serial_number, location_id, assigned_to, status,
        purchase_date, purchase_price, notes, created_at, updated_at

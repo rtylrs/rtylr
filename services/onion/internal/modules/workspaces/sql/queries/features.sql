@@ -117,20 +117,65 @@ FROM flow_tasks
 WHERE workspace_id = ? AND status = 'done' AND completed_at IS NOT NULL;
 
 -- name: GetInsightsVelocity :many
+-- Every task event in the window is counted once: a creation and a completion
+-- each contribute. `total` is measured from the task history, so the
+-- completion rate reported alongside it is real; the previous code sent
+-- completed*1.3 as the total and a constant rate.
 SELECT
-    DATE_FORMAT(DATE_SUB(completed_at, INTERVAL WEEKDAY(completed_at) DAY), '%Y-%m-%d') AS week_start,
-    COUNT(*) AS completed
-FROM flow_tasks
-WHERE workspace_id = ?
-  AND status = 'done'
-  AND completed_at >= DATE_SUB(NOW(), INTERVAL 8 WEEK)
-GROUP BY YEARWEEK(completed_at, 1)
+    DATE_FORMAT(DATE_SUB(MIN(day), INTERVAL WEEKDAY(MIN(day)) DAY), '%Y-%m-%d') AS week_start,
+    COUNT(CASE WHEN kind = 2 THEN 1 END) AS completed,
+    COUNT(*) AS total
+FROM (
+    SELECT created_at AS day, 1 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.created_at >= DATE_SUB(NOW(), INTERVAL 8 WEEK)
+    UNION ALL
+    SELECT completed_at AS day, 2 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.status = 'done' AND flow_tasks.completed_at IS NOT NULL
+      AND completed_at >= DATE_SUB(NOW(), INTERVAL 8 WEEK)
+) events
+GROUP BY YEARWEEK(day, 1)
 ORDER BY week_start ASC;
 
 -- name: GetInsightsOpenTaskCount :one
 SELECT COUNT(*) AS open_tasks
 FROM flow_tasks
 WHERE workspace_id = ? AND status NOT IN ('done', 'cancelled') AND parent_task_id IS NULL;
+
+-- name: GetInsightsBurndownBase :one
+-- Work already in flight when the burndown window opened: created before the
+-- window and not completed before it.
+SELECT COUNT(*) AS open_tasks
+FROM flow_tasks
+WHERE workspace_id = ?
+  AND parent_task_id IS NULL
+  AND status != 'cancelled'
+  AND created_at < DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+  AND (completed_at IS NULL OR completed_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY));
+
+-- name: GetInsightsBurndownDaily :many
+-- Per-day creations and completions inside the burndown window. The repository
+-- accumulates them into the measured remaining-work curve; the previous actual
+-- line was an assumed burn rate.
+SELECT
+    DATE(day) AS day,
+    COUNT(CASE WHEN kind = 1 THEN 1 END) AS created,
+    COUNT(CASE WHEN kind = 2 THEN 1 END) AS completed
+FROM (
+    SELECT created_at AS day, 1 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.parent_task_id IS NULL AND flow_tasks.status != 'cancelled'
+      AND flow_tasks.created_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+    UNION ALL
+    SELECT completed_at AS day, 2 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.parent_task_id IS NULL AND flow_tasks.status = 'done'
+      AND flow_tasks.completed_at IS NOT NULL
+      AND flow_tasks.completed_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+) events
+GROUP BY DATE(day)
+ORDER BY day ASC;
 
 -- cross-schema read from users and hr_time_entries — insights time-by-member
 -- aggregation over BOTH stores of hours.

@@ -168,7 +168,12 @@ func (r *Repository) Update(ctx context.Context, input domain.CampaignUpdateInpu
 	}
 
 	if rows == 0 {
-		return domain.ErrCampaignNotFound
+		// MySQL reports zero changed rows when the UPDATE matched a row whose
+		// values are already identical (an idempotent re-send). Only a campaign
+		// that does not exist for this business is a genuine not-found.
+		if _, err := r.GetByID(ctx, businessID, input.ID); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -192,7 +197,11 @@ func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, sta
 	}
 
 	if rows == 0 {
-		return domain.ErrCampaignNotFound
+		// Same as Update: an unchanged status is an idempotent success, not a
+		// missing campaign.
+		if _, err := r.GetByID(ctx, businessID, id); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -814,6 +814,9 @@ func parseDimension(raw string) (int, error) {
 	return int(math.Round(n)), nil
 }
 
+// orientStep maps the request's orient/rotate value onto a chain step. Bare
+// h/v agree with the hflip/vflip aliases: fx_flop is a left-to-right mirror
+// and fx_flip a top-to-bottom one (media-engine apply.cpp).
 func orientStep(raw string) string {
 	switch strings.ToLower(strings.TrimSpace(raw)) {
 	case "", "auto":
@@ -824,9 +827,9 @@ func orientStep(raw string) string {
 		return "a_180"
 	case "270", "r270", "-90":
 		return "a_270"
-	case "h", "flip", "vflip":
+	case "v", "flip", "vflip":
 		return "fx_flip"
-	case "v", "flop", "hflip":
+	case "h", "flop", "hflip":
 		return "fx_flop"
 	default:
 		return "a_" + sanitizeChainValue(raw)

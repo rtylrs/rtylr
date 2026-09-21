@@ -128,6 +128,12 @@ WHERE d.business_id = sqlc.arg('business_id')
 -- Bounded by how recently a delivery died, so a registration that failed
 -- months ago and was never fixed does not generate a notification forever.
 -- updated_at is when the row reached its final state.
+--
+-- cross-schema read from shared — email_jobs holds the notifier's own dedupe
+-- keys. A registration already told today is excluded so a batch advances past
+-- the head of the list: the query returns the same rows on every hourly pass,
+-- and without the exclusion everything beyond one batch is never reached. The
+-- key must match the notifier's dedupe key exactly (webhook_dead:<id>:<date>).
 -- name: ListRegistrationsWithRecentDeadDeliveries :many
 SELECT d.business_id, d.webhook_id, w.url,
        COUNT(*) AS dead_count,
@@ -136,6 +142,11 @@ FROM webhook_deliveries d
 JOIN hub_webhooks w ON w.id = d.webhook_id AND w.business_id = d.business_id
 WHERE d.status = 'dead'
   AND d.updated_at >= DATE_SUB(NOW(), INTERVAL sqlc.arg('within_hours') HOUR)
+  AND NOT EXISTS (
+        SELECT 1
+        FROM email_jobs e
+        WHERE e.dedupe_key = CONCAT('webhook_dead:', d.webhook_id, ':', sqlc.arg('notified_on'))
+      )
 GROUP BY d.business_id, d.webhook_id, w.url
 ORDER BY d.webhook_id ASC
 LIMIT ?;

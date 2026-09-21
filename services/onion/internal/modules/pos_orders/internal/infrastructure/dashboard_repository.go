@@ -24,7 +24,11 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 	stats.AvgOrder = interfaceToFloat(salesRow.AvgOrder)
 
 	turnover, err := r.queries.GetTableTurnover(ctx, businessID)
-	if err == nil && turnover.TableCount > 0 {
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get table turnover", logger.Error(err))
+		return stats, err
+	}
+	if turnover.TableCount > 0 {
 		stats.TableTurnover = interfaceToFloat(turnover.TurnedTables) / float64(turnover.TableCount)
 	}
 

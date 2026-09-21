@@ -109,6 +109,21 @@ option(MEDIA_ENGINE_TESTS "Build the media-engine unit tests" ON)
 if(MEDIA_ENGINE_TESTS)
     enable_testing()
     file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*_test.cpp")
+    # process_test covers the subprocess runner, which lives in a vips-free
+    # translation unit; it is built explicitly with that source instead of the
+    # header-only glob.
+    list(FILTER TEST_SOURCES EXCLUDE REGEX ".*/process_test\\.cpp$")
+    add_executable(process_test tests/process_test.cpp src/process.cpp)
+    target_include_directories(process_test PRIVATE include tests)
+    add_test(NAME process_test COMMAND process_test)
+    # image_processor_test exercises the vips-backed resize path end to end
+    # (synthetic source -> process -> decoded output), so it links the core
+    # library and the vips bindings instead of being header-only.
+    list(FILTER TEST_SOURCES EXCLUDE REGEX ".*/image_processor_test\\.cpp$")
+    add_executable(image_processor_test tests/image_processor_test.cpp)
+    target_link_libraries(image_processor_test PRIVATE media_engine_core)
+    target_include_directories(image_processor_test PRIVATE include tests)
+    add_test(NAME image_processor_test COMMAND image_processor_test)
     foreach(test_src ${TEST_SOURCES})
         get_filename_component(test_name ${test_src} NAME_WE)
         add_executable(${test_name} ${test_src})

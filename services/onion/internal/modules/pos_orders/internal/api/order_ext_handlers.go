@@ -75,6 +75,9 @@ func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return SplitOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
+		if errors.Is(err, domain.ErrOrderCannotBeSplit) {
+			return SplitOrderResponse{}, onekiterrors.New(http.StatusConflict, "Order cannot be split in its current status")
+		}
 		return SplitOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to split order")
 	}
 	return SplitOrderResponse{OrderIDs: orderIDs, Message: "Order split successfully"}, nil
@@ -405,6 +408,9 @@ func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemReques
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return VoidOrderItemResponse{}, onekiterrors.New(http.StatusNotFound, "Order item not found")
 		}
+		if errors.Is(err, domain.ErrItemNotVoidable) {
+			return VoidOrderItemResponse{}, onekiterrors.New(http.StatusConflict, "Order item cannot be voided in its current status")
+		}
 		return VoidOrderItemResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to void order item")
 	}
 	return VoidOrderItemResponse{Success: true}, nil
@@ -455,6 +461,9 @@ func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequ
 	if err := h.Service.TransferTable(ctx, businessID, orderID, req.NewTableID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return TransferTableResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
+		}
+		if errors.Is(err, domain.ErrTableNotFound) {
+			return TransferTableResponse{}, onekiterrors.New(http.StatusNotFound, "Table not found")
 		}
 		if errors.Is(err, domain.ErrOrderCannotBeTransferred) {
 			return TransferTableResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, err.Error())

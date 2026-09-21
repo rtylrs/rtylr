@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -154,6 +155,9 @@ func (h *UpdateHRCoreDepartmentHandler) Serve(ctx context.Context, req *UpdateHR
 	dept := domain.DepartmentRecord{ID: id, Name: req.Name, LocationID: req.LocationID, ParentDepartmentID: req.ParentDepartmentID, DefaultWorkScheduleID: req.DefaultWorkScheduleID}
 	updated, err := h.Service.UpdateDepartment(ctx, businessID, dept)
 	if err != nil {
+		if errors.Is(err, domain.ErrDepartmentNotFound) {
+			return UpdateHRCoreDepartmentResponse{}, onekiterrors.New(http.StatusNotFound, "Department not found")
+		}
 		logger.Ctx(ctx).Error("failed to update department", logger.Any("business_id", businessID), logger.Any("department_id", id), logger.Error(err))
 		return UpdateHRCoreDepartmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update department")
 	}

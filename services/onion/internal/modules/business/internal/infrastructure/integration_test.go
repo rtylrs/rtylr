@@ -3,8 +3,10 @@ package infrastructure_test
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/business/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
@@ -122,6 +124,82 @@ func TestLookupBySlug_ReturnsBusinessAndLocations(t *testing.T) {
 	if result.Business.Name != "Test Business" {
 		t.Errorf("expected Name='Test Business', got %q", result.Business.Name)
 	}
+}
+
+// TestLookupBySlug_LocationsAreBusinessScoped seeds two storefronts for the
+// same owner: the queried business has its own location and a sibling business
+// holds a legacy-style location whose owner_id is the shared user id. The
+// public lookup must list the business-scoped row and must not leak the
+// sibling's row onto it.
+func TestLookupBySlug_LocationsAreBusinessScoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	var ownerID int64
+	if err := db.QueryRowContext(ctx, `SELECT owner_id FROM businesses WHERE id = 1`).Scan(&ownerID); err != nil {
+		t.Fatalf("read fixture owner: %v", err)
+	}
+
+	suffix := time.Now().UnixNano()
+	bizA := insertTestBusiness(t, db, ownerID, fmt.Sprintf("Public Scope A %d", suffix), fmt.Sprintf("public-scope-a-%d", suffix))
+	bizB := insertTestBusiness(t, db, ownerID, fmt.Sprintf("Public Scope B %d", suffix), fmt.Sprintf("public-scope-b-%d", suffix))
+
+	locA := insertTestLocation(t, db, bizA, bizA, fmt.Sprintf("Scope A Location %d", suffix), fmt.Sprintf("scope-a-loc-%d", suffix))
+	// Legacy rows keep the owner user id in owner_id; the query must key on
+	// business_id, so this row may only appear on business B's storefront.
+	locB := insertTestLocation(t, db, ownerID, bizB, fmt.Sprintf("Scope B Location %d", suffix), fmt.Sprintf("scope-b-loc-%d", suffix))
+
+	result, err := repo.LookupBySlug(ctx, fmt.Sprintf("public-scope-a-%d", suffix))
+	if err != nil {
+		t.Fatalf("LookupBySlug: %v", err)
+	}
+
+	ids := make([]int64, 0, len(result.Locations))
+	for _, loc := range result.Locations {
+		ids = append(ids, loc.ID)
+	}
+	testutil.AssertTenantIsolation(t, ids, []int64{locA}, []int64{locB})
+}
+
+func insertTestBusiness(t *testing.T, db *sql.DB, ownerID int64, name, slug string) int64 {
+	t.Helper()
+
+	result, err := db.Exec(
+		`INSERT INTO businesses (name, owner_id, slug, is_active) VALUES (?, ?, ?, TRUE)`,
+		name, ownerID, slug,
+	)
+	if err != nil {
+		t.Fatalf("insert business: %v", err)
+	}
+	businessID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("read business id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), `DELETE FROM businesses WHERE id = ?`, businessID)
+	})
+	return businessID
+}
+
+func insertTestLocation(t *testing.T, db *sql.DB, ownerID, businessID int64, name, slug string) int64 {
+	t.Helper()
+
+	result, err := db.Exec(
+		`INSERT INTO hr_locations (owner_id, business_id, name, slug, is_active) VALUES (?, ?, ?, ?, TRUE)`,
+		ownerID, businessID, name, slug,
+	)
+	if err != nil {
+		t.Fatalf("insert hr_location: %v", err)
+	}
+	locationID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("read hr_location id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), `DELETE FROM hr_locations WHERE id = ?`, locationID)
+	})
+	return locationID
 }
 
 func TestLookupBySlug_UnknownSlugReturnsError(t *testing.T) {

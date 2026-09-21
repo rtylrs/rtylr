@@ -54,7 +54,11 @@ func NewNotifier(db *sql.DB) *Notifier {
 // aborting the pass, so one unreachable owner does not stop everyone else
 // hearing about their own endpoints.
 func (n *Notifier) NotifyFailing(ctx context.Context) error {
-	failing, err := n.repo.ListFailingRegistrations(ctx, n.withinHours, n.batchSize)
+	// Fixed once per pass so the query's exclusion and the dedupe keys below
+	// agree even if the pass crosses midnight.
+	notifiedOn := time.Now().UTC().Format("2006-01-02")
+
+	failing, err := n.repo.ListFailingRegistrations(ctx, n.withinHours, n.batchSize, notifiedOn)
 	if err != nil {
 		return fmt.Errorf("listing failing registrations: %w", err)
 	}
@@ -63,13 +67,13 @@ func (n *Notifier) NotifyFailing(ctx context.Context) error {
 		if ctx.Err() != nil {
 			return nil
 		}
-		n.notifyOne(ctx, registration)
+		n.notifyOne(ctx, registration, notifiedOn)
 	}
 	return nil
 }
 
 // notifyOne tells one registration's owner, once a day at most.
-func (n *Notifier) notifyOne(ctx context.Context, registration domain.FailingRegistration) {
+func (n *Notifier) notifyOne(ctx context.Context, registration domain.FailingRegistration, notifiedOn string) {
 	recipient, err := n.repo.GetNotificationRecipient(ctx, registration.WebhookID, registration.BusinessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -97,8 +101,9 @@ func (n *Notifier) notifyOne(ctx context.Context, registration domain.FailingReg
 
 	// One message per registration per day. The key is what makes this safe to
 	// run hourly over a query that keeps returning the same rows: the second
-	// and later enqueues in a day are no-ops.
-	dedupeKey := fmt.Sprintf("webhook_dead:%d:%s", registration.WebhookID, time.Now().UTC().Format("2006-01-02"))
+	// and later enqueues in a day are no-ops, and the next batch query skips
+	// registrations that already have it.
+	dedupeKey := fmt.Sprintf("webhook_dead:%d:%s", registration.WebhookID, notifiedOn)
 
 	if err := emailqueue.Enqueue(ctx, n.db, emailqueue.Job{
 		To:        recipient.Email,

@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
@@ -40,13 +41,18 @@ func (h *GetMyPayrollRunHandler) Serve(ctx context.Context, _ *GetMyPayrollRunRe
 		return GetMyPayrollRunResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid payroll run id")
 	}
 
-	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
-	if empErr != nil {
-		logger.Ctx(ctx).Warn("failed to resolve employee for self-service payroll lookup", logger.Any("owner_id", device.User.UserID), logger.Error(empErr))
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
 		return GetMyPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	run, entry, err := h.Service.GetMyPayrollRun(ctx, device.User.UserID, id, employeeID)
+	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+	if empErr != nil {
+		logger.Ctx(ctx).Warn("failed to resolve employee for self-service payroll lookup", logger.Any("business_id", businessID), logger.Error(empErr))
+		return GetMyPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	run, entry, err := h.Service.GetMyPayrollRun(ctx, businessID, id, employeeID)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollRunNotFound) {
 			return GetMyPayrollRunResponse{}, onekiterrors.New(http.StatusNotFound, "Payroll run not found")

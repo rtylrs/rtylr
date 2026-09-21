@@ -416,7 +416,16 @@ func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderSt
 	}
 
 	if err := h.Service.UpdateOrderStatus(ctx, businessID, orderID, domain.OrderStatus(req.Status)); err != nil {
-		return UpdateOrderStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update order status")
+		switch {
+		case errors.Is(err, domain.ErrOrderNotFound):
+			return UpdateOrderStatusResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
+		case errors.Is(err, domain.ErrInvalidOrderStatus):
+			return UpdateOrderStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order status")
+		case errors.Is(err, domain.ErrOrderStatusRequiresWorkflow):
+			return UpdateOrderStatusResponse{}, onekiterrors.New(http.StatusConflict, "Order status must be changed through its dedicated flow")
+		default:
+			return UpdateOrderStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update order status")
+		}
 	}
 
 	return UpdateOrderStatusResponse{Message: "Order status updated"}, nil
@@ -461,7 +470,14 @@ func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrd
 		return UpdateOrderItemStatusResponse{}, bizErr
 	}
 	if err := h.Service.UpdateOrderItemStatus(ctx, businessID, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
-		return UpdateOrderItemStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
+		switch {
+		case errors.Is(err, domain.ErrOrderNotFound):
+			return UpdateOrderItemStatusResponse{}, onekiterrors.New(http.StatusNotFound, "Order item not found")
+		case errors.Is(err, domain.ErrInvalidItemStatus):
+			return UpdateOrderItemStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid item status")
+		default:
+			return UpdateOrderItemStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
+		}
 	}
 
 	return UpdateOrderItemStatusResponse{Message: "Item status updated"}, nil

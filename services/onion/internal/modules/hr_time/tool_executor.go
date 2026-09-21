@@ -98,9 +98,16 @@ func (m *Module) executeListTimesheetsTool(ctx context.Context, input map[string
 	if err != nil {
 		return nil, err
 	}
-	employeeID, err := hrTimeToolNonNegativeInt64(firstHRTimeToolValue(input, "employee_id", "employee"))
-	if err != nil {
-		return nil, fmt.Errorf("invalid employee_id: %w", err)
+	// The employee filter is optional (hr.time_entry.v1 ListTimesheetsRequest):
+	// only an explicit value is forwarded, so an absent employee_id lists the
+	// business instead of filtering by employee 0.
+	var employeeID *int64
+	if raw := firstHRTimeToolValue(input, "employee_id", "employee"); raw != nil {
+		parsed, parseErr := hrTimeToolNonNegativeInt64(raw)
+		if parseErr != nil {
+			return nil, fmt.Errorf("invalid employee_id: %w", parseErr)
+		}
+		employeeID = &parsed
 	}
 
 	timesheets, total, err := m.service.ListTimesheets(ctx, businessID, domain.ListTimesheetsParams{

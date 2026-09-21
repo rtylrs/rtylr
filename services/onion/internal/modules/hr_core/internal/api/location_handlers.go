@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -175,6 +176,9 @@ func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRe
 	}
 	updated, err := h.Service.UpdateLocation(ctx, businessID, loc)
 	if err != nil {
+		if errors.Is(err, domain.ErrLocationNotFound) {
+			return UpdateLocationResponse{}, onekiterrors.New(http.StatusNotFound, "Location not found")
+		}
 		logger.Ctx(ctx).Error("failed to update location", logger.Any("business_id", businessID), logger.Any("location_id", id), logger.Error(err))
 		return UpdateLocationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update location")
 	}

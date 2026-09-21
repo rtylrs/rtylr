@@ -249,7 +249,11 @@ func (s *Service) CreateShiftAssignment(ctx context.Context, businessID int64, a
 
 	conflicts := s.DetectConflicts(ctx, businessID, assignment.EmployeeID, assignment.Date)
 	for _, c := range conflicts {
-		if c.ConflictType == "leave" {
+		// An existing assignment on the same date blocks too: uk_shift_assignment
+		// allows only one assignment per (owner, employee, date), so letting the
+		// insert through would surface a raw duplicate-key error as a 500 while
+		// the endpoint's contract promises 409 for "another shift".
+		if c.ConflictType == "leave" || c.ConflictType == "existing_shift" {
 			return nil, nil, domain.ErrRosterConflict
 		}
 	}

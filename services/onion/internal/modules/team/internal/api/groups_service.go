@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 )
@@ -68,6 +69,9 @@ func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.Create
 		ResourcePermissions: perms,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrInvalidPermissionLevel) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid resource permission level")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create group")
 	}
 
@@ -130,6 +134,9 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 		if errors.Is(err, domain.ErrGroupNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
 		}
+		if errors.Is(err, domain.ErrInvalidPermissionLevel) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid resource permission level")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update group")
 	}
 
@@ -173,6 +180,11 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	device := authPkg.DeviceCtx(ctx)
+	businessID := int64(0)
+	if device.User != nil {
+		businessID = device.User.BusinessID
+	}
 
 	groupID := req.GetId()
 	if groupID <= 0 {
@@ -184,7 +196,7 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 		return nil, onekiterrors.New(http.StatusBadRequest, "user_ids is required")
 	}
 
-	if err := a.Service.AddGroupMembers(ctx, ownerID, groupID, actorID, userIDs); err != nil {
+	if err := a.Service.AddGroupMembers(ctx, ownerID, groupID, businessID, actorID, userIDs); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add members")
 	}
 

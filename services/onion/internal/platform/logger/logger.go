@@ -196,9 +196,14 @@ type betterStackHandler struct {
 }
 
 type betterStackDelivery struct {
-	mu       sync.Mutex
-	pending  sync.WaitGroup
-	flushing bool
+	mu sync.Mutex
+	// activeFlushes counts Flush calls that have not returned yet. Handle drops
+	// records while it is non-zero so Flush never waits on records logged during
+	// shutdown. Counting instead of a plain bool lets delivery resume when a
+	// Flush returns instead of staying disabled for the rest of the process —
+	// runServer() is re-entered after a crash and Flush runs on every return.
+	activeFlushes int
+	pending       sync.WaitGroup
 }
 
 func newBetterStackHandler(token, endpoint string) *betterStackHandler {
@@ -226,7 +231,7 @@ func (h *betterStackHandler) Handle(ctx context.Context, record slog.Record) err
 	}
 
 	h.delivery.mu.Lock()
-	if h.delivery.flushing {
+	if h.delivery.activeFlushes > 0 {
 		h.delivery.mu.Unlock()
 		return nil
 	}
@@ -276,9 +281,14 @@ func (h *betterStackHandler) WithGroup(name string) slog.Handler {
 
 func (h *betterStackHandler) Flush() {
 	h.delivery.mu.Lock()
-	h.delivery.flushing = true
+	h.delivery.activeFlushes++
 	h.delivery.mu.Unlock()
+
 	h.delivery.pending.Wait()
+
+	h.delivery.mu.Lock()
+	h.delivery.activeFlushes--
+	h.delivery.mu.Unlock()
 }
 
 func appendAttrsToGroup(groups []string, existing []slog.Attr, attrs ...slog.Attr) []slog.Attr {
@@ -434,9 +444,16 @@ func (l *Logger) Warn(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelWarn, msg, convertFields(fields)...)
 }
 
+// exitProcess terminates the process. It is a variable so tests can exercise
+// Fatal's shutdown path without killing the test binary.
+var exitProcess = os.Exit
+
 func (l *Logger) Fatal(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelError, msg, convertFields(fields)...)
-	os.Exit(1)
+	// os.Exit skips every deferred call, including runServer's Flush, so the
+	// record queued above must be delivered before the process dies.
+	Flush()
+	exitProcess(1)
 }
 
 func Any(key string, value interface{}) Field { return Field{Key: key, Value: value} }

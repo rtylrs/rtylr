@@ -70,7 +70,7 @@ func (r *Repository) GetCommentsByTask(ctx context.Context, taskID int64) ([]dom
 }
 
 func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64) error {
-	err := r.queries.DeleteComment(ctx, sqlc.DeleteCommentParams{
+	res, err := r.queries.DeleteComment(ctx, sqlc.DeleteCommentParams{
 		ID:     commentID,
 		UserID: userID,
 	})
@@ -78,7 +78,10 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 		logger.Ctx(ctx).Error("DeleteComment failed", logger.Error(err))
 		return err
 	}
-	return nil
+	// The statement is scoped by user_id, so deleting a comment the caller did
+	// not write matches no row. Returning nil there made the handler answer
+	// "Comment deleted successfully" while the comment stayed in the database.
+	return requireAffected(res)
 }
 
 // GetCommentTaskID returns the task a comment belongs to. Used by the
@@ -354,11 +357,15 @@ func (r *Repository) GetTimeLogTaskID(ctx context.Context, id int64) (int64, err
 }
 
 func (r *Repository) DeleteTimeLog(ctx context.Context, id, userID int64) error {
-	err := r.queries.DeleteTimeLog(ctx, sqlc.DeleteTimeLogParams{ID: id, UserID: userID})
+	res, err := r.queries.DeleteTimeLog(ctx, sqlc.DeleteTimeLogParams{ID: id, UserID: userID})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteTimeLog failed", logger.Error(err))
+		return err
 	}
-	return err
+	// The statement is scoped by user_id, so deleting a log the caller did not
+	// write matches no row. Returning nil there made the handler answer "Time
+	// log deleted successfully" while the entry stayed in the database.
+	return requireAffected(res)
 }
 
 func (r *Repository) RecalcActualHours(ctx context.Context, taskID, actorID int64) error {

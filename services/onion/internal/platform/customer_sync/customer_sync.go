@@ -86,9 +86,19 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, businessID int64, contact C
 		updateLastVisit = lastVisit
 	}
 
+	// The name fallback derived from the email/phone is only for fresh rows.
+	// When the contact carried no name, keep the stored name instead of
+	// overwriting it with the email prefix on every sync.
+	updateFirstName := firstName
+	updateLastName := sqlutil.NullString(lastName)
+	if name == "" {
+		updateFirstName = ""
+		updateLastName = sql.NullString{}
+	}
+
 	err = queries.UpdateCRMCustomerFromSync(ctx, customersyncsqlc.UpdateCRMCustomerFromSyncParams{
-		FirstName:       firstName,
-		LastName:        sqlutil.NullString(lastName),
+		FirstName:       updateFirstName,
+		LastName:        updateLastName,
 		Email:           sqlutil.NullString(email),
 		Phone:           sqlutil.NullString(phone),
 		TotalSpentDelta: sql.NullString{String: totalSpent, Valid: true},

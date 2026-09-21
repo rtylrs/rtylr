@@ -14,7 +14,8 @@ type InvoiceAgingBucketPayload struct {
 	AmountMinorUnits int64  `json:"amount_minor_units"`
 }
 
-// GetInvoiceAging returns the four standard A/R aging buckets.
+// GetInvoiceAging returns the A/R aging buckets declared by the contract:
+// current (not yet past due), 1-30, 31-60, 61-90 and 90+ days past due.
 func (s *Service) GetInvoiceAging(ctx context.Context, businessID int64) ([]InvoiceAgingBucketPayload, error) {
 	key, err := s.insightsCacheKey(ctx, businessID, "financial:invoice-aging")
 	if err != nil {

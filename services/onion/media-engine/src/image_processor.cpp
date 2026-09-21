@@ -2,6 +2,7 @@
 #include "encode.hpp"
 #include <vips/vips8>
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 namespace voxire {
@@ -77,18 +78,24 @@ vips::VImage ImageProcessor::resizeImage(vips::VImage img, int targetW, int targ
             );
     }
 
+    // Round the thumbnail box up. vips_thumbnail without "crop" fits the image
+    // inside the box with one equalised shrink factor and rounds the resulting
+    // axes, so a truncated box lets an axis come out a pixel below the target —
+    // 4032x3024 -> cover 750x500 requested a 750x562 box, produced a 749x562
+    // thumbnail, and the crop below failed with "bad extract area".
     img = img.thumbnail_image(
-        static_cast<int>(srcW * scale),
+        static_cast<int>(std::ceil(srcW * scale)),
         vips::VImage::option()
-            ->set("height", static_cast<int>(srcH * scale))
+            ->set("height", static_cast<int>(std::ceil(srcH * scale)))
             ->set("size", size)
     );
 
     if (fit == FitMode::Cover) {
-        // Centre-crop to exact target dimensions
+        // Centre-crop to exact target dimensions, clamped so a future rounding
+        // surprise degrades to a slightly smaller image instead of throwing.
         int x = std::max(0, (img.width()  - targetW) / 2);
         int y = std::max(0, (img.height() - targetH) / 2);
-        img = img.crop(x, y, targetW, targetH);
+        img = img.crop(x, y, std::min(targetW, img.width()), std::min(targetH, img.height()));
     }
 
     return img;

@@ -53,7 +53,8 @@ mysql_cmd "$DB_NAME" <<'SQL'
 INSERT INTO users (id, email, password_hash)
 VALUES
     (1001, 'role-backfill-owner@example.com', 'test'),
-    (1002, 'role-backfill-other@example.com', 'test');
+    (1002, 'role-backfill-other@example.com', 'test'),
+    (1003, 'role-backfill-viewer@example.com', 'test');
 
 INSERT INTO businesses (id, name, owner_id)
 VALUES
@@ -63,7 +64,10 @@ VALUES
 INSERT INTO user_app_permissions
     (id, business_id, owner_id, user_id, apps, role, is_active)
 VALUES
-    (3001, 2002, 1001, 1001, '["flow"]', 'owner', TRUE);
+    (3001, 2002, 1001, 1001, '["flow"]', 'owner', TRUE),
+    -- The legacy read-only role must not be escalated to pos.cashier or
+    -- flow.contributor by the per-app fallback arms.
+    (3002, 2002, 1001, 1003, '["pos","flow"]', 'viewer', TRUE);
 SQL
 
 if mysql_cmd "$DB_NAME" < shared/zz_role_access_v2_backfill.sql >"$OUTPUT_FILE" 2>&1; then
@@ -91,7 +95,7 @@ fi
 mysql_cmd "$DB_NAME" <<'SQL'
 UPDATE user_app_permissions
 SET business_id = 2001
-WHERE id = 3001;
+WHERE id IN (3001, 3002);
 SQL
 
 mysql_cmd "$DB_NAME" < shared/zz_role_access_v2_backfill.sql >"$OUTPUT_FILE" 2>&1
@@ -103,6 +107,15 @@ counts=$(mysql_cmd "$DB_NAME" -Nse "SELECT CONCAT(
 )")
 if [[ "$counts" != "1:1:1" ]]; then
     echo "valid backfill produced unexpected normalized row counts: $counts" >&2
+    exit 1
+fi
+
+viewer_roles=$(mysql_cmd "$DB_NAME" -Nse "SELECT GROUP_CONCAT(CONCAT(ra.app_id, ':', r.role_key) ORDER BY ra.app_id)
+FROM authorization_role_assignments ra
+JOIN authorization_roles r ON r.id = ra.role_id
+WHERE ra.business_id = 2001 AND ra.user_id = 1003")
+if [[ "$viewer_roles" != "flow:flow.viewer,pos:pos.viewer" ]]; then
+    echo "read-only backfill was escalated to working roles: $viewer_roles" >&2
     exit 1
 fi
 

@@ -116,7 +116,12 @@ func (a *OauthAPI) Revoke(ctx context.Context, req *commonoauthv1.RevokeRequest)
 		return nil, oauthStatusError(http.StatusBadRequest, "token is required")
 	}
 	if err := a.Service.RevokeToken(ctx, req.GetToken()); err != nil {
-		logger.Ctx(ctx).Warn("oauth token revocation failed", logger.Error(err))
+		// The repository treats an unknown token as a no-op success, so a
+		// non-nil error here is an infrastructure failure and the refresh
+		// token is still usable; reporting Ok would tell the caller a live
+		// token had been revoked (B08-R03).
+		logger.Ctx(ctx).Error("oauth token revocation failed", logger.Error(err))
+		return nil, oauthStatusError(http.StatusInternalServerError, "failed to revoke token")
 	}
 	return &commonoauthv1.RevokeResponse{Ok: true}, nil
 }

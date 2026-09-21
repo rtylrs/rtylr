@@ -20,7 +20,7 @@ VALUES (?, ?, ?, ?, ?, ?);
 INSERT IGNORE INTO hr_roles (owner_id, business_id, name, description, permissions, is_system)
 VALUES (?, ?, ?, ?, ?, ?);
 
--- name: UpdateRole :exec
+-- name: UpdateRole :execresult
 UPDATE hr_roles
 SET name = ?, description = ?, permissions = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;

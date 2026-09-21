@@ -54,7 +54,11 @@ func (s *OnboardingService) UpdateChecklistTemplate(ctx context.Context, req *hr
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	err := s.service.UpdateTemplate(ctx, device.User.UserID, req.GetRoleId(), domain.UpdateTemplateParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	err := s.service.UpdateTemplate(ctx, businessID, req.GetRoleId(), domain.UpdateTemplateParams{
 		Name:        body.GetName(),
 		TriggerType: body.GetTriggerType(),
 		RoleID:      req.GetRoleId(),
@@ -121,7 +125,7 @@ func (s *OnboardingService) GetEmployeeChecklist(ctx context.Context, req *hronb
 	if bizErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	checklist, err := s.service.GetEmployeeChecklist(ctx, businessID, req.GetEmployeeId(), req.GetEmployeeId())
+	checklist, err := s.service.GetLatestEmployeeChecklist(ctx, businessID, req.GetEmployeeId())
 	if err != nil {
 		if errors.Is(err, domain.ErrChecklistNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Checklist not found")

@@ -49,3 +49,66 @@ func TestGetMarginDistribution_ClassifiesBoundariesInDatabase(t *testing.T) {
 		}
 	}
 }
+
+// TestGetProductMarginRows_ReturnsUnitsAndMinorUnitRevenue pins B55-R04: the
+// DECIMAL SUMs must reach the response as the sold quantity and as cents,
+// matching cost_minor_units in the same message.
+func TestGetProductMarginRows_ReturnsUnitsAndMinorUnitRevenue(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	businessID := time.Now().UTC().UnixNano()
+
+	res, err := db.ExecContext(ctx,
+		`INSERT INTO erp_products (owner_id, business_id, name, cost_price, sale_price, is_active)
+		 VALUES (?, ?, 'margin-row-product', 4.00, 10.00, TRUE)`,
+		businessID, businessID)
+	if err != nil {
+		t.Fatalf("insert product: %v", err)
+	}
+	productID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("product id: %v", err)
+	}
+
+	res, err = db.ExecContext(ctx,
+		`INSERT INTO pos_orders (owner_id, business_id, order_number, total, payment_status)
+		 VALUES (?, ?, 'margin-row-order', 25.00, 'paid')`,
+		businessID, businessID)
+	if err != nil {
+		t.Fatalf("insert order: %v", err)
+	}
+	orderID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("order id: %v", err)
+	}
+
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO pos_order_items (order_id, menu_item_id, name, quantity, unit_price, total)
+		 VALUES (?, ?, 'margin-row-product', 2.500, 10.00, 25.00)`,
+		orderID, productID); err != nil {
+		t.Fatalf("insert order item: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM pos_order_items WHERE order_id = ?", orderID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM pos_orders WHERE id = ?", orderID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM erp_products WHERE id = ?", productID)
+	})
+
+	rows, err := infrastructure.NewRepository(db).GetProductMarginRows(ctx, businessID)
+	if err != nil {
+		t.Fatalf("GetProductMarginRows: %v", err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("rows = %d, want 1", len(rows))
+	}
+	row := rows[0]
+	if row.UnitsSold != 2.5 {
+		t.Errorf("UnitsSold = %v, want 2.5", row.UnitsSold)
+	}
+	if row.RevenueMinor != 2500 {
+		t.Errorf("RevenueMinor = %d, want 2500 (SUM(total) in cents)", row.RevenueMinor)
+	}
+	if row.CostMinorUnits == nil || *row.CostMinorUnits != 400 {
+		t.Errorf("CostMinorUnits = %v, want 400", row.CostMinorUnits)
+	}
+}

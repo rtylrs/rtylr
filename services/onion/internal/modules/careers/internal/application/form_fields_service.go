@@ -30,6 +30,16 @@ func (s *Service) CreateFormField(ctx context.Context, in domain.FormFieldInput)
 	return s.repo.CreateFormField(ctx, in)
 }
 
+// GetFormField returns one field. Handlers use it to echo the row an insert
+// produced instead of re-deriving it from the (position-ordered, capped) list.
+func (s *Service) GetFormField(ctx context.Context, businessID, fieldID int64) (domain.FormField, error) {
+	field, err := s.repo.GetFormField(ctx, businessID, fieldID)
+	if errors.Is(err, infrastructure.ErrFormFieldNotFound) {
+		return domain.FormField{}, ErrNotFound
+	}
+	return field, err
+}
+
 func (s *Service) UpdateFormField(ctx context.Context, in domain.FormFieldInput) error {
 	if _, err := s.repo.GetFormField(ctx, in.BusinessID, in.ID); err != nil {
 		if errors.Is(err, infrastructure.ErrFormFieldNotFound) {

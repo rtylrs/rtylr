@@ -85,12 +85,44 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 		}
 
 		cacheKey := buildIdempotencyKey(r, key)
-		if config.IsRedisEnabled() {
+		if useRedisIdempotencyStore() {
 			serveIdempotentRedis(w, r, next, cacheKey)
 			return
 		}
 		serveIdempotentLocal(w, r, next, cacheKey)
 	})
+}
+
+// useRedisIdempotencyStore reports whether the shared Redis store is usable
+// right now. It requires the config flag *and* a live client: cache.Initialize
+// swaps in the no-op cache when its Redis probe fails
+// (cacher.DisableRedisForProcess), and the no-op reports success for every
+// SetNx while persisting nothing. Selecting the Redis path in that state would
+// silently disable deduplication instead of falling back to the in-process
+// store that still dedups a single replica.
+func useRedisIdempotencyStore() bool {
+	return config.IsRedisEnabled() && cacher.RedisAvailable()
+}
+
+// idempotencyConfirmingStore is implemented by cache stores that can report
+// whether a write was actually persisted. Stores without it keep the previous
+// assumption that Put succeeded.
+type idempotencyConfirmingStore interface {
+	PutConfirmed(ctx context.Context, key string, val []byte, ttl time.Duration) bool
+}
+
+// persistIdempotencyRecord stores the completed response and reports whether
+// the write can be trusted. A false result makes the caller release the
+// reservation so a retry re-executes instead of replaying the pending sentinel
+// for the full TTL.
+func persistIdempotencyRecord(ctx context.Context, store idempotencyRedisStore, key string, payload []byte) bool {
+	if confirming, ok := store.(idempotencyConfirmingStore); ok {
+		return confirming.PutConfirmed(ctx, key, payload, idempotencyTTL)
+	}
+
+	store.Put(ctx, key, payload, idempotencyTTL)
+
+	return true
 }
 
 // serveIdempotentRedis gives correct cross-replica idempotency. SetNx atomically
@@ -99,7 +131,10 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 // still in flight. The reservation is released if the handler fails or panics so
 // the client can retry with a fresh attempt.
 func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string) {
-	rc := cacher.GetRedisCache()
+	serveIdempotentRedisWithStore(w, r, next, cacheKey, cacher.GetRedisCache())
+}
+
+func serveIdempotentRedisWithStore(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string, rc idempotencyRedisStore) {
 	pending := []byte(`{"status":0}`)
 
 	reserved, cached := reserveIdempotencyKey(r.Context(), rc, cacheKey, pending)
@@ -150,8 +185,11 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 
 	if rec.status >= 200 && rec.status < 300 {
 		storeIdempotencyRecord(r.Context(), cacheKey, rec, func(cacheCtx context.Context, key string, payload []byte) {
-			rc.Put(cacheCtx, key, payload, idempotencyTTL)
-			stored = true
+			// Put cannot report failure, so confirm the write instead of
+			// assuming it landed: an unconfirmed write leaves the pending
+			// sentinel in place and every retry would be answered with 409
+			// until the reservation TTL expires.
+			stored = persistIdempotencyRecord(cacheCtx, rc, key, payload)
 		})
 	}
 }

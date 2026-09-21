@@ -163,8 +163,11 @@ func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx,
 		Change:        -quantity,
 		ReferenceID:   int64Ptr(orderID),
 		ReferenceType: "store_order",
-		Channel:       "store",
-		Note:          "store order confirmation",
+		// stock_ledger.channel is an ENUM('pos','erp'); a store order is an
+		// ERP-side sale, and any other value aborts the confirmation on the
+		// ledger insert.
+		Channel: "erp",
+		Note:    "store order confirmation",
 	}
 	if entryType == "return" {
 		movement.EntryType = stock_core.EntryReturn
@@ -343,6 +346,14 @@ func validateOrderStatusTransition(current, next string) error {
 		return domain.ErrInvalidStatus
 	}
 	if (current == "cancelled" || current == "refunded") && next != "confirmed" {
+		return domain.ErrInvalidStatus
+	}
+	// Confirming an order deducts stock and consumes cost layers; the reverse
+	// transition applies no reversal, so an order that went back to pending
+	// would deduct the same quantity again on the next confirmation. A
+	// deducted order can only be reopened through cancellation, which returns
+	// the stock (cancelled/refunded -> confirmed re-applies a single sale).
+	if next == "pending" {
 		return domain.ErrInvalidStatus
 	}
 	return nil

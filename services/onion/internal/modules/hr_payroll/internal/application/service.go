@@ -19,6 +19,10 @@ import (
 const (
 	hrPayrollScope = "hr_payroll"
 	hrPayrollTTL   = 5 * time.Minute
+
+	// payrollExportReleaseTimeout bounds the compensating release of an export
+	// claim so a canceled request cannot leave the run stuck in 'exporting'.
+	payrollExportReleaseTimeout = 5 * time.Second
 )
 
 func invalidateHRPayrollScope(ctx context.Context, ownerID int64) {
@@ -406,13 +410,11 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		return err
 	}
 	if err := s.repo.ValidatePayrollRunEmployees(ctx, ownerID, runID); err != nil {
-		if releaseErr := s.repo.ReleasePayrollRunExportClaim(ctx, ownerID, runID); releaseErr != nil {
-			logger.Ctx(ctx).Error("failed to release payroll export claim after employee validation failure",
-				logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(releaseErr))
-		}
+		s.releasePayrollExportClaim(ctx, ownerID, runID, "employee validation failed")
 		return err
 	}
 	if s.financePoster == nil {
+		s.releasePayrollExportClaim(ctx, ownerID, runID, "finance integration unavailable")
 		return domain.ErrFinanceIntegrationUnavailable
 	}
 
@@ -429,10 +431,7 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		TotalGross:  money.CentsToDollars(run.TotalGrossCents),
 		TotalNet:    money.CentsToDollars(run.TotalNetCents),
 	}); postErr != nil {
-		if releaseErr := s.repo.ReleasePayrollRunExportClaim(ctx, ownerID, runID); releaseErr != nil {
-			logger.Ctx(ctx).Error("failed to release payroll export claim after finance error",
-				logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(releaseErr))
-		}
+		s.releasePayrollExportClaim(ctx, ownerID, runID, "finance journal post failed")
 		logger.Ctx(ctx).Error("finance journal post failed",
 			logger.Any("owner_id", ownerID),
 			logger.Any("run_id", runID),
@@ -480,6 +479,21 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 	}
 
 	return nil
+}
+
+// releasePayrollExportClaim returns a run claimed for export to 'approved'.
+// It deliberately detaches from the caller's context: releasing the claim is
+// what makes a failed or abandoned export retryable, so it must still run
+// after the request context is canceled or has hit its deadline, which is
+// exactly when the client disconnected mid-export (B62-R05).
+func (s *Service) releasePayrollExportClaim(ctx context.Context, ownerID, runID int64, reason string) {
+	releaseCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), payrollExportReleaseTimeout)
+	defer cancel()
+	if err := s.repo.ReleasePayrollRunExportClaim(releaseCtx, ownerID, runID); err != nil {
+		logger.Ctx(releaseCtx).Error("failed to release payroll export claim",
+			logger.Any("owner_id", ownerID), logger.Any("run_id", runID),
+			logger.String("reason", reason), logger.Error(err))
+	}
 }
 
 func (s *Service) ListPayrollRuns(ctx context.Context, ownerID int64, params domain.ListPayrollRunsParams) ([]domain.PayrollRunRecord, int64, error) {

@@ -75,6 +75,31 @@ WHERE business_id = ? AND slug = ?
 ORDER BY slug ASC
 LIMIT 1;
 
+-- name: GetRecruitCareerByID :one
+SELECT
+    id,
+    owner_id,
+    business_id,
+    COALESCE(slug, '') AS slug,
+    title,
+    COALESCE(department, '') AS department,
+    COALESCE(location, '') AS location,
+    COALESCE(employment_type, '') AS employment_type,
+    COALESCE(work_mode, '') AS work_mode,
+    COALESCE(seniority, '') AS seniority,
+    details,
+    COALESCE(requirements, '') AS requirements,
+    COALESCE(salary_min, 0) AS salary_min,
+    COALESCE(salary_max, 0) AS salary_max,
+    COALESCE(salary_currency, '') AS salary_currency,
+    COALESCE(is_published, false) AS is_published,
+    is_active,
+    created_at,
+    updated_at
+FROM careers
+WHERE id = ? AND business_id = ?
+LIMIT 1;
+
 -- name: CreateRecruitCareer :execresult
 INSERT INTO careers (
     owner_id,
@@ -301,6 +326,53 @@ LEFT JOIN careers c ON c.id = s.career_id
 WHERE s.business_id = ? AND s.status = ?
 ORDER BY s.created_at DESC
 LIMIT 100;
+
+-- The paged variants below back reads that must not silently truncate at the
+-- UI page size (the submissions CSV export walks them until a short page).
+-- id breaks created_at ties so OFFSET paging cannot skip or repeat rows.
+-- name: ListCareerSubmissionsPage :many
+SELECT
+    s.id,
+    s.career_id,
+    s.owner_id,
+    s.business_id,
+    s.candidate_name,
+    s.email,
+    COALESCE(s.phone, '') AS phone,
+    COALESCE(s.resume_url, '') AS resume_url,
+    COALESCE(s.cover_letter, '') AS cover_letter,
+    s.status,
+    COALESCE(CAST(s.answers_json AS CHAR), '') AS answers_json,
+    s.created_at,
+    s.updated_at,
+    COALESCE(c.title, '') AS career_title
+FROM careers_submissions s
+LEFT JOIN careers c ON c.id = s.career_id
+WHERE s.business_id = ?
+ORDER BY s.created_at DESC, s.id DESC
+LIMIT ? OFFSET ?;
+
+-- name: ListCareerSubmissionsByStatusPage :many
+SELECT
+    s.id,
+    s.career_id,
+    s.owner_id,
+    s.business_id,
+    s.candidate_name,
+    s.email,
+    COALESCE(s.phone, '') AS phone,
+    COALESCE(s.resume_url, '') AS resume_url,
+    COALESCE(s.cover_letter, '') AS cover_letter,
+    s.status,
+    COALESCE(CAST(s.answers_json AS CHAR), '') AS answers_json,
+    s.created_at,
+    s.updated_at,
+    COALESCE(c.title, '') AS career_title
+FROM careers_submissions s
+LEFT JOIN careers c ON c.id = s.career_id
+WHERE s.business_id = ? AND s.status = ?
+ORDER BY s.created_at DESC, s.id DESC
+LIMIT ? OFFSET ?;
 
 -- name: GetCareerSubmissionResumeURL :one
 SELECT COALESCE(resume_url, '') AS resume_url

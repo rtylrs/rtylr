@@ -269,9 +269,19 @@ func (r *Repository) UpsertTimesheet(ctx context.Context, businessID int64, ts d
 }
 
 func (r *Repository) ListTimesheets(ctx context.Context, businessID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
+	var employeeID sql.NullInt64
+	if params.EmployeeID != nil {
+		employeeID = sql.NullInt64{Int64: *params.EmployeeID, Valid: true}
+	}
+	var status sql.NullString
+	if params.Status != nil {
+		status = sql.NullString{String: *params.Status, Valid: true}
+	}
+
 	total, err := r.queries.CountTimesheets(ctx, sqlc.CountTimesheetsParams{
 		BusinessID: businessID,
-		EmployeeID: params.EmployeeID,
+		EmployeeID: employeeID,
+		Status:     status,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to count timesheets", logger.Any("business_id", businessID), logger.Error(err))
@@ -280,7 +290,8 @@ func (r *Repository) ListTimesheets(ctx context.Context, businessID int64, param
 
 	rows, err := r.queries.ListTimesheets(ctx, sqlc.ListTimesheetsParams{
 		BusinessID: businessID,
-		EmployeeID: params.EmployeeID,
+		EmployeeID: employeeID,
+		Status:     status,
 		Limit:      params.Limit,
 		Offset:     params.Offset,
 	})
@@ -337,12 +348,15 @@ func (r *Repository) SubmitTimesheet(ctx context.Context, businessID, timesheetI
 	return r.GetTimesheet(ctx, businessID, timesheetID)
 }
 
-func (r *Repository) AdvanceApprovalLevel(ctx context.Context, businessID, timesheetID, approverID int64) (*domain.TimesheetRecord, error) {
-	ts, err := r.GetTimesheet(ctx, businessID, timesheetID)
-	if err != nil {
-		return nil, err
-	}
-
+// AdvanceApprovalLevel moves a submitted timesheet from expectedLevel to the
+// next one and records the approval action in the same transaction. The
+// UPDATE is conditional on status='submitted' AND
+// current_approval_level = expectedLevel, where expectedLevel is the level the
+// caller read before deciding to approve: an overlapping or retried approval
+// then affects 0 rows and is reported as a conflict instead of incrementing
+// twice and skipping a level of the chain. hr_leave and hr_overtime guard
+// their advance queries the same way.
+func (r *Repository) AdvanceApprovalLevel(ctx context.Context, businessID, timesheetID int64, expectedLevel int32, approverID int64) (*domain.TimesheetRecord, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -356,9 +370,23 @@ func (r *Repository) AdvanceApprovalLevel(ctx context.Context, businessID, times
 
 	qtx := r.queries.WithTx(tx)
 
-	if err := qtx.AdvanceApprovalLevel(ctx, sqlc.AdvanceApprovalLevelParams{ID: timesheetID, BusinessID: businessID}); err != nil {
+	result, err := qtx.AdvanceApprovalLevel(ctx, sqlc.AdvanceApprovalLevelParams{
+		ID:                   timesheetID,
+		BusinessID:           businessID,
+		CurrentApprovalLevel: expectedLevel,
+	})
+	if err != nil {
 		_ = tx.Rollback()
 		return nil, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	if affected == 0 {
+		_ = tx.Rollback()
+		return nil, domain.ErrTimesheetNotPending
 	}
 
 	if err := qtx.CreateApprovalAction(ctx, sqlc.CreateApprovalActionParams{
@@ -367,10 +395,66 @@ func (r *Repository) AdvanceApprovalLevel(ctx context.Context, businessID, times
 		TimesheetID: timesheetID,
 		ApproverID:  approverID,
 		Action:      "approved",
-		Level:       ts.CurrentApprovalLevel,
+		Level:       expectedLevel,
 		Comment:     nullString(""),
 	}); err != nil {
 		_ = tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return r.GetTimesheet(ctx, businessID, timesheetID)
+}
+
+// LockTimesheetWithApprovalAction locks a submitted timesheet and records the
+// final approval action in one transaction, the way SubmitTimesheet pairs its
+// status change with its action. The service used to commit the lock first and
+// only log a failed action insert, which left a locked timesheet whose approval
+// history was permanently missing the final entry.
+func (r *Repository) LockTimesheetWithApprovalAction(ctx context.Context, businessID, timesheetID, approverID int64, level int32) (*domain.TimesheetRecord, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	result, err := qtx.LockTimesheet(ctx, sqlc.LockTimesheetParams{ID: timesheetID, BusinessID: businessID})
+	if err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("failed to lock timesheet", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
+		return nil, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	if affected == 0 {
+		_ = tx.Rollback()
+		return nil, domain.ErrTimesheetNotPending
+	}
+
+	if err := qtx.CreateApprovalAction(ctx, sqlc.CreateApprovalActionParams{
+		OwnerID:     businessID,
+		BusinessID:  businessID,
+		TimesheetID: timesheetID,
+		ApproverID:  approverID,
+		Action:      "final_approved",
+		Level:       level,
+		Comment:     nullString(""),
+	}); err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("failed to record final approval action", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
 		return nil, err
 	}
 
@@ -394,11 +478,25 @@ func (r *Repository) RejectTimesheet(ctx context.Context, businessID, timesheetI
 	return r.GetTimesheet(ctx, businessID, timesheetID)
 }
 
+// LockTimesheet locks a submitted timesheet. It reports ErrTimesheetNotPending
+// when the UPDATE matched nothing (draft, rejected, or already locked), so a
+// caller cannot move a row the approval flow does not own.
 func (r *Repository) LockTimesheet(ctx context.Context, businessID, timesheetID int64) error {
-	return r.queries.LockTimesheet(ctx, sqlc.LockTimesheetParams{
+	result, err := r.queries.LockTimesheet(ctx, sqlc.LockTimesheetParams{
 		ID:         timesheetID,
 		BusinessID: businessID,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrTimesheetNotPending
+	}
+	return nil
 }
 
 func (r *Repository) CreateApprovalAction(ctx context.Context, businessID int64, action domain.ApprovalActionRecord) error {

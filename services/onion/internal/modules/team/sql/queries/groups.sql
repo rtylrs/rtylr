@@ -41,8 +41,14 @@ WHERE group_id = ?
 LIMIT 500;
 
 -- name: AddGroupMember :exec
-INSERT IGNORE INTO user_group_members (group_id, user_id, owner_id, added_by)
-VALUES (?, ?, ?, ?);
+-- business_id must be the caller's business, not the column default 0: the
+-- authorization snapshot readers resolve group grants with
+-- `business_id = <member's business>`, so a 0 row silently drops the group's
+-- licenses and role assignments for that member. ON DUPLICATE KEY UPDATE
+-- repairs rows written before this was set.
+INSERT INTO user_group_members (group_id, user_id, owner_id, business_id, added_by)
+VALUES (?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), added_by = VALUES(added_by);
 
 -- name: RemoveGroupMember :exec
 DELETE FROM user_group_members WHERE group_id = ? AND user_id = ?;

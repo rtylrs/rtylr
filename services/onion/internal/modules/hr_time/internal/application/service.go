@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
@@ -149,13 +150,52 @@ func normalizeListTimeEntriesParams(params domain.ListTimeEntriesParams) domain.
 	return params
 }
 
+// cacheKeyValue renders one optional filter for a cache key. The filters are
+// pointers so "absent" is distinguishable from a zero value; formatting the
+// pointer itself (%d) printed the address, which made every combination
+// without that filter collide on one key. "-" is the nil marker and strings
+// are quoted so a value cannot masquerade as another field.
+func cacheKeyValue[T any](value *T) string {
+	if value == nil {
+		return "-"
+	}
+	if str, ok := any(*value).(string); ok {
+		return strconv.Quote(str)
+	}
+	return fmt.Sprint(*value)
+}
+
+func listTimeEntriesCacheKey(businessID int64, params domain.ListTimeEntriesParams) string {
+	return cacheKeys.Scoped(hrTimeScope, businessID, fmt.Sprintf(
+		"entries|l=%d|o=%d|e=%s|from=%s|to=%s|p=%s|billable=%s|status=%s",
+		params.Limit,
+		params.Offset,
+		cacheKeyValue(params.EmployeeID),
+		cacheKeyValue(params.FromDate),
+		cacheKeyValue(params.ToDate),
+		cacheKeyValue(params.ProjectID),
+		cacheKeyValue(params.IsBillable),
+		cacheKeyValue(params.Status),
+	))
+}
+
+func listTimesheetsCacheKey(businessID int64, params domain.ListTimesheetsParams) string {
+	return cacheKeys.Scoped(hrTimeScope, businessID, fmt.Sprintf(
+		"ts_list|e=%s|s=%s|l=%d|o=%d",
+		cacheKeyValue(params.EmployeeID),
+		cacheKeyValue(params.Status),
+		params.Limit,
+		params.Offset,
+	))
+}
+
 func (s *Service) ListTimeEntries(ctx context.Context, businessID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
 	params = normalizeListTimeEntriesParams(params)
 	type lr struct {
 		Items []domain.TimeEntryRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrTimeScope, businessID, fmt.Sprintf("entries|l=%d|o=%d|e=%d", params.Limit, params.Offset, params.EmployeeID))
+	key := listTimeEntriesCacheKey(businessID, params)
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
 			items, total, err := s.repo.ListTimeEntries(ctx, businessID, params)
@@ -221,7 +261,7 @@ func (s *Service) ListTimesheets(ctx context.Context, businessID int64, params d
 		Items []domain.TimesheetRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrTimeScope, businessID, fmt.Sprintf("ts_list|e=%d|l=%d|o=%d", params.EmployeeID, params.Limit, params.Offset))
+	key := listTimesheetsCacheKey(businessID, params)
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
 			items, total, err := s.repo.ListTimesheets(ctx, businessID, params)
@@ -253,6 +293,12 @@ func (s *Service) ApproveTimesheet(ctx context.Context, businessID, timesheetID,
 	if err != nil {
 		return nil, err
 	}
+	// Only a submitted timesheet has an approval to record. Without this a
+	// draft (level 0) or a rejected/locked row could be advanced and then
+	// locked as if a submission had been approved (B08-R02).
+	if ts.Status != domain.TimesheetStatusSubmitted {
+		return nil, domain.ErrTimesheetNotPending
+	}
 
 	chain, chainErr := s.approvalProvider.GetApprovalChain(ctx, businessID, "timesheet")
 	if chainErr != nil {
@@ -263,26 +309,19 @@ func (s *Service) ApproveTimesheet(ctx context.Context, businessID, timesheetID,
 	}
 
 	if ts.CurrentApprovalLevel >= chain.TotalLevels {
-		if err := s.repo.LockTimesheet(ctx, businessID, timesheetID); err != nil {
-			return nil, err
+		// The lock and its final_approved action commit together: a logged-only
+		// action failure used to leave a locked timesheet whose approval
+		// history was permanently missing the final entry.
+		rec, err := s.repo.LockTimesheetWithApprovalAction(ctx, businessID, timesheetID, approverID, ts.CurrentApprovalLevel)
+		if err == nil {
+			invalidateHRTimeScope(ctx, businessID)
 		}
-
-		lockErr := s.repo.CreateApprovalAction(ctx, businessID, domain.ApprovalActionRecord{
-			TimesheetID: timesheetID,
-			ApproverID:  approverID,
-			Action:      "final_approved",
-			Level:       ts.CurrentApprovalLevel,
-		})
-		if lockErr != nil {
-			logger.Ctx(ctx).Error("failed to record final approval action", logger.Any("business_id", businessID), logger.Error(lockErr))
-		}
-
-		rec, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
-		invalidateHRTimeScope(ctx, businessID)
 		return rec, err
 	}
 
-	rec, err := s.repo.AdvanceApprovalLevel(ctx, businessID, timesheetID, approverID)
+	// The level read above travels with the write so a retried or overlapping
+	// approval cannot increment twice and skip a level of the chain (B44-R02).
+	rec, err := s.repo.AdvanceApprovalLevel(ctx, businessID, timesheetID, ts.CurrentApprovalLevel, approverID)
 	if err == nil {
 		invalidateHRTimeScope(ctx, businessID)
 	}

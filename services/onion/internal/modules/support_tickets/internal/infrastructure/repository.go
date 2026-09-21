@@ -81,6 +81,9 @@ func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (*domain
 		BusinessID: businessID,
 		ID:         id,
 	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrTicketNotFound
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get support ticket", logger.Error(err))
 		return nil, err
@@ -176,7 +179,10 @@ func upsertSupportCustomer(ctx context.Context, qtx *sqlc.Queries, businessID in
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.TicketUpdateInput) error {
+	// The statement treats an omitted field (empty string / NULL) as "keep the
+	// stored value", so the two subject parameters carry the same value.
 	params := sqlc.UpdateTicketParams{
+		Column1:    input.Subject,
 		Subject:    input.Subject,
 		BusinessID: input.BusinessID,
 		ID:         input.ID,

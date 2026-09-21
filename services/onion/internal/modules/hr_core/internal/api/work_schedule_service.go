@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -242,6 +243,9 @@ func (a *WorkScheduleAPI) UpdateWorkSchedule(
 		ScheduleData: scheduleData,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrWorkScheduleNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Work schedule not found")
+		}
 		logger.Ctx(ctx).Error("failed to update work schedule",
 			logger.Any("business_id", businessID), logger.Any("schedule_id", req.GetId()), logger.Error(err))
 

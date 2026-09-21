@@ -213,6 +213,14 @@ func main() {
 	flushSentry := observability.InitSentry(shutdownCtx)
 	defer flushSentry()
 
+	// Slack's flush loop is started once by logger.SetupLogger and its
+	// notifier lives for the whole process. runServer is re-entered after a
+	// crash, so shutting Slack down inside it would kill the only flush loop
+	// on the first restart while Post kept buffering, and no periodic flush
+	// would ever deliver an alert again. Deferring the shutdown here keeps the
+	// loop alive across restarts and flushes exactly once at final exit.
+	defer slack.Shutdown()
+
 	for {
 		if err := runServer(shutdownCtx); err != nil {
 			logger.Global().Error("API server crashed, restarting in 5 seconds..", logger.Error(err))
@@ -235,9 +243,9 @@ func runServer(shutdownCtx context.Context) error {
 	serverCtx, cancel := context.WithCancel(shutdownCtx)
 	defer cancel()
 
-	// Declared first so it runs last: recoverAndLog may still queue Slack
-	// alerts that the final flush must deliver.
-	defer slack.Shutdown()
+	// recoverAndLog may queue Slack alerts while the final logger.Flush runs,
+	// so those defers stay ahead of it. Slack itself is only shut down in
+	// main, at process exit — see the comment there.
 	defer recoverAndLog(serverCtx)
 	defer logger.Flush()
 
@@ -742,7 +750,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	// Fan realtime events across replicas when Redis is available; otherwise the
 	// hub stays in-process, which is correct for a single replica.
 	if platformConfig.IsRedisEnabled() && cache.RedisAvailable() {
-		wsbus.EnableRedisBackplane()
+		wsbus.EnableRedisBackplane(ctx)
 	} else if platformConfig.IsRedisEnabled() {
 		logger.Ctx(ctx).Warn("Redis backplane disabled; using in-process websocket fan-out")
 	}

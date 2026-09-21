@@ -277,8 +277,13 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 		return 0, err
 	}
 
+	// The guard keys off commit state, not the local err: several paths below
+	// return a sentinel without assigning err, and the table-occupancy block
+	// shadows it, so an err check would skip the rollback and leave the
+	// transaction (and its row locks) open.
+	committed := false
 	defer func() {
-		if err != nil {
+		if !committed {
 			_ = tx.Rollback()
 		}
 	}()
@@ -418,6 +423,7 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 		logger.Ctx(ctx).Error("Failed to commit create order transaction", logger.Error(err))
 		return 0, err
 	}
+	committed = true
 
 	return orderID, nil
 }
@@ -550,7 +556,7 @@ func (r *Repository) resolveModifierTotal(ctx context.Context, qtx *sqlc.Queries
 }
 
 func (r *Repository) UpdateOrderStatus(ctx context.Context, businessID, orderID int64, status domain.OrderStatus) error {
-	err := r.queries.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
+	result, err := r.queries.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
 		Status:     sqlc.NullPosOrdersStatus{PosOrdersStatus: sqlc.PosOrdersStatus(status), Valid: true},
 		BusinessID: businessID,
 		ID:         orderID,
@@ -559,11 +565,31 @@ func (r *Repository) UpdateOrderStatus(ctx context.Context, businessID, orderID 
 		logger.Ctx(ctx).Error("Failed to update order status", logger.Error(err))
 		return err
 	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		// MySQL reports 0 changed rows both when no row matched and when the
+		// requested status equals the stored one. Confirm the order exists
+		// before answering 404: a stale/foreign id must not succeed, but an
+		// idempotent re-send must not look like a missing order either.
+		existing, existsErr := r.queries.OrderExists(ctx, sqlc.OrderExistsParams{
+			BusinessID: businessID,
+			ID:         orderID,
+		})
+		if existsErr != nil {
+			return existsErr
+		}
+		if existing == 0 {
+			return domain.ErrOrderNotFound
+		}
+	}
 	return nil
 }
 
 func (r *Repository) UpdateOrderItemStatus(ctx context.Context, orderID, itemID int64, status domain.ItemStatus) error {
-	err := r.queries.UpdateOrderItemStatus(ctx, sqlc.UpdateOrderItemStatusParams{
+	result, err := r.queries.UpdateOrderItemStatus(ctx, sqlc.UpdateOrderItemStatusParams{
 		Status:  sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(status), Valid: true},
 		OrderID: orderID,
 		ID:      itemID,
@@ -571,6 +597,24 @@ func (r *Repository) UpdateOrderItemStatus(ctx context.Context, orderID, itemID 
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update order item status", logger.Error(err))
 		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		// Same-value updates also report 0 changed rows; only a missing item
+		// is an error. The caller already verified the order's business.
+		existing, existsErr := r.queries.OrderItemExists(ctx, sqlc.OrderItemExistsParams{
+			OrderID: orderID,
+			ID:      itemID,
+		})
+		if existsErr != nil {
+			return existsErr
+		}
+		if existing == 0 {
+			return domain.ErrOrderNotFound
+		}
 	}
 	return nil
 }
@@ -666,7 +710,12 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 	}
 
 	if paymentRow.TableID.Valid && paymentRow.TableID.Int64 > 0 && string(paymentRow.Type.PosOrdersType) == string(domain.OrderTypeDineIn) {
-		err = qtx.FreeTable(ctx, paymentRow.TableID.Int64)
+		// Business-scoped: an order that was (wrongly) pointed at another
+		// tenant's table must never free that table.
+		err = qtx.FreeTable(ctx, sqlc.FreeTableParams{
+			ID:         paymentRow.TableID.Int64,
+			BusinessID: businessID,
+		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to free table after payment", logger.Error(err))
 			return err
@@ -887,15 +936,32 @@ func (r *Repository) VoidOrderItem(ctx context.Context, businessID, orderID, ite
 		return err
 	}
 
-	if _, err := qtx.VoidOrderItem(ctx, sqlc.VoidOrderItemParams{
+	voidResult, err := qtx.VoidOrderItem(ctx, sqlc.VoidOrderItemParams{
 		ID:      itemID,
 		OrderID: orderID,
-	}); err != nil {
+	})
+	if err != nil {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil {
 			logger.Ctx(ctx).Error("failed to rollback void-order-item update", logger.Error(rollbackErr))
 		}
 		logger.Ctx(ctx).Error("Failed to cancel order item", logger.Error(err))
 		return err
+	}
+	voided, err := voidResult.RowsAffected()
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback void-order-item update", logger.Error(rollbackErr))
+		}
+		return err
+	}
+	if voided == 0 {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback void-order-item update", logger.Error(rollbackErr))
+		}
+		// The item exists (checked above) but is not in a voidable state, e.g.
+		// it is already ready/served/cancelled. Report that instead of
+		// answering success for a no-op.
+		return domain.ErrItemNotVoidable
 	}
 
 	itemsTotal, err := qtx.GetActiveOrderItemsTotal(ctx, orderID)
@@ -973,15 +1039,33 @@ func (r *Repository) TransferTable(ctx context.Context, businessID, orderID, old
 		return err
 	}
 
-	if err := qtx.OccupyTableByID(ctx, sqlc.OccupyTableByIDParams{
+	occupyResult, err := qtx.OccupyTableByID(ctx, sqlc.OccupyTableByIDParams{
 		ID:         newTableID,
 		BusinessID: businessID,
-	}); err != nil {
+	})
+	if err != nil {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil {
 			logger.Ctx(ctx).Error("failed to rollback occupy table", logger.Error(rollbackErr))
 		}
 		logger.Ctx(ctx).Error("Failed to mark new table occupied during transfer", logger.Error(err))
 		return err
+	}
+	affected, err := occupyResult.RowsAffected()
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback occupy table", logger.Error(rollbackErr))
+		}
+		return err
+	}
+	if affected == 0 {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback occupy table", logger.Error(rollbackErr))
+		}
+		// The target table either doesn't exist or belongs to another
+		// business. Rolling back leaves the order on its current table.
+		logger.Ctx(ctx).Warn("TransferTable rejected: table not in business scope",
+			logger.Any("table_id", newTableID), logger.Any("business_id", businessID))
+		return domain.ErrTableNotFound
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -996,6 +1080,17 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 	order, err := r.GetOrder(ctx, businessID, orderID)
 	if err != nil {
 		return nil, err
+	}
+
+	// Splitting moves the items into new unpaid orders and cancels the
+	// original. A paid/refunded order would keep its paid totals while the
+	// children could be charged again, so refuse those up front.
+	if order.PaymentStatus == domain.PaymentStatusPaid || order.PaymentStatus == domain.PaymentStatusRefunded {
+		return nil, domain.ErrOrderCannotBeSplit
+	}
+	switch order.Status {
+	case domain.OrderStatusPaid, domain.OrderStatusVoided, domain.OrderStatusCancelled:
+		return nil, domain.ErrOrderCannotBeSplit
 	}
 
 	tx, txErr := r.pool.BeginTx(ctx, nil)
@@ -1014,7 +1109,13 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 	newOrderIDs := make([]int64, 0, len(splits))
 
 	for _, splitItemIDs := range splits {
-		orderNum, genErr := r.GenerateOrderNumber(ctx, businessID)
+		// Count through the transaction, not the pool. GenerateOrderNumber
+		// counts committed rows, so every group in this loop was offered the
+		// same ORD-<date>-NNNN; the second child insert then violated
+		// uq_pos_orders_number and the whole split failed. Counting through
+		// qtx includes the children this transaction has already inserted,
+		// so each one gets a distinct number.
+		orderNum, genErr := generateOrderNumber(ctx, qtx, businessID)
 		if genErr != nil {
 			txErr = genErr
 			return nil, genErr
@@ -1241,9 +1342,18 @@ func (r *Repository) ListHeldOrders(ctx context.Context, businessID int64) ([]do
 }
 
 func (r *Repository) GenerateOrderNumber(ctx context.Context, businessID int64) (string, error) {
+	return generateOrderNumber(ctx, r.queries, businessID)
+}
+
+// generateOrderNumber builds the next order number from the rows the given
+// queries can see. Callers that insert several orders in one transaction must
+// pass the transaction-scoped queries: rows the transaction has already
+// inserted are then counted, keeping sibling order numbers distinct. Counting
+// through the pool cannot see them and returns the same number every time.
+func generateOrderNumber(ctx context.Context, q *sqlc.Queries, businessID int64) (string, error) {
 	today := time.Now().Format("20060102")
 
-	count, err := r.queries.CountTodaysOrders(ctx, businessID)
+	count, err := q.CountTodaysOrders(ctx, businessID)
 	if err != nil {
 		return "", err
 	}

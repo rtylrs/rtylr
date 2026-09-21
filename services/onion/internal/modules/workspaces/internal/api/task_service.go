@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -330,6 +331,11 @@ func (a *TaskAPI) CreateSubtask(ctx context.Context, req *flowtaskv1.CreateSubta
 	if err != nil {
 		return nil, err
 	}
+	// Same elevated operation as CreateTask/UpdateTask: assigning another user
+	// is gated on flow:tasks:assign, self-assignment is not.
+	if err := requireTaskAssignmentPermission(ctx, req.AssigneeId, authUser.UserID); err != nil {
+		return nil, err
+	}
 
 	parentID := req.GetParentTaskId()
 	parent, err := a.Service.GetTaskDetail(ctx, parentID)
@@ -463,6 +469,12 @@ func (a *TaskAPI) DeleteComment(ctx context.Context, req *flowtaskv1.DeleteComme
 	}
 
 	if err := a.Service.DeleteComment(ctx, req.GetId(), authUser.UserID); err != nil {
+		// The delete is scoped to the comment's author, so a comment written by
+		// someone else reports ErrUnauthorized: the caller may administer the
+		// project but not this row. That is a permission answer, not an outage.
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete comment")
 	}
 
@@ -590,6 +602,11 @@ func (a *TaskAPI) DeleteTimeLog(ctx context.Context, req *flowtaskv1.DeleteTimeL
 	}
 
 	if err := a.Service.DeleteTimeLogFlat(ctx, req.GetId(), authUser.UserID); err != nil {
+		// Same shape as DeleteComment: a log written by someone else is a
+		// permission answer from the row-scoped delete, not an outage.
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete time log")
 	}
 

@@ -374,3 +374,66 @@ func TestMoveTaskToColumnInvalidatesTheAssignee(t *testing.T) {
 		t.Error("an uninvolved user's my-tasks cache was evicted by someone else's board move")
 	}
 }
+
+// Labels are part of the cached my-tasks payload, so relabelling a task is a
+// task-visible write like any other and has to evict the assignee's pages.
+func TestSetTaskLabelsInvalidatesTheAssignee(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := initCache(t)
+	svc := NewService(ctx, db)
+
+	workspaceID, projectID := seedProject(ctx, t, svc)
+
+	assignee := cacheTestUserA
+	task, err := svc.CreateTask(ctx, domain.TaskInput{
+		ProjectID:   projectID,
+		WorkspaceID: workspaceID,
+		OwnerID:     cacheTestUserA,
+		BusinessID:  cacheTestBusiness,
+		Title:       "relabelled card",
+		AssigneeID:  &assignee,
+		ReporterID:  cacheTestUserA,
+	})
+	if err != nil {
+		t.Fatalf("CreateTask: %v", err)
+	}
+
+	primeMyTasks(ctx, t, svc, cacheTestUserA)
+	primeMyTasks(ctx, t, svc, cacheTestUserB)
+
+	if err := svc.SetTaskLabels(ctx, task.ID, cacheTestUserA, []int64{101, 102}); err != nil {
+		t.Fatalf("SetTaskLabels: %v", err)
+	}
+
+	if myTasksCached(ctx, cacheTestUserA, 1, cacheTestLimit) {
+		t.Error("the assignee's my-tasks cache survived a label change")
+	}
+	if !myTasksCached(ctx, cacheTestUserB, 1, cacheTestLimit) {
+		t.Error("an uninvolved user's my-tasks cache was evicted by someone else's label change")
+	}
+
+	// The reported symptom, end to end: the assignee's next read has to show
+	// the new labels now, not two minutes from now.
+	tasks, _, err := svc.GetMyTasks(ctx, cacheTestUserA, 1, cacheTestLimit)
+	if err != nil {
+		t.Fatalf("GetMyTasks after label change: %v", err)
+	}
+	if !labelsOfTaskContain(tasks, task.ID, 101) {
+		t.Error("the label change is missing from the assignee's my-tasks row")
+	}
+}
+
+func labelsOfTaskContain(tasks []domain.Task, taskID, labelID int64) bool {
+	for _, task := range tasks {
+		if task.ID != taskID {
+			continue
+		}
+		for _, id := range task.Labels {
+			if id == labelID {
+				return true
+			}
+		}
+	}
+
+	return false
+}

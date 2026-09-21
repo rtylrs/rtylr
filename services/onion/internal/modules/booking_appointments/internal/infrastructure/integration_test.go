@@ -2,8 +2,10 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/infrastructure"
@@ -295,6 +297,68 @@ func TestUpdateAppointment_ChangesStatus(t *testing.T) {
 		if a.ID == id && a.Status != "cancelled" {
 			t.Errorf("expected status cancelled, got %s", a.Status)
 		}
+	}
+}
+
+// Regression: an update that changes no column reports RowsAffected()==0 (the
+// MySQL driver does not use clientFoundRows), which used to be converted into
+// sql.ErrNoRows and surfaced as HTTP 404 even though the locked read in Update
+// had already proven the appointment exists.
+func TestUpdateAppointment_NoOpUpdateSucceeds(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := baseAppointmentInput()
+	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, input); err != nil {
+		t.Fatalf("no-op Update = %v, want nil", err)
+	}
+}
+
+// The locked status read is the existence check, so an unknown appointment id
+// must still come back as sql.ErrNoRows for the API to map to 404.
+func TestUpdateAppointment_UnknownIDReturnsNoRows(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	err := repo.Update(context.Background(), testutil.OwnerID, 999999999, baseAppointmentInput())
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("Update unknown id = %v, want sql.ErrNoRows", err)
+	}
+}
+
+// Regression: sentinel returns skipped the deferred rollback because the local
+// err was never assigned, so the failed update abandoned its transaction and
+// kept the businesses FOR UPDATE lock until the request context was cancelled.
+func TestUpdateAppointment_InvalidStatusReleasesBusinessLock(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, baseAppointmentInput())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	updated := baseAppointmentInput()
+	updated.Status = "archived"
+	if err := repo.Update(ctx, testutil.OwnerID, id, updated); !errors.Is(err, domain.ErrInvalidStatus) {
+		t.Fatalf("Update invalid status = %v, want ErrInvalidStatus", err)
+	}
+
+	lockCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	var lockedID int64
+	if err := db.QueryRowContext(lockCtx,
+		"SELECT id FROM businesses WHERE id = ? FOR UPDATE", testutil.OwnerID).Scan(&lockedID); err != nil {
+		t.Fatalf("business %d still locked after failed update: %v", testutil.OwnerID, err)
 	}
 }
 

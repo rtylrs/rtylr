@@ -40,13 +40,15 @@ func assetToProto(a domain.AssetRecord) *hrequipmentv1.AssetPayload {
 
 	var returnedDate *string
 
+	// hr_assets stores only purchase_date, so there is no assignment timestamp
+	// to report. Leaving assigned_date unset keeps it from advertising the
+	// purchase date as an assignment that never happened.
 	return &hrequipmentv1.AssetPayload{
 		Id:           a.ID,
 		OwnerId:      a.OwnerID,
 		EmployeeId:   a.AssignedTo,
 		Name:         a.Name,
 		SerialNumber: serialNumber,
-		AssignedDate: a.PurchaseDate,
 		ReturnedDate: returnedDate,
 		Condition:    a.Status,
 		CreatedAt:    a.CreatedAt.Unix(),

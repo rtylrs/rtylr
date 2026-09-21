@@ -8,14 +8,15 @@ import (
 )
 
 var (
-	ErrPermissionNotFound = errors.New("user app permission not found")
-	ErrUserNotFound       = errors.New("user not found")
-	ErrTokenAlreadyUsed   = errors.New("invite token already used")
-	ErrTokenExpired       = errors.New("invite token expired")
-	ErrForbidden          = errors.New("permission denied")
-	ErrSeatLimitExceeded  = errors.New("subscription seat limit exceeded")
-	ErrGroupNotFound      = errors.New("group not found")
-	ErrDelegationCeiling  = errors.New("authorization exceeds delegation ceiling")
+	ErrPermissionNotFound     = errors.New("user app permission not found")
+	ErrUserNotFound           = errors.New("user not found")
+	ErrTokenAlreadyUsed       = errors.New("invite token already used")
+	ErrTokenExpired           = errors.New("invite token expired")
+	ErrForbidden              = errors.New("permission denied")
+	ErrSeatLimitExceeded      = errors.New("subscription seat limit exceeded")
+	ErrGroupNotFound          = errors.New("group not found")
+	ErrInvalidPermissionLevel = errors.New("invalid group resource permission level")
+	ErrDelegationCeiling      = errors.New("authorization exceeds delegation ceiling")
 )
 
 // ValidApps is the set of recognized app identifiers.

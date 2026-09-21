@@ -4,10 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 func TestIdempotencyHeadersForReplayKeepsContentTypeOnly(t *testing.T) {
@@ -219,9 +223,13 @@ func TestIdempotencyMiddlewareRejectsCriticalMutationWithoutKey(t *testing.T) {
 }
 
 type idempotencyTestStore struct {
-	setResults []bool
-	setCalls   int
-	cached     []byte
+	setResults   []bool
+	setCalls     int
+	cached       []byte
+	putConfirmed bool
+	putCalls     int
+	putPayload   []byte
+	deleted      []string
 }
 
 func (s *idempotencyTestStore) SetNx(_ context.Context, _ string, _ []byte, _ time.Duration) bool {
@@ -230,6 +238,121 @@ func (s *idempotencyTestStore) SetNx(_ context.Context, _ string, _ []byte, _ ti
 	return result
 }
 
-func (s *idempotencyTestStore) Get(_ context.Context, _ string) []byte                     { return s.cached }
-func (s *idempotencyTestStore) Put(_ context.Context, _ string, _ []byte, _ time.Duration) {}
-func (s *idempotencyTestStore) Delete(_ context.Context, _ []string)                       {}
+func (s *idempotencyTestStore) Get(_ context.Context, _ string) []byte { return s.cached }
+func (s *idempotencyTestStore) Put(_ context.Context, _ string, val []byte, _ time.Duration) {
+	s.putCalls++
+	s.putPayload = val
+}
+func (s *idempotencyTestStore) PutConfirmed(_ context.Context, _ string, val []byte, _ time.Duration) bool {
+	s.putCalls++
+	s.putPayload = val
+	return s.putConfirmed
+}
+func (s *idempotencyTestStore) Delete(_ context.Context, keys []string) {
+	s.deleted = append(s.deleted, keys...)
+}
+
+// TestIdempotencyMiddlewareFallsBackToLocalStoreWhenRedisDisabledAtRuntime
+// covers the runtime-disabled deployment state: Redis is enabled in config but
+// cache.Initialize's probe failed, so cacher.DisableRedisForProcess installed
+// the no-op store. The no-op's SetNx reports success while storing nothing, so
+// selecting the Redis path here would execute every retry instead of deduping.
+func TestIdempotencyMiddlewareFallsBackToLocalStoreWhenRedisDisabledAtRuntime(t *testing.T) {
+	previousConfig := config.GlobalConfig
+	config.GlobalConfig = &config.AppConfig{RedisEnabled: true}
+	t.Cleanup(func() { config.GlobalConfig = previousConfig })
+
+	if err := cacher.InitializeLocalCache(context.Background()); err != nil {
+		t.Fatalf("InitializeLocalCache: %v", err)
+	}
+	cacher.DisableRedisForProcess(context.Background())
+
+	if cacher.RedisAvailable() {
+		t.Fatal("precondition: cacher.DisableRedisForProcess should leave no live Redis client")
+	}
+
+	runs := 0
+	handler := IdempotencyMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		runs++
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		if _, err := w.Write([]byte(`{"ok":true}`)); err != nil {
+			t.Errorf("write response: %v", err)
+		}
+	}))
+
+	key := fmt.Sprintf("b14-r04-%d", time.Now().UnixNano())
+	for attempt := 1; attempt <= 2; attempt++ {
+		req := httptest.NewRequest(http.MethodPost, "/hr/equipment/v1/requests", nil)
+		req.Header.Set(idempotencyHeader, key)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusCreated {
+			t.Fatalf("attempt %d: status = %d, want %d", attempt, rec.Code, http.StatusCreated)
+		}
+		if attempt == 2 && rec.Header().Get("Idempotent-Replayed") != "true" {
+			t.Fatal("second attempt was not replayed from the idempotency store")
+		}
+	}
+
+	if runs != 1 {
+		t.Fatalf("handler ran %d times, want 1 (duplicate mutation)", runs)
+	}
+}
+
+func TestServeIdempotentRedisReleasesReservationWhenPersistFails(t *testing.T) {
+	store := &idempotencyTestStore{setResults: []bool{true}, putConfirmed: false}
+
+	runs := 0
+	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		runs++
+		w.WriteHeader(http.StatusOK)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/pos/orders/1/payment", nil)
+	rec := httptest.NewRecorder()
+	serveIdempotentRedisWithStore(rec, req, next, "idem:test:persist-failed", store)
+
+	if runs != 1 {
+		t.Fatalf("handler runs = %d, want 1", runs)
+	}
+	if store.putCalls != 1 {
+		t.Fatalf("confirmed put calls = %d, want 1", store.putCalls)
+	}
+	if len(store.deleted) != 1 || store.deleted[0] != "idem:test:persist-failed" {
+		t.Fatalf("deleted keys = %v, want the pending reservation to be released", store.deleted)
+	}
+}
+
+func TestServeIdempotentRedisKeepsReservationWhenPersistSucceeds(t *testing.T) {
+	store := &idempotencyTestStore{setResults: []bool{true}, putConfirmed: true}
+
+	runs := 0
+	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		runs++
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write([]byte(`{"ok":true}`)); err != nil {
+			t.Errorf("write response: %v", err)
+		}
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/pos/orders/1/payment", nil)
+	rec := httptest.NewRecorder()
+	serveIdempotentRedisWithStore(rec, req, next, "idem:test:persisted", store)
+
+	if runs != 1 {
+		t.Fatalf("handler runs = %d, want 1", runs)
+	}
+	if len(store.deleted) != 0 {
+		t.Fatalf("deleted keys = %v, want the reservation to be kept", store.deleted)
+	}
+
+	var stored idempotencyRecord
+	if err := json.Unmarshal(store.putPayload, &stored); err != nil {
+		t.Fatalf("persisted payload is not an idempotency record: %v", err)
+	}
+	if stored.Status != http.StatusOK {
+		t.Fatalf("persisted status = %d, want %d", stored.Status, http.StatusOK)
+	}
+}

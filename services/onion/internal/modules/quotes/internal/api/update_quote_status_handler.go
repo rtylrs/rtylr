@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -56,6 +57,9 @@ func (h *UpdateQuoteStatusHandler) Serve(ctx context.Context, req *UpdateQuoteSt
 	}
 
 	if err := h.Service.UpdateStatus(ctx, businessID, id, strings.TrimSpace(req.Status)); err != nil {
+		if errors.Is(err, domain.ErrQuoteNotFound) {
+			return UpdateQuoteStatusResponse{}, onekiterrors.New(http.StatusNotFound, "Quote not found")
+		}
 		return UpdateQuoteStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update quote status")
 	}
 

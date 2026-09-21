@@ -53,3 +53,9 @@ func (n *noopRedisCache) SetNx(_ context.Context, _ string, _ []byte, _ time.Dur
 }
 func (n *noopRedisCache) Expire(_ context.Context, _ string, _ time.Duration)   {}
 func (n *noopRedisCache) ExpireAt(_ context.Context, _ string, _ time.Duration) {}
+
+// PutConfirmed never persists anything, so it must report failure rather than
+// let callers treat a no-op as a successful write.
+func (n *noopRedisCache) PutConfirmed(_ context.Context, _ string, _ []byte, _ time.Duration) bool {
+	return false
+}

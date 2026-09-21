@@ -19,7 +19,10 @@ const (
 	listSessionsToolName         = "pos.list_sessions"
 	defaultListSessionsToolLimit = int64(20)
 	maxListSessionsToolLimit     = int64(50)
-	posSessionToolTimestampDate  = "2006-01-02T15:04:05Z"
+	// maxListSessionsToolPage bounds the page so (page-1)*limit cannot leave
+	// the int64 range before it is used as a slice offset.
+	maxListSessionsToolPage     = int64(1_000_000)
+	posSessionToolTimestampDate = "2006-01-02T15:04:05Z"
 )
 
 type listSessionsToolInput struct {
@@ -61,14 +64,7 @@ func (m *Module) executeListSessionsTool(ctx context.Context, input map[string]a
 	}
 	sessions = filterSessionsForTool(sessions, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
-	if start > len(sessions) {
-		start = len(sessions)
-	}
-	end := start + int(parsed.Limit)
-	if end > len(sessions) {
-		end = len(sessions)
-	}
+	start, end := listSessionsToolBounds(len(sessions), parsed.Page, parsed.Limit)
 
 	payloads := make([]map[string]any, 0, end-start)
 	for _, session := range sessions[start:end] {
@@ -88,6 +84,21 @@ func (m *Module) executeListSessionsTool(ctx context.Context, input map[string]a
 			"staff_id":    parsed.StaffID,
 		},
 	}, nil
+}
+
+// listSessionsToolBounds turns a 1-based page into a slice range. The offset
+// is computed in int64 and clamped before narrowing so an out-of-range page
+// can never overflow into a negative slice index.
+func listSessionsToolBounds(total int, page, limit int64) (int, int) {
+	start64 := (page - 1) * limit
+	if start64 < 0 || start64 > int64(total) {
+		start64 = int64(total)
+	}
+	end64 := start64 + limit
+	if end64 < start64 || end64 > int64(total) {
+		end64 = int64(total)
+	}
+	return int(start64), int(end64)
 }
 
 func parseListSessionsToolInput(input map[string]any) (listSessionsToolInput, error) {
@@ -111,6 +122,9 @@ func parseListSessionsToolInput(input map[string]any) (listSessionsToolInput, er
 	}
 	if page == 0 {
 		page = 1
+	}
+	if page > maxListSessionsToolPage {
+		return listSessionsToolInput{}, fmt.Errorf("page must be at most %d", maxListSessionsToolPage)
 	}
 
 	limit, err := posSessionToolNonNegativeInt64(firstPosSessionToolValue(input, "limit", "page_size"))

@@ -182,18 +182,13 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 		IsPublished:    req.IsPublished,
 	}
 
-	id, err := h.CareersService.CreateCareer(ctx, input)
+	// Round-trip the freshly-created row (resolved slug, timestamps, stored
+	// published state) so the client doesn't need a second request. The
+	// service reads the row back by id because the slug may have been
+	// generated server-side from the title.
+	created, err := h.CareersService.CreateCareer(ctx, input)
 	if err != nil {
 		return CreateRecruitCareerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create career")
-	}
-
-	// Round-trip the freshly-created row so the client gets the
-	// server-generated slug + timestamps without a second request.
-	created, err := h.CareersService.GetCareerBySlug(ctx, businessID, input.Slug)
-	if err != nil {
-		// Fallback — return what we know. The client will refetch on
-		// next list cycle.
-		created = domain.RecruitCareer{ID: id, OwnerID: authUser.UserID, BusinessID: businessID, Slug: input.Slug, Title: input.Title}
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return CreateRecruitCareerResponse{Career: toRecruitCareerPayload(created)}, nil

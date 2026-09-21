@@ -138,7 +138,15 @@ func (r *Repository) CreateBalanceTransaction(ctx context.Context, businessID, c
 	if acquired != 1 {
 		return 0, fmt.Errorf("could not lock loyalty balance")
 	}
-	defer tx.ExecContext(ctx, `SELECT RELEASE_LOCK(?)`, lockName)
+	// MySQL named locks are connection-scoped: COMMIT/ROLLBACK do not release
+	// them, and database/sql refuses to run statements on a finished Tx, so a
+	// deferred RELEASE_LOCK after Commit never reaches the server and leaks
+	// the lock onto the pooled connection. Keep a deferred best-effort release
+	// for the early-return paths and release explicitly (with the result
+	// checked) while the transaction is still open on the success path below.
+	defer func() {
+		_ = releaseNamedLock(ctx, tx, lockName)
+	}()
 
 	var current int32
 	if err := tx.QueryRowContext(ctx, `
@@ -174,10 +182,29 @@ func (r *Repository) CreateBalanceTransaction(ctx context.Context, businessID, c
 	if err != nil {
 		return 0, err
 	}
+	if err := releaseNamedLock(ctx, tx, lockName); err != nil {
+		logger.Ctx(ctx).Error("Failed to release loyalty balance lock", logger.Error(err))
+		return 0, err
+	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
 	return id, nil
+}
+
+// releaseNamedLock releases a MySQL named lock held by tx. It must be called
+// while tx is still open: MySQL releases named locks at connection close, not
+// at COMMIT/ROLLBACK, and a finished *sql.Tx returns ErrTxDone without sending
+// the statement, which would leak the lock on the pooled connection.
+func releaseNamedLock(ctx context.Context, tx *sql.Tx, name string) error {
+	var released sql.NullInt64
+	if err := tx.QueryRowContext(ctx, `SELECT RELEASE_LOCK(?)`, name).Scan(&released); err != nil {
+		return err
+	}
+	if !released.Valid || released.Int64 != 1 {
+		return fmt.Errorf("mysql lock %q was not held by this connection", name)
+	}
+	return nil
 }
 
 func (r *Repository) CreateTransaction(ctx context.Context, businessID, customerID int64, orderID *int64, txnType string, points, balanceAfter int32, note *string) (int64, error) {

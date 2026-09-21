@@ -135,6 +135,11 @@ func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, pro
 		if m.TargetDate.Valid {
 			milestone.DueDate = m.TargetDate.Time
 		}
+		// The list joins the project for its name and color; without them every
+		// milestone card rendered a blank project line.
+		if m.ProjectName.Valid {
+			milestone.Project = &domain.MilestoneProject{Name: m.ProjectName.String, Color: m.ProjectColor.String}
+		}
 		milestones = append(milestones, milestone)
 	}
 	return milestones, int64(len(rows)), nil

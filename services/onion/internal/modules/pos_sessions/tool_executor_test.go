@@ -61,6 +61,34 @@ func TestParseListSessionsToolInputRejectsBadStatus(t *testing.T) {
 	}
 }
 
+func TestParseListSessionsToolInputRejectsOverflowingPage(t *testing.T) {
+	_, err := parseListSessionsToolInput(map[string]any{
+		"page": int64(500000000000000000),
+	})
+	if err == nil || !strings.Contains(err.Error(), "page") {
+		t.Fatalf("error = %v, want page validation", err)
+	}
+}
+
+func TestListSessionsToolBoundsNeverPanics(t *testing.T) {
+	// (page-1)*limit overflows int64 for this input: the offset must clamp to
+	// the end of the slice instead of going negative.
+	start, end := listSessionsToolBounds(5, 500000000000000000, 20)
+	if start != 5 || end != 5 {
+		t.Fatalf("bounds = (%d, %d), want (5, 5)", start, end)
+	}
+
+	start, end = listSessionsToolBounds(5, 1, 20)
+	if start != 0 || end != 5 {
+		t.Fatalf("bounds = (%d, %d), want (0, 5)", start, end)
+	}
+
+	start, end = listSessionsToolBounds(5, 3, 2)
+	if start != 4 || end != 5 {
+		t.Fatalf("bounds = (%d, %d), want (4, 5)", start, end)
+	}
+}
+
 func TestFilterSessionsForTool(t *testing.T) {
 	locationID := int64(4)
 	staffID := int64(7)

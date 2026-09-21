@@ -279,3 +279,22 @@ func (r *Repository) HasActiveAddonGrant(ctx context.Context, businessID int64, 
 	}
 	return count > 0, nil
 }
+
+// AdoptAddonGrantEnablement moves the "this grant turned the add-on on" marker
+// to a surviving active grant. Revoking keeps the marker row around, but
+// deleting hard-removes it, and either way a later removal of the remaining
+// grant must still be able to tell a grant-driven enablement from one the
+// business enabled itself.
+func (r *Repository) AdoptAddonGrantEnablement(ctx context.Context, businessID int64, addonID string, removedID int64) error {
+	query := `
+UPDATE manual_addon_grants
+SET enabled_by_grant = TRUE
+WHERE business_id = ? AND addon_id = ? AND id <> ?
+  AND revoked_at IS NULL
+  AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+  AND enabled_by_grant = FALSE
+ORDER BY id ASC
+LIMIT 1`
+	_, err := r.pool.ExecContext(ctx, query, businessID, addonID, removedID)
+	return err
+}

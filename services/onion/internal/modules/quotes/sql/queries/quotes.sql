@@ -51,6 +51,11 @@ INSERT INTO finance_invoice_items
 (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- Serialize invoice-number allocation per tenant before CountInvoiceSequenceForQuote.
+-- The race-safe backstop when no invoice row exists yet for the year.
+-- name: LockBusinessForQuoteConversion :one
+SELECT id FROM businesses WHERE id = ? FOR UPDATE;
+
 -- name: CountInvoiceSequenceForQuote :one
 SELECT COUNT(*)
 FROM finance_invoices

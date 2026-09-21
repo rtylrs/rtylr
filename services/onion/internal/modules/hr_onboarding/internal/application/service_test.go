@@ -55,6 +55,10 @@ func (m *mockRepo) GetEmployeeChecklist(_ context.Context, _, _, _ int64) (*doma
 	return m.checklist, m.err
 }
 
+func (m *mockRepo) GetLatestEmployeeChecklist(_ context.Context, _, _ int64) (*domain.EmployeeChecklistRecord, error) {
+	return m.checklist, m.err
+}
+
 func (m *mockRepo) ListEmployeeChecklists(_ context.Context, _, _ int64, _, _ int32) ([]domain.EmployeeChecklistRecord, int64, error) {
 	return m.checklists, m.totalCklst, m.err
 }

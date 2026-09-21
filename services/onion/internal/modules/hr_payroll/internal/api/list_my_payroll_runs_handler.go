@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
@@ -34,9 +35,14 @@ func (h *ListMyPayrollRunsHandler) Serve(ctx context.Context, req *ListMyPayroll
 		return ListMyPayrollRunsResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return ListMyPayrollRunsResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
 	if empErr != nil {
-		logger.Ctx(ctx).Warn("failed to resolve employee for self-service payroll lookup", logger.Any("owner_id", device.User.UserID), logger.Error(empErr))
+		logger.Ctx(ctx).Warn("failed to resolve employee for self-service payroll lookup", logger.Any("business_id", businessID), logger.Error(empErr))
 		return ListMyPayrollRunsResponse{}, onekiterrors.PermissionDenied()
 	}
 
@@ -47,7 +53,7 @@ func (h *ListMyPayrollRunsHandler) Serve(ctx context.Context, req *ListMyPayroll
 		req.Limit = 100
 	}
 
-	runs, total, err := h.Service.ListMyPayrollRuns(ctx, device.User.UserID, employeeID, domain.ListPayrollRunsParams{
+	runs, total, err := h.Service.ListMyPayrollRuns(ctx, businessID, employeeID, domain.ListPayrollRunsParams{
 		Limit: req.Limit, Offset: req.Offset,
 	})
 	if err != nil {

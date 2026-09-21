@@ -252,9 +252,34 @@ func formatCycleDate(t time.Time) string {
 }
 
 func (a *CycleAPIV2) UpdateCycle(ctx context.Context, req *flowcyclev2.UpdateCycleRequest) (*flowcyclev2.UpdateCycleResponse, error) {
+	caller, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var end time.Time
+	if req.GetEndDate() != "" {
+		parsed, parseErr := time.Parse("2006-01-02", req.GetEndDate())
+		if parseErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid end_date")
+		}
+		end = parsed
+	}
+
 	if err := a.Service.UpdateCycle(ctx, domain.UpdateCycleInput{
-		ID: req.GetId(), Name: req.GetName(), Status: req.GetStatus(),
+		ID:         req.GetId(),
+		ActorID:    caller.UserID,
+		BusinessID: businessID,
+		Name:       req.GetName(),
+		Status:     req.GetStatus(),
+		EndDate:    end,
 	}); err != nil {
+		// The repository reports a row the caller may not write as
+		// ErrUnauthorized. That is a 403, not an outage: mapping it to 500 made
+		// a permission denial look like a broken server and get retried.
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update cycle")
 	}
 	return &flowcyclev2.UpdateCycleResponse{}, nil
@@ -283,6 +308,10 @@ func (a *MilestoneAPIV2) ListMilestones(ctx context.Context, req *flowmilestonev
 	out := make([]*flowmilestonev2.Milestone, 0, len(milestones))
 	for _, m := range milestones {
 		mp := &flowmilestonev2.MilestoneProject{}
+		if m.Project != nil {
+			mp.Name = m.Project.Name
+			mp.Color = m.Project.Color
+		}
 		mv2 := &flowmilestonev2.Milestone{
 			Id: m.ID, ProjectId: m.ProjectID, Name: m.Name,
 			DoneCount: int32(m.DoneCount), TaskCount: int32(m.TaskCount), Status: m.Status, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
@@ -319,10 +348,32 @@ func (a *MilestoneAPIV2) CreateMilestone(ctx context.Context, req *flowmilestone
 }
 
 func (a *MilestoneAPIV2) UpdateMilestone(ctx context.Context, req *flowmilestonev2.UpdateMilestoneRequest) (*flowmilestonev2.UpdateMilestoneResponse, error) {
-	if err := a.Service.UpdateMilestone(ctx, domain.UpdateMilestoneInput{
-		ID: req.GetId(), Name: req.GetName(),
-		Status: req.GetStatus(),
+	caller, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var dueDate time.Time
+	if req.GetTargetDate() != "" {
+		parsed, parseErr := time.Parse("2006-01-02", req.GetTargetDate())
+		if parseErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid target_date")
+		}
+		dueDate = parsed
+	}
+
+	if err := a.Service.UpdateMilestoneV2(ctx, domain.UpdateMilestoneInput{
+		ID:          req.GetId(),
+		ActorID:     caller.UserID,
+		BusinessID:  businessID,
+		Name:        req.GetName(),
+		Description: req.GetDescription(),
+		Status:      req.GetStatus(),
+		DueDate:     dueDate,
 	}); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update milestone")
 	}
 	return &flowmilestonev2.UpdateMilestoneResponse{}, nil

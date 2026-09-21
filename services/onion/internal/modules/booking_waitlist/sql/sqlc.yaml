@@ -12,3 +12,13 @@ sql:
         sql_package: "database/sql"
         emit_json_tags: true
         emit_db_tags: true
+        # preferred_time is a MySQL TIME. The driver always hands TIME back as
+        # []byte, so scanning it into time.Time fails at runtime with
+        # "unsupported Scan". Read and write it as an "HH:MM:SS" string
+        # instead; MySQL coerces the string back into the column. NullString
+        # because the column is nullable.
+        overrides:
+          - column: "booking_waitlist.preferred_time"
+            go_type:
+              import: "database/sql"
+              type: "NullString"

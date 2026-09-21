@@ -153,11 +153,12 @@ func (q *Queries) GetExpensesByCategory(ctx context.Context, arg GetExpensesByCa
 const getInvoiceAging = `-- name: GetInvoiceAging :many
 SELECT
   CASE
-    WHEN DATEDIFF(CURDATE(), due_date) BETWEEN 0 AND 30 THEN '0-30'
+    WHEN DATEDIFF(CURDATE(), due_date) <= 0 THEN 'current'
+    WHEN DATEDIFF(CURDATE(), due_date) BETWEEN 1 AND 30 THEN '1-30'
     WHEN DATEDIFF(CURDATE(), due_date) BETWEEN 31 AND 60 THEN '31-60'
     WHEN DATEDIFF(CURDATE(), due_date) BETWEEN 61 AND 90 THEN '61-90'
     WHEN DATEDIFF(CURDATE(), due_date) > 90 THEN '90+'
-    ELSE 'not_due'
+    ELSE 'current'
   END AS bucket,
   COUNT(*) AS invoice_count,
   COALESCE(SUM(amount_due), 0) AS amount_due
@@ -176,6 +177,8 @@ type GetInvoiceAgingRow struct {
 }
 
 // cross-schema read from finance — bucket outstanding invoices by due-date age.
+// Bucket labels match the insights.financial.v1 InvoiceAgingBucket contract:
+// current (not past due, including due today), 1-30, 31-60, 61-90, 90+.
 func (q *Queries) GetInvoiceAging(ctx context.Context, businessID int64) ([]GetInvoiceAgingRow, error) {
 	rows, err := q.db.QueryContext(ctx, getInvoiceAging, businessID)
 	if err != nil {

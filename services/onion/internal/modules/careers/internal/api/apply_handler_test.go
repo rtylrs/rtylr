@@ -35,16 +35,54 @@ func TestApplyHandlerRejectsOversizedCV(t *testing.T) {
 	}
 }
 
+// job_id=0 rows join no opening in the recruiter pipeline, so a missing or
+// malformed job_id must fail the request instead of being stored as an orphan.
+func TestApplyHandlerRejectsMissingJobID(t *testing.T) {
+	body, contentType := newCareerMultipartBodyWithFields(t, 0, map[string]string{"job_id": ""})
+	req := httptest.NewRequest(http.MethodPost, "/careers/apply", body)
+	req.Header.Set("Content-Type", contentType)
+	rec := httptest.NewRecorder()
+
+	ApplyHandler(context.Background(), nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+	}
+}
+
+func TestApplyHandlerRejectsMalformedJobID(t *testing.T) {
+	body, contentType := newCareerMultipartBodyWithFields(t, 0, map[string]string{"job_id": "abc"})
+	req := httptest.NewRequest(http.MethodPost, "/careers/apply", body)
+	req.Header.Set("Content-Type", contentType)
+	rec := httptest.NewRecorder()
+
+	ApplyHandler(context.Background(), nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+	}
+}
+
 func newCareerMultipartBody(t *testing.T, cvSize int) (*bytes.Buffer, string) {
+	t.Helper()
+	return newCareerMultipartBodyWithFields(t, cvSize, nil)
+}
+
+func newCareerMultipartBodyWithFields(t *testing.T, cvSize int, extraFields map[string]string) (*bytes.Buffer, string) {
 	t.Helper()
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	for key, value := range map[string]string{
-		"name":  "Ada Lovelace",
-		"email": "ada@example.com",
-	} {
+	fields := map[string]string{
+		"name":   "Ada Lovelace",
+		"email":  "ada@example.com",
+		"job_id": "4242",
+	}
+	for key, value := range extraFields {
+		fields[key] = value
+	}
+	for key, value := range fields {
 		if err := writer.WriteField(key, value); err != nil {
 			t.Fatalf("WriteField(%s): %v", key, err)
 		}

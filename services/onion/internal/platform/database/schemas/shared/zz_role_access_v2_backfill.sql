@@ -198,6 +198,10 @@ JOIN authorization_roles role
               AND apps.app_id IN ('erp','hr','crm','finance','recruit') THEN 'manager'
          WHEN legacy.role IN ('operator','store_manager','menu_manager')
               AND apps.app_id = 'menu' THEN 'manager'
+         -- The legacy read-only role stays read-only in every app; without
+         -- this arm it falls through to the per-app working roles below and
+         -- is escalated (pos.cashier / flow.contributor / hr.employee).
+         WHEN legacy.role = 'viewer' THEN 'viewer'
          WHEN apps.app_id = 'pos' THEN 'cashier'
          WHEN apps.app_id = 'flow' THEN 'contributor'
          WHEN apps.app_id = 'hr' THEN 'employee'

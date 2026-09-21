@@ -16,6 +16,11 @@ import (
 // this short; loud notifications matter for a service in launch mode.
 var notifyEmails = []string{"hire@voxire.com", "info@voxire.com", "amounehabed@gmail.com"}
 
+// sendNotificationEmail delivers a background notification email. It is a
+// variable so tests can assert that the context handed to the notification
+// goroutine outlives the HTTP request that triggered it.
+var sendNotificationEmail = emailPkg.Send
+
 type repository interface {
 	CreateCompanyLead(ctx context.Context, input domain.CompanyLeadInput) (int64, error)
 	CreateTalentApplication(ctx context.Context, input domain.TalentApplicationInput) (int64, error)
@@ -70,7 +75,9 @@ func (s *Service) SubmitCompanyLead(ctx context.Context, input domain.CompanyLea
 		return 0, err
 	}
 
-	go s.notifyCompanyLead(ctx, id, input)
+	// Detach from the request context: the goroutine outlives the handler and
+	// would otherwise be canceled before the email is sent.
+	go s.notifyCompanyLead(context.WithoutCancel(ctx), id, input)
 
 	return id, nil
 }
@@ -83,7 +90,8 @@ func (s *Service) SubmitTalentApplication(ctx context.Context, input domain.Tale
 		return 0, err
 	}
 
-	go s.notifyTalentApplication(ctx, id, input)
+	// See SubmitCompanyLead: the notification must outlive the request.
+	go s.notifyTalentApplication(context.WithoutCancel(ctx), id, input)
 
 	return id, nil
 }
@@ -135,7 +143,7 @@ func (s *Service) notifyCompanyLead(ctx context.Context, id int64, lead domain.C
 
 	subject := fmt.Sprintf("[VoxHire] New hiring inquiry from %s", lead.CompanyName)
 
-	if _, err := emailPkg.Send(ctx, emailPkg.SendParams{
+	if _, err := sendNotificationEmail(ctx, emailPkg.SendParams{
 		To:      notifyEmails,
 		Subject: subject,
 		HTML:    emailHTML,
@@ -226,7 +234,7 @@ func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app dom
 
 	subject := fmt.Sprintf("[VoxHire] New talent application from %s (%s)", app.FullName, app.Track)
 
-	if _, err := emailPkg.Send(ctx, emailPkg.SendParams{
+	if _, err := sendNotificationEmail(ctx, emailPkg.SendParams{
 		To:      notifyEmails,
 		Subject: subject,
 		HTML:    emailHTML,

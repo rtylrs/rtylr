@@ -155,18 +155,18 @@ func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormField
 		OptionsJSON: req.OptionsJSON,
 		Position:    req.Position,
 	}
-	if _, err := h.CareersService.CreateFormField(ctx, in); err != nil {
+	fieldID, err := h.CareersService.CreateFormField(ctx, in)
+	if err != nil {
 		return CreateFormFieldResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create field")
 	}
 
-	// Return the full field list so the client stays in sync without
-	// re-hitting the list endpoint — simpler than juggling the fresh
-	// ID client-side for drag-reorder.
-	fields, _ := h.CareersService.ListFormFields(ctx, businessID, req.CareerID)
-	if len(fields) == 0 {
-		return CreateFormFieldResponse{Field: nil}, nil
+	// Echo the row the insert produced. The list is ordered by position and
+	// capped at 100 rows, so its tail is not necessarily the new field.
+	field, err := h.CareersService.GetFormField(ctx, businessID, fieldID)
+	if err != nil {
+		return CreateFormFieldResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load created field")
 	}
-	return CreateFormFieldResponse{Field: toFormFieldPayload(fields[len(fields)-1])}, nil
+	return CreateFormFieldResponse{Field: toFormFieldPayload(field)}, nil
 }
 
 // ─────────────────────────────────────────────

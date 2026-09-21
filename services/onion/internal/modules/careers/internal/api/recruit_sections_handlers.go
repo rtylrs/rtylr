@@ -142,21 +142,21 @@ func (h *CreateSectionHandler) Serve(ctx context.Context, req *CreateSectionRequ
 		Enabled:    req.Enabled,
 	}
 
-	_, err := h.CareersService.CreateSection(ctx, in)
+	sectionID, err := h.CareersService.CreateSection(ctx, in)
 	if err != nil {
 		return CreateSectionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create section")
 	}
 
-	// Refetch list and return the newly-added row (tail of ordered
-	// list when position wasn't supplied). Keeps the client in sync
-	// without the client having to refetch.
 	invalidatePublicCareersCache(ctx, businessID)
 
-	sections, _ := h.CareersService.ListSections(ctx, businessID, false)
-	if len(sections) == 0 {
-		return CreateSectionResponse{Section: nil}, nil
+	// Echo the row the insert produced. A client-supplied position need not
+	// be the list tail, so re-reading the list and returning its last element
+	// can return a different section.
+	section, err := h.CareersService.GetSection(ctx, businessID, sectionID)
+	if err != nil {
+		return CreateSectionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load created section")
 	}
-	return CreateSectionResponse{Section: toSectionPayload(sections[len(sections)-1])}, nil
+	return CreateSectionResponse{Section: toSectionPayload(section)}, nil
 }
 
 // ─────────────────────────────────────────────

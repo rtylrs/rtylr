@@ -61,9 +61,11 @@ export const paths = {
 };
 
 // Voxie lives as this repo's submodule when initialised, otherwise as the
-// sibling checkout. Contracts are read from whichever exists.
+// sibling checkout. Contracts are read from whichever exists; CROSS_APP_VOXIE
+// overrides both when the checkout lives somewhere else.
 import { existsSync } from 'node:fs';
 export function voxieApiDir() {
+  if (process.env.CROSS_APP_VOXIE) return process.env.CROSS_APP_VOXIE;
   const sub = join(ONION, 'voxie', 'api');
   if (existsSync(sub)) return sub;
   return join(homedir(), 'Development', 'voxie', 'api');

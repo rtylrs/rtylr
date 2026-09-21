@@ -21,11 +21,21 @@ count_files() {
     echo $count
 }
 
+# Generated sqlc output lives in directories named "sqlc". The schemas tree has
+# one too, but it is not output: internal/platform/database/schemas/sqlc holds
+# the hand-written, git-tracked sqlc-only schema supplement
+# flow/v8_time_tracking_columns.sql, which internal/modules/workspaces/sql/sqlc.yaml
+# feeds to sqlc as a schema input. Deleting it left `make generate` failing until
+# git restored the file, so it is excluded here.
+list_sqlc_output_dirs() {
+    find . -name "sqlc" -type d -not -path "*/database/schemas/sqlc" -print
+}
+
 # Count files before deletion
 echo -e "${BLUE}Counting files to be removed...${NC}"
 sqlc_count=$(find . -name "dbmodels" -type d | wc -l)
 sqlc_go_count=$(find . -name "*.sql.go" -type f 2>/dev/null | wc -l)
-persistence_count=$(find . -name "sqlc" -type d | wc -l)
+persistence_count=$(list_sqlc_output_dirs | wc -l)
 
 total_count=$((sqlc_count + sqlc_go_count + persistence_count))
 
@@ -55,23 +65,34 @@ echo -e "${BLUE}Removing generated files...${NC}"
 # Remove SQLC generated files
 if [ $sqlc_count -gt 0 ]; then
     echo -e "${BLUE}Removing SQLC dbmodels...${NC}"
-    find . -name "dbmodels" -type d -exec rm -rf {} \; 2>/dev/null || true
+    find . -name "dbmodels" -type d -exec rm -rf {} \;
 fi
 
 if [ $sqlc_go_count -gt 0 ]; then
     echo -e "${BLUE}Removing SQLC Go files...${NC}"
-    find . -name "*.sql.go" -type f -delete 2>/dev/null || true
+    find . -name "*.sql.go" -type f -delete
 fi
 
 # Remove persistence files
 if [ $persistence_count -gt 0 ]; then
     echo -e "${BLUE}Removing persistence files...${NC}"
-    find . -name "sqlc" -type d -exec rm -rf {} \; 2>/dev/null || true
+    while IFS= read -r sqlc_dir; do
+        rm -rf "$sqlc_dir"
+    done < <(list_sqlc_output_dirs)
 fi
 
 # Remove empty directories (cleanup any remaining empty dirs)
 echo -e "${BLUE}Cleaning up any remaining empty directories...${NC}"
 find . -type d -empty -delete 2>/dev/null || true
+
+# Verify the generated sqlc directories are really gone: a failed rm (read-only
+# mount, root-owned files) must fail the script, not be reported as success.
+remaining=$(list_sqlc_output_dirs | wc -l)
+if [ "$remaining" -ne 0 ]; then
+    echo -e "${RED}❌ ${remaining} generated sqlc directories could not be removed:${NC}" >&2
+    list_sqlc_output_dirs >&2
+    exit 1
+fi
 
 echo -e "${GREEN}✅ Generated files cleaned successfully!${NC}"
 echo ""

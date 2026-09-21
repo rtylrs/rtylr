@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"math"
 	"time"
 
@@ -30,7 +31,78 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+// CreateAttendanceRecord creates a clock-in record for the employee, refusing
+// the insert when an open (not yet clocked out) record already exists. The
+// check and the insert must be one atomic step: two overlapping clock-ins
+// (kiosk double-tap, client retry, two devices) would otherwise both observe
+// no active record and insert open rows, and the orphan left behind keeps
+// GetActiveClockIn non-nil forever, blocking the employee from clocking in.
+// There is no row to take FOR UPDATE on before the first open record exists,
+// so a MySQL advisory lock serializes the pair per (business, employee).
 func (r *Repository) CreateAttendanceRecord(ctx context.Context, businessID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
+	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	lockName := fmt.Sprintf("hr_attendance_clockin:%d:%d", businessID, record.EmployeeID)
+	var acquired int
+	if err := tx.QueryRowContext(ctx, `SELECT GET_LOCK(?, 5)`, lockName).Scan(&acquired); err != nil {
+		return nil, err
+	}
+	if acquired != 1 {
+		return nil, fmt.Errorf("attendance clock-in for employee %d is already being processed", record.EmployeeID)
+	}
+	// MySQL named locks are connection-scoped: COMMIT/ROLLBACK do not release
+	// them, and database/sql refuses to run statements on a finished Tx, so a
+	// deferred RELEASE_LOCK after Commit never reaches the server and leaks
+	// the lock onto the pooled connection. Keep a deferred best-effort release
+	// for the early-return paths and release explicitly (with the result
+	// checked) while the transaction is still open on the success path below.
+	defer func() {
+		_ = releaseNamedLock(ctx, tx, lockName)
+	}()
+
+	var active int
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(
+		SELECT 1 FROM hr_attendance_records WHERE business_id = ? AND employee_id = ? AND clock_out_at IS NULL)`, businessID, record.EmployeeID).Scan(&active); err != nil {
+		return nil, err
+	}
+	if active == 1 {
+		return nil, domain.ErrAlreadyClockedIn
+	}
+
+	created, err := createAttendanceRecord(ctx, r.queries.WithTx(tx), businessID, record)
+	if err != nil {
+		return nil, err
+	}
+	if err := releaseNamedLock(ctx, tx, lockName); err != nil {
+		logger.Ctx(ctx).Error("failed to release attendance clock-in lock", logger.Error(err))
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return created, nil
+}
+
+// releaseNamedLock releases a MySQL named lock held by tx. It must be called
+// while tx is still open: MySQL releases named locks at connection close, not
+// at COMMIT/ROLLBACK, and a finished *sql.Tx returns ErrTxDone without sending
+// the statement, which would leak the lock on the pooled connection.
+func releaseNamedLock(ctx context.Context, tx *sql.Tx, name string) error {
+	var released sql.NullInt64
+	if err := tx.QueryRowContext(ctx, `SELECT RELEASE_LOCK(?)`, name).Scan(&released); err != nil {
+		return err
+	}
+	if !released.Valid || released.Int64 != 1 {
+		return fmt.Errorf("mysql lock %q was not held by this connection", name)
+	}
+	return nil
+}
+
+func createAttendanceRecord(ctx context.Context, q *sqlc.Queries, businessID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
 	date, err := time.Parse("2006-01-02", record.Date)
 	if err != nil {
 		return nil, err
@@ -46,7 +118,7 @@ func (r *Repository) CreateAttendanceRecord(ctx context.Context, businessID int6
 		ownerID = businessID
 	}
 
-	result, err := r.queries.CreateAttendanceRecord(ctx, sqlc.CreateAttendanceRecordParams{
+	result, err := q.CreateAttendanceRecord(ctx, sqlc.CreateAttendanceRecordParams{
 		OwnerID:       ownerID,
 		BusinessID:    businessID,
 		EmployeeID:    record.EmployeeID,

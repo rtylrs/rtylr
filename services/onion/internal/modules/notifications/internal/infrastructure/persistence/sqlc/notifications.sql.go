@@ -87,16 +87,25 @@ func (q *Queries) ListNotifications(ctx context.Context, arg ListNotificationsPa
 }
 
 const markAllNotificationsRead = `-- name: MarkAllNotificationsRead :exec
-UPDATE hub_notifications SET is_read = TRUE WHERE user_id = ? AND is_read = FALSE
+UPDATE hub_notifications
+SET is_read = TRUE
+WHERE business_id = ? AND user_id = ? AND is_read = FALSE
 `
 
-func (q *Queries) MarkAllNotificationsRead(ctx context.Context, userID int64) error {
-	_, err := q.db.ExecContext(ctx, markAllNotificationsRead, userID)
+type MarkAllNotificationsReadParams struct {
+	BusinessID int64 `db:"business_id" json:"business_id"`
+	UserID     int64 `db:"user_id" json:"user_id"`
+}
+
+func (q *Queries) MarkAllNotificationsRead(ctx context.Context, arg MarkAllNotificationsReadParams) error {
+	_, err := q.db.ExecContext(ctx, markAllNotificationsRead, arg.BusinessID, arg.UserID)
 	return err
 }
 
 const markNotificationRead = `-- name: MarkNotificationRead :exec
-UPDATE hub_notifications SET is_read = TRUE WHERE id = ? AND (business_id = ? OR 1=1) AND user_id = ?
+UPDATE hub_notifications
+SET is_read = TRUE
+WHERE id = ? AND business_id = ? AND user_id = ?
 `
 
 type MarkNotificationReadParams struct {

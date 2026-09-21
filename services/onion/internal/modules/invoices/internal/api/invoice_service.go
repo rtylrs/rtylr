@@ -134,6 +134,7 @@ func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.
 	}
 
 	inv, err := a.Service.CreateInvoice(ctx, businessID, domain.InvoiceInput{
+		CustomerID:    req.GetCustomerId(),
 		ClientName:    req.GetClientName(),
 		ClientEmail:   req.GetClientEmail(),
 		ClientAddress: req.GetClientAddress(),
@@ -149,6 +150,9 @@ func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.
 		Items:         toInvoiceItemInputs(req.GetItems()),
 	})
 	if err != nil {
+		if errors.Is(err, application.ErrCustomerNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Customer not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create invoice")
 	}
 

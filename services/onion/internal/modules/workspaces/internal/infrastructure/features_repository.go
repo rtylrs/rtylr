@@ -101,11 +101,13 @@ func (r *Repository) UpdateCycle(ctx context.Context, input domain.UpdateCycleIn
 		parts = append(parts, "end_date = ?")
 		args = append(args, input.EndDate.Format("2006-01-02"))
 	}
-	// Trailing binds: id, then the two placeholders inside workspaceMemberPredicate.
-	args = append(args, input.ID, input.BusinessID, input.ActorID)
+	// Trailing binds: id, then the five placeholders inside memberPredicate - all
+	// the acting user, so the workspace owner branch stops comparing the owner
+	// id against the business id.
+	args = append(args, input.ID, input.ActorID, input.ActorID, input.ActorID, input.ActorID, input.ActorID)
 
 	res, err := r.pool.ExecContext(ctx,
-		fmt.Sprintf("UPDATE flow_cycles SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_cycles")),
+		fmt.Sprintf("UPDATE flow_cycles SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), memberPredicate("flow_cycles")),
 		args...,
 	)
 	if err != nil {
@@ -253,7 +255,11 @@ func (r *Repository) CreateMilestone(ctx context.Context, input domain.Milestone
 	return res.LastInsertId()
 }
 
-func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMilestoneInput) error {
+// updateMilestone writes the milestone columns both APIs share. dateColumn
+// differs by generation: v1 stores its target date in due_date, while the v2
+// list reads target_date, so a v2 update that wrote due_date would not be
+// visible to the client that sent it.
+func (r *Repository) updateMilestone(ctx context.Context, input domain.UpdateMilestoneInput, dateColumn string) error {
 	parts := []string{"name = ?"}
 	args := []interface{}{input.Name}
 
@@ -269,14 +275,14 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 		}
 	}
 	if !input.DueDate.IsZero() {
-		parts = append(parts, "due_date = ?")
+		parts = append(parts, dateColumn+" = ?")
 		args = append(args, input.DueDate.Format("2006-01-02"))
 	}
-	// Trailing binds: id, then the two placeholders inside workspaceMemberPredicate.
-	args = append(args, input.ID, input.BusinessID, input.ActorID)
+	// Trailing binds: id, then the five placeholders inside memberPredicate.
+	args = append(args, input.ID, input.ActorID, input.ActorID, input.ActorID, input.ActorID, input.ActorID)
 
 	res, err := r.pool.ExecContext(ctx,
-		fmt.Sprintf("UPDATE flow_milestones SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_milestones")),
+		fmt.Sprintf("UPDATE flow_milestones SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), memberPredicate("flow_milestones")),
 		args...,
 	)
 	if err != nil {
@@ -284,6 +290,14 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 		return err
 	}
 	return requireAffected(res)
+}
+
+func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMilestoneInput) error {
+	return r.updateMilestone(ctx, input, "due_date")
+}
+
+func (r *Repository) UpdateMilestoneV2(ctx context.Context, input domain.UpdateMilestoneInput) error {
+	return r.updateMilestone(ctx, input, "target_date")
 }
 
 // ─────────────────────────────────────────────
@@ -422,11 +436,24 @@ func (r *Repository) DeleteView(ctx context.Context, id, actorID, businessID int
 	return requireAffected(res)
 }
 
-func workspaceMemberPredicate(table string) string {
+// memberPredicate authorizes a write to a project-scoped table by the acting
+// user's membership of the project or, for legacy rows, the workspace.
+//
+// Both halves are needed. A v2 cycle carries workspace_id 0 and a v2 milestone
+// carries NULL (v2 no longer creates workspaces), so the workspace branches
+// alone could never match and requireAffected turned every v2 update into
+// domain.ErrUnauthorized - the same trap SetTaskLabels documents in labels.sql.
+// The workspace branches stay so a v1 row keeps resolving exactly as before.
+//
+// Five placeholders, in order: project member, project owner, project creator,
+// workspace owner, workspace member - each bound to the acting user.
+func memberPredicate(table string) string {
 	return fmt.Sprintf(`(
-		EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = %s.workspace_id AND w.owner_id = ?)
+		EXISTS (SELECT 1 FROM flow_project_members pm WHERE pm.project_id = %s.project_id AND pm.user_id = ?)
+		OR EXISTS (SELECT 1 FROM flow_projects p WHERE p.id = %s.project_id AND (p.owner_id = ? OR p.created_by = ?))
+		OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = %s.workspace_id AND w.owner_id = ?)
 		OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = %s.workspace_id AND wm.user_id = ?)
-	)`, table, table)
+	)`, table, table, table, table)
 }
 
 func requireAffected(res sql.Result) error {
@@ -459,23 +486,32 @@ func (r *Repository) GetInsights(ctx context.Context, workspaceID int64) (domain
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("GetInsights cycle time failed", logger.Error(err))
 	}
+	// MySQL reports AVG(DATEDIFF(...)) as DECIMAL and the driver hands that back
+	// as []byte, so a direct float64 assertion never matched and every
+	// workspace reported cycleTime 0. countIfaceToFloat64 is this file's
+	// converter for the driver's wire types; DoneTasks above uses it too.
 	if avgDays != nil {
-		if f, ok := avgDays.(float64); ok {
-			ins.CycleTime = math.Round(f*10) / 10
-		}
+		ins.CycleTime = math.Round(countIfaceToFloat64(avgDays)*10) / 10
 	}
 
-	velRows, err := r.queries.GetInsightsVelocity(ctx, workspaceID)
+	velRows, err := r.queries.GetInsightsVelocity(ctx, sqlc.GetInsightsVelocityParams{
+		WorkspaceID: workspaceID, WorkspaceID_2: workspaceID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Warn("GetInsights velocity failed", logger.Error(err))
 	} else {
 		for _, row := range velRows {
 			completed := int(row.Completed)
+			total := int(row.Total)
+			rate := 0.0
+			if total > 0 {
+				rate = float64(completed) / float64(total)
+			}
 			ins.Velocity = append(ins.Velocity, domain.InsightsVelocityPoint{
 				Cycle:          row.WeekStart,
 				Completed:      completed,
-				Total:          completed + int(float64(completed)*0.3),
-				CompletionRate: math.Min(1.0, float64(completed)/math.Max(1, float64(completed)+float64(completed)*0.3)),
+				Total:          total,
+				CompletionRate: rate,
 			})
 		}
 	}
@@ -485,19 +521,47 @@ func (r *Repository) GetInsights(ctx context.Context, workspaceID int64) (domain
 		ins.Throughput[i] = domain.InsightsThroughput{Week: v.Cycle, Completed: v.Completed}
 	}
 
-	totalOpen, err := r.queries.GetInsightsOpenTaskCount(ctx, workspaceID)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Warn("GetInsights open task count failed", logger.Error(err))
+	// Burndown is measured from the task history rather than extrapolated: the
+	// remaining work at the end of a day is whatever was already in flight when
+	// the window opened, plus everything created up to that day, minus
+	// everything completed up to it. The previous curve was a synthetic line
+	// derived from the open-task count.
+	activity, err := r.queries.GetInsightsBurndownDaily(ctx, sqlc.GetInsightsBurndownDailyParams{
+		WorkspaceID: workspaceID, WorkspaceID_2: workspaceID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Warn("GetInsights burndown activity failed", logger.Error(err))
 	}
-	idealPerDay := float64(totalOpen) / 14.0
+	createdByDay := make(map[string]int, len(activity))
+	completedByDay := make(map[string]int, len(activity))
+	for _, a := range activity {
+		day := a.Day.Format("2006-01-02")
+		createdByDay[day] += int(a.Created)
+		completedByDay[day] += int(a.Completed)
+	}
+	baseOpen, err := r.queries.GetInsightsBurndownBase(ctx, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Warn("GetInsights burndown base failed", logger.Error(err))
+	}
+
+	now := time.Now().UTC()
+	windowStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).AddDate(0, 0, -14)
 	ins.Burndown = make([]domain.InsightsBurndownPoint, 15)
+	remaining := int(baseOpen)
 	for d := 0; d <= 14; d++ {
-		remaining := math.Max(0, float64(totalOpen)-float64(d)*idealPerDay*1.15)
-		ins.Burndown[d] = domain.InsightsBurndownPoint{
-			Day:    d,
-			Ideal:  math.Round((float64(totalOpen)-idealPerDay*float64(d))*10) / 10,
-			Actual: math.Round(remaining*10) / 10,
+		day := windowStart.AddDate(0, 0, d).Format("2006-01-02")
+		remaining += createdByDay[day] - completedByDay[day]
+		if remaining < 0 {
+			remaining = 0
 		}
+		ins.Burndown[d].Day = d
+		ins.Burndown[d].Actual = float64(remaining)
+	}
+	// The ideal line burns the same starting scope down to zero across the
+	// window, so the two lines share an origin.
+	scope := ins.Burndown[0].Actual
+	for d := 0; d <= 14; d++ {
+		ins.Burndown[d].Ideal = math.Round(scope*(float64(14-d)/14)*10) / 10
 	}
 
 	tlRows, err := r.queries.GetInsightsTimeByMember(ctx, workspaceID)

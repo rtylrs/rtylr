@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -129,6 +130,9 @@ func (s *Service) GetOvertimeConfig(ctx context.Context, businessID int64) (*dom
 		func(ctx context.Context) (*domain.OvertimeConfigRecord, error) {
 			cfg, err := s.repo.GetOvertimeConfig(ctx, businessID)
 			if err != nil {
+				if !errors.Is(err, domain.ErrOvertimeConfigNotFound) {
+					return nil, err
+				}
 				logger.Ctx(ctx).Debug("no overtime config found, auto-detection disabled",
 					logger.Any("business_id", businessID))
 				return nil, domain.ErrOvertimeConfigNotFound
@@ -150,6 +154,12 @@ func (s *Service) UpsertOvertimeConfig(ctx context.Context, businessID int64, cf
 func (s *Service) DetectAndFlagOvertime(ctx context.Context, businessID int64, date string) error {
 	cfg, err := s.repo.GetOvertimeConfig(ctx, businessID)
 	if err != nil {
+		// A missing config is a legitimate "auto-detection off" state. Any other
+		// error is a transient read failure and must reach RunDailyDetection so
+		// the business is not silently skipped for the day.
+		if !errors.Is(err, domain.ErrOvertimeConfigNotFound) {
+			return err
+		}
 		logger.Ctx(ctx).Debug("overtime auto-detect: no config, skipping",
 			logger.Any("business_id", businessID))
 		return nil

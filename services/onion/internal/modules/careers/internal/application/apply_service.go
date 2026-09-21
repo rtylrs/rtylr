@@ -26,7 +26,13 @@ func (s *Service) SaveApplication(ctx context.Context, in domain.ApplicationInpu
 }
 
 func (s *Service) sendApplicationNotification(ctx context.Context, id int64, in domain.ApplicationInput) {
-	if !emailPkg.IsEnabled() {
+	// The caller spawns this on the request context, which net/http cancels
+	// as soon as the handler returns. Detach (values preserved) with a bound
+	// so the applicant's request finishing cannot abort the notification.
+	ctx, cancel := detachSend(ctx)
+	defer cancel()
+
+	if !emailEnabled() {
 		return
 	}
 
@@ -70,7 +76,7 @@ func (s *Service) sendApplicationNotification(ctx context.Context, id int64, in 
 		in.Email,
 	)
 
-	_, emailErr := emailPkg.Send(ctx, emailPkg.SendParams{
+	_, emailErr := sendEmail(ctx, emailPkg.SendParams{
 		To:      voxireNotifyEmails,
 		Subject: subject,
 		HTML:    html,

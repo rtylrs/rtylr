@@ -374,12 +374,16 @@ func (r *Repository) insertLicenseAssignments(ctx context.Context, tx *sql.Tx, b
 			continue
 		}
 		source := authorization.SourceExplicit
-		if assignment.GroupID == nil && source != authorization.SourceGroup {
+		if assignment.GroupID == nil {
+			// Per-user assignments are written once below, after every group
+			// assignment has been handled.
 			continue
 		}
-		if assignment.GroupID == nil {
-			return errors.New("group license assignment requires a group id")
-		}
+		// Assignment source is server-owned metadata: a group license row must
+		// say 'group'. The resolver rejects an explicit row that carries a
+		// group id, so writing 'explicit' here silently denied the app to every
+		// member of the group.
+		source = authorization.SourceGroup
 		var validGroupID int64
 		if err := tx.QueryRowContext(ctx, `
 			SELECT id FROM user_groups
@@ -513,7 +517,14 @@ func appRoleKey(appID string, role domain.Role) string {
 	case domain.RoleOwner, domain.RoleAdmin:
 		suffix = "admin"
 	case domain.RoleOperator, domain.RoleStoreManager, domain.RoleMenuManager:
-		suffix = "manager"
+		// Insights has no manager role in the catalog (viewer/analyst/admin
+		// only) and the legacy backfill maps these roles to viewer, so follow
+		// it instead of looking up a key that does not exist.
+		if appID == "insights" {
+			suffix = "viewer"
+		} else {
+			suffix = "manager"
+		}
 	case domain.RoleStaff:
 		switch appID {
 		case "pos":
@@ -524,7 +535,7 @@ func appRoleKey(appID string, role domain.Role) string {
 			suffix = "employee"
 		}
 	}
-	if appID == "pos" && (role == domain.RoleOperator || role == domain.RoleStoreManager) {
+	if appID == "pos" && (role == domain.RoleOperator || role == domain.RoleStoreManager || role == domain.RoleMenuManager) {
 		suffix = "location_manager"
 	}
 	return appID + "." + suffix
@@ -1125,6 +1136,13 @@ func (r *Repository) MarkInviteTokenUsed(ctx context.Context, token string) erro
 	return nil
 }
 
+// ReleaseInviteToken reverts the single-use claim taken by MarkInviteTokenUsed.
+// AcceptInvite calls it when a later step fails, so the invitee can retry the
+// accept instead of being left with a consumed token and no activation.
+func (r *Repository) ReleaseInviteToken(ctx context.Context, token string) error {
+	return r.queries.ReleaseInviteToken(ctx, token)
+}
+
 func (r *Repository) SetPassword(ctx context.Context, userID int64, passwordHash string) error {
 	return r.queries.SetPassword(ctx, sqlc.SetPasswordParams{
 		PasswordHash: passwordHash,
@@ -1232,32 +1250,67 @@ func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int
 
 // ─── Groups ──────────────────────────────────────────────────────────────────
 
+// CreateGroup writes the group row and its resource permissions in one
+// transaction. Without it a failure mid-rewrite leaves the group created with
+// no permissions and blocks a retry under the same name (uk_group_owner_name).
 func (r *Repository) CreateGroup(ctx context.Context, ownerID int64, input domain.CreateGroupInput) (int64, error) {
-	res, err := r.queries.CreateGroup(ctx, sqlc.CreateGroupParams{
+	if err := validateResourcePermissions(input.ResourcePermissions); err != nil {
+		return 0, err
+	}
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	qtx := r.queries.WithTx(tx)
+
+	res, err := qtx.CreateGroup(ctx, sqlc.CreateGroupParams{
 		OwnerID:     ownerID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
 	})
 	if err != nil {
+		_ = tx.Rollback()
 		return 0, err
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
+		_ = tx.Rollback()
 		return 0, err
 	}
-	if err := r.setGroupResourcePermissions(ctx, id, input.ResourcePermissions); err != nil {
+	if err := r.setGroupResourcePermissions(ctx, qtx, id, input.ResourcePermissions); err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (r *Repository) setGroupResourcePermissions(ctx context.Context, groupID int64, perms []domain.ResourcePermission) error {
-	if err := r.queries.DeleteGroupResourcePermissions(ctx, groupID); err != nil {
+// validateResourcePermissions rejects levels outside the
+// user_group_resource_permissions.permission_level ENUM('viewer','editor')
+// before any row is written.
+func validateResourcePermissions(perms []domain.ResourcePermission) error {
+	for _, p := range perms {
+		switch p.PermissionLevel {
+		case domain.PermLevelViewer, domain.PermLevelEditor:
+		default:
+			return domain.ErrInvalidPermissionLevel
+		}
+	}
+	return nil
+}
+
+// setGroupResourcePermissions replaces a group's resource-permission rows. It
+// must run inside the caller's transaction: the delete-then-upsert rewrite
+// would otherwise drop the stored permissions when an upsert fails.
+func (r *Repository) setGroupResourcePermissions(ctx context.Context, qtx *sqlc.Queries, groupID int64, perms []domain.ResourcePermission) error {
+	if err := qtx.DeleteGroupResourcePermissions(ctx, groupID); err != nil {
 		return err
 	}
 	for _, p := range perms {
-		if err := r.queries.UpsertGroupResourcePermission(ctx, sqlc.UpsertGroupResourcePermissionParams{
+		if err := qtx.UpsertGroupResourcePermission(ctx, sqlc.UpsertGroupResourcePermissionParams{
 			GroupID:         groupID,
 			ResourceKey:     p.ResourceKey,
 			PermissionLevel: sqlc.UserGroupResourcePermissionsPermissionLevel(p.PermissionLevel),
@@ -1361,8 +1414,20 @@ func (r *Repository) resourcePermissionsForGroups(ctx context.Context, groupIDs 
 	return result
 }
 
+// UpdateGroup writes the group row and its rewritten resource permissions in
+// one transaction so a failed permission write cannot leave the row updated
+// with the previous permissions silently deleted.
 func (r *Repository) UpdateGroup(ctx context.Context, ownerID, groupID int64, input domain.UpdateGroupInput) error {
-	res, err := r.queries.UpdateGroup(ctx, sqlc.UpdateGroupParams{
+	if err := validateResourcePermissions(input.ResourcePermissions); err != nil {
+		return err
+	}
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	qtx := r.queries.WithTx(tx)
+
+	res, err := qtx.UpdateGroup(ctx, sqlc.UpdateGroupParams{
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
@@ -1370,18 +1435,25 @@ func (r *Repository) UpdateGroup(ctx context.Context, ownerID, groupID int64, in
 		OwnerID:     ownerID,
 	})
 	if err != nil {
+		_ = tx.Rollback()
 		return err
 	}
 	affected, err := res.RowsAffected()
 	if err != nil {
+		_ = tx.Rollback()
 		return err
 	}
 	// A foreign or stale group id must never fall through to the unscoped
 	// resource-permission rewrite below.
 	if affected == 0 {
+		_ = tx.Rollback()
 		return domain.ErrGroupNotFound
 	}
-	return r.setGroupResourcePermissions(ctx, groupID, input.ResourcePermissions)
+	if err := r.setGroupResourcePermissions(ctx, qtx, groupID, input.ResourcePermissions); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }
 
 func (r *Repository) DeleteGroup(ctx context.Context, ownerID, groupID int64) error {
@@ -1401,13 +1473,14 @@ func (r *Repository) DeleteGroup(ctx context.Context, ownerID, groupID int64) er
 	return r.queries.DeleteGroupResourcePermissions(ctx, groupID)
 }
 
-func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, addedBy int64, userIDs []int64) error {
+func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, businessID, addedBy int64, userIDs []int64) error {
 	for _, uid := range userIDs {
 		if err := r.queries.AddGroupMember(ctx, sqlc.AddGroupMemberParams{
-			GroupID: groupID,
-			UserID:  uid,
-			OwnerID: ownerID,
-			AddedBy: sql.NullInt64{Int64: addedBy, Valid: addedBy > 0},
+			GroupID:    groupID,
+			UserID:     uid,
+			OwnerID:    ownerID,
+			BusinessID: businessID,
+			AddedBy:    sql.NullInt64{Int64: addedBy, Valid: addedBy > 0},
 		}); err != nil {
 			return err
 		}

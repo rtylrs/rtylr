@@ -11,7 +11,11 @@ ORDER BY created_at DESC, id DESC
 LIMIT ?;
 
 -- name: MarkNotificationRead :exec
-UPDATE hub_notifications SET is_read = TRUE WHERE id = ? AND (business_id = ? OR 1=1) AND user_id = ?;
+UPDATE hub_notifications
+SET is_read = TRUE
+WHERE id = ? AND business_id = ? AND user_id = ?;
 
 -- name: MarkAllNotificationsRead :exec
-UPDATE hub_notifications SET is_read = TRUE WHERE user_id = ? AND is_read = FALSE;
+UPDATE hub_notifications
+SET is_read = TRUE
+WHERE business_id = ? AND user_id = ? AND is_read = FALSE;

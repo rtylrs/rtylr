@@ -21,6 +21,14 @@ var (
 	ErrLocationNotFound         = errors.New("location not found")
 	ErrTableNotFound            = errors.New("table not found")
 	ErrOrderCannotBeTransferred = errors.New("order cannot be transferred in current status")
+	ErrOrderCannotBeSplit       = errors.New("order cannot be split in current status")
+	ErrItemNotVoidable          = errors.New("order item cannot be voided in current status")
+	ErrInvalidOrderStatus       = errors.New("invalid order status")
+	ErrInvalidItemStatus        = errors.New("invalid order item status")
+	// ErrOrderStatusRequiresWorkflow is returned when a caller tries to set a
+	// status that has companion writes and must go through its own flow
+	// (paid -> payment, refunded -> refund, voided -> void).
+	ErrOrderStatusRequiresWorkflow = errors.New("order status must be changed through its dedicated flow")
 )
 
 // ─── Location ────────────────────────────────────────────────────────────────
@@ -152,6 +160,33 @@ const (
 	OrderStatusHeld      OrderStatus = "held"
 )
 
+// IsOrderStatus reports whether status is one of the values the pos_orders
+// status column accepts.
+func IsOrderStatus(status OrderStatus) bool {
+	switch status {
+	case OrderStatusPending, OrderStatusConfirmed, OrderStatusPreparing,
+		OrderStatusReady, OrderStatusServed, OrderStatusPaid,
+		OrderStatusCancelled, OrderStatusRefunded, OrderStatusVoided,
+		OrderStatusHeld:
+		return true
+	default:
+		return false
+	}
+}
+
+// CanSetOrderStatusDirectly reports whether the generic status endpoint may
+// write status. paid, refunded, and voided all have companion writes
+// (payment row and payment_status, refund row, void trail) and must be set
+// through their dedicated flows.
+func CanSetOrderStatusDirectly(status OrderStatus) bool {
+	switch status {
+	case OrderStatusPaid, OrderStatusRefunded, OrderStatusVoided:
+		return false
+	default:
+		return IsOrderStatus(status)
+	}
+}
+
 type PaymentMethod string
 
 const (
@@ -230,6 +265,18 @@ const (
 	ItemStatusServed    ItemStatus = "served"
 	ItemStatusCancelled ItemStatus = "cancelled"
 )
+
+// IsItemStatus reports whether status is one of the values the
+// pos_order_items status column accepts.
+func IsItemStatus(status ItemStatus) bool {
+	switch status {
+	case ItemStatusPending, ItemStatusPreparing, ItemStatusReady,
+		ItemStatusServed, ItemStatusCancelled:
+		return true
+	default:
+		return false
+	}
+}
 
 type OrderItem struct {
 	ID             int64

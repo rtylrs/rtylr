@@ -370,6 +370,9 @@ type TaskInput struct {
 	Title         string
 	Status        string
 	DueAt         *time.Time
+	// DueAtSet reports whether the request supplied due_at at all. A partial
+	// update that omits it must keep the stored due date instead of clearing it.
+	DueAtSet bool
 }
 
 type Shortlist struct {

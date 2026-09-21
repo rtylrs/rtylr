@@ -41,10 +41,14 @@ func (r *RecurringInvoice) FromRow(row *sql.Rows) error {
 	return nil
 }
 
+// RecurringInvoiceInput carries the writable recurring invoice fields. The
+// pointer fields keep the contract's optional fields distinguishable from a
+// zero value: nil means the caller did not send the field, so create applies
+// its default and update leaves the stored value unchanged.
 type RecurringInvoiceInput struct {
-	TemplateInvoiceID int64  `json:"template_invoice_id"`
-	Frequency         string `json:"frequency"`
-	NextInvoiceDate   string `json:"next_invoice_date"`
-	EndDate           string `json:"end_date"`
-	IsActive          bool   `json:"is_active"`
+	TemplateInvoiceID *int64  `json:"template_invoice_id,omitempty"`
+	Frequency         string  `json:"frequency"`
+	NextInvoiceDate   string  `json:"next_invoice_date"`
+	EndDate           *string `json:"end_date,omitempty"`
+	IsActive          *bool   `json:"is_active,omitempty"`
 }

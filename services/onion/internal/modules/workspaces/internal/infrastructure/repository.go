@@ -1088,8 +1088,13 @@ func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID, busine
 	if err == nil && existing > 0 {
 		return existing, nil
 	}
+	// Only a genuine miss may fall through to the INSERT. flow_workspaces has
+	// no unique key on owner_id/business_id/is_personal, so treating a
+	// transient lookup failure (pool exhaustion, statement timeout) as "no
+	// workspace yet" inserts a second 'Personal' workspace for the same owner.
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Warn("CreatePersonalWorkspace lookup failed", logger.Error(err))
+		logger.Ctx(ctx).Error("CreatePersonalWorkspace lookup failed", logger.Error(err))
+		return 0, err
 	}
 
 	res, err := r.queries.CreatePersonalWorkspace(ctx, sqlc.CreatePersonalWorkspaceParams{
@@ -1112,7 +1117,10 @@ func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID, busine
 		UserID:      userID,
 		Role:        sqlc.NullFlowWorkspaceMembersRole{FlowWorkspaceMembersRole: sqlc.FlowWorkspaceMembersRoleAdmin, Valid: true},
 	}); addErr != nil {
-		logger.Ctx(ctx).Warn("CreatePersonalWorkspace add member failed", logger.Error(addErr))
+		// A workspace whose owner is not a member is not usable; reporting the
+		// insert as a success left the caller with a half-created workspace.
+		logger.Ctx(ctx).Error("CreatePersonalWorkspace add member failed", logger.Error(addErr))
+		return 0, addErr
 	}
 	return id, nil
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -78,13 +79,22 @@ func (h *GetTicketHandler) Serve(ctx context.Context, req *GetTicketRequest) (Ge
 	}
 	ticket, err := h.Service.GetByID(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
-		return GetTicketResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get support ticket")
+		return GetTicketResponse{}, supportTicketLookupError(err)
 	}
 	msgs, err := h.Service.ListMessages(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
 		return GetTicketResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list ticket messages")
 	}
 	return GetTicketResponse{Ticket: ticket, Messages: msgs}, nil
+}
+
+// supportTicketLookupError maps a ticket lookup failure to the HTTP error the
+// client should see: a missing ticket is a 404, not a server failure.
+func supportTicketLookupError(err error) error {
+	if errors.Is(err, domain.ErrTicketNotFound) {
+		return onekiterrors.New(http.StatusNotFound, "Support ticket not found")
+	}
+	return onekiterrors.New(http.StatusInternalServerError, "Failed to get support ticket")
 }
 
 // -- CREATE ------------------------------------------------------------------

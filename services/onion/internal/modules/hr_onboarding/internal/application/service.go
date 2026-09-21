@@ -26,6 +26,7 @@ type repository interface {
 	ListTemplateItems(ctx context.Context, businessID, templateID int64) ([]domain.ChecklistItemRecord, error)
 	TriggerChecklist(ctx context.Context, businessID, employeeID, templateID int64, triggerDate time.Time) (*domain.EmployeeChecklistRecord, error)
 	GetEmployeeChecklist(ctx context.Context, businessID, employeeID, checklistID int64) (*domain.EmployeeChecklistRecord, error)
+	GetLatestEmployeeChecklist(ctx context.Context, businessID, employeeID int64) (*domain.EmployeeChecklistRecord, error)
 	ListEmployeeChecklists(ctx context.Context, businessID, employeeID int64, limit, offset int32) ([]domain.EmployeeChecklistRecord, int64, error)
 	UpdateEmployeeChecklistStatus(ctx context.Context, businessID, checklistID int64, status string) error
 	CreateEmployeeChecklistItem(ctx context.Context, businessID, employeeChecklistID, checklistItemID, assignedToEmployeeID int64, dueDate string) error
@@ -151,6 +152,18 @@ func (s *Service) GetEmployeeChecklist(ctx context.Context, businessID, employee
 	return cacher.Of[*domain.EmployeeChecklistRecord]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*domain.EmployeeChecklistRecord, error) {
 			return s.repo.GetEmployeeChecklist(ctx, businessID, employeeID, checklistID)
+		},
+		cacher.WithExpiry(ctx, hrOnboardingTTL),
+	)
+}
+
+// GetLatestEmployeeChecklist resolves the employee's most recent checklist for
+// routes that only carry an employee id (GET /employees/{employee_id}).
+func (s *Service) GetLatestEmployeeChecklist(ctx context.Context, businessID, employeeID int64) (*domain.EmployeeChecklistRecord, error) {
+	key := cacheKeys.Scoped(hrOnboardingScope, businessID, fmt.Sprintf("cklst|e=%d|latest", employeeID))
+	return cacher.Of[*domain.EmployeeChecklistRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.EmployeeChecklistRecord, error) {
+			return s.repo.GetLatestEmployeeChecklist(ctx, businessID, employeeID)
 		},
 		cacher.WithExpiry(ctx, hrOnboardingTTL),
 	)

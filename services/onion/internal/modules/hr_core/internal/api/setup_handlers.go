@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -97,6 +98,9 @@ func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupSt
 
 	step, err := h.Service.CompleteSetupStep(ctx, businessID, stepKey)
 	if err != nil {
+		if errors.Is(err, domain.ErrSetupStepNotFound) {
+			return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusNotFound, "Setup step not found")
+		}
 		logger.Ctx(ctx).Error("failed to complete setup step", logger.Any("business_id", businessID), logger.String("step_key", stepKey), logger.Error(err))
 		return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to complete setup step")
 	}

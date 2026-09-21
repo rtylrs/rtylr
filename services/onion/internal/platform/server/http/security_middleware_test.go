@@ -29,6 +29,22 @@ func TestIsMaliciousPath(t *testing.T) {
 		{"/proc/self", true},
 		{"/wp-admin", true}, // /wp-admin IS in the pattern list
 
+		// Patterns declared with a trailing slash must still match; before the
+		// normalisation these entries were dead because a path segment can
+		// never contain '/'.
+		{"/.git/config", true},
+		{"/.git", true},
+		{"/debug/pprof", true},
+		{"/log/app.log", true},
+		{"/lock", true},
+		{"/api/v1/probe", true},
+
+		// But the allow-listed routes they would otherwise shadow stay reachable.
+		{"/.well-known/rtylr.json", false},
+
+		// A trailing-slash pattern must not become a substring match.
+		{"/logger", false},
+
 		// Empty path / root — never malicious.
 		{"/", false},
 		{"", false},
@@ -117,6 +133,44 @@ func TestHasSuspiciousParams(t *testing.T) {
 		if got := hasSuspiciousParams(r); got != tc.want {
 			t.Errorf("hasSuspiciousParams(%q) = %v, want %v", tc.query, got, tc.want)
 		}
+	}
+}
+
+func TestSecurityMiddlewareAllowsCDNTransformParams(t *testing.T) {
+	cases := []string{
+		"/images/4c85c397-1234-9d1ef64f5e8b?sharpen=50",
+		"/images/4c85c397-1234-9d1ef64f5e8b?threshold=128",
+		"/images/4c85c397-1234-9d1ef64f5e8b?aspect-ratio=4:3",
+		"/images/4c85c397-1234-9d1ef64f5e8b?sharpen=50&aspect-ratio=4:3&width=800",
+	}
+	for _, target := range cases {
+		nextCalled := false
+		handler := SecurityMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			nextCalled = true
+			w.WriteHeader(http.StatusOK)
+		}))
+
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, target, http.NoBody))
+
+		if rec.Code != http.StatusOK || !nextCalled {
+			t.Errorf("GET %s: status = %d, nextCalled = %t; CDN transform request must reach the handler", target, rec.Code, nextCalled)
+		}
+	}
+}
+
+func TestSecurityMiddlewareStillBlocksSuspiciousParamsOutsideAllowList(t *testing.T) {
+	nextCalled := false
+	handler := SecurityMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		nextCalled = true
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/hr/equipment/v1/assets?cmd=whoami", http.NoBody))
+
+	if rec.Code != http.StatusBadRequest || nextCalled {
+		t.Errorf("status = %d, nextCalled = %t; suspicious params must still be rejected outside allow-listed routes", rec.Code, nextCalled)
 	}
 }
 

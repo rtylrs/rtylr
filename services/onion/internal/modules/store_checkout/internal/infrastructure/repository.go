@@ -162,15 +162,17 @@ func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) erro
 		logger.Ctx(ctx).Error("Failed to begin checkout completion transaction", logger.Error(err))
 		return err
 	}
+	// Unconditional: the early returns below are successful no-ops, and an
+	// open transaction would otherwise hold its pooled connection until the
+	// request context is cancelled. Rollback after Commit is a no-op.
 	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
+		_ = tx.Rollback()
 	}()
+	qtx := r.queries.WithTx(tx)
 
 	var customerEmail sql.NullString
 	var totalString string
-	checkout, err := r.queries.WithTx(tx).GetCheckoutForComplete(ctx, sqlc.GetCheckoutForCompleteParams{
+	checkout, err := qtx.GetCheckoutForComplete(ctx, sqlc.GetCheckoutForCompleteParams{
 		BusinessID: businessID,
 		ID:         id,
 	})
@@ -188,6 +190,25 @@ func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) erro
 	}
 	customerEmail = checkout.CustomerEmail
 	totalString = checkout.Total
+
+	// Claim the completion before the CRM side effect: the guarded UPDATE is
+	// the only thing that decides which concurrent request owns the
+	// completion, so a request that affects 0 rows (another transaction
+	// completed the checkout first) must not touch the customer's totals.
+	result, err := qtx.CompleteCheckout(ctx, sqlc.CompleteCheckoutParams{BusinessID: businessID, ID: id})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to complete checkout", logger.Error(err))
+		return err
+	}
+	claimed, err := result.RowsAffected()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read completed checkout rows", logger.Error(err))
+		return err
+	}
+	if claimed == 0 {
+		return nil
+	}
+
 	total, parseErr := strconv.ParseFloat(totalString, 64)
 	if parseErr != nil {
 		logger.Ctx(ctx).Warn("failed to parse checkout total for CRM sync",
@@ -205,11 +226,6 @@ func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) erro
 		}
 	}
 
-	err = r.queries.WithTx(tx).CompleteCheckout(ctx, sqlc.CompleteCheckoutParams{BusinessID: businessID, ID: id})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to complete checkout", logger.Error(err))
-		return err
-	}
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit checkout completion transaction", logger.Error(err))
 		return err

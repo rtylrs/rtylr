@@ -118,6 +118,11 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 		return err
 	}
 
+	// The visit write feeds the dashboard counters, so the cache must be
+	// busted on every path out of this function — including the award
+	// block's early return when the loyalty config lookup fails.
+	defer s.invalidateDashboardCache(ctx, input.BusinessID)
+
 	s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.CustomerID,
 		"visit", fmt.Sprintf("Visit recorded (spend: %.2f)", input.Amount),
 		map[string]any{"amount": input.Amount})
@@ -145,8 +150,6 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 			}
 		}
 	}
-
-	s.invalidateDashboardCache(ctx, input.BusinessID)
 
 	return nil
 }

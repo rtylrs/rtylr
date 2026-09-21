@@ -88,24 +88,41 @@ func issueWebSocketTicketAt(ctx context.Context, user *AuthUser, issuedAt time.T
 	return ticket, nil
 }
 
+// storeWebSocketTicket stores a ticket for later consumption. Redis is the
+// production source of truth with cross-instance atomic GETDEL; the
+// process-local map is only a fallback for deployments and tests without Redis.
 func storeWebSocketTicket(ctx context.Context, ticket string, record websocketTicketRecord) {
 	hash := hashWebSocketTicket(ticket)
 
-	websocketTickets.Lock()
-	websocketTickets.entries[hash] = record
-	websocketTickets.Unlock()
+	if !cacher.RedisAvailable() {
+		storeLocalWebSocketTicket(hash, record)
+		return
+	}
 
 	encoded, err := json.Marshal(record)
 	if err != nil {
 		return
 	}
 
-	if cacher.RedisAvailable() {
-		remaining := time.Until(time.Unix(0, record.ExpiresAt))
-		if remaining > 0 {
-			cacher.GetRedisCache().Put(ctx, websocketTicketKey(hash), encoded, remaining)
+	remaining := time.Until(time.Unix(0, record.ExpiresAt))
+	if remaining > 0 {
+		cacher.GetRedisCache().Put(ctx, websocketTicketKey(hash), encoded, remaining)
+	}
+}
+
+// storeLocalWebSocketTicket records a ticket in the fallback map and drops
+// already-expired entries, so an abandoned ticket cannot accumulate in the map
+// for the lifetime of the process.
+func storeLocalWebSocketTicket(hash string, record websocketTicketRecord) {
+	now := time.Now().UnixNano()
+	websocketTickets.Lock()
+	for key, existing := range websocketTickets.entries {
+		if existing.ExpiresAt <= now {
+			delete(websocketTickets.entries, key)
 		}
 	}
+	websocketTickets.entries[hash] = record
+	websocketTickets.Unlock()
 }
 
 // ConsumeWebSocketTicket atomically consumes a ticket and returns its user.

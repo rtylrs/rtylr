@@ -85,11 +85,11 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		logger.Ctx(ctx).Error("Failed to begin appointment transaction", logger.Error(err))
 		return 0, err
 	}
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
-	}()
+	// Rollback after Commit returns ErrTxDone and is a no-op, so it is safe to
+	// defer unconditionally: every early return must release the transaction,
+	// or the tenant FOR UPDATE lock taken below is held until the request
+	// context is cancelled.
+	defer func() { _ = tx.Rollback() }()
 	qtx := r.queries.WithTx(tx)
 	status := normalizeAppointmentStatus(input.Status)
 	if status == "" {
@@ -164,11 +164,10 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		logger.Ctx(ctx).Error("Failed to begin appointment update transaction", logger.Error(err))
 		return err
 	}
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
-	}()
+	// Rollback after Commit returns ErrTxDone and is a no-op, so it is safe to
+	// defer unconditionally: sentinel returns (invalid status, missing row)
+	// must not abandon the transaction holding the tenant FOR UPDATE lock.
+	defer func() { _ = tx.Rollback() }()
 	qtx := r.queries.WithTx(tx)
 	if _, err = qtx.LockBusinessForBooking(ctx, businessID); err != nil {
 		return err
@@ -206,7 +205,11 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return err
 	}
 
-	result, err := qtx.UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
+	// Existence is already proven by the locked status read above, so a zero
+	// RowsAffected (no column actually changed) must not be treated as a
+	// missing appointment: the driver does not use clientFoundRows, and
+	// updated_at is only bumped by MySQL when another column changes.
+	if _, err = qtx.UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		ResourceID:    sql.NullInt64{Int64: input.ResourceID, Valid: input.ResourceID != 0},
 		StaffID:       sql.NullInt64{Int64: input.StaffID, Valid: input.StaffID != 0},
@@ -217,17 +220,9 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		Status:     sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(status), Valid: true},
 		Notes:      sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		BusinessID: businessID, ID: id,
-	})
-	if err != nil {
+	}); err != nil {
 		logger.Ctx(ctx).Error("Failed to update appointment", logger.Error(err))
 		return err
-	}
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rows == 0 {
-		return sql.ErrNoRows
 	}
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit appointment update transaction", logger.Error(err))

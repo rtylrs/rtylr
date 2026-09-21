@@ -244,8 +244,23 @@ func (r *Repository) listConditionsByRuleIDs(ctx context.Context, ruleIDs []int6
 	return condByRule, nil
 }
 
+// CreateRule inserts the rule and its conditions atomically. A committed rule
+// with zero conditions matches every subject, so a partial write must never
+// survive a failed condition insert.
 func (r *Repository) CreateRule(ctx context.Context, rule domain.Rule) (int64, error) {
-	res, err := r.queries.CreateRule(ctx, sqlc.CreateRuleParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+	qtx := r.queries.WithTx(tx)
+
+	res, err := qtx.CreateRule(ctx, sqlc.CreateRuleParams{
 		FeatureKey:        rule.FeatureKey,
 		Priority:          rule.Priority,
 		Description:       rule.Description,
@@ -254,18 +269,21 @@ func (r *Repository) CreateRule(ctx context.Context, rule domain.Rule) (int64, e
 		Enabled:           rule.Enabled,
 	})
 	if err != nil {
+		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to create feature rule", logger.Error(err))
 		return 0, err
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
+		_ = tx.Rollback()
 		return 0, err
 	}
-	if err := insertRuleConditions(ctx, r.pool, id, rule.Conditions); err != nil {
+	if err := insertRuleConditions(ctx, tx, id, rule.Conditions); err != nil {
+		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to create rule conditions", logger.Error(err))
 		return 0, err
 	}
-	return id, nil
+	return id, tx.Commit()
 }
 
 // ReplaceRuleConditions atomically swaps a rule's conditions for a new set.

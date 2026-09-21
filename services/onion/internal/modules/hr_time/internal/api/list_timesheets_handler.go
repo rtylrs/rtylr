@@ -18,9 +18,10 @@ func ListTimesheetsRoutes() []string { return []string{"/hr/timesheets"} }
 type ListTimesheetsHandler struct{ Service *application.Service }
 
 type ListTimesheetsRequest struct {
-	EmployeeID int64 `json:"employee_id"`
-	Limit      int32 `json:"limit"`
-	Offset     int32 `json:"offset"`
+	EmployeeID *int64  `json:"employee_id"`
+	Status     *string `json:"status"`
+	Limit      int32   `json:"limit"`
+	Offset     int32   `json:"offset"`
 }
 
 type ListTimesheetsResponse struct {
@@ -50,6 +51,7 @@ func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRe
 
 	timesheets, total, err := h.Service.ListTimesheets(ctx, businessID, domain.ListTimesheetsParams{
 		EmployeeID: req.EmployeeID,
+		Status:     req.Status,
 		Limit:      req.Limit,
 		Offset:     req.Offset,
 	})

@@ -131,13 +131,24 @@ func (a *AuthAPI) GoogleAuth(ctx context.Context, req *commonauthv1.GoogleAuthRe
 		return nil, onekithttp.NewError(http.StatusBadRequest, "code is required")
 	}
 
-	var signupIP netip.Addr
+	// The register flow records the signup IP and device for abuse review;
+	// Google signups are handed the same device context the login path reads,
+	// instead of a zero Addr that stringifies to the literal "invalid IP".
+	device := authPkg.DeviceCtx(ctx)
+	signupIP, ipErr := netip.ParseAddr(device.IP)
+	if ipErr != nil {
+		logger.Ctx(ctx).Warn("google auth: could not parse client IP",
+			logger.String("ip", device.IP),
+			logger.Error(ipErr),
+		)
+	}
+
 	businessName := ""
 	if req.BusinessName != nil {
 		businessName = strings.TrimSpace(*req.BusinessName)
 	}
 
-	result, err := a.UserService.GoogleAuth(ctx, req.GetCode(), businessName, signupIP, "")
+	result, err := a.UserService.GoogleAuth(ctx, req.GetCode(), businessName, signupIP, device.DeviceInfo)
 	if err != nil {
 		switch {
 		case errors.Is(err, application.ErrGoogleOAuthNotConfigured):
@@ -266,6 +277,11 @@ func authErrorFromError(err error, fallbackMessage string) error {
 	lowerErr := strings.ToLower(errStr)
 
 	switch {
+	case errors.Is(err, application.ErrBusinessNameTaken):
+		// A taken business name is a user-correctable conflict; without this it
+		// fell through to the 500 default because the message does not contain
+		// "duplicate" or "already exists".
+		return onekithttp.NewError(http.StatusConflict, errStr)
 	case errStr == "sql: no rows in result set" || strings.Contains(lowerErr, "not found"):
 		return onekithttp.NewError(http.StatusNotFound, errStr)
 	case strings.Contains(lowerErr, "duplicate") || strings.Contains(lowerErr, "already exists"):

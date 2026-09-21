@@ -85,8 +85,16 @@ type ListTimeEntriesParams struct {
 	Offset     int32
 }
 
+// ListTimesheetsParams selects timesheets for the approvals screen. Both
+// filters are optional and combine with AND, matching the contract's
+// hr.time_entry.v1 ListTimesheetsRequest ("absent to include all
+// employees/all statuses"). They are pointers so an absent filter is not
+// confused with a zero one: the previous int64 employee_id kept the zero
+// sentinel and made absent mean employee 0, so a status-only query always
+// came back empty.
 type ListTimesheetsParams struct {
-	EmployeeID int64
+	EmployeeID *int64
+	Status     *string
 	Limit      int32
 	Offset     int32
 }

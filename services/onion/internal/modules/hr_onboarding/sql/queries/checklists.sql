@@ -7,6 +7,13 @@ SELECT id, owner_id, business_id, employee_id, template_id, status, triggered_at
 FROM hr_onboarding_employee_checklists
 WHERE business_id = ? AND employee_id = ? AND id = ?;
 
+-- name: GetLatestEmployeeChecklist :one
+SELECT id, owner_id, business_id, employee_id, template_id, status, triggered_at, created_at, updated_at
+FROM hr_onboarding_employee_checklists
+WHERE business_id = ? AND employee_id = ?
+ORDER BY triggered_at DESC, id DESC
+LIMIT 1;
+
 -- name: ListEmployeeChecklists :many
 SELECT id, owner_id, business_id, employee_id, template_id, status, triggered_at, created_at, updated_at
 FROM hr_onboarding_employee_checklists

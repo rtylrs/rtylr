@@ -187,6 +187,104 @@ func TestFlushWaitsForPendingBetterStackLogs(t *testing.T) {
 	}
 }
 
+// Fatal must deliver the record it just queued to Better Stack before exiting;
+// os.Exit skips the deferred Flush in runServer.
+func TestFatalFlushesBetterStackBeforeExiting(t *testing.T) {
+	originalHandler := activeBetterStackHandler
+	originalDefault := slog.Default()
+	originalExit := exitProcess
+	t.Cleanup(func() {
+		activeBetterStackHandler = originalHandler
+		slog.SetDefault(originalDefault)
+		exitProcess = originalExit
+	})
+
+	started := make(chan struct{})
+	release := make(chan struct{})
+	delivered := make(chan struct{})
+	h := &betterStackHandler{
+		level:    slog.LevelWarn,
+		delivery: &betterStackDelivery{},
+		send: func(context.Context, string, string, time.Duration, []byte) error {
+			close(started)
+			<-release
+			close(delivered)
+			return nil
+		},
+	}
+	activeBetterStackHandler = h
+	slog.SetDefault(slog.New(&multiHandler{handlers: []slog.Handler{h}}))
+
+	exitCode := make(chan int, 1)
+	exitProcess = func(code int) { exitCode <- code }
+
+	go Global().Fatal("boot failed", String("reason", "missing env"))
+
+	select {
+	case <-started:
+	case <-time.After(time.Second):
+		t.Fatal("fatal record was never sent to Better Stack")
+	}
+
+	select {
+	case code := <-exitCode:
+		t.Fatalf("Fatal exited with code %d before the pending Better Stack POST finished", code)
+	case <-time.After(10 * time.Millisecond):
+	}
+
+	close(release)
+	select {
+	case <-delivered:
+	case <-time.After(time.Second):
+		t.Fatal("Better Stack POST did not finish")
+	}
+	select {
+	case code := <-exitCode:
+		if code != 1 {
+			t.Fatalf("Fatal exit code = %d, want 1", code)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Fatal did not exit after flushing")
+	}
+}
+
+func TestBetterStackFlushIsReusable(t *testing.T) {
+	delivered := make(chan struct{}, 2)
+	h := &betterStackHandler{
+		level:    slog.LevelWarn,
+		delivery: &betterStackDelivery{},
+		send: func(context.Context, string, string, time.Duration, []byte) error {
+			delivered <- struct{}{}
+			return nil
+		},
+	}
+	record := func(msg string) slog.Record {
+		return slog.NewRecord(time.Now(), slog.LevelWarn, msg, 0)
+	}
+	assertDelivered := func(stage string) {
+		t.Helper()
+		select {
+		case <-delivered:
+		case <-time.After(time.Second):
+			t.Fatalf("%s: record was dropped because Flush disabled delivery permanently", stage)
+		}
+	}
+
+	// runServer()'s deferred Flush runs on every crash-restart cycle; the next
+	// cycle's warn/error records must still reach Better Stack.
+	h.Flush()
+	if err := h.Handle(context.Background(), record("after first flush")); err != nil {
+		t.Fatalf("Handle: %v", err)
+	}
+	assertDelivered("after first flush")
+
+	h.Flush()
+	if err := h.Handle(context.Background(), record("after second flush")); err != nil {
+		t.Fatalf("Handle: %v", err)
+	}
+	assertDelivered("after second flush")
+}
+
 func TestBetterStackHandlerPreservesGroupedAttributes(t *testing.T) {
 	h := &betterStackHandler{
 		level:    slog.LevelWarn,

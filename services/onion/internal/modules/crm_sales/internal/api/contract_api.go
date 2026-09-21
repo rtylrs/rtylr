@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
@@ -144,33 +145,20 @@ func (a *ContractAPI) UpdateContract(ctx context.Context, req *crmsalesv1.Update
 	if err != nil {
 		return nil, err
 	}
-	body := req.GetBody()
-	domainReq := domain.UpdateContractRequest{
-		Plan:         body.GetPlan(),
-		MRR:          money.Amount(0),
-		Seats:        int(body.GetSeats()),
-		SignedByName: body.GetSignedByName(),
-		Notes:        body.GetNotes(),
-	}
-	// Absent mrr keeps the stored value; present mrr must parse.
-	if body.GetMrr() != "" {
-		mrr, parseErr := money.FromString(body.GetMrr())
-		if parseErr != nil {
-			return nil, onekiterrors.New(http.StatusBadRequest, "mrr must be a decimal number")
+	// The generated body exposes plan/mrr/seats/signed_by_name/notes as plain
+	// values, so an omitted field arrives as its zero value. Merge onto the
+	// stored contract instead of writing zero values over fields the caller
+	// did not send, as the contract documents.
+	stored, err := a.Service.GetContract(ctx, req.GetId(), businessID)
+	if err != nil {
+		if errors.Is(err, domain.ErrContractNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Contract not found")
 		}
-		if mrr < 0 {
-			return nil, onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
-		}
-		domainReq.MRR = mrr
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update contract")
 	}
-	if body.GetSignedAt() != "" {
-		v := body.GetSignedAt()
-		domainReq.SignedAt = &v
-	} else if body != nil {
-		// Explicitly empty string clears the signature only when the field was
-		// sent; presence detection is not available on the generated shape, so
-		// absent and empty both mean "leave unchanged" for safety.
-		domainReq.SignedAt = nil
+	domainReq, err := contractUpdateFromBody(req.GetBody(), stored)
+	if err != nil {
+		return nil, err
 	}
 	c, err := a.Service.UpdateContract(ctx, req.GetId(), businessID, domainReq)
 	if err != nil {
@@ -180,4 +168,62 @@ func (a *ContractAPI) UpdateContract(ctx context.Context, req *crmsalesv1.Update
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update contract")
 	}
 	return &crmsalesv1.UpdateContractResponse{Contract: contractToGen(c)}, nil
+}
+
+// contractUpdateFromBody merges an amend body onto the stored contract,
+// mirroring the partial-update semantics the generated contract documents.
+// Absent fields are indistinguishable from their zero value on this generated
+// shape, so for those a zero value keeps the stored one: a contract always has
+// a non-empty plan and at least one seat, and mrr=0 is expressed as "0"
+// (an empty decimal string is not a valid amount). signed_at is optional on
+// the wire: nil keeps the stored signature, an empty string clears it, and a
+// value replaces it.
+func contractUpdateFromBody(body *crmsalesv1.UpdateContractBody, stored domain.Contract) (domain.UpdateContractRequest, error) {
+	domainReq := domain.UpdateContractRequest{
+		Plan:         stored.Plan,
+		MRR:          stored.MRR,
+		Seats:        stored.Seats,
+		SignedAt:     stored.SignedAt,
+		SignedByName: stored.SignedByName,
+		ClosedBy:     stored.ClosedBy,
+		Notes:        stored.Notes,
+	}
+	if body == nil {
+		return domainReq, nil
+	}
+	if plan := body.GetPlan(); strings.TrimSpace(plan) != "" {
+		domainReq.Plan = plan
+	}
+	if body.GetMrr() != "" {
+		mrr, parseErr := money.FromString(body.GetMrr())
+		if parseErr != nil {
+			return domain.UpdateContractRequest{}, onekiterrors.New(http.StatusBadRequest, "mrr must be a decimal number")
+		}
+		if mrr < 0 {
+			return domain.UpdateContractRequest{}, onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
+		}
+		domainReq.MRR = mrr
+	}
+	if seats := int(body.GetSeats()); seats != 0 {
+		// The repository stores seats as INT; larger values wrap negative (#836).
+		if seats < 0 {
+			return domain.UpdateContractRequest{}, onekiterrors.New(http.StatusBadRequest, "seats must be between 0 and 2147483647")
+		}
+		domainReq.Seats = seats
+	}
+	if body.SignedAt != nil {
+		v := *body.SignedAt
+		if v == "" {
+			domainReq.SignedAt = nil
+		} else {
+			domainReq.SignedAt = &v
+		}
+	}
+	if body.GetSignedByName() != "" {
+		domainReq.SignedByName = body.GetSignedByName()
+	}
+	if body.GetNotes() != "" {
+		domainReq.Notes = body.GetNotes()
+	}
+	return domainReq, nil
 }

@@ -148,6 +148,9 @@ func (a *SplitAPI) SplitOrder(ctx context.Context, req *posorderssplitv1.SplitOr
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")
 		}
+		if errors.Is(err, domain.ErrOrderCannotBeSplit) {
+			return nil, orderAPIStatusError(http.StatusConflict, "Order cannot be split in its current status")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to split order")
 	}
 
@@ -293,7 +296,14 @@ func (a *ItemAPI) UpdateOrderItemStatus(ctx context.Context, req *posordersitems
 	}
 
 	if err := a.Service.UpdateOrderItemStatus(ctx, businessID, orderID, itemID, domain.ItemStatus(status)); err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
+		switch {
+		case errors.Is(err, domain.ErrOrderNotFound):
+			return nil, orderAPIStatusError(http.StatusNotFound, "Order item not found")
+		case errors.Is(err, domain.ErrInvalidItemStatus):
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Invalid item status")
+		default:
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
+		}
 	}
 
 	return &posordersitemsv1.UpdateOrderItemStatusResponse{Message: "Item status updated"}, nil
@@ -318,6 +328,9 @@ func (a *ItemAPI) VoidOrderItem(ctx context.Context, req *posordersitemsv1.VoidO
 	if err := a.Service.VoidOrderItem(ctx, businessID, orderID, itemID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return nil, orderAPIStatusError(http.StatusNotFound, "Order item not found")
+		}
+		if errors.Is(err, domain.ErrItemNotVoidable) {
+			return nil, orderAPIStatusError(http.StatusConflict, "Order item cannot be voided in its current status")
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to void order item")
 	}

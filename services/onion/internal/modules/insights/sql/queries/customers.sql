@@ -23,7 +23,7 @@ WHERE c.business_id = ?
   AND EXISTS (SELECT 1 FROM pos_orders o WHERE o.business_id = c.business_id AND o.customer_id = c.id AND o.payment_status = 'paid')
   AND NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.business_id = c.business_id AND o2.customer_id = c.id AND o2.payment_status = 'paid' AND o2.created_at >= ?);
 
--- cross-schema read from crm and pos — bucket customer spend over the trailing year.
+-- cross-schema read from crm and pos — bucket customer lifetime spend.
 -- name: GetLTVDistribution :many
 WITH buckets AS (
   SELECT 0 AS bucket_order, '0-100' AS label, 0 AS lower_minor_units, 10000 AS upper_minor_units
@@ -40,7 +40,6 @@ customer_spend AS (
     ON o.business_id = c.business_id
    AND o.customer_id = c.id
    AND o.payment_status = 'paid'
-   AND o.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
   WHERE c.business_id = ?
   GROUP BY c.id
 )

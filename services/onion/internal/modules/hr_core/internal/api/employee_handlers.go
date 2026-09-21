@@ -448,11 +448,13 @@ func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequ
 		return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
-	emp := domain.EmployeeRecord{ID: id, Status: "terminated"}
-	_, err := h.Service.UpdateEmployeeForWriter(ctx, businessID, device.User.UserID, emp)
+	err := h.Service.DeactivateEmployeeForWriter(ctx, businessID, device.User.UserID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrEmployeeNotFound) {
+			return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
 		}
 		logger.Ctx(ctx).Error("failed to delete employee", logger.Any("business_id", businessID), logger.Any("employee_id", id), logger.Error(err))
 		return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete employee")

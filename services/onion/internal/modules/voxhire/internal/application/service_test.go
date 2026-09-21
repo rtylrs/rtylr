@@ -15,6 +15,8 @@ type mockRepo struct {
 	talentErr   error
 	career      *domain.Opening
 	careerErr   error
+	apps        []domain.Application
+	appsErr     error
 	cvTargets   []domain.CVProcessingTarget
 	cvResults   []domain.CVProcessingResult
 	cvUpdateErr error
@@ -70,6 +72,44 @@ func TestListOpeningsPageClampsBounds(t *testing.T) {
 	}
 }
 
+// A failed opening lookup must not silently score every applicant against a
+// nil opening; the applications come back without a match signal and the error
+// is logged instead of discarded.
+func TestListApplicationsLeavesMatchesUnscoredWhenOpeningLookupFails(t *testing.T) {
+	repo := &mockRepo{
+		apps:      []domain.Application{{ID: 1, Name: "Ada Lovelace"}},
+		careerErr: domain.ErrCareerNotFound,
+	}
+	svc := &Service{repo: repo}
+
+	apps, total, err := svc.ListApplications(context.Background(), domain.ApplicationFilter{JobID: 404})
+	if err != nil {
+		t.Fatalf("ListApplications: %v", err)
+	}
+	if total != 1 || len(apps) != 1 {
+		t.Fatalf("apps = %d, total = %d, want 1 and 1", len(apps), total)
+	}
+	if apps[0].MatchSignal.Score != 0 || apps[0].MatchSignal.Label != "" {
+		t.Fatalf("MatchSignal = %#v, want zero value when the opening lookup fails", apps[0].MatchSignal)
+	}
+}
+
+func TestListApplicationsEnrichesMatchesWhenOpeningExists(t *testing.T) {
+	repo := &mockRepo{
+		apps:   []domain.Application{{ID: 1, Name: "Ada Lovelace", CVProcessingStatus: "processed"}},
+		career: &domain.Opening{ID: 5, Title: "Operations Manager", Location: "Beirut"},
+	}
+	svc := &Service{repo: repo}
+
+	apps, _, err := svc.ListApplications(context.Background(), domain.ApplicationFilter{JobID: 5})
+	if err != nil {
+		t.Fatalf("ListApplications: %v", err)
+	}
+	if apps[0].MatchSignal.Score == 0 || apps[0].MatchSignal.Label == "" {
+		t.Fatalf("MatchSignal = %#v, want an enriched signal when the opening exists", apps[0].MatchSignal)
+	}
+}
+
 func (m *mockRepo) CreateCareer(_ context.Context, _ domain.CareerInput) (*domain.Opening, error) {
 	return m.career, m.careerErr
 }
@@ -83,7 +123,7 @@ func (m *mockRepo) SetCareerActive(_ context.Context, _ int64, _ bool) (*domain.
 }
 
 func (m *mockRepo) ListApplications(_ context.Context, _ domain.ApplicationFilter) ([]domain.Application, int64, error) {
-	return nil, 0, nil
+	return m.apps, int64(len(m.apps)), m.appsErr
 }
 
 func (m *mockRepo) ListCandidates(_ context.Context, _ domain.CandidateFilter) ([]domain.Candidate, int64, error) {

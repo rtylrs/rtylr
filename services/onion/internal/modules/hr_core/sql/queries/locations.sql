@@ -16,7 +16,7 @@ WHERE business_id = ? AND id = ?;
 INSERT INTO hr_locations (owner_id, business_id, name, address, city, country, timezone, latitude, longitude, is_default)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: UpdateLocation :exec
+-- name: UpdateLocation :execresult
 UPDATE hr_locations
 SET name = ?, address = ?, city = ?, country = ?, timezone = ?, latitude = ?, longitude = ?, is_default = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;

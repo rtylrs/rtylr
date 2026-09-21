@@ -42,7 +42,7 @@ func Default() *Hub {
 // to any replica receive it exactly once. Without the backplane it fans out
 // in-process only (correct for a single replica).
 func Publish(e Event) {
-	if backplaneEnabled {
+	if backplaneEnabled.Load() {
 		publishBackplane(e)
 		return
 	}

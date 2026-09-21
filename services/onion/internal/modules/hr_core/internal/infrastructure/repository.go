@@ -34,6 +34,18 @@ type Repository struct {
 	pool    *sql.DB
 }
 
+// updateNotFound classifies a zero-affected UPDATE. MySQL reports the number of
+// rows changed, not the number matched, so an update that stores the values the
+// row already holds (an idempotent PUT) also affects zero rows. Only a probe
+// that comes back sql.ErrNoRows means the record is genuinely absent; any other
+// probe failure is returned unchanged.
+func updateNotFound(probeErr, notFound error) error {
+	if errors.Is(probeErr, sql.ErrNoRows) {
+		return notFound
+	}
+	return probeErr
+}
+
 func NewRepository(db *sql.DB) *Repository {
 	pool := db
 	return &Repository{
@@ -330,8 +342,64 @@ func (r *Repository) GetInviteByToken(ctx context.Context, token string) (*domai
 	}, nil
 }
 
-func (r *Repository) ConsumeInviteToken(ctx context.Context, token string) error {
-	return r.queries.ConsumeInviteToken(ctx, token)
+// AcceptInvite consumes the invite token and links the user to the invited
+// employee in a single transaction. Consuming the token before the link would
+// burn it when the link cannot succeed - the user_id already belongs to
+// another employee row, or the employee row is gone - leaving the invitee with
+// "invalid invite token" on every retry and the employee still unlinked.
+func (r *Repository) AcceptInvite(ctx context.Context, businessID, employeeID, userID int64, token string) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	consumed, err := qtx.ConsumeInviteToken(ctx, token)
+	if err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("failed to consume invite token", logger.Any("business_id", businessID), logger.Error(err))
+		return err
+	}
+	if affected, err := consumed.RowsAffected(); err != nil {
+		_ = tx.Rollback()
+		return err
+	} else if affected == 0 {
+		_ = tx.Rollback()
+		return domain.ErrInviteTokenInvalid
+	}
+
+	linked, err := qtx.LinkInviteAcceptance(ctx, sqlc.LinkInviteAcceptanceParams{
+		UserID:     sqlutil.NullInt64(userID),
+		ID:         employeeID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		_ = tx.Rollback()
+		if isDuplicateUserIDError(err) {
+			return domain.ErrUserAlreadyLinked
+		}
+		logger.Ctx(ctx).Error("failed to link invite acceptance", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return err
+	}
+	if affected, err := linked.RowsAffected(); err != nil {
+		_ = tx.Rollback()
+		return err
+	} else if affected == 0 {
+		_ = tx.Rollback()
+		return domain.ErrEmployeeNotFound
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // --- Locations ---
@@ -389,7 +457,7 @@ func (r *Repository) CreateLocation(ctx context.Context, businessID int64, loc d
 }
 
 func (r *Repository) UpdateLocation(ctx context.Context, businessID int64, loc domain.LocationRecord) (*domain.LocationRecord, error) {
-	err := r.queries.UpdateLocation(ctx, sqlc.UpdateLocationParams{
+	result, err := r.queries.UpdateLocation(ctx, sqlc.UpdateLocationParams{
 		Name:       loc.Name,
 		Address:    sqlutil.NullString(loc.Address),
 		City:       sqlutil.NullString(loc.City),
@@ -405,6 +473,13 @@ func (r *Repository) UpdateLocation(ctx context.Context, businessID int64, loc d
 		logger.Ctx(ctx).Error("failed to update location", logger.Any("business_id", businessID), logger.Any("location_id", loc.ID), logger.Error(err))
 		return nil, err
 	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return nil, err
+	} else if affected == 0 {
+		if _, getErr := r.queries.GetLocation(ctx, sqlc.GetLocationParams{BusinessID: businessID, ID: loc.ID}); getErr != nil {
+			return nil, updateNotFound(getErr, domain.ErrLocationNotFound)
+		}
+	}
 	loc.OwnerID = businessID
 	loc.BusinessID = businessID
 	return &loc, nil
@@ -412,8 +487,11 @@ func (r *Repository) UpdateLocation(ctx context.Context, businessID int64, loc d
 
 // --- Departments ---
 
-func (r *Repository) ListDepartments(ctx context.Context, businessID, _ int64) ([]domain.DepartmentRecord, error) {
-	rows, err := r.queries.ListHRDepartments(ctx, businessID)
+func (r *Repository) ListDepartments(ctx context.Context, businessID, locationID int64) ([]domain.DepartmentRecord, error) {
+	rows, err := r.queries.ListHRDepartments(ctx, sqlc.ListHRDepartmentsParams{
+		BusinessID: businessID,
+		LocationID: locationID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list departments", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
@@ -449,7 +527,7 @@ func (r *Repository) CreateDepartment(ctx context.Context, businessID int64, dep
 }
 
 func (r *Repository) UpdateDepartment(ctx context.Context, businessID int64, dept domain.DepartmentRecord) (*domain.DepartmentRecord, error) {
-	err := r.queries.UpdateHRDepartment(ctx, sqlc.UpdateHRDepartmentParams{
+	result, err := r.queries.UpdateHRDepartment(ctx, sqlc.UpdateHRDepartmentParams{
 		LocationID:            dept.LocationID,
 		ParentDepartmentID:    sqlutil.NullInt64(dept.ParentDepartmentID),
 		Name:                  dept.Name,
@@ -460,6 +538,13 @@ func (r *Repository) UpdateDepartment(ctx context.Context, businessID int64, dep
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to update department", logger.Any("business_id", businessID), logger.Any("department_id", dept.ID), logger.Error(err))
 		return nil, err
+	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return nil, err
+	} else if affected == 0 {
+		if _, getErr := r.queries.GetHRDepartment(ctx, sqlc.GetHRDepartmentParams{BusinessID: businessID, ID: dept.ID}); getErr != nil {
+			return nil, updateNotFound(getErr, domain.ErrDepartmentNotFound)
+		}
 	}
 	dept.OwnerID = businessID
 	dept.BusinessID = businessID
@@ -540,7 +625,7 @@ func (r *Repository) CreateWorkSchedule(ctx context.Context, businessID int64, w
 func (r *Repository) UpdateWorkSchedule(ctx context.Context, businessID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
 	ws.ScheduleData = defaultedScheduleData(ws.ScheduleData)
 
-	err := r.queries.UpdateWorkSchedule(ctx, sqlc.UpdateWorkScheduleParams{
+	result, err := r.queries.UpdateWorkSchedule(ctx, sqlc.UpdateWorkScheduleParams{
 		Name:         ws.Name,
 		ScheduleData: json.RawMessage(ws.ScheduleData),
 		IsDefault:    ws.IsDefault,
@@ -550,6 +635,13 @@ func (r *Repository) UpdateWorkSchedule(ctx context.Context, businessID int64, w
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to update work schedule", logger.Any("business_id", businessID), logger.Any("schedule_id", ws.ID), logger.Error(err))
 		return nil, err
+	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return nil, err
+	} else if affected == 0 {
+		if _, getErr := r.queries.GetWorkSchedule(ctx, sqlc.GetWorkScheduleParams{BusinessID: businessID, ID: ws.ID}); getErr != nil {
+			return nil, updateNotFound(getErr, domain.ErrWorkScheduleNotFound)
+		}
 	}
 	ws.OwnerID = businessID
 	ws.BusinessID = businessID
@@ -595,7 +687,7 @@ func (r *Repository) CreateRole(ctx context.Context, businessID int64, role doma
 }
 
 func (r *Repository) UpdateRole(ctx context.Context, businessID int64, role domain.RoleRecord) (*domain.RoleRecord, error) {
-	err := r.queries.UpdateRole(ctx, sqlc.UpdateRoleParams{
+	result, err := r.queries.UpdateRole(ctx, sqlc.UpdateRoleParams{
 		Name:        role.Name,
 		Description: sqlutil.NullString(role.Description),
 		Permissions: json.RawMessage(role.Permissions),
@@ -605,6 +697,13 @@ func (r *Repository) UpdateRole(ctx context.Context, businessID int64, role doma
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to update role", logger.Any("business_id", businessID), logger.Any("role_id", role.ID), logger.Error(err))
 		return nil, err
+	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return nil, err
+	} else if affected == 0 {
+		if _, getErr := r.queries.GetRole(ctx, sqlc.GetRoleParams{BusinessID: businessID, ID: role.ID}); getErr != nil {
+			return nil, updateNotFound(getErr, domain.ErrRoleNotFound)
+		}
 	}
 	role.OwnerID = businessID
 	role.BusinessID = businessID
@@ -693,6 +792,9 @@ func (r *Repository) CompleteSetupStep(ctx context.Context, businessID int64, st
 		StepKey:    stepKey,
 	})
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrSetupStepNotFound
+		}
 		return nil, err
 	}
 	step := setupStepFromRow(row)

@@ -224,9 +224,13 @@ func (r *Repository) ListDeliveriesForBusiness(ctx context.Context, businessID i
 
 // ListFailingRegistrations returns registrations that dead-lettered something
 // within the window, one row each rather than one per lost event.
-func (r *Repository) ListFailingRegistrations(ctx context.Context, withinHours int64, limit int32) ([]domain.FailingRegistration, error) {
+//
+// notifiedOn excludes registrations already told on that UTC day, which is what
+// lets successive batches advance past the head of the failing set.
+func (r *Repository) ListFailingRegistrations(ctx context.Context, withinHours int64, limit int32, notifiedOn string) ([]domain.FailingRegistration, error) {
 	rows, err := r.queries.ListRegistrationsWithRecentDeadDeliveries(ctx, sqlc.ListRegistrationsWithRecentDeadDeliveriesParams{
 		WithinHours: withinHours,
+		NotifiedOn:  notifiedOn,
 		Limit:       limit,
 	})
 	if err != nil {

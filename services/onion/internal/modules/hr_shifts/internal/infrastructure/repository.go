@@ -6,11 +6,17 @@ import (
 	"errors"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/sqlutil"
 )
+
+// mysqlDuplicateEntry is MySQL's ER_DUP_ENTRY. uk_shift_assignment turns a
+// repeat assignment for the same employee and date into this error.
+const mysqlDuplicateEntry = 1062
 
 // The three safety limits below bound queries that have no caller-supplied
 // pagination today. Each cap is set well above any legitimate result size for
@@ -280,6 +286,14 @@ func (r *Repository) CreateShiftAssignment(ctx context.Context, businessID int64
 		Date:       assignDate,
 	})
 	if err != nil {
+		// uk_shift_assignment allows one assignment per (owner, employee, date).
+		// The service checks first, but a concurrent request can still reach the
+		// insert; report that as the roster conflict the endpoint documents
+		// rather than an opaque 500.
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == mysqlDuplicateEntry {
+			return nil, domain.ErrRosterConflict
+		}
 		logger.Ctx(ctx).Error("failed to create shift assignment", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}

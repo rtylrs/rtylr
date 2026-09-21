@@ -216,6 +216,9 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		if errors.Is(err, domain.ErrInvalidAmount) {
 			return UpdateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 		}
+		if errors.Is(err, domain.ErrInvalidStatus) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusConflict, "Order status transition is not allowed")
+		}
 		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update order")
 	}
 	return UpdateResponse{Message: "Order updated successfully"}, nil

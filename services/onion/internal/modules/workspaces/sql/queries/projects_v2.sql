@@ -177,10 +177,12 @@ SELECT m.id, m.project_id, m.name,
        m.target_date,
        COALESCE(m.status, 'upcoming') AS status,
        COALESCE(m.description, '') AS description,
+       p.name AS project_name, p.color AS project_color,
        (SELECT COUNT(*) FROM flow_milestone_tasks mt WHERE mt.milestone_id = m.id) AS task_count,
        (SELECT COUNT(*) FROM flow_milestone_tasks mt JOIN flow_tasks t ON t.id = mt.task_id
         WHERE mt.milestone_id = m.id AND t.status = 'done') AS done_count
 FROM flow_milestones m
+LEFT JOIN flow_projects p ON p.id = m.project_id
 WHERE m.business_id = ?
   AND (? = 0 OR m.project_id = ?)
   AND (? = 1 OR EXISTS (SELECT 1 FROM flow_projects p

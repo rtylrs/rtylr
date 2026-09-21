@@ -717,10 +717,14 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			return
 		}
 	}
+	// The provider stream completed and the answer was persisted, so the tenant
+	// owes for these tokens even if the client vanished before the closing
+	// events. Settling first keeps the deferred settle(0) from refunding the
+	// whole reservation when Finish fails on a disconnected client.
+	settleUsage(int64(totalTokens))
 	if err := renderer.Finish(); err != nil {
 		return
 	}
-	settleUsage(int64(totalTokens))
 	h.writeExactCacheEntry(ctx, token, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
 }
 

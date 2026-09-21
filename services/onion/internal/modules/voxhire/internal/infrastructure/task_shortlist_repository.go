@@ -82,7 +82,8 @@ func (r *Repository) UpdateTask(ctx context.Context, in domain.TaskInput) (*doma
 		return nil, err
 	}
 	if _, err := r.db.ExecContext(ctx, updateFollowUpTaskScopedSQL,
-		ownerID, in.Title, in.Title, in.Status, in.Status, sqlNullTimePtr(in.DueAt),
+		ownerID, in.Title, in.Title, in.Status, in.Status,
+		in.DueAtSet, sqlNullTimePtr(in.DueAt),
 		in.Status, in.Status, in.ID,
 	); err != nil {
 		return nil, err
@@ -448,7 +449,10 @@ func (r *Repository) recordApplicationEvent(ctx context.Context, applicationID i
 
 // ListPendingCVProcessingTargets returns stored CVs that have not been
 // extracted into searchable text yet. It covers both the talent pool and
-// job-specific application tables.
+// job-specific application tables. Targets that previously failed extraction
+// are still retried, but after every pending CV: permanently failing files
+// (for example legacy .doc) must not consume the whole batch and starve newer
+// CVs.
 func (r *Repository) ListPendingCVProcessingTargets(ctx context.Context, limit int) ([]domain.CVProcessingTarget, error) {
 	if limit <= 0 {
 		limit = 25
@@ -469,7 +473,7 @@ func (r *Repository) ListPendingCVProcessingTargets(ctx context.Context, limit i
 		 WHERE cv_key IS NOT NULL
 		   AND cv_key <> ''
 		   AND COALESCE(cv_processing_status, 'pending') IN ('pending', 'error')
-		 ORDER BY created_at ASC
+		 ORDER BY (COALESCE(cv_processing_status, 'pending') = 'error'), created_at ASC
 		 LIMIT ?
 	`, perTable)
 	if err != nil {
@@ -498,7 +502,7 @@ func (r *Repository) ListPendingCVProcessingTargets(ctx context.Context, limit i
 		 WHERE cv_key IS NOT NULL
 		   AND cv_key <> ''
 		   AND COALESCE(cv_processing_status, 'pending') IN ('pending', 'error')
-		 ORDER BY created_at ASC
+		 ORDER BY (COALESCE(cv_processing_status, 'pending') = 'error'), created_at ASC
 		 LIMIT ?
 	`, remaining)
 	if err != nil {

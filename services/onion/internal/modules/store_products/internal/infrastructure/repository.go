@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"strings"
 
@@ -93,19 +94,24 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	}
 	defer tx.Rollback()
 
+	// Verify the storefront row exists before touching the shared ERP catalog:
+	// a stale caller (row deleted elsewhere, stale list) otherwise rewrites
+	// erp_products and then reports success from a zero-row update.
+	linkedProductID, err := r.queries.WithTx(tx).GetStoreProductLinkedID(ctx, sqlc.GetStoreProductLinkedIDParams{
+		BusinessID: businessID,
+		ID:         id,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrStoreProductNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to load existing store product link", logger.Error(err))
+		return err
+	}
+
 	productID := input.ProductID
-	if productID == 0 {
-		linkedProductID, err := r.queries.WithTx(tx).GetStoreProductLinkedID(ctx, sqlc.GetStoreProductLinkedIDParams{
-			BusinessID: businessID,
-			ID:         id,
-		})
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to load existing store product link", logger.Error(err))
-			return err
-		}
-		if linkedProductID.Valid {
-			productID = linkedProductID.Int64
-		}
+	if productID == 0 && linkedProductID.Valid {
+		productID = linkedProductID.Int64
 	}
 
 	productID, err = syncCatalogProduct(ctx, r.queries.WithTx(tx), businessID, businessID, productID, input)
@@ -114,7 +120,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return err
 	}
 
-	err = r.queries.WithTx(tx).UpdateStoreProduct(ctx, sqlc.UpdateStoreProductParams{
+	affected, err := r.queries.WithTx(tx).UpdateStoreProduct(ctx, sqlc.UpdateStoreProductParams{
 		ProductID:      sql.NullInt64{Int64: productID, Valid: productID != 0},
 		Title:          input.Title,
 		Slug:           sql.NullString{String: input.Slug, Valid: input.Slug != ""},
@@ -130,6 +136,12 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update store product", logger.Error(err))
 		return err
+	}
+	if affected == 0 {
+		// Raced with a concurrent delete after the existence check. Returning
+		// here rolls the whole transaction back, including the catalog write,
+		// so the caller is never told an update happened that did not.
+		return domain.ErrStoreProductNotFound
 	}
 	if err := tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit store product update transaction", logger.Error(err))

@@ -51,7 +51,7 @@ until mysqladmin ping \
 done
 
 # Schema directories
-SCHEMA_DIRS=("db/schemas" "internal/platform/database/schemas")
+SCHEMA_DIRS=("internal/platform/database/schemas")
 
 # Check if schema directories exist
 for schema_dir in "${SCHEMA_DIRS[@]}"; do
@@ -60,28 +60,6 @@ for schema_dir in "${SCHEMA_DIRS[@]}"; do
         exit 1
     fi
 done
-
-# Function to drop tables not in schema
-drop_orphaned_tables() {
-    local schema_tables="$1"
-
-    echo -e "${BLUE}Checking for orphaned tables...${NC}"
-
-    # Get list of existing tables in the database
-    local existing_tables
-    existing_tables=$("${mysql_cmd[@]}" --batch --skip-column-names -e "SHOW TABLES;" | tr -d ' ')
-
-    # Check each existing table
-    for table in $existing_tables; do
-        # Skip if table is in our schema list
-        if echo "$schema_tables" | grep -q "^$table$"; then
-            echo -e "${GREEN}✓ Table $table is in schema${NC}"
-        else
-            echo -e "${YELLOW}Dropping orphaned table: $table${NC}"
-            "${mysql_cmd[@]}" -e "DROP TABLE IF EXISTS \`$table\`;"
-        fi
-    done
-}
 
 # Function to create table if not exists
 create_table_if_not_exists() {
@@ -116,19 +94,8 @@ fi
 
 echo -e "${GREEN}Found $(echo "$sql_files" | wc -l) schema file(s)${NC}"
 
-# Collect schema table names
-schema_tables=""
-for file in $sql_files; do
-    if [ -n "$file" ]; then
-        table_name=$(basename "$file" .sql)
-        schema_tables="$schema_tables$table_name"$'\n'
-    fi
-done
-
-# Drop orphaned tables first
-drop_orphaned_tables "$schema_tables"
-
-# Process each SQL file to create/update tables
+# Process each SQL file to create/update tables. Existing tables are left alone
+# (the files use CREATE TABLE IF NOT EXISTS); tables are never dropped here.
 for file in $sql_files; do
     if [ -n "$file" ]; then
         create_table_if_not_exists "$file"

@@ -3,11 +3,32 @@ package application
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+// asyncSendTimeout bounds an email send that was detached from the request
+// that triggered it, so a stuck provider call cannot leak a goroutine.
+const asyncSendTimeout = 10 * time.Second
+
+// Seams for tests: the provider client is package-private, so tests swap
+// these to observe the context an async send actually runs with.
+var (
+	sendEmail    = emailPkg.Send
+	emailEnabled = emailPkg.IsEnabled
+)
+
+// detachSend returns a context for an asynchronous send. The caller's context
+// is the HTTP request's, and net/http cancels it as soon as the handler
+// returns — the goroutine would otherwise observe "context canceled" on both
+// the outbound rate-limit wait and the provider call. Values (logger, auth)
+// are preserved; only cancellation is dropped, and the send stays bounded.
+func detachSend(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.WithoutCancel(ctx), asyncSendTimeout)
+}
 
 // Emails for the recruit product. Two flows:
 //
@@ -22,8 +43,10 @@ import (
 // never want a flaky email provider to block a candidate's apply.
 
 // SendSubmissionEmails fires both emails in parallel (via goroutines)
-// so the HTTP handler doesn't wait on SMTP to return. Errors are
-// logged but swallowed — the submission is already saved to the DB.
+// so the HTTP handler doesn't wait on SMTP to return. Each send detaches
+// from the request context (detachSend) so the response finishing doesn't
+// cancel it. Errors are logged but swallowed — the submission is already
+// saved to the DB.
 func (s *Service) SendSubmissionEmails(
 	ctx context.Context,
 	submission domain.Submission,
@@ -44,7 +67,10 @@ func (s *Service) sendCandidateConfirmation(
 	career domain.RecruitCareer,
 	candidateName, candidateEmail string,
 ) {
-	if !emailPkg.IsEnabled() || candidateEmail == "" {
+	ctx, cancel := detachSend(ctx)
+	defer cancel()
+
+	if !emailEnabled() || candidateEmail == "" {
 		return
 	}
 
@@ -56,7 +82,7 @@ func (s *Service) sendCandidateConfirmation(
 	// hits reply reaches HR, not noreply@.
 	replyTo := custom.NotificationEmail
 
-	if _, err := emailPkg.Send(ctx, emailPkg.SendParams{
+	if _, err := sendEmail(ctx, emailPkg.SendParams{
 		To:      []string{candidateEmail},
 		Subject: subject,
 		HTML:    html,
@@ -78,7 +104,10 @@ func (s *Service) sendHRNewSubmission(
 	submission domain.Submission,
 	candidateName, candidateEmail, adminURL string,
 ) {
-	if !emailPkg.IsEnabled() {
+	ctx, cancel := detachSend(ctx)
+	defer cancel()
+
+	if !emailEnabled() {
 		return
 	}
 
@@ -88,7 +117,7 @@ func (s *Service) sendHRNewSubmission(
 
 	// ReplyTo the candidate — HR hits reply and reaches them directly,
 	// no copy-paste of the email address.
-	if _, err := emailPkg.Send(ctx, emailPkg.SendParams{
+	if _, err := sendEmail(ctx, emailPkg.SendParams{
 		To:      []string{custom.NotificationEmail},
 		Subject: subject,
 		HTML:    html,

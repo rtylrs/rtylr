@@ -58,6 +58,9 @@ func (a *WaitlistAPI) CreateEntry(ctx context.Context, req *bookingwaitlistv1.Cr
 		if errors.Is(err, domain.ErrServiceNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Booking service not found")
 		}
+		if errors.Is(err, domain.ErrPreferredDateInvalid) || errors.Is(err, domain.ErrPreferredTimeInvalid) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create waitlist entry")
 	}
 	return &bookingwaitlistv1.CreateEntryResponse{Id: id, Message: "Waitlist entry created"}, nil
@@ -83,6 +86,12 @@ func (a *WaitlistAPI) UpdateEntry(ctx context.Context, req *bookingwaitlistv1.Up
 	if err := a.service.Update(ctx, businessID, req.GetId(), input); err != nil {
 		if errors.Is(err, domain.ErrServiceNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Booking service not found")
+		}
+		if errors.Is(err, domain.ErrWaitlistEntryNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Waitlist entry not found")
+		}
+		if errors.Is(err, domain.ErrPreferredDateInvalid) || errors.Is(err, domain.ErrPreferredTimeInvalid) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update waitlist entry")
 	}

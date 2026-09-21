@@ -20,8 +20,8 @@ const notificationsTTL = 30 * time.Second
 
 type repository interface {
 	List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error)
-	MarkRead(ctx context.Context, userID, notificationID int64) error
-	MarkAllRead(ctx context.Context, userID int64) error
+	MarkRead(ctx context.Context, businessID, userID, notificationID int64) error
+	MarkAllRead(ctx context.Context, businessID, userID int64) error
 }
 
 type pagedRepository interface {
@@ -110,7 +110,7 @@ func (s *Service) ListPage(ctx context.Context, businessID, userID int64, limit 
 }
 
 func (s *Service) MarkRead(ctx context.Context, businessID, userID, notificationID int64) error {
-	if err := s.repo.MarkRead(ctx, userID, notificationID); err != nil {
+	if err := s.repo.MarkRead(ctx, businessID, userID, notificationID); err != nil {
 		return err
 	}
 	invalidateNotificationsScope(ctx, businessID, userID)
@@ -118,7 +118,7 @@ func (s *Service) MarkRead(ctx context.Context, businessID, userID, notification
 }
 
 func (s *Service) MarkAllRead(ctx context.Context, businessID, userID int64) error {
-	if err := s.repo.MarkAllRead(ctx, userID); err != nil {
+	if err := s.repo.MarkAllRead(ctx, businessID, userID); err != nil {
 		return err
 	}
 	invalidateNotificationsScope(ctx, businessID, userID)

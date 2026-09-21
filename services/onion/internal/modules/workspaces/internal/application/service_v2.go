@@ -451,6 +451,12 @@ func (s *Service) ListMilestonesV2(ctx context.Context, businessID int64, projec
 	return s.repo.ListMilestonesV2(ctx, businessID, projectID, callerID, false, limit, offset)
 }
 
+// UpdateMilestoneV2 writes the target_date column the v2 list reads; the v1
+// update writes due_date, the column v1 reads.
+func (s *Service) UpdateMilestoneV2(ctx context.Context, input domain.UpdateMilestoneInput) error {
+	return s.repo.UpdateMilestoneV2(ctx, input)
+}
+
 func (s *Service) CreateMilestoneV2(ctx context.Context, businessID, projectID int64, name, description, targetDate string) (domain.Milestone, error) {
 	var dueDate time.Time
 	if targetDate != "" {

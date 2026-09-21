@@ -32,7 +32,7 @@ SELECT id, owner_id, business_id, employee_id, token, expires_at, consumed_at, c
 FROM hr_employee_invites
 WHERE token = ? AND consumed_at IS NULL;
 
--- name: ConsumeInviteToken :exec
+-- name: ConsumeInviteToken :execresult
 UPDATE hr_employee_invites
 SET consumed_at = NOW(), updated_at = NOW()
-WHERE token = ?;
+WHERE token = ? AND consumed_at IS NULL;

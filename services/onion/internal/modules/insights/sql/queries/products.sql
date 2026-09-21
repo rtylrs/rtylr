@@ -99,7 +99,7 @@ LIMIT 500;
 SELECT p.id,
        p.name,
        COALESCE(SUM(oi.quantity), 0)     AS units_sold,
-       COALESCE(SUM(oi.total), 0)        AS revenue_minor_units_x100,
+       CAST(COALESCE(SUM(oi.total), 0) * 100 AS SIGNED) AS revenue_minor_units_x100,
        CAST(p.cost_price * 100 AS SIGNED) AS cost_minor_units_x100
 FROM erp_products p
 JOIN pos_order_items oi ON oi.menu_item_id = p.id
@@ -107,5 +107,5 @@ JOIN pos_orders o       ON o.id = oi.order_id AND o.business_id = p.business_id
 WHERE p.business_id = ?
 GROUP BY p.id, p.name, p.cost_price
 HAVING SUM(oi.quantity) > 0
-ORDER BY revenue DESC
+ORDER BY revenue_minor_units_x100 DESC
 LIMIT 200;

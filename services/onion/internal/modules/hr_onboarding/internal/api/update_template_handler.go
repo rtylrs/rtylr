@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateTemplateRoutes() []string { return []string{"/hr/onboarding/templates/{id}"} }
@@ -42,13 +43,18 @@ func (h *UpdateTemplateHandler) Serve(ctx context.Context, req *UpdateTemplateRe
 		return UpdateTemplateResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateTemplateResponse{}, onekiterrors.PermissionDenied()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateTemplateResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid template id")
 	}
 
-	err := h.Service.UpdateTemplate(ctx, device.User.UserID, id, domain.UpdateTemplateParams{
+	err := h.Service.UpdateTemplate(ctx, businessID, id, domain.UpdateTemplateParams{
 		Name:        req.Name,
 		TriggerType: req.TriggerType,
 		RoleID:      req.RoleID,

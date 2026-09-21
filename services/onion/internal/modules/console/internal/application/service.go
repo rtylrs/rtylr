@@ -11,7 +11,6 @@ import (
 	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
@@ -39,10 +38,8 @@ func invalidateConsoleScope(ctx context.Context) {
 }
 
 func invalidateOwnerSubscriptionScope(ctx context.Context, ownerID int64) {
-	cacher.InvalidateScope(ctx,
-		cacheKeys.SubscriptionPrefix(ownerID),
-		cacheKeys.UserPrefix(ownerID),
-	)
+	patterns := append(cacheKeys.SubscriptionPatterns(ownerID), cacheKeys.UserPrefix(ownerID))
+	cacher.InvalidateScope(ctx, patterns...)
 }
 
 func invalidateBusinessAddonScope(ctx context.Context, businessID int64) {
@@ -919,20 +916,15 @@ func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int
 		return nil, err
 	}
 
-	id, err := s.repo.CreateGrant(ctx, userID, planID, grantedBy, note, expiresAt)
-	if err != nil {
-		return nil, err
-	}
-
-	// Also activate the subscription for that owner.
-	if subErr := s.repo.UpsertSubscription(ctx, infrastructure.SubscriptionWriteParams{
+	id, err := s.repo.CreateGrantAndActivateSubscription(ctx, userID, planID, grantedBy, note, expiresAt, infrastructure.SubscriptionWriteParams{
 		OwnerID:             userID,
 		PlanID:              planID,
 		Status:              "active",
 		SeatCount:           seatCount,
 		CurrentPeriodEndsAt: nullableInputTime(expiresAt),
-	}); subErr != nil {
-		logger.Ctx(ctx).Warn("failed to upsert subscription for grant", logger.Error(subErr))
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	grant, err := s.repo.GetGrant(ctx, id)
@@ -1169,14 +1161,36 @@ func (s *Service) cleanupAddonGrantEnablement(ctx context.Context, scope *infras
 	return s.repo.DisableBusinessAddon(ctx, scope.BusinessID, scope.AddonID)
 }
 
+// adoptAddonGrantEnablement hands the "this grant turned the add-on on" marker
+// to a surviving active grant before the owning grant is revoked or deleted.
+// Without it the last remaining grant could no longer turn the add-on off, and
+// the enablement would outlive every grant.
+func (s *Service) adoptAddonGrantEnablement(ctx context.Context, scope *infrastructure.AddonGrantScopeRow, removedID int64) error {
+	if scope == nil || !scope.EnabledByGrant {
+		return nil
+	}
+	hasActiveGrant, err := s.repo.HasActiveAddonGrant(ctx, scope.BusinessID, scope.AddonID)
+	if err != nil {
+		return err
+	}
+	if !hasActiveGrant {
+		return nil
+	}
+	return s.repo.AdoptAddonGrantEnablement(ctx, scope.BusinessID, scope.AddonID, removedID)
+}
+
 func (s *Service) RevokeAddonGrant(ctx context.Context, id int64) error {
 	defer invalidateConsoleScope(ctx)
 	scope, err := s.repo.GetAddonGrantScope(ctx, id)
-	if err == nil {
-		defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
-		defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
+	if err != nil {
+		return err
 	}
+	defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
+	defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
 	if err := s.repo.RevokeAddonGrant(ctx, id); err != nil {
+		return err
+	}
+	if err := s.adoptAddonGrantEnablement(ctx, scope, id); err != nil {
 		return err
 	}
 	return s.cleanupAddonGrantEnablement(ctx, scope)
@@ -1185,11 +1199,15 @@ func (s *Service) RevokeAddonGrant(ctx context.Context, id int64) error {
 func (s *Service) DeleteAddonGrant(ctx context.Context, id int64) error {
 	defer invalidateConsoleScope(ctx)
 	scope, err := s.repo.GetAddonGrantScope(ctx, id)
-	if err == nil {
-		defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
-		defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
+	if err != nil {
+		return err
 	}
+	defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
+	defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
 	if err := s.repo.DeleteAddonGrant(ctx, id); err != nil {
+		return err
+	}
+	if err := s.adoptAddonGrantEnablement(ctx, scope, id); err != nil {
 		return err
 	}
 	return s.cleanupAddonGrantEnablement(ctx, scope)

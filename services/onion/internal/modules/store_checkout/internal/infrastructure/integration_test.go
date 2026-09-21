@@ -2,7 +2,10 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/infrastructure"
@@ -220,6 +223,76 @@ func TestCheckout_Complete_TwiceSameID_NoError(t *testing.T) {
 	}
 	if err := repo.Complete(context.Background(), testutil.OwnerID, id, testutil.OwnerID); err != nil {
 		t.Fatalf("Complete second: %v", err)
+	}
+}
+
+// Concurrent completions of the same checkout (double click or client retry)
+// must apply the CRM spend/visit delta exactly once. The completion claim and
+// the CRM sync used to run in the opposite order, so every request that saw
+// status='active' applied the delta even though only one guarded UPDATE
+// matched the row.
+func TestCheckout_Complete_ConcurrentDuplicateCountsOnce(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	stamp := time.Now().UnixNano()
+	email := fmt.Sprintf("b37-r04-%d@example.com", stamp)
+	const total = 42.50
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
+		SessionID:     fmt.Sprintf("b37-r04-%d", stamp),
+		CustomerEmail: email,
+		Subtotal:      total,
+		Total:         total,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, err := db.ExecContext(context.Background(), "DELETE FROM store_checkouts WHERE id = ?", id); err != nil {
+			t.Errorf("cleanup store_checkouts: %v", err)
+		}
+		if _, err := db.ExecContext(context.Background(), "DELETE FROM crm_customers WHERE business_id = ? AND email = ?", testutil.BusinessID, email); err != nil {
+			t.Errorf("cleanup crm_customers: %v", err)
+		}
+	})
+
+	const workers = 6
+	start := make(chan struct{})
+	errs := make(chan error, workers)
+	var wg sync.WaitGroup
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			errs <- repo.Complete(ctx, testutil.BusinessID, id, testutil.OwnerID)
+		}()
+	}
+	close(start)
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Fatalf("concurrent Complete: %v", err)
+		}
+	}
+
+	var totalSpent string
+	var visitCount int32
+	if err := db.QueryRowContext(ctx, `
+		SELECT total_spent, visit_count
+		FROM crm_customers
+		WHERE business_id = ? AND LOWER(email) = LOWER(?)
+		ORDER BY id DESC
+		LIMIT 1`, testutil.BusinessID, email).Scan(&totalSpent, &visitCount); err != nil {
+		t.Fatalf("read CRM customer: %v", err)
+	}
+	if totalSpent != "42.50" {
+		t.Errorf("total_spent = %q, want 42.50 counted once", totalSpent)
+	}
+	if visitCount != 1 {
+		t.Errorf("visit_count = %d, want 1 counted once", visitCount)
 	}
 }
 

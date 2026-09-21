@@ -17,6 +17,7 @@ func ListAssetsRoutes() []string { return []string{"/hr/equipment/assets"} }
 type ListAssetsHandler struct{ Service *application.Service }
 
 type ListAssetsRequest struct {
+	EmployeeID int64  `json:"employee_id"`
 	LocationID int64  `json:"location_id"`
 	Status     string `json:"status"`
 	Limit      int32  `json:"limit"`
@@ -25,6 +26,9 @@ type ListAssetsRequest struct {
 
 type ListAssetsResponse struct {
 	Assets []*hrequipmentv1.AssetPayload `json:"assets"`
+	Total  int64                         `json:"total"`
+	Limit  int32                         `json:"limit"`
+	Offset int32                         `json:"offset"`
 }
 
 func (h *ListAssetsHandler) Serve(ctx context.Context, req *ListAssetsRequest) (ListAssetsResponse, error) {
@@ -33,7 +37,17 @@ func (h *ListAssetsHandler) Serve(ctx context.Context, req *ListAssetsRequest) (
 		return ListAssetsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	if req.Limit <= 0 {
+		req.Limit = 20
+	}
+	if req.Limit > 100 {
+		req.Limit = 100
+	}
+
 	params := domain.ListAssetsParams{Limit: req.Limit, Offset: req.Offset}
+	if req.EmployeeID != 0 {
+		params.AssignedTo = &req.EmployeeID
+	}
 	if req.LocationID != 0 {
 		params.LocationID = &req.LocationID
 	}
@@ -41,7 +55,7 @@ func (h *ListAssetsHandler) Serve(ctx context.Context, req *ListAssetsRequest) (
 		params.Status = &req.Status
 	}
 
-	assets, err := h.Service.ListAssets(ctx, device.User.UserID, params)
+	assets, total, err := h.Service.ListAssets(ctx, device.User.UserID, params)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list assets", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListAssetsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list assets")
@@ -52,5 +66,5 @@ func (h *ListAssetsHandler) Serve(ctx context.Context, req *ListAssetsRequest) (
 		payloads = append(payloads, assetToProto(a))
 	}
 
-	return ListAssetsResponse{Assets: payloads}, nil
+	return ListAssetsResponse{Assets: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
 }

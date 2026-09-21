@@ -9,19 +9,47 @@
 # migration container would either refuse to start ("DB_USER is required") or,
 # worse, fall back to the localhost defaults and report success against nothing.
 #
-# The format is the go-sql-driver DSN, which is NOT a URL:
+# Two shapes are accepted, matching what the Go layer connects with
+# (dbclient/mysql.go normalizeDSN):
 #
-#   [username[:password]@][protocol[(address)]]/dbname[?param=value]
+#   native: [username[:password]@][protocol[(address)]]/dbname[?param=value]
+#   URL:    mysql://username[:password]@host[:port]/dbname[?param=value]
 #
 # Parsing follows the driver's own rules, because a password is allowed to
 # contain the characters a naive split would break on:
 #
-#   - the dbname starts after the LAST '/' that precedes any '?'
-#   - within the part before it, the credentials end at the LAST '@'
+#   - in the native form the dbname starts after the LAST '/', and the query
+#     string at the first '?' that follows it. A '?' earlier in the DSN (inside
+#     a password) is not a delimiter: the driver scans for '/' first.
+#   - within the part before the dbname, the credentials end at the LAST '@'
 #   - within the credentials, the username ends at the FIRST ':'
 #
-# So `u:p@ss:w/rd@tcp(h:3306)/db` yields password `p@ss:w/rd`, which is what the
-# driver does and what a naive cut on the first '@' or ':' would get wrong.
+# So `u:p@ss:w/rd?x@tcp(h:3306)/db` yields password `p@ss:w/rd?x`, which is what
+# the driver does and what a naive cut on the first '@', ':' or '?' would get
+# wrong.
+
+# Percent-decode a URL-form user or password, the way url.Parse does in
+# normalizeDSN before it rebuilds the native DSN. Anything that is not a valid
+# '%XX' escape is kept verbatim, so a literal '%' survives.
+percent_decode() {
+    local input="$1"
+    local output=""
+    local hex
+
+    while [[ "$input" == *%* ]]; do
+        output+="${input%%\%*}"
+        input="${input#*\%}"
+        hex="${input:0:2}"
+        input="${input:2}"
+        if [[ "$hex" =~ ^[0-9A-Fa-f]{2}$ ]]; then
+            output+="$(printf '%b' "\\x${hex}")"
+        else
+            output+="%${hex}"
+        fi
+    done
+
+    printf '%s' "$output$input"
+}
 
 # Print `KEY=VALUE` lines for the DSN in $1. Returns non-zero on a malformed DSN.
 parse_mysql_dsn() {
@@ -32,26 +60,62 @@ parse_mysql_dsn() {
         return 1
     fi
 
-    # Strip query parameters; a '?' inside a password is not legal unescaped.
-    local without_params="${dsn%%\?*}"
+    local url_form=false
+    local credentials address dbname
 
-    # dbname is everything after the last '/'.
-    local dbname="${without_params##*/}"
-    local prefix="${without_params%/*}"
+    if [[ "$dsn" == *"://"* ]]; then
+        # URL form. Only the scheme normalizeDSN rewrites is supported; any
+        # other scheme is a misconfiguration and must not be exported as
+        # credentials.
+        local scheme="${dsn%%://*}"
+        if [ "$scheme" != "mysql" ]; then
+            echo "parse_mysql_dsn: unsupported DSN scheme '$scheme' (expected 'mysql://' or the native driver form)" >&2
+            return 1
+        fi
 
-    if [ "$prefix" = "$without_params" ]; then
-        echo "parse_mysql_dsn: no '/' separating the database name" >&2
-        return 1
-    fi
+        local rest="${dsn#*://}"
+        local authority="${rest%%/*}"
+        if [ "$authority" = "$rest" ]; then
+            echo "parse_mysql_dsn: no '/' separating the database name" >&2
+            return 1
+        fi
 
-    # Credentials end at the last '@'; the address follows it.
-    local credentials address
-    if [[ "$prefix" == *@* ]]; then
-        credentials="${prefix%@*}"
-        address="${prefix##*@}"
+        # The dbname follows the authority and ends at the query string.
+        local after_authority="${rest#*/}"
+        dbname="${after_authority%%\?*}"
+
+        # Credentials end at the last '@' in the authority.
+        if [[ "$authority" == *@* ]]; then
+            credentials="${authority%@*}"
+            address="${authority##*@}"
+        else
+            credentials=""
+            address="$authority"
+        fi
+
+        url_form=true
     else
-        credentials=""
-        address="$prefix"
+        # Native form. The dbname starts after the LAST '/' (a password may
+        # contain '/'), and the query string after the first '?' that follows
+        # it, so a '?' before the dbname stays in the password.
+        local head="${dsn%/*}"
+        local tail="${dsn##*/}"
+
+        if [ "$head" = "$dsn" ]; then
+            echo "parse_mysql_dsn: no '/' separating the database name" >&2
+            return 1
+        fi
+
+        dbname="${tail%%\?*}"
+
+        # Credentials end at the last '@'; the address follows it.
+        if [[ "$head" == *@* ]]; then
+            credentials="${head%@*}"
+            address="${head##*@}"
+        else
+            credentials=""
+            address="$head"
+        fi
     fi
 
     # Username ends at the first ':'; everything after is the password.
@@ -62,6 +126,11 @@ parse_mysql_dsn() {
     else
         user="$credentials"
         password=""
+    fi
+
+    if [ "$url_form" = true ]; then
+        user="$(percent_decode "$user")"
+        password="$(percent_decode "$password")"
     fi
 
     # address is protocol(host:port), e.g. tcp(db.example.com:3306).

@@ -189,11 +189,7 @@ func (s *Service) AcceptInvite(ctx context.Context, token string, userID int64) 
 		return err
 	}
 
-	if err := s.repo.ConsumeInviteToken(ctx, token); err != nil {
-		return err
-	}
-
-	if err := s.repo.LinkInviteAcceptance(ctx, invite.OwnerID, invite.EmployeeID, userID); err != nil {
+	if err := s.repo.AcceptInvite(ctx, invite.OwnerID, invite.EmployeeID, userID, token); err != nil {
 		return err
 	}
 	invalidateHRCoreScope(ctx, invite.OwnerID)

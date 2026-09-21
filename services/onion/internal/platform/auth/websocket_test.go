@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 )
 
@@ -165,5 +166,34 @@ func TestWebSocketTicketExpires(t *testing.T) {
 
 	if _, ok := ConsumeWebSocketTicket(context.Background(), ticket); ok {
 		t.Fatal("expired ticket was accepted")
+	}
+}
+
+// Tickets that are issued but never consumed must not accumulate in the local
+// fallback map for the process lifetime.
+func TestWebSocketTicketFallbackMapEvictsExpiredTickets(t *testing.T) {
+	if cacher.RedisAvailable() {
+		t.Skip("the local fallback map is only populated when Redis is unavailable")
+	}
+
+	expiredTicket, err := issueWebSocketTicketAt(
+		context.Background(),
+		&AuthUser{UserID: 13},
+		time.Now().Add(-webSocketTicketLifetime-time.Second),
+	)
+	if err != nil {
+		t.Fatalf("issueWebSocketTicketAt: %v", err)
+	}
+	expiredHash := hashWebSocketTicket(expiredTicket)
+
+	if _, err := IssueWebSocketTicket(context.Background(), &AuthUser{UserID: 14}); err != nil {
+		t.Fatalf("IssueWebSocketTicket: %v", err)
+	}
+
+	websocketTickets.Lock()
+	_, stillStored := websocketTickets.entries[expiredHash]
+	websocketTickets.Unlock()
+	if stillStored {
+		t.Fatal("expired ticket remained in the fallback map after a new ticket was stored")
 	}
 }

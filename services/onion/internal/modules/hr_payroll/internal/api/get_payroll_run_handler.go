@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
@@ -38,14 +39,19 @@ func (h *GetPayrollRunHandler) Serve(ctx context.Context, _ *GetPayrollRunReques
 		return GetPayrollRunResponse{}, err
 	}
 
-	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
-	if empErr != nil {
-		logger.Ctx(ctx).Warn("failed to resolve employee for payroll permission check", logger.Any("owner_id", device.User.UserID), logger.Error(empErr))
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
 		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
-	allowed, permErr := h.Service.HasPermission(ctx, device.User.UserID, employeeID, "manage_payroll")
+
+	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+	if empErr != nil {
+		logger.Ctx(ctx).Warn("failed to resolve employee for payroll permission check", logger.Any("business_id", businessID), logger.Error(empErr))
+		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+	allowed, permErr := h.Service.HasPermission(ctx, businessID, employeeID, "manage_payroll")
 	if permErr != nil {
-		logger.Ctx(ctx).Error("failed to check manage_payroll permission", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(permErr))
+		logger.Ctx(ctx).Error("failed to check manage_payroll permission", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(permErr))
 		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 	if !allowed {
@@ -58,12 +64,12 @@ func (h *GetPayrollRunHandler) Serve(ctx context.Context, _ *GetPayrollRunReques
 		return GetPayrollRunResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid payroll run id")
 	}
 
-	run, entries, err := h.Service.GetPayrollRun(ctx, device.User.UserID, id)
+	run, entries, err := h.Service.GetPayrollRun(ctx, businessID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollRunNotFound) {
 			return GetPayrollRunResponse{}, onekiterrors.New(http.StatusNotFound, "Payroll run not found")
 		}
-		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("owner_id", device.User.UserID), logger.Any("run_id", id), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("business_id", businessID), logger.Any("run_id", id), logger.Error(err))
 		return GetPayrollRunResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get payroll run")
 	}
 

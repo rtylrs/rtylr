@@ -130,7 +130,11 @@ FROM flow_task_comments c
 LEFT JOIN users u ON u.id = c.user_id
 WHERE c.task_id = ? ORDER BY c.created_at ASC, c.id ASC LIMIT 500;
 
--- name: DeleteComment :exec
+-- Self-scoped like the delete itself: only the author's own comment row can
+-- match, so an admin-tier caller deleting someone else's comment reports the
+-- denial instead of a success that deleted nothing. :execresult is what lets
+-- the repository tell the two apart via requireAffected.
+-- name: DeleteComment :execresult
 DELETE FROM flow_task_comments WHERE id = ? AND user_id = ?;
 
 -- name: LogActivity :exec

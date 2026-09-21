@@ -23,7 +23,14 @@ INSERT INTO support_tickets (business_id, customer_name, customer_email, subject
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateTicket :exec
-UPDATE support_tickets SET subject = ?, status = ?, priority = ?, assigned_to = ?, channel = ?
+-- Partial update: omitted fields (empty string / NULL) keep their stored value
+-- so a request that only sets one field cannot blank or NULL the others.
+UPDATE support_tickets SET
+    subject = CASE WHEN ? <> '' THEN ? ELSE subject END,
+    status = COALESCE(?, status),
+    priority = COALESCE(?, priority),
+    assigned_to = COALESCE(?, assigned_to),
+    channel = COALESCE(?, channel)
 WHERE business_id = ? AND id = ?;
 
 -- name: ListMessages :many

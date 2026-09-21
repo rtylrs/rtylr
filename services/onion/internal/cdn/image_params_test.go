@@ -199,6 +199,22 @@ func TestUploadImageReadURLPreservesTransformParams(t *testing.T) {
 	}
 }
 
+func TestOrientStepBareLettersMatchAliases(t *testing.T) {
+	tests := map[string]string{
+		"h":     "fx_flop",
+		"flop":  "fx_flop",
+		"hflip": "fx_flop",
+		"v":     "fx_flip",
+		"flip":  "fx_flip",
+		"vflip": "fx_flip",
+	}
+	for raw, want := range tests {
+		if got := orientStep(raw); got != want {
+			t.Errorf("orientStep(%q) = %q, want %q", raw, got, want)
+		}
+	}
+}
+
 func TestResponsiveWidths(t *testing.T) {
 	got := responsiveWidths(200, 1000, 5)
 	want := []int{200, 400, 600, 800, 1000}

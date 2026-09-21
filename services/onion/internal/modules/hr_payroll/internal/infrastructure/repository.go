@@ -569,6 +569,7 @@ func payrollRunFromRow(row sqlc.HrPayrollRun) domain.PayrollRunRecord {
 	run := domain.PayrollRunRecord{
 		ID:              row.ID,
 		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
 		PeriodStart:     row.PeriodStart.Format("2006-01-02"),
 		PeriodEnd:       row.PeriodEnd.Format("2006-01-02"),
 		Status:          row.Status,

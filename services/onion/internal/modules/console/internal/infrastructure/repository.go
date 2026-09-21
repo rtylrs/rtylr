@@ -1257,16 +1257,7 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 }
 
 func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time) (int64, error) {
-	var expiresSQL interface{}
-	if expiresAt != nil {
-		expiresSQL = *expiresAt
-	}
-	query, args, err := sq.
-		Insert("manual_access_grants").
-		Columns("user_id", "plan_id", "granted_by", "note", "expires_at").
-		Values(userID, planID, grantedBy, note, expiresSQL).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	query, args, err := buildCreateGrantSQL(userID, planID, grantedBy, note, expiresAt)
 	if err != nil {
 		return 0, err
 	}
@@ -1276,6 +1267,62 @@ func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy 
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+func buildCreateGrantSQL(userID, planID, grantedBy int64, note string, expiresAt *time.Time) (string, []any, error) {
+	var expiresSQL interface{}
+	if expiresAt != nil {
+		expiresSQL = *expiresAt
+	}
+	return sq.
+		Insert("manual_access_grants").
+		Columns("user_id", "plan_id", "granted_by", "note", "expires_at").
+		Values(userID, planID, grantedBy, note, expiresSQL).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+}
+
+// CreateGrantAndActivateSubscription inserts a manual access grant and mirrors
+// it onto the owner's subscription row in one transaction. Entitlement is
+// resolved from subscriptions, so a grant whose subscription write failed would
+// report success while granting nothing; either both writes land or neither does.
+func (r *Repository) CreateGrantAndActivateSubscription(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time, sub SubscriptionWriteParams) (int64, error) {
+	query, args, err := buildCreateGrantSQL(userID, planID, grantedBy, note, expiresAt)
+	if err != nil {
+		return 0, err
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	res, err := tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	if err := sqlc.New(tx).UpsertSubscription(ctx, upsertSubscriptionParams(sub)); err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 // GetGrant returns the display fields for one grant without loading the full

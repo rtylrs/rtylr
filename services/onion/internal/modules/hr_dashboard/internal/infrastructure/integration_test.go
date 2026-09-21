@@ -456,3 +456,35 @@ func TestGetWidgets_CountMatchesUpserted(t *testing.T) {
 		t.Errorf("expected 2 widgets, got %d", len(got))
 	}
 }
+
+func TestUpsertWidgets_PersistsOwnerIDDistinctFromBusinessID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// The caller's user id and the business it belongs to are normally
+	// different values; the row must carry each in its own column.
+	const isolatedOwner int64 = 9_999_916
+	const isolatedBusiness int64 = 9_999_917
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedBusiness, []*domain.DashboardWidget{}) }()
+
+	if err := repo.UpsertWidgets(ctx, isolatedBusiness, []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, BusinessID: isolatedBusiness, WidgetType: "owner_check", Width: 1, Height: 1, Config: []byte("{}")},
+	}); err != nil {
+		t.Fatalf("UpsertWidgets: %v", err)
+	}
+
+	got, err := repo.GetWidgets(ctx, isolatedBusiness)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("expected 1 widget, got %d", len(got))
+	}
+	if got[0].OwnerID != isolatedOwner {
+		t.Errorf("owner_id = %d, want the caller's user id %d", got[0].OwnerID, isolatedOwner)
+	}
+	if got[0].BusinessID != isolatedBusiness {
+		t.Errorf("business_id = %d, want %d", got[0].BusinessID, isolatedBusiness)
+	}
+}

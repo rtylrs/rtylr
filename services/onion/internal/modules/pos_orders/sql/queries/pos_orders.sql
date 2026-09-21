@@ -32,7 +32,7 @@ DELETE FROM pos_tables WHERE business_id = ? AND id = ?;
 UPDATE pos_tables SET status = 'occupied', current_session_order_id = ? WHERE business_id = ? AND id = ?;
 
 -- name: FreeTable :exec
-UPDATE pos_tables SET status = 'available', current_session_order_id = NULL WHERE id = ?;
+UPDATE pos_tables SET status = 'available', current_session_order_id = NULL WHERE id = ? AND business_id = ?;
 
 -- name: GetCurrentOpenSession :one
 SELECT id, owner_id, business_id, location_id, staff_id, status,
@@ -104,10 +104,10 @@ INSERT INTO pos_order_items
  discount_pct, discount_amount, tax_rate, total, notes, modifiers, combo_id)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: UpdateOrderStatus :exec
+-- name: UpdateOrderStatus :execresult
 UPDATE pos_orders SET status = ? WHERE business_id = ? AND id = ?;
 
--- name: UpdateOrderItemStatus :exec
+-- name: UpdateOrderItemStatus :execresult
 UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
 
 -- name: GetOrderItems :many

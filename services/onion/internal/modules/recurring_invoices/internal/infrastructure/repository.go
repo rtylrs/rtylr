@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
@@ -58,20 +59,35 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Recur
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.RecurringInvoiceInput) (int64, error) {
+	if input.TemplateInvoiceID == nil {
+		return 0, errors.New("template_invoice_id is required")
+	}
 	nextDate, err := time.Parse("2006-01-02", input.NextInvoiceDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse next_invoice_date", logger.Error(err))
 		return 0, err
 	}
+	endDate, err := parseEndDate(input.EndDate)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse end_date", logger.Error(err))
+		return 0, err
+	}
+
+	// is_active is optional in the contract and defaults to TRUE in the schema:
+	// an omitted flag means "active unless told otherwise".
+	isActive := true
+	if input.IsActive != nil {
+		isActive = *input.IsActive
+	}
 
 	res, err := r.queries.CreateRecurringInvoice(ctx, sqlc.CreateRecurringInvoiceParams{
 		OwnerID:           businessID,
 		BusinessID:        businessID,
-		TemplateInvoiceID: input.TemplateInvoiceID,
+		TemplateInvoiceID: *input.TemplateInvoiceID,
 		Frequency:         sqlc.FinanceRecurringInvoicesFrequency(input.Frequency),
 		NextInvoiceDate:   nextDate,
-		EndDate:           nullTimeStr(input.EndDate),
-		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
+		EndDate:           endDate,
+		IsActive:          sql.NullBool{Bool: isActive, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create recurring invoice", logger.Error(err))
@@ -87,13 +103,27 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		logger.Ctx(ctx).Error("Failed to parse next_invoice_date", logger.Error(err))
 		return err
 	}
+	endDate, err := parseEndDate(input.EndDate)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse end_date", logger.Error(err))
+		return err
+	}
 
-	err = r.queries.UpdateRecurringInvoice(ctx, sqlc.UpdateRecurringInvoiceParams{
-		TemplateInvoiceID: input.TemplateInvoiceID,
+	// The optional fields only overwrite the stored row when the caller sent
+	// them: an omitted template_invoice_id must not clear the template, an
+	// omitted is_active must not pause the schedule, and an omitted end_date
+	// must not turn a bounded schedule into an open-ended one.
+	setEndDate := int64(0)
+	if input.EndDate != nil {
+		setEndDate = 1
+	}
+	res, err := r.queries.UpdateRecurringInvoice(ctx, sqlc.UpdateRecurringInvoiceParams{
+		TemplateInvoiceID: nullInt64Ptr(input.TemplateInvoiceID),
 		Frequency:         sqlc.FinanceRecurringInvoicesFrequency(input.Frequency),
 		NextInvoiceDate:   nextDate,
-		EndDate:           nullTimeStr(input.EndDate),
-		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
+		SetEndDate:        setEndDate,
+		EndDate:           endDate,
+		IsActive:          nullBoolPtr(input.IsActive),
 		ID:                id,
 		BusinessID:        businessID,
 	})
@@ -101,8 +131,17 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		logger.Ctx(ctx).Error("Failed to update recurring invoice", logger.Error(err))
 		return err
 	}
-
-	return nil
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows > 0 {
+		return nil
+	}
+	// An update that changes no column value reports zero affected rows just
+	// like an update that matches no row, so probe for the row to tell the two
+	// apart instead of reporting a 404 for a no-op update.
+	return r.requireExists(ctx, businessID, id)
 }
 
 func (r *Repository) SetActive(ctx context.Context, businessID, id int64, active bool) error {
@@ -119,7 +158,26 @@ func (r *Repository) SetActive(ctx context.Context, businessID, id int64, active
 	if err != nil {
 		return err
 	}
-	if rows == 0 {
+	if rows > 0 {
+		return nil
+	}
+	// Pausing an already-paused schedule (or resuming an active one) changes no
+	// column value, so zero affected rows is not proof that the row is missing.
+	return r.requireExists(ctx, businessID, id)
+}
+
+// requireExists maps a zero-affected update onto the domain not-found error
+// unless the row is actually present.
+func (r *Repository) requireExists(ctx context.Context, businessID, id int64) error {
+	exists, err := r.queries.RecurringInvoiceExists(ctx, sqlc.RecurringInvoiceExistsParams{
+		ID:         id,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to check recurring invoice existence", logger.Error(err))
+		return err
+	}
+	if !exists {
 		return domain.ErrRecurringInvoiceNotFound
 	}
 	return nil
@@ -311,15 +369,37 @@ func nullTime(t sql.NullTime) time.Time {
 	return time.Time{}
 }
 
-func nullTimeStr(s string) sql.NullTime {
-	if s == "" {
-		return sql.NullTime{}
+// parseEndDate maps the optional end_date contract field onto the NULL-able
+// end_date column. nil means "not supplied" (on update that leaves the stored
+// value untouched); an empty value clears the bound. A malformed value is an
+// error rather than a silently open-ended schedule.
+func parseEndDate(value *string) (sql.NullTime, error) {
+	if value == nil {
+		return sql.NullTime{}, nil
 	}
-	t, err := time.Parse("2006-01-02", s)
+	trimmed := strings.TrimSpace(*value)
+	if trimmed == "" {
+		return sql.NullTime{}, nil
+	}
+	parsed, err := time.Parse("2006-01-02", trimmed)
 	if err != nil {
-		return sql.NullTime{}
+		return sql.NullTime{}, fmt.Errorf("end_date must be in YYYY-MM-DD format: %w", err)
 	}
-	return sql.NullTime{Time: t, Valid: true}
+	return sql.NullTime{Time: parsed, Valid: true}, nil
+}
+
+func nullBoolPtr(b *bool) sql.NullBool {
+	if b == nil {
+		return sql.NullBool{}
+	}
+	return sql.NullBool{Bool: *b, Valid: true}
+}
+
+func nullInt64Ptr(i *int64) sql.NullInt64 {
+	if i == nil {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: *i, Valid: true}
 }
 
 func advanceDate(date time.Time, frequency string) (time.Time, error) {

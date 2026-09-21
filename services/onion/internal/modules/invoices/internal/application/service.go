@@ -292,6 +292,11 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 		Notes:          input.Notes,
 		Terms:          input.Terms,
 	}
+	// The verified customer link must be persisted, or per-customer reads
+	// (ListInvoicesByCustomer) can never return the invoice.
+	if input.CustomerID > 0 {
+		inv.CustomerID = &input.CustomerID
+	}
 
 	invID, err := s.repo.CreateInvoiceWithItems(ctx, businessID, inv, items)
 	if err != nil {

@@ -171,13 +171,28 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 }
 
 func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
-	_, err := r.queries.UpdateQuoteStatus(ctx, sqlc.UpdateQuoteStatusParams{
+	result, err := r.queries.UpdateQuoteStatus(ctx, sqlc.UpdateQuoteStatusParams{
 		Status:     sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(status), Valid: status != ""},
 		ID:         id,
 		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update quote status", logger.Error(err))
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected != 0 {
+		return nil
+	}
+
+	// MySQL reports changed rows, not matched rows, so re-setting the current
+	// status also lands here. Re-read the row to tell that idempotent no-op
+	// apart from a quote that does not exist in this business, mirroring
+	// Delete below.
+	if _, err := r.Get(ctx, businessID, id); err != nil {
 		return err
 	}
 
@@ -247,6 +262,17 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 	}()
 
 	qtx := r.queries.WithTx(tx)
+
+	// Serialize invoice-number allocation per business. The business row is
+	// the per-tenant mutex: locking it before the first read also starts this
+	// transaction's read view after any competing conversion committed, so
+	// CountInvoiceSequenceForQuote below cannot mint a number another
+	// conversion has just taken.
+	if _, err = qtx.LockBusinessForQuoteConversion(ctx, businessID); err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to lock business for quote conversion", logger.Error(err))
+		return 0, err
+	}
 
 	quoteRow, err := qtx.GetQuote(ctx, sqlc.GetQuoteParams{ID: quoteID, BusinessID: businessID})
 	if err != nil {

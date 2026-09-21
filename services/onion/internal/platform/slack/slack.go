@@ -55,6 +55,9 @@ type notifier struct {
 	bufs     map[Channel][]string
 	stop     chan struct{}
 	stopOnce sync.Once
+	// stopped is set by Shutdown (under mu, before the final flush) so a
+	// concurrent Post cannot append after the flush and lose the message.
+	stopped bool
 }
 
 type postMessageResult struct {
@@ -96,13 +99,21 @@ func Init() {
 // Shutdown stops the flush loop and delivers any buffered messages. Call it
 // from binary shutdown paths so queued alerts (including security-relevant
 // ones) survive a deploy. Safe to call multiple times; no-op when disabled.
+//
+// Shutdown clears the global notifier: after it returns, Enabled() is false
+// and Post is a no-op instead of appending to a flush loop that will never run
+// again. Init can arm a fresh notifier afterwards.
 func Shutdown() {
-	mu.RLock()
+	mu.Lock()
 	n := global
-	mu.RUnlock()
+	global = nil
+	mu.Unlock()
 	if n == nil {
 		return
 	}
+	n.mu.Lock()
+	n.stopped = true
+	n.mu.Unlock()
 	n.stopOnce.Do(func() { close(n.stop) })
 	n.flush()
 }
@@ -127,6 +138,10 @@ func Post(ch Channel, text string) {
 		return
 	}
 	n.mu.Lock()
+	if n.stopped {
+		n.mu.Unlock()
+		return
+	}
 	n.bufs[ch] = append(n.bufs[ch], text)
 	n.mu.Unlock()
 }

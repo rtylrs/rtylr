@@ -245,7 +245,16 @@ func (a *OrderAPI) UpdateOrderStatus(ctx context.Context, req *posordersv1.Updat
 	}
 
 	if err := a.Service.UpdateOrderStatus(ctx, businessID, req.GetOrderId(), domain.OrderStatus(body.GetStatus())); err != nil {
-		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to update order status")
+		switch {
+		case errors.Is(err, domain.ErrOrderNotFound):
+			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")
+		case errors.Is(err, domain.ErrInvalidOrderStatus):
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Invalid order status")
+		case errors.Is(err, domain.ErrOrderStatusRequiresWorkflow):
+			return nil, orderAPIStatusError(http.StatusConflict, "Order status must be changed through its dedicated flow")
+		default:
+			return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to update order status")
+		}
 	}
 
 	return &posordersv1.UpdateOrderStatusResponse{Message: "Order status updated"}, nil
@@ -431,6 +440,9 @@ func (a *OrderAPI) TransferTable(ctx context.Context, req *posordersv1.TransferT
 	if err := a.Service.TransferTable(ctx, businessID, orderID, newTableID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Order not found")
+		}
+		if errors.Is(err, domain.ErrTableNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Table not found")
 		}
 		if errors.Is(err, domain.ErrOrderCannotBeTransferred) {
 			return nil, onekiterrors.New(http.StatusUnprocessableEntity, err.Error())

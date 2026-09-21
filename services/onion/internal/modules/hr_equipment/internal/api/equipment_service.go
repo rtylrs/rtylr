@@ -22,15 +22,17 @@ func NewEquipmentAPI(service *application.Service) *EquipmentAPI {
 
 func (a *EquipmentAPI) ListAssets(ctx context.Context, req *hrequipmentv1.ListAssetsRequest) (*hrequipmentv1.ListAssetsResponse, error) {
 	result, err := (&ListAssetsHandler{Service: a.Service}).Serve(ctx, &ListAssetsRequest{
-		Status: req.GetCondition(),
+		EmployeeID: req.GetEmployeeId(),
+		Status:     req.GetCondition(),
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &hrequipmentv1.ListAssetsResponse{
 		Assets: result.Assets,
-		Total:  int64(len(result.Assets)),
-		Limit:  int32(len(result.Assets)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Total:  result.Total,
+		Limit:  result.Limit,
+		Offset: result.Offset,
 	}, nil
 }
 
@@ -70,14 +72,18 @@ func (a *EquipmentAPI) ApproveEquipment(ctx context.Context, req *hrequipmentv1.
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	// An absent body means the client never sent a decision. Silently reading
+	// the zero value as "rejected" used to persist a rejection for a valid
+	// pending request while responding success:true.
+	body := req.GetBody()
+	if body == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "request body with the approval decision is required")
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	approved := false
-	if req.GetBody() != nil {
-		approved = req.GetBody().GetApproved()
-	}
+	approved := body.GetApproved()
 	if err := a.Service.ApproveEquipmentRequest(ctx, businessID, req.GetEquipmentRequestId(), device.User.UserID, approved, ""); err != nil {
 		logger.Ctx(ctx).Error("failed to process equipment request", logger.Any("owner_id", device.User.UserID), logger.Any("request_id", req.GetEquipmentRequestId()), logger.Error(err))
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to process equipment request")

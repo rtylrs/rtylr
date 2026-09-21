@@ -2,7 +2,14 @@ package api
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"net/http"
 	"testing"
+
+	onekithttp "github.com/corezio/onekit/http"
+
+	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 )
 
 func TestGetTicketHandler_Validate_RequiresID(t *testing.T) {
@@ -125,4 +132,29 @@ func TestGetTicketHandler_Validate_NegativeIDFails(_ *testing.T) {
 	req := &GetTicketRequest{ID: -1}
 	// -1 != 0 so validation should pass (documenting behavior)
 	_ = h.Validate(context.Background(), req)
+}
+
+func TestSupportTicketLookupError_MapsNotFound(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want int
+	}{
+		{name: "missing ticket", err: domain.ErrTicketNotFound, want: http.StatusNotFound},
+		{name: "wrapped missing ticket", err: fmt.Errorf("lookup: %w", domain.ErrTicketNotFound), want: http.StatusNotFound},
+		{name: "other failure", err: errors.New("connection reset"), want: http.StatusInternalServerError},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mapped := supportTicketLookupError(tt.err)
+			var oneKitErr *onekithttp.Error
+			if !errors.As(mapped, &oneKitErr) {
+				t.Fatalf("expected oneKit HTTP error, got %T: %v", mapped, mapped)
+			}
+			if got := int(oneKitErr.GetStatusCode()); got != tt.want {
+				t.Fatalf("status = %d, want %d", got, tt.want)
+			}
+		})
+	}
 }

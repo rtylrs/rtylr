@@ -24,7 +24,17 @@ const (
 	cvProcessingBatchSize = 25
 	maxCVExtractionBytes  = 10 << 20
 	maxCVStoredTextBytes  = 128 << 10
-	maxCVSummaryRunes     = 700
+	// maxCVExtractedTextBytes bounds the decompressed text materialized from a
+	// CV before it is normalized and truncated to maxCVStoredTextBytes, so a
+	// compression bomb cannot exhaust the worker's memory.
+	maxCVExtractedTextBytes = 1 << 20
+	// maxCVExtractedXMLBytes bounds the decompressed DOCX XML read while looking
+	// for the text above. XML carries markup on top of the text, so it is
+	// allowed more room than the text itself.
+	maxCVExtractedXMLBytes = 4 << 20
+	// maxCVExtractedPDFPages bounds how many PDF pages are inspected.
+	maxCVExtractedPDFPages = 500
+	maxCVSummaryRunes      = 700
 )
 
 var (
@@ -136,6 +146,45 @@ var cvLocationKeywords = []cvKeyword{
 	{"MENA", []string{"mena", "middle east"}},
 	{"Remote", []string{"remote"}},
 	{"Europe", []string{"europe", "eu"}},
+}
+
+// cvKeywordPatterns holds one precompiled word-boundary pattern per keyword
+// term. Matching terms as raw substrings tags CVs with unrelated skills: "hr"
+// matches "three", "ui" matches "built", "commerce" matches "e-commerce".
+var cvKeywordPatterns = buildCVKeywordPatterns(
+	cvSkillKeywords,
+	cvFunctionKeywords,
+	cvIndustryKeywords,
+	cvRoleKeywords,
+	cvEducationKeywords,
+	cvLanguageKeywords,
+	cvCertificationKeywords,
+	cvLocationKeywords,
+)
+
+func buildCVKeywordPatterns(groups ...[]cvKeyword) map[string]*regexp.Regexp {
+	patterns := make(map[string]*regexp.Regexp)
+	for _, keywords := range groups {
+		for _, keyword := range keywords {
+			for _, term := range keyword.Terms {
+				term = strings.ToLower(strings.TrimSpace(term))
+				if term == "" {
+					continue
+				}
+				if _, ok := patterns[term]; ok {
+					continue
+				}
+				// The pattern consumes the character before and after the term;
+				// RE2 has no lookaround. A term only matches when it is neither
+				// preceded nor followed by a letter, digit, or hyphen — hyphens
+				// join compounds ("e-commerce"), so "commerce" must not match
+				// inside "e-commerce" while "b.a." and "e-commerce" still match
+				// themselves.
+				patterns[term] = regexp.MustCompile(`(?:^|[^a-z0-9-])` + regexp.QuoteMeta(term) + `(?:[^a-z0-9-]|$)`)
+			}
+		}
+	}
+	return patterns
 }
 
 type cvStorage interface {
@@ -284,15 +333,76 @@ func extractPDFText(raw []byte) (string, error) {
 	}
 	defer file.Close()
 
-	plain, err := reader.GetPlainText()
-	if err != nil {
-		return "", err
+	return extractPDFPlainText(reader, maxCVExtractedTextBytes)
+}
+
+// extractPDFPlainText decodes PDF pages one at a time and stops once the
+// extracted text reaches limit. The pdf library materializes a page's full text
+// before returning it, so pages whose decompressed content does not fit in the
+// remaining budget are skipped instead of decoded: a compression bomb must not
+// exhaust worker memory before the caller's limit can be applied.
+func extractPDFPlainText(reader *pdf.Reader, limit int) (string, error) {
+	var out strings.Builder
+	skipped := false
+	pages := reader.NumPage()
+	if pages > maxCVExtractedPDFPages {
+		pages = maxCVExtractedPDFPages
 	}
-	out, err := io.ReadAll(io.LimitReader(plain, maxCVStoredTextBytes+1))
-	if err != nil {
-		return "", err
+	for i := 1; i <= pages && out.Len() < limit; i++ {
+		page := reader.Page(i)
+		if page.V.IsNull() {
+			continue
+		}
+		if !pdfContentFits(page, limit-out.Len()) {
+			skipped = true
+			continue
+		}
+		text, err := page.GetPlainText(nil)
+		if err != nil {
+			return "", err
+		}
+		out.WriteString(text)
 	}
-	return string(out), nil
+	if skipped && out.Len() == 0 {
+		// Nothing could be decoded without buffering more than the limit; fail
+		// loudly instead of storing an empty CV.
+		return "", fmt.Errorf("CV text is too large to extract")
+	}
+	return out.String(), nil
+}
+
+// pdfContentFits reports whether the decompressed content streams of a page fit
+// in budget.
+func pdfContentFits(page pdf.Page, budget int) bool {
+	contents := page.V.Key("Contents")
+	switch contents.Kind() {
+	case pdf.Stream:
+		return pdfStreamFits(contents, budget)
+	case pdf.Array:
+		for i := 0; i < contents.Len(); i++ {
+			if !pdfStreamFits(contents.Index(i), budget) {
+				return false
+			}
+		}
+		return true
+	default:
+		return true
+	}
+}
+
+// pdfStreamFits counts a content stream's decompressed bytes up to budget+1.
+// The pdf library panics on unreadable streams, so a panic counts as "does not
+// fit" and the page is skipped.
+func pdfStreamFits(stream pdf.Value, budget int) (fits bool) {
+	defer func() {
+		if recover() != nil {
+			fits = false
+		}
+	}()
+	reader := stream.Reader()
+	defer reader.Close()
+	n, err := io.CopyN(io.Discard, reader, int64(budget)+1)
+	return n <= int64(budget) && errors.Is(err, io.EOF)
 }
 
 func extractDOCXText(raw []byte) (string, error) {
@@ -309,7 +419,23 @@ func extractDOCXText(raw []byte) (string, error) {
 			return "", err
 		}
 		defer rc.Close()
-		return extractWordXMLText(rc)
+
+		// Bound the decompressed entry: a deflate-ratio bomb must not grow the
+		// worker's memory before the extracted text is truncated.
+		data, err := io.ReadAll(io.LimitReader(rc, maxCVExtractedXMLBytes+1))
+		if err != nil {
+			return "", err
+		}
+		truncated := len(data) > maxCVExtractedXMLBytes
+		text, err := extractWordXMLText(bytes.NewReader(data))
+		if err != nil {
+			if !truncated {
+				return "", err
+			}
+			// The bounded prefix may end mid-token; keep what was decoded.
+			return text, nil
+		}
+		return text, nil
 	}
 	return "", fmt.Errorf("DOCX missing word/document.xml")
 }
@@ -323,10 +449,17 @@ func extractWordXMLText(r io.Reader) (string, error) {
 			break
 		}
 		if err != nil {
-			return "", err
+			return out.String(), err
 		}
-		switch t := tok.(type) {
-		case xml.CharData:
+		if t, ok := tok.(xml.CharData); ok {
+			remaining := maxCVExtractedTextBytes - out.Len()
+			if remaining <= 0 {
+				break
+			}
+			if len(t) > remaining {
+				out.Write([]byte(t[:remaining]))
+				break
+			}
 			out.Write([]byte(t))
 			out.WriteByte(' ')
 		}
@@ -369,7 +502,8 @@ func matchCVKeywords(lowerText string, keywords []cvKeyword) []string {
 	out := make([]string, 0)
 	for _, keyword := range keywords {
 		for _, term := range keyword.Terms {
-			if strings.Contains(lowerText, strings.ToLower(term)) {
+			pattern := cvKeywordPatterns[strings.ToLower(strings.TrimSpace(term))]
+			if pattern != nil && pattern.MatchString(lowerText) {
 				out = append(out, keyword.Label)
 				break
 			}

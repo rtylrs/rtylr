@@ -235,9 +235,32 @@ func (r *Repository) GetEmployeeChecklist(ctx context.Context, businessID, emplo
 		return nil, err
 	}
 
+	return r.employeeChecklistWithItems(ctx, businessID, row)
+}
+
+// GetLatestEmployeeChecklist returns the employee's most recently triggered
+// checklist. The public GET /employees/{employee_id} route carries no checklist
+// id, so resolving the employee's latest checklist is the only way it can
+// return real data (the employee id must never be used as a checklist id).
+func (r *Repository) GetLatestEmployeeChecklist(ctx context.Context, businessID, employeeID int64) (*domain.EmployeeChecklistRecord, error) {
+	row, err := r.queries.GetLatestEmployeeChecklist(ctx, sqlc.GetLatestEmployeeChecklistParams{
+		BusinessID: businessID,
+		EmployeeID: employeeID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrChecklistNotFound
+		}
+		return nil, err
+	}
+
+	return r.employeeChecklistWithItems(ctx, businessID, row)
+}
+
+func (r *Repository) employeeChecklistWithItems(ctx context.Context, businessID int64, row sqlc.HrOnboardingEmployeeChecklist) (*domain.EmployeeChecklistRecord, error) {
 	items, err := r.queries.ListEmployeeChecklistItems(ctx, sqlc.ListEmployeeChecklistItemsParams{
 		BusinessID:          businessID,
-		EmployeeChecklistID: checklistID,
+		EmployeeChecklistID: row.ID,
 	})
 	if err != nil {
 		return nil, err

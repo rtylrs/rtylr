@@ -1271,7 +1271,18 @@ func (s *Service) DeleteLabel(ctx context.Context, id, actorID, businessID int64
 	return s.repo.DeleteLabel(ctx, id, actorID, businessID)
 }
 
+// SetTaskLabels is a task mutation: labels are part of every my-tasks payload,
+// so the assignee's cached pages have to go with the write, exactly as they do
+// for the other task-visible write paths.
 func (s *Service) SetTaskLabels(ctx context.Context, taskID, actorID int64, labelIDs []int64) error {
+	existing, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		logger.Ctx(ctx).Error("SetTaskLabels: failed to read task, my-tasks cache left to expire",
+			logger.Error(err))
+	} else {
+		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
+	}
+
 	return s.repo.SetTaskLabels(ctx, taskID, actorID, labelIDs)
 }
 

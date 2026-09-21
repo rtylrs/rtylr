@@ -193,6 +193,31 @@ for (const m of moduleDirs()) {
   }
 }
 
+// Module routes registered directly on the chi router (websocket upgrades,
+// signed webhooks, raw HTTP) bypass serverHttp.Register, so sweep those
+// literals too. Auth follows the module's GetAnonymousRoutes list.
+for (const m of moduleDirs()) {
+  for (const f of walk(m.path, ['.go'])) {
+    const t = readFileSync(f, 'utf8');
+    const re = /\.(Get|Post|Put|Patch|Delete)\("(\/[^"]+)"/g;
+    let mm;
+    while ((mm = re.exec(t))) {
+      const anon = anonByModule.get(m.name) || [];
+      rows.push({
+        module: m.name,
+        service: 'legacy-chi',
+        rpc_or_route: `${mm[1].toUpperCase()} ${mm[2]}`,
+        request_type: '',
+        response_type: '',
+        auth_required: anon.includes(mm[2]) ? 'no' : 'yes',
+        tenant_predicate: tenantEvidence(t, m.name),
+        file: relRepo(f),
+        line: t.slice(0, mm.index).split('\n').length,
+      });
+    }
+  }
+}
+
 // ---------- oneKit RPC handlers ----------
 // .onk services -> generated RegisterXServiceServer calls in module.go.
 const onkRoot = voxieApiDir();

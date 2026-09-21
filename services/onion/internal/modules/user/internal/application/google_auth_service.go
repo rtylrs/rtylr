@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"net/netip"
@@ -141,6 +142,15 @@ func (s *Service) linkGoogleUser(
 		return &GoogleAuthResult{UserID: existing.ID, Token: token, IsNew: false}, nil
 	}
 
+	// Only a genuine miss may provision a new account. Any other lookup failure
+	// (connection reset, context deadline, lock wait timeout) used to fall
+	// through to CreateUser for an email that already exists, hit the UNIQUE
+	// email index, and surface a raw duplicate-key error instead of the lookup
+	// failure; without that index it would create a second account.
+	if findErr != nil && !errors.Is(findErr, sql.ErrNoRows) {
+		return nil, findErr
+	}
+
 	// Create a new user. Password hash is a random 64 hex chars --
 	// bcrypt of that string, never handed out. User can set a real
 	// password later via the "forgot password" flow.
@@ -157,8 +167,12 @@ func (s *Service) linkGoogleUser(
 		Email:            email,
 		PasswordHash:     pwHash,
 		FullName:         googleUser.Name,
-		SignupIPAddress:  signupIP.String(),
 		SignupDeviceInfo: deviceInfo,
+	}
+	// netip.Addr{}.String() is the literal "invalid IP"; leave the column NULL
+	// when the client address could not be parsed rather than storing that.
+	if signupIP.IsValid() {
+		newUser.SignupIPAddress = signupIP.String()
 	}
 
 	userID, createErr := s.repo.CreateUser(ctx, newUser)

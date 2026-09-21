@@ -44,40 +44,40 @@ func (r *Repository) GetInsightsStats(ctx context.Context, businessID int64) (do
 	avgDays, err := r.queries.GetAvgCompletionDays(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetInsightsStats: avg completion failed", logger.Error(err))
-	} else {
-		stats.AvgCompletionDays = interfaceToFloat64(avgDays)
+		return stats, err
 	}
+	stats.AvgCompletionDays = interfaceToFloat64(avgDays)
 
 	velThis, err := r.queries.GetVelocityThisWeek(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetInsightsStats: velocity this week failed", logger.Error(err))
-	} else {
-		stats.VelocityThisWeek = velThis
+		return stats, err
 	}
+	stats.VelocityThisWeek = velThis
 
 	velLast, err := r.queries.GetVelocityLastWeek(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetInsightsStats: velocity last week failed", logger.Error(err))
-	} else {
-		stats.VelocityLastWeek = velLast
+		return stats, err
 	}
+	stats.VelocityLastWeek = velLast
 
 	statusRows, err := r.queries.GetTasksByStatus(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetInsightsStats: tasks by status failed", logger.Error(err))
-	} else {
-		for _, row := range statusRows {
-			stats.TasksByStatus[string(row.Status.FlowTasksStatus)] = row.Cnt
-		}
+		return stats, err
+	}
+	for _, row := range statusRows {
+		stats.TasksByStatus[string(row.Status.FlowTasksStatus)] = row.Cnt
 	}
 
 	priorityRows, err := r.queries.GetTasksByPriority(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetInsightsStats: tasks by priority failed", logger.Error(err))
-	} else {
-		for _, row := range priorityRows {
-			stats.TasksByPriority[string(row.Priority.FlowTasksPriority)] = row.Cnt
-		}
+		return stats, err
+	}
+	for _, row := range priorityRows {
+		stats.TasksByPriority[string(row.Priority.FlowTasksPriority)] = row.Cnt
 	}
 
 	return stats, nil
@@ -141,11 +141,11 @@ func (r *Repository) GetRoadmap(ctx context.Context, businessID int64) (domain.R
 		byProject, err := r.getMilestonesByProjectIDs(ctx, businessID, projectIDs)
 		if err != nil {
 			logger.Ctx(ctx).Error("GetRoadmap: milestones query failed", logger.Error(err))
-		} else {
-			for i := range result.Projects {
-				if ms := byProject[result.Projects[i].ID]; ms != nil {
-					result.Projects[i].Milestones = ms
-				}
+			return domain.RoadmapResult{}, err
+		}
+		for i := range result.Projects {
+			if ms := byProject[result.Projects[i].ID]; ms != nil {
+				result.Projects[i].Milestones = ms
 			}
 		}
 	}

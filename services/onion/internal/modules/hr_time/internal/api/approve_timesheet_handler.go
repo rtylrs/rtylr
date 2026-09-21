@@ -53,6 +53,9 @@ func (h *ApproveTimesheetHandler) Serve(ctx context.Context, _ *ApproveTimesheet
 		if errors.Is(err, domain.ErrTimesheetNotFound) {
 			return ApproveTimesheetResponse{}, onekiterrors.New(http.StatusNotFound, "Timesheet not found")
 		}
+		if errors.Is(err, domain.ErrTimesheetNotPending) {
+			return ApproveTimesheetResponse{}, onekiterrors.New(http.StatusConflict, "Timesheet is not awaiting approval")
+		}
 		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
 			return ApproveTimesheetResponse{}, onekiterrors.New(http.StatusPreconditionFailed, "Approval chain not configured for timesheets")
 		}

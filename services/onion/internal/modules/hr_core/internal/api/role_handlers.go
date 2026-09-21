@@ -174,6 +174,9 @@ func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return UpdateRoleResponse{}, onekiterrors.PermissionDenied()
 		}
+		if errors.Is(err, domain.ErrRoleNotFound) {
+			return UpdateRoleResponse{}, onekiterrors.New(http.StatusNotFound, "Role not found")
+		}
 		logger.Ctx(ctx).Error("failed to update role", logger.Any("business_id", businessID), logger.Any("role_id", id), logger.Error(err))
 		return UpdateRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}

@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
@@ -208,8 +209,8 @@ func TestGetTicket_NotFound_Errors(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetByID(ctx, supportTicketsBusinessID, 9999999)
-	if err == nil {
-		t.Fatal("expected error for non-existent ticket ID, got nil")
+	if !errors.Is(err, domain.ErrTicketNotFound) {
+		t.Fatalf("GetByID(missing) error = %v, want ErrTicketNotFound", err)
 	}
 }
 
@@ -280,6 +281,82 @@ func TestUpdateTicket_ChangesAssignee(t *testing.T) {
 	}
 	if ticket.AssignedTo == nil || *ticket.AssignedTo != assignee {
 		t.Errorf("expected assignee %d, got %v", assignee, ticket.AssignedTo)
+	}
+}
+
+// TestUpdateTicket_PartialUpdate_PreservesUntouchedFields pins the fix for a
+// partial PUT that only carries the fields being changed: the columns the
+// request omits must keep their stored values instead of being blanked/NULLed.
+func TestUpdateTicket_PartialUpdate_PreservesUntouchedFields(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	assignee := testutil.OwnerID
+	id, err := repo.Create(ctx, domain.TicketInput{
+		BusinessID:    supportTicketsBusinessID,
+		CustomerName:  "Nora",
+		CustomerEmail: "nora@example.com",
+		Subject:       "Partial Update Subject",
+		Status:        "open",
+		Priority:      "high",
+		Channel:       "email",
+		AssignedTo:    &assignee,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	// Only the status is supplied; subject/priority/assignee/channel are omitted.
+	if err := repo.Update(ctx, domain.TicketUpdateInput{
+		BusinessID: supportTicketsBusinessID,
+		ID:         id,
+		Status:     "resolved",
+	}); err != nil {
+		t.Fatalf("Update status only: %v", err)
+	}
+
+	ticket, err := repo.GetByID(ctx, supportTicketsBusinessID, id)
+	if err != nil {
+		t.Fatalf("GetByID after update: %v", err)
+	}
+	if ticket.Status != "resolved" {
+		t.Errorf("expected status 'resolved', got %q", ticket.Status)
+	}
+	if ticket.Subject != "Partial Update Subject" {
+		t.Errorf("partial update blanked subject: got %q, want %q", ticket.Subject, "Partial Update Subject")
+	}
+	if ticket.Priority != "high" {
+		t.Errorf("partial update cleared priority: got %q, want 'high'", ticket.Priority)
+	}
+	if ticket.AssignedTo == nil || *ticket.AssignedTo != assignee {
+		t.Errorf("partial update cleared assigned_to: got %v, want %d", ticket.AssignedTo, assignee)
+	}
+	if ticket.Channel != "email" {
+		t.Errorf("partial update cleared channel: got %q, want 'email'", ticket.Channel)
+	}
+
+	// A subject-only update must leave the previously set status in place.
+	if err := repo.Update(ctx, domain.TicketUpdateInput{
+		BusinessID: supportTicketsBusinessID,
+		ID:         id,
+		Subject:    "Renamed Subject",
+	}); err != nil {
+		t.Fatalf("Update subject only: %v", err)
+	}
+
+	ticket, err = repo.GetByID(ctx, supportTicketsBusinessID, id)
+	if err != nil {
+		t.Fatalf("GetByID after subject update: %v", err)
+	}
+	if ticket.Subject != "Renamed Subject" {
+		t.Errorf("expected subject 'Renamed Subject', got %q", ticket.Subject)
+	}
+	if ticket.Status != "resolved" {
+		t.Errorf("subject-only update cleared status: got %q, want 'resolved'", ticket.Status)
+	}
+	if ticket.Priority != "high" {
+		t.Errorf("subject-only update cleared priority: got %q, want 'high'", ticket.Priority)
 	}
 }
 

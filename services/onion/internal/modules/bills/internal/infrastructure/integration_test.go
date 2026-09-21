@@ -367,6 +367,82 @@ func TestCreate_Bill_WithSupplier(t *testing.T) {
 	}
 }
 
+func TestUpdate_Bill_NoopUpdateSucceeds(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:      money.Amount(17500),
+		Currency:    "USD",
+		DueDate:     "2026-12-15",
+		Status:      "pending",
+		Description: "unchanged retry",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+
+	// A retry that re-sends the stored values changes no column, so MySQL
+	// reports zero affected rows even though the row matched.
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BillInput{
+		Amount:      money.Amount(17500),
+		Currency:    "USD",
+		DueDate:     "2026-12-15",
+		Status:      "pending",
+		Description: "unchanged retry",
+	}); err != nil {
+		t.Fatalf("no-op Update must not report an existing bill as not found: %v", err)
+	}
+}
+
+func TestUpdate_Bill_OmittedSupplierFieldsKeepStoredValues(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	purchaseOrderID := int64(981234)
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		SupplierID:      5101,
+		SupplierName:    "Acme Supply",
+		PurchaseOrderID: &purchaseOrderID,
+		Amount:          money.Amount(24000),
+		Currency:        "USD",
+		DueDate:         "2026-10-20",
+		Status:          "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+
+	// The partial update body omits supplier_id, supplier_name and
+	// purchase_order_id; those keep the stored values.
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BillInput{
+		Amount:   money.Amount(24000),
+		Currency: "USD",
+		DueDate:  "2026-10-20",
+		Status:   "pending",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get after update: %v", err)
+	}
+	if bill.SupplierID != 5101 {
+		t.Errorf("SupplierID = %d, want 5101 (stored link cleared)", bill.SupplierID)
+	}
+	if bill.SupplierName != "Acme Supply" {
+		t.Errorf("SupplierName = %q, want %q (stored snapshot cleared)", bill.SupplierName, "Acme Supply")
+	}
+	if bill.PurchaseOrderID == nil || *bill.PurchaseOrderID != purchaseOrderID {
+		t.Errorf("PurchaseOrderID = %v, want %d (stored link cleared)", bill.PurchaseOrderID, purchaseOrderID)
+	}
+}
+
 func TestUpdate_Bill_ChangesStatus(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

@@ -324,6 +324,9 @@ var maliciousPathAllowedPrefixes = []string{
 	"/files",
 	"/images",
 	"/uploads",
+	// Registered anonymous route (GET /.well-known/rtylr.json). The scanner
+	// probe pattern for /.well-known/ must not take it down.
+	"/.well-known",
 }
 
 func SecurityMiddleware() MiddlewareFunc {
@@ -370,7 +373,12 @@ func SecurityMiddleware() MiddlewareFunc {
 				return
 			}
 
-			if hasSuspiciousParams(r) {
+			// CDN/media routes advertise transformation params (sharpen,
+			// threshold, aspect-ratio, ...) whose names contain short tokens
+			// from the suspicious list ("sh", "asp"), so the same allow-list
+			// used for malicious paths must exempt their query params from the
+			// probe heuristic.
+			if !isAllowListedPath(path) && hasSuspiciousParams(r) {
 				batcher.addRequest(blockedRequest{
 					IP:          ip,
 					UserAgent:   userAgent,
@@ -393,11 +401,8 @@ func SecurityMiddleware() MiddlewareFunc {
 
 func isMaliciousPath(path string) bool {
 	pathLower := strings.ToLower(path)
-	for _, prefix := range maliciousPathAllowedPrefixes {
-		prefixLower := strings.ToLower(prefix)
-		if pathLower == prefixLower || strings.HasPrefix(pathLower, prefixLower+"/") {
-			return false
-		}
+	if isAllowListedPath(pathLower) {
+		return false
 	}
 
 	// Split into segments so that /hr/setup/status does not match the /setup pattern.
@@ -413,13 +418,35 @@ func isMaliciousPath(path string) bool {
 	}
 
 	for _, pattern := range maliciousPatterns {
-		patternLower := strings.ToLower(strings.TrimPrefix(pattern, "/"))
+		// Patterns may carry a leading and/or trailing slash ("/.git/"); trim
+		// them before matching so entries like "/.git/" are not dead: a path
+		// segment can never contain '/' .
+		patternLower := strings.ToLower(strings.Trim(pattern, "/"))
+		if patternLower == "" {
+			continue
+		}
 		if _, ok := segmentSet[patternLower]; ok {
 			// Confirm the pattern actually appears as a standalone first segment
 			// (i.e. the path starts with /<pattern> exactly), not just anywhere.
 			if strings.HasPrefix(pathLower, "/"+patternLower+"/") || pathLower == "/"+patternLower {
 				return true
 			}
+		}
+	}
+
+	return false
+}
+
+// isAllowListedPath reports whether the path belongs to a route group that must
+// stay reachable even though its name collides with a scanner-probe pattern
+// (CDN/upload/files/console routes). It is shared by isMaliciousPath and the
+// suspicious-param check so both keep the same exemptions.
+func isAllowListedPath(path string) bool {
+	pathLower := strings.ToLower(path)
+	for _, prefix := range maliciousPathAllowedPrefixes {
+		prefixLower := strings.ToLower(prefix)
+		if pathLower == prefixLower || strings.HasPrefix(pathLower, prefixLower+"/") {
+			return true
 		}
 	}
 

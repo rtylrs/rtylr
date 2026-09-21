@@ -1,6 +1,9 @@
 package keys
 
-import "testing"
+import (
+	"path"
+	"testing"
+)
 
 func TestUserMeForBusinessScopesByUserAndBusiness(t *testing.T) {
 	got := UserMeForBusiness(42, 7)
@@ -47,5 +50,35 @@ func TestBusinessEnabledAddonsIsBusinessScoped(t *testing.T) {
 	want := "cache:business:7:enabled_addons"
 	if got != want {
 		t.Fatalf("BusinessEnabledAddons = %q, want %q", got, want)
+	}
+}
+
+func TestSubscriptionPatternsDelimitOwnerID(t *testing.T) {
+	patterns := SubscriptionPatterns(4)
+	want := []string{"cache:subscription:4", "cache:subscription:4:*"}
+	if len(patterns) != len(want) {
+		t.Fatalf("SubscriptionPatterns(4) = %v, want %v", patterns, want)
+	}
+	for i := range want {
+		if patterns[i] != want[i] {
+			t.Fatalf("SubscriptionPatterns(4) = %v, want %v", patterns, want)
+		}
+	}
+
+	// The wildcard covers the owner's derived keys but must not bleed into
+	// neighbouring owner ids (4 vs 42) the way "cache:subscription:4*" would.
+	matched, err := path.Match(SubscriptionPrefix(4), SubscriptionAccess(4))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !matched {
+		t.Fatalf("prefix %q does not match %q", SubscriptionPrefix(4), SubscriptionAccess(4))
+	}
+	matched, err = path.Match(SubscriptionPrefix(4), Subscription(42))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if matched {
+		t.Fatalf("prefix %q leaked into owner 42's key", SubscriptionPrefix(4))
 	}
 }

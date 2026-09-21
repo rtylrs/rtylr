@@ -14,8 +14,8 @@ import (
 const appsCacheTTL = 5 * time.Minute
 
 type repository interface {
-	GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool
-	GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string
+	GetEnabledAddons(ctx context.Context, businessID int64) (map[string]bool, error)
+	GetUserAllowedApps(ctx context.Context, businessID, userID int64) ([]string, error)
 	GetUserBusinessID(ctx context.Context, userID int64) (int64, error)
 }
 
@@ -33,11 +33,15 @@ func (s *Service) ListApps() []domain.App {
 	return domain.AvailableApps()
 }
 
+// GetEnabledAddons keeps its fail-closed signature: callers get an empty map
+// when the lookup fails, so addon-gated apps stay disabled. The fetch closure
+// propagates the error though, so a transient failure is never cached as "no
+// addons enabled" for the whole TTL.
 func (s *Service) GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool {
 	enabled, err := cacher.Of[map[string]bool]().GetOrComputeSingle(ctx,
 		cacheKeys.BusinessEnabledAddons(businessID),
 		func(ctx context.Context) (map[string]bool, error) {
-			return s.repo.GetEnabledAddons(ctx, businessID), nil
+			return s.repo.GetEnabledAddons(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, appsCacheTTL),
 	)
@@ -50,11 +54,14 @@ func (s *Service) GetEnabledAddons(ctx context.Context, businessID int64) map[st
 	return enabled
 }
 
+// GetUserAllowedApps keeps its fail-closed signature for the same reason: no
+// allowed apps means no app access. The fetch closure propagates the error so a
+// transient failure is not cached as an empty app list.
 func (s *Service) GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string {
 	apps, err := cacher.Of[[]string]().GetOrComputeSingle(ctx,
 		cacheKeys.UserAllowedApps(userID, businessID),
 		func(ctx context.Context) ([]string, error) {
-			return s.repo.GetUserAllowedApps(ctx, businessID, userID), nil
+			return s.repo.GetUserAllowedApps(ctx, businessID, userID)
 		},
 		cacher.WithExpiry(ctx, appsCacheTTL),
 	)

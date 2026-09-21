@@ -262,10 +262,22 @@ func TestRejectOvertime_PropagatesGetRequestError(t *testing.T) {
 // ---- GetOvertimeConfig ----
 
 func TestGetOvertimeConfig_PropagatesNotFoundError(t *testing.T) {
-	s := &Service{repo: &mockRepo{err: errors.New("not found")}}
+	s := &Service{repo: &mockRepo{err: domain.ErrOvertimeConfigNotFound}}
 	_, err := s.GetOvertimeConfig(context.Background(), 1)
 	if !errors.Is(err, domain.ErrOvertimeConfigNotFound) {
 		t.Errorf("expected ErrOvertimeConfigNotFound, got %v", err)
+	}
+}
+
+func TestGetOvertimeConfig_PropagatesUnexpectedRepoError(t *testing.T) {
+	want := errors.New("connection reset")
+	s := &Service{repo: &mockRepo{err: want}}
+	_, err := s.GetOvertimeConfig(context.Background(), 1)
+	if !errors.Is(err, want) {
+		t.Errorf("expected the read failure to surface, got %v", err)
+	}
+	if errors.Is(err, domain.ErrOvertimeConfigNotFound) {
+		t.Errorf("transient read failure was mapped to ErrOvertimeConfigNotFound")
 	}
 }
 
@@ -297,6 +309,24 @@ func TestUpsertOvertimeConfig_PropagatesRepoError(t *testing.T) {
 	err := s.UpsertOvertimeConfig(context.Background(), 1, domain.OvertimeConfigRecord{})
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+// ---- DetectAndFlagOvertime ----
+
+func TestDetectAndFlagOvertime_MissingConfigSkipsSilently(t *testing.T) {
+	s := &Service{repo: &mockRepo{err: domain.ErrOvertimeConfigNotFound}}
+	if err := s.DetectAndFlagOvertime(context.Background(), 1, "2026-03-20"); err != nil {
+		t.Fatalf("missing config should skip, got %v", err)
+	}
+}
+
+func TestDetectAndFlagOvertime_PropagatesConfigReadError(t *testing.T) {
+	want := errors.New("connection reset")
+	s := &Service{repo: &mockRepo{err: want}}
+	err := s.DetectAndFlagOvertime(context.Background(), 1, "2026-03-20")
+	if !errors.Is(err, want) {
+		t.Fatalf("transient config read error was swallowed, got %v", err)
 	}
 }
 

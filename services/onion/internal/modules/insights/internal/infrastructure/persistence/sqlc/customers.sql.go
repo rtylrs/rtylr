@@ -98,7 +98,6 @@ customer_spend AS (
     ON o.business_id = c.business_id
    AND o.customer_id = c.id
    AND o.payment_status = 'paid'
-   AND o.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
   WHERE c.business_id = ?
   GROUP BY c.id
 )
@@ -118,7 +117,7 @@ type GetLTVDistributionRow struct {
 	CustomerCount   int64  `db:"customer_count" json:"customer_count"`
 }
 
-// cross-schema read from crm and pos — bucket customer spend over the trailing year.
+// cross-schema read from crm and pos — bucket customer lifetime spend.
 func (q *Queries) GetLTVDistribution(ctx context.Context, businessID int64) ([]GetLTVDistributionRow, error) {
 	rows, err := q.db.QueryContext(ctx, getLTVDistribution, businessID)
 	if err != nil {

@@ -16,19 +16,32 @@ import (
 	"github.com/voxire/onion/internal/platform/storage"
 )
 
-// publicCareersCacheScope namespaces the per-owner public careers page
+// publicCareersCacheScope namespaces the per-business public careers page
 // cache. The careers, careers_customizations and careers_sections tables
 // are written only within this module, so a short TTL plus invalidation
 // on every careers/customization/section mutation keeps the anonymous
-// public page consistent. The cache is keyed by owner_id (resolved from
-// the slug), so write handlers — which know the owner_id — can wipe it.
+// public page consistent.
+//
+// The cache is keyed by business_id — the id every write handler already
+// has — not by the customization's owner_id. owner_id is a users.id
+// (businesses.owner_id) and only coincides with the business id by
+// accident; keying the reader on owner_id while writers invalidated
+// business_id left the public page stale for the whole TTL whenever they
+// differed.
 const publicCareersCacheScope = "careers_public"
 
-// invalidatePublicCareersCache wipes the cached public careers page for an
-// owner. Call from every careers/customization/section create/update/delete
+// publicCareersCacheKey is the single source of truth for the cached public
+// careers page key. The reader (ListPublicCareersHandler) and the
+// invalidation helper must derive it from the same id: the business id.
+func publicCareersCacheKey(businessID int64) string {
+	return cacheKeys.Scoped(publicCareersCacheScope, businessID, "list")
+}
+
+// invalidatePublicCareersCache wipes the cached public careers page for a
+// business. Call from every careers/customization/section create/update/delete
 // so the public site reflects changes within the TTL window at worst.
-func invalidatePublicCareersCache(ctx context.Context, ownerID int64) {
-	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(publicCareersCacheScope, ownerID))
+func invalidatePublicCareersCache(ctx context.Context, businessID int64) {
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(publicCareersCacheScope, businessID))
 }
 
 // The "public" handlers power the candidate-facing site at
@@ -120,7 +133,7 @@ func (h *ListPublicCareersHandler) Serve(ctx context.Context, req *ListPublicCar
 
 	res, cacheErr := cacher.Of[ListPublicCareersResponse]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Scoped(publicCareersCacheScope, custom.OwnerID, "list"),
+		publicCareersCacheKey(custom.BusinessID),
 		func(ctx context.Context) (ListPublicCareersResponse, error) {
 			return h.computePublicCareers(ctx, custom)
 		},

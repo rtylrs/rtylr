@@ -745,3 +745,49 @@ func TestCreateShiftAssignment_EmployeeIDStored(t *testing.T) {
 		t.Errorf("EmployeeID = %d, want %d", created.EmployeeID, empID)
 	}
 }
+
+// TestCreateShiftAssignment_DuplicateReturnsRosterConflict covers the unique
+// key on (owner_id, employee_id, date): a second assignment for the same
+// employee and day must surface as the roster conflict the endpoint maps to
+// 409, not as a raw duplicate-key error that becomes a 500.
+func TestCreateShiftAssignment_DuplicateReturnsRosterConflict(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const (
+		employeeID int64 = 4111
+		shiftDate        = "2026-11-03"
+	)
+
+	shift, err := repo.CreateShift(ctx, testutil.OwnerID, domain.ShiftRecord{
+		Name:      "Duplicate Assignment Shift",
+		StartTime: "09:00",
+		EndTime:   "17:00",
+		Color:     "#334455",
+	})
+	if err != nil {
+		t.Fatalf("CreateShift: %v", err)
+	}
+	t.Cleanup(func() {
+		deleteShiftRow(t, db, shift.ID)
+		if _, err := db.ExecContext(context.Background(),
+			"DELETE FROM hr_shift_assignments WHERE owner_id = ? AND employee_id = ? AND date = ?",
+			testutil.OwnerID, employeeID, shiftDate); err != nil {
+			t.Errorf("cleanup of assignment: %v", err)
+		}
+	})
+
+	assignment := domain.ShiftAssignmentRecord{
+		EmployeeID: employeeID,
+		ShiftID:    shift.ID,
+		Date:       shiftDate,
+	}
+	if _, err := repo.CreateShiftAssignment(ctx, testutil.OwnerID, assignment); err != nil {
+		t.Fatalf("first CreateShiftAssignment: %v", err)
+	}
+
+	if _, err := repo.CreateShiftAssignment(ctx, testutil.OwnerID, assignment); !errors.Is(err, domain.ErrRosterConflict) {
+		t.Fatalf("duplicate CreateShiftAssignment error = %v, want ErrRosterConflict", err)
+	}
+}

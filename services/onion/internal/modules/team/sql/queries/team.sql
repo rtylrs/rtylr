@@ -88,6 +88,12 @@ UPDATE invite_tokens
 SET used_at = NOW()
 WHERE token = ? AND used_at IS NULL AND expires_at > NOW();
 
+-- name: ReleaseInviteToken :exec
+-- Reverts the single-use claim made by ConsumeInviteToken when a later step of
+-- the accept flow fails, so a failed accept leaves the invitation retryable
+-- instead of stranding the invitee with a consumed token and no activation.
+UPDATE invite_tokens SET used_at = NULL WHERE token = ?;
+
 -- name: SetPassword :exec
 UPDATE users SET password_hash = ? WHERE id = ?;
 
@@ -127,7 +133,11 @@ FROM (
     SELECT u.id AS user_id
     FROM users u
     JOIN businesses b ON b.id = u.business_id
+    LEFT JOIN user_app_permissions p ON p.owner_id = b.owner_id AND p.user_id = u.id
     WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+      -- Deactivated members keep users.business_id, so the permission row decides
+      -- whether they still occupy a seat. A missing row still counts (legacy data).
+      AND COALESCE(p.is_active, TRUE) = TRUE
 ) active_users;
 
 -- cross-schema read from subscriptions + plans — approved for owner app resolution

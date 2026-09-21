@@ -203,8 +203,19 @@ func SubscriptionAccess(ownerID int64) string {
 	return fmt.Sprintf("%ssubscription:%d:access", Namespace, ownerID)
 }
 
+// SubscriptionPrefix matches every subscription-scoped key for the owner. The
+// trailing ':' is load-bearing: a bare "cache:subscription:4*" glob would also
+// match owner 42's keys. The exact Subscription key carries no suffix, so
+// invalidation must pair this with Subscription() — see SubscriptionPatterns.
 func SubscriptionPrefix(ownerID int64) string {
-	return fmt.Sprintf("%ssubscription:%d*", Namespace, ownerID)
+	return fmt.Sprintf("%ssubscription:%d:*", Namespace, ownerID)
+}
+
+// SubscriptionPatterns returns the exact subscription object key plus the
+// delimited wildcard covering its derived keys (e.g. SubscriptionAccess).
+// Invalidation callers should delete both.
+func SubscriptionPatterns(ownerID int64) []string {
+	return []string{Subscription(ownerID), SubscriptionPrefix(ownerID)}
 }
 
 // ─── generic per-module scoping ────────────────────────────────────────────

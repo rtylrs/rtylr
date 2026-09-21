@@ -122,7 +122,7 @@ func patternsFor(t keys.InvalidationType, id string) []string {
 	case keys.InvalidateMenu:
 		return []string{keys.MenuPrefix(idN)}
 	case keys.InvalidateSubscription:
-		return []string{keys.SubscriptionPrefix(idN)}
+		return keys.SubscriptionPatterns(idN)
 	}
 	return nil
 }

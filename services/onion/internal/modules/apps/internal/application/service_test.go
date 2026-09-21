@@ -4,11 +4,15 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
 type mockRepo struct {
 	enabled        map[string]bool
+	enabledErr     error
 	allowed        []string
+	allowedErr     error
 	businessID     int64
 	businessErr    error
 	gotEnabledBiz  int64
@@ -16,15 +20,15 @@ type mockRepo struct {
 	gotAllowed     struct{ biz, uid int64 }
 }
 
-func (m *mockRepo) GetEnabledAddons(_ context.Context, businessID int64) map[string]bool {
+func (m *mockRepo) GetEnabledAddons(_ context.Context, businessID int64) (map[string]bool, error) {
 	m.gotEnabledBiz = businessID
-	return m.enabled
+	return m.enabled, m.enabledErr
 }
 
-func (m *mockRepo) GetUserAllowedApps(_ context.Context, biz, uid int64) []string {
+func (m *mockRepo) GetUserAllowedApps(_ context.Context, biz, uid int64) ([]string, error) {
 	m.gotAllowed.biz = biz
 	m.gotAllowed.uid = uid
-	return m.allowed
+	return m.allowed, m.allowedErr
 }
 
 func (m *mockRepo) GetUserBusinessID(_ context.Context, uid int64) (int64, error) {
@@ -199,5 +203,51 @@ func TestGetUserAllowedApps_Empty(t *testing.T) {
 	got := s.GetUserAllowedApps(context.Background(), 1, 5)
 	if len(got) != 0 {
 		t.Errorf("expected empty slice, got %v", got)
+	}
+}
+
+// Regression: a transient repository failure used to be handed to the cacher
+// with a nil error, so the fail-closed empty result was cached for the full
+// 5-minute TTL and outlived the incident. The fetch closures now propagate the
+// error, which stops the cacher from storing the empty value.
+//
+// A real in-memory cache is required to observe the difference: without one
+// every call re-fetches and the bug is invisible.
+func TestGetEnabledAddons_FailureIsNotCached(t *testing.T) {
+	if err := cacher.InitializeLocalCache(context.Background()); err != nil {
+		t.Fatalf("InitializeLocalCache: %v", err)
+	}
+
+	const businessID int64 = 987001
+	m := &mockRepo{enabledErr: errors.New("transient db failure")}
+	s := &Service{repo: m}
+
+	if got := s.GetEnabledAddons(context.Background(), businessID); len(got) != 0 {
+		t.Fatalf("failed lookup should fail closed to an empty map, got %v", got)
+	}
+
+	m.enabled, m.enabledErr = map[string]bool{"crm": true}, nil
+	if got := s.GetEnabledAddons(context.Background(), businessID); !got["crm"] {
+		t.Fatalf("recovered lookup still saw the cached empty map: %v", got)
+	}
+}
+
+func TestGetUserAllowedApps_FailureIsNotCached(t *testing.T) {
+	if err := cacher.InitializeLocalCache(context.Background()); err != nil {
+		t.Fatalf("InitializeLocalCache: %v", err)
+	}
+
+	const businessID int64 = 987002
+	const userID int64 = 987003
+	m := &mockRepo{allowedErr: errors.New("transient db failure")}
+	s := &Service{repo: m}
+
+	if got := s.GetUserAllowedApps(context.Background(), businessID, userID); len(got) != 0 {
+		t.Fatalf("failed lookup should fail closed to an empty list, got %v", got)
+	}
+
+	m.allowed, m.allowedErr = []string{"hub"}, nil
+	if got := s.GetUserAllowedApps(context.Background(), businessID, userID); len(got) != 1 || got[0] != "hub" {
+		t.Fatalf("recovered lookup still saw the cached empty list: %v", got)
 	}
 }

@@ -23,10 +23,8 @@ const (
 // invalidateSubscriptionScope clears every subscription + user-scoped cache
 // entry for the owner. Called by every mutation that changes plan/seat/state.
 func invalidateSubscriptionScope(ctx context.Context, ownerID int64) {
-	cacher.InvalidateScope(ctx,
-		cacheKeys.SubscriptionPrefix(ownerID),
-		cacheKeys.UserPrefix(ownerID),
-	)
+	patterns := append(cacheKeys.SubscriptionPatterns(ownerID), cacheKeys.UserPrefix(ownerID))
+	cacher.InvalidateScope(ctx, patterns...)
 }
 
 type Service struct {

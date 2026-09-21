@@ -33,11 +33,44 @@ func (s *Service) GetCareerBySlug(ctx context.Context, businessID int64, slug st
 	return c, nil
 }
 
-func (s *Service) CreateCareer(ctx context.Context, in domain.RecruitCareerInput) (int64, error) {
+// CreateCareer inserts a career and returns the stored row. The slug may be
+// server-generated from the title, so callers must echo the returned row
+// instead of re-deriving it from the input (which still has the empty slug).
+func (s *Service) CreateCareer(ctx context.Context, in domain.RecruitCareerInput) (domain.RecruitCareer, error) {
 	if in.Slug == "" {
 		in.Slug = slugify(in.Title)
 	}
-	return s.repo.CreateCareer(ctx, in)
+	id, err := s.repo.CreateCareer(ctx, in)
+	if err != nil {
+		return domain.RecruitCareer{}, err
+	}
+
+	created, err := s.repo.GetCareerByID(ctx, in.BusinessID, id)
+	if err != nil {
+		// The row is committed. Return the input's own values (with the
+		// resolved slug and publish state) rather than failing a write that
+		// already succeeded.
+		return domain.RecruitCareer{
+			ID:             id,
+			OwnerID:        in.OwnerID,
+			BusinessID:     in.BusinessID,
+			Slug:           in.Slug,
+			Title:          in.Title,
+			Department:     in.Department,
+			Location:       in.Location,
+			EmploymentType: in.EmploymentType,
+			WorkMode:       in.WorkMode,
+			Seniority:      in.Seniority,
+			Details:        in.Details,
+			Requirements:   in.Requirements,
+			SalaryMin:      in.SalaryMin,
+			SalaryMax:      in.SalaryMax,
+			SalaryCurrency: in.SalaryCurrency,
+			IsPublished:    in.IsPublished,
+			IsActive:       true,
+		}, nil
+	}
+	return created, nil
 }
 
 func (s *Service) UpdateCareer(ctx context.Context, in domain.RecruitCareerInput) error {
@@ -91,6 +124,13 @@ func (s *Service) CreateSubmission(ctx context.Context, in domain.SubmissionInpu
 
 func (s *Service) ListSubmissions(ctx context.Context, businessID int64, status string) ([]domain.Submission, error) {
 	return s.repo.ListSubmissions(ctx, businessID, status)
+}
+
+// ListSubmissionsPage returns one page of submissions, newest first. Exports
+// walk it until a short page comes back; ListSubmissions keeps the UI's
+// fixed first-page shape.
+func (s *Service) ListSubmissionsPage(ctx context.Context, businessID int64, status string, limit, offset int32) ([]domain.Submission, error) {
+	return s.repo.ListSubmissionsPage(ctx, businessID, status, limit, offset)
 }
 
 func (s *Service) GetSubmissionResumeURL(ctx context.Context, businessID, submissionID int64) (string, error) {

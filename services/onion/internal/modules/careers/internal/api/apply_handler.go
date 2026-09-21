@@ -58,12 +58,21 @@ func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Servic
 			return
 		}
 
-		jobIDStr := r.FormValue("job_id")
+		jobIDStr := strings.TrimSpace(r.FormValue("job_id"))
 		var jobID int64
 		if jobIDStr != "" {
-			if n, err := strconv.ParseInt(jobIDStr, 10, 64); err == nil {
-				jobID = n
+			n, parseErr := strconv.ParseInt(jobIDStr, 10, 64)
+			if parseErr != nil {
+				writeApplyError(w, http.StatusBadRequest, "job_id must be a number")
+				return
 			}
+			jobID = n
+		}
+		// job_id=0 rows join no opening in the recruiter pipeline, so reject
+		// a missing/malformed id instead of storing an orphan application.
+		if jobID <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "job_id is required")
+			return
 		}
 
 		in := domain.ApplicationInput{

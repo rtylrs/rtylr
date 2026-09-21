@@ -16,7 +16,11 @@ FROM flow_task_attachments
 WHERE id = ?
 LIMIT 1;
 
--- name: DeleteTimeLog :exec
+-- Self-scoped like the delete itself: only the author's own time log can
+-- match, so an admin-tier caller deleting someone else's log reports the
+-- denial instead of a success that deleted nothing. :execresult is what lets
+-- the repository tell the two apart via requireAffected.
+-- name: DeleteTimeLog :execresult
 DELETE FROM flow_time_logs
 WHERE id = ? AND user_id = ?;
 

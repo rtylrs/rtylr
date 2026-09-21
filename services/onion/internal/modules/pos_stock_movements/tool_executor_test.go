@@ -148,3 +148,57 @@ func TestBranchInventoryToolPayload(t *testing.T) {
 		t.Fatalf("updated_at = %#v", payload["updated_at"])
 	}
 }
+
+func TestPaginateStockMovementsForTool(t *testing.T) {
+	items := []domain.StockMovement{{ID: 1}, {ID: 2}, {ID: 3}, {ID: 4}, {ID: 5}}
+
+	page, hasMore := paginateStockMovementsForTool(items, 2, 2)
+	if len(page) != 2 || page[0].ID != 3 || !hasMore {
+		t.Fatalf("page 2 = %+v hasMore=%v", page, hasMore)
+	}
+
+	page, hasMore = paginateStockMovementsForTool(items, 3, 2)
+	if len(page) != 1 || page[0].ID != 5 || hasMore {
+		t.Fatalf("page 3 = %+v hasMore=%v", page, hasMore)
+	}
+
+	page, hasMore = paginateStockMovementsForTool(items, 100, 2)
+	if len(page) != 0 || hasMore {
+		t.Fatalf("past-the-end page = %+v hasMore=%v", page, hasMore)
+	}
+}
+
+func TestPaginateStockMovementsForToolHugePageDoesNotPanic(t *testing.T) {
+	items := []domain.StockMovement{{ID: 1}, {ID: 2}, {ID: 3}}
+
+	// JSON decoding into map[string]any produces float64, so page 2^62 is
+	// exactly representable and passes parsePOSStockToolPage.
+	parsed, err := parseListStockMovementsToolInput(map[string]any{
+		"branch_id":  4,
+		"product_id": 10,
+		"page":       float64(int64(1) << 62),
+	})
+	if err != nil {
+		t.Fatalf("parseListStockMovementsToolInput: %v", err)
+	}
+
+	page, hasMore := paginateStockMovementsForTool(items, parsed.Page, parsed.Limit)
+	if len(page) != 0 {
+		t.Fatalf("len(page) = %d, want 0", len(page))
+	}
+	if hasMore {
+		t.Fatalf("hasMore = true, want false")
+	}
+}
+
+func TestPaginateBranchInventoryForToolHugePageDoesNotPanic(t *testing.T) {
+	items := []domain.BranchInventory{{ID: 1}, {ID: 2}, {ID: 3}}
+
+	page, hasMore := paginateBranchInventoryForTool(items, int64(1)<<62, defaultPOSStockToolLimit)
+	if len(page) != 0 {
+		t.Fatalf("len(page) = %d, want 0", len(page))
+	}
+	if hasMore {
+		t.Fatalf("hasMore = true, want false")
+	}
+}

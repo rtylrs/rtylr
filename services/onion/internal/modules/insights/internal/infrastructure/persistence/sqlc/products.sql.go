@@ -170,7 +170,7 @@ const getProductMarginRows = `-- name: GetProductMarginRows :many
 SELECT p.id,
        p.name,
        COALESCE(SUM(oi.quantity), 0)     AS units_sold,
-       COALESCE(SUM(oi.total), 0)        AS revenue_minor_units_x100,
+       CAST(COALESCE(SUM(oi.total), 0) * 100 AS SIGNED) AS revenue_minor_units_x100,
        CAST(p.cost_price * 100 AS SIGNED) AS cost_minor_units_x100
 FROM erp_products p
 JOIN pos_order_items oi ON oi.menu_item_id = p.id
@@ -178,7 +178,7 @@ JOIN pos_orders o       ON o.id = oi.order_id AND o.business_id = p.business_id
 WHERE p.business_id = ?
 GROUP BY p.id, p.name, p.cost_price
 HAVING SUM(oi.quantity) > 0
-ORDER BY revenue DESC
+ORDER BY revenue_minor_units_x100 DESC
 LIMIT 200
 `
 
@@ -186,7 +186,7 @@ type GetProductMarginRowsRow struct {
 	ID                    int64       `db:"id" json:"id"`
 	Name                  string      `db:"name" json:"name"`
 	UnitsSold             interface{} `db:"units_sold" json:"units_sold"`
-	RevenueMinorUnitsX100 interface{} `db:"revenue_minor_units_x100" json:"revenue_minor_units_x100"`
+	RevenueMinorUnitsX100 int64       `db:"revenue_minor_units_x100" json:"revenue_minor_units_x100"`
 	CostMinorUnitsX100    int64       `db:"cost_minor_units_x100" json:"cost_minor_units_x100"`
 }
 

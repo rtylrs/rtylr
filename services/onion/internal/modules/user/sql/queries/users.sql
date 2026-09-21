@@ -17,7 +17,7 @@ SELECT id, business_id, email, password_hash, full_name, signup_ip_address, sign
 FROM users WHERE email = ?;
 
 -- name: GetUserByIdentifier :one
-SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, token_epoch
+SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, is_banned, token_epoch
 FROM users
 WHERE email = ? OR LOWER(username) = LOWER(?)
 ORDER BY id ASC

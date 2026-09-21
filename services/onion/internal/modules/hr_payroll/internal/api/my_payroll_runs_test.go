@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -96,5 +97,31 @@ func TestGetMyPayrollRunHandler_Serve_NotFoundWhenCallerHasNoEntry(t *testing.T)
 	}
 	if got := statusOf(err); got != http.StatusNotFound {
 		t.Errorf("status = %d, want %d", got, http.StatusNotFound)
+	}
+}
+
+// Fixture employee 4102 belongs to business 1001 but carries user id 1002, which
+// is the production shape: users.id and businesses.id are independent sequences.
+// The real hr_core provider resolves hr_employees by business_id + user_id, so
+// it is the only dependency that can catch a handler scoping the lookup by the
+// caller's user id; fakePermissionProvider ignores its arguments.
+func TestGetMyPayrollRunHandler_Serve_ScopesByCallersBusinessNotUserID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	svc := application.NewService(context.Background(), db, fakeApprovalChainProvider{}, hrcore.NewModule(context.Background(), db))
+	h := &GetMyPayrollRunHandler{Service: svc}
+
+	ctx := withURLParam(deviceContext(1002), "id", "4301")
+	resp, err := h.Serve(ctx, &GetMyPayrollRunRequest{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Run == nil {
+		t.Fatal("expected a run payload")
+	}
+	if len(resp.Run.Entries) != 1 {
+		t.Fatalf("expected exactly 1 entry (caller's own), got %d", len(resp.Run.Entries))
+	}
+	if resp.Run.Entries[0].EmployeeId != 4102 {
+		t.Errorf("EmployeeId = %d, want 4102 (Bob's employee row in business 1001)", resp.Run.Entries[0].EmployeeId)
 	}
 }

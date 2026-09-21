@@ -21,6 +21,8 @@ type mockRepo struct {
 	deletedID   int64
 	deleteCalls int
 
+	createAssignCalls int
+
 	availability      []domain.AvailabilityRecord
 	availabilityTotal int64
 	availabilityOne   *domain.AvailabilityRecord
@@ -70,6 +72,7 @@ func (m *mockRepo) ListRosterAssignments(_ context.Context, _ int64, _, _ string
 }
 
 func (m *mockRepo) CreateShiftAssignment(_ context.Context, _ int64, a domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
+	m.createAssignCalls++
 	return &a, m.err
 }
 
@@ -454,6 +457,28 @@ func TestCreateShiftAssignment_HappyPathNoConflicts(t *testing.T) {
 	}
 	if got.ShiftID != 1 {
 		t.Errorf("expected ShiftID=1, got %d", got.ShiftID)
+	}
+}
+
+// A second assignment for the same employee and date collides with
+// uk_shift_assignment, so it has to be reported as the documented roster
+// conflict instead of falling through to a duplicate-key 500.
+func TestCreateShiftAssignment_ExistingShiftReturnsConflict(t *testing.T) {
+	repo := &mockRepo{
+		shift:       &domain.ShiftRecord{ID: 1},
+		dateAssigns: []domain.ShiftAssignmentRecord{{ID: 7, EmployeeID: 5, Date: "2024-06-01"}},
+	}
+	s := &Service{
+		repo:                 repo,
+		leaveConflictChecker: &mockLeaveChecker{hasLeave: false},
+	}
+
+	_, _, err := s.CreateShiftAssignment(context.Background(), 1, domain.ShiftAssignmentRecord{ShiftID: 1, EmployeeID: 5, Date: "2024-06-01"})
+	if !errors.Is(err, domain.ErrRosterConflict) {
+		t.Errorf("expected ErrRosterConflict, got %v", err)
+	}
+	if repo.createAssignCalls != 0 {
+		t.Errorf("conflicting assignment was inserted %d time(s)", repo.createAssignCalls)
 	}
 }
 

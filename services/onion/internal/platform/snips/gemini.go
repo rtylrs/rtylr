@@ -79,13 +79,14 @@ func (c *GeminiProvider) CompleteTextWithOptions(ctx context.Context, prompt str
 			continue
 		}
 
-		if len(resp.Candidates[0].Content.Parts) == 0 {
-			logger.Ctx(ctx).Warn("Gemini model returned empty content parts", logger.String("model", modelName))
+		candidate := resp.Candidates[0]
+		if candidate.Content == nil || len(candidate.Content.Parts) == 0 {
+			logger.Ctx(ctx).Warn("Gemini model returned empty content", logger.String("model", modelName))
 
 			continue
 		}
 
-		part := resp.Candidates[0].Content.Parts[0]
+		part := candidate.Content.Parts[0]
 		if textPart, ok := part.(genai.Text); ok {
 			logger.Ctx(ctx).Info("Gemini model succeeded", logger.String("model", modelName))
 

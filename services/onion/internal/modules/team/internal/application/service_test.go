@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -54,14 +57,14 @@ func TestUpdateGroup_RequiresName(t *testing.T) {
 
 func TestAddGroupMembers_RequiresUserIDs(t *testing.T) {
 	s := &Service{}
-	if err := s.AddGroupMembers(context.Background(), 1, 5, 1, nil); err == nil {
+	if err := s.AddGroupMembers(context.Background(), 1, 5, 1, 1, nil); err == nil {
 		t.Fatal("expected error when no user IDs provided")
 	}
 }
 
 func TestAddGroupMembers_RequiresNonEmptyUserIDs(t *testing.T) {
 	s := &Service{}
-	if err := s.AddGroupMembers(context.Background(), 1, 5, 1, []int64{}); err == nil {
+	if err := s.AddGroupMembers(context.Background(), 1, 5, 1, 1, []int64{}); err == nil {
 		t.Fatal("expected error for empty user IDs slice")
 	}
 }
@@ -184,5 +187,76 @@ func TestAcceptInvite_RejectsWeakPassword(t *testing.T) {
 		if _, err := s.AcceptInvite(context.Background(), "any-token", password); !errors.Is(err, passwordutils.ErrWeakPassword) {
 			t.Errorf("AcceptInvite(password=%q): got err=%v, want ErrWeakPassword", password, err)
 		}
+	}
+}
+
+type fakeSeatChangeStore struct {
+	count     int
+	recordErr error
+	recorded  int
+	calls     int
+}
+
+func (f *fakeSeatChangeStore) CountActiveMembers(context.Context, int64) (int, error) {
+	return f.count, nil
+}
+
+func (f *fakeSeatChangeStore) RecordSeatChange(_ context.Context, _ int64, newCount int) error {
+	f.calls++
+	f.recorded = newCount
+	return f.recordErr
+}
+
+func seedCachedSubscription(t *testing.T, ownerID int64) cacher.Cache[string] {
+	t.Helper()
+	ctx := context.Background()
+	if err := cacher.InitializeLocalCache(ctx); err != nil {
+		t.Fatalf("InitializeLocalCache: %v", err)
+	}
+
+	// The subscriptions module stores its payload under this key family; the
+	// typed value does not matter here, only that the key is invalidated.
+	cache := cacher.Of[string]()
+	cache.Put(ctx, cacheKeys.Subscription(ownerID), "stale subscription payload",
+		cacher.MemoryOnly(), cacher.WithExpiry(ctx, time.Minute))
+	if _, ok := cache.Get(ctx, cacheKeys.Subscription(ownerID), cacher.MemoryOnly()); !ok {
+		t.Fatal("failed to seed cached subscription")
+	}
+	return cache
+}
+
+// A team-driven seat change must invalidate the owner's cached subscription:
+// the payload embeds seat counts and GET /hub/subscription/me otherwise serves
+// the pre-change usage until the cache TTL expires.
+func TestRecordSeatChange_InvalidatesCachedSubscription(t *testing.T) {
+	const ownerID int64 = 4242
+	cache := seedCachedSubscription(t, ownerID)
+
+	store := &fakeSeatChangeStore{count: 5}
+	if err := recordSeatChange(context.Background(), store, ownerID); err != nil {
+		t.Fatalf("recordSeatChange: %v", err)
+	}
+	if store.calls != 1 || store.recorded != 5 {
+		t.Fatalf("recorded seat count = %d after %d calls, want 5 after 1", store.recorded, store.calls)
+	}
+
+	if got, ok := cache.Get(context.Background(), cacheKeys.Subscription(ownerID), cacher.MemoryOnly()); ok {
+		t.Fatalf("cached subscription survived the seat change: %+v", got)
+	}
+}
+
+// A failed seat-change write leaves the database untouched, so the cached
+// subscription must be kept (invalidating would only cause a pointless reload).
+func TestRecordSeatChange_FailureKeepsCachedSubscription(t *testing.T) {
+	const ownerID int64 = 4243
+	cache := seedCachedSubscription(t, ownerID)
+
+	store := &fakeSeatChangeStore{count: 5, recordErr: errors.New("write failed")}
+	if err := recordSeatChange(context.Background(), store, ownerID); err == nil {
+		t.Fatal("expected recordSeatChange to surface the write error")
+	}
+
+	if _, ok := cache.Get(context.Background(), cacheKeys.Subscription(ownerID), cacher.MemoryOnly()); !ok {
+		t.Fatal("cached subscription was invalidated even though the seat change failed")
 	}
 }

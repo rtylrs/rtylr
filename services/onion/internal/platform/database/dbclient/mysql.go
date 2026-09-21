@@ -88,6 +88,23 @@ func Connect(ctx context.Context) error {
 		return fmt.Errorf("failed to connect to main MySQL database: %w", err)
 	}
 
+	// Connect is retried in-process after a crash (cmd/api restarts the
+	// server), and every later call reports success from the mainDB != nil
+	// early return above. A fatal error below therefore must not leave a
+	// partially initialized client behind: the next attempt would skip the
+	// logging pool entirely and serve traffic with LoggingPool()/
+	// ReplicaPool() silently falling back to the primary.
+	initialized := false
+	defer func() {
+		if initialized {
+			return
+		}
+		client.mainDB = nil
+		client.loggingDB = nil
+		client.replicaDB = nil
+		_ = mainDB.Close()
+	}()
+
 	client.mainDB = mainDB
 
 	// The logging pool is writable, so a local run pointed at the production
@@ -149,6 +166,8 @@ func Connect(ctx context.Context) error {
 		logger.String("host", logHost),
 		logger.String("database", logDB),
 	)
+
+	initialized = true
 
 	return nil
 }

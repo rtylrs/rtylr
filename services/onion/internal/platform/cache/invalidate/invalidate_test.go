@@ -41,3 +41,16 @@ func TestPatternsForTeamRejectsEmptyID(t *testing.T) {
 		t.Fatalf("expected nil patterns for empty team id, got %v", got)
 	}
 }
+
+func TestPatternsForSubscriptionDelimitsOwnerID(t *testing.T) {
+	got := patternsFor(keys.InvalidateSubscription, "4")
+	want := []string{"cache:subscription:4", "cache:subscription:4:*"}
+	if len(got) != len(want) {
+		t.Fatalf("patternsFor(subscription,4) = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("patternsFor(subscription,4) = %v, want %v", got, want)
+		}
+	}
+}

@@ -275,6 +275,9 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 		input.ScheduledAt = &t
 	}
 	if updateErr := h.Service.Update(ctx, input); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrCampaignNotFound) {
+			return UpdateCampaignResponse{}, onekiterrors.New(http.StatusNotFound, "Campaign not found")
+		}
 		return UpdateCampaignResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update campaign")
 	}
 	return UpdateCampaignResponse{Message: "Campaign updated successfully"}, nil
@@ -329,7 +332,10 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 	if bizErr != nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
-	if updateErr := h.Service.UpdateStatus(ctx, businessID, id, req.Status); updateErr != nil {
+	if updateErr := h.Service.UpdateStatus(ctx, businessID, id, status); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrCampaignNotFound) {
+			return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusNotFound, "Campaign not found")
+		}
 		if errors.Is(updateErr, domain.ErrInvalidCampaignStatus) {
 			return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign status")
 		}

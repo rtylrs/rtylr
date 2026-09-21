@@ -19,9 +19,10 @@ import (
 	"github.com/voxire/onion/internal/platform/utils/convert"
 )
 
-// userFromRow maps the explicit columns selected by GetUserByEmail/GetUserByID
-// into a domain.User. Both queries select the same column set, so they share
-// this mapper.
+// userFromRow maps the explicit columns selected by
+// GetUserByEmail/GetUserByID/GetUserByIdentifier into a domain.User. The three
+// queries select the same columns except business_id, which
+// GetUserByIdentifier does not need; its caller passes sql.NullInt64{}.
 func userFromRow(id int64, businessID sql.NullInt64, email, passwordHash string, fullName, signupIP, deviceInfo sql.NullString, createdAt, updatedAt sql.NullTime, isConsoleAdmin, isBanned bool, tokenEpoch int64) *domain.User {
 	u := &domain.User{
 		ID:               id,
@@ -114,7 +115,7 @@ func (r *Repository) GetUserByIdentifier(ctx context.Context, identifier string)
 		row.ID, sql.NullInt64{}, row.Email, row.PasswordHash,
 		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
 		row.CreatedAt, row.UpdatedAt,
-		row.IsConsoleAdmin, false,
+		row.IsConsoleAdmin, row.IsBanned,
 		row.TokenEpoch,
 	), nil
 }

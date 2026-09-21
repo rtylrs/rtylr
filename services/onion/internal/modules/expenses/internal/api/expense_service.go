@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"time"
 
@@ -15,11 +16,13 @@ import (
 	financeexpensesv1 "github.com/voxire/voxie/gen/go/finance/expenses/v1"
 )
 
-// listExpensesPageSize bounds ListExpenses server-side. The voxie
-// finance.expenses.v1.ListExpensesRequest contract has no pagination fields
-// yet, so the endpoint returns at most one maximum-size page instead of every
-// row.
-const listExpensesPageSize int32 = 500
+// listExpensesDefaultPageSize and listExpensesMaxPageSize bound the
+// finance.expenses.v1.ListExpenses page: an omitted or non-positive page_size
+// asks for 50 rows and no client can request more than 500 in one page.
+const (
+	listExpensesDefaultPageSize int64 = 50
+	listExpensesMaxPageSize     int64 = 500
+)
 
 type ExpensesAPI struct {
 	Service *application.Service
@@ -29,7 +32,7 @@ func NewExpensesAPI(service *application.Service) *ExpensesAPI {
 	return &ExpensesAPI{Service: service}
 }
 
-func (a *ExpensesAPI) ListExpenses(ctx context.Context, _ *financeexpensesv1.ListExpensesRequest) (*financeexpensesv1.ListExpensesResponse, error) {
+func (a *ExpensesAPI) ListExpenses(ctx context.Context, req *financeexpensesv1.ListExpensesRequest) (*financeexpensesv1.ListExpensesResponse, error) {
 	if err := requireExpensePermission(ctx, "finance:expenses:view"); err != nil {
 		return nil, err
 	}
@@ -37,7 +40,25 @@ func (a *ExpensesAPI) ListExpenses(ctx context.Context, _ *financeexpensesv1.Lis
 	if err != nil {
 		return nil, err
 	}
-	expenses, listErr := a.Service.ListPaginated(ctx, businessID, listExpensesPageSize, 0)
+	page, pageSize := req.GetPage(), req.GetPageSize()
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = listExpensesDefaultPageSize
+	}
+	if pageSize > listExpensesMaxPageSize {
+		pageSize = listExpensesMaxPageSize
+	}
+	// Clamp the offset before narrowing to int32 so an absurd page number can
+	// never wrap into a mid-table window; any offset past the table is empty.
+	offset := int64(0)
+	if page-1 > math.MaxInt32/pageSize {
+		offset = math.MaxInt32
+	} else {
+		offset = (page - 1) * pageSize
+	}
+	expenses, listErr := a.Service.ListPaginated(ctx, businessID, int32(pageSize), int32(offset))
 	if listErr != nil {
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to list expenses")
 	}
@@ -45,7 +66,14 @@ func (a *ExpensesAPI) ListExpenses(ctx context.Context, _ *financeexpensesv1.Lis
 	for _, expense := range expenses {
 		payloads = append(payloads, newExpensePayload(expense))
 	}
-	return &financeexpensesv1.ListExpensesResponse{Expenses: payloads}, nil
+	return &financeexpensesv1.ListExpensesResponse{
+		Expenses: payloads,
+		Page:     page,
+		PageSize: pageSize,
+		// A full page may be followed by more rows; the client stops when a
+		// short page comes back.
+		HasMore: len(expenses) == int(pageSize),
+	}, nil
 }
 
 func (a *ExpensesAPI) CreateExpense(ctx context.Context, req *financeexpensesv1.CreateExpenseRequest) (*financeexpensesv1.CreateExpenseResponse, error) {

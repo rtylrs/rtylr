@@ -2,7 +2,9 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/security/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
@@ -246,5 +248,61 @@ func TestSetTwoFactor_Persists(t *testing.T) {
 	}
 	if !settings.TwoFactorEnabled {
 		t.Fatal("expected two-factor authentication to be enabled")
+	}
+}
+
+// A failure of the second write in SetTwoFactor must roll back the first, so
+// users.two_factor_enabled and user_provisioning_states.mfa_required never
+// disagree after a reported failure.
+func TestSetTwoFactor_SecondWriteFailureRollsBackFirst(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	res, err := db.ExecContext(ctx,
+		"INSERT INTO users (business_id, email, password_hash) VALUES (?, ?, '')",
+		testutil.BusinessID, fmt.Sprintf("mfa-tx-%d@example.test", time.Now().UnixNano()))
+	if err != nil {
+		t.Fatalf("insert user: %v", err)
+	}
+	userID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("user id: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM user_provisioning_states WHERE user_id = ?", userID)
+		db.ExecContext(context.Background(), "DELETE FROM users WHERE id = ?", userID)
+	})
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO user_provisioning_states (user_id, business_id, mode, mfa_required)
+		VALUES (?, ?, 'direct_credentials', 0)`, userID, testutil.BusinessID); err != nil {
+		t.Fatalf("insert provisioning state: %v", err)
+	}
+
+	// Hold the provisioning row so the second UPDATE blocks until the context
+	// deadline expires.
+	lockTx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		t.Fatalf("begin lock tx: %v", err)
+	}
+	defer lockTx.Rollback()
+	var lockedID int64
+	if err := lockTx.QueryRowContext(ctx,
+		`SELECT user_id FROM user_provisioning_states WHERE user_id = ? FOR UPDATE`, userID).Scan(&lockedID); err != nil {
+		t.Fatalf("lock provisioning row: %v", err)
+	}
+
+	setCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
+	defer cancel()
+	if err := repo.SetTwoFactor(setCtx, userID, true); err == nil {
+		t.Fatal("SetTwoFactor reported success while the provisioning row was locked")
+	}
+
+	var enabled bool
+	if err := db.QueryRowContext(ctx, `SELECT two_factor_enabled FROM users WHERE id = ?`, userID).Scan(&enabled); err != nil {
+		t.Fatalf("read two_factor_enabled: %v", err)
+	}
+	if enabled {
+		t.Fatal("users.two_factor_enabled was committed although the transaction failed")
 	}
 }

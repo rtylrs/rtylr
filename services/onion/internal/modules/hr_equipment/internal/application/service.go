@@ -50,6 +50,11 @@ type listEquipmentResult struct {
 	Total   int64
 }
 
+type listAssetsResult struct {
+	Records []domain.AssetRecord
+	Total   int64
+}
+
 func (s *Service) ListEquipmentRequests(ctx context.Context, businessID int64, params domain.ListEquipmentRequestsParams) ([]domain.EquipmentRequestRecord, int64, error) {
 	if params.Limit <= 0 {
 		params.Limit = 20
@@ -102,7 +107,7 @@ func (s *Service) CreateAsset(ctx context.Context, businessID int64, params doma
 	return rec, nil
 }
 
-func (s *Service) ListAssets(ctx context.Context, businessID int64, params domain.ListAssetsParams) ([]domain.AssetRecord, error) {
+func (s *Service) ListAssets(ctx context.Context, businessID int64, params domain.ListAssetsParams) ([]domain.AssetRecord, int64, error) {
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
@@ -117,13 +122,19 @@ func (s *Service) ListAssets(ctx context.Context, businessID int64, params domai
 	if params.Status != nil {
 		status = *params.Status
 	}
-	key := cacheKeys.Scoped(hrEquipmentScope, businessID, fmt.Sprintf("assets|loc=%d|s=%s|l=%d|o=%d", loc, status, params.Limit, params.Offset))
-	return cacher.Of[[]domain.AssetRecord]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.AssetRecord, error) {
-			return s.repo.ListAssets(ctx, businessID, params)
+	assignedTo := int64(0)
+	if params.AssignedTo != nil {
+		assignedTo = *params.AssignedTo
+	}
+	key := cacheKeys.Scoped(hrEquipmentScope, businessID, fmt.Sprintf("assets|loc=%d|s=%s|a=%d|l=%d|o=%d", loc, status, assignedTo, params.Limit, params.Offset))
+	res, err := cacher.Of[listAssetsResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (listAssetsResult, error) {
+			records, total, err := s.repo.ListAssets(ctx, businessID, params)
+			return listAssetsResult{Records: records, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrEquipmentTTL),
 	)
+	return res.Records, res.Total, err
 }
 
 func (s *Service) AssignAsset(ctx context.Context, businessID, assetID, employeeID int64) error {

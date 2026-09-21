@@ -3,23 +3,45 @@
 -- hard LIMIT used for the other per-employee reports in this HR domain (see
 -- hr_reports's AttendanceSummaryReport).
 -- cross-schema read from hr_time — include approved timesheets in payroll periods.
+--
+-- Final approval in hr_time locks the timesheet (LockTimesheet sets
+-- status='locked'), so 'locked' is the status that represents approved time;
+-- 'approved' is accepted too so rows written by older code (the currently
+-- uncalled ApproveTimesheet statement) still count. If hr_time ever changes
+-- what final approval writes, this set must change with it (B11-R05).
+--
+-- Minutes are summed from hr_time_entries, not read from
+-- hr_timesheets.total_minutes: no write path maintains that column after
+-- CreateTimesheet, so it is always 0 and hourly base pay would silently be zero
+-- (B11-R05). Entries are attributed by employee and the timesheet's own period,
+-- which hr_time_entries indexes on (business_id, employee_id, date), so the
+-- optional hr_time_entries.timesheet_id is not required. A run that covers only
+-- part of a timesheet period still prorates by the overlapping day count, as
+-- this query did before.
 -- name: ListApprovedTimesheetSummaries :many
-SELECT employee_id,
+SELECT t.employee_id,
        ROUND(SUM(
-           total_minutes *
+           (
+               SELECT COALESCE(SUM(e.duration_minutes), 0)
+               FROM hr_time_entries e
+               WHERE e.business_id = t.business_id
+                 AND e.employee_id = t.employee_id
+                 AND e.date >= t.period_start
+                 AND e.date <= t.period_end
+           ) *
            (DATEDIFF(
-                LEAST(period_end, sqlc.arg(period_end)),
-                GREATEST(period_start, sqlc.arg(period_start))
+                LEAST(t.period_end, sqlc.arg(period_end)),
+                GREATEST(t.period_start, sqlc.arg(period_start))
             ) + 1) /
-           (DATEDIFF(period_end, period_start) + 1)
+           (DATEDIFF(t.period_end, t.period_start) + 1)
        ), 0) AS total_minutes
-FROM hr_timesheets
-WHERE business_id = ?
-  AND status = 'approved'
-  AND period_start <= sqlc.arg(period_end)
-  AND period_end >= sqlc.arg(period_start)
-GROUP BY employee_id
-ORDER BY employee_id
+FROM hr_timesheets t
+WHERE t.business_id = ?
+  AND t.status IN ('approved', 'locked')
+  AND t.period_start <= sqlc.arg(period_end)
+  AND t.period_end >= sqlc.arg(period_start)
+GROUP BY t.employee_id
+ORDER BY t.employee_id
 LIMIT 5001;
 
 -- ListApprovedOvertimeSummaries returns one row per employee for a single

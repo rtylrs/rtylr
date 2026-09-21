@@ -64,6 +64,7 @@ type CreateAssetParams struct {
 type ListAssetsParams struct {
 	LocationID *int64
 	Status     *string
+	AssignedTo *int64
 	Limit      int32
 	Offset     int32
 }

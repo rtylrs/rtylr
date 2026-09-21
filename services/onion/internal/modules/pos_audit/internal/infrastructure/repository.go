@@ -36,7 +36,7 @@ func (r *Repository) List(ctx context.Context, filter domain.AuditLogFilter) ([]
 		EntityType:      nullStringPtr(filter.EntityType),
 		EmployeeID:      nullInt64Ptr(filter.EmployeeID),
 		StartDate:       nullTimePtr(filter.StartDate),
-		EndDate:         nullTimePtr(filter.EndDate),
+		EndDate:         endOfDayTimePtr(filter.EndDate),
 		CursorCreatedAt: nullTime(filter.CursorCreatedAt),
 		CursorID:        nullInt64Ptr(filter.CursorID),
 		Limit:           limit,
@@ -125,6 +125,21 @@ func nullTimePtr(v *string) sql.NullTime {
 		}
 	}
 	return sql.NullTime{Time: t, Valid: true}
+}
+
+// endOfDayTimePtr converts a date-only inclusive upper bound to the last
+// instant of that day. The query compares created_at <= end_date, so the
+// midnight value nullTimePtr returns would drop every row created later on the
+// end date (B55-R06). A value that is not date-only keeps its exact instant.
+func endOfDayTimePtr(v *string) sql.NullTime {
+	if v == nil || *v == "" {
+		return sql.NullTime{}
+	}
+	t, err := time.Parse("2006-01-02", *v)
+	if err != nil {
+		return nullTimePtr(v)
+	}
+	return sql.NullTime{Time: t.Add(24*time.Hour - time.Nanosecond), Valid: true}
 }
 
 func nullTime(v *time.Time) sql.NullTime {

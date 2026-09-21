@@ -61,8 +61,43 @@ NOPASS='u@tcp(h:3306)/d'
 expect "user without a password: user"     "$NOPASS" DB_USER     "u"
 expect "user without a password: password" "$NOPASS" DB_PASSWORD ""
 
-expect_error "empty DSN"              ""
-expect_error "no database name"       "u:p@tcp(h:3306)"
+# A '?' in a password is legal: the driver finds the last '/' first and only
+# then looks for the query string.
+QPASS='u:p?ss@tcp(h:3306)/db'
+expect "password with ?: user"     "$QPASS" DB_USER     "u"
+expect "password with ?: password" "$QPASS" DB_PASSWORD "p?ss"
+expect "password with ?: host"     "$QPASS" DB_HOST     "h"
+expect "password with ?: name"     "$QPASS" DB_NAME     "db"
+
+QPASS_PARAMS='u:p?ss@tcp(h:3306)/db?parseTime=true'
+expect "password with ? and params: password" "$QPASS_PARAMS" DB_PASSWORD "p?ss"
+expect "password with ? and params: name"     "$QPASS_PARAMS" DB_NAME     "db"
+
+# URL form: the shape normalizeDSN rewrites and the deployed API accepts.
+URL='mysql://bolted:pw@voxire-db.c32oko2gqonb.eu-west-1.rds.amazonaws.com:3306/voxire?tls=true'
+expect "url: host"     "$URL" DB_HOST     "voxire-db.c32oko2gqonb.eu-west-1.rds.amazonaws.com"
+expect "url: port"     "$URL" DB_PORT     "3306"
+expect "url: user"     "$URL" DB_USER     "bolted"
+expect "url: password" "$URL" DB_PASSWORD "pw"
+expect "url: name"     "$URL" DB_NAME     "voxire"
+
+# URL form without credentials, and without an explicit port.
+URL_NO_CREDS='mysql://host.internal/db'
+expect "url without credentials: host"     "$URL_NO_CREDS" DB_HOST     "host.internal"
+expect "url without credentials: port"     "$URL_NO_CREDS" DB_PORT     "3306"
+expect "url without credentials: user"     "$URL_NO_CREDS" DB_USER     ""
+expect "url without credentials: password" "$URL_NO_CREDS" DB_PASSWORD ""
+expect "url without credentials: name"     "$URL_NO_CREDS" DB_NAME     "db"
+
+# Percent-escaped userinfo decodes the way url.Parse does in normalizeDSN.
+URL_ESCAPED='mysql://bolted:p%40ss%2Fword@host.internal:3306/voxire'
+expect "url percent escapes: user"     "$URL_ESCAPED" DB_USER     "bolted"
+expect "url percent escapes: password" "$URL_ESCAPED" DB_PASSWORD 'p@ss/word'
+
+expect_error "empty DSN"               ""
+expect_error "no database name"        "u:p@tcp(h:3306)"
+expect_error "url without dbname"      "mysql://u:p@h:3306"
+expect_error "non-mysql URL scheme"    "postgres://u:p@h:5432/db"
 
 # export_db_vars_from_dsn must not clobber an explicit override.
 (

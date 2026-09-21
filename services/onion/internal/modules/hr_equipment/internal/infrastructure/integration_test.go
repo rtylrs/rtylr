@@ -142,7 +142,7 @@ func TestListAssets_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	assets, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{Limit: 50})
+	assets, _, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{Limit: 50})
 	if err != nil {
 		t.Fatalf("ListAssets: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestListAssets_FilterByStatus(t *testing.T) {
 	ctx := context.Background()
 
 	status := "available"
-	assets, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{Status: &status, Limit: 50})
+	assets, _, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{Status: &status, Limit: 50})
 	if err != nil {
 		t.Fatalf("ListAssets by status: %v", err)
 	}
@@ -163,6 +163,87 @@ func TestListAssets_FilterByStatus(t *testing.T) {
 		if a.Status != "available" {
 			t.Errorf("expected status 'available', got %q for asset %d", a.Status, a.ID)
 		}
+	}
+}
+
+func TestListAssets_FilterByAssignedTo(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	employeeID := int64(4101)
+
+	created, err := repo.CreateAsset(ctx, testutil.OwnerID, domain.CreateAssetParams{
+		Name:     "Employee Filter Laptop",
+		Category: "electronics",
+	})
+	if err != nil {
+		t.Fatalf("CreateAsset: %v", err)
+	}
+	t.Cleanup(func() {
+		if _, err := db.ExecContext(context.Background(), "DELETE FROM hr_assets WHERE id = ?", created.ID); err != nil {
+			t.Errorf("cleanup asset: %v", err)
+		}
+	})
+	if err := repo.AssignAssetToEmployee(ctx, testutil.OwnerID, created.ID, employeeID); err != nil {
+		t.Fatalf("AssignAssetToEmployee: %v", err)
+	}
+
+	assets, total, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{AssignedTo: &employeeID, Limit: 100})
+	if err != nil {
+		t.Fatalf("ListAssets by assigned_to: %v", err)
+	}
+
+	found := false
+	for _, a := range assets {
+		if a.AssignedTo != employeeID {
+			t.Errorf("filter by employee %d returned asset %d assigned to %d", employeeID, a.ID, a.AssignedTo)
+		}
+		if a.ID == created.ID {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("asset %d assigned to employee %d is missing from the filtered page", created.ID, employeeID)
+	}
+	if total < int64(len(assets)) {
+		t.Errorf("total = %d is smaller than the returned page (%d)", total, len(assets))
+	}
+}
+
+func TestListAssets_TotalCountsRowsBeyondThePage(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	locationID := int64(987654321)
+
+	for i := 0; i < 2; i++ {
+		created, err := repo.CreateAsset(ctx, testutil.OwnerID, domain.CreateAssetParams{
+			Name:       "Total Count Asset",
+			Category:   "electronics",
+			LocationID: locationID,
+		})
+		if err != nil {
+			t.Fatalf("CreateAsset %d: %v", i, err)
+		}
+		id := created.ID
+		t.Cleanup(func() {
+			if _, err := db.ExecContext(context.Background(), "DELETE FROM hr_assets WHERE id = ?", id); err != nil {
+				t.Errorf("cleanup asset: %v", err)
+			}
+		})
+	}
+
+	page, total, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{LocationID: &locationID, Limit: 1})
+	if err != nil {
+		t.Fatalf("ListAssets page: %v", err)
+	}
+	if len(page) != 1 {
+		t.Fatalf("page length = %d, want 1", len(page))
+	}
+	if total != 2 {
+		t.Errorf("total = %d, want 2 (all matching rows, not just the page)", total)
 	}
 }
 

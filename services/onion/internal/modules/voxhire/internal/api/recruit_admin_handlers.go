@@ -330,14 +330,37 @@ func ListCVJobsHandler(svc *application.Service) http.HandlerFunc {
 }
 
 type adminTaskRequest struct {
-	ApplicationID int64  `json:"application_id"`
-	Title         string `json:"title"`
-	Status        string `json:"status"`
-	DueAt         string `json:"due_at"`
+	ApplicationID int64           `json:"application_id"`
+	Title         string          `json:"title"`
+	Status        string          `json:"status"`
+	DueAt         json.RawMessage `json:"due_at"`
+}
+
+// dueAtInput reports the due date the request carries and whether it was
+// supplied at all. The raw JSON is kept because a decoded string cannot tell
+// "due_at was omitted" (keep the stored date) apart from "due_at was sent empty
+// or null" (clear the stored date).
+func (b adminTaskRequest) dueAtInput() (*time.Time, bool, error) {
+	raw := strings.TrimSpace(string(b.DueAt))
+	if raw == "" {
+		return nil, false, nil
+	}
+	if raw == "null" {
+		return nil, true, nil
+	}
+	var value string
+	if err := json.Unmarshal(b.DueAt, &value); err != nil {
+		return nil, true, err
+	}
+	dueAt, err := parseAdminTime(value)
+	if err != nil {
+		return nil, true, err
+	}
+	return dueAt, true, nil
 }
 
 func (b adminTaskRequest) taskInput(id int64) (domain.TaskInput, error) {
-	dueAt, err := parseAdminTime(b.DueAt)
+	dueAt, dueAtSet, err := b.dueAtInput()
 	if err != nil {
 		return domain.TaskInput{}, err
 	}
@@ -347,6 +370,7 @@ func (b adminTaskRequest) taskInput(id int64) (domain.TaskInput, error) {
 		Title:         b.Title,
 		Status:        b.Status,
 		DueAt:         dueAt,
+		DueAtSet:      dueAtSet,
 	}, nil
 }
 

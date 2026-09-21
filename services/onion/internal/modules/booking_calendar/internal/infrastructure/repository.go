@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
@@ -23,21 +24,15 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) FetchAppointments(ctx context.Context, businessID int64, from, to string) ([]domain.CalendarAppointment, error) {
-	fromTime, err := time.Parse(time.RFC3339, from)
+	fromTime, err := parseCalendarBoundary(from, false)
 	if err != nil {
-		fromTime, err = time.Parse("2006-01-02T15:04:05Z07:00", from)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to parse calendar from time", logger.Error(err))
-			return nil, err
-		}
+		logger.Ctx(ctx).Error("Failed to parse calendar from time", logger.Error(err))
+		return nil, err
 	}
-	toTime, err := time.Parse(time.RFC3339, to)
+	toTime, err := parseCalendarBoundary(to, true)
 	if err != nil {
-		toTime, err = time.Parse("2006-01-02T15:04:05Z07:00", to)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to parse calendar to time", logger.Error(err))
-			return nil, err
-		}
+		logger.Ctx(ctx).Error("Failed to parse calendar to time", logger.Error(err))
+		return nil, err
 	}
 
 	rows, err := r.queries.FetchCalendarAppointments(ctx, sqlc.FetchCalendarAppointmentsParams{
@@ -71,4 +66,25 @@ func (r *Repository) FetchAppointments(ctx context.Context, businessID int64, fr
 	}
 
 	return appts, nil
+}
+
+// parseCalendarBoundary accepts either an RFC3339 timestamp or a plain
+// YYYY-MM-DD date. The tool executor and REST callers both send date-only
+// values (from_date/to_date), which the old RFC3339-only parse rejected, so
+// every calendar request failed.
+//
+// A date-only upper bound is widened to the start of the following day: the
+// query window is half-open (start_time < to), and callers asking for
+// to=2026-06-08 mean the whole of that day, not just its midnight.
+func parseCalendarBoundary(value string, upperBound bool) (time.Time, error) {
+	if ts, err := time.Parse(time.RFC3339, value); err == nil {
+		return ts, nil
+	}
+	if day, err := time.Parse("2006-01-02", value); err == nil {
+		if upperBound {
+			return day.AddDate(0, 0, 1), nil
+		}
+		return day, nil
+	}
+	return time.Time{}, fmt.Errorf("calendar time %q must be RFC3339 or YYYY-MM-DD", value)
 }

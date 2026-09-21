@@ -60,7 +60,7 @@ func (s *Service) notifyCareerApplication(ctx context.Context, id int64, app dom
 
 	subject := fmt.Sprintf("[VoxHire] New application from %s", crlfStripper.Replace(app.Name))
 
-	if _, err := emailPkg.Send(ctx, emailPkg.SendParams{
+	if _, err := sendNotificationEmail(ctx, emailPkg.SendParams{
 		To:      notifyEmails,
 		Subject: subject,
 		HTML:    emailHTML,

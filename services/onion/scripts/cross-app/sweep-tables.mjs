@@ -49,7 +49,68 @@ const fromRe = /\.(?:From|Join)\("([a-zA-Z_]\w*)"/g;
 const insertRe = /\.Insert\("([a-zA-Z_]\w*)"/g;
 const updateRe = /\.Update\("([a-zA-Z_]\w*)"/g;
 const deleteRe = /\.Delete\("([a-zA-Z_]\w*)"/g;
-const rawRe = /\b(?:FROM|INTO|UPDATE|JOIN)\s+([a-z][a-z0-9_]*)\b/g;
+// Go source text is scanned for SQL string literals only: prose in comments and
+// log/error messages ("stock_core: update level") must not become tables. The
+// scan returns every double-quoted or backtick literal with comments and rune
+// literals skipped.
+function sqlLiterals(text) {
+  const out = [];
+  let i = 0;
+  while (i < text.length) {
+    const c = text[i];
+    if (c === '/' && text[i + 1] === '/') {
+      const nl = text.indexOf('\n', i);
+      i = nl < 0 ? text.length : nl + 1;
+      continue;
+    }
+    if (c === '/' && text[i + 1] === '*') {
+      const end = text.indexOf('*/', i + 2);
+      i = end < 0 ? text.length : end + 2;
+      continue;
+    }
+    if (c === "'") {
+      // Rune literal: skip it so quotes and slashes inside are not read as code.
+      i++;
+      while (i < text.length && text[i] !== "'") i += text[i] === '\\' ? 2 : 1;
+      i++;
+      continue;
+    }
+    if (c === '"' || c === '`') {
+      const quote = c;
+      let j = i + 1;
+      let lit = '';
+      while (j < text.length && text[j] !== quote) {
+        if (quote === '"' && text[j] === '\\') {
+          lit += text[j + 1] ?? '';
+          j += 2;
+          continue;
+        }
+        lit += text[j];
+        j++;
+      }
+      out.push(lit);
+      i = j + 1;
+      continue;
+    }
+    i++;
+  }
+  return out;
+}
+
+// rawTablesIn reads a SQL statement: FROM/JOIN read, INTO/UPDATE/DELETE FROM
+// write. ON DUPLICATE KEY UPDATE names columns, not tables.
+function rawTablesIn(sql) {
+  let q = sql.replace(/--[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  q = q.replace(/\bon\s+duplicate\s+key\s+update/gi, ' ');
+  // Strip DELETE FROM first so its target is not also counted as a read.
+  q = q.replace(/\bdelete\s+from/gi, 'delete_from');
+  const reads = [];
+  const writes = [];
+  for (const m of q.matchAll(/\b(?:from|join)\s+([a-zA-Z_]\w*)/gi)) reads.push(m[1]);
+  for (const m of q.matchAll(/\b(?:into|update)\s+([a-zA-Z_]\w*)/gi)) writes.push(m[1]);
+  for (const m of q.matchAll(/\bdelete_from\s+([a-zA-Z_]\w*)/gi)) writes.push(m[1]);
+  return { reads, writes };
+}
 
 for (const f of walk(paths.modules, ['.go'])) {
   const mod = f.slice(paths.modules.length + 1).split('/')[0];
@@ -72,12 +133,17 @@ for (const f of walk(paths.platform, ['.go'])) {
   while ((m = insertRe.exec(t))) touch(m[1], mod, 'write');
   while ((m = updateRe.exec(t))) touch(m[1], mod, 'write');
   while ((m = deleteRe.exec(t))) touch(m[1], mod, 'write');
-  // Raw SQL string literals (non-squirrel), lowercased word match.
-  const rawLower = /\b(?:from|into|update|join)\s+([a-z][a-z0-9_]{3,})\b/g;
-  while ((m = rawLower.exec(t))) {
-    const name = m[1];
-    if (/^(the|this|that|which|where|table|their|them|these|those|there)$/.test(name)) continue;
-    touch(name, mod, /from|join/.test(m[0]) ? 'read' : 'write');
+  // Raw SQL string literals (non-squirrel). Only literals whose first
+  // statement opens with a SQL verb are scanned; error prose that merely
+  // contains "update <word>" is not, and the case-insensitive match catches
+  // uppercase SQL. A generated sqlc literal starts with its "-- name:" header,
+  // so leading comments are skipped before the verb check.
+  for (const sql of sqlLiterals(t)) {
+    const head = sql.replace(/^(?:\s+|--[^\n]*|\/\*[\s\S]*?\*\/)*/, '');
+    if (!/^(?:select|insert|replace|update|delete|with)\b/i.test(head)) continue;
+    const { reads, writes } = rawTablesIn(sql);
+    for (const name of reads) touch(name, mod, 'read');
+    for (const name of writes) touch(name, mod, 'write');
   }
 }
 

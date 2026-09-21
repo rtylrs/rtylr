@@ -56,7 +56,7 @@ func TestMarkRead_UnknownNotificationIsNoOp(t *testing.T) {
 	ctx := context.Background()
 
 	// Should not error even when no matching row exists.
-	err := repo.MarkRead(ctx, testutil.OwnerID, 0)
+	err := repo.MarkRead(ctx, testutil.OwnerID, testutil.OwnerID, 0)
 	if err != nil {
 		t.Fatalf("MarkRead on non-existent notification returned error: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestMarkAllRead_UnknownUserIsNoOp(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.MarkAllRead(ctx, 0)
+	err := repo.MarkAllRead(ctx, testutil.OwnerID, 0)
 	if err != nil {
 		t.Fatalf("MarkAllRead with unknown user_id returned error: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestMarkAllRead_ForOwnerIsNoOp(t *testing.T) {
 	ctx := context.Background()
 
 	// Just verify no error is returned for a valid user.
-	err := repo.MarkAllRead(ctx, testutil.OwnerID)
+	err := repo.MarkAllRead(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("MarkAllRead returned error: %v", err)
 	}
@@ -187,7 +187,7 @@ func TestMarkRead_KnownUserUnknownNotification_NoError(t *testing.T) {
 	ctx := context.Background()
 
 	// A valid user but a notification ID that does not exist; should be no-op.
-	err := repo.MarkRead(ctx, testutil.OwnerID, 9999999)
+	err := repo.MarkRead(ctx, testutil.OwnerID, testutil.OwnerID, 9999999)
 	if err != nil {
 		t.Fatalf("MarkRead valid user, missing notification: %v", err)
 	}
@@ -198,7 +198,7 @@ func TestMarkAllRead_OwnerID_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.MarkAllRead(ctx, testutil.OwnerID)
+	err := repo.MarkAllRead(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("MarkAllRead ownerID: %v", err)
 	}
@@ -209,7 +209,7 @@ func TestMarkAllRead_ThenListReturnsNoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	if err := repo.MarkAllRead(ctx, testutil.OwnerID); err != nil {
+	if err := repo.MarkAllRead(ctx, testutil.OwnerID, testutil.OwnerID); err != nil {
 		t.Fatalf("MarkAllRead: %v", err)
 	}
 	_, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
@@ -223,7 +223,7 @@ func TestMarkRead_ZeroNotificationID_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.MarkRead(ctx, testutil.OwnerID, 0)
+	err := repo.MarkRead(ctx, testutil.OwnerID, testutil.OwnerID, 0)
 	if err != nil {
 		t.Fatalf("MarkRead with notificationID=0: %v", err)
 	}
@@ -249,7 +249,7 @@ func TestMarkAllRead_ConsecutiveCalls_NoError(t *testing.T) {
 	ctx := context.Background()
 
 	for i := 0; i < 3; i++ {
-		if err := repo.MarkAllRead(ctx, testutil.OwnerID); err != nil {
+		if err := repo.MarkAllRead(ctx, testutil.OwnerID, testutil.OwnerID); err != nil {
 			t.Fatalf("MarkAllRead iteration %d: %v", i, err)
 		}
 	}
@@ -291,7 +291,7 @@ func TestMarkRead_MultipleCallsSameNotification_NoError(t *testing.T) {
 
 	// Call MarkRead twice for the same (non-existent) notification; should be idempotent.
 	for i := 0; i < 2; i++ {
-		if err := repo.MarkRead(ctx, testutil.OwnerID, 8888888); err != nil {
+		if err := repo.MarkRead(ctx, testutil.OwnerID, testutil.OwnerID, 8888888); err != nil {
 			t.Fatalf("MarkRead iteration %d: %v", i, err)
 		}
 	}
@@ -316,7 +316,7 @@ func TestMarkAllRead_LargeUserID_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.MarkAllRead(ctx, 1<<40)
+	err := repo.MarkAllRead(ctx, testutil.OwnerID, 1<<40)
 	if err != nil {
 		t.Fatalf("MarkAllRead(large userID): %v", err)
 	}

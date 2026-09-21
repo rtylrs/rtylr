@@ -53,8 +53,13 @@ for (const p of pkgs.sort()) {
   for (const f of files) {
     const t = readFileSync(f, 'utf8');
     if (f.endsWith('_test.go')) continue;
-    for (const m of t.matchAll(/^(?:func|type|var|const)\s+\(??(\w+)/gm)) {
-      if (/^[A-Z]/.test(m[1])) exported.add(m[1]);
+    for (const m of t.matchAll(/^(?:func\s+(?:\([^)]*\)\s+)?([A-Z]\w*)|(?:type|var|const)\s+([A-Z]\w*))/gm)) {
+      exported.add(m[1] || m[2]);
+    }
+    // Grouped type/var/const blocks declare one exported name per line, so the
+    // single-line pattern above cannot see them.
+    for (const m of t.matchAll(/^(?:type|var|const)\s*\(([\s\S]*?)^\)/gm)) {
+      for (const d of m[1].matchAll(/^\s*([A-Z]\w*)/gm)) exported.add(d[1]);
     }
     // Concrete functions with bodies that are not trivial accessors.
     for (const m of t.matchAll(/^func\s+(?:\([^)]*\)\s+)?([A-Za-z]\w*)\s*\([^)]*\)[^{]*\{/gm)) {
