@@ -45,7 +45,14 @@ function QrCode() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const value =
+      target.type === 'checkbox'
+        ? target.checked
+        : target.type === 'number'
+          ? // <input type="number"> reports a string; react-qrcode-logo only
+            // honors eyeRadius/logoWidth/logoHeight when they are numbers.
+            Number(target.value) || 0
+          : target.value;
     const name = target.name;
     setQrOptions((current) => ({ ...current, [name]: value }));
   };
@@ -79,7 +86,8 @@ function QrCode() {
     }
     const logoSrc = typeof user?.logo === 'string' ? user.logo : '';
     if (!logoSrc) {
-      setIsLogoLoaded(false);
+      // No logo exists, so nothing is awaited and the download must not be blocked.
+      setIsLogoLoaded(true);
       return;
     }
     let cancelled = false;

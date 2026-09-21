@@ -5,7 +5,6 @@ import { Search, Loader2, Check } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { EmptyState } from '@voxire/ui';
 import { useBusinessStore, type BusinessType } from '../../../../../shared/stores/businessStore';
-import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useIndustries } from '../../../../../shared/hooks/queries/useIndustries';
 import {
   Card,
@@ -20,7 +19,6 @@ import { cn } from '../../../../../shared/lib/utils';
 const BusinessTypeSettings: React.FC = () => {
   const { t } = useTranslation();
   const { businessType, setBusinessType } = useBusinessStore();
-  const updateBusiness = useUpdateBusiness();
   const { data, isLoading } = useIndustries();
 
   const [selected, setSelected] = useState<string>(businessType || '');
@@ -56,10 +54,9 @@ const BusinessTypeSettings: React.FC = () => {
   const handleSave = () => {
     if (!selected) return;
 
-    updateBusiness.mutate(
-      { data: { businessType: selected } },
-      { onSuccess: () => setBusinessType(selected as BusinessType) }
-    );
+    // The hub config contract has no business_type field, so this preference
+    // lives in the persisted business store only.
+    setBusinessType(selected as BusinessType);
   };
 
   const hasChanges = selected !== (businessType || '');
@@ -175,12 +172,8 @@ const BusinessTypeSettings: React.FC = () => {
                     </span>
                   </p>
                 </div>
-                <Button
-                  onClick={handleSave}
-                  disabled={updateBusiness.isPending}
-                  className="rounded-full"
-                >
-                  {updateBusiness.isPending ? 'Saving...' : 'Save changes'}
+                <Button onClick={handleSave} className="rounded-full">
+                  Save changes
                 </Button>
               </div>
             </motion.div>

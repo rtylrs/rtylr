@@ -93,6 +93,8 @@ const Businesses: React.FC = () => {
   const openLogoUpload = (business: OwnedBusiness, event: React.MouseEvent): void => {
     event.stopPropagation();
     setLogoUploadTargetId(business.id);
+    // Reset before opening so re-picking the same file still fires change.
+    if (logoInputRef.current) logoInputRef.current.value = '';
     logoInputRef.current?.click();
   };
 
@@ -107,8 +109,8 @@ const Businesses: React.FC = () => {
     } catch (error) {
       toast.error(errorMessage(error, t('businesses.logoUploadError')));
     } finally {
-      setLogoUploadTargetId(null);
-      if (logoInputRef.current) logoInputRef.current.value = '';
+      // Leave a newer upload's target alone: only clear ours.
+      setLogoUploadTargetId((current) => (current === businessId ? null : current));
     }
   };
 

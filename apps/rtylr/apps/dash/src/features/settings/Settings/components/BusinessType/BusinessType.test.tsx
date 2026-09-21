@@ -17,12 +17,22 @@ vi.mock('motion/react', () => ({
   AnimatePresence: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock('../../../../../shared/stores/businessStore', () => ({
-  useBusinessStore: () => ({ businessType: '', setBusinessType: vi.fn() }),
+const businessStoreMock = vi.hoisted(() => ({
+  businessType: null as string | null,
+  setBusinessType: vi.fn(),
 }));
 
+vi.mock('../../../../../shared/stores/businessStore', () => ({
+  useBusinessStore: () => ({
+    businessType: businessStoreMock.businessType,
+    setBusinessType: businessStoreMock.setBusinessType,
+  }),
+}));
+
+const updateBusinessMock = vi.hoisted(() => ({ mutate: vi.fn(), isPending: false }));
+
 vi.mock('../../../../../shared/hooks/queries/useBusiness', () => ({
-  useUpdateBusiness: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateBusiness: () => updateBusinessMock,
 }));
 
 type IndustryType = { slug: string; label: string; icon?: string };
@@ -41,6 +51,7 @@ import BusinessTypeSettings from './BusinessType';
 
 beforeEach(() => {
   vi.clearAllMocks();
+  businessStoreMock.businessType = null;
   industriesData.data = {
     groups: [
       {
@@ -92,5 +103,17 @@ describe('BusinessType: search-empty state', () => {
     expect(
       screen.queryByText('settings.businessType.noIndustriesMatchTitle')
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('BusinessType: save', () => {
+  it('applies the industry locally without a no-op config request', () => {
+    render(<BusinessTypeSettings />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Restaurant' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(businessStoreMock.setBusinessType).toHaveBeenCalledWith('restaurant');
+    expect(updateBusinessMock.mutate).not.toHaveBeenCalled();
   });
 });

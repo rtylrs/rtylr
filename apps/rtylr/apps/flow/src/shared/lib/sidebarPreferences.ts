@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
@@ -537,15 +537,20 @@ export function useSidebarPreferences() {
     queryKey: sidebarSettingsQueryKey,
     queryFn: () => unwrap(flowApi.getUserSettings()),
   });
-  const [preferences, setPreferences] = useState<SidebarPreferences>(() =>
-    parseSidebarPreferences(settings?.sidebarPreferences)
+
+  // Derived from the shared cache rather than copied into per-instance state.
+  // FlowLayout and SidebarSettingsSection each mount this hook, and a private
+  // copy of the document is what let one instance autosave a snapshot taken
+  // before the other's just-made change.
+  const preferences = useMemo(
+    () => parseSidebarPreferences(settings?.sidebarPreferences),
+    [settings]
   );
 
-  useEffect(() => {
-    if (settings) setPreferences(parseSidebarPreferences(settings.sidebarPreferences));
-  }, [settings]);
-
   const save = useMutation({
+    // The payload is a whole document, so writes from every mounted instance
+    // are serialized: an older response must not land after a newer one.
+    scope: { id: 'flow-sidebar-preferences' },
     mutationFn: async ({
       preferences: next,
     }: {
@@ -567,7 +572,12 @@ export function useSidebarPreferences() {
       return sent;
     },
     onSuccess: (sent, variables) => {
-      queryClient.setQueryData(sidebarSettingsQueryKey, sent);
+      const latest = queryClient.getQueryData<ApiUserSettings>(sidebarSettingsQueryKey);
+      // A newer optimistic document wins: writing this response would revert a
+      // change the user made while the request was in flight.
+      if (latest?.sidebarPreferences === sent.sidebarPreferences) {
+        queryClient.setQueryData(sidebarSettingsQueryKey, sent);
+      }
       if (variables.showToast) toast.success(t('flow.sidebar.saved'));
     },
     onError: (_error, variables) => {
@@ -580,16 +590,37 @@ export function useSidebarPreferences() {
       mutator: (draft: SidebarPreferences) => SidebarPreferences,
       options: SidebarPreferencesUpdateOptions = {}
     ) => {
-      const next = updateSidebarPreferences(preferences, mutator);
-      setPreferences(next);
+      const cached = queryClient.getQueryData<ApiUserSettings>(sidebarSettingsQueryKey);
+      const next = updateSidebarPreferences(
+        parseSidebarPreferences(cached?.sidebarPreferences),
+        mutator
+      );
+      const optimistic: ApiUserSettings = {
+        ...(cached ?? defaultSettings),
+        sidebarPreferences: serializeSidebarPreferences(next),
+      };
+      // Written before the request so every instance reads the new document
+      // immediately, including the one that did not make this change.
+      queryClient.setQueryData(sidebarSettingsQueryKey, optimistic);
       save.mutate(
         { preferences: next, showToast: options.showToast !== false },
         {
-          onError: () => setPreferences(preferences),
+          onError: () => {
+            // Restore the document this update replaced, and only if nothing
+            // newer has written since: rolling back over a newer change would
+            // lose it the way this fix exists to prevent.
+            const latest = queryClient.getQueryData<ApiUserSettings>(sidebarSettingsQueryKey);
+            if (latest?.sidebarPreferences === optimistic.sidebarPreferences) {
+              queryClient.setQueryData<ApiUserSettings | undefined>(
+                sidebarSettingsQueryKey,
+                cached
+              );
+            }
+          },
         }
       );
     },
-    [preferences, save]
+    [queryClient, save]
   );
 
   return useMemo(

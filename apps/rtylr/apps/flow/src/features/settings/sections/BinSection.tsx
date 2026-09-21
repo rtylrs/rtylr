@@ -60,8 +60,22 @@ const BinSection = (): React.JSX.Element => {
   // partial failure part-way through a batch should stop rather than race the
   // rest. Failures surface through the mutation's own error toast.
   const confirmPurge = async (): Promise<void> => {
+    const remaining = new Set(selected);
+    let failed = false;
     for (const id of selected) {
-      await purge.mutateAsync(id).catch(() => undefined);
+      try {
+        await purge.mutateAsync(id);
+      } catch {
+        failed = true;
+        break;
+      }
+      remaining.delete(id);
+    }
+    if (failed) {
+      // Keep the failed project and the ones the stop left unprocessed
+      // selected, and the dialog open, so a retry is one click.
+      setSelected(remaining);
+      return;
     }
     setSelected(new Set());
     setConfirming(false);
