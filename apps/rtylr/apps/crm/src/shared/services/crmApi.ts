@@ -184,6 +184,11 @@ export interface Automation {
   completed: number;
   createdAt: string;
   nodes?: Array<{ id: string; type: string; label: string; x: number; y: number }>;
+  /** Canonical backend fields, sent by the automations hook as the mutation payload. */
+  triggerType?: string;
+  triggerConfig?: Record<string, unknown> | string;
+  actions?: unknown[];
+  isActive?: boolean;
 }
 
 export interface Template {
@@ -444,17 +449,26 @@ interface AutomationMutationPayload {
   name?: string;
   triggerType?: string;
   triggerConfig?: Record<string, unknown>;
-  actions?: Array<{ id: string; type: string; label: string; x: number; y: number }>;
+  actions?: unknown[];
   isActive?: boolean;
 }
 
+/**
+ * The automations hook already converts its legacy UI record into the backend
+ * shape (triggerType/triggerConfig/actions/isActive). Reading only the legacy
+ * fields here dropped trigger_type and actions from every PUT, which onion
+ * rejects with 400. Prefer the canonical fields and keep the legacy ones as a
+ * fallback for callers that still send the UI record.
+ */
 function toAutomationMutationPayload(data: Partial<Automation>): AutomationMutationPayload {
+  const triggerConfig =
+    data.triggerConfig && typeof data.triggerConfig === 'object' ? data.triggerConfig : {};
   return {
     name: data.name,
-    triggerType: data.trigger,
-    triggerConfig: {},
-    actions: data.nodes,
-    isActive: data.status === 'active',
+    triggerType: data.triggerType ?? data.trigger,
+    triggerConfig,
+    actions: data.actions ?? data.nodes,
+    isActive: data.isActive ?? data.status === 'active',
   };
 }
 
