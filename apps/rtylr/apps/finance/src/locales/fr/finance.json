@@ -146,7 +146,9 @@
   },
   "clients": {
     "search": "Rechercher un client",
-    "none": "Aucun client trouvé"
+    "none": "Aucun client trouvé",
+    "loadError": "Impossible de charger les clients",
+    "retry": "Réessayer"
   },
   "pdf": {
     "download": "Télécharger le PDF",

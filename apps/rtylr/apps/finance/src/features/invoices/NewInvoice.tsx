@@ -97,7 +97,10 @@ const NewInvoice: React.FC = () => {
       .then((data) => {
         const clients = parseClientsResponse(data);
         const selected = (clients ?? []).find((entry) => entry.id === clientId);
-        if (selected) setClient(selected);
+        // The id is resolved against the CRM directory, so this is a verified
+        // CRM customer: hydrate the link the same way the manual picker does
+        // (ClientSelect.tsx), or the invoice saves without customerId (#840).
+        if (selected) setClient({ ...selected, crmCustomerId: selected.id });
       })
       .catch(() => {});
   }, [clientId, clone]);
