@@ -2,6 +2,7 @@ import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import worker from '../../cloudflare/_worker.js';
 import { htmlCandidates, markdownCandidates, markdownNotFound, jsonError } from '../../cloudflare/_worker.js';
+import { validateLead, __resetLeadRateLimit } from '../../cloudflare/_worker.js';
 
 // ---------------------------------------------------------------------------
 // In-memory ASSETS binding that mimics Cloudflare Pages asset serving.
@@ -437,5 +438,125 @@ describe('security headers', () => {
     const policy = res.headers.get('content-security-policy-report-only');
     assert.match(policy, /default-src 'self'/);
     assert.match(policy, /https:\/\/www\.googletagmanager\.com/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Lead capture
+// ---------------------------------------------------------------------------
+
+describe('lead endpoint', () => {
+  const LEAD = '/api/v1/lead';
+  const valid = { form: 'contact', name: 'T', email: 't@example.com', message: 'hi' };
+
+  // The per-IP counter lives in module scope, so it survives between tests.
+  // Without this the fifth test in this block starts rate limited and the
+  // suite passes or fails depending on the order it happens to run in.
+  beforeEach(() => __resetLeadRateLimit());
+
+  const post = (body, opts = {}) =>
+    new Request(SITE + LEAD, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.1', ...opts },
+      body: typeof body === 'string' ? body : JSON.stringify(body),
+    });
+
+  it('accepts a valid contact lead with 202 once a transport is configured', async () => {
+    const calls = [];
+    const env2 = { ...env, LEAD_WEBHOOK_URL: 'https://crm.example/leads' };
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = async (url, init) => {
+      calls.push({ url, body: JSON.parse(init.body) });
+      return new Response('{}', { status: 200 });
+    };
+    try {
+      const res = await worker.fetch(post(valid), env2);
+      assert.equal(res.status, 202);
+      assert.deepEqual(await res.json(), { ok: true, delivered: ['webhook'] });
+      assert.equal(calls.length, 1);
+      assert.equal(calls[0].body.email, 't@example.com');
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  });
+
+  it('reports 503 rather than success when nothing is configured', async () => {
+    // The failure that matters: a form showing "sent" while the lead is gone
+    // is worse than the mailto: link this replaces.
+    const res = await worker.fetch(post(valid), env);
+    assert.equal(res.status, 503);
+    const body = await res.json();
+    assert.equal(body.error.code, 'delivery_unavailable');
+  });
+
+  it('rejects a missing email with 400', async () => {
+    const res = await worker.fetch(post({ form: 'contact', message: 'hi' }), env);
+    assert.equal(res.status, 400);
+    assert.equal((await res.json()).error.code, 'invalid_lead');
+  });
+
+  it('rejects an unknown form with 400', async () => {
+    const res = await worker.fetch(post({ ...valid, form: 'newsletter' }), env);
+    assert.equal(res.status, 400);
+  });
+
+  it('rejects a filled honeypot with 400', async () => {
+    const res = await worker.fetch(post({ ...valid, honeypot: 'http://spam' }), env);
+    assert.equal(res.status, 400);
+  });
+
+  it('rejects a body that is not JSON with 400', async () => {
+    const res = await worker.fetch(post('not json'), env);
+    assert.equal(res.status, 400);
+    assert.equal((await res.json()).error.code, 'invalid_body');
+  });
+
+  it('answers GET with 405 and Allow: POST, OPTIONS', async () => {
+    const res = await worker.fetch(req(LEAD), env);
+    assert.equal(res.status, 405);
+    assert.equal(res.headers.get('allow'), 'POST, OPTIONS');
+  });
+
+  it('answers OPTIONS with 204 and Allow: POST, OPTIONS', async () => {
+    const res = await worker.fetch(new Request(SITE + LEAD, { method: 'OPTIONS' }), env);
+    assert.equal(res.status, 204);
+    assert.equal(res.headers.get('allow'), 'POST, OPTIONS');
+  });
+
+  it('rate limits a single address after five submissions a minute', async () => {
+    for (let i = 0; i < 5; i += 1) {
+      const res = await worker.fetch(post(valid), env);
+      assert.notEqual(res.status, 429, `submission ${i + 1} should not be limited`);
+    }
+    const res = await worker.fetch(post(valid), env);
+    assert.equal(res.status, 429);
+    assert.equal(res.headers.get('retry-after'), '60');
+  });
+
+  it('counts each address separately', async () => {
+    for (let i = 0; i < 6; i += 1) await worker.fetch(post(valid), env);
+    const other = await worker.fetch(post(valid, { 'cf-connecting-ip': '203.0.113.9' }), env);
+    assert.notEqual(other.status, 429);
+  });
+
+  it('is advertised on /api/v1/status', async () => {
+    const res = await worker.fetch(req('/api/v1/status'), env);
+    assert.equal((await res.json()).endpoints.lead, '/api/v1/lead');
+  });
+});
+
+describe('validateLead', () => {
+  it('trims and keeps only the known fields', () => {
+    const { lead } = validateLead({
+      form: 'demo', email: '  a@b.co ', reason: ' Partnerships ', nope: 'dropped',
+    });
+    assert.equal(lead.email, 'a@b.co');
+    assert.equal(lead.reason, 'Partnerships');
+    assert.ok(!('nope' in lead));
+  });
+
+  it('rejects an over-long message', () => {
+    const { error } = validateLead({ form: 'contact', email: 'a@b.co', message: 'x'.repeat(4001) });
+    assert.match(error, /4000/);
   });
 });
