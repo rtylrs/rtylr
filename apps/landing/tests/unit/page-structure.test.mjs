@@ -217,6 +217,7 @@ describe('FAQ answers reach a crawler', () => {
     ['finance/index.html', 'balance sheet and cash flow reports'],
     ['flow/index.html', 'boards, lists, timeline views, cycles'],
     ['index.html', 'stops stitching a register, a spreadsheet'],
+    ['demo/index.html', 'the questions a signup page cannot answer'],
   ];
 
   for (const [page, needle] of CASES) {
@@ -364,6 +365,34 @@ describe('optional third-party embeds', () => {
 // nobody touched. Two assertions, because either alone can pass on a broken
 // sitemap: that the values are not uniform, and that the blog values are the
 // dates the posts actually declare.
+// Thin pages. /demo/ and /contact/ are where every CTA on the site points,
+// and they were a heading and a form: 139 and 164 words of visible text.
+// Google has nothing to match on a page that thin and an extractor has
+// nothing to lift.
+//
+// The threshold is the one the audit script uses. This gate exists because
+// every other check on that fix lives either in production or in a script
+// that is not merged, so nothing here would notice the copy being deleted.
+describe('page word counts', () => {
+  const MINIMUM = 250;
+  const COUNTED = ['demo/index.html', 'contact/index.html', 'blog/index.html'];
+
+  const visibleWords = (html) =>
+    stripScripts(html)
+      .replace(/<style[\s\S]*?<\/style>/g, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&[a-z]+;|&#x?[0-9a-f]+;/gi, ' ')
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+  for (const page of COUNTED) {
+    it(`${page} carries more than ${MINIMUM} words of visible text`, () => {
+      const n = visibleWords(read(page));
+      assert.ok(n > MINIMUM, `${page} has ${n} visible words, under the ${MINIMUM} threshold`);
+    });
+  }
+});
+
 describe('sitemap lastmod', () => {
   const SITEMAP = path.join(OUT, 'sitemap-0.xml');
   let entries = [];
