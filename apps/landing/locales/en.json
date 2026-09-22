@@ -284,6 +284,23 @@
           "answer": "Yes. Flow is included in the Free plan along with the other six apps, covering 10 team members at one location, with unlimited projects, tasks, comments and attachments. Pro and Scale raise the team and location limits and add the controls a larger team needs. rtylr does not publish prices yet, so Pro and Scale are quoted."
         }
       ]
+    },
+    "demo": {
+      "title": "Questions about the rtylr demo",
+      "items": [
+        {
+          "question": "What should I prepare for the demo?",
+          "answer": "Nothing is required. If you would rather see your own data than a sample, bring a menu or a SKU list, a recent invoice, and a rough idea of how many people and how many locations you run. Those are enough to show the register, stock, payroll and the books working against something you recognise."
+        },
+        {
+          "question": "Is the demo a sales call?",
+          "answer": "It is a 30 minute product walkthrough, run by someone who built rtylr. You do not need one in order to start: the Free plan covers 10 team members at one location and needs no card, so you can sign up and look around on your own first. The walkthrough is for the questions a signup page cannot answer."
+        },
+        {
+          "question": "Can the demo cover self hosting?",
+          "answer": "Yes. rtylr can be self hosted, and the setup is documented publicly at docs.rtylr.com/self-hosting. Say so when you book, under Explore a Rtylr Use Case, and the walkthrough can go that way instead. The documentation is open, so you can also read it first and arrive with specific questions about your own infrastructure."
+        }
+      ]
     }
   },
   "contact": {
@@ -1556,6 +1573,10 @@
       "title": "Book a Live rtylr Demo for Your Business | rtylr",
       "description": "See rtylr running against real data in a live 30 minute walkthrough with someone who built it. Bring your questions about POS, inventory, payroll and books.",
       "schemaName": "Book a Demo"
+    },
+    "directAnswer": {
+      "label": "What a rtylr demo is",
+      "body": "A rtylr demo is a 30 minute walkthrough of the product running against real data, led by someone who built it. It covers the register, inventory, payroll and the books, and shows how they sit on one data model rather than four tools that have to be reconciled. Bring your menu, your SKU list or a PDF of invoices and the walkthrough uses those. If you would rather not book anything, the Free plan needs no card."
     },
     "hero": {
       "title": "See rtylr on your data.",
