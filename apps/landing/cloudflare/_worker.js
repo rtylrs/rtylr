@@ -270,6 +270,234 @@ export function rateLimitHeaders() {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Lead capture
+// ---------------------------------------------------------------------------
+
+/** The two forms allowed to post here. Anything else is a 400. */
+const LEAD_FORMS = new Set(['demo', 'contact']);
+
+/** Deliberately permissive. Real validation is the reply not bouncing. */
+const LEAD_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const LEAD_MAX_FIELD = 4000;
+
+const LEAD_WINDOW_MS = 60_000;
+const LEAD_MAX_PER_WINDOW = 5;
+
+/**
+ * Per-IP counter, held in the isolate.
+ *
+ * Be clear about what this is and is not. `rateLimitHeaders()` above meters
+ * nothing at all: it advertises a ceiling on a cacheable read-only surface
+ * and says so. That is fine for GET. This endpoint sends mail, so an
+ * unmetered POST is a relay, and advisory headers would not have been rate
+ * limiting in any sense.
+ *
+ * What this gives: a single client hammering one colo is cut off after five
+ * submissions a minute. What it does not give: anything durable. Workers
+ * isolates are per-colo and evicted at will, so a distributed flood, or a
+ * patient one, walks straight through. The real control is a Cloudflare
+ * rate-limiting rule on /api/v1/lead, which lives in the dashboard and is
+ * not ours to add from here. This is the floor, not the ceiling.
+ */
+const leadHits = new Map();
+
+function leadRateLimited(ip) {
+  const now = Date.now();
+  const seen = leadHits.get(ip);
+  if (!seen || now - seen.start >= LEAD_WINDOW_MS) {
+    leadHits.set(ip, { start: now, count: 1 });
+    return false;
+  }
+  seen.count += 1;
+  return seen.count > LEAD_MAX_PER_WINDOW;
+}
+
+/** Test seam. The map outlives a single request, so it outlives a test too. */
+export function __resetLeadRateLimit() {
+  leadHits.clear();
+}
+
+/**
+ * Validate a submitted lead. Returns the cleaned lead, or a reason.
+ *
+ * `honeypot` is a field no human sees and no human fills. A bot that posts
+ * every input it finds fills it, and gets a 400 that looks exactly like a
+ * validation failure.
+ */
+export function validateLead(body) {
+  if (!body || typeof body !== 'object') return { error: 'Body must be a JSON object.' };
+  if (body.honeypot) return { error: 'Rejected.' };
+
+  const form = typeof body.form === 'string' ? body.form.trim() : '';
+  if (!LEAD_FORMS.has(form)) {
+    return { error: `form must be one of: ${[...LEAD_FORMS].join(', ')}.` };
+  }
+
+  const email = typeof body.email === 'string' ? body.email.trim() : '';
+  if (!LEAD_EMAIL.test(email)) return { error: 'A valid email address is required.' };
+
+  const text = (key) => {
+    const raw = body[key];
+    return typeof raw === 'string' ? raw.trim() : '';
+  };
+  const lead = {
+    form,
+    email,
+    name: text('name'),
+    company: text('company'),
+    country: text('country'),
+    companySize: text('companySize'),
+    reason: text('reason'),
+    message: text('message'),
+  };
+
+  for (const key of ['message', 'reason']) {
+    if (lead[key].length > LEAD_MAX_FIELD) {
+      return { error: `${key} must be under ${LEAD_MAX_FIELD} characters.` };
+    }
+  }
+
+  return { lead };
+}
+
+function leadSubject(lead) {
+  // The demo form collects no name, so fall back to the address rather than
+  // emitting "[rtylr lead] demo from undefined".
+  return `[rtylr lead] ${lead.form} from ${lead.name || lead.email}`;
+}
+
+function leadBody(lead) {
+  return Object.entries(lead)
+    .filter(([, value]) => value)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n');
+}
+
+/**
+ * Deliver one lead. Two independent legs, both optional, both configured by
+ * environment rather than by code:
+ *
+ *   CRM    LEAD_WEBHOOK_URL (+ LEAD_WEBHOOK_TOKEN), posted the lead verbatim.
+ *   Email  RESEND_API_KEY, via Resend.
+ *
+ * Returns which legs succeeded. The caller treats "none" as a failure and
+ * says so, because a form that reports success while the lead evaporates is
+ * worse than the mailto: link this replaces.
+ *
+ * MailChannels is deliberately absent. Its free Workers integration was
+ * terminated on 30 June 2024 and the free service ended that August, so the
+ * unauthenticated POST the issue describes now returns an error. Cloudflare's
+ * own guide points at Resend instead.
+ */
+export async function deliverLead(lead, env) {
+  const delivered = [];
+  const failed = [];
+
+  if (env?.LEAD_WEBHOOK_URL) {
+    try {
+      const res = await fetch(env.LEAD_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(env.LEAD_WEBHOOK_TOKEN ? { Authorization: `Bearer ${env.LEAD_WEBHOOK_TOKEN}` } : {}),
+        },
+        body: JSON.stringify(lead),
+      });
+      (res.ok ? delivered : failed).push('webhook');
+    } catch {
+      failed.push('webhook');
+    }
+  }
+
+  if (env?.RESEND_API_KEY) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: env.LEAD_FROM || 'rtylr <noreply@rtylr.com>',
+          to: [env.LEAD_TO || 'sales@rtylr.com'],
+          reply_to: lead.email,
+          subject: leadSubject(lead),
+          text: leadBody(lead),
+        }),
+      });
+      (res.ok ? delivered : failed).push('email');
+    } catch {
+      failed.push('email');
+    }
+  }
+
+  return { delivered, failed };
+}
+
+async function handleLead(request, method, env) {
+  const allow = 'POST, OPTIONS';
+  if (method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: { Allow: allow, ...rateLimitHeaders() } });
+  }
+  if (method !== 'POST') {
+    const res = jsonError(
+      405,
+      'method_not_allowed',
+      `${method} is not supported on /api/v1/lead.`,
+      `Use POST. Allowed methods: ${allow}.`
+    );
+    res.headers.set('Allow', allow);
+    return res;
+  }
+
+  const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  if (leadRateLimited(ip)) {
+    const res = jsonError(
+      429,
+      'rate_limited',
+      'Too many submissions from this address.',
+      `The limit is ${LEAD_MAX_PER_WINDOW} per minute. Email sales@rtylr.com if this is genuine.`
+    );
+    res.headers.set('Retry-After', String(Math.ceil(LEAD_WINDOW_MS / 1000)));
+    return res;
+  }
+
+  let body = null;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonError(400, 'invalid_body', 'Body must be valid JSON.', 'Send Content-Type: application/json.');
+  }
+
+  const { lead, error } = validateLead(body);
+  if (error) {
+    return jsonError(400, 'invalid_lead', error, 'See /openapi.json for the accepted shape.');
+  }
+
+  const { delivered, failed } = await deliverLead(lead, env);
+  if (delivered.length === 0) {
+    // Nothing was configured, or every configured leg failed. Either way the
+    // lead is gone, so say so and let the form show the address instead.
+    return jsonError(
+      503,
+      'delivery_unavailable',
+      'The lead could not be delivered.',
+      'Email sales@rtylr.com directly.'
+    );
+  }
+
+  return new Response(JSON.stringify({ ok: true, delivered }, null, 2) + '\n', {
+    status: 202,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      ...rateLimitHeaders(),
+    },
+  });
+}
+
 export function jsonError(status, code, message, hint) {
   const body = {
     error: {
@@ -366,6 +594,12 @@ async function handleApi(request, url, env) {
       },
     });
 
+  // Lead capture is POST-only, so it is routed before the table below, whose
+  // Allow header is GET, HEAD, OPTIONS for every entry it holds.
+  if (path === '/api/v1/lead') {
+    return handleLead(request, method, env);
+  }
+
   const allowMethods = 'GET, HEAD, OPTIONS';
 
   const endpoints = {
@@ -376,6 +610,7 @@ async function handleApi(request, url, env) {
         time: new Date().toISOString(),
         endpoints: {
           openapi: '/openapi.json',
+          lead: '/api/v1/lead',
           pages: '/api/v1/pages',
           status: '/api/v1/status',
           sitemap: '/sitemap.xml',
