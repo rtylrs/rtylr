@@ -308,6 +308,38 @@
       "title": "Contact rtylr Sales and Support in Lebanon | rtylr",
       "description": "Reach the rtylr team for sales, support, press or partnerships. Every message lands with a human and we reply within one business day, usually faster."
     },
+    "directAnswer": {
+      "label": "What happens when you write",
+      "body": "Every message sent from this page lands in front of a human on the rtylr team, and we reply within one business day, usually faster. Use the form for anything at all, or write to the address that matches what you need. Phone and WhatsApp are open Monday to Friday, 9 am to 5 pm GMT+3."
+    },
+    "routing": {
+      "title": "Which channel for what",
+      "sales": {
+        "label": "Sales and demos",
+        "value": "sales@rtylr.com",
+        "description": "Pricing, plans, migrating from another system, and booking a walkthrough."
+      },
+      "support": {
+        "label": "Help with an account",
+        "value": "support@voxire.com",
+        "description": "Something is broken, or you are stuck in an account you already have."
+      },
+      "security": {
+        "label": "Security reports",
+        "value": "security@voxire.com",
+        "description": "Suspected vulnerabilities and incidents. See the Trust Center for disclosure."
+      },
+      "partners": {
+        "label": "Partnerships",
+        "value": "partners@voxire.com",
+        "description": "Implementation, technology, solution and hardware partner enquiries."
+      },
+      "press": {
+        "label": "Press",
+        "value": "info@voxire.com",
+        "description": "There is no separate press address, so press requests go to the general inbox."
+      }
+    },
     "hero": {
       "title": "Reach out. We read it all.",
       "subtitle": "Product question, sales inquiry, press request, feature ask, every message lands in front of a human. We reply within one business day, usually faster."
