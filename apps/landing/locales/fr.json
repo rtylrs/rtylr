@@ -784,6 +784,38 @@
       "title": "Contacter rtylr\u00a0: ventes et support au Liban | rtylr",
       "description": "Contactez l’équipe rtylr pour les ventes, le support, la presse ou les partenariats. Chaque message est lu par une personne et la réponse arrive sous un jour ouvré."
     },
+    "directAnswer": {
+      "label": "Ce qui se passe quand vous écrivez",
+      "body": "Chaque message envoyé depuis cette page est lu par une personne de l’équipe rtylr, et la réponse arrive sous un jour ouvré, souvent plus vite. Utilisez le formulaire pour n’importe quelle demande, ou écrivez à l’adresse qui correspond à votre besoin. Téléphone et WhatsApp sont ouverts du lundi au vendredi, de 9 h à 17 h (GMT+3)."
+    },
+    "routing": {
+      "title": "Quel canal pour quoi",
+      "sales": {
+        "label": "Ventes et démos",
+        "value": "sales@rtylr.com",
+        "description": "Tarifs, offres, migration depuis un autre système et réservation d’une présentation."
+      },
+      "support": {
+        "label": "Aide sur un compte",
+        "value": "support@voxire.com",
+        "description": "Quelque chose ne fonctionne pas, ou vous êtes bloqué sur un compte existant."
+      },
+      "security": {
+        "label": "Signalements de sécurité",
+        "value": "security@voxire.com",
+        "description": "Vulnérabilités suspectées et incidents. Voir le Centre de confiance pour la divulgation."
+      },
+      "partners": {
+        "label": "Partenariats",
+        "value": "partners@voxire.com",
+        "description": "Demandes des partenaires d’intégration, technologiques, de solutions et matériels."
+      },
+      "press": {
+        "label": "Presse",
+        "value": "info@voxire.com",
+        "description": "Il n’existe pas d’adresse presse dédiée, les demandes arrivent donc à l’adresse générale."
+      }
+    },
     "hero": {
       "title": "Écrivez-nous. Nous lisons tout.",
       "subtitle": "Question produit, demande commerciale, sollicitation presse, idée de fonctionnalité\u00a0: chaque message arrive devant un humain. Nous répondons en un jour ouvré, souvent plus vite."
@@ -940,6 +972,23 @@
         {
           "question": "Qu’est-ce que rtylr ERP remplace\u00a0?",
           "answer": "Le tableur de stock, et le CSV censé le tenir à jour avec les ventes. Une vente dans POS décrémente les composants de la recette dans ERP au moment où elle se produit\u00a0: «\u00a0combien d’unités d’un composant reste-t-il sur trois établissements\u00a0?\u00a0» devient une question à laquelle vous répondez sans ouvrir un second outil."
+        }
+      ]
+    },
+    "demo": {
+      "title": "Questions sur la démo rtylr",
+      "items": [
+        {
+          "question": "Que faut-il préparer pour la démo\u00a0?",
+          "answer": "Rien n’est obligatoire. Si vous préférez voir vos propres données plutôt qu’un exemple, apportez un menu ou une liste d’articles, une facture récente, et une idée du nombre de personnes et d’établissements que vous gérez. Cela suffit à montrer la caisse, les stocks, la paie et la comptabilité sur des données que vous reconnaissez."
+        },
+        {
+          "question": "La démo est-elle un rendez-vous commercial\u00a0?",
+          "answer": "C’est une présentation produit de 30 minutes, menée par quelqu’un qui a construit rtylr. Vous n’en avez pas besoin pour commencer\u00a0: l’offre gratuite couvre 10 membres sur un établissement et ne demande aucune carte, vous pouvez donc vous inscrire et explorer seul d’abord. La présentation sert aux questions qu’une page d’inscription ne traite pas."
+        },
+        {
+          "question": "La démo peut-elle couvrir l’auto-hébergement\u00a0?",
+          "answer": "Oui. rtylr peut être auto-hébergé, et l’installation est documentée publiquement sur docs.rtylr.com/self-hosting. Signalez-le à la réservation, sous Explore a Rtylr Use Case, et la présentation prendra cette direction. La documentation est ouverte, vous pouvez donc la lire d’abord et venir avec des questions précises sur votre infrastructure."
         }
       ]
     }
@@ -1340,6 +1389,10 @@
     "meta": {
       "title": "Réserver une démo rtylr sur vos données | rtylr",
       "description": "Voyez rtylr tourner sur des données réelles pendant une démo de 30 minutes avec ceux qui l’ont construit. Posez vos questions sur la caisse, les stocks et la paie."
+    },
+    "directAnswer": {
+      "label": "Ce qu’est une démo rtylr",
+      "body": "Une démo rtylr est une présentation de 30 minutes du produit en fonctionnement sur des données réelles, menée par quelqu’un qui l’a construit. Elle couvre la caisse, les stocks, la paie et la comptabilité, et montre comment tout repose sur un seul modèle de données plutôt que sur quatre outils à rapprocher. Apportez votre menu, votre liste d’articles ou un PDF de factures\u00a0: la présentation s’appuiera dessus. Et si vous préférez ne rien réserver, l’offre gratuite ne demande aucune carte bancaire."
     }
   },
   "integrations": {
@@ -1370,6 +1423,12 @@
     "meta": {
       "title": "Programme partenaires rtylr | rtylr",
       "description": "Construisez avec rtylr. Partenaires d’intégration, technologiques, de solutions et matériels\u00a0: les conditions, les niveaux et comment se porter candidat."
+    }
+  },
+  "blog": {
+    "hero": {
+      "subtitle": "Des écrits concrets, éprouvés sur le terrain\u00a0: caisse, stocks, paie, et ce qui change quand tout partage une seule plateforme. Sans remplissage, seulement ce qui tient un samedi soir.",
+      "intro": "Les articles couvrent quatre sujets\u00a0: faire tourner une PME libanaise sur un seul système plutôt que six, le quotidien de la caisse et de la restauration, ce qui change vraiment quand on quitte les tableurs et les outils dispersés, et des explications claires pour chaque module rtylr. Écrit à partir du fonctionnement du produit, pas d’une liste de mots-clés."
     }
   }
 }
