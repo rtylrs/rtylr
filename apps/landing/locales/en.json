@@ -1754,7 +1754,9 @@
     },
     "hero": {
       "eyebrow": "BLOG",
-      "title": "Playbooks for running the whole business."
+      "title": "Playbooks for running the whole business.",
+      "subtitle": "Concrete, operator-tested writing on POS, inventory, payroll, and what changes when they share one platform. No fluff, just what works on a Saturday night.",
+      "intro": "The writing here covers four things: running a small or mid-sized Lebanese business on one system instead of six, the day to day of POS and restaurants, what actually changes when you move off spreadsheets and disconnected tools, and plain explainers for each rtylr module. Written from how the product works, not from a keyword list."
     },
     "readingTime": "{{minutes}} min read",
     "readingTimeShort": "{{minutes}} min",

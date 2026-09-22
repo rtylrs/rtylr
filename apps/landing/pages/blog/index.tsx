@@ -49,8 +49,10 @@ const BlogPage = (): React.JSX.Element => {
             {t('blog.hero.title')}
           </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Concrete, operator-tested writing on POS, inventory, payroll, and what changes when
-                they share one platform. No fluff, just what works on a Saturday night.
+                {t('blog.hero.subtitle')}
+              </motion.p>
+              <motion.p className={styles.heroIntro} variants={blurFadeIn}>
+                {t('blog.hero.intro')}
               </motion.p>
             </motion.div>
           </section>
