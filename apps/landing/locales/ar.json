@@ -260,8 +260,8 @@
       },
       "press": {
         "label": "الصحافة",
-        "value": "info@voxire.com",
-        "description": "لا يوجد عنوان منفصل للصحافة، لذا تصل طلباتها إلى البريد العام."
+        "value": "sales@rtylr.com",
+        "description": "لا يوجد عنوان منفصل للصحافة، لذا تصل طلباتها إلى البريد نفسه."
       }
     },
     "hero": {
@@ -314,7 +314,8 @@
       "nameRequired": "الاسم مطلوب.",
       "emailRequired": "البريد الإلكتروني مطلوب.",
       "emailInvalid": "أدخل بريدًا إلكترونيًا صحيحًا.",
-      "messageRequired": "الرسالة مطلوبة."
+      "messageRequired": "الرسالة مطلوبة.",
+      "submitFailed": "لم تُرسل الرسالة. حاول مرة أخرى، أو راسلنا على"
     },
     "success": {
       "title": "خطوة أخيرة.",
