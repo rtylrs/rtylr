@@ -686,12 +686,15 @@ func initializeModules(ctx context.Context) *apiModules {
 			}
 			return m
 		}(),
-		Variants:    variants.NewModule(ctx, dbclient.Pool()),
-		Voxhire:     voxhire.NewModule(ctx, dbclient.Pool()),
-		Warehouses:  warehousesModule,
-		Webhooks:    webhooks.NewModule(ctx, dbclient.Pool()),
-		WebsiteLead: websitelead.NewModule(ctx, dbclient.Pool()),
-		Workspaces:  workspacesModule,
+		Variants:   variants.NewModule(ctx, dbclient.Pool()),
+		Voxhire:    voxhire.NewModule(ctx, dbclient.Pool()),
+		Warehouses: warehousesModule,
+		Webhooks:   webhooks.NewModule(ctx, dbclient.Pool()),
+		WebsiteLead: websitelead.NewModule(ctx, dbclient.Pool(), websitelead.Notify{
+			LeadEmails:       platformConfig.GlobalConfig.LeadNotifyEmails,
+			NewsletterEmails: platformConfig.GlobalConfig.NewsletterNotifyEmails,
+		}),
+		Workspaces: workspacesModule,
 	}
 }
 

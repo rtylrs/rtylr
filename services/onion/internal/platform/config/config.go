@@ -79,23 +79,25 @@ const (
 )
 
 type AppConfig struct {
-	RunMode             string
-	DatabaseURL         string
-	DBHost              string
-	DBPort              string
-	DBUser              string
-	DBPass              string
-	DBName              string
-	JWTSecret           string
-	JWTDuration         time.Duration
-	ResendKey           string
-	AppEnv              string
-	AppRelease          string
-	DeploymentMode      string
-	Port                string
-	Hostname            string
-	AuthAppURL          string
-	GoogleOAuthClientID string
+	RunMode                string
+	DatabaseURL            string
+	DBHost                 string
+	DBPort                 string
+	DBUser                 string
+	DBPass                 string
+	DBName                 string
+	JWTSecret              string
+	JWTDuration            time.Duration
+	ResendKey              string
+	LeadNotifyEmails       []string
+	NewsletterNotifyEmails []string
+	AppEnv                 string
+	AppRelease             string
+	DeploymentMode         string
+	Port                   string
+	Hostname               string
+	AuthAppURL             string
+	GoogleOAuthClientID    string
 
 	// WorkOS
 	WorkOSAPIKey      string
@@ -292,23 +294,25 @@ func LoadAndValidate() (*AppConfig, error) {
 	}
 
 	cfg := &AppConfig{
-		RunMode:             envOrDefault("RUN_MODE", "api"),
-		DatabaseURL:         os.Getenv("DATABASE_URL"),
-		DBHost:              os.Getenv("DB_HOST"),
-		DBPort:              os.Getenv("DB_PORT"),
-		DBUser:              os.Getenv("DB_USER"),
-		DBPass:              os.Getenv("DB_PASSWORD"),
-		DBName:              os.Getenv("DB_NAME"),
-		JWTSecret:           os.Getenv("JWT_SECRET"),
-		JWTDuration:         jwtDuration,
-		ResendKey:           os.Getenv("RESEND_API_KEY"),
-		AppEnv:              os.Getenv("APP_ENV"),
-		AppRelease:          os.Getenv("APP_RELEASE"),
-		DeploymentMode:      envOrDefault("DEPLOYMENT_MODE", "hosted"),
-		Port:                os.Getenv("PORT"),
-		Hostname:            os.Getenv("HOSTNAME"),
-		AuthAppURL:          envFirst("AUTH_URL", "AUTH_APP_URL"),
-		GoogleOAuthClientID: os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+		RunMode:                envOrDefault("RUN_MODE", "api"),
+		DatabaseURL:            os.Getenv("DATABASE_URL"),
+		DBHost:                 os.Getenv("DB_HOST"),
+		DBPort:                 os.Getenv("DB_PORT"),
+		DBUser:                 os.Getenv("DB_USER"),
+		DBPass:                 os.Getenv("DB_PASSWORD"),
+		DBName:                 os.Getenv("DB_NAME"),
+		JWTSecret:              os.Getenv("JWT_SECRET"),
+		JWTDuration:            jwtDuration,
+		ResendKey:              os.Getenv("RESEND_API_KEY"),
+		LeadNotifyEmails:       ParseEmailList(os.Getenv("LEAD_NOTIFY_EMAILS"), DefaultLeadNotifyEmails),
+		NewsletterNotifyEmails: ParseEmailList(os.Getenv("NEWSLETTER_NOTIFY_EMAILS"), DefaultNewsletterNotifyEmails),
+		AppEnv:                 os.Getenv("APP_ENV"),
+		AppRelease:             os.Getenv("APP_RELEASE"),
+		DeploymentMode:         envOrDefault("DEPLOYMENT_MODE", "hosted"),
+		Port:                   os.Getenv("PORT"),
+		Hostname:               os.Getenv("HOSTNAME"),
+		AuthAppURL:             envFirst("AUTH_URL", "AUTH_APP_URL"),
+		GoogleOAuthClientID:    os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
 
 		// WorkOS
 		WorkOSAPIKey:      os.Getenv("WORKOS_API_KEY"),

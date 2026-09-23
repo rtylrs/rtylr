@@ -35,3 +35,19 @@ func (r *Repository) Create(ctx context.Context, input domain.LeadInput) (int64,
 	}
 	return result.LastInsertId()
 }
+
+func (r *Repository) CreateSubscriber(ctx context.Context, input domain.SubscriberInput) (int64, error) {
+	result, err := r.queries.CreateNewsletterSubscriber(ctx, sqlc.CreateNewsletterSubscriberParams{
+		Email:        input.Email,
+		Source:       input.Source,
+		PostSlug:     sql.NullString{String: input.PostSlug, Valid: input.PostSlug != ""},
+		PostTitle:    sql.NullString{String: input.PostTitle, Valid: input.PostTitle != ""},
+		PostCategory: sql.NullString{String: input.PostCategory, Valid: input.PostCategory != ""},
+		Language:     input.Language,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to insert newsletter subscriber", logger.Error(err))
+		return 0, err
+	}
+	return result.LastInsertId()
+}

@@ -19,6 +19,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, ContactRoutes(), &ContactHandler{Service: service},
 		http.PerRouteRateLimit(10, time.Minute),
 	)
+	http.RegisterPOSTWithValidationAndMiddleware[NewsletterRequest, NewsletterResponse](
+		ctx, router, NewsletterRoutes(), &NewsletterHandler{Service: service},
+		http.PerRouteRateLimit(10, time.Minute),
+	)
 	http.RegisterPOSTWithValidationAndMiddleware[AnalyticsEventRequest, AnalyticsEventResponse](
 		ctx, router, AnalyticsEventRoutes(), &AnalyticsEventHandler{},
 		http.PerRouteRateLimit(60, time.Minute),

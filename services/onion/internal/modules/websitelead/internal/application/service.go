@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"html"
+	"net/url"
 	"strings"
 	"time"
 
@@ -14,15 +16,25 @@ import (
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
 )
 
-// notifyEmails receives the internal lead notification.
-var notifyEmails = []string{"info@voxire.com", "amounehabed@gmail.com"}
+// Notify holds the recipient lists for the two internal notifications this
+// module sends. Both come from configuration; see config.ParseEmailList.
+type Notify struct {
+	LeadEmails       []string
+	NewsletterEmails []string
+}
+
+// sendEmail is the outbound seam. Tests replace it to capture what would have
+// gone to Resend without sending anything.
+var sendEmail = emailPkg.Send
 
 type repository interface {
 	Create(ctx context.Context, input domain.LeadInput) (int64, error)
+	CreateSubscriber(ctx context.Context, input domain.SubscriberInput) (int64, error)
 }
 
 type Service struct {
-	repo repository
+	repo   repository
+	notify Notify
 }
 
 const asyncLeadTaskTimeout = 10 * time.Second
@@ -31,9 +43,10 @@ func asyncLeadContext(ctx context.Context) (context.Context, context.CancelFunc)
 	return context.WithTimeout(context.WithoutCancel(ctx), asyncLeadTaskTimeout)
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
+func NewService(_ context.Context, db *sql.DB, notify Notify) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(db),
+		repo:   infrastructure.NewRepository(db),
+		notify: notify,
 	}
 }
 
@@ -76,24 +89,12 @@ func fieldRow(label, value string) string {
       </tr>`, label, value)
 }
 
-// priorityBadge returns an HTML badge based on budget signal.
+// priorityBadge returns an HTML badge based on the budget signal.
 func priorityBadge(lead domain.LeadInput) string {
-	budget := strings.ToLower(lead.Budget)
-	switch {
-	case strings.Contains(budget, "10,000") ||
-		strings.Contains(budget, "10000") ||
-		strings.Contains(budget, "15,000") ||
-		strings.Contains(budget, "20,000") ||
-		strings.Contains(budget, "25,000") ||
-		strings.Contains(budget, "$10k") ||
-		strings.Contains(budget, "$15k") ||
-		strings.Contains(budget, "$20k"):
+	switch budgetTier(lead.Budget) {
+	case tierHot:
 		return `<span style="display:inline-block;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.05em;text-transform:uppercase;">HOT</span>`
-	case strings.Contains(budget, "5,000") ||
-		strings.Contains(budget, "5000") ||
-		strings.Contains(budget, "$5k") ||
-		strings.Contains(budget, "7,000") ||
-		strings.Contains(budget, "$7k"):
+	case tierWarm:
 		return `<span style="display:inline-block;background:#f59e0b;color:#111;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.05em;text-transform:uppercase;">WARM</span>`
 	default:
 		return `<span style="display:inline-block;background:rgba(99,198,189,0.2);color:#63c6bd;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.05em;text-transform:uppercase;">NEW</span>`
@@ -116,19 +117,25 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
 	if leadType == "contact" {
 		leadType = "Contact message"
 	}
+	escLeadType := html.EscapeString(leadType)
+
+	escName := html.EscapeString(lead.Name)
+	escEmail := html.EscapeString(lead.Email)
+	escPhone := html.EscapeString(lead.Phone)
 
 	// Quick-action buttons.
 	replyBtn := ctaButton(
-		fmt.Sprintf("mailto:%s?subject=Re%%3A%%20Your%%20Voxire%%20Enquiry", lead.Email),
-		"Reply to "+lead.Name,
+		fmt.Sprintf("mailto:%s?subject=Re%%3A%%20Your%%20Voxire%%20Enquiry", html.EscapeString(lead.Email)),
+		"Reply to "+escName,
 		"#63c6bd", "#111118",
 	)
 	var phoneButtons string
 	if lead.Phone != "" {
 		cleanPhone := strings.ReplaceAll(lead.Phone, " ", "")
-		callBtn := ctaButton("tel:"+cleanPhone, "Call "+lead.Name, "rgba(255,255,255,0.08)", "#f0f0f6")
+		callBtn := ctaButton("tel:"+html.EscapeString(cleanPhone), "Call "+escName, "rgba(255,255,255,0.08)", "#f0f0f6")
+		waPhone := html.EscapeString(url.PathEscape(strings.TrimPrefix(cleanPhone, "+")))
 		waBtn := ctaButton(
-			fmt.Sprintf("https://wa.me/%s?text=Hi+%s%%2C+this+is+Abed+from+Voxire!", strings.TrimPrefix(cleanPhone, "+"), lead.Name),
+			fmt.Sprintf("https://wa.me/%s?text=Hi+%s%%2C+this+is+Voxire+following+up+on+your+request.", waPhone, url.QueryEscape(lead.Name)),
 			"WhatsApp",
 			"#25d366", "#111118",
 		)
@@ -137,20 +144,20 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
 
 	// Build field rows.
 	var rows strings.Builder
-	rows.WriteString(fieldRow("Name", lead.Name))
-	rows.WriteString(fieldRow("Email", fmt.Sprintf(`<a href="mailto:%s" style="color:#63c6bd;text-decoration:none;">%s</a>`, lead.Email, lead.Email)))
+	rows.WriteString(fieldRow("Name", escName))
+	rows.WriteString(fieldRow("Email", fmt.Sprintf(`<a href="mailto:%s" style="color:#63c6bd;text-decoration:none;">%s</a>`, escEmail, escEmail)))
 	if lead.Phone != "" {
-		rows.WriteString(fieldRow("Phone", fmt.Sprintf(`<a href="tel:%s" style="color:#63c6bd;text-decoration:none;">%s</a>`, lead.Phone, lead.Phone)))
+		rows.WriteString(fieldRow("Phone", fmt.Sprintf(`<a href="tel:%s" style="color:#63c6bd;text-decoration:none;">%s</a>`, escPhone, escPhone)))
 	}
 	if lead.Company != "" {
-		rows.WriteString(fieldRow("Company", lead.Company))
+		rows.WriteString(fieldRow("Company", html.EscapeString(lead.Company)))
 	}
-	rows.WriteString(fieldRow("Service", lead.Service))
+	rows.WriteString(fieldRow("Service", html.EscapeString(lead.Service)))
 	if lead.Budget != "" {
-		rows.WriteString(fieldRow("Budget", lead.Budget))
+		rows.WriteString(fieldRow("Budget", html.EscapeString(lead.Budget)))
 	}
 	if lead.Source != "" {
-		rows.WriteString(fieldRow("Source", lead.Source))
+		rows.WriteString(fieldRow("Source", html.EscapeString(lead.Source)))
 	}
 
 	// Project brief block (only if non-empty).
@@ -160,12 +167,12 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
     <div style="margin-top:24px;padding:18px 20px;background:rgba(99,198,189,0.07);border-radius:10px;border-left:3px solid #63c6bd;">
       <p style="font-size:11px;color:rgba(240,240,246,0.45);margin:0 0 8px 0;text-transform:uppercase;letter-spacing:0.06em;font-weight:500;">Message / Project Brief</p>
       <p style="font-size:14px;color:#f0f0f6;margin:0;line-height:1.7;white-space:pre-wrap;">%s</p>
-    </div>`, lead.Project)
+    </div>`, html.EscapeString(lead.Project))
 	}
 
 	now := time.Now().UTC().Format("2 Jan 2006, 15:04 UTC")
 
-	html := fmt.Sprintf(`<!DOCTYPE html>
+	body := fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <body style="margin:0;padding:0;background:#0d0d14;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <div style="max-width:620px;margin:0 auto;padding:40px 16px;">
@@ -200,14 +207,14 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
   </div>
 
   <p style="font-size:12px;color:rgba(240,240,246,0.2);text-align:center;margin-top:24px;">
-    Voxire lead management &mdash; voxire.com
+    Voxire lead management: voxire.com
   </p>
 
 </div>
 </body>
 </html>`,
 		now,
-		leadType,
+		escLeadType,
 		priorityBadge(lead),
 		id,
 		rows.String(),
@@ -221,10 +228,10 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
 		subject = fmt.Sprintf("[Lead #%d] %s from %s - %s", id, leadType, lead.Name, lead.Budget)
 	}
 
-	_, emailErr := emailPkg.Send(ctx, emailPkg.SendParams{
-		To:      notifyEmails,
+	_, emailErr := sendEmail(ctx, emailPkg.SendParams{
+		To:      s.notify.LeadEmails,
 		Subject: subject,
-		HTML:    html,
+		HTML:    body,
 		From:    "Voxire Leads <noreply@voxire.com>",
 		ReplyTo: lead.Email,
 	})
@@ -239,15 +246,14 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
 // ─── Auto-reply to submitter ──────────────────────────────────────────────────
 
 func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
-	// Build a brief summary of what they submitted.
 	var summaryRows strings.Builder
 	if lead.Service != "" && lead.Service != "contact" {
 		fmt.Fprintf(&summaryRows, `<tr><td style="padding:7px 0;color:rgba(0,0,0,0.45);font-size:13px;width:120px;">Service</td><td style="padding:7px 0;font-size:14px;color:#111;font-weight:500;">%s</td></tr>`,
-			lead.Service)
+			html.EscapeString(lead.Service))
 	}
 	if lead.Budget != "" {
 		fmt.Fprintf(&summaryRows, `<tr><td style="padding:7px 0;color:rgba(0,0,0,0.45);font-size:13px;">Budget</td><td style="padding:7px 0;font-size:14px;color:#111;">%s</td></tr>`,
-			lead.Budget)
+			html.EscapeString(lead.Budget))
 	}
 
 	summaryBlock := ""
@@ -259,7 +265,7 @@ func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
     </div>`, summaryRows.String())
 	}
 
-	html := fmt.Sprintf(`<!DOCTYPE html>
+	body := fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <body style="margin:0;padding:0;background:#f0f0f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <div style="max-width:560px;margin:0 auto;padding:40px 16px;">
@@ -269,21 +275,21 @@ func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
     <p style="font-size:20px;font-weight:700;color:#63c6bd;margin:0 0 28px 0;letter-spacing:-0.01em;">Voxire</p>
 
     <h2 style="font-size:22px;font-weight:700;color:#111;margin:0 0 12px 0;line-height:1.3;">
-      Got it, %s.
+      Thanks, %s. We have your request.
     </h2>
     <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 20px 0;">
-      Thanks for reaching out. We have received your message and one of our team will get back to you within <strong>24 hours</strong> (usually much faster).
+      One of the Voxire team will reply within <strong>24 hours</strong>, usually much sooner.
     </p>
 
     %s
 
     <p style="font-size:14px;color:#555;line-height:1.7;margin:0 0 28px 0;">
-      If your project is time-sensitive, you can reach Abed directly on WhatsApp:
+      If your project is time-sensitive, reach the team on WhatsApp:
     </p>
 
-    <a href="https://wa.me/9613940708?text=Hi+Abed%%2C+I+just+submitted+a+request+on+voxire.com"
+    <a href="https://wa.me/9613940708?text=Hi+Voxire%%2C+I+just+submitted+a+request+on+voxire.com"
        style="display:inline-block;background:#25d366;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
-      WhatsApp Abed
+      WhatsApp Voxire
     </a>
 
   </div>
@@ -296,15 +302,15 @@ func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
 </div>
 </body>
 </html>`,
-		lead.Name,
+		html.EscapeString(lead.Name),
 		summaryBlock,
 	)
 
-	_, emailErr := emailPkg.Send(ctx, emailPkg.SendParams{
+	_, emailErr := sendEmail(ctx, emailPkg.SendParams{
 		To:      []string{lead.Email},
 		Subject: "We received your message - Voxire",
-		HTML:    html,
-		From:    "Abed at Voxire <info@voxire.com>",
+		HTML:    body,
+		From:    "Voxire <info@voxire.com>",
 		ReplyTo: "info@voxire.com",
 	})
 	if emailErr != nil {
