@@ -33,11 +33,19 @@ vi.mock('sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));
 
-const tasksData = vi.hoisted(() => ({ data: [] as unknown[] }));
+const tasksData = vi.hoisted(() => ({
+  data: [] as unknown[],
+  isPending: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
+}));
+const createTaskState = vi.hoisted(() => ({ isPending: false }));
 const createTaskMutate = vi.hoisted(() => vi.fn());
 vi.mock('../tasks/useTasks', () => ({
   useTasks: () => tasksData,
-  useCreateTask: () => ({ mutate: createTaskMutate, isPending: false }),
+  useCreateTask: () => ({ mutate: createTaskMutate, isPending: createTaskState.isPending }),
 }));
 
 const labelsData = vi.hoisted(() => ({ data: [] as { id: number; name: string }[] }));
@@ -73,6 +81,11 @@ import Calendar from './Calendar';
 beforeEach(() => {
   vi.clearAllMocks();
   tasksData.data = [];
+  tasksData.isPending = false;
+  tasksData.isError = false;
+  tasksData.isPaused = false;
+  tasksData.failureCount = 0;
+  createTaskState.isPending = false;
   labelsData.data = [];
   storeProjects.value = [{ id: 'p-9', name: 'Web' }];
 });
@@ -199,6 +212,18 @@ describe('Calendar day-add submission (#1057)', () => {
     expect(createTaskMutate.mock.calls[0][0]).toMatchObject({ labels: ['994343'] });
   });
 
+  it('does not submit a second task from Enter while creation is pending', () => {
+    createTaskState.isPending = true;
+    render(<Calendar />);
+
+    openModalAndType('Only once');
+    fireEvent.keyDown(screen.getByPlaceholderText(/flow\.calendar\.titlePlaceholder/), {
+      key: 'Enter',
+    });
+
+    expect(createTaskMutate).not.toHaveBeenCalled();
+  });
+
   it('still refuses when the business has no project to create into', async () => {
     const { toast } = await import('sonner');
     storeProjects.value = [];
@@ -267,6 +292,45 @@ describe('Calendar pills carry their project (#1087)', () => {
     ];
     render(<Calendar />);
     expect(screen.getByText('مهمة طويلة جدا')).toHaveAttribute('dir', 'auto');
+  });
+
+  it('renders the overflow count as text rather than a dead button', () => {
+    setViewportWidth(DESKTOP_WIDTH);
+    tasksData.data = Array.from({ length: 4 }, (_, index) => ({
+      id: `overflow-${index}`,
+      title: `Task ${index}`,
+      projectId: 'p-9',
+      dueDate: iso,
+      priority: 'medium',
+    }));
+    render(<Calendar />);
+
+    const more = screen.getByText('flow.calendar.moreCount {"count":1}');
+    expect(more.tagName).toBe('SPAN');
+    fireEvent.click(more);
+    expect(screen.queryByText('flow.calendar.newTaskFor')).not.toBeInTheDocument();
+  });
+});
+
+describe('Calendar task query states', () => {
+  it('shows loading while the initial task query is paused before its first attempt', () => {
+    tasksData.isPending = true;
+    tasksData.isPaused = true;
+    render(<Calendar />);
+
+    expect(screen.getByText('common.loading')).toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
+  });
+
+  it('shows a retryable failure instead of an empty calendar when tasks fail', () => {
+    tasksData.isError = true;
+    tasksData.failureCount = 1;
+    render(<Calendar />);
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.calendar.agendaEmpty')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('flow.loadFailed.retry'));
+    expect(tasksData.refetch).toHaveBeenCalled();
   });
 });
 

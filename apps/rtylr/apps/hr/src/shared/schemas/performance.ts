@@ -4,7 +4,6 @@ export const createCycleSchema = z.object({
   name: z.string().min(1),
   periodStart: z.string().min(1),
   periodEnd: z.string().min(1),
-  reviewTypes: z.array(z.enum(['self', 'manager', 'peer'])).min(1),
 });
 
 export type CreateCycleForm = z.infer<typeof createCycleSchema>;

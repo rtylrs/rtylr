@@ -71,6 +71,7 @@
       "both": "Both"
     },
     "period": "Pay period",
+    "payDayOfMonth": "Pay day of month",
     "periods": {
       "weekly": "Weekly",
       "biweekly": "Bi-weekly",

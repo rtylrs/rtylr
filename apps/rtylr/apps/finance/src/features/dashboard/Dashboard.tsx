@@ -18,6 +18,7 @@ import FinanceKpiWidgets from '../../shared/components/FinanceKpiWidgets';
 import OverdueInvoicesWidget from '../../shared/components/OverdueInvoicesWidget';
 import { ErrorBoundary } from '@voxire/ui';
 import { formatMoney, type Currency } from '../../shared/lib/money';
+import { ghostBtn } from '../../shared/lib/tokens';
 
 const fmt = (n: number, currency = 'USD') => formatMoney(n, currency as Currency, 0);
 
@@ -191,7 +192,8 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { data: dashData, isLoading: loading } = useFinanceDashboard();
+  const { data: dashData, isPending, isError, isFetching, refetch } = useFinanceDashboard();
+  const loading = isPending || (!dashData && !isError);
 
   const expensesMtd = dashData?.totalExpensesMtd ?? 0;
   const netProfitMtd = dashData?.netProfitMtd ?? 0;
@@ -245,6 +247,38 @@ const Dashboard: React.FC = () => {
   const barData: BarDataPoint[] = dashData?.barData ?? [];
   const transactions: Transaction[] = dashData?.recentTransactions ?? [];
   const overdueInvoices: OverdueInvoice[] = dashData?.overdueInvoices ?? [];
+
+  if (isError) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.25 }}
+        style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
+      >
+        <HelmetContainer title={pageTitle(t('nav.dashboard'))} />
+        <div
+          role="alert"
+          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlertTriangle size={16} style={{ color: 'var(--finance-danger)' }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+              {t('errors.generic')}
+            </span>
+          </div>
+          <button
+            type="button"
+            style={ghostBtn}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            {t('common.refresh')}
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

@@ -5,7 +5,7 @@
  * consumers refetch canonical data via REST when they see a relevant `type`.
  */
 
-import type { RealtimeEvent } from '@voxire/api';
+import type { RealtimeEvent } from "@voxire/api";
 
 // The event types currently published by onion (grep `Type:.*"pos:` there):
 //   pos:order:created      owner:{userId}
@@ -20,16 +20,16 @@ import type { RealtimeEvent } from '@voxire/api';
 // them, but today no such events arrive.
 
 export type PosEventType =
-  | 'pos:order:created'
-  | 'pos:order:updated'
-  | 'pos:order:paid'
-  | 'pos:order:voided'
-  | 'pos:order:preparing'
-  | 'pos:kds:item:updated'
-  | 'pos:table:status'
+  | "pos:order:created"
+  | "pos:order:updated"
+  | "pos:order:paid"
+  | "pos:order:voided"
+  | "pos:order:preparing"
+  | "pos:kds:item:updated"
+  | "pos:table:status"
   // Not emitted by the backend yet; kept so clients are already wired.
-  | 'pos:stock:low'
-  | 'pos:stock:out';
+  | "pos:stock:low"
+  | "pos:stock:out";
 
 /** Narrow a generic realtime event to a known POS event type. */
 export function isPosEvent(event: RealtimeEvent, type: PosEventType): boolean {
@@ -38,7 +38,9 @@ export function isPosEvent(event: RealtimeEvent, type: PosEventType): boolean {
 
 /** All KDS-relevant event types - used by useKdsStream to filter the bus. */
 export const KDS_EVENT_TYPES = new Set<PosEventType>([
-  'pos:order:created',
-  'pos:order:preparing',
-  'pos:kds:item:updated',
+  "pos:order:created",
+  "pos:order:voided",
+  "pos:order:paid",
+  "pos:order:preparing",
+  "pos:kds:item:updated",
 ]);

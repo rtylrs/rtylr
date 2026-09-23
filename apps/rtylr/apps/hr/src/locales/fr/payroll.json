@@ -71,6 +71,7 @@
       "both": "Les deux"
     },
     "period": "Période de paie",
+    "payDayOfMonth": "Jour de paie du mois",
     "periods": {
       "weekly": "Hebdomadaire",
       "biweekly": "Bimensuel",

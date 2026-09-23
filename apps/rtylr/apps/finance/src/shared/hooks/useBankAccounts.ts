@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { financeApi } from '../services/financeApi';
 import { BankAccountServiceClient } from '@voxire/voxie/finance/bank_account/v1/client';
 import { bankAccountSchema, bankTransactionSchema } from '../schemas/accounts';
-import { unwrapList } from '../lib/unwrapList';
 
 const bankAccountClient = createOneKitClient(BankAccountServiceClient, 'finance');
 
@@ -66,14 +65,25 @@ export function useCreateBankAccount() {
   });
 }
 
-// finance.bank_account.v1.BankAccountService has no transaction/feed
-// endpoint yet - this genuinely has no backend contract to migrate to.
+function bankTransactionRows(payload: unknown): unknown[] {
+  if (Array.isArray(payload)) return payload;
+  if (payload && typeof payload === 'object') {
+    const transactions = (payload as { transactions?: unknown }).transactions;
+    if (Array.isArray(transactions)) return transactions;
+  }
+  throw new Error('Invalid bank feed response');
+}
+
+// The literal /finance/bank-feeds endpoint is not part of the generated
+// BankAccountService contract, but it does have a live response contract. Map
+// and validate that response here so failures reach React Query instead of
+// being converted into a successful empty list.
 export function useBankTransactions(accountId?: string) {
   return useQuery({
     queryKey: ['bank-tx', accountId ?? 'all'],
     queryFn: async () => {
       const res = await unwrap(financeApi.getBankFeeds(accountId));
-      return z.array(bankTransactionSchema).parse(unwrapList(res, 'transactions'));
+      return z.array(bankTransactionSchema).parse(bankTransactionRows(res));
     },
   });
 }

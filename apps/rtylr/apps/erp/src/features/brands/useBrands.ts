@@ -10,19 +10,35 @@ import type {
   UpdateBrandRequest,
   UpdateBrandResponse,
 } from '@voxire/voxie/erp/brand/v1/types';
-import { withErpListBounds } from '../../shared/lib/erpListBounds';
+import { ERP_LIST_LIMIT } from '../../shared/lib/erpListBounds';
 
 const brandClient = createOneKitClient(BrandServiceClient, 'erp');
 
 export type { Brand };
 
+export async function fetchAllBrands(): Promise<Brand[]> {
+  const brands: Brand[] = [];
+  let offset = 0;
+
+  while (true) {
+    const response = await brandClient.listBrands({ limit: ERP_LIST_LIMIT, offset });
+    const page = response.brands ?? [];
+    brands.push(...page);
+
+    const hasMore =
+      response.hasMore ??
+      (response.total !== undefined
+        ? brands.length < response.total
+        : page.length === ERP_LIST_LIMIT);
+    if (!hasMore || page.length === 0) return brands;
+    offset += page.length;
+  }
+}
+
 export function useBrands() {
   return useQuery<Brand[]>({
     queryKey: ['brands'],
-    queryFn: async () => {
-      const response = await brandClient.listBrands(withErpListBounds({}));
-      return response.brands ?? [];
-    },
+    queryFn: fetchAllBrands,
   });
 }
 

@@ -1,58 +1,56 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { PerformanceServiceClient } from '@voxire/voxie/hr/performance/v1/client';
 import type {
   ReviewCyclePayload,
   PerformanceReviewPayload,
   ReviewGoalPayload,
-} from '@voxire/voxie/hr/performance/v1/types';
-import type {
   CreateReviewCycleRequest,
   CreateReviewCycleResponse,
-} from '@voxire/voxie/hr/performance/v1/types';
-import type {
   OpenReviewCycleRequest,
   OpenReviewCycleResponse,
-} from '@voxire/voxie/hr/performance/v1/types';
-import type {
   SubmitReviewRequest,
   SubmitReviewResponse,
+  ListReviewCyclesResponse,
+  ListGoalsRequest as GeneratedListGoalsRequest,
+  ListGoalsResponse,
 } from '@voxire/voxie/hr/performance/v1/types';
-import type { ListReviewCyclesResponse } from '@voxire/voxie/hr/performance/v1/types';
-import type { ListGoalsRequest, ListGoalsResponse } from '@voxire/voxie/hr/performance/v1/types';
 import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-/* ── Local param types for endpoints missing from contracts ── */
+const performanceClient = createOneKitClient(PerformanceServiceClient, 'hr');
 
-interface ListReviewCyclesParams {
-  limit?: number;
-  offset?: number;
-}
-
-interface ListPerformanceReviewsParams {
+export interface ListPerformanceReviewsParams {
   reviewCycleId?: number;
   status?: string;
   limit?: number;
   offset?: number;
 }
 
-interface ListPerformanceReviewsResponse {
+export interface ListPerformanceReviewsResponse {
   reviews: PerformanceReviewPayload[];
   total: number;
   limit: number;
   offset: number;
 }
 
-interface CreateGoalRequest {
+export interface ListGoalsParams {
+  employeeId?: number | string;
+  reviewCycleId?: number | string;
+}
+
+export interface CreateGoalRequest {
+  employeeId: number;
   reviewCycleId: number;
   title: string;
   description: string;
   weight?: number;
+  successCriteria?: string;
 }
 
 interface CreateGoalResponse {
-  goal: ReviewGoalPayload;
+  goal?: ReviewGoalPayload;
 }
 
 interface UpdateGoalRequest {
@@ -64,7 +62,7 @@ interface UpdateGoalRequest {
 }
 
 interface UpdateGoalResponse {
-  goal: ReviewGoalPayload;
+  goal?: ReviewGoalPayload;
 }
 
 interface ShareReviewRequest {
@@ -75,25 +73,22 @@ interface ShareReviewResponse {
   review: PerformanceReviewPayload;
 }
 
-type CreateReviewCycleMutationInput = CreateReviewCycleRequest & {
-  type?: string;
-  cycleType?: string;
-  periodStart?: string;
-  periodEnd?: string;
-  reviewTypes?: string[];
-};
+function positiveInteger(value: number | string | undefined): number | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
 
-/* ── Queries ── */
+function requiredPositiveInteger(value: number | string | undefined, label: string): number {
+  const parsed = positiveInteger(value);
+  if (!parsed) throw new Error(`${label} is required`);
+  return parsed;
+}
 
-export const useListReviewCycles = (params?: ListReviewCyclesParams) => {
+export const useListReviewCycles = () => {
   return useQuery<ListReviewCyclesResponse>({
-    queryKey: ['review-cycles', 'filter', params],
-    queryFn: async (): Promise<ListReviewCyclesResponse> => {
-      const res = await unwrap(
-        hrTransport.get<ListReviewCyclesResponse>('/hr/performance/cycles', { params })
-      );
-      return res as ListReviewCyclesResponse;
-    },
+    queryKey: ['review-cycles'],
+    queryFn: () => performanceClient.listReviewCycles({}),
   });
 };
 
@@ -106,7 +101,7 @@ export const useGetReviewCycle = (id: number | undefined) => {
       );
       return (res as { cycle: ReviewCyclePayload }).cycle;
     },
-    enabled: !!id,
+    enabled: id !== undefined && id > 0,
   });
 };
 
@@ -115,20 +110,10 @@ export const useCreateReviewCycle = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (
-      data: CreateReviewCycleMutationInput
-    ): Promise<ReviewCyclePayload | undefined> => {
-      const res = await unwrap(
-        hrTransport.post<CreateReviewCycleResponse>('/hr/performance/cycles', {
-          name: data.name,
-          cycleType: data.cycleType ?? data.type,
-          periodStart: data.periodStart,
-          periodEnd: data.periodEnd,
-          reviewTypes: data.reviewTypes,
-        })
-      );
-      return (res as CreateReviewCycleResponse).cycle;
-    },
+    mutationFn: (data: CreateReviewCycleRequest): Promise<ReviewCyclePayload | undefined> =>
+      performanceClient
+        .createReviewCycle(data)
+        .then((response: CreateReviewCycleResponse) => response.cycle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['review-cycles'] });
       toast.success(t('performance.cycleCreated'));
@@ -144,13 +129,11 @@ export const useOpenReviewCycle = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: OpenReviewCycleRequest): Promise<ReviewCyclePayload | undefined> => {
-      const res = await unwrap(
-        hrTransport.post<OpenReviewCycleResponse>(`/hr/performance/cycles/${data.cycleId}/open`, {
-          id: data.cycleId,
-        })
-      );
-      return (res as OpenReviewCycleResponse).cycle;
+    mutationFn: (data: OpenReviewCycleRequest): Promise<ReviewCyclePayload | undefined> => {
+      const cycleId = requiredPositiveInteger(data.cycleId, 'cycleId');
+      return performanceClient
+        .openReviewCycle({ cycleId: String(cycleId) })
+        .then((response: OpenReviewCycleResponse) => response.cycle);
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['review-cycles'] });
@@ -163,14 +146,16 @@ export const useOpenReviewCycle = () => {
   });
 };
 
-export const useListGoals = (params?: ListGoalsRequest) => {
+export const useListGoals = (params?: ListGoalsParams) => {
   return useQuery<ListGoalsResponse>({
     queryKey: ['review-goals', 'filter', params],
-    queryFn: async (): Promise<ListGoalsResponse> => {
-      const res = await unwrap(
-        hrTransport.get<ListGoalsResponse>('/hr/performance/goals', { params })
-      );
-      return res as ListGoalsResponse;
+    queryFn: () => {
+      const request: GeneratedListGoalsRequest = {};
+      const employeeId = positiveInteger(params?.employeeId);
+      const reviewCycleId = positiveInteger(params?.reviewCycleId);
+      if (employeeId !== undefined) request.employeeId = String(employeeId);
+      if (reviewCycleId !== undefined) request.reviewCycleId = String(reviewCycleId);
+      return performanceClient.listGoals(request);
     },
   });
 };
@@ -181,8 +166,19 @@ export const useCreateGoal = () => {
 
   return useMutation({
     mutationFn: async (data: CreateGoalRequest): Promise<ReviewGoalPayload> => {
-      const res = await unwrap(hrTransport.post<CreateGoalResponse>('/hr/performance/goals', data));
-      return (res as CreateGoalResponse).goal;
+      const employeeId = requiredPositiveInteger(data.employeeId, 'employeeId');
+      const reviewCycleId = requiredPositiveInteger(data.reviewCycleId, 'reviewCycleId');
+      const res = await unwrap(
+        hrTransport.post<CreateGoalResponse>('/hr/performance/goals', {
+          employeeId,
+          reviewCycleId,
+          title: data.title,
+          description: data.description,
+          weight: data.weight ?? 0,
+          successCriteria: data.successCriteria,
+        })
+      );
+      return (res as CreateGoalResponse).goal as ReviewGoalPayload;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['review-goals'] });
@@ -200,10 +196,11 @@ export const useUpdateGoal = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateGoalRequest): Promise<ReviewGoalPayload> => {
+      const goalId = requiredPositiveInteger(data.goalId, 'goalId');
       const source = data as UpdateGoalRequest & { successCriteria?: string };
       const res = await unwrap(
-        hrTransport.put<UpdateGoalResponse>(`/hr/performance/goals/${data.goalId}`, {
-          id: data.goalId,
+        hrTransport.put<UpdateGoalResponse>(`/hr/performance/goals/${goalId}`, {
+          id: goalId,
           title: data.title,
           description: data.description,
           weight: data.weight,
@@ -211,7 +208,7 @@ export const useUpdateGoal = () => {
           status: data.status,
         })
       );
-      return (res as UpdateGoalResponse).goal;
+      return (res as UpdateGoalResponse).goal as ReviewGoalPayload;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['review-goals'] });
@@ -224,13 +221,38 @@ export const useUpdateGoal = () => {
 };
 
 export const useListReviews = (params?: ListPerformanceReviewsParams) => {
+  const status = params?.status?.trim();
+  const serverParams: {
+    cycleId?: number;
+    employeeId?: number;
+    limit?: number;
+    offset?: number;
+  } = {};
+  const cycleId = positiveInteger(params?.reviewCycleId);
+  if (cycleId !== undefined) serverParams.cycleId = cycleId;
+  if (params?.limit !== undefined) serverParams.limit = params.limit;
+  if (params?.offset !== undefined) serverParams.offset = params.offset;
+
   return useQuery<ListPerformanceReviewsResponse>({
-    queryKey: ['performance-reviews', 'filter', params],
+    // Status is deliberately absent from the server query. The live handler
+    // accepts cycle_id but has no status filter, so status is applied below to
+    // the returned page without changing the request contract.
+    queryKey: ['performance-reviews', 'filter', serverParams],
     queryFn: async (): Promise<ListPerformanceReviewsResponse> => {
       const res = await unwrap(
-        hrTransport.get<ListPerformanceReviewsResponse>('/hr/performance/reviews', { params })
+        hrTransport.get<ListPerformanceReviewsResponse>('/hr/performance/reviews', {
+          params: serverParams,
+        })
       );
       return res as ListPerformanceReviewsResponse;
+    },
+    select: (response) => {
+      if (!status) return response;
+      const wanted = status.toLowerCase();
+      const reviews = response.reviews.filter(
+        (review) => (review.status ?? '').toLowerCase() === wanted
+      );
+      return { ...response, reviews, total: reviews.length };
     },
   });
 };
@@ -243,19 +265,8 @@ export const useSubmitReview = () => {
     mutationFn: async (
       data: SubmitReviewRequest
     ): Promise<PerformanceReviewPayload | undefined> => {
-      const source = data as SubmitReviewRequest & {
-        rating?: string;
-        narrative?: string;
-        overallRating?: number;
-      };
-      const res = await unwrap(
-        hrTransport.post<SubmitReviewResponse>(`/hr/performance/reviews/${data.reviewId}/submit`, {
-          id: data.reviewId,
-          rating: source.rating ?? String(source.overallRating ?? ''),
-          narrative: source.narrative,
-        })
-      );
-      return (res as SubmitReviewResponse).review;
+      const response: SubmitReviewResponse = await performanceClient.submitReview(data);
+      return response.review;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['performance-reviews'] });
@@ -273,9 +284,10 @@ export const useShareReview = () => {
 
   return useMutation({
     mutationFn: async (data: ShareReviewRequest): Promise<PerformanceReviewPayload> => {
+      const reviewId = requiredPositiveInteger(data.reviewId, 'reviewId');
       const res = await unwrap(
-        hrTransport.post<ShareReviewResponse>(`/hr/performance/reviews/${data.reviewId}/share`, {
-          id: data.reviewId,
+        hrTransport.post<ShareReviewResponse>(`/hr/performance/reviews/${reviewId}/share`, {
+          id: reviewId,
         })
       );
       return (res as ShareReviewResponse).review;

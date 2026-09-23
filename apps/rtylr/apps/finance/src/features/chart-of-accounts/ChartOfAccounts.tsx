@@ -49,6 +49,7 @@ const ChartOfAccounts: React.FC = () => {
     try {
       await createMut.mutateAsync({
         name: newName.trim(),
+        code: newCode.trim() || undefined,
         type: newType,
         currency: 'USD',
         balance: 0,

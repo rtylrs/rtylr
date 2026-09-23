@@ -65,6 +65,34 @@ describe('bankTransactionSchema', () => {
     expect(result.amount).toBe(-5.5);
   });
 
+  it('maps the bank-feed wire payload into the reconciliation view', () => {
+    const result = bankTransactionSchema.parse({
+      id: 7,
+      owner_id: 12,
+      bank_account_id: 3,
+      amount_minor_units: '-1234',
+      currency: 'USD',
+      occurred_at: '2026-09-20T12:30:00Z',
+      description: 'Coffee shop',
+      external_id: 'ext-7',
+      matched_expense_id: null,
+      matched_invoice_id: 99,
+      created_at: '2026-09-20T12:31:00Z',
+    });
+
+    expect(result).toMatchObject({
+      id: '7',
+      matched: true,
+      description: 'Coffee shop',
+      date: '2026-09-20T12:30:00Z',
+      category: null,
+      amount: -12.34,
+      currency: 'USD',
+      bankAccountId: '3',
+      matchedInvoiceId: '99',
+    });
+  });
+
   it('rejects an account-shaped object', () => {
     expect(() => bankTransactionSchema.parse(account)).toThrow();
   });

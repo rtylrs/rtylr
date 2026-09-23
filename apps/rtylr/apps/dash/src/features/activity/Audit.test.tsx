@@ -12,8 +12,7 @@ vi.mock('@voxire/components', () => ({
 
 const auditData = vi.hoisted(() => ({
   data: { entries: [] as { id: string }[], total: 0 } as
-    | { entries: { id: string }[]; total: number }
-    | undefined,
+    { entries: { id: string }[]; total: number } | undefined,
   isLoading: false,
   isFetching: false,
   refetch: vi.fn(),
@@ -38,6 +37,13 @@ beforeEach(() => {
 });
 
 describe('Audit log empty state', () => {
+  it('does not advertise an IP field that the activity contract does not provide', () => {
+    render(<Audit />);
+
+    expect(screen.getByPlaceholderText('Search actor, action, target...')).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/IP/)).not.toBeInTheDocument();
+  });
+
   it('shows the illustration, title and a refresh call-to-action when there are no entries', () => {
     render(<Audit />);
 
@@ -99,7 +105,7 @@ describe('Audit log empty state', () => {
     };
     render(<Audit />);
 
-    fireEvent.change(screen.getByPlaceholderText('Search actor, action, IP...'), {
+    fireEvent.change(screen.getByPlaceholderText('Search actor, action, target...'), {
       target: { value: 'jane' },
     });
 
@@ -115,7 +121,7 @@ describe('Audit log empty state', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(auditData.params[auditData.params.length - 1]).toMatchObject({ page: 2 });
 
-    fireEvent.change(screen.getByPlaceholderText('Search actor, action, IP...'), {
+    fireEvent.change(screen.getByPlaceholderText('Search actor, action, target...'), {
       target: { value: 'jane' },
     });
     expect(auditData.params[auditData.params.length - 1]).toMatchObject({ page: 1 });

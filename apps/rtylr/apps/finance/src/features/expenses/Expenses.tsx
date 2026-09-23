@@ -8,8 +8,10 @@ import { Plus, Paperclip, Check } from 'lucide-react';
 import { safeRatio } from '@voxire/api';
 import { Expense } from '../../shared/services/financeApi';
 import { useExpenses, useExpenseCategories } from './useExpenses';
+import { SkeletonRow } from '../../shared/components/Skeleton';
 
 const ACCENT = 'var(--finance-accent)';
+const EXPENSE_PAGE_SIZE = 25;
 
 const categoryColors: Record<string, string> = {
   'Food & Bev': 'var(--finance-warning)',
@@ -120,11 +122,20 @@ const Expenses: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const { data, isLoading: loading } = useExpenses({ page });
+  const {
+    data,
+    isLoading: loading,
+    isError,
+    refetch,
+  } = useExpenses({
+    page: 1,
+    pageSize: Number.MAX_SAFE_INTEGER,
+  });
   const { data: categories = [] } = useExpenseCategories();
-  const expenses: Expense[] = data?.expenses ?? [];
-  const hasMore = data?.hasMore ?? false;
-  void loading;
+  const allExpenses: Expense[] = data?.expenses ?? [];
+  const start = (page - 1) * EXPENSE_PAGE_SIZE;
+  const expenses = allExpenses.slice(start, start + EXPENSE_PAGE_SIZE);
+  const hasMore = start + EXPENSE_PAGE_SIZE < allExpenses.length;
 
   const categoryName: CategoryNameLookup = useMemo(() => {
     const byId = new Map<number, string>(categories.map((c) => [c.id, c.name]));
@@ -132,7 +143,7 @@ const Expenses: React.FC = () => {
       categoryId != null ? (byId.get(categoryId) ?? 'Uncategorized') : 'Uncategorized';
   }, [categories]);
 
-  const grandTotal = expenses.reduce((s, e) => s + e.amount, 0);
+  const grandTotal = allExpenses.reduce((s, e) => s + e.amount, 0);
 
   return (
     <motion.div
@@ -148,9 +159,11 @@ const Expenses: React.FC = () => {
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hub-text)' }}>
             {t('expenses.title')}
           </h2>
-          <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
-            Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
-          </p>
+          {!loading && !isError && (
+            <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
+              Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -175,182 +188,225 @@ const Expenses: React.FC = () => {
         </button>
       </div>
 
-      {/* Category breakdown */}
-      <div style={cardStyle}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
-          {t('expenses.breakdown')}
-        </h3>
-        <CategoryBar expenses={expenses} categoryName={categoryName} />
-      </div>
+      {loading ? (
+        <div style={cardStyle}>
+          <SkeletonRow />
+        </div>
+      ) : isError ? (
+        <div role="alert" style={cardStyle}>
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--hub-text)' }}>
+            {t('errors.generic')}
+          </p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            style={{
+              background: 'var(--hub-hover)',
+              color: 'var(--hub-text-muted)',
+              border: 'none',
+              borderRadius: 8,
+              padding: '7px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            {t('common.refresh')}
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Category breakdown */}
+          <div style={cardStyle}>
+            <h3
+              style={{
+                margin: '0 0 16px',
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+              }}
+            >
+              {t('expenses.breakdown')}
+            </h3>
+            <CategoryBar expenses={allExpenses} categoryName={categoryName} />
+          </div>
 
-      {/* Expenses table */}
-      <div
-        style={{
-          background: 'var(--hub-card)',
-          border: '1px solid var(--hub-border)',
-          borderRadius: 12,
-          overflow: 'hidden',
-        }}
-      >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-              {['Date', 'Description', 'Category', 'Amount', 'Receipt'].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: '10px 16px',
-                    textAlign: 'start',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.07em',
-                    color: 'var(--hub-text-dim)',
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map((exp, i) => (
-              <tr
-                key={exp.id}
-                style={{
-                  borderBottom: i < expenses.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--hub-hover)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
-                <td style={{ padding: '11px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>
-                  {exp.expenseDate}
-                </td>
-                <td style={{ padding: '11px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
-                  <div>{exp.description}</div>
-                  <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{exp.id}</div>
-                </td>
-                <td style={{ padding: '11px 16px' }}>
-                  {(() => {
-                    const name = categoryName(exp.categoryId);
-                    return (
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 5,
-                          padding: '3px 10px',
-                          borderRadius: 20,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          background: `${getCategoryColor(name)}18`,
-                          color: getCategoryColor(name),
-                        }}
-                      >
-                        {name}
-                      </span>
-                    );
-                  })()}
-                </td>
-                <td
-                  style={{
-                    padding: '11px 16px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: 'var(--finance-danger)',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
-                  -{fmt(exp.amount)}
-                </td>
-                <td style={{ padding: '11px 16px' }}>
-                  {exp.receiptUrl ? (
-                    <span
+          {/* Expenses table */}
+          <div
+            style={{
+              background: 'var(--hub-card)',
+              border: '1px solid var(--hub-border)',
+              borderRadius: 12,
+              overflow: 'hidden',
+            }}
+          >
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                  {['Date', 'Description', 'Category', 'Amount', 'Receipt'].map((h) => (
+                    <th
+                      key={h}
                       style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
+                        padding: '10px 16px',
+                        textAlign: 'start',
                         fontSize: 11,
-                        color: 'var(--finance-accent)',
-                      }}
-                    >
-                      <Check size={12} /> Yes
-                    </span>
-                  ) : (
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        fontSize: 11,
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.07em',
                         color: 'var(--hub-text-dim)',
                       }}
                     >
-                      <Paperclip size={12} /> Upload
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr
-              style={{ borderTop: '1px solid var(--hub-border)', background: 'var(--hub-hover)' }}
-            >
-              <td
-                colSpan={3}
-                style={{
-                  padding: '10px 16px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: 'var(--hub-text-muted)',
-                }}
-              >
-                {t('expenses.monthlyTotal')}
-              </td>
-              <td
-                style={{
-                  padding: '10px 16px',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: 'var(--finance-danger)',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                -{fmt(grandTotal)}
-              </td>
-              <td />
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      {(page > 1 || hasMore) && (
-        <div className="flex items-center justify-between px-1 py-3">
-          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-            Page {page}
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
-              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
-            >
-              {t('common.prev')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={!hasMore}
-              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
-              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
-            >
-              {t('common.next')}
-            </button>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((exp, i) => (
+                  <tr
+                    key={exp.id}
+                    style={{
+                      borderBottom:
+                        i < expenses.length - 1 ? '1px solid var(--hub-border)' : 'none',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--hub-hover)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <td
+                      style={{ padding: '11px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
+                    >
+                      {exp.expenseDate}
+                    </td>
+                    <td style={{ padding: '11px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
+                      <div>{exp.description}</div>
+                      <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{exp.id}</div>
+                    </td>
+                    <td style={{ padding: '11px 16px' }}>
+                      {(() => {
+                        const name = categoryName(exp.categoryId);
+                        return (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 5,
+                              padding: '3px 10px',
+                              borderRadius: 20,
+                              fontSize: 11,
+                              fontWeight: 600,
+                              background: `${getCategoryColor(name)}18`,
+                              color: getCategoryColor(name),
+                            }}
+                          >
+                            {name}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                    <td
+                      style={{
+                        padding: '11px 16px',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: 'var(--finance-danger)',
+                        fontVariantNumeric: 'tabular-nums',
+                      }}
+                    >
+                      -{fmt(exp.amount)}
+                    </td>
+                    <td style={{ padding: '11px 16px' }}>
+                      {exp.receiptUrl ? (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            fontSize: 11,
+                            color: 'var(--finance-accent)',
+                          }}
+                        >
+                          <Check size={12} /> Yes
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            fontSize: 11,
+                            color: 'var(--hub-text-dim)',
+                          }}
+                        >
+                          <Paperclip size={12} /> Upload
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr
+                  style={{
+                    borderTop: '1px solid var(--hub-border)',
+                    background: 'var(--hub-hover)',
+                  }}
+                >
+                  <td
+                    colSpan={3}
+                    style={{
+                      padding: '10px 16px',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: 'var(--hub-text-muted)',
+                    }}
+                  >
+                    {t('expenses.monthlyTotal')}
+                  </td>
+                  <td
+                    style={{
+                      padding: '10px 16px',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: 'var(--finance-danger)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    -{fmt(grandTotal)}
+                  </td>
+                  <td />
+                </tr>
+              </tfoot>
+            </table>
           </div>
-        </div>
+
+          {(page > 1 || hasMore) && (
+            <div className="flex items-center justify-between px-1 py-3">
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                Page {page}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+                  style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                >
+                  {t('common.prev')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!hasMore}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+                  style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                >
+                  {t('common.next')}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </motion.div>
   );

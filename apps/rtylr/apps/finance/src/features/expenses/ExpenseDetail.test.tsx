@@ -1,7 +1,9 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import ExpenseDetail from './ExpenseDetail';
+import { initTestI18n } from '../../shared/testing/i18n';
 
 const expense = {
   id: 'EXP-1',
@@ -16,12 +18,21 @@ const expense = {
   notes: '',
 };
 
-const mocks = vi.hoisted(() => ({ role: 'staff' as string | null }));
+const mocks = vi.hoisted(() => ({
+  role: 'staff' as string | null,
+  updateExpense: vi.fn(),
+  refetchExpense: vi.fn(),
+}));
 
 vi.mock('@voxire/auth', () => ({
   useUserStore: (
     selector: (state: { user: { role: string | null }; role: string | null }) => unknown
   ) => selector({ user: { role: mocks.role }, role: mocks.role }),
+}));
+
+vi.mock('@voxire/api', () => ({
+  createOneKitClient: () => ({ updateExpense: mocks.updateExpense }),
+  getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -35,7 +46,11 @@ vi.mock('motion/react', () => ({
 }));
 
 vi.mock('./useExpenseById', () => ({
-  useExpenseById: () => ({ data: expense, isLoading: false }),
+  useExpenseById: () => ({
+    data: expense,
+    isLoading: false,
+    refetch: mocks.refetchExpense,
+  }),
 }));
 
 vi.mock('./useExpenses', () => ({
@@ -56,16 +71,38 @@ vi.mock('../../shared/components/MoneyDisplay', () => ({
 }));
 
 vi.mock('../../shared/components/Skeleton', () => ({ SkeletonRow: () => null }));
-vi.mock('../../shared/components/ReceiptUpload', () => ({ default: () => null }));
+vi.mock('../../shared/components/ReceiptUpload', () => ({
+  default: ({ onChange }: { onChange: (url: string | null) => void }) => (
+    <button type="button" onClick={() => onChange('https://cdn.example/receipt.png')}>
+      Attach receipt
+    </button>
+  ),
+}));
 
-describe('ExpenseDetail approval actions', () => {
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
+let queryClient: QueryClient;
+const renderDetail = () =>
+  render(
+    <QueryClientProvider client={queryClient}>
+      <ExpenseDetail />
+    </QueryClientProvider>
+  );
+
+describe('ExpenseDetail', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     mocks.role = 'staff';
+    mocks.updateExpense.mockResolvedValue({});
+    mocks.refetchExpense.mockResolvedValue({ data: expense });
   });
 
   it('hides Approve/Reject for a role without finance:expenses:approve', () => {
     mocks.role = 'staff';
-    render(<ExpenseDetail />);
+    renderDetail();
 
     expect(screen.queryByText('Approve')).not.toBeInTheDocument();
     expect(screen.queryByText('Reject')).not.toBeInTheDocument();
@@ -73,7 +110,7 @@ describe('ExpenseDetail approval actions', () => {
 
   it('shows Approve/Reject for admin', () => {
     mocks.role = 'admin';
-    render(<ExpenseDetail />);
+    renderDetail();
 
     expect(screen.getByText('Approve')).toBeInTheDocument();
     expect(screen.getByText('Reject')).toBeInTheDocument();
@@ -81,9 +118,34 @@ describe('ExpenseDetail approval actions', () => {
 
   it('shows Approve/Reject for owner', () => {
     mocks.role = 'owner';
-    render(<ExpenseDetail />);
+    renderDetail();
 
     expect(screen.getByText('Approve')).toBeInTheDocument();
     expect(screen.getByText('Reject')).toBeInTheDocument();
+  });
+
+  it('persists a receipt change before updating the displayed value', async () => {
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    renderDetail();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Attach receipt' }));
+
+    await waitFor(() =>
+      expect(mocks.updateExpense).toHaveBeenCalledWith({
+        id: 'EXP-1',
+        body: {
+          categoryId: undefined,
+          amount: 42,
+          currency: 'USD',
+          description: 'Office supplies',
+          vendor: 'Acme',
+          receiptUrl: 'https://cdn.example/receipt.png',
+          notes: '',
+          expenseDate: '2026-08-01',
+        },
+      })
+    );
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['expenses'] });
+    expect(mocks.refetchExpense).toHaveBeenCalled();
   });
 });

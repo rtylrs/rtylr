@@ -29,6 +29,17 @@ import { isAtRisk } from '../../shared/lib/customerUtils';
 const ACCENT = '#3b82f6';
 const AT_RISK_DAYS = 60;
 
+function atRiskSegmentId(segments: Array<{ id: string; name: string }>): string | undefined {
+  const segment = segments.find(({ id, name }) => {
+    const normalizedName = name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+    return /^\d+$/.test(id) && normalizedName.includes('atrisk');
+  });
+  return segment?.id;
+}
+
 interface StatItem {
   /** Stable id, used as the React key: the label is a translation and changes with the language. */
   id: string;
@@ -144,6 +155,7 @@ const Dashboard: React.FC = () => {
   const { data: fetchedSegments } = useListSegments();
   const customersPool = fetchedCustomers ?? [];
   const segmentsPool = fetchedSegments ?? [];
+  const winBackSegmentId = atRiskSegmentId(segmentsPool);
 
   const ltv =
     customersPool.length > 0
@@ -490,7 +502,12 @@ const Dashboard: React.FC = () => {
             </div>
             <button
               type="button"
-              onClick={() => navigate({ to: '/campaigns/email', search: { segment: 'atrisk' } })}
+              onClick={() =>
+                navigate({
+                  to: '/campaigns/email',
+                  search: winBackSegmentId ? { segment: winBackSegmentId } : {},
+                })
+              }
               style={{
                 fontSize: '12px',
                 color: '#3b82f6',

@@ -99,6 +99,32 @@ describe('useUpdateBusiness', () => {
       contactNumber: '+961000000',
     });
   });
+
+  it('forwards an explicitly empty store name', async () => {
+    mockConfigClient.updateConfig.mockResolvedValue({ config: { site_name: '' } });
+
+    const { result } = renderHook(() => useUpdateBusiness(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.mutate({ data: { storeName: '', companyName: 'Old name' } });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockConfigClient.updateConfig).toHaveBeenCalledWith({ siteName: '' });
+  });
+
+  it('uses company name only when store name was not supplied', async () => {
+    mockConfigClient.updateConfig.mockResolvedValue({ config: { site_name: 'Company name' } });
+
+    const { result } = renderHook(() => useUpdateBusiness(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.mutate({ data: { companyName: 'Company name' } });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockConfigClient.updateConfig).toHaveBeenCalledWith({ siteName: 'Company name' });
+  });
 });
 
 describe('useCustomDomain', () => {

@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
-import { APP_URLS } from '@voxire/config';
+import { APP_CONFIG, APP_URLS } from '@voxire/config';
 
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -21,13 +21,17 @@ import { getEmailError, getPasswordMatchError } from '../../shared/lib/validatio
 const DEFAULT_SIGNUP_PLAN_SLUG = 'free';
 const AUTH_SOCIAL_LOGIN_FLAG = 'auth.social_login_enabled';
 
-type KnownAppId = keyof typeof APP_URLS;
+type RedirectableAppId = keyof typeof APP_CONFIG;
 
-function getRedirectUrl(redirectParam: string | null): string {
-  if (redirectParam && redirectParam in APP_URLS) {
-    return APP_URLS[redirectParam as KnownAppId] as string;
+function getRedirectAppId(value: string | null): RedirectableAppId | null {
+  if (value && Object.prototype.hasOwnProperty.call(APP_CONFIG, value)) {
+    return value as RedirectableAppId;
   }
-  return APP_URLS.dash as string;
+  return null;
+}
+
+function getRedirectUrl(appId: RedirectableAppId | null): string {
+  return appId ? (APP_URLS[appId] as string) : (APP_URLS.dash as string);
 }
 
 // ── Register ────────────────────────────────────────────────────────────────
@@ -70,9 +74,9 @@ const Register: React.FC = (): React.JSX.Element => {
   const { isAuthenticated, loading, error, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
 
-  const redirectParam = useMemo((): string | null => {
+  const redirectParam = useMemo((): RedirectableAppId | null => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('redirect');
+    return getRedirectAppId(params.get('redirect'));
   }, []);
 
   const handleRegister = (): void => {

@@ -1,11 +1,14 @@
-import { motion } from 'motion/react';
-import React from 'react';
+import { AnimatePresence, motion } from "motion/react";
+import React from "react";
 
-type AnimationType = 'slide' | 'fade' | 'scale' | 'slideUp' | 'slideDown' | 'none';
+type AnimationType =
+  "slide" | "fade" | "scale" | "slideUp" | "slideDown" | "none";
 
 interface AnimatedRoutesProps {
   children: React.ReactNode;
   animationType?: AnimationType;
+  /** Changes to this value remount the route so exit animations can run. */
+  animationKey?: React.Key;
 }
 
 const animations = {
@@ -86,26 +89,32 @@ const animations = {
 /**
  * @param children - React components/routes to animate
  * @param animationType - Type of animation: slide, fade, scale, slideUp, slideDown, or none (default: fade)
+ * @param animationKey - Key identifying the current route; change it to run
+ * exit/enter transitions.
  */
 const AnimatedRoutes: React.FC<AnimatedRoutesProps> = ({
   children,
-  animationType = 'slideDown',
+  animationType = "slideDown",
+  animationKey,
 }) => {
   const selectedAnimation = animations[animationType];
 
   return (
-    <motion.div
-      variants={selectedAnimation}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      transition={{
-        duration: 0.2,
-        ease: 'easeOut',
-      }}
-    >
-      {children}
-    </motion.div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={animationKey}
+        variants={selectedAnimation}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={{
+          duration: 0.2,
+          ease: "easeOut",
+        }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

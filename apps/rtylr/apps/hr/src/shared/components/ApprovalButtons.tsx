@@ -7,6 +7,7 @@ interface Props {
   onApprove: (note?: string) => void;
   onReject: (note?: string) => void;
   allowNote?: boolean;
+  rejectNoteRequired?: boolean;
   size?: 'sm' | 'md';
 }
 
@@ -14,11 +15,13 @@ const ApprovalButtons: React.FC<Props> = ({
   onApprove,
   onReject,
   allowNote = false,
+  rejectNoteRequired = false,
   size = 'sm',
 }) => {
   const { t } = useTranslation();
   const [note, setNote] = useState('');
   const [open, setOpen] = useState(false);
+  const rejectDisabled = rejectNoteRequired && !note.trim();
   const pad = size === 'md' ? '8px 14px' : '5px 10px';
   const font = size === 'md' ? 12 : 11;
 
@@ -26,7 +29,16 @@ const ApprovalButtons: React.FC<Props> = ({
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <Textarea
-          placeholder={t('common.optionalNote', { defaultValue: 'Optional note' })}
+          placeholder={
+            rejectNoteRequired
+              ? t('timesheets.rejectionReason', { defaultValue: 'Rejection reason' })
+              : t('common.optionalNote', { defaultValue: 'Optional note' })
+          }
+          aria-label={
+            rejectNoteRequired
+              ? t('timesheets.rejectionReason', { defaultValue: 'Rejection reason' })
+              : undefined
+          }
           value={note}
           onChange={(e) => setNote(e.target.value)}
           style={{ minHeight: 60 }}
@@ -59,6 +71,7 @@ const ApprovalButtons: React.FC<Props> = ({
           </button>
           <button
             type="button"
+            disabled={rejectDisabled}
             onClick={() => {
               onReject(note);
               setNote('');

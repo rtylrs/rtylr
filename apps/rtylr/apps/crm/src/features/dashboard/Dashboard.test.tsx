@@ -60,10 +60,34 @@ beforeEach(() => {
   mocks.navigate.mockClear();
   refetchDashboard.mockClear();
   customersList.length = 0;
+  segmentsList.length = 0;
   dashboardData.recentCampaigns = [];
 });
 
 describe('Dashboard read-only empty states', () => {
+  it('uses the real segment id for the at-risk win-back campaign', () => {
+    segmentsList.push({ id: '42', name: 'At Risk', customerCount: 0 });
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('button', { name: /Send win-back/i }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith({
+      to: '/campaigns/email',
+      search: { segment: '42' },
+    });
+  });
+
+  it('does not pass the symbolic at-risk key when no matching segment exists', () => {
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('button', { name: /Send win-back/i }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith({
+      to: '/campaigns/email',
+      search: {},
+    });
+  });
+
   it('shows a "view customers" call-to-action when there are no at-risk customers', () => {
     renderDashboard();
 

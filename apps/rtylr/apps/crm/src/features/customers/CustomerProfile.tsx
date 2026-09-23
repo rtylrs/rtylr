@@ -141,36 +141,22 @@ const CustomerProfile: React.FC = () => {
       return;
     }
     const tagName = newTag.trim();
+    if (tags.some((tag) => tag.trim().toLowerCase() === tagName.toLowerCase())) {
+      newTagInputRef.current?.select();
+      return;
+    }
     const updated = [...tags, tagName];
-    update.mutate(
-      { id: customer.id, data: { tags: updated } },
-      {
-        onSuccess: () => toast.success(`Tag "${tagName}" added`),
-        onError: () => toast.error(t('crm.customerProfile.addTagFailed')),
-      }
-    );
+    update.mutate({ id: customer.id, data: { tags: updated } });
     setNewTag('');
   };
 
   const handleRemoveTag = (tag: string) => {
     const updated = tags.filter((t) => t !== tag);
-    update.mutate(
-      { id: customer.id, data: { tags: updated } },
-      {
-        onSuccess: () => toast.success(`Tag "${tag}" removed`),
-        onError: () => toast.error(t('crm.customerProfile.removeTagFailed')),
-      }
-    );
+    update.mutate({ id: customer.id, data: { tags: updated } });
   };
 
   const handleNotesSave = (notes: string) => {
-    update.mutate(
-      { id: customer.id, data: { notes } },
-      {
-        onSuccess: () => toast.success(t('crm.customers.notesSaved')),
-        onError: () => toast.error(t('crm.customers.notesFailed')),
-      }
-    );
+    update.mutate({ id: customer.id, data: { notes } });
   };
 
   const handleAward = (points: number, reason: string) => {
@@ -203,20 +189,13 @@ const CustomerProfile: React.FC = () => {
 
   const handleDelete = () => {
     remove.mutate(customer.id, {
-      onSuccess: () => {
-        toast.success(t('crm.customers.deleted'));
-        navigate({ to: '/customers' });
-      },
-      onError: () => {
-        toast.error(t('crm.customers.deleteFailed'));
-      },
+      onSuccess: () => navigate({ to: '/customers' }),
     });
   };
 
   const handleExport = () => {
     exportData.mutate(customer.id, {
       onSuccess: (data) => {
-        toast.success(t('crm.customers.exported'));
         if (data) {
           const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
@@ -229,7 +208,6 @@ const CustomerProfile: React.FC = () => {
           URL.revokeObjectURL(url);
         }
       },
-      onError: () => toast.error(t('crm.customers.exportFailed')),
     });
   };
 

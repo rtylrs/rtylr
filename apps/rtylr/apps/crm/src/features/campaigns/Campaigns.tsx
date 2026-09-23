@@ -35,13 +35,7 @@ import { canEditCampaign, hasVerifiedCampaignAudience } from './campaignActions'
 const ACCENT = '#3b82f6';
 
 type CampaignStatus =
-  | 'Draft'
-  | 'Scheduled'
-  | 'Active'
-  | 'Paused'
-  | 'Completed'
-  | 'Sent'
-  | 'Cancelled';
+  'Draft' | 'Scheduled' | 'Active' | 'Paused' | 'Completed' | 'Sent' | 'Cancelled';
 type Channel = 'Email' | 'SMS' | 'Push';
 
 interface Campaign {
@@ -451,6 +445,11 @@ const Campaigns: React.FC = () => {
   const { data: fetchedSegments, error: segmentsError } = useListSegments();
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
+  const resetPagination = (): void => {
+    setOffset(0);
+    setExhausted(false);
+    setLoadedCampaigns([]);
+  };
   useEffect(() => {
     if (!fetchedCampaigns) return;
     if (offset > 0 && fetchedCampaigns.length === 0) {
@@ -466,7 +465,8 @@ const Campaigns: React.FC = () => {
     });
   }, [fetchedCampaigns, offset]);
 
-  const hasMore = !exhausted && fetchedCampaigns?.length === pageSize;
+  const hasMore =
+    !exhausted && !isError && loadedCampaigns.length > 0 && loadedCampaigns.length % pageSize === 0;
   const audienceBySegment = useMemo(
     () =>
       new Map(
@@ -497,23 +497,11 @@ const Campaigns: React.FC = () => {
       toast.error(t('crm.campaigns.noEligibleRecipients'));
       return;
     }
-    updateStatus.mutate(
-      { id, status: 'active' },
-      {
-        onSuccess: () => toast.success(t('crm.campaigns.activated')),
-        onError: () => toast.error(t('crm.campaigns.activateFailed')),
-      }
-    );
+    updateStatus.mutate({ id, status: 'active' }, { onSuccess: resetPagination });
   };
 
   const handlePause = (id: number): void => {
-    updateStatus.mutate(
-      { id, status: 'paused' },
-      {
-        onSuccess: () => toast.success(t('crm.campaigns.paused')),
-        onError: () => toast.error(t('crm.campaigns.pauseFailed')),
-      }
-    );
+    updateStatus.mutate({ id, status: 'paused' }, { onSuccess: resetPagination });
   };
 
   const handleEdit = (c: Campaign): void => {
@@ -528,13 +516,10 @@ const Campaigns: React.FC = () => {
   const handleDelete = (id: number): void => {
     removeCampaign.mutate(id, {
       onSuccess: () => {
-        toast.success(t('crm.campaigns.deleted'));
+        resetPagination();
         setConfirmDeleteId(null);
       },
-      onError: () => {
-        toast.error(t('crm.campaigns.deleteFailed'));
-        setConfirmDeleteId(null);
-      },
+      onError: () => setConfirmDeleteId(null),
     });
   };
 
@@ -649,9 +634,33 @@ const Campaigns: React.FC = () => {
 
         {/* Campaign cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {isError && campaigns.length === 0 && (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
-              {t('crm.campaigns.loadFailed')}
+          {isError && (
+            <div
+              role="alert"
+              style={{
+                padding: '16px',
+                textAlign: 'center',
+                color: 'var(--hub-text-muted)',
+                border: '1px solid var(--hub-border)',
+                borderRadius: '8px',
+              }}
+            >
+              <div>{t('crm.campaigns.loadFailed')}</div>
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                style={{
+                  marginTop: '8px',
+                  padding: '6px 12px',
+                  borderRadius: '7px',
+                  border: '1px solid var(--hub-border)',
+                  background: 'var(--hub-card)',
+                  color: 'var(--hub-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                {t('crm.actions.refresh')}
+              </button>
             </div>
           )}
           {isLoading && campaigns.length === 0 && (

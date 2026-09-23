@@ -5,7 +5,8 @@ import { Printer, Check } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useTranslation } from 'react-i18next';
-import { useProducts } from '../products/useProducts';
+import { useQuery } from '@tanstack/react-query';
+import { fetchAllProducts, type Product } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import BarcodeSvg from '../../shared/components/BarcodeSvg';
@@ -18,8 +19,10 @@ const AMBER = 'var(--erp-accent)';
 const Barcodes: React.FC = () => {
   const { t } = useTranslation('erp');
   const navigate = useNavigate();
-  const { data: productResult, isLoading } = useProducts();
-  const products = productResult?.products ?? [];
+  const { data: products = [], isLoading } = useQuery<Product[]>({
+    queryKey: ['products', 'barcodes'],
+    queryFn: () => fetchAllProducts(),
+  });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [copies, setCopies] = useState(1);
 

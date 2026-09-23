@@ -10,77 +10,88 @@ import type {
   RoleScope,
   RoleScopeType,
   TenantAppId,
-} from '@voxire/types';
+} from "@voxire/types";
 
 type UnknownRecord = Record<string, unknown>;
 
 function isRecord(value: unknown): value is UnknownRecord {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function stringValue(value: unknown): string | null {
-  return typeof value === 'string' && value.length > 0 ? value : null;
+  return typeof value === "string" && value.length > 0 ? value : null;
 }
 
 function booleanValue(value: unknown): boolean | null {
-  return typeof value === 'boolean' ? value : null;
+  return typeof value === "boolean" ? value : null;
 }
 
 function numberValue(value: unknown): number | null {
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
   // OneKit wire int64s arrive as strings to avoid JS float precision loss
   // (see the client's int64-handling convention); accept that shape too.
-  if (typeof value === 'string' && value.length > 0 && Number.isFinite(Number(value))) {
+  if (
+    typeof value === "string" &&
+    value.length > 0 &&
+    Number.isFinite(Number(value))
+  ) {
     return Number(value);
   }
   return null;
 }
 
 function stringArray(value: unknown): string[] | null {
-  if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) return null;
+  if (!Array.isArray(value) || !value.every((item) => typeof item === "string"))
+    return null;
   return value;
 }
 
 function appId(value: unknown): TenantAppId | null {
   const apps: readonly TenantAppId[] = [
-    'pos',
-    'erp',
-    'hr',
-    'crm',
-    'finance',
-    'flow',
-    'insights',
-    'menu',
-    'recruit',
+    "pos",
+    "erp",
+    "hr",
+    "crm",
+    "finance",
+    "flow",
+    "insights",
+    "menu",
+    "recruit",
   ];
-  return typeof value === 'string' && apps.includes(value as TenantAppId)
+  return typeof value === "string" && apps.includes(value as TenantAppId)
     ? (value as TenantAppId)
     : null;
 }
 
 function assignmentSource(value: unknown): AssignmentSource | null {
-  return value === 'explicit' || value === 'dash_default' || value === 'group' || value === 'system'
+  return value === "explicit" ||
+    value === "dash_default" ||
+    value === "group" ||
+    value === "system"
     ? value
     : null;
 }
 
 function assignmentStatus(value: unknown): AssignmentStatus | null {
-  return value === 'pending' || value === 'active' || value === 'revoked' || value === 'archived'
+  return value === "pending" ||
+    value === "active" ||
+    value === "revoked" ||
+    value === "archived"
     ? value
     : null;
 }
 
 function scopeType(value: unknown): RoleScopeType | null {
   const types: readonly RoleScopeType[] = [
-    'business',
-    'location',
-    'department',
-    'team',
-    'project',
-    'terminal',
-    'portfolio',
+    "business",
+    "location",
+    "department",
+    "team",
+    "project",
+    "terminal",
+    "portfolio",
   ];
-  return typeof value === 'string' && types.includes(value as RoleScopeType)
+  return typeof value === "string" && types.includes(value as RoleScopeType)
     ? (value as RoleScopeType)
     : null;
 }
@@ -103,7 +114,7 @@ function parseLicense(value: unknown): LicenseAssignment | null {
   const app = appId(value.appId ?? value.app_id);
   const status = assignmentStatus(value.status);
   const source = assignmentSource(
-    value.source ?? value.assignmentSource ?? value.assignment_source
+    value.source ?? value.assignmentSource ?? value.assignment_source,
   );
   const grantedAt = stringValue(value.grantedAt ?? value.granted_at);
   if (!app || !status || !source || !grantedAt) return null;
@@ -113,10 +124,15 @@ function parseLicense(value: unknown): LicenseAssignment | null {
     appId: app,
     status,
     source,
-    groupId: groupIdValue === null || groupIdValue === undefined ? null : stringValue(groupIdValue),
+    groupId:
+      groupIdValue === null || groupIdValue === undefined
+        ? null
+        : stringValue(groupIdValue),
     grantedAt,
     revokedAt:
-      revokedAtValue === null || revokedAtValue === undefined ? null : stringValue(revokedAtValue),
+      revokedAtValue === null || revokedAtValue === undefined
+        ? null
+        : stringValue(revokedAtValue),
   };
 }
 
@@ -135,18 +151,25 @@ function parseAppAccess(value: unknown): EffectiveAppAccess | null {
   const licensed = rawLicensed == null ? false : booleanValue(rawLicensed);
   const rawHasAccess = value.hasAccess ?? value.has_access;
   const hasAccess = rawHasAccess == null ? false : booleanValue(rawHasAccess);
-  // roleIds, scopes and permissionSources are per-role detail the backend
-  // does not always populate (e.g. onion PR #1043 omits them entirely on
-  // apps[] entries). Missing is treated as "none", not as malformed data -
-  // only a present-but-invalid value still fails closed.
+  // Per-role and per-assignment details are not always populated on apps[]
+  // entries. Missing is treated as "none", not as malformed data; only a
+  // present-but-invalid value still fails closed.
   const rawRoleIds = value.roleIds ?? value.role_ids;
   const roleIds = rawRoleIds == null ? [] : stringArray(rawRoleIds);
-  const permissions = stringArray(value.permissions);
+  const permissions =
+    value.permissions == null ? [] : stringArray(value.permissions);
   const rawScopes = value.scopes;
   const scopes = rawScopes == null ? [] : parseScopes(rawScopes);
-  const sourcesValue = Array.isArray(value.sources) ? value.sources.map(assignmentSource) : null;
-  const rawPermissionSources = value.permissionSources ?? value.permission_sources;
-  const permissionSourcesValue = rawPermissionSources == null ? {} : rawPermissionSources;
+  const sourcesValue =
+    value.sources == null
+      ? []
+      : Array.isArray(value.sources)
+        ? value.sources.map(assignmentSource)
+        : null;
+  const rawPermissionSources =
+    value.permissionSources ?? value.permission_sources;
+  const permissionSourcesValue =
+    rawPermissionSources == null ? {} : rawPermissionSources;
   if (
     !app ||
     licensed === null ||
@@ -161,13 +184,15 @@ function parseAppAccess(value: unknown): EffectiveAppAccess | null {
     return null;
   }
   const permissionSources: Record<string, string[]> = {};
-  for (const [permission, sourceValue] of Object.entries(permissionSourcesValue)) {
+  for (const [permission, sourceValue] of Object.entries(
+    permissionSourcesValue,
+  )) {
     const sourceIds = Array.isArray(sourceValue)
       ? stringArray(sourceValue)
-      : typeof sourceValue === 'string'
+      : typeof sourceValue === "string"
         ? sourceValue.length === 0
           ? []
-          : sourceValue.split(',')
+          : sourceValue.split(",")
         : null;
     if (!sourceIds) return null;
     permissionSources[permission] = sourceIds;
@@ -179,8 +204,10 @@ function parseAppAccess(value: unknown): EffectiveAppAccess | null {
     licensed,
     hasAccess,
     roleIds,
-    primaryRoleId: primaryRoleIdValue === null ? null : stringValue(primaryRoleIdValue),
-    displayRole: displayRoleValue === null ? null : stringValue(displayRoleValue),
+    primaryRoleId:
+      primaryRoleIdValue === null ? null : stringValue(primaryRoleIdValue),
+    displayRole:
+      displayRoleValue === null ? null : stringValue(displayRoleValue),
     permissions: permissions as PermissionKey[],
     scopes,
     sources: sourcesValue as AssignmentSource[],
@@ -202,11 +229,18 @@ export function parseEffectiveAccess(value: unknown): EffectiveAccess | null {
   // whole parse - see the isOwner/isAdmin comment below for why "absent" and
   // "malformed" must stay distinguishable here.
   const rawDashPermissions = value.dashPermissions ?? value.dash_permissions;
-  const dashPermissions = rawDashPermissions == null ? [] : stringArray(rawDashPermissions);
+  const dashPermissions =
+    rawDashPermissions == null ? [] : stringArray(rawDashPermissions);
   const rawSubscribedApps = value.subscribedApps ?? value.subscribed_apps;
   const subscribedAppsValue: unknown[] | null =
-    rawSubscribedApps == null ? [] : Array.isArray(rawSubscribedApps) ? rawSubscribedApps : null;
-  const subscribedApps = subscribedAppsValue ? subscribedAppsValue.map(appId) : null;
+    rawSubscribedApps == null
+      ? []
+      : Array.isArray(rawSubscribedApps)
+        ? rawSubscribedApps
+        : null;
+  const subscribedApps = subscribedAppsValue
+    ? subscribedAppsValue.map(appId)
+    : null;
   const rawLicenses = value.licenses;
   const licensesValue: (LicenseAssignment | null)[] | null =
     rawLicenses == null
@@ -235,7 +269,8 @@ export function parseEffectiveAccess(value: unknown): EffectiveAccess | null {
   const isOwner = rawIsOwner == null ? false : booleanValue(rawIsOwner);
   const rawIsAdmin = value.isAdmin ?? value.is_admin;
   const isAdmin = rawIsAdmin == null ? false : booleanValue(rawIsAdmin);
-  const rawAuthorizationVersion = value.authorizationVersion ?? value.authorization_version;
+  const rawAuthorizationVersion =
+    value.authorizationVersion ?? value.authorization_version;
   const authorizationVersion =
     rawAuthorizationVersion == null ? 0 : numberValue(rawAuthorizationVersion);
   if (
@@ -270,9 +305,11 @@ export function parseEffectiveAccess(value: unknown): EffectiveAccess | null {
 
 export function hasEffectiveAppAccess(
   access: EffectiveAccess | null | undefined,
-  appId: AuthorizationAppId | string
+  appId: AuthorizationAppId | string,
 ): boolean {
   if (!access) return false;
-  if (appId === 'dash') return access.dashRole !== null;
-  return access.apps.some((app) => app.appId === appId && app.licensed && app.hasAccess);
+  if (appId === "dash") return access.dashRole !== null;
+  return access.apps.some(
+    (app) => app.appId === appId && app.licensed && app.hasAccess,
+  );
 }

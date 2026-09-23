@@ -437,7 +437,6 @@ const ProductDetail: React.FC = () => {
       <ConfirmModal
         open={confirmDelete}
         title={t('erp.products.detail.delete')}
-        description={t('erp.products.detail.notFoundDescription')}
         danger
         confirmLabel={t('common.delete')}
         cancelLabel={t('common.cancel')}

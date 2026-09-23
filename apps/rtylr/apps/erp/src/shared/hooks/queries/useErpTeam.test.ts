@@ -4,18 +4,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { useErpTeam, useErpInviteMember, useErpDeactivateMember } from './useErpTeam';
 
-vi.mock('@voxire/api', () => ({ unwrap: vi.fn((v) => v) }));
-
-const mockGet = vi.fn();
-const mockPost = vi.fn();
-const mockPatch = vi.fn();
-
-vi.mock('../../lib/clients', () => ({
-  rest: {
-    get: (...args: unknown[]) => mockGet(...args),
-    post: (...args: unknown[]) => mockPost(...args),
-    patch: (...args: unknown[]) => mockPatch(...args),
+const { mockClient } = vi.hoisted(() => ({
+  mockClient: {
+    listTeam: vi.fn(),
+    inviteUser: vi.fn(),
+    removeMember: vi.fn(),
   },
+}));
+
+vi.mock('@voxire/api', () => ({
+  createOneKitClient: vi.fn(() => mockClient),
+  getOneKitErrorMessage: vi.fn((_error, fallback) => fallback),
+  oneKitResult: vi.fn((operation: () => Promise<unknown>) => operation()),
+  unwrap: vi.fn(async (value: unknown) => value),
 }));
 
 function createWrapper() {
@@ -27,41 +28,42 @@ function createWrapper() {
 const sampleMembers = [
   {
     id: '1',
-    name: 'Alice',
+    fullName: 'Alice',
     email: 'alice@example.com',
     role: 'admin',
     apps: ['erp'],
     isActive: true,
   },
-  { id: '2', name: 'Bob', email: 'bob@example.com', role: 'staff', apps: ['erp'], isActive: true },
+  {
+    id: '2',
+    fullName: 'Bob',
+    email: 'bob@example.com',
+    role: 'staff',
+    apps: ['erp'],
+    isActive: true,
+  },
 ];
 
 describe('useErpTeam', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('fetches team members', async () => {
-    mockGet.mockResolvedValue({ members: sampleMembers });
+  it('fetches and maps canonical team members', async () => {
+    mockClient.listTeam.mockResolvedValue({ users: sampleMembers });
     const { result } = renderHook(() => useErpTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toHaveLength(2);
-  });
-
-  it('falls back to users key if members not present', async () => {
-    mockGet.mockResolvedValue({ users: sampleMembers });
-    const { result } = renderHook(() => useErpTeam(), { wrapper: createWrapper() });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toHaveLength(2);
+    expect(result.current.data?.[0]?.name).toBe('Alice');
   });
 
   it('returns empty array when response is empty', async () => {
-    mockGet.mockResolvedValue({});
+    mockClient.listTeam.mockResolvedValue({});
     const { result } = renderHook(() => useErpTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual([]);
   });
 
   it('handles API error', async () => {
-    mockGet.mockRejectedValue(new Error('fail'));
+    mockClient.listTeam.mockRejectedValue(new Error('fail'));
     const { result } = renderHook(() => useErpTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
@@ -71,8 +73,8 @@ describe('useErpInviteMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls invite endpoint with correct payload', async () => {
-    mockPost.mockResolvedValue({ success: true });
-    mockGet.mockResolvedValue({ members: [] });
+    mockClient.inviteUser.mockResolvedValue({ success: true });
+    mockClient.listTeam.mockResolvedValue({ users: [] });
     const { result } = renderHook(() => useErpInviteMember(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({
@@ -81,7 +83,7 @@ describe('useErpInviteMember', () => {
         role: 'staff',
       });
     });
-    expect(mockPost).toHaveBeenCalledWith('/team/invite', {
+    expect(mockClient.inviteUser).toHaveBeenCalledWith({
       email: 'new@example.com',
       fullName: 'New User',
       role: 'staff',
@@ -94,12 +96,12 @@ describe('useErpDeactivateMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls deactivate endpoint with member id', async () => {
-    mockPatch.mockResolvedValue({ success: true });
-    mockGet.mockResolvedValue({ members: [] });
+    mockClient.removeMember.mockResolvedValue({ success: true });
+    mockClient.listTeam.mockResolvedValue({ users: [] });
     const { result } = renderHook(() => useErpDeactivateMember(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync('user-123');
     });
-    expect(mockPatch).toHaveBeenCalledWith('/team/members/user-123/deactivate', {});
+    expect(mockClient.removeMember).toHaveBeenCalledWith({ userId: 'user-123' });
   });
 });

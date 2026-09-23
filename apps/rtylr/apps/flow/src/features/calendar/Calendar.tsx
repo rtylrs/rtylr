@@ -14,6 +14,8 @@ import type { ApiTask } from '../../shared/services/flowApi';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
 import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
 import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 
 const ACCENT_VAR = 'var(--accent)';
@@ -38,8 +40,11 @@ const Calendar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const openTask = useOpenTask();
   const isWide = useMediaQuery(WIDE);
-  const { data: apiTasks = [] } = useTasks({});
+  const tasksQuery = useTasks({});
+  const { data: apiTasks = [] } = tasksQuery;
   const tasks = apiTasks as ApiTask[];
+  const tasksFailed = hasQueryFailed(tasksQuery);
+  const tasksLoading = tasksQuery.isPending && !tasksFailed;
   const { projects } = useFlowStore();
   const { data: labels = [] } = useLabels();
   const createTask = useCreateTask();
@@ -83,6 +88,7 @@ const Calendar: React.FC = () => {
   };
 
   const submitCreate = () => {
+    if (createTask.isPending) return;
     if (!newTitle.trim()) {
       toast.error(t('errors.generic'));
       return;
@@ -169,7 +175,18 @@ const Calendar: React.FC = () => {
           a title to two or three characters and leaves the pills too small to
           hit (rtylr#1215, S-10). The month navigation above is shared; only the
           body swaps. */}
-      {!isWide && (
+      {tasksFailed && (
+        <div className="flex-1 overflow-auto p-4">
+          <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
+        </div>
+      )}
+      {tasksLoading && (
+        <div className="flex-1 p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+          {t('common.loading')}
+        </div>
+      )}
+
+      {!tasksFailed && !tasksLoading && !isWide && (
         <div className="flex-1 overflow-auto">
           <CalendarAgenda
             entries={agenda}
@@ -183,7 +200,7 @@ const Calendar: React.FC = () => {
         </div>
       )}
 
-      {isWide && (
+      {!tasksFailed && !tasksLoading && isWide && (
         <div className="flex-1 overflow-auto p-4">
           <div className="grid grid-cols-7 gap-px" style={{ background: 'var(--flow-border)' }}>
             {days.slice(0, 7).map((c) => (
@@ -283,14 +300,13 @@ const Calendar: React.FC = () => {
                       );
                     })}
                     {dayTasks.length > 3 && (
-                      <button
-                        type="button"
+                      <span
                         onClick={(e) => e.stopPropagation()}
-                        className="text-meta px-1 hover:underline"
-                        style={{ color: ACCENT_VAR }}
+                        className="text-meta px-1"
+                        style={{ color: 'var(--flow-text-dim)' }}
                       >
                         {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
-                      </button>
+                      </span>
                     )}
                   </div>
                 </motion.div>

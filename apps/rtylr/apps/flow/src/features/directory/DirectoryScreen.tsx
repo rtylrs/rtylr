@@ -33,8 +33,9 @@ const DirectoryScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const directoryQuery = useDirectory(search);
-  const { data: members, isLoading, refetch } = directoryQuery;
+  const { data: members, isLoading: queryLoading, isPending, refetch } = directoryQuery;
   const isError = hasQueryFailed(directoryQuery);
+  const isLoading = queryLoading || (isPending && !isError);
   const groups = useMemo(() => groupByDepartment(members ?? []), [members]);
 
   return (

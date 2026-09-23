@@ -20,8 +20,18 @@ vi.mock('../../shared/stores/flowStore', () => ({
 
 const mutateSpy = vi.fn();
 
+interface CyclesQueryState {
+  data: ApiCycle[];
+  isLoading: boolean;
+  isPending?: boolean;
+  isError?: boolean;
+  isPaused?: boolean;
+  failureCount?: number;
+  refetch?: () => unknown;
+}
+
 const cyclesState = vi.hoisted(() => ({
-  value: { data: [] as ApiCycle[], isLoading: false },
+  value: { data: [] as ApiCycle[], isLoading: false, isPending: false } as CyclesQueryState,
 }));
 
 // The screen asks which project's cycles to show, so it reads the project list.
@@ -70,11 +80,11 @@ beforeEach(() => {
 describe('Cycles', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    cyclesState.value = { data: [], isLoading: false };
+    cyclesState.value = { data: [], isLoading: false, isPending: false };
   });
 
   it('shows a real empty state with a create CTA when the workspace has zero cycles', () => {
-    cyclesState.value = { data: [], isLoading: false };
+    cyclesState.value = { data: [], isLoading: false, isPending: false };
     render(<Cycles />);
 
     expect(screen.getByText('flow.cycles.emptyTitle')).toBeInTheDocument();
@@ -99,6 +109,34 @@ describe('Cycles', () => {
     expect(screen.getAllByText('Next Sprint').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Past Sprint').length).toBeGreaterThan(0);
   });
+
+  it('keeps loading while a project query is paused before its first attempt', () => {
+    cyclesState.value = {
+      data: [],
+      isLoading: false,
+      isPending: true,
+      isPaused: true,
+      failureCount: 0,
+    };
+    render(<Cycles />);
+
+    expect(screen.getByText('flow.cycles.loading')).toBeInTheDocument();
+    expect(screen.queryByText('flow.cycles.emptyTitle')).not.toBeInTheDocument();
+  });
+
+  it('renders every active cycle when the API returns more than one', () => {
+    cyclesState.value = {
+      data: [
+        cycle({ id: '1', name: 'First Active', status: 'active' }),
+        cycle({ id: '2', name: 'Second Active', status: 'active' }),
+      ],
+      isLoading: false,
+    };
+    render(<Cycles />);
+
+    expect(screen.getByText('First Active')).toBeInTheDocument();
+    expect(screen.getByText('Second Active')).toBeInTheDocument();
+  });
 });
 
 describe('Cycles create form', () => {
@@ -106,7 +144,7 @@ describe('Cycles create form', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
     vi.clearAllMocks();
-    cyclesState.value = { data: [], isLoading: false };
+    cyclesState.value = { data: [], isLoading: false, isPending: false };
   });
 
   afterEach(() => {

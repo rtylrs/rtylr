@@ -87,7 +87,12 @@ const itemVariants: Variants = {
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const [quickAddOpen, setQuickAddOpen] = React.useState(false);
-  const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats();
+  const {
+    data: dashboardStats,
+    isError: statsError,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useDashboardStats();
   const { data: productsResult, isLoading: productsLoading } = useProducts({ pageSize: 5 });
   const productsData = productsResult?.products ?? [];
   const { data: activityData = [] } = useActivity(8);
@@ -102,7 +107,7 @@ const Dashboard: React.FC = () => {
     {
       id: 'totalProducts',
       label: t('erp.dashboard.totalProducts'),
-      value: dashboardStats?.totalProducts ?? 0,
+      value: dashboardStats?.totalProducts,
       icon: Package,
       change: '',
       changePositive: true,
@@ -111,7 +116,7 @@ const Dashboard: React.FC = () => {
     {
       id: 'lowStockItems',
       label: t('erp.dashboard.lowStockItems'),
-      value: dashboardStats?.lowStockCount ?? 0,
+      value: dashboardStats?.lowStockCount,
       icon: AlertTriangle,
       change: t('erp.dashboard.criticalCount', { count: criticalLowStockCount }),
       changePositive: false,
@@ -120,7 +125,7 @@ const Dashboard: React.FC = () => {
     {
       id: 'pendingOrders',
       label: t('erp.dashboard.pendingOrders'),
-      value: dashboardStats?.pendingOrders ?? 0,
+      value: dashboardStats?.pendingOrders,
       icon: ShoppingCart,
       change: t('erp.dashboard.needsReview'),
       changePositive: true,
@@ -129,7 +134,7 @@ const Dashboard: React.FC = () => {
     {
       id: 'totalSuppliers',
       label: t('erp.dashboard.totalSuppliers'),
-      value: dashboardStats?.totalSuppliers ?? 0,
+      value: dashboardStats?.totalSuppliers,
       icon: Users,
       change: '',
       changePositive: true,
@@ -137,11 +142,38 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  const inventoryValue =
-    dashboardStats?.inventoryValue ??
-    (productsData || [])
-      .slice(0, 5)
-      .reduce((s, p) => s + (p.salePrice ?? 0) * (p.stockQuantity || 0), 0);
+  const inventoryValue = dashboardStats?.inventoryValue;
+
+  if (statsError) {
+    return (
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="w-full min-w-0 space-y-6"
+      >
+        <HelmetContainer title={pageTitle(t(routeLabels['/'].title))} />
+        <div
+          role="alert"
+          className="rounded-xl p-8 flex flex-col items-center justify-center gap-3"
+          style={{ ...CARD_STYLE }}
+        >
+          <AlertTriangle size={28} style={{ color: 'var(--erp-danger)' }} />
+          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            {t('errors.generic')}
+          </p>
+          <button
+            type="button"
+            onClick={() => void refetchStats()}
+            className="rounded-lg px-3 py-1.5 text-xs font-semibold"
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+          >
+            {t('erp.reorder.refresh')}
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -212,7 +244,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-                    {isLoading ? '…' : stat.value}
+                    {isLoading ? '…' : (stat.value ?? '—')}
                   </p>
                   {stat.change && (
                     <p
@@ -239,7 +271,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-auto">
             <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-              {isLoading ? '…' : formatCurrency(inventoryValue)}
+              {isLoading ? '…' : inventoryValue == null ? '—' : formatCurrency(inventoryValue)}
             </p>
             <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
               active tracked stock at cost
@@ -360,7 +392,11 @@ const Dashboard: React.FC = () => {
                 color: 'var(--erp-danger)',
               }}
             >
-              {isLoading ? '…' : `${dashboardStats?.lowStockCount ?? 0} items`}
+              {isLoading
+                ? '…'
+                : dashboardStats?.lowStockCount == null
+                  ? '—'
+                  : `${dashboardStats.lowStockCount} items`}
             </span>
           </div>
           <div className={`${SCROLL_AREA_CLASS} space-y-1`}>

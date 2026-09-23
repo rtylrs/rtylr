@@ -1,9 +1,10 @@
-import { createOneKitClient } from '@voxire/api';
-import { SessionServiceClient } from '@voxire/voxie/pos/session/v1/client';
-import type { CloseSessionRequest } from '@voxire/voxie/pos/session/v1/types';
-import { isRetryableTransportError } from '../../shared/utils/errorClassify';
+import { createOneKitClient } from "@voxire/api";
+import { SessionServiceClient } from "@voxire/voxie/pos/session/v1/client";
+import type { CloseSessionRequest } from "@voxire/voxie/pos/session/v1/types";
+import { isRetryableTransportError } from "../../shared/utils/errorClassify";
+import { useUserStore } from "../../shared/stores/userStore";
 
-const sessionClient = createOneKitClient(SessionServiceClient, 'pos');
+const sessionClient = createOneKitClient(SessionServiceClient, "pos");
 
 export interface SessionClosePayload {
   closingFloat: number;
@@ -26,7 +27,7 @@ interface CloseSessionWithFallbackParams {
   resolveSessionId?: () => Promise<number>;
 }
 
-type CloseSessionResult = { status: 'online' } | { status: 'queued' };
+type CloseSessionResult = { status: "online" } | { status: "queued" };
 
 function nonNegativeNumber(value: number): number {
   if (!Number.isFinite(value) || value < 0) return 0;
@@ -34,7 +35,8 @@ function nonNegativeNumber(value: number): number {
 }
 
 function positiveInteger(value: unknown): number | undefined {
-  const numeric = typeof value === 'string' ? Number(value.trim()) : Number(value);
+  const numeric =
+    typeof value === "string" ? Number(value.trim()) : Number(value);
   if (!Number.isInteger(numeric) || numeric <= 0) return undefined;
   return numeric;
 }
@@ -45,7 +47,7 @@ export function buildCloseSessionPayload({
 }: BuildCloseSessionPayloadParams): SessionClosePayload {
   const actual = Number(actualInput);
   if (!Number.isFinite(actual) || actual < 0) {
-    throw new Error('Enter a valid counted cash amount.');
+    throw new Error("Enter a valid counted cash amount.");
   }
 
   const normalizedExpected = nonNegativeNumber(expected);
@@ -56,17 +58,27 @@ export function buildCloseSessionPayload({
   };
 }
 
+export class NoOpenRegisterSessionError extends Error {
+  constructor() {
+    super("No open register session found.");
+    this.name = "NoOpenRegisterSessionError";
+  }
+}
+
 // The backend closes a session by id (/pos/sessions/{id}/close) and has no
-// "current" route, so the open session is resolved from the session list.
+// "current" route, so the open session is resolved from the business-wide list.
 export async function resolveOpenSessionId(): Promise<number> {
   const res = await sessionClient.listSessions({});
-  const open = (res.sessions ?? []).find((s) => s.status === 'open');
-  if (!open || !open.id) {
-    throw new Error('No open register session found.');
-  }
-  const sessionId = positiveInteger(open.id);
-  if (sessionId == null) {
-    throw new Error('No open register session found.');
+  const staffId = positiveInteger(useUserStore.getState().userId);
+  const open = (res.sessions ?? []).find(
+    (session) =>
+      staffId != null &&
+      session.status === "open" &&
+      positiveInteger(session.staffId) === staffId,
+  );
+  const sessionId = positiveInteger(open?.id);
+  if (staffId == null || sessionId == null) {
+    throw new NoOpenRegisterSessionError();
   }
   return sessionId;
 }
@@ -81,13 +93,16 @@ export async function closeSessionWithFallback({
   // that must surface now instead of becoming an unfixable queue entry.
   const sessionId = await resolveSessionId();
   try {
-    await closeSession({ id: String(sessionId), closingFloat: payload.closingFloat });
-    return { status: 'online' };
+    await closeSession({
+      id: String(sessionId),
+      closingFloat: payload.closingFloat,
+    });
+    return { status: "online" };
   } catch (error) {
     // Only transport-class failures may be replayed later; server rejections
     // (4xx) would fail forever as poison entries.
     if (!isRetryableTransportError(error)) throw error;
     enqueue({ ...payload, sessionId });
-    return { status: 'queued' };
+    return { status: "queued" };
   }
 }

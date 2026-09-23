@@ -62,11 +62,9 @@ export const payrollRunParamsSchema = z.object({
 export type PayrollRunParams = z.infer<typeof payrollRunParamsSchema>;
 
 export const payrollConfigSchema = z.object({
-  grossModel: z.enum(['hourly', 'salary', 'both']),
   period: z.enum(['weekly', 'biweekly', 'monthly']),
   overtimeEnabled: z.boolean(),
-  deductionsEnabled: z.boolean(),
-  bonusesEnabled: z.boolean(),
+  payDayOfMonth: z.number().int().min(1).max(28),
 });
 
 export type PayrollConfigForm = z.infer<typeof payrollConfigSchema>;

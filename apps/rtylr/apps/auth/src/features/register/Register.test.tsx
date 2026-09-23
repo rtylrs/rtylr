@@ -49,6 +49,20 @@ vi.mock('../../shared/components/PasswordStrengthMeter', () => ({
 import Register from './Register';
 import { initTestI18n } from '../../shared/testing/i18n';
 
+const captureRedirectLocation = (search: string): unknown[] => {
+  const assigned: unknown[] = [];
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: {
+      search,
+      set href(value: unknown) {
+        assigned.push(value);
+      },
+    },
+  });
+  return assigned;
+};
+
 beforeAll(async () => {
   await initTestI18n('en');
 });
@@ -107,4 +121,33 @@ describe('Register Feature Component', () => {
       );
     });
   });
+
+  it.each(['constructor', 'api'])(
+    'falls back to Dash for an invalid redirect app id: %s',
+    async (redirect) => {
+      const assigned = captureRedirectLocation(`?redirect=${redirect}`);
+      render(<Register />);
+      fireEvent.change(screen.getByPlaceholderText(/jane doe/i), {
+        target: { value: 'Alex Smith' },
+      });
+      fireEvent.change(screen.getByPlaceholderText(/my coffee shop/i), {
+        target: { value: 'Acme Coffee' },
+      });
+      fireEvent.change(screen.getByPlaceholderText(/you@company.com/i), {
+        target: { value: 'alex@acme.com' },
+      });
+      const passwordInputs = screen.getAllByPlaceholderText(/characters/i);
+      fireEvent.change(passwordInputs[0], { target: { value: 'SecurePass123' } });
+      fireEvent.change(screen.getByPlaceholderText(/repeat password/i), {
+        target: { value: 'SecurePass123' },
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+      await waitFor(() => expect(mockMutate).toHaveBeenCalledOnce());
+      const options = mockMutate.mock.calls[0][1] as { onSuccess: () => void };
+      options.onSuccess();
+
+      expect(assigned).toEqual(['http://localhost:5175']);
+    }
+  );
 });

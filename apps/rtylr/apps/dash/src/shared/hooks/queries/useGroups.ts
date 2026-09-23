@@ -240,7 +240,7 @@ export const useRemoveGroupMember = (
     },
     onSuccess: () => {
       toast.success(i18next.t('common.toasts.memberRemoved', 'Member removed'));
-      qc.invalidateQueries({ queryKey: ['groups', groupId] });
+      qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['team'] });
     },
     onError: () =>

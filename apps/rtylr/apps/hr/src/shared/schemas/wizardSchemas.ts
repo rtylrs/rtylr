@@ -2,8 +2,6 @@ import { z } from 'zod';
 
 export const companyProfileSchema = z.object({
   name: z.string().min(1),
-  industry: z.string().min(1),
-  country: z.string().min(1),
   timezone: z.string().min(1),
   currency: z.string().min(3).max(3),
 });
@@ -41,16 +39,9 @@ export const locationsSchema = z.object({
 });
 
 export const payrollConfigSchema = z.object({
-  payrollGrossModel: z.enum(['hourly', 'salary', 'both']),
   payrollPeriod: z.enum(['weekly', 'biweekly', 'monthly']),
   enableOvertime: z.boolean(),
-  enableDeductions: z.boolean(),
-  enableBonuses: z.boolean(),
-});
-
-export const notificationsSchema = z.object({
-  emailEnabled: z.boolean(),
-  smsEnabled: z.boolean(),
+  payDayOfMonth: z.number().int().min(1).max(28),
 });
 
 export type CompanyProfileFormData = z.infer<typeof companyProfileSchema>;
@@ -58,4 +49,3 @@ export type WorkScheduleFormData = z.infer<typeof workScheduleSchema>;
 export type OrgStructureFormData = z.infer<typeof orgStructureSchema>;
 export type LocationsFormData = z.infer<typeof locationsSchema>;
 export type PayrollConfigFormData = z.infer<typeof payrollConfigSchema>;
-export type NotificationsFormData = z.infer<typeof notificationsSchema>;

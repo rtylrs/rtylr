@@ -22,7 +22,7 @@ import {
   useCompleteMFAEnrollment,
   useVerifyMFA,
   useMFARecoveryCode,
-  useRevokeSession,
+  useRevokeAllSessions,
   type Session,
 } from '../../shared/hooks/queries/useSecurity';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -37,10 +37,7 @@ function formatRelative(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }> = ({
-  session,
-  onRevoke,
-}) => {
+const SessionRow: React.FC<{ session: Session }> = ({ session }) => {
   const isMobile = /iphone|android|ipad/i.test(session.device);
   const Icon = isMobile ? Smartphone : Laptop;
   return (
@@ -70,12 +67,6 @@ const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }>
           {formatRelative(session.lastActive)}
         </p>
       </div>
-      {!session.current && (
-        <Button size="sm" variant="secondary" onClick={() => onRevoke(session.id)}>
-          <LogOut size={12} />
-          Revoke session
-        </Button>
-      )}
     </div>
   );
 };
@@ -90,7 +81,7 @@ const Security: React.FC = () => {
   const completeMFA = useCompleteMFAEnrollment();
   const verifyMFA = useVerifyMFA();
   const recoveryMFA = useMFARecoveryCode();
-  const revoke = useRevokeSession();
+  const revokeAllSessions = useRevokeAllSessions();
 
   const [setupModalOpen, setSetupModalOpen] = useState(false);
   const [disableConfirmOpen, setDisableConfirmOpen] = useState(false);
@@ -511,10 +502,21 @@ const Security: React.FC = () => {
         <SettingSection
           title="Active sessions"
           description="Devices currently signed in to your account."
+          footer={
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => revokeAllSessions.mutate()}
+              disabled={revokeAllSessions.isPending}
+            >
+              <LogOut size={12} />
+              Sign out all sessions
+            </Button>
+          }
         >
           <div className="-mx-5">
             {data.sessions.map((s) => (
-              <SessionRow key={s.id} session={s} onRevoke={(id) => revoke.mutate(id)} />
+              <SessionRow key={s.id} session={s} />
             ))}
           </div>
         </SettingSection>

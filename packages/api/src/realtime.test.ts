@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RealtimeClient } from './realtime';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { RealtimeClient } from "./realtime";
 
-describe('RealtimeClient', () => {
+describe("RealtimeClient", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('subscribes and handles incoming WebSocket messages', () => {
+  it("subscribes and handles incoming WebSocket messages", () => {
     let mockWsInstance: any = null;
     const capture = (ws: any): void => {
       mockWsInstance = ws;
@@ -30,20 +30,22 @@ describe('RealtimeClient', () => {
       }
     }
 
-    vi.stubGlobal('WebSocket', MockWebSocket);
+    vi.stubGlobal("WebSocket", MockWebSocket);
 
     const client = new RealtimeClient({
-      url: 'wss://test.voxire.com/ws',
-      getTicket: async () => 'one-time-ticket',
+      url: "wss://test.voxire.com/ws",
+      getTicket: async () => "one-time-ticket",
     });
 
     const handler = vi.fn();
-    const unsub = client.subscribe('project:123', handler);
+    const unsub = client.subscribe("project:123", handler);
 
     return vi
       .waitFor(() => {
-        expect(mockWsInstance.url).toBe('wss://test.voxire.com/ws?ticket=one-time-ticket');
-        expect(mockWsInstance.url).not.toContain('token=');
+        expect(mockWsInstance.url).toBe(
+          "wss://test.voxire.com/ws?ticket=one-time-ticket",
+        );
+        expect(mockWsInstance.url).not.toContain("token=");
       })
       .then(() => {
         expect(handler).not.toHaveBeenCalled();
@@ -52,7 +54,7 @@ describe('RealtimeClient', () => {
         mockWsInstance.readyState = 1; // OPEN
         mockWsInstance.onopen();
         expect(mockWsInstance.send).toHaveBeenCalledWith(
-          JSON.stringify({ op: 'subscribe', topics: ['project:123'] })
+          JSON.stringify({ op: "subscribe", topics: ["project:123"] }),
         );
 
         // Trigger non-string message (should be safely ignored)
@@ -62,14 +64,14 @@ describe('RealtimeClient', () => {
         // Trigger valid event message
         mockWsInstance.onmessage({
           data: JSON.stringify({
-            op: 'event',
-            event: { topic: 'project:123', type: 'updated', entity_id: 1 },
+            op: "event",
+            event: { topic: "project:123", type: "updated", entity_id: 1 },
           }),
         });
 
         expect(handler).toHaveBeenCalledWith({
-          topic: 'project:123',
-          type: 'updated',
+          topic: "project:123",
+          type: "updated",
           entity_id: 1,
         });
 
@@ -78,22 +80,22 @@ describe('RealtimeClient', () => {
       });
   });
 
-  it('does not open a socket when the ticket exchange has no authenticated session', async () => {
+  it("does not open a socket when the ticket exchange has no authenticated session", async () => {
     const webSocket = vi.fn();
-    vi.stubGlobal('WebSocket', webSocket);
+    vi.stubGlobal("WebSocket", webSocket);
     const getTicket = vi.fn().mockResolvedValue(null);
     const client = new RealtimeClient({
-      url: 'wss://test.voxire.com/ws',
+      url: "wss://test.voxire.com/ws",
       getTicket,
     });
 
-    client.subscribe('project:123', vi.fn());
+    client.subscribe("project:123", vi.fn());
     await vi.waitFor(() => expect(getTicket).toHaveBeenCalled());
     expect(webSocket).not.toHaveBeenCalled();
     client.close();
   });
 
-  it('removes a legacy token from the supplied URL before opening the socket', async () => {
+  it("removes a legacy token from the supplied URL before opening the socket", async () => {
     let mockWsInstance: any = null;
     const capture = (ws: any): void => {
       mockWsInstance = ws;
@@ -117,20 +119,22 @@ describe('RealtimeClient', () => {
       }
     }
 
-    vi.stubGlobal('WebSocket', MockWebSocket);
+    vi.stubGlobal("WebSocket", MockWebSocket);
     const client = new RealtimeClient({
-      url: 'wss://test.voxire.com/ws?token=reusable-jwt',
-      getTicket: async () => 'single-use-ticket',
+      url: "wss://test.voxire.com/ws?token=reusable-jwt",
+      getTicket: async () => "single-use-ticket",
     });
 
-    client.subscribe('project:123', vi.fn());
+    client.subscribe("project:123", vi.fn());
     await vi.waitFor(() => expect(mockWsInstance).not.toBeNull());
-    expect(mockWsInstance.url).toBe('wss://test.voxire.com/ws?ticket=single-use-ticket');
-    expect(mockWsInstance.url).not.toContain('reusable-jwt');
+    expect(mockWsInstance.url).toBe(
+      "wss://test.voxire.com/ws?ticket=single-use-ticket",
+    );
+    expect(mockWsInstance.url).not.toContain("reusable-jwt");
     client.close();
   });
 
-  describe('connection state', () => {
+  describe("connection state", () => {
     function stubSocket() {
       let instance: any = null;
       const capture = (ws: any): void => {
@@ -152,114 +156,225 @@ describe('RealtimeClient', () => {
           capture(this);
         }
       }
-      vi.stubGlobal('WebSocket', MockWebSocket);
+      vi.stubGlobal("WebSocket", MockWebSocket);
       return () => instance;
     }
 
-    it('reports disconnected before anything has tried to connect', () => {
+    it("reports disconnected before anything has tried to connect", () => {
       stubSocket();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
       });
 
-      expect(client.getStatus()).toBe('disconnected');
+      expect(client.getStatus()).toBe("disconnected");
       client.close();
     });
 
-    it('hands a new listener the current status immediately, not on next change', () => {
+    it("hands a new listener the current status immediately, not on next change", () => {
       stubSocket();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
       });
 
       const seen: string[] = [];
       client.subscribeStatus((s) => seen.push(s));
 
-      expect(seen).toEqual(['disconnected']);
+      expect(seen).toEqual(["disconnected"]);
       client.close();
     });
 
-    it('moves to connected when the socket opens and back on close', async () => {
+    it("moves to connected when the socket opens and back on close", async () => {
       const socket = stubSocket();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
       });
 
       const seen: string[] = [];
       client.subscribeStatus((s) => seen.push(s));
-      client.subscribe('project:1', vi.fn());
+      client.subscribe("project:1", vi.fn());
 
       await vi.waitFor(() => expect(socket()).not.toBeNull());
-      expect(seen).toContain('connecting');
+      expect(seen).toContain("connecting");
 
       socket().readyState = 1;
       socket().onopen?.();
-      expect(client.getStatus()).toBe('connected');
-      expect(seen).toContain('connected');
+      expect(client.getStatus()).toBe("connected");
+      expect(seen).toContain("connected");
 
       socket().onclose?.();
-      expect(client.getStatus()).toBe('reconnecting');
-      expect(seen).toContain('reconnecting');
+      expect(client.getStatus()).toBe("reconnecting");
+      expect(seen).toContain("reconnecting");
 
       client.close();
     });
 
-    it('reports disconnected after an explicit close, never reconnecting', async () => {
+    it("reports disconnected after an explicit close, never reconnecting", async () => {
       const socket = stubSocket();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
       });
-      client.subscribe('project:1', vi.fn());
+      client.subscribe("project:1", vi.fn());
       await vi.waitFor(() => expect(socket()).not.toBeNull());
       socket().onopen?.();
 
       client.close();
 
-      expect(client.getStatus()).toBe('disconnected');
+      expect(client.getStatus()).toBe("disconnected");
     });
 
-    it('stops notifying a listener that unsubscribed', async () => {
+    it("stops notifying a listener that unsubscribed", async () => {
       const socket = stubSocket();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
       });
 
       const seen: string[] = [];
       const unsub = client.subscribeStatus((s) => seen.push(s));
       unsub();
-      client.subscribe('project:1', vi.fn());
+      client.subscribe("project:1", vi.fn());
       await vi.waitFor(() => expect(socket()).not.toBeNull());
       socket().onopen?.();
 
-      expect(seen).toEqual(['disconnected']);
+      expect(seen).toEqual(["disconnected"]);
       client.close();
     });
 
-    it('does not let one throwing listener stop the others', () => {
+    it("does not let one throwing listener stop the others", () => {
       stubSocket();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
       });
 
       const second = vi.fn();
       client.subscribeStatus(() => {
-        throw new Error('listener blew up');
+        throw new Error("listener blew up");
       });
       client.subscribeStatus(second);
-      client.subscribe('project:1', vi.fn());
+      client.subscribe("project:1", vi.fn());
 
       expect(second).toHaveBeenCalled();
       client.close();
     });
   });
 
-  describe('onDiagnostic', () => {
+  it("does not replace a socket that is still closing when a reconnect timer fires", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    try {
+      const sockets: any[] = [];
+      class MockWebSocket {
+        static CONNECTING = 0;
+        static OPEN = 1;
+        static CLOSING = 2;
+        static CLOSED = 3;
+
+        readyState = 0;
+        send = vi.fn();
+        close = vi.fn();
+        onopen: any;
+        onmessage: any;
+        onerror: any;
+        onclose: any;
+
+        constructor(public url: string) {
+          sockets.push(this);
+        }
+      }
+      vi.stubGlobal("WebSocket", MockWebSocket);
+
+      const client = new RealtimeClient({
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
+      });
+      client.subscribe("project:1", vi.fn());
+      await vi.advanceTimersByTimeAsync(0);
+      const first = sockets[0];
+      first.readyState = MockWebSocket.OPEN;
+      first.onopen();
+      first.readyState = MockWebSocket.CLOSED;
+      first.onclose();
+
+      // A new subscription starts a second connection while the first
+      // reconnect timer is still pending.
+      client.subscribe("project:2", vi.fn());
+      await vi.advanceTimersByTimeAsync(0);
+      expect(sockets).toHaveLength(2);
+
+      // The second socket is in CLOSING, so its own close event owns the next
+      // reconnect decision; the old timer must not start a third socket.
+      sockets[1].readyState = MockWebSocket.CLOSING;
+      await vi.advanceTimersByTimeAsync(500);
+      expect(sockets).toHaveLength(2);
+      client.close();
+    } finally {
+      vi.restoreAllMocks();
+      vi.useRealTimers();
+    }
+  });
+
+  it("ignores a close event from a socket that has already been replaced", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    try {
+      const sockets: any[] = [];
+      class MockWebSocket {
+        static CONNECTING = 0;
+        static OPEN = 1;
+        static CLOSING = 2;
+        static CLOSED = 3;
+
+        readyState = 0;
+        send = vi.fn();
+        close = vi.fn();
+        onopen: any;
+        onmessage: any;
+        onerror: any;
+        onclose: any;
+
+        constructor(public url: string) {
+          sockets.push(this);
+        }
+      }
+      vi.stubGlobal("WebSocket", MockWebSocket);
+
+      const client = new RealtimeClient({
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
+      });
+      client.subscribe("project:1", vi.fn());
+      await vi.advanceTimersByTimeAsync(0);
+      const first = sockets[0];
+      first.readyState = MockWebSocket.OPEN;
+      first.onopen();
+      first.readyState = MockWebSocket.CLOSED;
+      first.onclose();
+
+      client.subscribe("project:2", vi.fn());
+      await vi.advanceTimersByTimeAsync(0);
+      const second = sockets[1];
+      second.readyState = MockWebSocket.OPEN;
+      second.onopen();
+
+      // A delayed close from the first socket must not orphan the live one.
+      first.onclose();
+      client.subscribe("project:3", vi.fn());
+      await vi.advanceTimersByTimeAsync(0);
+      expect(sockets).toHaveLength(2);
+      expect(client.getStatus()).toBe("connected");
+      client.close();
+    } finally {
+      vi.restoreAllMocks();
+      vi.useRealTimers();
+    }
+  });
+
+  describe("onDiagnostic", () => {
     function stubSocket() {
       let instance: any = null;
       const capture = (ws: any): void => {
@@ -281,45 +396,51 @@ describe('RealtimeClient', () => {
           capture(this);
         }
       }
-      vi.stubGlobal('WebSocket', MockWebSocket);
+      vi.stubGlobal("WebSocket", MockWebSocket);
       return () => instance;
     }
 
-    it('reports a dropped malformed message without affecting delivery of the next good one', async () => {
+    it("reports a dropped malformed message without affecting delivery of the next good one", async () => {
       const socket = stubSocket();
       const onDiagnostic = vi.fn();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
         onDiagnostic,
       });
       const handler = vi.fn();
-      client.subscribe('project:1', handler);
+      client.subscribe("project:1", handler);
       await vi.waitFor(() => expect(socket()).not.toBeNull());
       socket().readyState = 1;
       socket().onopen?.();
 
-      socket().onmessage({ data: 'not json{{{' });
-      expect(onDiagnostic).toHaveBeenCalledWith({ type: 'malformed_message' });
+      socket().onmessage({ data: "not json{{{" });
+      expect(onDiagnostic).toHaveBeenCalledWith({ type: "malformed_message" });
       expect(handler).not.toHaveBeenCalled();
 
       socket().onmessage({
-        data: JSON.stringify({ op: 'event', event: { topic: 'project:1', type: 'updated' } }),
+        data: JSON.stringify({
+          op: "event",
+          event: { topic: "project:1", type: "updated" },
+        }),
       });
-      expect(handler).toHaveBeenCalledWith({ topic: 'project:1', type: 'updated' });
+      expect(handler).toHaveBeenCalledWith({
+        topic: "project:1",
+        type: "updated",
+      });
 
       client.close();
     });
 
-    it('does not fire for the first two reconnect failures', async () => {
+    it("does not fire for the first two reconnect failures", async () => {
       const socket = stubSocket();
       const onDiagnostic = vi.fn();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
         onDiagnostic,
       });
-      client.subscribe('project:1', vi.fn());
+      client.subscribe("project:1", vi.fn());
       await vi.waitFor(() => expect(socket()).not.toBeNull());
       socket().onopen?.();
 
@@ -329,7 +450,7 @@ describe('RealtimeClient', () => {
       client.close();
     });
 
-    it('fires once when reconnect failures cross the repeated-failure threshold', async () => {
+    it("fires once when reconnect failures cross the repeated-failure threshold", async () => {
       // scheduleReconnect no-ops while its own backoff timer is still pending,
       // so getting three real failures counted needs that timer to actually
       // fire (spawning the next socket) between each close - fake time lets
@@ -339,11 +460,11 @@ describe('RealtimeClient', () => {
         const socket = stubSocket();
         const onDiagnostic = vi.fn();
         const client = new RealtimeClient({
-          url: 'wss://test.voxire.com/ws',
-          getTicket: async () => 'ticket',
+          url: "wss://test.voxire.com/ws",
+          getTicket: async () => "ticket",
           onDiagnostic,
         });
-        client.subscribe('project:1', vi.fn());
+        client.subscribe("project:1", vi.fn());
         await vi.advanceTimersByTimeAsync(0);
         expect(socket()).not.toBeNull();
 
@@ -357,7 +478,7 @@ describe('RealtimeClient', () => {
 
         socket().onclose?.(); // failure 3/3 - crosses the threshold
         expect(onDiagnostic).toHaveBeenCalledWith({
-          type: 'repeated_reconnect_failures',
+          type: "repeated_reconnect_failures",
           attempt: 3,
         });
         expect(onDiagnostic).toHaveBeenCalledTimes(1);
@@ -368,17 +489,17 @@ describe('RealtimeClient', () => {
       }
     });
 
-    it('never calls onDiagnostic when the caller does not supply one', async () => {
+    it("never calls onDiagnostic when the caller does not supply one", async () => {
       const socket = stubSocket();
       const client = new RealtimeClient({
-        url: 'wss://test.voxire.com/ws',
-        getTicket: async () => 'ticket',
+        url: "wss://test.voxire.com/ws",
+        getTicket: async () => "ticket",
       });
-      client.subscribe('project:1', vi.fn());
+      client.subscribe("project:1", vi.fn());
       await vi.waitFor(() => expect(socket()).not.toBeNull());
 
       expect(() => {
-        socket().onmessage({ data: 'not json' });
+        socket().onmessage({ data: "not json" });
         socket().onclose?.();
         socket().onclose?.();
         socket().onclose?.();

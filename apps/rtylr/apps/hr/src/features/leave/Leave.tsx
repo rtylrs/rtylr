@@ -143,18 +143,24 @@ const Leave = (): React.JSX.Element => {
                     </div>
                     {canApprove && isHrRequestStatus(req.status, 'pending') && (
                       <ApprovalButtons
-                        onApprove={() =>
-                          approveLeave.mutate({
-                            requestId: req.id,
-                            body: { approved: true, rejectionReason: undefined },
-                          })
-                        }
-                        onReject={() =>
-                          approveLeave.mutate({
-                            requestId: req.id,
-                            body: { approved: false, rejectionReason: undefined },
-                          })
-                        }
+                        allowNote
+                        rejectNoteRequired
+                        onApprove={() => {
+                          if (req.id) {
+                            approveLeave.mutate({
+                              requestId: req.id,
+                              body: { approved: true },
+                            });
+                          }
+                        }}
+                        onReject={(reason) => {
+                          if (req.id && reason?.trim()) {
+                            approveLeave.mutate({
+                              requestId: req.id,
+                              body: { approved: false, rejectionReason: reason.trim() },
+                            });
+                          }
+                        }}
                       />
                     )}
                   </Card>

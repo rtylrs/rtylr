@@ -5,7 +5,12 @@ import { HelmetContainer } from '@voxire/components';
 import { Target } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import type { ReviewGoalPayload } from '@voxire/voxie/hr/performance/v1/types';
-import { useListGoals, useCreateGoal } from '../../shared/hooks/queries/usePerformance';
+import {
+  useListGoals,
+  useCreateGoal,
+  useListReviewCycles,
+} from '../../shared/hooks/queries/usePerformance';
+import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import { goalFormSchema } from '../../shared/schemas/performance';
 import {
   SectionHeader,
@@ -26,10 +31,12 @@ const STATUS_COLORS: Record<string, string> = {
 
 function InlineGoalForm({
   onClose,
+  employeeId,
   reviewCycleId,
 }: {
   onClose: () => void;
-  reviewCycleId: number;
+  employeeId: number | undefined;
+  reviewCycleId: number | undefined;
 }): React.JSX.Element {
   const { t } = useTranslation();
   const createGoal = useCreateGoal();
@@ -41,6 +48,7 @@ function InlineGoalForm({
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+    if (!employeeId || !reviewCycleId) return;
 
     const parsed = goalFormSchema.safeParse({
       title,
@@ -65,6 +73,7 @@ function InlineGoalForm({
     setErrors({});
     createGoal.mutate(
       {
+        employeeId,
         reviewCycleId,
         title: parsed.data.title,
         description: parsed.data.description,
@@ -130,7 +139,11 @@ function InlineGoalForm({
           <Button type="button" variant="ghost" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button type="submit" variant="primary" disabled={createGoal.isPending}>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={createGoal.isPending || !employeeId || !reviewCycleId}
+          >
             {createGoal.isPending ? t('common.loading') : t('common.add')}
           </Button>
         </div>
@@ -142,11 +155,13 @@ function InlineGoalForm({
 const GoalsList = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [formOpen, setFormOpen] = useState(false);
-  const { data, isLoading } = useListGoals();
+  const { data: myEmployee } = useMyEmployeeId();
+  const { data: cycleData } = useListReviewCycles();
+  const { data, isLoading } = useListGoals(
+    myEmployee !== undefined ? { employeeId: myEmployee } : undefined
+  );
   const goals = data?.goals ?? [];
-
-  /* Pick the most recent cycle id for creating new goals */
-  const latestCycleId = goals.length > 0 ? Number(goals[0].reviewCycleId ?? 0) : 0;
+  const latestCycleId = Number(cycleData?.cycles?.[0]?.id ?? 0) || undefined;
 
   return (
     <>
@@ -163,7 +178,11 @@ const GoalsList = (): React.JSX.Element => {
         />
 
         {formOpen && (
-          <InlineGoalForm onClose={() => setFormOpen(false)} reviewCycleId={latestCycleId} />
+          <InlineGoalForm
+            onClose={() => setFormOpen(false)}
+            employeeId={myEmployee}
+            reviewCycleId={latestCycleId}
+          />
         )}
 
         {isLoading ? (

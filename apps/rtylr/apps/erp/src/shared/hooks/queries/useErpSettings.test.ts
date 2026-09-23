@@ -69,6 +69,21 @@ describe('useErpSettings', () => {
     expect(useSettings.getState().taxRate).toBe(20);
   });
 
+  it('keeps notification flags disabled when Go omits false values', async () => {
+    const {
+      notifyOnLowStock: _lowStock,
+      notifyOnExpiry: _expiry,
+      ...requiredSettings
+    } = apiSettings;
+    mockClient.getErpSettings.mockResolvedValue({ settings: requiredSettings });
+
+    const { result } = renderHook(() => useErpSettings(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.notifyOnLowStock).toBe(false);
+    expect(result.current.data?.notifyOnExpiry).toBe(false);
+  });
+
   it('saves all tenant business fields through the ERP contract', async () => {
     mockClient.updateErpSettings.mockResolvedValue({ settings: apiSettings });
 

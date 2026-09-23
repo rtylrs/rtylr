@@ -25,8 +25,8 @@ function fromApiSettings(settings?: ApiErpBusinessSettings): ErpBusinessSettings
     taxRate: settings?.taxRate ?? DEFAULT_SETTINGS.taxRate,
     lowStockThreshold: settings?.lowStockThreshold ?? DEFAULT_SETTINGS.lowStockThreshold,
     defaultWarehouseId: Number(settings?.defaultWarehouseId ?? DEFAULT_SETTINGS.defaultWarehouseId),
-    notifyOnLowStock: settings?.notifyOnLowStock ?? DEFAULT_SETTINGS.notifyOnLowStock,
-    notifyOnExpiry: settings?.notifyOnExpiry ?? DEFAULT_SETTINGS.notifyOnExpiry,
+    notifyOnLowStock: settings?.notifyOnLowStock ?? false,
+    notifyOnExpiry: settings?.notifyOnExpiry ?? false,
   };
 }
 

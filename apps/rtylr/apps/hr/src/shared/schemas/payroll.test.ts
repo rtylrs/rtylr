@@ -9,72 +9,36 @@ import {
 // ─── payroll Zod schemas - pure parse/validation tests ───────────────────────
 
 describe('payrollConfigSchema', () => {
-  it('parses a valid payroll config', () => {
+  it('parses the fields supported by the live payroll config contract', () => {
     const result = payrollConfigSchema.parse({
-      grossModel: 'hourly',
       period: 'biweekly',
       overtimeEnabled: true,
-      deductionsEnabled: false,
-      bonusesEnabled: true,
+      payDayOfMonth: 15,
     });
-    expect(result.grossModel).toBe('hourly');
     expect(result.period).toBe('biweekly');
     expect(result.overtimeEnabled).toBe(true);
-    expect(result.bonusesEnabled).toBe(true);
-  });
-
-  it('accepts all valid grossModel values', () => {
-    for (const model of ['hourly', 'salary', 'both'] as const) {
-      const r = payrollConfigSchema.parse({
-        grossModel: model,
-        period: 'monthly',
-        overtimeEnabled: false,
-        deductionsEnabled: false,
-        bonusesEnabled: false,
-      });
-      expect(r.grossModel).toBe(model);
-    }
+    expect(result.payDayOfMonth).toBe(15);
   });
 
   it('accepts all valid period values', () => {
     for (const period of ['weekly', 'biweekly', 'monthly'] as const) {
       const r = payrollConfigSchema.parse({
-        grossModel: 'salary',
         period,
         overtimeEnabled: true,
-        deductionsEnabled: true,
-        bonusesEnabled: false,
+        payDayOfMonth: 28,
       });
       expect(r.period).toBe(period);
     }
   });
 
-  it('rejects invalid grossModel', () => {
-    expect(() =>
-      payrollConfigSchema.parse({
-        grossModel: 'tips',
-        period: 'weekly',
-        overtimeEnabled: true,
-        deductionsEnabled: false,
-        bonusesEnabled: false,
-      })
-    ).toThrow();
-  });
-
   it('rejects invalid period', () => {
     expect(() =>
-      payrollConfigSchema.parse({
-        grossModel: 'hourly',
-        period: 'quarterly',
-        overtimeEnabled: true,
-        deductionsEnabled: false,
-        bonusesEnabled: false,
-      })
+      payrollConfigSchema.parse({ period: 'quarterly', overtimeEnabled: true, payDayOfMonth: 28 })
     ).toThrow();
   });
 
-  it('rejects missing required boolean fields', () => {
-    expect(() => payrollConfigSchema.parse({ grossModel: 'hourly', period: 'weekly' })).toThrow();
+  it('rejects a missing pay day', () => {
+    expect(() => payrollConfigSchema.parse({ period: 'weekly', overtimeEnabled: true })).toThrow();
   });
 });
 

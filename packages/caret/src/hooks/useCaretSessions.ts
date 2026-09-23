@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import type { CaretChatSummary } from '../types/chat';
-import { createMemoryClient } from '../lib/memoryClient';
-import { normalizeChatTitle } from '../lib/chatTitles';
+import { useQuery } from "@tanstack/react-query";
+import type { CaretChatSummary } from "../types/chat";
+import { createMemoryClient } from "../lib/memoryClient";
+import { normalizeChatTitle } from "../lib/chatTitles";
 
 interface UseCaretSessionsParams {
   userId: number;
@@ -11,18 +11,25 @@ interface UseCaretSessionsParams {
 interface UseCaretSessionsResult {
   sessions: CaretChatSummary[];
   isLoading: boolean;
+  error: Error | null;
+  refetch: () => Promise<unknown>;
 }
 
 export function useCaretSessions({
   userId,
   apiBaseUrl,
 }: UseCaretSessionsParams): UseCaretSessionsResult {
-  const { data, isLoading } = useQuery<CaretChatSummary[]>({
-    queryKey: ['caret', 'sessions', userId],
+  const { data, isLoading, error, refetch } = useQuery<CaretChatSummary[]>({
+    queryKey: ["caret", "sessions", userId],
     queryFn: async (): Promise<CaretChatSummary[]> => {
-      const res = await createMemoryClient(apiBaseUrl).listChats({ limit: 20, offset: 0 });
+      const res = await createMemoryClient(apiBaseUrl).listChats({
+        limit: 20,
+        offset: 0,
+      });
       return (res.chats ?? [])
-        .filter((chat): chat is typeof chat & { id: string } => Boolean(chat.id))
+        .filter((chat): chat is typeof chat & { id: string } =>
+          Boolean(chat.id),
+        )
         .map((chat) => ({
           id: chat.id,
           title: normalizeChatTitle(chat.title),
@@ -38,5 +45,7 @@ export function useCaretSessions({
   return {
     sessions: data ?? [],
     isLoading,
+    error: error ?? null,
+    refetch,
   };
 }

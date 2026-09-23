@@ -32,8 +32,7 @@ const Audit: React.FC = () => {
         !query.trim() ||
         e.actor.toLowerCase().includes(query.toLowerCase()) ||
         e.action.toLowerCase().includes(query.toLowerCase()) ||
-        e.target.toLowerCase().includes(query.toLowerCase()) ||
-        e.ip?.toLowerCase().includes(query.toLowerCase());
+        e.target.toLowerCase().includes(query.toLowerCase());
       const matchesSeverity = severity === 'all' || e.severity === severity;
       return matchesQuery && matchesSeverity;
     });
@@ -41,14 +40,13 @@ const Audit: React.FC = () => {
 
   const exportCsv = () => {
     const rows = [
-      ['id', 'actor', 'action', 'target', 'app', 'ip', 'severity', 'created_at'],
+      ['id', 'actor', 'action', 'target', 'app', 'severity', 'created_at'],
       ...filtered.map((e) => [
         e.id,
         e.actor,
         e.action,
         e.target,
         e.app,
-        e.ip ?? '',
         e.severity ?? '',
         e.createdAt,
       ]),
@@ -106,7 +104,7 @@ const Audit: React.FC = () => {
                 setQuery(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search actor, action, IP..."
+              placeholder="Search actor, action, target..."
               className="pl-9"
             />
           </div>
@@ -155,7 +153,7 @@ const Audit: React.FC = () => {
           ) : (
             <div className="p-2">
               {filtered.map((e, i) => (
-                <ActivityEntryRow key={e.id} entry={e} index={i} showIp />
+                <ActivityEntryRow key={e.id} entry={e} index={i} />
               ))}
             </div>
           )}

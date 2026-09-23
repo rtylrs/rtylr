@@ -19,6 +19,8 @@ export interface UnbilledBillableEntry {
 export const UNBILLED_ENTRIES_QUERY_KEY = (from: string, to: string) =>
   ['hr', 'time-entries', 'unbilled', { from, to }] as const;
 
+const UNBILLED_ENTRIES_PAGE_SIZE = 200;
+
 /**
  * Approved billable time entries with no invoice yet, for the range.
  *
@@ -30,22 +32,37 @@ export function useUnbilledBillableEntries(from: string, to: string) {
     queryKey: UNBILLED_ENTRIES_QUERY_KEY(from, to),
     queryFn: async (): Promise<UnbilledBillableEntry[] | null> => {
       try {
-        const res = await timeEntryClient.listTimeEntries({
-          isBillable: true,
-          status: 'approved',
-          fromDate: from,
-          toDate: to,
-          limit: 200,
-          offset: 0,
-        });
-        if (res === null || res === undefined) return null;
-        return (res.entries ?? []).map((e) => ({
-          id: e.id ?? '',
-          date: e.date,
-          description: e.description,
-          durationMinutes: e.durationMinutes,
-          projectId: e.projectId,
-        }));
+        const entries: UnbilledBillableEntry[] = [];
+        let offset = 0;
+
+        while (true) {
+          const res = await timeEntryClient.listTimeEntries({
+            isBillable: true,
+            status: 'approved',
+            fromDate: from,
+            toDate: to,
+            limit: UNBILLED_ENTRIES_PAGE_SIZE,
+            offset,
+          });
+          if (res === null || res === undefined) return null;
+
+          const page = res.entries ?? [];
+          entries.push(
+            ...page.map((e) => ({
+              id: e.id ?? '',
+              date: e.date,
+              description: e.description,
+              durationMinutes: e.durationMinutes,
+              projectId: e.projectId,
+            }))
+          );
+          offset += page.length;
+          const total = res.total ?? entries.length;
+
+          if (page.length === 0 || !Number.isFinite(total) || offset >= total) break;
+        }
+
+        return entries;
       } catch {
         return null;
       }

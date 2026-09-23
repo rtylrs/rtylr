@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
-import classNames from 'classnames';
-import MenuHeader from '../../components/MenuHeader';
-import MenuCategory from '../../components/MenuCategory';
-import MenuCart, { CartItem } from '../../components/MenuCart';
-import AiChat from '../../components/AiChat';
-import { MenuItemData } from '../../components/MenuItem';
-import { MenuCategoryData } from '../../components/MenuCategory';
-import { BusinessInfo, MenuLayoutConfig, DEFAULT_LAYOUT_CONFIG } from '../../types';
-import { ChatMessage } from '../../components/AiChat';
-import AboutPage from '../../pages/AboutPage';
-import GalleryPage from '../../pages/GalleryPage';
-import ReviewsPage from '../../pages/ReviewsPage';
-import OffersPage from '../../pages/OffersPage';
-import styles from './MenuLayoutCore.module.scss';
+import React, { useState } from "react";
+import classNames from "classnames";
+import MenuHeader from "../../components/MenuHeader";
+import MenuCategory from "../../components/MenuCategory";
+import MenuCart, { CartItem } from "../../components/MenuCart";
+import AiChat from "../../components/AiChat";
+import { MenuItemData } from "../../components/MenuItem";
+import { MenuCategoryData } from "../../components/MenuCategory";
+import {
+  BusinessInfo,
+  MenuLayoutConfig,
+  DEFAULT_LAYOUT_CONFIG,
+} from "../../types";
+import { ChatMessage } from "../../components/AiChat";
+import AboutPage from "../../pages/AboutPage";
+import GalleryPage from "../../pages/GalleryPage";
+import ReviewsPage from "../../pages/ReviewsPage";
+import OffersPage from "../../pages/OffersPage";
+import styles from "./MenuLayoutCore.module.scss";
 
 export interface MenuLayoutCoreProps {
   business: BusinessInfo;
@@ -46,16 +50,24 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     pages: { menu: true, ...configOverride?.pages },
   };
 
-  const [activePage, setActivePage] = useState('menu');
+  const [activePage, setActivePage] = useState("menu");
+  const pageEnabled =
+    activePage === "menu" ||
+    config.pages[activePage as keyof MenuLayoutConfig["pages"]] === true;
+  const renderedPage = pageEnabled ? activePage : "menu";
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(categories[0]?.id ?? '');
+  const [activeCategoryId, setActiveCategoryId] = useState<string>(
+    categories[0]?.id ?? "",
+  );
 
   const handleAddToCart = (item: MenuItemData) => {
     setCartItems((prev) => {
       const existing = prev.find((c) => c.id === item.id);
       if (existing) {
-        return prev.map((c) => (c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c));
+        return prev.map((c) =>
+          c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c,
+        );
       }
       return [...prev, { ...item, quantity: 1 }];
     });
@@ -65,18 +77,20 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     if (qty <= 0) {
       setCartItems((prev) => prev.filter((c) => c.id !== itemId));
     } else {
-      setCartItems((prev) => prev.map((c) => (c.id === itemId ? { ...c, quantity: qty } : c)));
+      setCartItems((prev) =>
+        prev.map((c) => (c.id === itemId ? { ...c, quantity: qty } : c)),
+      );
     }
   };
 
   const scrollToCategory = (id: string) => {
     setActiveCategoryId(id);
     const el = document.getElementById(`category-${id}`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const totalItems = cartItems.reduce((sum, c) => sum + c.quantity, 0);
-  const cartEnabled = enableCart && config.items.layout !== 'minimal';
+  const cartEnabled = enableCart && config.items.layout !== "minimal";
   const categoryNavItems = categories.map((c) => ({ id: c.id, name: c.name }));
 
   return (
@@ -86,10 +100,10 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
         headerConfig={config.header}
         navConfig={config.nav}
         pages={config.pages}
-        activePage={activePage}
+        activePage={renderedPage}
         onPageChange={(page) => {
           setActivePage(page);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }}
         categories={categoryNavItems}
         activeCategoryId={activeCategoryId}
@@ -97,8 +111,11 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
       />
 
       {/* Cart bar */}
-      {cartEnabled && totalItems > 0 && activePage === 'menu' && (
-        <button className={styles.layout__cartBar} onClick={() => setCartOpen(true)}>
+      {cartEnabled && totalItems > 0 && renderedPage === "menu" && (
+        <button
+          className={styles.layout__cartBar}
+          onClick={() => setCartOpen(true)}
+        >
           <span className={styles.layout__cartCount}>{totalItems}</span>
           View Order
         </button>
@@ -106,7 +123,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
 
       {/* Page content */}
       <main className={styles.layout__main}>
-        {activePage === 'menu' && (
+        {renderedPage === "menu" && (
           <>
             {categories.map((cat) => (
               <MenuCategory
@@ -120,13 +137,16 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
           </>
         )}
 
-        {activePage === 'about' && <AboutPage business={business} />}
+        {renderedPage === "about" && <AboutPage business={business} />}
 
-        {activePage === 'gallery' && (
-          <GalleryPage photos={business.photos ?? []} businessName={business.name} />
+        {renderedPage === "gallery" && (
+          <GalleryPage
+            photos={business.photos ?? []}
+            businessName={business.name}
+          />
         )}
 
-        {activePage === 'reviews' && (
+        {renderedPage === "reviews" && (
           <ReviewsPage
             reviews={business.reviews ?? []}
             averageRating={business.averageRating}
@@ -134,7 +154,9 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
           />
         )}
 
-        {activePage === 'offers' && <OffersPage offers={business.offers ?? []} />}
+        {renderedPage === "offers" && (
+          <OffersPage offers={business.offers ?? []} />
+        )}
       </main>
 
       {/* Cart drawer */}

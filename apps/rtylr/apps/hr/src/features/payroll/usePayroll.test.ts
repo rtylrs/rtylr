@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import React from 'react';
 
 const mockPayrollClient = vi.hoisted(() => ({
@@ -40,7 +40,13 @@ import {
   useTriggerPayrollRun,
   useApprovePayrollRun,
 } from './usePayroll';
-import { useListMyPayrollRuns, useGetMyPayrollRun } from '../../shared/hooks/queries/usePayroll';
+import {
+  useGetPayrollConfig,
+  useUpsertPayrollConfig,
+  useListMyPayrollRuns,
+  useGetMyPayrollRun,
+  useExportPayrollRun,
+} from '../../shared/hooks/queries/usePayroll';
 import { hrTransport } from '../../shared/lib/clients';
 
 const createClient = (): QueryClient =>
@@ -113,6 +119,88 @@ describe('useTriggerPayrollRun', () => {
   });
 });
 
+describe('payroll transition reconciliation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('invalidates self-service caches after approval and export', async () => {
+    (hrTransport.post as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    const client = createClient();
+    const wrapper = wrapperFor(client);
+    const invalidateQueries = vi.spyOn(client, 'invalidateQueries');
+    const approval = renderHook(() => useApprovePayrollRun(), { wrapper });
+    const exportRun = renderHook(() => useExportPayrollRun(), { wrapper });
+
+    await act(async () => {
+      await Promise.all([
+        approval.result.current.mutateAsync({ runId: 7 }),
+        exportRun.result.current.mutateAsync(7),
+      ]);
+    });
+
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['my-payroll-runs'] });
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['my-payroll-run', 7] });
+  });
+});
+
+describe('useGetPayrollConfig', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('uses editable defaults only when the server reports no configuration', async () => {
+    (hrTransport.get as ReturnType<typeof vi.fn>).mockRejectedValue({ status: 404 });
+
+    const { result } = renderHook(() => useGetPayrollConfig(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual({
+      period: 'monthly',
+      overtimeEnabled: false,
+      payDayOfMonth: 28,
+    });
+  });
+
+  it('surfaces other request failures instead of returning editable defaults', async () => {
+    (hrTransport.get as ReturnType<typeof vi.fn>).mockRejectedValue({ status: 500 });
+
+    const { result } = renderHook(() => useGetPayrollConfig(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toBeUndefined();
+  });
+});
+
+describe('useUpsertPayrollConfig', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('sends only the fields supported by the payroll config contract', async () => {
+    (hrTransport.put as ReturnType<typeof vi.fn>).mockResolvedValue({ success: true });
+    const { result } = renderHook(() => useUpsertPayrollConfig(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        period: 'monthly',
+        overtimeEnabled: true,
+        payDayOfMonth: 28,
+      });
+    });
+
+    expect(hrTransport.put).toHaveBeenCalledWith('/hr/payroll/config', {
+      periodType: 'monthly',
+      payDayOfMonth: 28,
+      overtimeEnabled: true,
+    });
+  });
+});
+
 describe('payroll configuration query and action gates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -177,6 +265,39 @@ describe('useListMyPayrollRuns', () => {
     expect(hrTransport.get).toHaveBeenCalledWith('/hr/payroll/my-runs', {
       params: { limit: 50, offset: 0 },
     });
+  });
+
+  it('refetches self-service runs on focus while the cached result is still fresh', async () => {
+    const params = { limit: 50, offset: 0 };
+    (hrTransport.get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      runs: [],
+      total: 0,
+      limit: 50,
+      offset: 0,
+    });
+    const client = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          staleTime: 300_000,
+          refetchOnWindowFocus: false,
+        },
+      },
+    });
+    const wrapper = wrapperFor(client);
+
+    focusManager.setFocused(false);
+    try {
+      const { result } = renderHook(() => useListMyPayrollRuns(params), { wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      (hrTransport.get as ReturnType<typeof vi.fn>).mockClear();
+
+      act(() => focusManager.setFocused(true));
+
+      await waitFor(() => expect(hrTransport.get).toHaveBeenCalledTimes(1));
+    } finally {
+      focusManager.setFocused(undefined);
+    }
   });
 
   it('sends no status param since the server already restricts to approved/exported', async () => {

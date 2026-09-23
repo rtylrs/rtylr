@@ -3,8 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { useParams } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUserStore } from '@voxire/auth';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/client';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { CheckCircle, XCircle } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
@@ -15,6 +19,8 @@ import { useExpenseCategories } from './useExpenses';
 import { useApproveExpense, useRejectExpense } from '../../shared/hooks/queries/useExpenses';
 import { cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
+
+const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
 
 const statusStyle: Record<string, React.CSSProperties> = {
   pending: {
@@ -34,11 +40,13 @@ const statusStyle: Record<string, React.CSSProperties> = {
 const ExpenseDetail: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams({ strict: false });
-  const { data: expense, isLoading } = useExpenseById(id);
+  const { data: expense, isLoading, refetch } = useExpenseById(id);
   const { data: categories = [] } = useExpenseCategories();
+  const queryClient = useQueryClient();
   const approveMut = useApproveExpense();
   const rejectMut = useRejectExpense();
   const [receipt, setReceipt] = React.useState<string | null>(null);
+  const [savingReceipt, setSavingReceipt] = React.useState(false);
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canApproveExpense = canFinancePermission(role, 'finance:expenses:approve');
 
@@ -48,8 +56,37 @@ const ExpenseDetail: React.FC = () => {
   }, [categories, expense]);
 
   React.useEffect(() => {
-    if (expense?.receiptUrl) setReceipt(expense.receiptUrl);
+    setReceipt(expense?.receiptUrl ?? null);
   }, [expense]);
+
+  const handleReceiptChange = async (receiptUrl: string | null): Promise<void> => {
+    if (!expense || savingReceipt) return;
+
+    setSavingReceipt(true);
+    try {
+      await expensesClient.updateExpense({
+        id: expense.id,
+        body: {
+          categoryId: expense.categoryId != null ? String(expense.categoryId) : undefined,
+          amount: expense.amount,
+          currency: expense.currency ?? 'USD',
+          description: expense.description,
+          vendor: expense.vendor ?? '',
+          receiptUrl: receiptUrl ?? '',
+          notes: expense.notes ?? '',
+          expenseDate: expense.expenseDate,
+        },
+      });
+      setReceipt(receiptUrl);
+      toast.success(t('expenses.updated'));
+      void queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      void refetch();
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
+    } finally {
+      setSavingReceipt(false);
+    }
+  };
 
   if (isLoading || !expense) {
     return (
@@ -156,7 +193,22 @@ const ExpenseDetail: React.FC = () => {
           >
             {t('common.receipt')}
           </div>
-          <ReceiptUpload value={receipt} onChange={setReceipt} />
+          <div aria-busy={savingReceipt}>
+            <div style={{ pointerEvents: savingReceipt ? 'none' : 'auto' }}>
+              <ReceiptUpload
+                value={receipt}
+                onChange={(receiptUrl) => void handleReceiptChange(receiptUrl)}
+              />
+            </div>
+            {savingReceipt && (
+              <div
+                role="status"
+                style={{ marginTop: 8, color: 'var(--hub-text-dim)', fontSize: 12 }}
+              >
+                {t('common.saving')}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

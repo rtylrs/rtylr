@@ -3,14 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { createCycleSchema } from '../../shared/schemas/performance';
 import { useCreateReviewCycle } from '../../shared/hooks/queries/usePerformance';
-import { Modal, Button, Input, Label, Checkbox } from '../../shared/components/ui';
+import { Modal, Button, Input, Label } from '../../shared/components/ui';
 
 interface CreateCycleFormProps {
   open: boolean;
   onClose: () => void;
 }
-
-const REVIEW_TYPES = ['self', 'manager', 'peer'] as const;
 
 const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Element | null => {
   const { t } = useTranslation();
@@ -19,19 +17,12 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
   const [name, setName] = useState('');
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
-  const [reviewTypes, setReviewTypes] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const toggleType = (type: string): void => {
-    setReviewTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
-  };
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
 
-    const result = createCycleSchema.safeParse({ name, periodStart, periodEnd, reviewTypes });
+    const result = createCycleSchema.safeParse({ name, periodStart, periodEnd });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       for (const issue of result.error.issues) {
@@ -49,14 +40,12 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
         type: 'adhoc',
         periodStart: result.data.periodStart,
         periodEnd: result.data.periodEnd,
-        reviewTypes: result.data.reviewTypes,
       },
       {
         onSuccess: () => {
           setName('');
           setPeriodStart('');
           setPeriodEnd('');
-          setReviewTypes([]);
           onClose();
         },
         onError: () => toast.error(t('errors.createReviewCycle')),
@@ -111,25 +100,6 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
               </p>
             )}
           </div>
-        </div>
-
-        <div>
-          <Label>{t('performance.createCycle.reviewTypes')}</Label>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            {REVIEW_TYPES.map((type) => (
-              <Checkbox
-                key={type}
-                checked={reviewTypes.includes(type)}
-                onChange={() => toggleType(type)}
-                label={t(`performance.reviewTypes.${type}`)}
-              />
-            ))}
-          </div>
-          {errors.reviewTypes && (
-            <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
-              {t('performance.createCycle.reviewTypesRequired')}
-            </p>
-          )}
         </div>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>

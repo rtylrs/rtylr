@@ -19,14 +19,17 @@ export const useOrders = (params: UseOrdersParams = {}) => {
   return useQuery({
     queryKey: ['dash-orders', { limit, offset, status }],
     queryFn: async () => {
+      const pageSize = Number.isFinite(limit) && limit > 0 ? Math.min(200, Math.floor(limit)) : 50;
+      const normalizedOffset = Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0;
+      const page = Math.floor(normalizedOffset / pageSize) + 1;
       const searchParams = new URLSearchParams({
-        limit: String(limit),
-        offset: String(offset),
+        page: String(page),
+        page_size: String(pageSize),
       });
       if (status && status !== 'all') {
         searchParams.set('status', status);
       }
-      const res = await unwrap(rest.get(`/pos/orders/v1/orders?${searchParams.toString()}`));
+      const res = await unwrap(rest.get(`/pos/orders?${searchParams.toString()}`));
       const raw = res?.orders ?? res;
       return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
     },
