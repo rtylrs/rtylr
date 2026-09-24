@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -221,66 +220,13 @@ func (a *WorkspaceAPI) RemoveWorkspaceMember(ctx context.Context, req *flowworks
 	return &flowworkspacev1.RemoveWorkspaceMemberResponse{Message: "Member removed successfully"}, nil
 }
 
-func (a *WorkspaceAPI) resolveWorkspaceID(ctx context.Context, userID, businessID, workspaceID int64) (int64, error) {
-	raw := strconv.FormatInt(workspaceID, 10)
-	if workspaceID == 0 {
-		raw = "personal"
-	}
-	resolved, err := a.Service.ResolveWorkspaceID(ctx, userID, businessID, raw)
-	if err != nil || resolved == 0 {
-		return 0, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
-	}
-	return resolved, nil
-}
-
-func toWorkspaceMember(m domain.WorkspaceMember) *flowworkspacev1.WorkspaceMember {
-	role, ok := domain.CanonicalFlowMemberRole(m.Role)
-	if !ok {
-		role = m.Role
-	}
-	out := &flowworkspacev1.WorkspaceMember{
-		Id:          m.ID,
-		WorkspaceId: m.WorkspaceID,
-		UserId:      m.UserID,
-		Name:        m.Name,
-		Email:       m.Email,
-		Role:        role,
-		JoinedAt:    m.JoinedAt.Format("2006-01-02T15:04:05Z"),
-	}
-	if m.InvitedBy != nil {
-		out.InvitedBy = *m.InvitedBy
-	}
-	return out
-}
-
-func (a *WorkspaceAPI) ListWorkspaceMembers(ctx context.Context, req *flowworkspacev1.ListWorkspaceMembersRequest) (*flowworkspacev1.ListWorkspaceMembersResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
+// ListWorkspaceMembers cannot identify a project from the legacy contract.
+// Keep the route explicit rather than inventing a roster across projects.
+func (a *WorkspaceAPI) ListWorkspaceMembers(ctx context.Context, _ *flowworkspacev1.ListWorkspaceMembersRequest) (*flowworkspacev1.ListWorkspaceMembersResponse, error) {
+	if _, ok := authPkg.GetAuthUser(ctx); !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-
-	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, authUser.BusinessID, req.GetWorkspaceId())
-	if err != nil {
-		return nil, err
-	}
-	if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, workspaceID) {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
-	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	members, total, err := a.Service.ListWorkspaceMembers(ctx, workspaceID, int64(limit), offset)
-	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list members")
-	}
-
-	out := make([]*flowworkspacev1.WorkspaceMember, 0, len(members))
-	for _, m := range members {
-		out = append(out, toWorkspaceMember(m))
-	}
-	return &flowworkspacev1.ListWorkspaceMembersResponse{
-		Members:    out,
-		Pagination: buildPagination(page, limit, total, len(members)),
-	}, nil
+	return nil, onekiterrors.New(http.StatusGone, "Workspace member listing is retired; use project members")
 }
 
 func (a *WorkspaceAPI) UpdateWorkspaceMemberRole(ctx context.Context, req *flowworkspacev1.UpdateWorkspaceMemberRoleRequest) (*flowworkspacev1.UpdateWorkspaceMemberRoleResponse, error) {

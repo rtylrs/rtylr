@@ -502,12 +502,13 @@ func (s *Service) CreateViewV2(ctx context.Context, businessID, createdBy int64,
 // visibility unconditionally. The previous signature took only the id, so every
 // v2 update wrote empty strings over all of them - renaming a view through v2
 // blanked it.
-func (s *Service) UpdateViewV2(ctx context.Context, actorID, viewID int64, name, icon, filtersJSON, groupBy, sortBy, sortDir, visibility string) error {
+func (s *Service) UpdateViewV2(ctx context.Context, actorID, businessID, viewID int64, name, icon, filtersJSON, groupBy, sortBy, sortDir, visibility string) error {
 	var filters map[string]interface{}
 	_ = json.Unmarshal([]byte(filtersJSON), &filters)
 	return s.repo.UpdateView(ctx, domain.UpdateViewInput{
 		ID:         viewID,
 		ActorID:    actorID,
+		BusinessID: businessID,
 		Name:       name,
 		Icon:       icon,
 		Filters:    filters,

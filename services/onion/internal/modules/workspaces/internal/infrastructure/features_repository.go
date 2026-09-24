@@ -410,8 +410,10 @@ func (r *Repository) UpdateView(ctx context.Context, input domain.UpdateViewInpu
 		GroupBy:    sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
 		SortBy:     sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
 		SortDir:    sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
+		Visibility: sqlc.FlowViewsVisibility(visibilityOrShared(input.Visibility)),
 		ID:         input.ID,
 		BusinessID: input.BusinessID,
+		CreatedBy:  sql.NullInt64{Int64: input.ActorID, Valid: true},
 		OwnerID:    input.ActorID,
 		UserID:     input.ActorID,
 	})
@@ -426,6 +428,7 @@ func (r *Repository) DeleteView(ctx context.Context, id, actorID, businessID int
 	res, err := r.queries.DeleteView(ctx, sqlc.DeleteViewParams{
 		ID:         id,
 		BusinessID: businessID,
+		CreatedBy:  sql.NullInt64{Int64: actorID, Valid: true},
 		OwnerID:    actorID,
 		UserID:     actorID,
 	})

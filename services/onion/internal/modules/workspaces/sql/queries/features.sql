@@ -91,7 +91,8 @@ SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ?, vi
 WHERE flow_views.id = ?
   AND flow_views.business_id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
+    flow_views.created_by = ?
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_views.workspace_id AND wm.user_id = ?)
   );
 
@@ -100,7 +101,8 @@ DELETE FROM flow_views
 WHERE flow_views.id = ?
   AND flow_views.business_id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
+    flow_views.created_by = ?
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_views.workspace_id AND wm.user_id = ?)
   );
 

@@ -1,5 +1,7 @@
 # Repository decisions
 
+Run `make generate` before baseline build, vet, lint, and test commands.
+
 ## HR time-entry ownership
 
 `hr_time_entries.owner_id` is the business ID, matching `business_id`. This is

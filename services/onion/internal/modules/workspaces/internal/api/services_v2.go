@@ -431,12 +431,12 @@ func (a *ViewAPIV2) CreateView(ctx context.Context, req *flowviewv2.CreateViewRe
 }
 
 func (a *ViewAPIV2) UpdateView(ctx context.Context, req *flowviewv2.UpdateViewRequest) (*flowviewv2.UpdateViewResponse, error) {
-	caller, _, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if err := a.Service.UpdateViewV2(
-		ctx, caller.UserID, req.GetId(),
+		ctx, caller.UserID, businessID, req.GetId(),
 		req.GetName(), req.GetIcon(), req.GetFilters(),
 		req.GetGroupBy(), req.GetSortBy(), req.GetSortDir(), req.GetVisibility(),
 	); err != nil {

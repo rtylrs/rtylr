@@ -35,6 +35,9 @@ func TestGuardsAV2RowCanSatisfy(t *testing.T) {
 		{"RecalcActualHours", "../../sql/queries/helpers.sql", "flow_project_members"},
 		{"UpdateLabel", "../../sql/queries/labels.sql", "flow_labels.business_id"},
 		{"DeleteLabel", "../../sql/queries/labels.sql", "flow_labels.business_id"},
+		{"UpdateView", "../../sql/queries/features.sql", "flow_views.created_by = ?"},
+		{"DeleteView", "../../sql/queries/features.sql", "flow_views.created_by = ?"},
+		{"IsProjectMember", "../../sql/queries/helpers.sql", "flow_project_members"},
 	}
 
 	for _, tc := range cases {
@@ -47,6 +50,29 @@ func TestGuardsAV2RowCanSatisfy(t *testing.T) {
 			if !strings.Contains(body, tc.satisfiable) {
 				t.Errorf("%s is guarded on the workspace alone, which no v2 row can satisfy; expected a %s clause:\n%s",
 					tc.query, tc.satisfiable, body)
+			}
+		})
+	}
+}
+
+// These workspace contracts remain legacy-scoped. The public member endpoint
+// is retired; its repository query still serves legacy workspace time reports.
+// Workload needs a project contract before its roster can change safely.
+func TestRemainingWorkspaceQueriesKeepTheirLegacyScope(t *testing.T) {
+	cases := []struct {
+		query     string
+		file      string
+		predicate string
+	}{
+		{"IsWorkspaceMember", "../../sql/queries/helpers.sql", "flow_workspace_members"},
+		{"ListWorkspaceMembers", "../../sql/queries/members.sql", "WHERE wm.workspace_id = ?"},
+		{"GetTeamWorkload", "../../sql/queries/features.sql", "WHERE wm.workspace_id = ?"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.query, func(t *testing.T) {
+			body := namedBlock(t, readQuery(t, tc.file), tc.query)
+			if !strings.Contains(body, tc.predicate) {
+				t.Fatalf("legacy scope removed from %s: %s", tc.query, body)
 			}
 		})
 	}
