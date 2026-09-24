@@ -19,7 +19,14 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateMock,
 }));
 
-const myIssuesState = vi.hoisted(() => ({ data: [] as ApiTask[] }));
+const myIssuesState = vi.hoisted(() => ({
+  data: [] as ApiTask[],
+  isLoading: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
+}));
 vi.mock('../tasks/useMyIssues', () => ({
   useMyIssues: () => myIssuesState,
 }));
@@ -44,6 +51,42 @@ import FocusToday from './FocusToday';
 beforeEach(() => {
   vi.clearAllMocks();
   myIssuesState.data = [];
+  myIssuesState.isLoading = false;
+  myIssuesState.isError = false;
+  myIssuesState.isPaused = false;
+  myIssuesState.failureCount = 0;
+});
+
+describe('FocusToday when My Tasks cannot load', () => {
+  it('shows the load-failed state with retry, not an empty day', () => {
+    myIssuesState.isError = true;
+    myIssuesState.failureCount = 1;
+
+    render(<FocusToday />);
+
+    expect(screen.queryByText('common.focusToday.emptyTitle')).not.toBeInTheDocument();
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.loadFailed.retry' }));
+    expect(myIssuesState.refetch).toHaveBeenCalled();
+  });
+
+  it('treats a query paused after a failed attempt as failed', () => {
+    myIssuesState.isPaused = true;
+    myIssuesState.failureCount = 2;
+
+    render(<FocusToday />);
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+  });
+
+  it('does not claim an empty day while the first load is in flight', () => {
+    myIssuesState.isLoading = true;
+
+    render(<FocusToday />);
+
+    expect(screen.queryByText('common.focusToday.emptyTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
+  });
 });
 
 describe('FocusToday empty state', () => {
