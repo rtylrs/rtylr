@@ -107,6 +107,12 @@ func (a *DashboardAPI) UpdateDashboardWidgets(ctx context.Context, req *hrdashbo
 
 	widgets := make([]*hrdashboarddomain.DashboardWidget, 0, len(req.GetWidgets()))
 	for _, w := range req.GetWidgets() {
+		if w.GetPositionX() < 0 || w.GetPositionY() < 0 {
+			return nil, onekiterrors.New(http.StatusBadRequest, "widget position values must be non-negative")
+		}
+		if w.GetWidth() < 0 || w.GetHeight() < 0 {
+			return nil, onekiterrors.New(http.StatusBadRequest, "widget width and height must be non-negative")
+		}
 		widgets = append(widgets, &hrdashboarddomain.DashboardWidget{
 			OwnerID:    device.User.UserID,
 			BusinessID: businessID,

@@ -84,6 +84,9 @@ func (a *InvoicePaymentAPI) RecordPayment(ctx context.Context, req *financeinvoi
 		if errors.Is(err, domain.ErrInvalidPaymentAmount) {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Amount must be greater than zero")
 		}
+		if errors.Is(err, domain.ErrPaymentExceedsBalance) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Payment cannot exceed the remaining amount due")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to record payment")
 	}
 

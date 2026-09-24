@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
@@ -144,7 +145,7 @@ func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []doma
 	return result, nil
 }
 
-func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error) {
+func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput, events ...audit.Event) (int64, error) {
 	if err := domain.ValidateStockTransferInput(input); err != nil {
 		return 0, fmt.Errorf("%w: %w", domain.ErrInvalidStockTransfer, err)
 	}
@@ -162,7 +163,7 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, 
 	}()
 
 	qtx := r.queries.WithTx(tx)
-	if err := validateStockTransferReferences(ctx, qtx, businessID, input); err != nil {
+	if err = validateStockTransferReferences(ctx, qtx, businessID, input); err != nil {
 		return 0, err
 	}
 
@@ -197,6 +198,10 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, 
 		}
 	}
 
+	if err = appendStockTransferAuditEvents(ctx, tx, events, transferID); err != nil {
+		return 0, err
+	}
+
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit stock transfer", logger.Error(err))
 
@@ -226,46 +231,56 @@ func validateStockTransferReferences(ctx context.Context, qtx *sqlc.Queries, bus
 	return nil
 }
 
-func (r *Repository) UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error {
-	// Only 'received' moves stock; other transitions are a plain status update.
-	if status != domain.StockTransferStatusReceived {
-		result, err := r.queries.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
-			Status:     sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status), Valid: true},
-			BusinessID: businessID,
-			ID:         id,
-		})
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
-			return err
-		}
-		changed, err := statusUpdateChanged(result)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to inspect stock transfer status update", logger.Error(err))
-			return err
-		}
-		if !changed {
-			_, err = r.queries.GetStockTransferForUpdate(ctx, sqlc.GetStockTransferForUpdateParams{
-				BusinessID: businessID,
-				ID:         id,
-			})
-			if errors.Is(err, sql.ErrNoRows) {
-				return domain.ErrStockTransferNotFound
-			}
-			if err != nil {
-				return err
-			}
-		}
-		return nil
+func (r *Repository) UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus, events ...audit.Event) (err error) {
+	if status == domain.StockTransferStatusReceived {
+		return r.receiveTransfer(ctx, businessID, id, events...)
 	}
 
-	return r.receiveTransfer(ctx, businessID, id)
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
+		Status:     sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status), Valid: true},
+		BusinessID: businessID,
+		ID:         id,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
+		return err
+	}
+	changed, err := statusUpdateChanged(result)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to inspect stock transfer status update", logger.Error(err))
+		return err
+	}
+	if !changed {
+		_, err = qtx.GetStockTransferForUpdate(ctx, sqlc.GetStockTransferForUpdateParams{BusinessID: businessID, ID: id})
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrStockTransferNotFound
+		}
+		if err != nil {
+			return err
+		}
+	}
+	if err = appendStockTransferAuditEvents(ctx, tx, events, id); err != nil {
+		return err
+	}
+	err = tx.Commit()
+	return err
 }
 
 // receiveTransfer atomically moves each line item's quantity from the source
 // warehouse location to the destination location (transfer_out + transfer_in,
 // paired by transfer_group), then marks the transfer received. Owner-verified
 // and row-locked; idempotent on the (stock_transfer, transfer_out) ledger key.
-func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) (err error) {
+func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64, events ...audit.Event) (err error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -377,8 +392,21 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) 
 	}); err != nil {
 		return err
 	}
+	if err = appendStockTransferAuditEvents(ctx, tx, events, id); err != nil {
+		return err
+	}
 
 	return tx.Commit()
+}
+
+func appendStockTransferAuditEvents(ctx context.Context, tx *sql.Tx, events []audit.Event, entityID int64) error {
+	for _, event := range events {
+		event.EntityID = entityID
+		if err := audit.AppendTx(ctx, tx, event); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt

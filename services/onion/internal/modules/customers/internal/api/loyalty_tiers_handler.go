@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -53,13 +54,55 @@ type ListLoyaltyTiersHandler struct {
 	CRMService *application.Service
 }
 
-type ListLoyaltyTiersRequest struct{}
-
-type ListLoyaltyTiersResponse struct {
-	Tiers []*crmloyaltyv1.LoyaltyTier `json:"tiers"`
+type ListLoyaltyTiersRequest struct {
+	Page     int `json:"page"`
+	PageSize int `json:"page_size"`
 }
 
-func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiersRequest) (ListLoyaltyTiersResponse, error) {
+type ListLoyaltyTiersResponse struct {
+	Tiers    []*crmloyaltyv1.LoyaltyTier `json:"tiers"`
+	Total    int64                       `json:"total"`
+	Page     int                         `json:"page"`
+	PageSize int                         `json:"page_size"`
+	HasMore  bool                        `json:"has_more"`
+}
+
+func normalizeLoyaltyTierListPage(page, pageSize int) (int, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = domain.DefaultLoyaltyTierPageSize
+	}
+	if pageSize > domain.MaxLoyaltyTierPageSize {
+		pageSize = domain.MaxLoyaltyTierPageSize
+	}
+	if page-1 > math.MaxInt32/pageSize {
+		return 0, 0, domain.ErrLoyaltyTierPageOutOfRange
+	}
+	return page, pageSize, nil
+}
+
+func (h *ListLoyaltyTiersHandler) Validate(_ context.Context, req *ListLoyaltyTiersRequest) error {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "Loyalty tier list request is required")
+	}
+	// An entirely omitted page request retains the historical complete-list
+	// response for older raw clients. Supplying either bound opts into the
+	// paginated response.
+	if req.Page == 0 && req.PageSize == 0 {
+		return nil
+	}
+	page, pageSize, err := normalizeLoyaltyTierListPage(req.Page, req.PageSize)
+	if err != nil {
+		return onekiterrors.New(http.StatusBadRequest, "Loyalty tier page offset is too large")
+	}
+	req.Page = page
+	req.PageSize = pageSize
+	return nil
+}
+
+func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, req *ListLoyaltyTiersRequest) (ListLoyaltyTiersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListLoyaltyTiersResponse{}, onekiterrors.PermissionDenied()
@@ -70,9 +113,41 @@ func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiers
 		return ListLoyaltyTiersResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	tiers, err := h.CRMService.ListLoyaltyTiers(ctx, businessID)
-	if err != nil {
-		return ListLoyaltyTiersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty tiers")
+	if req == nil {
+		return ListLoyaltyTiersResponse{}, onekiterrors.New(http.StatusBadRequest, "Loyalty tier list request is required")
+	}
+	var (
+		tiers    []domain.LoyaltyTier
+		total    int64
+		page     int
+		pageSize int
+		hasMore  bool
+	)
+	if req.Page == 0 && req.PageSize == 0 {
+		tiers, err := h.CRMService.ListLoyaltyTiers(ctx, businessID)
+		if err != nil {
+			return ListLoyaltyTiersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty tiers")
+		}
+		total = int64(len(tiers))
+		page = 1
+		pageSize = len(tiers)
+	} else {
+		normalizedPage, normalizedPageSize, normalizeErr := normalizeLoyaltyTierListPage(req.Page, req.PageSize)
+		if normalizeErr != nil {
+			return ListLoyaltyTiersResponse{}, onekiterrors.New(http.StatusBadRequest, "Loyalty tier page offset is too large")
+		}
+		result, listErr := h.CRMService.ListLoyaltyTiersPage(ctx, businessID, normalizedPage, normalizedPageSize)
+		if listErr != nil {
+			if errors.Is(listErr, domain.ErrLoyaltyTierPageOutOfRange) {
+				return ListLoyaltyTiersResponse{}, onekiterrors.New(http.StatusBadRequest, "Loyalty tier page offset is too large")
+			}
+			return ListLoyaltyTiersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty tiers")
+		}
+		tiers = result.Tiers
+		total = result.Total
+		page = result.Page
+		pageSize = result.PageSize
+		hasMore = result.HasMore
 	}
 
 	payloads := make([]*crmloyaltyv1.LoyaltyTier, len(tiers))
@@ -80,7 +155,13 @@ func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiers
 		payloads[i] = newLoyaltyTierPayload(t)
 	}
 
-	return ListLoyaltyTiersResponse{Tiers: payloads}, nil
+	return ListLoyaltyTiersResponse{
+		Tiers:    payloads,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		HasMore:  hasMore,
+	}, nil
 }
 
 // -- CREATE ------------------------------------------------------------------

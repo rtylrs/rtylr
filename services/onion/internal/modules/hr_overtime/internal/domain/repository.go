@@ -8,7 +8,7 @@ type Repository interface {
 	CreateOvertimeRequest(ctx context.Context, businessID int64, req OvertimeRequestRecord) (*OvertimeRequestRecord, error)
 	ApproveOvertimeRequest(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error
 	AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64, currentLevel int32) error
-	RejectOvertimeRequest(ctx context.Context, businessID, requestID int64) error
+	RejectOvertimeRequest(ctx context.Context, businessID, requestID int64, rejectionReason string) error
 	CreateFlaggedOvertimeRequest(ctx context.Context, businessID, employeeID int64, date string, extraMinutes int32) error
 	ListFlaggedForDate(ctx context.Context, businessID int64, date string) ([]OvertimeRequestRecord, error)
 	ListOvertimeCandidates(ctx context.Context, businessID int64, date string, thresholdMinutes int32) ([]OvertimeDetectionCandidate, error)

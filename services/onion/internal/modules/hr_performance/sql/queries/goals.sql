@@ -15,11 +15,15 @@ WHERE business_id = ? AND id = ?;
 -- name: ListReviewGoals :many
 SELECT id, owner_id, business_id, employee_id, review_cycle_id, title, description, weight, success_criteria, status, created_at, updated_at
 FROM hr_performance_review_goals
-WHERE business_id = ? AND employee_id = ? AND review_cycle_id = ?
+WHERE business_id = sqlc.arg(business_id)
+  AND (sqlc.arg(employee_id) = 0 OR employee_id = sqlc.arg(employee_id))
+  AND (sqlc.arg(review_cycle_id) = 0 OR review_cycle_id = sqlc.arg(review_cycle_id))
 ORDER BY created_at ASC
 LIMIT ? OFFSET ?;
 
 -- name: CountReviewGoals :one
 SELECT COUNT(*) AS total
 FROM hr_performance_review_goals
-WHERE business_id = ? AND employee_id = ? AND review_cycle_id = ?;
+WHERE business_id = sqlc.arg(business_id)
+  AND (sqlc.arg(employee_id) = 0 OR employee_id = sqlc.arg(employee_id))
+  AND (sqlc.arg(review_cycle_id) = 0 OR review_cycle_id = sqlc.arg(review_cycle_id));

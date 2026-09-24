@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/billing/internal/infrastructure"
@@ -83,41 +84,33 @@ func TestGetSummary_WrongOwnerNoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Stub implementation returns same result regardless of owner
+	// An unknown owner with no subscription is treated as the seeded free plan.
 	summary, err := repo.GetSummary(ctx, 999999)
 	if err != nil {
 		t.Fatalf("GetSummary wrong owner: %v", err)
 	}
 	if summary.Plan == "" {
-		t.Error("expected non-empty Plan even for unknown owner (stub)")
+		t.Error("expected non-empty Plan for the seeded free plan")
 	}
 }
 
-func TestListInvoices_ReturnsNonNilSlice(t *testing.T) {
+func TestListInvoices_ReturnsUnavailable(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	invoices, err := repo.ListInvoices(ctx, testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("ListInvoices: %v", err)
-	}
-	if invoices == nil {
-		t.Fatal("expected non-nil slice")
+	if _, err := repo.ListInvoices(ctx, testutil.OwnerID); !errors.Is(err, infrastructure.ErrBillingInvoicesUnavailable) {
+		t.Fatalf("ListInvoices error = %v, want ErrBillingInvoicesUnavailable", err)
 	}
 }
 
-func TestListInvoices_WrongOwnerNoError(t *testing.T) {
+func TestListInvoices_WrongOwnerReturnsUnavailable(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	invoices, err := repo.ListInvoices(ctx, 999999)
-	if err != nil {
-		t.Fatalf("ListInvoices wrong owner: %v", err)
-	}
-	if invoices == nil {
-		t.Fatal("expected non-nil slice")
+	if _, err := repo.ListInvoices(ctx, 999999); !errors.Is(err, infrastructure.ErrBillingInvoicesUnavailable) {
+		t.Fatalf("ListInvoices wrong owner error = %v, want ErrBillingInvoicesUnavailable", err)
 	}
 }
 
@@ -156,46 +149,34 @@ func TestGetSummary_Idempotent(t *testing.T) {
 	}
 }
 
-func TestListInvoices_IsEmpty(t *testing.T) {
+func TestListInvoices_DoesNotReturnFabricatedEmptySuccess(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Stub always returns empty list
-	invoices, err := repo.ListInvoices(ctx, testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("ListInvoices: %v", err)
-	}
-	if len(invoices) != 0 {
-		t.Errorf("expected 0 invoices from stub, got %d", len(invoices))
+	if _, err := repo.ListInvoices(ctx, testutil.OwnerID); !errors.Is(err, infrastructure.ErrBillingInvoicesUnavailable) {
+		t.Fatalf("ListInvoices error = %v, want ErrBillingInvoicesUnavailable", err)
 	}
 }
 
-func TestGetSummary_OwnerIDZero_NoError(t *testing.T) {
+func TestGetSummary_OwnerIDZero_ReturnsError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Stub ignores owner ID; result should still be valid.
-	summary, err := repo.GetSummary(ctx, 0)
-	if err != nil {
-		t.Fatalf("GetSummary owner=0: %v", err)
-	}
-	if summary.Plan == "" {
-		t.Error("expected non-empty Plan for owner=0 (stub)")
+	if _, err := repo.GetSummary(ctx, 0); err == nil {
+		t.Fatal("GetSummary owner=0: expected an invalid-owner error")
 	}
 }
 
-func TestGetSummary_NegativeOwner_NoError(t *testing.T) {
+func TestGetSummary_NegativeOwner_ReturnsError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	summary, err := repo.GetSummary(ctx, -1)
-	if err != nil {
-		t.Fatalf("GetSummary owner=-1: %v", err)
+	if _, err := repo.GetSummary(ctx, -1); err == nil {
+		t.Fatal("GetSummary owner=-1: expected an invalid-owner error")
 	}
-	_ = summary
 }
 
 func TestGetSummary_StatusNonEmpty(t *testing.T) {
@@ -240,21 +221,18 @@ func TestGetSummary_UsageLimitGteCurrentUsage(t *testing.T) {
 	}
 }
 
-func TestListInvoices_MultipleCalls_Consistent(t *testing.T) {
+func TestListInvoices_MultipleCallsReturnSameUnavailableError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	first, err := repo.ListInvoices(ctx, testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("first ListInvoices: %v", err)
+	first, firstErr := repo.ListInvoices(ctx, testutil.OwnerID)
+	second, secondErr := repo.ListInvoices(ctx, testutil.OwnerID)
+	if !errors.Is(firstErr, infrastructure.ErrBillingInvoicesUnavailable) || !errors.Is(secondErr, infrastructure.ErrBillingInvoicesUnavailable) {
+		t.Fatalf("ListInvoices errors = %v, %v; want ErrBillingInvoicesUnavailable", firstErr, secondErr)
 	}
-	second, err := repo.ListInvoices(ctx, testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("second ListInvoices: %v", err)
-	}
-	if len(first) != len(second) {
-		t.Errorf("ListInvoices inconsistent: %d vs %d", len(first), len(second))
+	if first != nil || second != nil {
+		t.Fatal("unavailable invoice history must not return fabricated rows")
 	}
 }
 
@@ -306,17 +284,13 @@ func TestGetSummary_LargeOwnerID_NoError(t *testing.T) {
 	_ = summary
 }
 
-func TestListInvoices_ZeroOwner_NoError(t *testing.T) {
+func TestListInvoices_ZeroOwner_ReturnsError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	invoices, err := repo.ListInvoices(ctx, 0)
-	if err != nil {
-		t.Fatalf("ListInvoices owner=0: %v", err)
-	}
-	if invoices == nil {
-		t.Fatal("expected non-nil slice")
+	if _, err := repo.ListInvoices(ctx, 0); err == nil {
+		t.Fatal("ListInvoices owner=0: expected an invalid-owner error")
 	}
 }
 
@@ -335,16 +309,12 @@ func TestGetSummary_UsageLimitExact(t *testing.T) {
 	}
 }
 
-func TestListInvoices_LargeOwner_ReturnsNonNil(t *testing.T) {
+func TestListInvoices_LargeOwnerReturnsUnavailable(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	invoices, err := repo.ListInvoices(ctx, 1<<40)
-	if err != nil {
-		t.Fatalf("ListInvoices large owner: %v", err)
-	}
-	if invoices == nil {
-		t.Fatal("expected non-nil slice")
+	if _, err := repo.ListInvoices(ctx, 1<<40); !errors.Is(err, infrastructure.ErrBillingInvoicesUnavailable) {
+		t.Fatalf("ListInvoices large owner error = %v, want ErrBillingInvoicesUnavailable", err)
 	}
 }

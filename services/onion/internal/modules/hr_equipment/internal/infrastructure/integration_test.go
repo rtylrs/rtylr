@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/infrastructure"
@@ -163,6 +164,48 @@ func TestListAssets_FilterByStatus(t *testing.T) {
 		if a.Status != "available" {
 			t.Errorf("expected status 'available', got %q for asset %d", a.Status, a.ID)
 		}
+	}
+}
+
+func TestListAssets_FilterByConditionDoesNotUseLifecycleStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	businessID := time.Now().UnixNano()
+
+	fair, err := repo.CreateAsset(ctx, businessID, domain.CreateAssetParams{
+		Name:      "Condition Filter Fair Asset",
+		Category:  "electronics",
+		Condition: domain.AssetConditionFair,
+	})
+	if err != nil {
+		t.Fatalf("create fair asset: %v", err)
+	}
+	good, err := repo.CreateAsset(ctx, businessID, domain.CreateAssetParams{
+		Name:      "Condition Filter Good Asset",
+		Category:  "electronics",
+		Condition: domain.AssetConditionGood,
+	})
+	if err != nil {
+		t.Fatalf("create good asset: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_assets WHERE id IN (?, ?)", fair.ID, good.ID)
+	})
+
+	condition := domain.AssetConditionFair
+	assets, total, err := repo.ListAssets(ctx, businessID, domain.ListAssetsParams{
+		Condition: &condition,
+		Limit:     50,
+	})
+	if err != nil {
+		t.Fatalf("ListAssets by condition: %v", err)
+	}
+	if total != 1 || len(assets) != 1 {
+		t.Fatalf("condition filter returned total=%d rows=%d, want one", total, len(assets))
+	}
+	if assets[0].ID != fair.ID || assets[0].Condition != domain.AssetConditionFair {
+		t.Fatalf("condition filter returned asset %+v, want fair asset %d", assets[0], fair.ID)
 	}
 }
 

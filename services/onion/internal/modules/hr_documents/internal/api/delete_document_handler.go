@@ -31,6 +31,9 @@ func (h *DeleteDocumentHandler) Serve(ctx context.Context, _ *DeleteDocumentRequ
 	if device.IsAnonymous || device.User == nil {
 		return DeleteDocumentResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireDocumentPermission(ctx, "hr:employees:manage"); err != nil {
+		return DeleteDocumentResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

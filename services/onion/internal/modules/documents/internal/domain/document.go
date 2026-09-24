@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrDocumentNotFound = errors.New("document not found")
+var (
+	ErrDocumentNotFound      = errors.New("document not found")
+	ErrDocumentStaffNotFound = errors.New("document staff not found")
+)
 
 type Document struct {
 	ID         int64     `json:"id"`

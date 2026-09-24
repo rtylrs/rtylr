@@ -53,12 +53,21 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppERP, "erp:inventory:transfer"},
 	{authorization.AppERP, "erp:inventory:approve"},
 	{authorization.AppERP, "erp:warehouses:manage"},
+	{authorization.AppERP, "erp:settings:view"},
+	{authorization.AppERP, "erp:settings:manage"},
+	{authorization.AppERP, "erp:suppliers:view"},
+	{authorization.AppERP, "erp:suppliers:create"},
+	{authorization.AppERP, "erp:suppliers:edit"},
 	{authorization.AppERP, "erp:purchasing:view"},
 	{authorization.AppERP, "erp:purchasing:create"},
 	{authorization.AppERP, "erp:purchasing:approve"},
 	{authorization.AppFinance, "finance:invoices:view"},
 	{authorization.AppFinance, "finance:invoices:create"},
 	{authorization.AppFinance, "finance:invoices:send"},
+	{authorization.AppFinance, "finance:quotes:view"},
+	{authorization.AppFinance, "finance:quotes:manage"},
+	{authorization.AppFinance, "finance:recurring_invoices:view"},
+	{authorization.AppFinance, "finance:recurring_invoices:manage"},
 	{authorization.AppFinance, "finance:expenses:view"},
 	{authorization.AppFinance, "finance:expenses:create"},
 	{authorization.AppFinance, "finance:expenses:approve"},
@@ -119,9 +128,9 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppRecruit, "recruit:candidates:export"},
 }
 
-func TestFeatureMatrixContainsExactly104UniquePermissions(t *testing.T) {
-	if len(featureMatrixPermissions) != 104 {
-		t.Fatalf("feature matrix permissions = %d, want 104", len(featureMatrixPermissions))
+func TestFeatureMatrixContainsExactly113UniquePermissions(t *testing.T) {
+	if len(featureMatrixPermissions) != 113 {
+		t.Fatalf("feature matrix permissions = %d, want 113", len(featureMatrixPermissions))
 	}
 	seen := make(map[string]struct{}, len(featureMatrixPermissions))
 	for _, entry := range featureMatrixPermissions {

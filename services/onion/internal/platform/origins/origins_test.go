@@ -4,9 +4,13 @@ import (
 	"path"
 	"strings"
 	"testing"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 func TestAllowedOriginsRequireHTTPSForHostedDomains(t *testing.T) {
+	useTestEnvironment(t, "development")
+
 	cases := []struct {
 		origin string
 		want   bool
@@ -32,6 +36,8 @@ func TestAllowedOriginsRequireHTTPSForHostedDomains(t *testing.T) {
 }
 
 func TestAllowedPatternStringsUseWebSocketGlobSemantics(t *testing.T) {
+	useTestEnvironment(t, "development")
+
 	cases := []struct {
 		target string
 		want   bool
@@ -70,7 +76,7 @@ func TestAllowedPatternStringsUseWebSocketGlobSemantics(t *testing.T) {
 }
 
 func TestProductionBuildsExcludeLocalhostOrigins(t *testing.T) {
-	t.Setenv("APP_ENV", "production")
+	useTestEnvironment(t, "production")
 
 	for _, origin := range []string{
 		"http://localhost:3000",
@@ -94,6 +100,8 @@ func TestProductionBuildsExcludeLocalhostOrigins(t *testing.T) {
 }
 
 func TestWildcardsMatchExactlyOneSubdomainLabel(t *testing.T) {
+	useTestEnvironment(t, "development")
+
 	if !IsAllowed("https://app.voxire.com") {
 		t.Error("single-label subdomain should match")
 	}
@@ -101,4 +109,13 @@ func TestWildcardsMatchExactlyOneSubdomainLabel(t *testing.T) {
 	if IsAllowed("https://evil.attacker.voxire.com") {
 		t.Error("multi-label wildcard match allows nested takeover chains")
 	}
+}
+
+func useTestEnvironment(t *testing.T, appEnv string) {
+	t.Helper()
+
+	previous := config.GlobalConfig
+	t.Cleanup(func() { config.GlobalConfig = previous })
+	config.GlobalConfig = nil
+	t.Setenv("APP_ENV", appEnv)
 }

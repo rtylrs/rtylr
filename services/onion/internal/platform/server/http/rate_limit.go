@@ -12,6 +12,7 @@ import (
 	"time"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -21,7 +22,7 @@ import (
 var serverCtx = context.Background()
 
 var (
-	rateLimiterMu sync.RWMutex
+	rateLimiterMu      sync.RWMutex
 	activeRateLimiters = make(map[*SecurityRateLimiter]struct{})
 )
 
@@ -176,18 +177,25 @@ func RateLimitMiddleware(limit int, window time.Duration) func(http.Handler) htt
 // trust client-controllable headers, or an attacker rotates them to mint
 // unlimited buckets and bypass every limiter (global + per-route brute-force).
 //
-// onion runs behind Cloudflare, which sets CF-Connecting-IP to the true client
-// IP — a value a client cannot forge through Cloudflare. We trust only that,
-// then fall back to the connection's RemoteAddr. X-Forwarded-For / X-Real-IP are
-// deliberately NOT honored (they're attacker-settable on a direct connection).
+// CF-Connecting-IP is honored only when the socket peer is in the configured
+// Cloudflare/proxy CIDR set. Self-hosted API listeners are directly reachable,
+// so a client can otherwise rotate this header and receive a fresh bucket on
+// every request. X-Forwarded-For / X-Real-IP are deliberately not honored.
 func getClientKey(r *http.Request) string {
-	if cfIP := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); cfIP != "" {
-		return cfIP
+	peer := peerIP(r.RemoteAddr)
+	if config.IsTrustedProxyIP(r.RemoteAddr) {
+		if cfIP := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); net.ParseIP(cfIP) != nil {
+			return cfIP
+		}
 	}
-	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+	return peer
+}
+
+func peerIP(remoteAddr string) string {
+	if host, _, err := net.SplitHostPort(remoteAddr); err == nil {
 		return host
 	}
-	return r.RemoteAddr
+	return strings.Trim(remoteAddr, "[]")
 }
 
 // PerRouteRateLimit returns middleware that applies a tighter limit

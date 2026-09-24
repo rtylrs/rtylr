@@ -18,6 +18,9 @@ import (
 // RedisCache defines the interface for Redis cache operations.
 type RedisCache interface {
 	Put(ctx context.Context, key string, val []byte, ttl time.Duration)
+	// PutConfirmed is the error-reporting form of Put for callers that must
+	// not continue after a lost write (for example, one-time credentials).
+	PutConfirmed(ctx context.Context, key string, val []byte, ttl time.Duration) bool
 	Get(ctx context.Context, key string) []byte
 	// GetDel atomically gets and deletes a key. It is used for one-time
 	// credentials where a separate Get followed by Delete would allow replay.

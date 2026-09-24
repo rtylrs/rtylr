@@ -16,4 +16,7 @@ var (
 	ErrLeaveSelfApproval          = errors.New("employees cannot approve their own leave requests")
 	ErrInvalidDateRange           = errors.New("start date must be before or equal to end date")
 	ErrInsufficientNotice         = errors.New("insufficient notice period for this leave type")
+	ErrNegativeLeavePolicyLimit   = errors.New("leave policy day limits must be non-negative")
+	ErrInvalidCalendarLocation    = errors.New("location_id must be non-negative")
+	ErrEmptyLeaveTypeUpdate       = errors.New("at least one leave type field is required")
 )

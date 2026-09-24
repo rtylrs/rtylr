@@ -32,6 +32,7 @@ func TestNoLeaveHandlerPassesTheCallerAsTheBusiness(t *testing.T) {
 	}
 
 	doubledCaller := regexp.MustCompile(`\(\s*ctx\s*,\s*device\.User\.UserID\s*,\s*device\.User\.UserID\b`)
+	wrongBusinessScope := regexp.MustCompile(`Service\.(ListLeaveTypes|UpdateLeaveType|GetLeaveCalendar)\([^\n]*device\.User\.UserID`)
 
 	for _, entry := range entries {
 		name := entry.Name()
@@ -45,6 +46,9 @@ func TestNoLeaveHandlerPassesTheCallerAsTheBusiness(t *testing.T) {
 		if doubledCaller.Match(source) {
 			t.Errorf("%s passes device.User.UserID as both the business and the caller; "+
 				"resolve the business with tenant.ResolveBusinessID", name)
+		}
+		if wrongBusinessScope.Match(source) {
+			t.Errorf("%s passes the platform user id as the business scope", name)
 		}
 	}
 }

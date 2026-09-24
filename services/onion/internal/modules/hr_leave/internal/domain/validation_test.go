@@ -151,3 +151,41 @@ func TestRemainingBalance_NegativeIsAllowed(t *testing.T) {
 		t.Errorf("expected -3.0, got %v", got)
 	}
 }
+
+func TestValidateLeaveType_RejectsNegativePolicyLimits(t *testing.T) {
+	cases := []domain.LeaveTypeRecord{
+		{Name: "Annual", MaxCarryoverDays: -1},
+		{Name: "Annual", MinNoticeDays: -1},
+		{Name: "Annual", RequiresDocumentationAfterDays: -1},
+	}
+	for _, lt := range cases {
+		if err := domain.ValidateLeaveType(lt); !errors.Is(err, domain.ErrNegativeLeavePolicyLimit) {
+			t.Errorf("ValidateLeaveType(%+v) error = %v, want ErrNegativeLeavePolicyLimit", lt, err)
+		}
+	}
+}
+
+func TestApplyLeaveTypePatch_PreservesOmittedFields(t *testing.T) {
+	current := domain.LeaveTypeRecord{
+		Name:                           "Annual Leave",
+		IsPaid:                         true,
+		RequiresApproval:               true,
+		AccrualRule:                    domain.AccrualRuleMonthly,
+		AccrualAmount:                  2.5,
+		MaxCarryoverDays:               10,
+		MinNoticeDays:                  3,
+		RequiresDocumentationAfterDays: 7,
+		IsActive:                       true,
+	}
+	name := "Renamed Leave"
+	updated := domain.ApplyLeaveTypePatch(current, domain.LeaveTypePatch{Name: &name})
+	if updated.Name != name {
+		t.Fatalf("name = %q, want %q", updated.Name, name)
+	}
+	if updated.IsPaid != current.IsPaid || updated.RequiresApproval != current.RequiresApproval ||
+		updated.AccrualRule != current.AccrualRule || updated.AccrualAmount != current.AccrualAmount ||
+		updated.MaxCarryoverDays != current.MaxCarryoverDays || updated.MinNoticeDays != current.MinNoticeDays ||
+		updated.RequiresDocumentationAfterDays != current.RequiresDocumentationAfterDays || updated.IsActive != current.IsActive {
+		t.Fatalf("omitted fields changed: got %+v, want all fields except name preserved", updated)
+	}
+}

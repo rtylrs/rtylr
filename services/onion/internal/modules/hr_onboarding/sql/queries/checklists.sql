@@ -40,10 +40,15 @@ SELECT id, owner_id, business_id, employee_checklist_id, checklist_item_id, assi
 FROM hr_onboarding_employee_checklist_items
 WHERE business_id = ? AND id = ?;
 
--- name: CompleteEmployeeChecklistItem :exec
+-- name: CompleteEmployeeChecklistItem :execresult
 UPDATE hr_onboarding_employee_checklist_items
-SET status = 'complete', completed_at = NOW(), completed_by = ?
-WHERE business_id = ? AND id = ?;
+SET status = 'complete',
+    completed_at = NOW(),
+    completed_by = ?,
+    attachment_url = COALESCE(sqlc.narg('attachment_url'), attachment_url)
+WHERE business_id = ?
+  AND id = ?
+  AND status NOT IN ('complete', 'completed');
 
 -- name: CountChecklistItemsTotal :one
 SELECT COUNT(*) AS total

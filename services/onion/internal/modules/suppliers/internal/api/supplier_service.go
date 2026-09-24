@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/suppliers/internal/application"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpsupplierv1 "github.com/voxire/voxie/gen/go/erp/supplier/v1"
@@ -23,7 +24,7 @@ func NewSupplierAPI(service *application.Service) *SupplierAPI {
 }
 
 func (a *SupplierAPI) ListSuppliers(ctx context.Context, req *erpsupplierv1.ListSuppliersRequest) (*erpsupplierv1.ListSuppliersResponse, error) {
-	ownerID, err := supplierOwnerID(ctx)
+	ownerID, err := supplierOwnerID(ctx, "erp:suppliers:view")
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +57,7 @@ func (a *SupplierAPI) ListSuppliers(ctx context.Context, req *erpsupplierv1.List
 }
 
 func (a *SupplierAPI) CreateSupplier(ctx context.Context, req *erpsupplierv1.CreateSupplierRequest) (*erpsupplierv1.CreateSupplierResponse, error) {
-	ownerID, err := supplierOwnerID(ctx)
+	ownerID, err := supplierOwnerID(ctx, "erp:suppliers:create")
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (a *SupplierAPI) CreateSupplier(ctx context.Context, req *erpsupplierv1.Cre
 }
 
 func (a *SupplierAPI) UpdateSupplier(ctx context.Context, req *erpsupplierv1.UpdateSupplierRequest) (*erpsupplierv1.UpdateSupplierResponse, error) {
-	ownerID, err := supplierOwnerID(ctx)
+	ownerID, err := supplierOwnerID(ctx, "erp:suppliers:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +84,7 @@ func (a *SupplierAPI) UpdateSupplier(ctx context.Context, req *erpsupplierv1.Upd
 }
 
 func (a *SupplierAPI) DeleteSupplier(ctx context.Context, req *erpsupplierv1.DeleteSupplierRequest) (*erpsupplierv1.DeleteSupplierResponse, error) {
-	ownerID, err := supplierOwnerID(ctx)
+	ownerID, err := supplierOwnerID(ctx, "erp:suppliers:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -93,10 +94,10 @@ func (a *SupplierAPI) DeleteSupplier(ctx context.Context, req *erpsupplierv1.Del
 	return &erpsupplierv1.DeleteSupplierResponse{Message: "Supplier deleted successfully"}, nil
 }
 
-func supplierOwnerID(ctx context.Context) (int64, error) {
+func supplierOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, supplierStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

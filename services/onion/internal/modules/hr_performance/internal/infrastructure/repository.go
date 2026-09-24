@@ -114,6 +114,7 @@ func (r *Repository) GetReviewCycle(ctx context.Context, businessID, id int64) (
 }
 
 func (r *Repository) ListReviewCycles(ctx context.Context, businessID int64, limit, offset int32) ([]domain.ReviewCycleRecord, int64, error) {
+	limit, offset = normalizeListPage(limit, offset)
 	rows, err := r.queries.ListReviewCycles(ctx, sqlc.ListReviewCyclesParams{
 		BusinessID: businessID,
 		Limit:      limit,
@@ -311,6 +312,10 @@ func (r *Repository) ShareReview(ctx context.Context, businessID, id int64) erro
 // ===== Goals =====
 
 func (r *Repository) CreateGoal(ctx context.Context, businessID int64, params domain.CreateGoalParams) (*domain.ReviewGoalRecord, error) {
+	if err := r.ensureGoalReferences(ctx, businessID, params.EmployeeID, params.ReviewCycleID); err != nil {
+		return nil, err
+	}
+
 	result, err := r.queries.CreateReviewGoal(ctx, sqlc.CreateReviewGoalParams{
 		OwnerID:         businessID,
 		BusinessID:      businessID,
@@ -361,6 +366,13 @@ func (r *Repository) UpdateGoal(ctx context.Context, businessID, id int64, param
 }
 
 func (r *Repository) ListGoals(ctx context.Context, businessID, employeeID, cycleID int64, limit, offset int32) ([]domain.ReviewGoalRecord, int64, error) {
+	limit, offset = normalizeListPage(limit, offset)
+	if employeeID < 0 {
+		employeeID = 0
+	}
+	if cycleID < 0 {
+		cycleID = 0
+	}
 	rows, err := r.queries.ListReviewGoals(ctx, sqlc.ListReviewGoalsParams{
 		BusinessID:    businessID,
 		EmployeeID:    employeeID,
@@ -396,7 +408,85 @@ func (r *Repository) ListActiveEmployeeIDs(ctx context.Context, businessID int64
 	return r.queries.ListActiveEmployeeIDs(ctx, businessID)
 }
 
+func (r *Repository) EmployeeBelongsToBusiness(ctx context.Context, businessID, employeeID int64) (bool, error) {
+	if r.pool == nil || businessID <= 0 || employeeID <= 0 {
+		return false, nil
+	}
+
+	var exists int
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT 1
+		FROM hr_employees
+		WHERE id = ? AND business_id = ? AND status <> 'terminated'
+		LIMIT 1`, employeeID, businessID).Scan(&exists)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *Repository) GetEmployeeIDByUserID(ctx context.Context, businessID, userID int64) (int64, error) {
+	if r.pool == nil || businessID <= 0 || userID <= 0 {
+		return 0, domain.ErrEmployeeNotFound
+	}
+
+	var employeeID int64
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT id
+		FROM hr_employees
+		WHERE business_id = ? AND user_id = ? AND status <> 'terminated'
+		ORDER BY id ASC
+		LIMIT 1`, businessID, userID).Scan(&employeeID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, domain.ErrEmployeeNotFound
+	}
+	if err != nil {
+		return 0, err
+	}
+	return employeeID, nil
+}
+
+func (r *Repository) ensureGoalReferences(ctx context.Context, businessID, employeeID, cycleID int64) error {
+	belongs, err := r.EmployeeBelongsToBusiness(ctx, businessID, employeeID)
+	if err != nil {
+		return err
+	}
+	if !belongs {
+		return domain.ErrEmployeeNotFound
+	}
+
+	var cycleExists int
+	err = r.pool.QueryRowContext(ctx, `
+		SELECT 1
+		FROM hr_performance_review_cycles
+		WHERE id = ? AND business_id = ?
+		LIMIT 1`, cycleID, businessID).Scan(&cycleExists)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrReviewCycleNotFound
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // ===== Row conversion helpers =====
+
+func normalizeListPage(limit, offset int32) (int32, int32) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return limit, offset
+}
 
 func configFromRow(row sqlc.HrPerformanceConfig) domain.PerformanceConfigRecord {
 	labels := ""
@@ -466,6 +556,7 @@ func goalFromRow(row sqlc.HrPerformanceReviewGoal) domain.ReviewGoalRecord {
 	return domain.ReviewGoalRecord{
 		ID:              row.ID,
 		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
 		EmployeeID:      row.EmployeeID,
 		ReviewCycleID:   row.ReviewCycleID,
 		Title:           row.Title,

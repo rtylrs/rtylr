@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -33,10 +32,22 @@ type licenseVerifyRequest struct {
 // These allow self-hosted backends to verify and activate their license keys against
 // this authority service.
 func RegisterLicenseAuthorityRoutes(r chi.Router, cfg *platformconfig.AppConfig, db *sql.DB) {
+	// The API process is public, while the authority is a dedicated internal
+	// service. Do not mount the authority surface on any process other than
+	// the explicit license runmode, even though the API historically called
+	// this registration helper unconditionally.
+	if cfg == nil || !strings.EqualFold(strings.TrimSpace(cfg.RunMode), "license") {
+		return
+	}
+
+	var clock *license.ClockGuard
+	if cfg != nil {
+		clock = license.NewClockGuard(cfg.LicenseClockStateFile)
+	}
 	s := &licenseAuthorityServer{
 		cfg:   cfg,
 		db:    db,
-		clock: license.NewClockGuard(cfg.LicenseClockStateFile),
+		clock: clock,
 	}
 
 	r.Get("/license/status", s.status)
@@ -70,6 +81,15 @@ func (s *licenseAuthorityServer) verify(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *licenseAuthorityServer) activate(w http.ResponseWriter, r *http.Request) {
+	// Activation mutates the authority ledger. When an internal token is
+	// configured, require it as an additional capability check; never turn an
+	// anonymous request into a valid activation by falling back to the server's
+	// configured license key.
+	if s.internalTokenConfigured() && !hasValidInternalTokenForConfig(r, s.cfg) {
+		writeLicenseJSON(w, http.StatusUnauthorized, map[string]string{"error": "internal authority token required"})
+		return
+	}
+
 	req, ok := decodeLicenseVerifyRequest(w, r)
 	if !ok {
 		return
@@ -80,7 +100,8 @@ func (s *licenseAuthorityServer) activate(w http.ResponseWriter, r *http.Request
 	}
 	rawKey := strings.TrimSpace(req.LicenseKey)
 	if rawKey == "" {
-		rawKey, _ = licenseKeyFromAuthorityConfig(s.cfg)
+		writeLicenseJSON(w, http.StatusBadRequest, map[string]string{"error": "license_key is required"})
+		return
 	}
 	report := license.VerifyKeyAt(s.cfg, rawKey, s.now())
 	report = s.applyDBRevocation(r.Context(), rawKey, report)
@@ -107,21 +128,11 @@ func (s *licenseAuthorityServer) now() time.Time {
 	return time.Now().UTC()
 }
 
-func licenseKeyFromAuthorityConfig(cfg *platformconfig.AppConfig) (string, error) {
-	if cfg == nil {
-		return "", license.ErrMissingLicense
+func (s *licenseAuthorityServer) internalTokenConfigured() bool {
+	if s.cfg != nil && strings.TrimSpace(s.cfg.InternalToken) != "" {
+		return true
 	}
-	if strings.TrimSpace(cfg.LicenseKey) != "" {
-		return strings.TrimSpace(cfg.LicenseKey), nil
-	}
-	if strings.TrimSpace(cfg.LicenseFile) != "" {
-		contents, err := os.ReadFile(cfg.LicenseFile)
-		if err != nil {
-			return "", err
-		}
-		return strings.TrimSpace(string(contents)), nil
-	}
-	return "", license.ErrMissingLicense
+	return internalToken() != ""
 }
 
 func (s *licenseAuthorityServer) applyDBRevocation(ctx context.Context, rawKey string, report license.StatusReport) license.StatusReport {

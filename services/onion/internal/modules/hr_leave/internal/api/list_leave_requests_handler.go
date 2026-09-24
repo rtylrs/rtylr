@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
@@ -49,6 +50,28 @@ func (h *ListLeaveRequestsHandler) Serve(ctx context.Context, req *ListLeaveRequ
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListLeaveRequestsResponse{}, onekiterrors.PermissionDenied()
+	}
+	if req == nil {
+		return ListLeaveRequestsResponse{}, onekiterrors.New(http.StatusBadRequest, "Leave list request is required")
+	}
+
+	var fromDate, toDate time.Time
+	if req.FromDate != nil && *req.FromDate != "" {
+		parsed, err := time.Parse("2006-01-02", *req.FromDate)
+		if err != nil {
+			return ListLeaveRequestsResponse{}, onekiterrors.New(http.StatusBadRequest, "from_date must be in YYYY-MM-DD format")
+		}
+		fromDate = parsed
+	}
+	if req.ToDate != nil && *req.ToDate != "" {
+		parsed, err := time.Parse("2006-01-02", *req.ToDate)
+		if err != nil {
+			return ListLeaveRequestsResponse{}, onekiterrors.New(http.StatusBadRequest, "to_date must be in YYYY-MM-DD format")
+		}
+		toDate = parsed
+	}
+	if !fromDate.IsZero() && !toDate.IsZero() && fromDate.After(toDate) {
+		return ListLeaveRequestsResponse{}, onekiterrors.New(http.StatusBadRequest, "from_date must not be after to_date")
 	}
 
 	limit := req.Limit

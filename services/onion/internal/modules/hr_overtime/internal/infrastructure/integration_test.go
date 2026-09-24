@@ -337,7 +337,7 @@ func TestRejectOvertimeRequest_ChangesStatus(t *testing.T) {
 		t.Fatalf("CreateOvertimeRequest: %v", err)
 	}
 
-	if err := repo.RejectOvertimeRequest(ctx, testutil.OwnerID, created.ID); err != nil {
+	if err := repo.RejectOvertimeRequest(ctx, testutil.OwnerID, created.ID, "insufficient coverage"); err != nil {
 		t.Fatalf("RejectOvertimeRequest: %v", err)
 	}
 

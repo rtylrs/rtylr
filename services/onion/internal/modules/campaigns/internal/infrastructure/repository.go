@@ -13,11 +13,13 @@ import (
 
 type Repository struct {
 	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		pool:    db,
 	}
 }
 
@@ -254,8 +256,25 @@ func nullableTime(t *time.Time) sql.NullTime {
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
-	return r.queries.DeleteCampaign(ctx, sqlc.DeleteCampaignParams{
-		ID:         id,
-		BusinessID: businessID,
-	})
+	// The generated DeleteCampaign query is :exec and discards RowsAffected.
+	// Execute the same business-scoped delete through the repository pool so a
+	// missing or foreign campaign cannot be reported as a successful delete.
+	result, err := r.pool.ExecContext(ctx,
+		"DELETE FROM crm_campaigns WHERE id = ? AND business_id = ?",
+		id, businessID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to delete campaign", logger.Error(err))
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrCampaignNotFound
+	}
+
+	return nil
 }

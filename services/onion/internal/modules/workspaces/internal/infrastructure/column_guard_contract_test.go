@@ -46,3 +46,17 @@ func TestColumnDeletePathIsGuardedOnTheProject(t *testing.T) {
 		})
 	}
 }
+
+func TestMoveTaskToColumnRejectsAnotherProjectsColumn(t *testing.T) {
+	body := namedBlock(t, readQuery(t, "../../sql/queries/columns.sql"), "MoveTaskToColumn")
+
+	if !strings.Contains(body, "c.project_id = flow_tasks.project_id") {
+		t.Fatalf("move guard does not require the destination project to match:\n%s", body)
+	}
+	if strings.Contains(body, "c.project_id = flow_tasks.project_id OR c.workspace_id = flow_tasks.workspace_id") {
+		t.Fatalf("move guard still accepts a same-workspace column from another project:\n%s", body)
+	}
+	if !strings.Contains(body, "flow_tasks.workspace_id <> 0") {
+		t.Fatalf("legacy workspace fallback is not restricted to non-zero workspaces:\n%s", body)
+	}
+}

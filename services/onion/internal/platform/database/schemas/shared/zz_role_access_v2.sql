@@ -179,12 +179,21 @@ VALUES
     ('erp:inventory:transfer', 'erp', 'edit', FALSE, TRUE),
     ('erp:inventory:approve', 'erp', 'approve', FALSE, TRUE),
     ('erp:warehouses:manage', 'erp', 'manage', FALSE, TRUE),
+    ('erp:settings:view', 'erp', 'view', FALSE, FALSE),
+    ('erp:settings:manage', 'erp', 'manage', FALSE, TRUE),
+    ('erp:suppliers:view', 'erp', 'view', FALSE, FALSE),
+    ('erp:suppliers:create', 'erp', 'create', FALSE, FALSE),
+    ('erp:suppliers:edit', 'erp', 'edit', FALSE, TRUE),
     ('erp:purchasing:view', 'erp', 'view', FALSE, FALSE),
     ('erp:purchasing:create', 'erp', 'create', FALSE, FALSE),
     ('erp:purchasing:approve', 'erp', 'approve', FALSE, TRUE),
     ('finance:invoices:view', 'finance', 'view', FALSE, FALSE),
     ('finance:invoices:create', 'finance', 'create', FALSE, FALSE),
     ('finance:invoices:send', 'finance', 'send', FALSE, FALSE),
+    ('finance:quotes:view', 'finance', 'view', FALSE, FALSE),
+    ('finance:quotes:manage', 'finance', 'manage', FALSE, FALSE),
+    ('finance:recurring_invoices:view', 'finance', 'view', FALSE, FALSE),
+    ('finance:recurring_invoices:manage', 'finance', 'manage', FALSE, FALSE),
     ('finance:expenses:view', 'finance', 'view', FALSE, FALSE),
     ('finance:expenses:create', 'finance', 'create', FALSE, FALSE),
     ('finance:expenses:approve', 'finance', 'approve', FALSE, TRUE),
@@ -328,6 +337,18 @@ WHERE r.business_id = 0
       'insights.analyst', 'menu.manager', 'recruit.manager'
   )
   AND p.action IN ('view', 'create', 'edit', 'send', 'share', 'export')
+ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);
+
+-- The generic manager grant above intentionally excludes high-risk `manage`
+-- actions. Quote and recurring-invoice management are the two finance manager
+-- capabilities that need that action at the manager tier.
+INSERT INTO authorization_role_permissions (role_id, permission_key)
+SELECT r.id, p.permission_key
+FROM authorization_roles r
+JOIN authorization_permission_catalog p ON p.app_id = r.app_id
+WHERE r.business_id = 0
+  AND r.role_key = 'finance.manager'
+  AND p.permission_key IN ('finance:quotes:manage', 'finance:recurring_invoices:manage')
 ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);
 
 INSERT INTO authorization_role_permissions (role_id, permission_key)

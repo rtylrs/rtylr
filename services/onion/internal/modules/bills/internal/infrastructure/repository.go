@@ -100,6 +100,9 @@ func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit,
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.BillInput) (int64, error) {
+	if err := r.validateBillReferences(ctx, businessID, input.PurchaseOrderID); err != nil {
+		return 0, err
+	}
 	status := input.Status
 	if status == "" {
 		status = "pending"
@@ -156,6 +159,9 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	// The update body is partial: fields the caller omitted keep the stored
 	// value instead of clearing the vendor snapshot or the order link.
 	mergeBillInput(&input, current)
+	if err := r.validateBillReferences(ctx, businessID, input.PurchaseOrderID); err != nil {
+		return err
+	}
 
 	dueDate, err := time.Parse("2006-01-02", input.DueDate)
 	if err != nil && input.DueDate != "" {
@@ -197,8 +203,8 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	return nil
 }
 
-// mergeBillInput keeps the stored supplier link, vendor snapshot and purchase
-// order link when the caller omitted them from the partial update body.
+// mergeBillInput keeps stored values when the caller omitted them from the
+// partial update body.
 func mergeBillInput(input *domain.BillInput, current domain.Bill) {
 	if input.SupplierID == 0 {
 		input.SupplierID = current.SupplierID
@@ -209,6 +215,37 @@ func mergeBillInput(input *domain.BillInput, current domain.Bill) {
 	if input.PurchaseOrderID == nil {
 		input.PurchaseOrderID = current.PurchaseOrderID
 	}
+	if input.Amount == 0 {
+		input.Amount = current.Amount
+	}
+	if input.Currency == "" {
+		input.Currency = current.Currency
+	}
+	if input.DueDate == "" {
+		input.DueDate = current.DueDate.Format("2006-01-02")
+	}
+	if input.Description == "" {
+		input.Description = current.Description
+	}
+}
+
+func (r *Repository) validateBillReferences(ctx context.Context, businessID int64, purchaseOrderID *int64) error {
+	if purchaseOrderID == nil {
+		return nil
+	}
+	if *purchaseOrderID <= 0 {
+		return domain.ErrBillReferenceNotFound
+	}
+	var id int64
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT id
+		FROM erp_purchase_orders
+		WHERE business_id = ? AND id = ?
+		LIMIT 1`, businessID, *purchaseOrderID).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrBillReferenceNotFound
+	}
+	return err
 }
 
 // SumByStatus returns the total bill amount for a given status and owner.

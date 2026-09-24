@@ -241,9 +241,15 @@ func enqueue(ctx context.Context, db dbtx, p enqueueParams) error {
 	})
 }
 
-var htmlTagPattern = regexp.MustCompile(`<[^>]+>`)
+var (
+	// Raw-text elements are not presentation markup: stripping only their tags
+	// would leak the entire stylesheet/script into the plaintext alternative.
+	htmlRawTextElementPattern = regexp.MustCompile(`(?is)<(?:style|script)\b[^>]*>.*?(?:</(?:style|script)\s*>|$)`)
+	htmlTagPattern            = regexp.MustCompile(`<[^>]+>`)
+)
 
 func htmlToText(markup string) string {
+	markup = htmlRawTextElementPattern.ReplaceAllString(markup, " ")
 	text := htmlTagPattern.ReplaceAllString(markup, " ")
 	return strings.TrimSpace(stdhtml.UnescapeString(text))
 }

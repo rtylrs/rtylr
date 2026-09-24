@@ -84,6 +84,40 @@ func (r *Repository) SumPaidInvoicesInRange(ctx context.Context, businessID int6
 	return toFloat64FromInterface(result), nil
 }
 
+func (r *Repository) SumInvoicePaymentsInRange(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
+	query := `
+		SELECT COALESCE(SUM(p.amount), 0)
+		FROM finance_payments p
+		JOIN businesses b ON b.id = p.business_id
+		WHERE p.business_id = ?
+		  AND COALESCE(NULLIF(p.currency, ''), 'USD') = COALESCE(NULLIF(b.currency, ''), 'USD')`
+	args := []any{businessID}
+
+	if dateFrom != "" {
+		from, err := time.Parse("2006-01-02", dateFrom)
+		if err != nil {
+			return 0, fmt.Errorf("parse payment range start %q: %w", dateFrom, err)
+		}
+		query += " AND p.payment_date >= ?"
+		args = append(args, from)
+	}
+	if dateTo != "" {
+		to, err := time.Parse("2006-01-02", dateTo)
+		if err != nil {
+			return 0, fmt.Errorf("parse payment range end %q: %w", dateTo, err)
+		}
+		query += " AND p.payment_date <= ?"
+		args = append(args, to)
+	}
+
+	var result interface{}
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&result); err != nil {
+		logger.Ctx(ctx).Error("Failed to sum invoice payments in range", logger.Error(err))
+		return 0, err
+	}
+	return toFloat64FromInterface(result), nil
+}
+
 func (r *Repository) SumExpensesInRange(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
 	dfTime, err := time.Parse("2006-01-02", dateFrom)
 	if err != nil && dateFrom != "" {

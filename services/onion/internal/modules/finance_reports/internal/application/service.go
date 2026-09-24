@@ -3,16 +3,11 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/infrastructure"
-	"github.com/voxire/onion/internal/platform/cache/cacher"
-	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
-
-const financeReportsTTL = 5 * time.Minute
 
 type repository interface {
 	SumAccountsByType(ctx context.Context, businessID int64, accountType string) (float64, error)
@@ -24,6 +19,10 @@ type repository interface {
 	SumExpensesInRange(ctx context.Context, businessID int64, from, to string) (float64, error)
 }
 
+type invoicePaymentRepository interface {
+	SumInvoicePaymentsInRange(ctx context.Context, businessID int64, from, to string) (float64, error)
+}
+
 type Service struct {
 	repo repository
 }
@@ -33,13 +32,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) GetBalanceSheet(ctx context.Context, businessID int64) (domain.BalanceSheet, error) {
-	return cacher.Of[domain.BalanceSheet]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped("finance_reports", businessID, "balance_sheet"),
-		func(ctx context.Context) (domain.BalanceSheet, error) {
-			return s.computeBalanceSheet(ctx, businessID)
-		},
-		cacher.WithExpiry(ctx, financeReportsTTL),
-	)
+	return s.computeBalanceSheet(ctx, businessID)
 }
 
 func (s *Service) computeBalanceSheet(ctx context.Context, businessID int64) (domain.BalanceSheet, error) {
@@ -92,19 +85,13 @@ func (s *Service) computeBalanceSheet(ctx context.Context, businessID int64) (do
 }
 
 func (s *Service) GetCashFlow(ctx context.Context, businessID int64, period string) (domain.CashFlow, error) {
-	key := cacheKeys.Scoped("finance_reports", businessID, fmt.Sprintf("cash_flow|p=%s", period))
-	return cacher.Of[domain.CashFlow]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) (domain.CashFlow, error) {
-			return s.computeCashFlow(ctx, businessID, period)
-		},
-		cacher.WithExpiry(ctx, financeReportsTTL),
-	)
+	return s.computeCashFlow(ctx, businessID, period)
 }
 
 func (s *Service) computeCashFlow(ctx context.Context, businessID int64, period string) (domain.CashFlow, error) {
 	dateFrom, dateTo := resolvePeriodRange(period)
 
-	inflow, err := s.repo.SumPaidInvoicesInRange(ctx, businessID, dateFrom, dateTo)
+	inflow, err := s.sumInvoicePaymentsInRange(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return domain.CashFlow{}, err
 	}
@@ -123,6 +110,13 @@ func (s *Service) computeCashFlow(ctx context.Context, businessID int64, period 
 		NetOperating:     netOperating,
 		NetCashFlow:      netOperating,
 	}, nil
+}
+
+func (s *Service) sumInvoicePaymentsInRange(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
+	if repo, ok := s.repo.(invoicePaymentRepository); ok {
+		return repo.SumInvoicePaymentsInRange(ctx, businessID, dateFrom, dateTo)
+	}
+	return s.repo.SumPaidInvoicesInRange(ctx, businessID, dateFrom, dateTo)
 }
 
 func resolvePeriodRange(period string) (string, string) {

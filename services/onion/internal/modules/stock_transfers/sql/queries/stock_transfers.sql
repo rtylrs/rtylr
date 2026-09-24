@@ -2,14 +2,14 @@
 SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
 FROM erp_stock_transfers
 WHERE business_id = ?
-ORDER BY created_at DESC
+ORDER BY created_at DESC, id DESC
 LIMIT 200;
 
 -- name: ListStockTransfersPaged :many
 SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
 FROM erp_stock_transfers
 WHERE business_id = ?
-ORDER BY created_at DESC
+ORDER BY created_at DESC, id DESC
 LIMIT ? OFFSET ?;
 
 -- name: GetStockTransferForUpdate :one
@@ -57,5 +57,4 @@ LIMIT 1;
 SELECT id, transfer_id, product_id, quantity, created_at
 FROM erp_stock_transfer_items
 WHERE transfer_id IN (sqlc.slice('transfer_ids'))
-ORDER BY id ASC
-LIMIT 200;
+ORDER BY id ASC;

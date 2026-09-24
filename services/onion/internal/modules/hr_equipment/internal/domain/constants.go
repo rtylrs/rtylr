@@ -15,3 +15,13 @@ const (
 	AssetStatusRetired   = "retired"
 	AssetStatusRepair    = "repair"
 )
+
+// Asset condition is independent of the lifecycle status above. An asset can
+// be assigned while being in fair condition, or available while damaged and
+// awaiting repair.
+const (
+	AssetConditionNew     = "new"
+	AssetConditionGood    = "good"
+	AssetConditionFair    = "fair"
+	AssetConditionDamaged = "damaged"
+)

@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -127,6 +128,32 @@ func TestCreateDocument_WithStaffID(t *testing.T) {
 	}
 }
 
+func TestCreateDocument_RejectsForeignStaffWithoutInserting(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const name = "Foreign Staff Document Must Not Persist"
+
+	_, err := repo.Create(ctx, testutil.OtherBusinessID, domain.DocumentInput{
+		Name:    name,
+		StaffID: 4101,
+	})
+	if !errors.Is(err, domain.ErrDocumentStaffNotFound) {
+		t.Fatalf("Create with foreign staff error = %v, want ErrDocumentStaffNotFound", err)
+	}
+
+	var count int
+	if err := db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM hr_documents WHERE business_id = ? AND name = ?`,
+		testutil.OtherBusinessID, name,
+	).Scan(&count); err != nil {
+		t.Fatalf("count rejected document: %v", err)
+	}
+	if count != 0 {
+		t.Fatalf("foreign-staff document persisted %d row(s), want 0", count)
+	}
+}
+
 func TestCreateDocument_WithFileURL(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
@@ -185,7 +212,7 @@ func TestDeleteDocument_RemovesFromList(t *testing.T) {
 	}
 }
 
-func TestDeleteDocument_WrongOwnerIsNoop(t *testing.T) {
+func TestDeleteDocument_WrongOwnerReturnsNotFoundAndPreservesRow(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -200,8 +227,9 @@ func TestDeleteDocument_WrongOwnerIsNoop(t *testing.T) {
 		_ = repo.Delete(ctx, testutil.OwnerID, id)
 	}()
 
-	// Attempt delete with wrong owner should not delete the document.
-	_ = repo.Delete(ctx, 9999999, id)
+	if err := repo.Delete(ctx, 9999999, id); !errors.Is(err, domain.ErrDocumentNotFound) {
+		t.Fatalf("Delete with wrong owner error = %v, want ErrDocumentNotFound", err)
+	}
 
 	docs, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -344,14 +372,14 @@ func TestCreateDocument_NamePersisted(t *testing.T) {
 	t.Errorf("document id=%d not found", id)
 }
 
-func TestDeleteDocument_NonExistentIsNoop(t *testing.T) {
+func TestDeleteDocument_NonExistentReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Deleting a non-existent id should not return an error.
-	err := repo.Delete(ctx, testutil.OwnerID, 9999999)
-	_ = err
+	if err := repo.Delete(ctx, testutil.OwnerID, 9999999); !errors.Is(err, domain.ErrDocumentNotFound) {
+		t.Fatalf("Delete non-existent error = %v, want ErrDocumentNotFound", err)
+	}
 }
 
 func TestListDocuments_IsolatedByOwner(t *testing.T) {
@@ -429,7 +457,7 @@ func TestCreateDocument_UniqueIDsEachCall(t *testing.T) {
 	}
 }
 
-func TestDeleteDocument_DoubleDeleteIsNoop(t *testing.T) {
+func TestDeleteDocument_SecondDeleteReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -444,8 +472,9 @@ func TestDeleteDocument_DoubleDeleteIsNoop(t *testing.T) {
 	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
 		t.Fatalf("First Delete: %v", err)
 	}
-	// Second delete on already-removed row should not panic or return a fatal error.
-	_ = repo.Delete(ctx, testutil.OwnerID, id)
+	if err := repo.Delete(ctx, testutil.OwnerID, id); !errors.Is(err, domain.ErrDocumentNotFound) {
+		t.Fatalf("Second Delete error = %v, want ErrDocumentNotFound", err)
+	}
 }
 
 func TestCreateDocument_FileURLEmptyByDefault(t *testing.T) {

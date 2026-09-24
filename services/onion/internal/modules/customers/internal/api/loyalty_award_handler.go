@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"errors"
-	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -34,17 +33,15 @@ type AwardPointsResponse struct {
 }
 
 func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest) error {
-	if req.CustomerID == 0 {
+	if req == nil || req.CustomerID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
-	if req.Points <= 0 {
+	if err := domain.ValidateLoyaltyPoints(int64(req.Points)); err != nil {
+		if errors.Is(err, domain.ErrLoyaltyPointsOutOfRange) {
+			return onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
 		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
-	}
-	// The ledger write casts to int32; anything above MaxInt32 would wrap
-	// negative before the merge path's clamp ever sees it (#844).
-	if req.Points > math.MaxInt32 {
-		return onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
 	}
 
 	return nil
@@ -76,6 +73,15 @@ func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest)
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
 			return AwardPointsResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
+		}
+		if errors.Is(err, domain.ErrLoyaltyBalanceCapacity) {
+			return AwardPointsResponse{}, onekiterrors.New(http.StatusConflict, "Loyalty balance capacity exceeded")
+		}
+		if errors.Is(err, domain.ErrLoyaltyPointsOutOfRange) {
+			return AwardPointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
+		if errors.Is(err, domain.ErrLoyaltyPointsNotPositive) {
+			return AwardPointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 		}
 
 		return AwardPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to award points")

@@ -19,6 +19,68 @@ type LeaveTypeRecord struct {
 	UpdatedAt                      time.Time `json:"updated_at"`
 }
 
+// LeaveTypePatch preserves field presence for the generated update contract.
+// A nil field means "not supplied"; in particular, false and zero are valid
+// values when their pointer is non-nil.
+type LeaveTypePatch struct {
+	Name                           *string
+	IsPaid                         *bool
+	RequiresApproval               *bool
+	AccrualRule                    *string
+	AccrualAmount                  *float64
+	MaxCarryoverDays               *int32
+	MinNoticeDays                  *int32
+	RequiresDocumentationAfterDays *int32
+	IsActive                       *bool
+}
+
+func (p LeaveTypePatch) Empty() bool {
+	return p.Name == nil &&
+		p.IsPaid == nil &&
+		p.RequiresApproval == nil &&
+		p.AccrualRule == nil &&
+		p.AccrualAmount == nil &&
+		p.MaxCarryoverDays == nil &&
+		p.MinNoticeDays == nil &&
+		p.RequiresDocumentationAfterDays == nil &&
+		p.IsActive == nil
+}
+
+// ApplyLeaveTypePatch returns a copy of current with only supplied fields
+// changed. It is also used by the service to validate the effective record
+// before it is persisted.
+func ApplyLeaveTypePatch(current LeaveTypeRecord, patch LeaveTypePatch) LeaveTypeRecord {
+	updated := current
+	if patch.Name != nil {
+		updated.Name = *patch.Name
+	}
+	if patch.IsPaid != nil {
+		updated.IsPaid = *patch.IsPaid
+	}
+	if patch.RequiresApproval != nil {
+		updated.RequiresApproval = *patch.RequiresApproval
+	}
+	if patch.AccrualRule != nil {
+		updated.AccrualRule = *patch.AccrualRule
+	}
+	if patch.AccrualAmount != nil {
+		updated.AccrualAmount = *patch.AccrualAmount
+	}
+	if patch.MaxCarryoverDays != nil {
+		updated.MaxCarryoverDays = *patch.MaxCarryoverDays
+	}
+	if patch.MinNoticeDays != nil {
+		updated.MinNoticeDays = *patch.MinNoticeDays
+	}
+	if patch.RequiresDocumentationAfterDays != nil {
+		updated.RequiresDocumentationAfterDays = *patch.RequiresDocumentationAfterDays
+	}
+	if patch.IsActive != nil {
+		updated.IsActive = *patch.IsActive
+	}
+	return updated
+}
+
 type LeaveRequestRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`

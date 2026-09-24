@@ -7,6 +7,21 @@ import (
 	"testing"
 )
 
+func TestExtractIPOnlyTrustsConfiguredProxyHeader(t *testing.T) {
+	t.Setenv("TRUSTED_PROXY_CIDRS", "203.0.113.0/24")
+	r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
+	r.RemoteAddr = "198.51.100.10:1234"
+	r.Header.Set("CF-Connecting-IP", "8.8.8.8")
+	if got := extractIP(r); got != "198.51.100.10" {
+		t.Fatalf("direct connection trusted spoofed header: %q", got)
+	}
+
+	r.RemoteAddr = "203.0.113.10:1234"
+	if got := extractIP(r); got != "8.8.8.8" {
+		t.Fatalf("configured proxy header was ignored: %q", got)
+	}
+}
+
 func TestExtractLanguage(t *testing.T) {
 	cases := map[string]string{
 		"":               "en",

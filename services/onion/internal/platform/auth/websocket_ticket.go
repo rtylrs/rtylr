@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -20,7 +21,10 @@ const (
 	webSocketTicketKeyPrefix = "auth:websocket-ticket:"
 )
 
-var ErrWebSocketTicketInvalid = errors.New("websocket ticket invalid")
+var (
+	ErrWebSocketTicketInvalid = errors.New("websocket ticket invalid")
+	ErrWebSocketTicketStorage = errors.New("websocket ticket storage failed")
+)
 
 type websocketTicketRecord struct {
 	UserID         int64  `json:"user_id"`
@@ -83,7 +87,9 @@ func issueWebSocketTicketAt(ctx context.Context, user *AuthUser, issuedAt time.T
 		PlanID:         user.PlanID,
 		ExpiresAt:      issuedAt.Add(webSocketTicketLifetime).UnixNano(),
 	}
-	storeWebSocketTicket(ctx, ticket, record)
+	if err := storeWebSocketTicket(ctx, ticket, record); err != nil {
+		return "", err
+	}
 
 	return ticket, nil
 }
@@ -91,23 +97,51 @@ func issueWebSocketTicketAt(ctx context.Context, user *AuthUser, issuedAt time.T
 // storeWebSocketTicket stores a ticket for later consumption. Redis is the
 // production source of truth with cross-instance atomic GETDEL; the
 // process-local map is only a fallback for deployments and tests without Redis.
-func storeWebSocketTicket(ctx context.Context, ticket string, record websocketTicketRecord) {
+// When Redis is selected, a failed write is returned to the caller rather than
+// issuing a ticket that no handshake can consume.
+func storeWebSocketTicket(ctx context.Context, ticket string, record websocketTicketRecord) error {
+	return storeWebSocketTicketWithPut(
+		ctx,
+		ticket,
+		record,
+		cacher.RedisAvailable(),
+		func(ctx context.Context, key string, value []byte, ttl time.Duration) bool {
+			cache := cacher.GetRedisCache()
+			return cache != nil && cache.PutConfirmed(ctx, key, value, ttl)
+		},
+	)
+}
+
+// storeWebSocketTicketWithPut keeps the storage decision injectable for a
+// regression test without requiring a live Redis server.
+func storeWebSocketTicketWithPut(
+	ctx context.Context,
+	ticket string,
+	record websocketTicketRecord,
+	useRedis bool,
+	put func(context.Context, string, []byte, time.Duration) bool,
+) error {
 	hash := hashWebSocketTicket(ticket)
 
-	if !cacher.RedisAvailable() {
+	if !useRedis {
 		storeLocalWebSocketTicket(hash, record)
-		return
+		return nil
 	}
 
 	encoded, err := json.Marshal(record)
 	if err != nil {
-		return
+		return fmt.Errorf("marshal websocket ticket: %w", err)
 	}
 
 	remaining := time.Until(time.Unix(0, record.ExpiresAt))
-	if remaining > 0 {
-		cacher.GetRedisCache().Put(ctx, websocketTicketKey(hash), encoded, remaining)
+	if remaining <= 0 {
+		return ErrWebSocketTicketStorage
 	}
+	if put == nil || !put(ctx, websocketTicketKey(hash), encoded, remaining) {
+		return ErrWebSocketTicketStorage
+	}
+
+	return nil
 }
 
 // storeLocalWebSocketTicket records a ticket in the fallback map and drops

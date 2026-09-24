@@ -8,6 +8,7 @@ type Repository interface {
 	GetLeaveType(ctx context.Context, ownerID, leaveTypeID int64) (*LeaveTypeRecord, error)
 	CreateLeaveType(ctx context.Context, ownerID int64, lt LeaveTypeRecord) (*LeaveTypeRecord, error)
 	UpdateLeaveType(ctx context.Context, ownerID int64, lt LeaveTypeRecord) error
+	UpdateLeaveTypePatch(ctx context.Context, ownerID, leaveTypeID int64, patch LeaveTypePatch) error
 
 	// Leave Requests
 	ListLeaveRequests(ctx context.Context, ownerID int64, params ListLeaveRequestsParams) ([]LeaveRequestRecord, int64, error)
@@ -29,10 +30,11 @@ type Repository interface {
 	CancelLeaveRequest(ctx context.Context, ownerID, requestID int64) (bool, error)
 	CancelLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, allocations []LeaveDayAllocation) error
 	ListOverlappingLeaveRequests(ctx context.Context, ownerID, employeeID int64, startDate, endDate string) ([]LeaveRequestRecord, error)
-	ListLeaveCalendar(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]LeaveRequestRecord, error)
+	ListLeaveCalendar(ctx context.Context, businessID, locationID int64, dateFrom, dateTo string) ([]LeaveRequestRecord, error)
 
 	// Leave Balances
 	ListLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]LeaveBalanceRecord, error)
+	CountLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) (int64, error)
 	GetLeaveBalance(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32) (*LeaveBalanceRecord, error)
 	UpsertLeaveBalance(ctx context.Context, ownerID int64, bal LeaveBalanceRecord) error
 	AddToUsedDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error

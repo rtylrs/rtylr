@@ -12,8 +12,10 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	internaljobs "github.com/voxire/onion/internal/modules/hr_leave/internal/jobs"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
@@ -69,11 +71,23 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 
 // ApprovedLeaveEmployeeIDs returns the set of employee ids with an approved
 // leave request covering the given date (YYYY-MM-DD) - used by Flow's
-// business-wide "who's in today" presence view. Passing the same date as
-// both bounds relies on ListLeaveCalendar's own overlap query
-// (start_date <= to AND end_date >= from) to mean "covers this one day."
+// business-wide "who's in today" presence view. Passing the same date as both
+// bounds relies on ListLeaveCalendar's overlap query to mean "covers this one
+// day." Authenticated callers are re-resolved to their verified business id;
+// the ownerID argument remains for trusted internal callers without auth data.
 func (m *Module) ApprovedLeaveEmployeeIDs(ctx context.Context, ownerID int64, date string) (map[int64]bool, error) {
-	requests, err := m.service.GetLeaveCalendar(ctx, ownerID, domain.LeaveCalendarParams{DateFrom: date, DateTo: date})
+	businessID := ownerID
+	if authUser, ok := authPkg.GetAuthUser(ctx); ok && authUser != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if err != nil {
+			return nil, err
+		}
+		businessID = resolved
+	}
+	if businessID <= 0 {
+		return nil, domain.ErrLeaveAccessDenied
+	}
+	requests, err := m.service.GetLeaveCalendar(ctx, businessID, domain.LeaveCalendarParams{DateFrom: date, DateTo: date})
 	if err != nil {
 		return nil, err
 	}

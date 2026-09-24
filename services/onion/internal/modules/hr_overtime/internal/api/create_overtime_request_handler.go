@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -56,13 +57,16 @@ func (h *CreateOvertimeRequestHandler) Serve(ctx context.Context, req *CreateOve
 		return CreateOvertimeRequestResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	created, err := h.Service.CreateOvertimeRequest(ctx, businessID, domain.OvertimeRequestRecord{
+	created, err := h.Service.CreateOvertimeRequest(ctx, businessID, device.User.UserID, domain.OvertimeRequestRecord{
 		EmployeeID:          req.EmployeeID,
 		Date:                req.Date,
 		PlannedExtraMinutes: req.PlannedExtraMinutes,
 		Reason:              req.Reason,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrOvertimeAccessDenied) {
+			return CreateOvertimeRequestResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to create overtime request", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateOvertimeRequestResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create overtime request")
 	}

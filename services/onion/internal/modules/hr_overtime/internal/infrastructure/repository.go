@@ -28,7 +28,21 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListOvertimeRequests(ctx context.Context, businessID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
-	total, err := r.queries.CountOvertimeRequests(ctx, businessID)
+	employeeID := sql.NullInt64{}
+	if params.EmployeeID != nil {
+		employeeID = sql.NullInt64{Int64: *params.EmployeeID, Valid: true}
+	}
+	status := sql.NullString{}
+	if params.Status != nil {
+		status = sql.NullString{String: *params.Status, Valid: true}
+	}
+
+	filterParams := sqlc.CountOvertimeRequestsParams{
+		BusinessID: businessID,
+		EmployeeID: employeeID,
+		Status:     status,
+	}
+	total, err := r.queries.CountOvertimeRequests(ctx, filterParams)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to count overtime requests", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
@@ -36,6 +50,8 @@ func (r *Repository) ListOvertimeRequests(ctx context.Context, businessID int64,
 
 	rows, err := r.queries.ListOvertimeRequests(ctx, sqlc.ListOvertimeRequestsParams{
 		BusinessID: businessID,
+		EmployeeID: employeeID,
+		Status:     status,
 		Limit:      params.Limit,
 		Offset:     params.Offset,
 	})
@@ -91,7 +107,12 @@ func (r *Repository) CreateOvertimeRequest(ctx context.Context, businessID int64
 	req.ID = id
 	req.OwnerID = businessID
 	req.BusinessID = businessID
-	return &req, nil
+
+	// Re-read the row after INSERT. MySQL assigns created_at/updated_at in the
+	// database, so returning the pre-insert struct serialized Go's zero time
+	// as a large negative Unix timestamp. The scoped read also makes the
+	// returned record authoritative for any future database defaults.
+	return r.GetOvertimeRequest(ctx, businessID, id)
 }
 
 func (r *Repository) ApproveOvertimeRequest(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error {
@@ -117,8 +138,12 @@ func (r *Repository) AdvanceOvertimeApprovalLevel(ctx context.Context, businessI
 	return overtimeRequestWriteResult(result)
 }
 
-func (r *Repository) RejectOvertimeRequest(ctx context.Context, businessID, requestID int64) error {
-	result, err := r.queries.RejectOvertimeRequest(ctx, sqlc.RejectOvertimeRequestParams{ID: requestID, BusinessID: businessID})
+func (r *Repository) RejectOvertimeRequest(ctx context.Context, businessID, requestID int64, rejectionReason string) error {
+	result, err := r.queries.RejectOvertimeRequest(ctx, sqlc.RejectOvertimeRequestParams{
+		ID:              requestID,
+		BusinessID:      businessID,
+		RejectionReason: sqlutil.NullString(rejectionReason),
+	})
 	if err != nil {
 		return err
 	}
@@ -236,6 +261,7 @@ func overtimeRequestFromRow(row sqlc.HrOvertimeRequest) domain.OvertimeRequestRe
 		Reason:               row.Reason.String,
 		Status:               row.Status,
 		CurrentApprovalLevel: row.CurrentApprovalLevel,
+		RejectionReason:      row.RejectionReason.String,
 		ApprovedBy:           row.ApprovedBy.Int64,
 		MultiplierApplied:    parseFloat(row.MultiplierApplied.String),
 		CreatedAt:            row.CreatedAt,

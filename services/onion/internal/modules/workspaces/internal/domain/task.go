@@ -46,6 +46,8 @@ type Task struct {
 	CompletedAt    *time.Time
 	EstimatedHours *float64
 	ActualHours    *float64
+	EffortMinutes  *int32
+	FocusPin       bool
 	SortOrder      int
 	Labels         []int64
 	Archived       bool

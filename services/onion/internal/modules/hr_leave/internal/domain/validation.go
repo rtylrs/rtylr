@@ -20,7 +20,11 @@ func ValidateLeaveType(lt LeaveTypeRecord) error {
 	if lt.AccrualAmount < 0 {
 		return ErrNegativeAccrual
 	}
-	if lt.AccrualRule != "" && !IsValidAccrualRule(lt.AccrualRule) {
+	if lt.MaxCarryoverDays < 0 || lt.MinNoticeDays < 0 || lt.RequiresDocumentationAfterDays < 0 {
+		return ErrNegativeLeavePolicyLimit
+	}
+	rule := strings.ToLower(strings.TrimSpace(lt.AccrualRule))
+	if rule != "" && !IsValidAccrualRule(rule) {
 		return ErrInvalidAccrualRule
 	}
 	return nil

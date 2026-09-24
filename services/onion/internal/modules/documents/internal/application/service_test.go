@@ -53,3 +53,10 @@ func TestDelete_HappyPath(t *testing.T) {
 		t.Errorf("unexpected: %v", err)
 	}
 }
+
+func TestDelete_PropagatesNotFound(t *testing.T) {
+	s := &Service{repo: &mockRepo{delErr: domain.ErrDocumentNotFound}}
+	if err := s.Delete(context.Background(), 1, 5); !errors.Is(err, domain.ErrDocumentNotFound) {
+		t.Errorf("Delete error = %v, want ErrDocumentNotFound", err)
+	}
+}

@@ -14,8 +14,9 @@ func attendanceToProto(r domain.AttendanceRecordRecord) *hrattendancev1.Attendan
 		unix := r.ClockOutAt.Unix()
 		clockOutAt = &unix
 	}
-	if r.DurationMinutes > 0 {
-		durationMinutes = &r.DurationMinutes
+	if !r.ClockOutAt.IsZero() {
+		duration := r.DurationMinutes
+		durationMinutes = &duration
 	}
 	if r.ClockInLat != 0 {
 		clockInLat = &r.ClockInLat

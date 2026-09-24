@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
@@ -9,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
@@ -25,8 +27,9 @@ const (
 type ListTemplatesHandler struct{ Service *application.Service }
 
 type ListTemplatesRequest struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Limit       int32   `json:"limit"`
+	Offset      int32   `json:"offset"`
+	TriggerType *string `json:"trigger_type"`
 }
 
 type ListTemplatesResponse struct {
@@ -42,6 +45,14 @@ func (h *ListTemplatesHandler) Serve(ctx context.Context, req *ListTemplatesRequ
 		return ListTemplatesResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListTemplatesResponse{}, onekiterrors.PermissionDenied()
+	}
+	if req == nil {
+		req = &ListTemplatesRequest{}
+	}
+
 	limit := req.Limit
 	if limit <= 0 {
 		limit = defaultListTemplatesLimit
@@ -49,13 +60,21 @@ func (h *ListTemplatesHandler) Serve(ctx context.Context, req *ListTemplatesRequ
 	if limit > maxListTemplatesLimit {
 		limit = maxListTemplatesLimit
 	}
+	offset := req.Offset
+	if offset < 0 {
+		offset = 0
+	}
 
-	templates, total, err := h.Service.ListTemplates(ctx, device.User.UserID, domain.ListTemplatesParams{
-		Limit:  limit,
-		Offset: req.Offset,
+	templates, total, err := h.Service.ListTemplates(ctx, businessID, domain.ListTemplatesParams{
+		Limit:       limit,
+		Offset:      offset,
+		TriggerType: req.TriggerType,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list onboarding templates", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		if errors.Is(err, domain.ErrChecklistAccessDenied) {
+			return ListTemplatesResponse{}, onekiterrors.PermissionDenied()
+		}
+		logger.Ctx(ctx).Error("failed to list onboarding templates", logger.Any("business_id", businessID), logger.Error(err))
 		return ListTemplatesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list templates")
 	}
 
@@ -64,5 +83,5 @@ func (h *ListTemplatesHandler) Serve(ctx context.Context, req *ListTemplatesRequ
 		payloads = append(payloads, templateToProto(t))
 	}
 
-	return ListTemplatesResponse{Templates: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
+	return ListTemplatesResponse{Templates: payloads, Total: total, Limit: limit, Offset: offset}, nil
 }

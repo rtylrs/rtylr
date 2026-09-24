@@ -155,6 +155,11 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 		v := float64(*t.ActualHours)
 		out.ActualHours = &v
 	}
+	if t.EffortMinutes != nil {
+		v := *t.EffortMinutes
+		out.EffortMinutes = &v
+	}
+	out.FocusPin = t.FocusPin
 	if t.SectionID != nil {
 		v := *t.SectionID
 		out.SectionId = &v
@@ -218,12 +223,12 @@ func (a *TaskAPIV2) GetMyTasks(ctx context.Context, req *flowtaskv2.GetMyTasksRe
 	if err := requireFlowPermission(ctx, "flow:tasks:view"); err != nil {
 		return nil, err
 	}
-	caller, _, err := a.resolveAuth(ctx)
+	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
 	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
-	tasks, total, err := a.Service.GetMyTasks(ctx, caller.UserID, int64(page), int64(limit))
+	tasks, total, err := a.Service.GetMyTasksForBusiness(ctx, caller.UserID, businessID, int64(page), int64(limit))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get my tasks")
 	}
@@ -323,16 +328,19 @@ func (a *TaskAPIV2) GetTaskDetail(ctx context.Context, req *flowtaskv2.GetTaskDe
 	if err := requireFlowPermission(ctx, "flow:tasks:view"); err != nil {
 		return nil, err
 	}
-	caller, _, err := a.resolveAuth(ctx)
+	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if !a.Service.IsTaskMember(ctx, caller.UserID, req.GetId()) {
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), caller.UserID, businessID, domain.FlowRoleViewer); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	detail, err := a.Service.GetTaskDetail(ctx, req.GetId())
+	detail, err := a.Service.GetTaskDetailForViewer(ctx, req.GetId(), caller.UserID, businessID)
 	if err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get task detail")
 	}
 
@@ -382,18 +390,21 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 	}
 
 	input := domain.UpdateTaskInput{
-		ID:          req.GetId(),
-		OwnerID:     caller.UserID,
-		BusinessID:  businessID,
-		Title:       body.GetTitle(),
-		Description: body.GetDescription(),
-		Status:      body.GetStatus(),
-		Priority:    body.GetPriority(),
-		AssigneeID:  body.AssigneeId,
-		DueDate:     dueDate,
-		StartDate:   startDate,
-		Labels:      body.GetLabels(),
-		Archived:    body.Archived,
+		ID:             req.GetId(),
+		OwnerID:        caller.UserID,
+		BusinessID:     businessID,
+		Title:          body.GetTitle(),
+		Description:    body.GetDescription(),
+		Status:         body.GetStatus(),
+		Priority:       body.GetPriority(),
+		AssigneeID:     body.AssigneeId,
+		DueDate:        dueDate,
+		StartDate:      startDate,
+		Labels:         body.GetLabels(),
+		Archived:       body.Archived,
+		EffortMinutes:  body.EffortMinutes,
+		EstimatedHours: body.EstimatedHours,
+		FocusPin:       body.FocusPin,
 	}
 
 	if err := a.Service.UpdateTask(ctx, input, caller.UserID); err != nil {

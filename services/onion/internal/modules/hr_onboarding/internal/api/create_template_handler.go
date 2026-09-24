@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -29,8 +30,16 @@ type CreateTemplateResponse struct {
 }
 
 func (h *CreateTemplateHandler) Validate(_ context.Context, req *CreateTemplateRequest) error {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
 	if strings.TrimSpace(req.Name) == "" {
 		return onekiterrors.New(http.StatusBadRequest, "name is required")
+	}
+	if err := domain.ValidateCreateTemplateParams(domain.CreateTemplateParams{
+		Name: req.Name, TriggerType: req.TriggerType,
+	}); err != nil {
+		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return nil
 }
@@ -39,6 +48,9 @@ func (h *CreateTemplateHandler) Serve(ctx context.Context, req *CreateTemplateRe
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return CreateTemplateResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireOnboardingManagePermission(ctx); err != nil {
+		return CreateTemplateResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -52,6 +64,12 @@ func (h *CreateTemplateHandler) Serve(ctx context.Context, req *CreateTemplateRe
 		RoleID:      req.RoleID,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrChecklistAccessDenied) {
+			return CreateTemplateResponse{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrEmptyTemplateName) || errors.Is(err, domain.ErrInvalidTriggerType) {
+			return CreateTemplateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
 		logger.Ctx(ctx).Error("failed to create onboarding template", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateTemplateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create template")
 	}

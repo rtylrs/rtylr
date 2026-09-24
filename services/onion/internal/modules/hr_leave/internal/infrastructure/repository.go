@@ -95,7 +95,7 @@ func (r *Repository) CreateLeaveType(ctx context.Context, ownerID int64, lt doma
 }
 
 func (r *Repository) UpdateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) error {
-	return r.queries.UpdateLeaveType(ctx, sqlc.UpdateLeaveTypeParams{
+	result, err := r.queries.UpdateLeaveType(ctx, sqlc.UpdateLeaveTypeParams{
 		Name:                           lt.Name,
 		IsPaid:                         lt.IsPaid,
 		RequiresApproval:               lt.RequiresApproval,
@@ -108,6 +108,50 @@ func (r *Repository) UpdateLeaveType(ctx context.Context, ownerID int64, lt doma
 		ID:                             lt.ID,
 		BusinessID:                     ownerID,
 	})
+	if err != nil {
+		return err
+	}
+	return r.requireLeaveTypeExistsAfterUpdate(ctx, ownerID, lt.ID, result)
+}
+
+// UpdateLeaveTypePatch changes only fields explicitly supplied by the caller.
+// The SQL uses nullable COALESCE parameters so false and zero remain distinct
+// from an omitted field.
+func (r *Repository) UpdateLeaveTypePatch(ctx context.Context, ownerID, leaveTypeID int64, patch domain.LeaveTypePatch) error {
+	result, err := r.queries.PatchLeaveType(ctx, sqlc.PatchLeaveTypeParams{
+		Name:                           nullStringPtr(patch.Name),
+		IsPaid:                         nullBoolPtr(patch.IsPaid),
+		RequiresApproval:               nullBoolPtr(patch.RequiresApproval),
+		AccrualRule:                    nullStringPtr(patch.AccrualRule),
+		AccrualAmount:                  nullFloatPtr(patch.AccrualAmount),
+		MaxCarryoverDays:               nullInt32Ptr(patch.MaxCarryoverDays),
+		MinNoticeDays:                  nullInt32Ptr(patch.MinNoticeDays),
+		RequiresDocumentationAfterDays: nullInt32Ptr(patch.RequiresDocumentationAfterDays),
+		IsActive:                       nullBoolPtr(patch.IsActive),
+		ID:                             leaveTypeID,
+		BusinessID:                     ownerID,
+	})
+	if err != nil {
+		return err
+	}
+	return r.requireLeaveTypeExistsAfterUpdate(ctx, ownerID, leaveTypeID, result)
+}
+
+func (r *Repository) requireLeaveTypeExistsAfterUpdate(ctx context.Context, ownerID, leaveTypeID int64, result sql.Result) error {
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows > 0 {
+		return nil
+	}
+	// MySQL may report zero affected rows when every supplied value already
+	// matches the stored row. Probe the scoped row before calling that a 404.
+	_, err = r.queries.GetLeaveType(ctx, sqlc.GetLeaveTypeParams{BusinessID: ownerID, ID: leaveTypeID})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrLeaveTypeNotFound
+	}
+	return err
 }
 
 func (r *Repository) ListAllActiveLeaveTypesForOwner(ctx context.Context, ownerID int64) ([]domain.LeaveTypeRecord, error) {
@@ -534,7 +578,10 @@ func (r *Repository) ListOverlappingLeaveRequests(ctx context.Context, ownerID, 
 	return requests, nil
 }
 
-func (r *Repository) ListLeaveCalendar(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.LeaveRequestRecord, error) {
+func (r *Repository) ListLeaveCalendar(ctx context.Context, businessID, locationID int64, dateFrom, dateTo string) ([]domain.LeaveRequestRecord, error) {
+	if locationID < 0 {
+		return nil, domain.ErrInvalidCalendarLocation
+	}
 	df, err := time.Parse("2006-01-02", dateFrom)
 	if err != nil {
 		return nil, err
@@ -543,11 +590,15 @@ func (r *Repository) ListLeaveCalendar(ctx context.Context, ownerID int64, dateF
 	if err != nil {
 		return nil, err
 	}
+	if dt.Before(df) {
+		return nil, domain.ErrInvalidDateRange
+	}
 
 	rows, err := r.queries.ListLeaveCalendar(ctx, sqlc.ListLeaveCalendarParams{
-		BusinessID: ownerID,
-		EndDate:    dt,
-		StartDate:  df,
+		BusinessID: businessID,
+		DateTo:     dt,
+		DateFrom:   df,
+		LocationID: nullInt64Value(locationID),
 	})
 	if err != nil {
 		return nil, err
@@ -565,7 +616,7 @@ func (r *Repository) ListLeaveCalendar(ctx context.Context, ownerID int64, dateF
 func (r *Repository) ListLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
 	rows, err := r.queries.ListLeaveBalances(ctx, sqlc.ListLeaveBalancesParams{
 		BusinessID: ownerID,
-		EmployeeID: employeeID,
+		EmployeeID: nullInt64Value(employeeID),
 		Year:       year,
 	})
 	if err != nil {
@@ -578,6 +629,14 @@ func (r *Repository) ListLeaveBalances(ctx context.Context, ownerID, employeeID 
 		balances = append(balances, leaveBalanceFromRow(row))
 	}
 	return balances, nil
+}
+
+func (r *Repository) CountLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) (int64, error) {
+	return r.queries.CountLeaveBalances(ctx, sqlc.CountLeaveBalancesParams{
+		BusinessID: ownerID,
+		EmployeeID: nullInt64Value(employeeID),
+		Year:       year,
+	})
 }
 
 func (r *Repository) GetLeaveBalance(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32) (*domain.LeaveBalanceRecord, error) {
@@ -731,6 +790,7 @@ func leaveTypeFromRow(row sqlc.HrLeaveType) domain.LeaveTypeRecord {
 	return domain.LeaveTypeRecord{
 		ID:                             row.ID,
 		OwnerID:                        row.OwnerID,
+		BusinessID:                     row.BusinessID,
 		Name:                           row.Name,
 		IsPaid:                         row.IsPaid,
 		RequiresApproval:               row.RequiresApproval,
@@ -749,6 +809,7 @@ func leaveRequestFromRow(row sqlc.HrLeaveRequest) domain.LeaveRequestRecord {
 	return domain.LeaveRequestRecord{
 		ID:                   row.ID,
 		OwnerID:              row.OwnerID,
+		BusinessID:           row.BusinessID,
 		EmployeeID:           row.EmployeeID,
 		LeaveTypeID:          row.LeaveTypeID,
 		StartDate:            row.StartDate.Format("2006-01-02"),
@@ -767,6 +828,7 @@ func leaveBalanceFromRow(row sqlc.HrLeaveBalance) domain.LeaveBalanceRecord {
 	return domain.LeaveBalanceRecord{
 		ID:               row.ID,
 		OwnerID:          row.OwnerID,
+		BusinessID:       row.BusinessID,
 		EmployeeID:       row.EmployeeID,
 		LeaveTypeID:      row.LeaveTypeID,
 		Year:             row.Year,
@@ -791,6 +853,38 @@ func parseFloat(s string) float64 {
 
 func nullInt32(v int32) sql.NullInt32 {
 	return sql.NullInt32{Int32: v, Valid: v != 0}
+}
+
+func nullStringPtr(v *string) sql.NullString {
+	if v == nil {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: *v, Valid: true}
+}
+
+func nullBoolPtr(v *bool) sql.NullBool {
+	if v == nil {
+		return sql.NullBool{}
+	}
+	return sql.NullBool{Bool: *v, Valid: true}
+}
+
+func nullFloatPtr(v *float64) sql.NullString {
+	if v == nil {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: fmt.Sprintf("%.2f", *v), Valid: true}
+}
+
+func nullInt32Ptr(v *int32) sql.NullInt32 {
+	if v == nil {
+		return sql.NullInt32{}
+	}
+	return sql.NullInt32{Int32: *v, Valid: true}
+}
+
+func nullInt64Value(v int64) sql.NullInt64 {
+	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
 func nullStringFromFloat(f float64) sql.NullString {

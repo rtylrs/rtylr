@@ -28,28 +28,35 @@ func (a *BillAPI) ListBills(ctx context.Context, req *financebillv1.ListBillsReq
 	if err != nil {
 		return nil, err
 	}
-	// FIN->ERP-02's read surface: filter to one order's settlement bills.
-	if req != nil && req.GetPurchaseOrderId() > 0 {
-		bills, poErr := a.Service.ListByPurchaseOrder(ctx, businessID, req.GetPurchaseOrderId())
-		if poErr != nil {
-			return nil, billStatusError(http.StatusInternalServerError, "Failed to list bills")
-		}
-		out := make([]*financebillv1.Bill, 0, len(bills))
-		for _, bill := range bills {
-			out = append(out, newBillProto(bill))
-		}
-		return &financebillv1.ListBillsResponse{Bills: out, Page: 1, PageSize: int64(len(out))}, nil
-	}
 
 	var page, pageSize int64
+	var supplierID, purchaseOrderID *int64
 	if req != nil {
 		page = req.GetPage()
 		pageSize = req.GetPageSize()
+		// Preserve the generated request's pointer presence so an omitted
+		// filter means "all" while an explicitly supplied positive id is
+		// applied before pagination.
+		if req.SupplierId != nil && *req.SupplierId > 0 {
+			id := *req.SupplierId
+			supplierID = &id
+		}
+		if req.PurchaseOrderId != nil && *req.PurchaseOrderId > 0 {
+			id := *req.PurchaseOrderId
+			purchaseOrderID = &id
+		}
 	}
-	result, listErr := a.Service.ListPage(ctx, businessID, page, pageSize)
-	if listErr != nil {
+
+	var result application.BillPage
+	if supplierID != nil || purchaseOrderID != nil {
+		result, err = a.Service.ListFilteredPage(ctx, businessID, supplierID, purchaseOrderID, page, pageSize)
+	} else {
+		result, err = a.Service.ListPage(ctx, businessID, page, pageSize)
+	}
+	if err != nil {
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to list bills")
 	}
+
 	out := make([]*financebillv1.Bill, 0, len(result.Bills))
 	for _, bill := range result.Bills {
 		out = append(out, newBillProto(bill))
@@ -90,6 +97,9 @@ func (a *BillAPI) CreateBill(ctx context.Context, req *financebillv1.CreateBillR
 	}
 	id, createErr := a.Service.Create(ctx, businessID, input)
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrBillReferenceNotFound) {
+			return nil, billStatusError(http.StatusBadRequest, "Purchase order is not available in this business")
+		}
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to create bill")
 	}
 	return &financebillv1.CreateBillResponse{Id: id, Message: "Bill created successfully"}, nil
@@ -104,23 +114,16 @@ func (a *BillAPI) UpdateBill(ctx context.Context, req *financebillv1.UpdateBillR
 	if body == nil {
 		return nil, billStatusError(http.StatusBadRequest, "Bill body is required")
 	}
-	amount, amountErr := money.FromFloat64(body.GetAmount())
-	if amountErr != nil {
-		return nil, billStatusError(http.StatusBadRequest, "amount must be a valid monetary value")
+	current, currentErr := a.Service.GetBill(ctx, businessID, req.GetId())
+	if currentErr != nil {
+		if errors.Is(currentErr, domain.ErrBillNotFound) {
+			return nil, billStatusError(http.StatusNotFound, "Bill not found")
+		}
+		return nil, billStatusError(http.StatusInternalServerError, "Failed to load bill")
 	}
-	input := domain.BillInput{
-		SupplierName: body.GetSupplierName(),
-		Amount:       amount,
-		Currency:     body.GetCurrency(),
-		DueDate:      body.GetDueDate(),
-		Status:       body.GetStatus(),
-		Description:  body.GetDescription(),
-	}
-	if body.SupplierId != nil {
-		input.SupplierID = *body.SupplierId
-	}
-	if body.PurchaseOrderId != nil {
-		input.PurchaseOrderID = body.PurchaseOrderId
+	input, inputErr := mergeBillUpdateInput(current, body)
+	if inputErr != nil {
+		return nil, billStatusError(http.StatusBadRequest, inputErr.Error())
 	}
 	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
 		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
@@ -132,11 +135,58 @@ func (a *BillAPI) UpdateBill(ctx context.Context, req *financebillv1.UpdateBillR
 			return nil, billStatusError(http.StatusNotFound, "Bill not found")
 		case errors.Is(updateErr, domain.ErrInvalidStatusTransition), errors.Is(updateErr, domain.ErrPaidBillImmutable):
 			return nil, billStatusError(http.StatusConflict, "Paid bills cannot be changed and bill status transitions are one-way")
+		case errors.Is(updateErr, domain.ErrBillReferenceNotFound):
+			return nil, billStatusError(http.StatusBadRequest, "Purchase order is not available in this business")
 		}
 		logger.Ctx(ctx).Error("failed to update bill", logger.Any("bill_id", req.GetId()), logger.Error(updateErr))
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to update bill")
 	}
 	return &financebillv1.UpdateBillResponse{Message: "Bill updated successfully"}, nil
+}
+
+func mergeBillUpdateInput(current domain.Bill, body *financebillv1.UpdateBillBody) (domain.BillInput, error) {
+	input := domain.BillInput{
+		SupplierID:      current.SupplierID,
+		SupplierName:    current.SupplierName,
+		PurchaseOrderID: current.PurchaseOrderID,
+		Amount:          current.Amount,
+		Currency:        current.Currency,
+		DueDate:         current.DueDate.Format("2006-01-02"),
+		Status:          current.Status,
+		Description:     current.Description,
+	}
+	if body == nil {
+		return input, nil
+	}
+	if body.SupplierId != nil {
+		input.SupplierID = *body.SupplierId
+	}
+	if body.GetSupplierName() != "" {
+		input.SupplierName = body.GetSupplierName()
+	}
+	if body.PurchaseOrderId != nil {
+		input.PurchaseOrderID = body.PurchaseOrderId
+	}
+	if body.GetAmount() != 0 {
+		amount, err := money.FromFloat64(body.GetAmount())
+		if err != nil {
+			return domain.BillInput{}, errors.New("amount must be a valid monetary value")
+		}
+		input.Amount = amount
+	}
+	if body.GetCurrency() != "" {
+		input.Currency = body.GetCurrency()
+	}
+	if body.GetDueDate() != "" {
+		input.DueDate = body.GetDueDate()
+	}
+	if body.GetStatus() != "" {
+		input.Status = body.GetStatus()
+	}
+	if body.GetDescription() != "" {
+		input.Description = body.GetDescription()
+	}
+	return input, nil
 }
 
 func (a *BillAPI) GetBill(ctx context.Context, req *financebillv1.GetBillRequest) (*financebillv1.GetBillResponse, error) {

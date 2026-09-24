@@ -20,20 +20,32 @@ SET status = 'posted', posted_at = CURRENT_TIMESTAMP
 WHERE id = ? AND business_id = ? AND status = 'draft';
 
 -- name: GetJournalLines :many
-SELECT id, entry_id, account_id, debit, credit
-FROM finance_journal_lines
-WHERE entry_id = ?
-ORDER BY id ASC;
+SELECT l.id, l.entry_id, l.account_id, l.debit, l.credit, a.name AS account_name
+FROM finance_journal_lines l
+JOIN finance_journal_entries e ON e.id = l.entry_id
+LEFT JOIN finance_accounts a ON a.id = l.account_id AND a.business_id = e.business_id
+WHERE l.entry_id = ?
+ORDER BY l.id ASC;
 
 -- name: GetJournalLinesForEntries :many
-SELECT id, entry_id, account_id, debit, credit
-FROM finance_journal_lines
-WHERE entry_id IN (sqlc.slice('entry_ids'))
-ORDER BY id ASC;
+SELECT l.id, l.entry_id, l.account_id, l.debit, l.credit, a.name AS account_name
+FROM finance_journal_lines l
+JOIN finance_journal_entries e ON e.id = l.entry_id
+LEFT JOIN finance_accounts a ON a.id = l.account_id AND a.business_id = e.business_id
+WHERE l.entry_id IN (sqlc.slice('entry_ids'))
+ORDER BY l.id ASC;
 
 -- name: CreateJournalLine :exec
 INSERT INTO finance_journal_lines (entry_id, account_id, debit, credit)
 VALUES (?, ?, ?, ?);
+
+-- name: LockJournalAccounts :many
+SELECT id
+FROM finance_accounts
+WHERE business_id = sqlc.arg(business_id)
+  AND id IN (sqlc.slice('account_ids'))
+  AND is_active = TRUE
+FOR UPDATE;
 
 -- name: CountJournalEntriesByStatus :many
 SELECT status, COUNT(*) AS cnt

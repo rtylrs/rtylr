@@ -17,6 +17,12 @@ import (
 const serverShutdownTimeoutSeconds = 20
 
 func Start(ctx context.Context, runMode ChiRunMode, port string) error {
+	// Rate limiters created during package initialization (notably the auth
+	// route limiters) are process-lifetime objects. Snapshot them before setup
+	// so a server restart only tears down limiters owned by this Start call.
+	preexistingRateLimiters := snapshotSecurityRateLimiters()
+	defer stopSecurityRateLimitersNotIn(preexistingRateLimiters)
+
 	r := chi.NewRouter()
 
 	runMode.Setup(ctx, r)
@@ -76,8 +82,6 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 		MaxHeaderBytes:    1 << 20, // 1 MB
 	}
 
-	defer StopAllSecurityRateLimiters()
-
 	listenErr := make(chan error, 1)
 
 	go func() {
@@ -110,6 +114,41 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	}
 
 	return nil
+}
+
+// snapshotSecurityRateLimiters records limiters that already exist before a
+// server instance creates its route-specific limiters. The package-global
+// anonymous auth limiters are created during package initialization and must
+// remain usable when a listener is restarted.
+func snapshotSecurityRateLimiters() map[*SecurityRateLimiter]struct{} {
+	rateLimiterMu.RLock()
+	defer rateLimiterMu.RUnlock()
+
+	limiters := make(map[*SecurityRateLimiter]struct{}, len(activeRateLimiters))
+	for limiter := range activeRateLimiters {
+		limiters[limiter] = struct{}{}
+	}
+	return limiters
+}
+
+// stopSecurityRateLimitersNotIn stops only the limiters created by the current
+// server instance. It deliberately leaves preexisting/process-lifetime
+// limiters running, which is required for a clean restart of the server.
+func stopSecurityRateLimitersNotIn(keep map[*SecurityRateLimiter]struct{}) {
+	rateLimiterMu.Lock()
+	toStop := make([]*SecurityRateLimiter, 0)
+	for limiter := range activeRateLimiters {
+		if _, ok := keep[limiter]; ok {
+			continue
+		}
+		delete(activeRateLimiters, limiter)
+		toStop = append(toStop, limiter)
+	}
+	rateLimiterMu.Unlock()
+
+	for _, limiter := range toStop {
+		limiter.Stop()
+	}
 }
 
 func usesDatabaseHealthCheck(runMode ChiRunMode) bool {

@@ -9,17 +9,17 @@ import (
 	"github.com/voxire/onion/internal/platform/config"
 )
 
-// knownProductionHost is this application's production database endpoint.
+// knownProductionHosts are this application's production database endpoints.
 //
 // Matched exactly, not by an "*.rds.amazonaws.com" suffix: that suffix covers
 // every standard AWS RDS endpoint in existence, so a staging, dev or self-host
 // deployment running its own RDS instance would trip a guard that claims to be
-// protecting *this* production database. An exact host is the only match whose
-// meaning matches what the refusal says.
-//
-// If production ever moves, this constant moves with it. A stale value fails
-// open (the guard stops firing) rather than blocking a healthy deploy.
-const knownProductionHost = "voxire-db.rds.amazonaws.com"
+// protecting *this* production database. Keep the regional endpoint alongside
+// the legacy alias while both are supported.
+var knownProductionHosts = map[string]struct{}{
+	"voxire-db.rds.amazonaws.com":                        {},
+	"voxire-db.c32oko2gqonb.eu-west-1.rds.amazonaws.com": {},
+}
 
 // envAllowProductionDB opts a run into the production database without renaming
 // it "production". APP_ENV is not the only legitimate way to mean production:
@@ -41,7 +41,8 @@ func isProductionHost(host string) bool {
 		host = h
 	}
 
-	return strings.EqualFold(strings.TrimSpace(host), knownProductionHost)
+	_, known := knownProductionHosts[strings.ToLower(strings.TrimSpace(host))]
+	return known
 }
 
 // productionDBAllowed reports whether this run has explicitly declared that it
@@ -63,8 +64,15 @@ func productionDBAllowed() bool {
 // only on the combination that actually indicates a mistake: the production
 // host, with no declaration of intent from either signal.
 func checkProductionSafety(role, dsn string) error {
-	host := hostFromDSN(dsn)
-	if host == "" || !isProductionHost(host) {
+	metadata, parseErr := parseDSNMetadata(dsn)
+	if parseErr != nil || strings.TrimSpace(metadata.host) == "" {
+		return fmt.Errorf(
+			"refusing to connect: could not safely parse %s DSN; refusing an unknown database endpoint",
+			role,
+		)
+	}
+	host := metadata.host
+	if !isProductionHost(host) {
 		return nil
 	}
 
@@ -109,10 +117,10 @@ func isLocalDBHost(host string) bool {
 
 	host = strings.ToLower(strings.TrimSpace(strings.Trim(host, "[]")))
 	if host == "" {
-		// Nothing to judge. checkProductionSafety treats an unparsed host the
-		// same way, and refusing on a DSN we could not read would block far more
-		// than it protects.
-		return true
+		// An unknown endpoint is not evidence that it is local. The DSN parser
+		// now rejects malformed input before this helper is reached, but keep
+		// this branch fail-closed for direct callers as well.
+		return false
 	}
 
 	if host == "localhost" {
@@ -160,7 +168,14 @@ func checkDevelopmentSafety(role, dsn string) error {
 		return nil
 	}
 
-	host := hostFromDSN(dsn)
+	metadata, parseErr := parseDSNMetadata(dsn)
+	if parseErr != nil || strings.TrimSpace(metadata.host) == "" {
+		return fmt.Errorf(
+			"refusing to connect: could not safely parse %s DSN; refusing an unknown database endpoint",
+			role,
+		)
+	}
+	host := metadata.host
 	if isLocalDBHost(host) {
 		return nil
 	}

@@ -77,10 +77,15 @@ LIMIT 500;
 -- a wide or unbounded date range cannot pull the whole company's leave
 -- history in one query.
 -- name: ListLeaveCalendar :many
-SELECT id, owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days,
-       notes, status, current_approval_level, rejection_reason, created_at, updated_at
-FROM hr_leave_requests
-WHERE business_id = ? AND status IN ('approved', 'pending')
-  AND start_date <= ? AND end_date >= ?
-ORDER BY start_date ASC
+SELECT lr.id, lr.owner_id, lr.business_id, lr.employee_id, lr.leave_type_id,
+       lr.start_date, lr.end_date, lr.total_days, lr.notes, lr.status,
+       lr.current_approval_level, lr.rejection_reason, lr.created_at, lr.updated_at
+FROM hr_leave_requests AS lr
+LEFT JOIN hr_employees AS employee
+  ON employee.id = lr.employee_id
+ AND employee.business_id = lr.business_id
+WHERE lr.business_id = ? AND lr.status IN ('approved', 'pending')
+  AND lr.start_date <= sqlc.arg(date_to) AND lr.end_date >= sqlc.arg(date_from)
+  AND (sqlc.narg(location_id) IS NULL OR employee.location_id = sqlc.narg(location_id))
+ORDER BY lr.start_date ASC
 LIMIT 1000;

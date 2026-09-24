@@ -19,3 +19,16 @@ func TestTaskMappersIncludeDependencies(t *testing.T) {
 		t.Fatalf("v2 dependencies = %v, want [7 9]", v2.Dependencies)
 	}
 }
+
+func TestTaskMapperV2CarriesTodayFields(t *testing.T) {
+	minutes := int32(45)
+	task := domain.Task{ID: 42, EffortMinutes: &minutes, FocusPin: true}
+
+	mapped := toTaskV2(task)
+	if mapped.EffortMinutes == nil || *mapped.EffortMinutes != minutes {
+		t.Fatalf("v2 effort_minutes = %v, want %d", mapped.EffortMinutes, minutes)
+	}
+	if !mapped.FocusPin {
+		t.Fatal("v2 focus_pin = false, want true")
+	}
+}

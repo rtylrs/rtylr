@@ -33,11 +33,14 @@ type RedeemPointsResponse struct {
 }
 
 func (h *RedeemPointsHandler) Validate(_ context.Context, req *RedeemPointsRequest) error {
-	if req.CustomerID == 0 {
+	if req == nil || req.CustomerID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
-	if req.Points <= 0 {
+	if err := domain.ValidateLoyaltyPoints(int64(req.Points)); err != nil {
+		if errors.Is(err, domain.ErrLoyaltyPointsOutOfRange) {
+			return onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
 		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 
@@ -74,6 +77,15 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 
 		if errors.Is(err, domain.ErrInsufficientPoints) {
 			return RedeemPointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Insufficient loyalty points")
+		}
+		if errors.Is(err, domain.ErrLoyaltyBalanceCapacity) {
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusConflict, "Loyalty balance capacity exceeded")
+		}
+		if errors.Is(err, domain.ErrLoyaltyPointsOutOfRange) {
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
+		if errors.Is(err, domain.ErrLoyaltyPointsNotPositive) {
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 		}
 
 		return RedeemPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem points")

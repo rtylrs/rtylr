@@ -15,10 +15,15 @@ import (
 
 func SetClockInPINRoutes() []string { return []string{"/hr/employees/me/pin"} }
 
-type SetClockInPINHandler struct{ Service *application.Service }
+type SetClockInPINHandler struct {
+	Service          *application.Service
+	EmployeeResolver EmployeeResolver
+}
 
 type SetClockInPINRequest struct {
-	EmployeeID int64  `json:"employee_id"`
+	// EmployeeID is retained for compatibility with the legacy client. The
+	// handler always resolves the employee from the authenticated user.
+	EmployeeID int64  `json:"-"`
 	Pin        string `json:"pin"`
 }
 
@@ -27,8 +32,8 @@ type SetClockInPINResponse struct {
 }
 
 func (h *SetClockInPINHandler) Validate(_ context.Context, req *SetClockInPINRequest) error {
-	if req.EmployeeID == 0 {
-		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
 	}
 	if len(req.Pin) < 4 || len(req.Pin) > 6 {
 		return onekiterrors.New(http.StatusBadRequest, "pin must be 4-6 digits")
@@ -42,27 +47,36 @@ func (h *SetClockInPINHandler) Validate(_ context.Context, req *SetClockInPINReq
 }
 
 func (h *SetClockInPINHandler) Serve(ctx context.Context, req *SetClockInPINRequest) (SetClockInPINResponse, error) {
+	if h == nil || h.Service == nil || h.EmployeeResolver == nil {
+		return SetClockInPINResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := h.Validate(ctx, req); err != nil {
+		return SetClockInPINResponse{}, err
+	}
+
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return SetClockInPINResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	// Resolve the tenant scope from the JWT. Passing the raw user id as the
-	// owner argument scoped the UPDATE by a value that is not
-	// hr_employees.business_id, so any employee whose user id is not itself a
-	// business id matched zero rows (#938). The sibling clock-in/clock-out
-	// handlers resolve the same way.
+	// Resolve both the tenant and employee from the authenticated identity. The
+	// legacy body still contains employee_id, but trusting it would let a
+	// caller change another employee's clock-in credential.
 	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if err != nil {
 		return SetClockInPINResponse{}, onekiterrors.PermissionDenied()
 	}
+	employeeID, err := h.EmployeeResolver.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+	if err != nil || employeeID <= 0 {
+		return SetClockInPINResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	err = h.Service.SetClockInPIN(ctx, businessID, req.EmployeeID, req.Pin)
+	err = h.Service.SetClockInPIN(ctx, businessID, employeeID, req.Pin)
 	if err != nil {
 		if errors.Is(err, domain.ErrAttendanceNotFound) {
 			return SetClockInPINResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
 		}
-		logger.Ctx(ctx).Error("failed to set clock-in PIN", logger.Any("business_id", businessID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to set clock-in PIN", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return SetClockInPINResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to set PIN")
 	}
 

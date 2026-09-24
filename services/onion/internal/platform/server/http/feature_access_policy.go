@@ -103,6 +103,16 @@ func financeFeaturePermission(method, path string) (string, bool) {
 		if method == http.MethodPost {
 			return "finance:invoices:create", true
 		}
+	case strings.HasPrefix(path, "/finance/quote"), strings.HasPrefix(path, "/finance/quotes"):
+		if method == http.MethodGet {
+			return "finance:quotes:view", true
+		}
+		return "finance:quotes:manage", true
+	case strings.HasPrefix(path, "/finance/recurring-invoice"), strings.HasPrefix(path, "/finance/recurring-invoices"), strings.HasPrefix(path, "/finance/recurring_invoice"):
+		if method == http.MethodGet {
+			return "finance:recurring_invoices:view", true
+		}
+		return "finance:recurring_invoices:manage", true
 	case strings.HasPrefix(path, "/finance/expenses"):
 		if strings.Contains(path, "/approve") {
 			return "finance:expenses:approve", true
@@ -172,7 +182,7 @@ func crmFeaturePermission(method, path string) (string, bool) {
 
 func erpFeaturePermission(method, path string) (string, bool) {
 	switch {
-	case strings.Contains(path, "/erp/product"):
+	case strings.Contains(path, "/erp/product"), strings.Contains(path, "/erp/variant"):
 		if method == http.MethodGet {
 			return "erp:products:view", true
 		}
@@ -196,8 +206,34 @@ func erpFeaturePermission(method, path string) (string, bool) {
 			return "erp:inventory:adjust", true
 		}
 		return "erp:inventory:view", true
+	case strings.Contains(path, "/erp/stock-take"):
+		if method == http.MethodGet {
+			return "erp:inventory:view", true
+		}
+		if method == http.MethodPost {
+			return "erp:inventory:adjust", true
+		}
+		return "erp:inventory:approve", true
+	case strings.Contains(path, "/erp/stock-transfer"):
+		if method == http.MethodGet {
+			return "erp:inventory:view", true
+		}
+		return "erp:inventory:transfer", true
 	case strings.Contains(path, "/erp/warehouse"):
 		return "erp:warehouses:manage", true
+	case strings.Contains(path, "/erp/supplier"):
+		if method == http.MethodGet {
+			return "erp:suppliers:view", true
+		}
+		if method == http.MethodPost {
+			return "erp:suppliers:create", true
+		}
+		return "erp:suppliers:edit", true
+	case strings.Contains(path, "/erp/settings"):
+		if method == http.MethodGet {
+			return "erp:settings:view", true
+		}
+		return "erp:settings:manage", true
 	case strings.Contains(path, "/erp/purchas"):
 		if strings.Contains(path, "/approve") {
 			return "erp:purchasing:approve", true

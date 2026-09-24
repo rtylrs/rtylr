@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS hr_overtime_requests (
     reason TEXT,
     status VARCHAR(50) NOT NULL DEFAULT 'pending',
     current_approval_level INT NOT NULL DEFAULT 0,
+    rejection_reason TEXT,
     approved_by BIGINT,
     multiplier_applied DECIMAL(5,2),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

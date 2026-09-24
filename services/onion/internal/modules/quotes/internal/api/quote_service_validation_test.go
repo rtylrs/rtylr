@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
 	"github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	financequotev1 "github.com/voxire/voxie/gen/go/finance/quote/v1"
 )
@@ -24,6 +25,12 @@ func TestQuoteAPI_CreateQuote_ValidatesInput(t *testing.T) {
 	ctx := auth.WithAuthUser(context.Background(), &auth.AuthUser{
 		UserID:     testutil.OwnerID,
 		BusinessID: testutil.BusinessID,
+		EffectiveAccess: &authorization.EffectiveAccess{Apps: []authorization.EffectiveAppAccess{{
+			AppID:       authorization.AppFinance,
+			Licensed:    true,
+			HasAccess:   true,
+			Permissions: []string{"finance:quotes:view", "finance:quotes:manage"},
+		}}},
 	})
 
 	for _, tc := range []struct {

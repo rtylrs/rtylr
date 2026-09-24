@@ -32,10 +32,13 @@ func TestSetClockInPIN_ScopesByBusinessNotUserID(t *testing.T) {
 	testutil.GrantBusinessAccess(t, db, businessID, userID)
 	seedAttendanceEmployee(t, db, employeeID, businessID, userID)
 
-	handler := &SetClockInPINHandler{Service: application.NewService(ctx, db)}
+	handler := &SetClockInPINHandler{
+		Service:          application.NewService(ctx, db),
+		EmployeeResolver: &employeeResolverStub{employeeID: employeeID},
+	}
 	resp, err := handler.Serve(
 		authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: userID, BusinessID: businessID}),
-		&SetClockInPINRequest{EmployeeID: employeeID, Pin: "1234"},
+		&SetClockInPINRequest{EmployeeID: employeeID + 1, Pin: "1234"},
 	)
 	if err != nil {
 		t.Fatalf("Serve: %v", err)
@@ -72,7 +75,10 @@ func TestSetClockInPIN_DeniesWithoutBusinessScope(t *testing.T) {
 
 	testutil.GrantBusinessAccess(t, db, businessID, userID)
 
-	handler := &SetClockInPINHandler{Service: application.NewService(ctx, db)}
+	handler := &SetClockInPINHandler{
+		Service:          application.NewService(ctx, db),
+		EmployeeResolver: &employeeResolverStub{employeeID: 1},
+	}
 	_, err := handler.Serve(
 		authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: userID, BusinessID: 0}),
 		&SetClockInPINRequest{EmployeeID: 1, Pin: "1234"},

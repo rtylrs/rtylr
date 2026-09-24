@@ -31,7 +31,15 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.RecurringInvoice, error) {
-	rows, err := r.queries.ListRecurringInvoices(ctx, businessID)
+	return r.ListPage(ctx, businessID, 500, 0)
+}
+
+func (r *Repository) ListPage(ctx context.Context, businessID int64, limit, offset int32) ([]domain.RecurringInvoice, error) {
+	rows, err := r.queries.ListRecurringInvoicesPage(ctx, sqlc.ListRecurringInvoicesPageParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list recurring invoices", logger.Error(err))
 		return nil, err
@@ -39,23 +47,37 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Recur
 
 	items := make([]domain.RecurringInvoice, 0, len(rows))
 	for _, row := range rows {
-		ri := domain.RecurringInvoice{
-			ID:                row.ID,
-			OwnerID:           row.OwnerID,
-			BusinessID:        row.BusinessID,
-			TemplateInvoiceID: row.TemplateInvoiceID,
-			Frequency:         string(row.Frequency),
-			NextInvoiceDate:   row.NextInvoiceDate,
-			IsActive:          nullBool(row.IsActive),
-			CreatedAt:         nullTime(row.CreatedAt),
-		}
-		if row.EndDate.Valid {
-			ri.EndDate = row.EndDate.Time
-		}
-		items = append(items, ri)
+		items = append(items, recurringInvoiceFromRow(row))
 	}
-
 	return items, nil
+}
+
+func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.RecurringInvoice, error) {
+	row, err := r.queries.GetRecurringInvoice(ctx, sqlc.GetRecurringInvoiceParams{
+		ID:         id,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		return domain.RecurringInvoice{}, err
+	}
+	return recurringInvoiceFromRow(row), nil
+}
+
+func recurringInvoiceFromRow(row sqlc.FinanceRecurringInvoice) domain.RecurringInvoice {
+	item := domain.RecurringInvoice{
+		ID:                row.ID,
+		OwnerID:           row.OwnerID,
+		BusinessID:        row.BusinessID,
+		TemplateInvoiceID: row.TemplateInvoiceID,
+		Frequency:         string(row.Frequency),
+		NextInvoiceDate:   row.NextInvoiceDate,
+		IsActive:          nullBool(row.IsActive),
+		CreatedAt:         nullTime(row.CreatedAt),
+	}
+	if row.EndDate.Valid {
+		item.EndDate = row.EndDate.Time
+	}
+	return item
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.RecurringInvoiceInput) (int64, error) {

@@ -2,6 +2,7 @@ package domain_test
 
 import (
 	"errors"
+	"math"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
@@ -32,6 +33,8 @@ func TestIsValidCycleType_AllValid(t *testing.T) {
 		domain.CycleTypeAnnual,
 		domain.CycleTypeMidYear,
 		domain.CycleTypeCustom,
+		domain.CycleTypeProbation,
+		domain.CycleTypeAdHoc,
 	} {
 		if !domain.IsValidCycleType(ct) {
 			t.Errorf("expected %q to be valid", ct)
@@ -129,6 +132,21 @@ func TestValidateGoal_NegativeWeight(t *testing.T) {
 	p := domain.CreateGoalParams{Title: "Goal", Weight: -0.5}
 	if err := domain.ValidateGoal(p); !errors.Is(err, domain.ErrNegativeGoalWeight) {
 		t.Errorf("expected ErrNegativeGoalWeight, got %v", err)
+	}
+}
+
+func TestValidateGoal_WeightAboveRange(t *testing.T) {
+	p := domain.CreateGoalParams{Title: "Goal", Weight: 100.01}
+	if err := domain.ValidateGoal(p); !errors.Is(err, domain.ErrInvalidGoalWeight) {
+		t.Errorf("expected ErrInvalidGoalWeight, got %v", err)
+	}
+}
+
+func TestValidateGoal_NonFiniteWeight(t *testing.T) {
+	for _, weight := range []float64{math.NaN(), math.Inf(1), math.Inf(-1)} {
+		if err := domain.ValidateGoal(domain.CreateGoalParams{Title: "Goal", Weight: weight}); !errors.Is(err, domain.ErrInvalidGoalWeight) {
+			t.Errorf("weight %v error = %v, want ErrInvalidGoalWeight", weight, err)
+		}
 	}
 }
 

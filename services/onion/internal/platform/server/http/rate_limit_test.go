@@ -86,6 +86,7 @@ func TestRateLimitMiddleware_Returns429(t *testing.T) {
 }
 
 func TestGetClientKey_TrustsOnlyCloudflare(t *testing.T) {
+	t.Setenv("TRUSTED_PROXY_CIDRS", "10.0.0.0/8")
 	r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 	r.RemoteAddr = "10.0.0.1:1234"
 	if got := getClientKey(r); got != "10.0.0.1" {
@@ -104,6 +105,15 @@ func TestGetClientKey_TrustsOnlyCloudflare(t *testing.T) {
 	r.Header.Set("CF-Connecting-IP", "8.8.8.8")
 	if got := getClientKey(r); got != "8.8.8.8" {
 		t.Errorf("CF-Connecting-IP should win, got %q", got)
+	}
+
+	// A directly reachable self-host listener must ignore a rotated header even
+	// when the value looks like a valid public IP.
+	t.Setenv("TRUSTED_PROXY_CIDRS", "203.0.113.0/24")
+	r.RemoteAddr = "198.51.100.10:4321"
+	r.Header.Set("CF-Connecting-IP", "9.9.9.9")
+	if got := getClientKey(r); got != "198.51.100.10" {
+		t.Errorf("untrusted peer header changed bucket: %q", got)
 	}
 
 	r.Header.Del("CF-Connecting-IP")

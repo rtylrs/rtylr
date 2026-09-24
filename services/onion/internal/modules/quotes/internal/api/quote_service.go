@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -24,6 +25,9 @@ func NewQuoteAPI(service *application.Service) *QuoteAPI {
 }
 
 func (a *QuoteAPI) ListQuotes(ctx context.Context, req *financequotev1.ListQuotesRequest) (*financequotev1.ListQuotesResponse, error) {
+	if err := requireQuotePermission(ctx, "finance:quotes:view"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := quoteBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -57,6 +61,9 @@ func (a *QuoteAPI) ListQuotes(ctx context.Context, req *financequotev1.ListQuote
 }
 
 func (a *QuoteAPI) CreateQuote(ctx context.Context, req *financequotev1.CreateQuoteRequest) (*financequotev1.CreateQuoteResponse, error) {
+	if err := requireQuotePermission(ctx, "finance:quotes:manage"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := quoteBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -102,6 +109,9 @@ func (a *QuoteAPI) CreateQuote(ctx context.Context, req *financequotev1.CreateQu
 }
 
 func (a *QuoteAPI) GetQuote(ctx context.Context, req *financequotev1.GetQuoteRequest) (*financequotev1.GetQuoteResponse, error) {
+	if err := requireQuotePermission(ctx, "finance:quotes:view"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := quoteBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -116,6 +126,9 @@ func (a *QuoteAPI) GetQuote(ctx context.Context, req *financequotev1.GetQuoteReq
 }
 
 func (a *QuoteAPI) UpdateQuoteStatus(ctx context.Context, req *financequotev1.UpdateQuoteStatusRequest) (*financequotev1.UpdateQuoteStatusResponse, error) {
+	if err := requireQuotePermission(ctx, "finance:quotes:manage"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := quoteBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -140,6 +153,9 @@ func (a *QuoteAPI) UpdateQuoteStatus(ctx context.Context, req *financequotev1.Up
 }
 
 func (a *QuoteAPI) ConvertQuote(ctx context.Context, req *financequotev1.ConvertQuoteRequest) (*financequotev1.ConvertQuoteResponse, error) {
+	if err := requireQuotePermission(ctx, "finance:quotes:manage"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := quoteBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -229,6 +245,14 @@ func unmarshalQuoteLines(ctx context.Context, items string) []*financequotev1.Qu
 		})
 	}
 	return lines
+}
+
+func requireQuotePermission(ctx context.Context, permission string) error {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppFinance, permission) {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
 }
 
 func quoteBusinessID(ctx context.Context) (int64, error) {

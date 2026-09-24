@@ -9,6 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -71,6 +72,123 @@ func TestCreateStockTake_ReturnsInsertedID(t *testing.T) {
 	}
 	if id <= 0 {
 		t.Fatalf("stock_takes.CreateStockTake: expected positive ID, got %d", id)
+	}
+}
+
+func TestCreateStockTake_AuditFailureRollsBackStockTake(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const notes = "audit rollback stock take"
+
+	id, err := repo.CreateStockTake(ctx, testutil.OwnerID, domain.StockTakeInput{
+		Notes: notes,
+		Items: []domain.StockTakeItemInput{{ProductID: 5201}},
+	}, audit.Event{
+		BusinessID: testutil.OwnerID,
+		EntityType: "stock_take",
+		Action:     "created",
+		NewValues:  make(chan struct{}),
+	})
+	if err == nil {
+		t.Fatalf("CreateStockTake succeeded with id=%d despite audit failure", id)
+	}
+
+	var count int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM erp_stock_takes
+		WHERE business_id = ? AND notes = ?`, testutil.OwnerID, notes).Scan(&count); err != nil {
+		t.Fatalf("count rolled-back stock take: %v", err)
+	}
+	if count != 0 {
+		t.Fatalf("stock take count after audit rollback = %d, want 0", count)
+	}
+}
+
+func TestUpdateStockTake_CompletionRequiresEveryPhysicalCount(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateStockTake(ctx, testutil.OwnerID, domain.StockTakeInput{
+		Items: []domain.StockTakeItemInput{{ProductID: 5201}},
+	})
+	if err != nil {
+		t.Fatalf("CreateStockTake: %v", err)
+	}
+	var before string
+	if err := db.QueryRowContext(ctx, `
+		SELECT on_hand FROM stock_levels
+		WHERE owner_id = ? AND product_id = ?
+		ORDER BY location_id LIMIT 1`, testutil.OwnerID, 5201).Scan(&before); err != nil {
+		t.Fatalf("read stock before incomplete completion: %v", err)
+	}
+
+	err = repo.UpdateStockTake(ctx, testutil.OwnerID, domain.StockTakeUpdateInput{
+		ID: id, Status: domain.StockTakeStatusCompleted,
+	})
+	if !errors.Is(err, domain.ErrStockTakeIncomplete) {
+		t.Fatalf("completion error = %v, want ErrStockTakeIncomplete", err)
+	}
+
+	takes, _, err := repo.ListStockTakes(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("ListStockTakes: %v", err)
+	}
+	for _, take := range takes {
+		if take.ID == id && take.Status != domain.StockTakeStatusDraft {
+			t.Fatalf("incomplete completion changed status to %s", take.Status)
+		}
+	}
+	var after string
+	if err := db.QueryRowContext(ctx, `
+		SELECT on_hand FROM stock_levels
+		WHERE owner_id = ? AND product_id = ?
+		ORDER BY location_id LIMIT 1`, testutil.OwnerID, 5201).Scan(&after); err != nil {
+		t.Fatalf("read stock after incomplete completion: %v", err)
+	}
+	if after != before {
+		t.Fatalf("incomplete completion changed stock from %q to %q", before, after)
+	}
+}
+
+func TestUpdateStockTake_AuditFailureRollsBackStatusAndCounts(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	id, err := repo.CreateStockTake(ctx, testutil.OwnerID, domain.StockTakeInput{
+		Items: []domain.StockTakeItemInput{{ProductID: 5201}},
+	})
+	if err != nil {
+		t.Fatalf("CreateStockTake: %v", err)
+	}
+
+	err = repo.UpdateStockTake(ctx, testutil.OwnerID, domain.StockTakeUpdateInput{
+		ID: id, Status: domain.StockTakeStatusInProgress,
+		Items: []domain.StockTakeItemInput{{ProductID: 5201, CountedQty: 0}},
+	}, audit.Event{
+		BusinessID: testutil.OwnerID, EntityType: "stock_take", EntityID: id,
+		Action: "updated", NewValues: make(chan struct{}),
+	})
+	if err == nil {
+		t.Fatal("UpdateStockTake succeeded despite audit failure")
+	}
+
+	var status string
+	if err := db.QueryRowContext(ctx, `SELECT status FROM erp_stock_takes WHERE id = ?`, id).Scan(&status); err != nil {
+		t.Fatalf("read rolled-back status: %v", err)
+	}
+	if status != string(domain.StockTakeStatusDraft) {
+		t.Fatalf("status after audit rollback = %q, want draft", status)
+	}
+	var nullCount int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM erp_stock_take_items
+		WHERE stock_take_id = ? AND counted_qty IS NULL`, id).Scan(&nullCount); err != nil {
+		t.Fatalf("count rolled-back physical counts: %v", err)
+	}
+	if nullCount != 1 {
+		t.Fatalf("uncounted rows after audit rollback = %d, want 1", nullCount)
 	}
 }
 
@@ -370,6 +488,9 @@ func TestUpdateStockTake_StatusToCompleted(t *testing.T) {
 		ID:     id,
 		Status: domain.StockTakeStatusCompleted,
 		Notes:  "completed run",
+		Items: []domain.StockTakeItemInput{
+			{ProductID: 5201, CountedQty: 5},
+		},
 	})
 	if err != nil {
 		t.Fatalf("UpdateStockTake to completed: %v", err)
@@ -428,16 +549,28 @@ func TestUpdateStockTake_CompletedUsesSelectedWarehouse(t *testing.T) {
 	stockTakeID, err = repo.CreateStockTake(ctx, testutil.OwnerID, domain.StockTakeInput{
 		WarehouseID: warehouseID,
 		Items: []domain.StockTakeItemInput{
-			{ProductID: 5201, ExpectedQty: 0, CountedQty: 0},
+			{ProductID: 5201, ExpectedQty: 999, CountedQty: 0},
 		},
 	})
 	if err != nil {
 		t.Fatalf("create warehouse stock take: %v", err)
 	}
+	var snapshottedExpected string
+	if err := db.QueryRowContext(ctx, `
+		SELECT expected_qty FROM erp_stock_take_items
+		WHERE stock_take_id = ? AND product_id = ?`, stockTakeID, 5201).Scan(&snapshottedExpected); err != nil {
+		t.Fatalf("read warehouse-scoped expected quantity: %v", err)
+	}
+	if snapshottedExpected != "0" && snapshottedExpected != "0.000" {
+		t.Fatalf("warehouse-scoped expected quantity = %q, want zero", snapshottedExpected)
+	}
 
 	if err := repo.UpdateStockTake(ctx, testutil.OwnerID, domain.StockTakeUpdateInput{
 		ID:     stockTakeID,
 		Status: domain.StockTakeStatusCompleted,
+		Items: []domain.StockTakeItemInput{
+			{ProductID: 5201, CountedQty: 0},
+		},
 	}); err != nil {
 		t.Fatalf("complete warehouse stock take: %v", err)
 	}
@@ -548,40 +681,30 @@ func TestListStockTakes_HasMoreFlagWithLimitOne(t *testing.T) {
 	}
 }
 
-func TestCreateStockTake_MultipleItemsVarianceComputed(t *testing.T) {
+func TestCreateStockTake_ItemsStartUncounted(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
 	id, err := repo.CreateStockTake(ctx, testutil.OwnerID, domain.StockTakeInput{
 		Items: []domain.StockTakeItemInput{
-			{ProductID: 5201, ExpectedQty: 10.0, CountedQty: 8.0},
-			{ProductID: 5202, ExpectedQty: 5.0, CountedQty: 5.0},
+			{ProductID: 5201, ExpectedQty: 10, CountedQty: 0},
+			{ProductID: 5202, ExpectedQty: 5, CountedQty: 0},
 		},
 	})
 	if err != nil {
 		t.Fatalf("CreateStockTake: %v", err)
 	}
 
-	takes, _, err := repo.ListStockTakes(ctx, testutil.OwnerID, 100, 0)
-	if err != nil {
-		t.Fatalf("ListStockTakes: %v", err)
+	var nullCounts int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM erp_stock_take_items
+		WHERE stock_take_id = ? AND counted_qty IS NULL AND variance IS NULL`, id).Scan(&nullCounts); err != nil {
+		t.Fatalf("count uncounted items: %v", err)
 	}
-	for _, st := range takes {
-		if st.ID == id {
-			if len(st.Items) != 2 {
-				t.Fatalf("expected 2 items, got %d", len(st.Items))
-			}
-			for _, item := range st.Items {
-				expectedVariance := item.CountedQty - item.ExpectedQty
-				if item.Variance != expectedVariance {
-					t.Errorf("variance mismatch for productID=%d: got %f, want %f", item.ProductID, item.Variance, expectedVariance)
-				}
-			}
-			return
-		}
+	if nullCounts != 2 {
+		t.Fatalf("uncounted item count = %d, want 2", nullCounts)
 	}
-	t.Fatalf("stock take id=%d not found", id)
 }
 
 func TestUpdateStockTake_NonExistentIDNoError(t *testing.T) {

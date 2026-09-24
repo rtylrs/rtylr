@@ -14,18 +14,17 @@ import (
 type repository interface {
 	ListSuppliers(ctx context.Context, businessID int64, limit, offset int) ([]domain.Supplier, bool, error)
 	GetSupplierByID(ctx context.Context, businessID, id int64) (domain.Supplier, error)
-	CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error)
-	UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error
-	DeleteSupplier(ctx context.Context, businessID, id int64) error
+	CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput, events ...audit.Event) (int64, error)
+	UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput, events ...audit.Event) error
+	DeleteSupplier(ctx context.Context, businessID, id int64, events ...audit.Event) error
 }
 
 type Service struct {
 	repo repository
-	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db), db: db}
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func paginateSuppliers(page, pageSize int64) (int, int) {
@@ -58,11 +57,14 @@ func (s *Service) GetSupplierByID(ctx context.Context, businessID, id int64) (do
 }
 
 func (s *Service) CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error) {
-	id, err := s.repo.CreateSupplier(ctx, businessID, input)
+	id, err := s.repo.CreateSupplier(ctx, businessID, input, audit.Event{
+		BusinessID: businessID,
+		ActorID:    businessID,
+		EntityType: "supplier",
+		Action:     "created",
+		NewValues:  input,
+	})
 	if err != nil {
-		return 0, err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "supplier", EntityID: id, Action: "created", NewValues: input}); err != nil {
 		return 0, err
 	}
 	s.invalidateCache(ctx, businessID)
@@ -74,11 +76,16 @@ func (s *Service) UpdateSupplier(ctx context.Context, businessID, id int64, inpu
 	if err != nil {
 		return err
 	}
-	err = s.repo.UpdateSupplier(ctx, businessID, id, input)
+	err = s.repo.UpdateSupplier(ctx, businessID, id, input, audit.Event{
+		BusinessID: businessID,
+		ActorID:    businessID,
+		EntityType: "supplier",
+		EntityID:   id,
+		Action:     "updated",
+		OldValues:  old,
+		NewValues:  input,
+	})
 	if err != nil {
-		return err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "supplier", EntityID: id, Action: "updated", OldValues: old, NewValues: input}); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, businessID)
@@ -90,10 +97,14 @@ func (s *Service) DeleteSupplier(ctx context.Context, businessID, id int64) erro
 	if err != nil {
 		return err
 	}
-	if err := s.repo.DeleteSupplier(ctx, businessID, id); err != nil {
-		return err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "supplier", EntityID: id, Action: "deleted", OldValues: old}); err != nil {
+	if err := s.repo.DeleteSupplier(ctx, businessID, id, audit.Event{
+		BusinessID: businessID,
+		ActorID:    businessID,
+		EntityType: "supplier",
+		EntityID:   id,
+		Action:     "deleted",
+		OldValues:  old,
+	}); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, businessID)

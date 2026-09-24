@@ -9,17 +9,24 @@ import (
 )
 
 type mockRepo struct {
-	requests    []domain.OvertimeRequestRecord
-	request     *domain.OvertimeRequestRecord
-	totalReqs   int64
-	config      *domain.OvertimeConfigRecord
-	ownerIDs    []int64
-	flagged     []domain.OvertimeRequestRecord
-	err         error
-	configCalls []int64
+	requests         []domain.OvertimeRequestRecord
+	request          *domain.OvertimeRequestRecord
+	totalReqs        int64
+	config           *domain.OvertimeConfigRecord
+	ownerIDs         []int64
+	flagged          []domain.OvertimeRequestRecord
+	err              error
+	configCalls      []int64
+	listParams       domain.ListOvertimeRequestsParams
+	listCalls        int
+	createCalls      int
+	advanceCalls     int
+	rejectionReasons []string
 }
 
-func (m *mockRepo) ListOvertimeRequests(_ context.Context, _ int64, _ domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
+func (m *mockRepo) ListOvertimeRequests(_ context.Context, _ int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
+	m.listCalls++
+	m.listParams = params
 	return m.requests, m.totalReqs, m.err
 }
 
@@ -28,6 +35,7 @@ func (m *mockRepo) GetOvertimeRequest(_ context.Context, _, _ int64) (*domain.Ov
 }
 
 func (m *mockRepo) CreateOvertimeRequest(_ context.Context, _ int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
+	m.createCalls++
 	return &req, m.err
 }
 
@@ -36,10 +44,14 @@ func (m *mockRepo) ApproveOvertimeRequest(_ context.Context, _, _, _ int64, _ fl
 }
 
 func (m *mockRepo) AdvanceOvertimeApprovalLevel(_ context.Context, _, _ int64, _ int32) error {
+	m.advanceCalls++
 	return m.err
 }
 
-func (m *mockRepo) RejectOvertimeRequest(_ context.Context, _, _ int64) error { return m.err }
+func (m *mockRepo) RejectOvertimeRequest(_ context.Context, _, _ int64, rejectionReason string) error {
+	m.rejectionReasons = append(m.rejectionReasons, rejectionReason)
+	return m.err
+}
 func (m *mockRepo) CreateFlaggedOvertimeRequest(_ context.Context, _, _ int64, _ string, _ int32) error {
 	return m.err
 }
@@ -86,15 +98,31 @@ func (m *mockApprovalProvider) GetApprovalChain(_ context.Context, _ int64, _ st
 }
 
 type mockPermissionProvider struct {
-	employeeID int64
-	allowed    bool
+	employeeID         int64
+	businessID         int64
+	employeeBusinessID map[int64]int64
+	allowed            bool
+	permissions        map[string]bool
 }
 
 func (m *mockPermissionProvider) GetEmployeeIDByUserID(context.Context, int64, int64) (int64, error) {
 	return m.employeeID, nil
 }
 
-func (m *mockPermissionProvider) HasPermission(context.Context, int64, int64, string) (bool, error) {
+func (m *mockPermissionProvider) GetEmployeeBusinessID(_ context.Context, _, employeeID int64) (int64, error) {
+	if m.employeeBusinessID != nil {
+		return m.employeeBusinessID[employeeID], nil
+	}
+	if m.businessID == 0 {
+		return 1, nil
+	}
+	return m.businessID, nil
+}
+
+func (m *mockPermissionProvider) HasPermission(_ context.Context, _, _ int64, permissionKey string) (bool, error) {
+	if m.permissions != nil {
+		return m.permissions[permissionKey], nil
+	}
 	return m.allowed, nil
 }
 
@@ -139,8 +167,8 @@ func TestListOvertimeRequests_PropagatesRepoError(t *testing.T) {
 // ---- CreateOvertimeRequest ----
 
 func TestCreateOvertimeRequest_SetsPendingStatus(t *testing.T) {
-	s := &Service{repo: &mockRepo{}}
-	got, err := s.CreateOvertimeRequest(context.Background(), 1, domain.OvertimeRequestRecord{EmployeeID: 5, Status: "approved"})
+	s := &Service{repo: &mockRepo{}, permissions: &mockPermissionProvider{employeeID: 5, businessID: 1}}
+	got, err := s.CreateOvertimeRequest(context.Background(), 1, 77, domain.OvertimeRequestRecord{EmployeeID: 5, Status: "approved"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -150,8 +178,8 @@ func TestCreateOvertimeRequest_SetsPendingStatus(t *testing.T) {
 }
 
 func TestCreateOvertimeRequest_SetsApprovalLevelZero(t *testing.T) {
-	s := &Service{repo: &mockRepo{}}
-	got, err := s.CreateOvertimeRequest(context.Background(), 1, domain.OvertimeRequestRecord{EmployeeID: 5, CurrentApprovalLevel: 3})
+	s := &Service{repo: &mockRepo{}, permissions: &mockPermissionProvider{employeeID: 5, businessID: 1}}
+	got, err := s.CreateOvertimeRequest(context.Background(), 1, 77, domain.OvertimeRequestRecord{EmployeeID: 5, CurrentApprovalLevel: 3})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -162,8 +190,8 @@ func TestCreateOvertimeRequest_SetsApprovalLevelZero(t *testing.T) {
 
 func TestCreateOvertimeRequest_PropagatesRepoError(t *testing.T) {
 	want := errors.New("create error")
-	s := &Service{repo: &mockRepo{err: want}}
-	_, err := s.CreateOvertimeRequest(context.Background(), 1, domain.OvertimeRequestRecord{EmployeeID: 5})
+	s := &Service{repo: &mockRepo{err: want}, permissions: &mockPermissionProvider{employeeID: 5, businessID: 1}}
+	_, err := s.CreateOvertimeRequest(context.Background(), 1, 77, domain.OvertimeRequestRecord{EmployeeID: 5})
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
@@ -244,7 +272,7 @@ func TestApproveOvertime_RequiresConfiguredMultiplier(t *testing.T) {
 func TestRejectOvertime_HappyPath(t *testing.T) {
 	req := &domain.OvertimeRequestRecord{ID: 1, EmployeeID: 5}
 	s := &Service{repo: &mockRepo{request: req}, approvalProvider: &mockApprovalProvider{chain: &domain.ApprovalChainInfo{TotalLevels: 1, Levels: []domain.ApprovalLevelInfo{{LevelOrder: 1, ApproverEmployeeID: 2}}}}, permissions: &mockPermissionProvider{employeeID: 2, allowed: true}}
-	err := s.RejectOvertime(context.Background(), 1, 1, 77)
+	err := s.RejectOvertime(context.Background(), 1, 1, 77, "insufficient coverage")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -253,7 +281,7 @@ func TestRejectOvertime_HappyPath(t *testing.T) {
 func TestRejectOvertime_PropagatesGetRequestError(t *testing.T) {
 	want := domain.ErrOvertimeRequestNotFound
 	s := &Service{repo: &mockRepo{err: want}, permissions: &mockPermissionProvider{employeeID: 2, allowed: true}}
-	err := s.RejectOvertime(context.Background(), 1, 99, 77)
+	err := s.RejectOvertime(context.Background(), 1, 99, 77, "insufficient coverage")
 	if !errors.Is(err, want) {
 		t.Errorf("expected ErrOvertimeRequestNotFound, got %v", err)
 	}
@@ -296,8 +324,8 @@ func TestGetOvertimeConfig_ReturnsDelegatedConfig(t *testing.T) {
 // ---- UpsertOvertimeConfig ----
 
 func TestUpsertOvertimeConfig_HappyPath(t *testing.T) {
-	s := &Service{repo: &mockRepo{}}
-	err := s.UpsertOvertimeConfig(context.Background(), 1, domain.OvertimeConfigRecord{DefaultMultiplier: 2.0})
+	s := &Service{repo: &mockRepo{}, permissions: &mockPermissionProvider{employeeID: 5, businessID: 1, permissions: map[string]bool{domain.PermissionManageHRConfig: true}}}
+	err := s.UpsertOvertimeConfig(context.Background(), 1, 77, domain.OvertimeConfigRecord{DefaultMultiplier: 2.0})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -305,8 +333,8 @@ func TestUpsertOvertimeConfig_HappyPath(t *testing.T) {
 
 func TestUpsertOvertimeConfig_PropagatesRepoError(t *testing.T) {
 	want := errors.New("upsert error")
-	s := &Service{repo: &mockRepo{err: want}}
-	err := s.UpsertOvertimeConfig(context.Background(), 1, domain.OvertimeConfigRecord{})
+	s := &Service{repo: &mockRepo{err: want}, permissions: &mockPermissionProvider{employeeID: 5, businessID: 1, permissions: map[string]bool{domain.PermissionManageHRConfig: true}}}
+	err := s.UpsertOvertimeConfig(context.Background(), 1, 77, domain.OvertimeConfigRecord{})
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}

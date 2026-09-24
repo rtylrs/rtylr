@@ -55,6 +55,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	err := hrperformancev1.RegisterPerformanceServiceServer(
 		api.NewPerformanceService(m.service),
 		hrperformancev1.WithMux(mux),
+		hrperformancev1.WithMiddleware(api.PerformancePaginationMiddleware),
 	)
 	if err != nil {
 		panic(err)

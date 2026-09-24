@@ -14,6 +14,8 @@ const (
 	CycleTypeAnnual    = "annual"
 	CycleTypeMidYear   = "mid_year"
 	CycleTypeCustom    = "custom"
+	CycleTypeProbation = "probation"
+	CycleTypeAdHoc     = "adhoc"
 )
 
 // Performance review status values.

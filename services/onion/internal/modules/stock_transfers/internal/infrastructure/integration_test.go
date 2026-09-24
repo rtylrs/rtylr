@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -58,6 +59,145 @@ func TestCreateStockTransfer_ReturnsInsertedID(t *testing.T) {
 	}
 	if id <= 0 {
 		t.Fatalf("stock_transfers.CreateStockTransfer: expected positive ID, got %d", id)
+	}
+}
+
+func TestCreateStockTransfer_AuditFailureRollsBackTransfer(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const notes = "audit rollback transfer"
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Notes:           notes,
+		Items:           []domain.StockTransferItemInput{{ProductID: 5201, Quantity: 1}},
+	}, audit.Event{
+		BusinessID: testutil.OwnerID,
+		EntityType: "stock_transfer",
+		Action:     "created",
+		NewValues:  make(chan struct{}),
+	})
+	if err == nil {
+		t.Fatalf("CreateStockTransfer succeeded with id=%d despite audit failure", id)
+	}
+
+	var count int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM erp_stock_transfers
+		WHERE business_id = ? AND notes = ?`, testutil.OwnerID, notes).Scan(&count); err != nil {
+		t.Fatalf("count rolled-back transfer: %v", err)
+	}
+	if count != 0 {
+		t.Fatalf("transfer count after audit rollback = %d, want 0", count)
+	}
+}
+
+func TestListStockTransfers_ReturnsEveryItemWithoutGlobalCap(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	items := make([]domain.StockTransferItemInput, 201)
+	for i := range items {
+		items[i] = domain.StockTransferItemInput{ProductID: 5201, Quantity: 1}
+	}
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Notes:           "more than global item cap",
+		Items:           items,
+	})
+	if err != nil {
+		t.Fatalf("CreateStockTransfer: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM erp_stock_transfer_items WHERE transfer_id = ?", id)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM erp_stock_transfers WHERE id = ? AND business_id = ?", id, testutil.OwnerID)
+	})
+
+	transfers, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("ListStockTransfers: %v", err)
+	}
+	for _, transfer := range transfers {
+		if transfer.ID == id {
+			if len(transfer.Items) != len(items) {
+				t.Fatalf("transfer item count = %d, want %d", len(transfer.Items), len(items))
+			}
+			return
+		}
+	}
+	t.Fatalf("created transfer id=%d not found", id)
+}
+
+func TestUpdateStockTransferStatus_AuditFailureRollsBackStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items:           []domain.StockTransferItemInput{{ProductID: 5201, Quantity: 1}},
+	})
+	if err != nil {
+		t.Fatalf("CreateStockTransfer: %v", err)
+	}
+
+	err = repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, domain.StockTransferStatusInTransit, audit.Event{
+		BusinessID: testutil.OwnerID, EntityType: "stock_transfer", EntityID: id,
+		Action: "status_changed", NewValues: make(chan struct{}),
+	})
+	if err == nil {
+		t.Fatal("UpdateStockTransferStatus succeeded despite audit failure")
+	}
+
+	var status string
+	if err := db.QueryRowContext(ctx, `SELECT status FROM erp_stock_transfers WHERE id = ?`, id).Scan(&status); err != nil {
+		t.Fatalf("read rolled-back status: %v", err)
+	}
+	if status != string(domain.StockTransferStatusDraft) {
+		t.Fatalf("status after audit rollback = %q, want draft", status)
+	}
+}
+
+func TestReceiveStockTransfer_AuditFailureRollsBackStockAndStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items:           []domain.StockTransferItemInput{{ProductID: 5201, Quantity: 1}},
+	})
+	if err != nil {
+		t.Fatalf("CreateStockTransfer: %v", err)
+	}
+
+	err = repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, domain.StockTransferStatusReceived, audit.Event{
+		BusinessID: testutil.OwnerID, EntityType: "stock_transfer", EntityID: id,
+		Action: "status_changed", NewValues: make(chan struct{}),
+	})
+	if err == nil {
+		t.Fatal("receive succeeded despite audit failure")
+	}
+	var status string
+	if err := db.QueryRowContext(ctx, `SELECT status FROM erp_stock_transfers WHERE id = ?`, id).Scan(&status); err != nil {
+		t.Fatalf("read rolled-back receive status: %v", err)
+	}
+	if status != string(domain.StockTransferStatusDraft) {
+		t.Fatalf("status after receive audit rollback = %q, want draft", status)
+	}
+	var ledgerCount int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM stock_ledger
+		WHERE owner_id = ? AND reference_type = 'stock_transfer' AND reference_id = ?`,
+		testutil.OwnerID, id).Scan(&ledgerCount); err != nil {
+		t.Fatalf("count rolled-back receive ledger entries: %v", err)
+	}
+	if ledgerCount != 0 {
+		t.Fatalf("ledger entries after receive audit rollback = %d, want 0", ledgerCount)
 	}
 }
 

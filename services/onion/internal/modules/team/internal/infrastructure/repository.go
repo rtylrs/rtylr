@@ -1018,6 +1018,10 @@ func (r *Repository) ListStaffUsersByBusinessID(ctx context.Context, businessID 
 	return users, nil
 }
 
+func (r *Repository) CountStaffUsersByBusinessID(ctx context.Context, businessID int64) (int64, error) {
+	return r.queries.CountStaffUsersByBusinessID(ctx, sqlnull.Int64(businessID))
+}
+
 // groupsForUsers batches group lookups for many users into a single query,
 // mapping the result back per user ID in memory (avoids an N+1 over users).
 func (r *Repository) groupsForUsers(ctx context.Context, ownerID int64, userIDs []int64) (map[int64][]domain.GroupSummary, error) {

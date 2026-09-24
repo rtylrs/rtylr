@@ -21,11 +21,25 @@ type Event struct {
 	NewValues   any
 }
 
+type execer interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+}
+
 func Append(ctx context.Context, db *sql.DB, event Event) error {
 	if db == nil {
 		return nil
 	}
+	return appendEvent(ctx, db, event)
+}
 
+func AppendTx(ctx context.Context, tx *sql.Tx, event Event) error {
+	if tx == nil {
+		return nil
+	}
+	return appendEvent(ctx, tx, event)
+}
+
+func appendEvent(ctx context.Context, db execer, event Event) error {
 	actorID, ipAddress := actorDetails(ctx, event.ActorID)
 	oldValues, err := marshalNullable(event.OldValues)
 	if err != nil {

@@ -21,6 +21,7 @@ var (
 	ErrLocationNotFound         = errors.New("location not found")
 	ErrTableNotFound            = errors.New("table not found")
 	ErrOrderCannotBeTransferred = errors.New("order cannot be transferred in current status")
+	ErrOrderNotEditable         = errors.New("order cannot be edited in current status")
 	ErrOrderCannotBeSplit       = errors.New("order cannot be split in current status")
 	ErrItemNotVoidable          = errors.New("order item cannot be voided in current status")
 	ErrInvalidOrderStatus       = errors.New("invalid order status")
@@ -296,16 +297,17 @@ type OrderItem struct {
 }
 
 type OrderItemInput struct {
-	MenuItemID  int64
-	ComboID     int64
-	ModifierIDs []int64
-	Name        string
-	SKU         string
-	Quantity    float64
-	UnitPrice   float64
-	DiscountPct float64
-	TaxRate     float64
-	Notes       string
+	MenuItemID     int64
+	ComboID        int64
+	ModifierIDs    []int64
+	Name           string
+	SKU            string
+	Quantity       float64
+	UnitPrice      float64
+	DiscountPct    float64
+	DiscountAmount float64
+	TaxRate        float64
+	Notes          string
 }
 
 // ─── Payment ─────────────────────────────────────────────────────────────────

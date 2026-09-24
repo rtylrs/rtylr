@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
@@ -44,7 +45,18 @@ func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRe
 	if device.IsAnonymous || device.User == nil {
 		return ListLeaveTypesResponse{}, onekiterrors.PermissionDenied()
 	}
+	if req == nil {
+		return ListLeaveTypesResponse{}, onekiterrors.New(http.StatusBadRequest, "request is required")
+	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListLeaveTypesResponse{}, onekiterrors.PermissionDenied()
+	}
 
+	offset := req.Offset
+	if offset < 0 {
+		offset = 0
+	}
 	limit := req.Limit
 	if limit <= 0 {
 		limit = defaultLeaveTypesLimit
@@ -53,14 +65,14 @@ func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRe
 		limit = maxLeaveTypesLimit
 	}
 
-	types, total, err := h.Service.ListLeaveTypes(ctx, device.User.UserID, domain.ListLeaveTypesParams{
-		Limit: limit, Offset: req.Offset,
+	types, total, err := h.Service.ListLeaveTypes(ctx, businessID, domain.ListLeaveTypesParams{
+		Limit: limit, Offset: offset,
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrLeaveNotConfigured) {
-			return ListLeaveTypesResponse{Types: []*hrleavev1.LeaveTypePayload{}, Total: 0, Limit: limit, Offset: req.Offset}, nil
+			return ListLeaveTypesResponse{Types: []*hrleavev1.LeaveTypePayload{}, Total: 0, Limit: limit, Offset: offset}, nil
 		}
-		logger.Ctx(ctx).Error("failed to list leave types", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list leave types", logger.Any("business_id", businessID), logger.Error(err))
 		return ListLeaveTypesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list leave types")
 	}
 
@@ -69,5 +81,5 @@ func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRe
 		payloads = append(payloads, leaveTypeToProto(t))
 	}
 
-	return ListLeaveTypesResponse{Types: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
+	return ListLeaveTypesResponse{Types: payloads, Total: total, Limit: limit, Offset: offset}, nil
 }

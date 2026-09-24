@@ -4,6 +4,7 @@ sql:
     queries: "queries"
     schema:
       - "../../../../internal/platform/database/schemas/shared"
+      - "../../../../internal/platform/database/schemas/hr_core/schema.sql"
       - "../../../../internal/platform/database/schemas/hr_leave"
     gen:
       go:

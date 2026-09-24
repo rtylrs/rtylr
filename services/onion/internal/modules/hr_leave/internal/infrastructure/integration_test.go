@@ -495,7 +495,7 @@ func TestListLeaveCalendar_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	records, err := repo.ListLeaveCalendar(ctx, testutil.OwnerID, "2026-01-01", "2026-12-31")
+	records, err := repo.ListLeaveCalendar(ctx, testutil.OwnerID, 0, "2026-01-01", "2026-12-31")
 	if err != nil {
 		t.Fatalf("ListLeaveCalendar: %v", err)
 	}

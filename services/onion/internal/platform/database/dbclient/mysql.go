@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql" // register MySQL driver
+	mysql "github.com/go-sql-driver/mysql" // parse native DSNs and register the MySQL driver
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -267,46 +267,65 @@ func replicaDBName() string {
 	return DefaultDBName
 }
 
+type parsedDSNMetadata struct {
+	host   string
+	dbName string
+}
+
+func isMySQLURLDSN(dsn string) bool {
+	return strings.HasPrefix(strings.ToLower(strings.TrimSpace(dsn)), "mysql://")
+}
+
+// parseDSNMetadata parses the DSN with the same boundary rules as the MySQL
+// driver. In particular, native DSN credentials may legally contain '?', '@',
+// '/', and even text such as "tcp(...)"; delimiter searches over the whole DSN
+// cannot distinguish those bytes from the real endpoint.
+func parseDSNMetadata(dsn string) (parsedDSNMetadata, error) {
+	if isMySQLURLDSN(dsn) {
+		parsed, err := url.Parse(dsn)
+		if err != nil {
+			return parsedDSNMetadata{}, err
+		}
+		if parsed.Scheme != "mysql" || parsed.Host == "" {
+			return parsedDSNMetadata{}, fmt.Errorf("unsupported MySQL DSN URL")
+		}
+
+		escapedPath := strings.TrimPrefix(parsed.EscapedPath(), "/")
+		dbName, err := url.PathUnescape(escapedPath)
+		if err != nil {
+			return parsedDSNMetadata{}, err
+		}
+		return parsedDSNMetadata{host: parsed.Host, dbName: dbName}, nil
+	}
+
+	cfg, err := mysql.ParseDSN(dsn)
+	if err != nil {
+		return parsedDSNMetadata{}, err
+	}
+	return parsedDSNMetadata{host: cfg.Addr, dbName: cfg.DBName}, nil
+}
+
 // hostFromDSN extracts host[:port] from a go-sql-driver DSN
 // (user:pass@tcp(host:port)/dbname?params) or a URL DSN
-// (scheme://user:pass@host:port/dbname?params). Returns "" if it can't parse,
-// so callers can fall back to the DB_HOST env. Used only for log output — it
-// never carries credentials.
+// (scheme://user:pass@host:port/dbname?params). Returns "" only when the DSN
+// cannot be parsed. Used only for log output and safety checks — it never
+// carries credentials.
 func hostFromDSN(dsn string) string {
-	if i := strings.IndexByte(dsn, '?'); i >= 0 {
-		dsn = dsn[:i]
+	metadata, err := parseDSNMetadata(dsn)
+	if err != nil {
+		return ""
 	}
-	// native form: ...@tcp(host:port)/...
-	if i := strings.Index(dsn, "tcp("); i >= 0 {
-		rest := dsn[i+len("tcp("):]
-		if j := strings.IndexByte(rest, ')'); j >= 0 {
-			return rest[:j]
-		}
-	}
-	// URL form: scheme://[user:pass@]host:port/db
-	if i := strings.Index(dsn, "://"); i >= 0 {
-		rest := dsn[i+len("://"):]
-		if s := strings.IndexByte(rest, '/'); s >= 0 {
-			rest = rest[:s]
-		}
-		if at := strings.LastIndexByte(rest, '@'); at >= 0 {
-			rest = rest[at+1:]
-		}
-		return rest
-	}
-	return ""
+	return metadata.host
 }
 
 // dbNameFromDSN extracts the database name from a go-sql-driver DSN
 // (user:pass@tcp(host:port)/dbname?params) or a URL DSN (scheme://.../dbname?params).
 func dbNameFromDSN(dsn string) string {
-	if i := strings.IndexByte(dsn, '?'); i >= 0 {
-		dsn = dsn[:i]
+	metadata, err := parseDSNMetadata(dsn)
+	if err != nil {
+		return ""
 	}
-	if i := strings.LastIndexByte(dsn, '/'); i >= 0 {
-		return dsn[i+1:]
-	}
-	return ""
+	return metadata.dbName
 }
 
 // buildReplicaDSN builds the DSN for the AI read-only user against the replica.
@@ -341,60 +360,94 @@ func buildLocalDSN() string {
 }
 
 func normalizeDSN(dsn string) string {
-	if !strings.Contains(dsn, "://") {
-		if strings.Contains(dsn, "?") {
-			if !strings.Contains(dsn, "time_zone=") {
-				dsn += "&time_zone=%27UTC%27"
-			}
-			if !strings.Contains(dsn, "parseTime=") {
-				dsn += "&parseTime=true"
-			}
-			if !strings.Contains(dsn, "loc=") {
-				dsn += "&loc=UTC"
-			}
-			return dsn
-		}
-
-		return dsn + "?parseTime=true&loc=UTC&time_zone=%27UTC%27"
+	if isMySQLURLDSN(dsn) {
+		return normalizeURLDSN(dsn)
 	}
 
+	cfg, err := mysql.ParseDSN(dsn)
+	if err != nil {
+		return dsn
+	}
+	params := nativeDSNParams(dsn)
+	if _, present := params["parseTime"]; !present {
+		cfg.ParseTime = true
+	}
+	if _, present := params["loc"]; !present {
+		cfg.Loc = time.UTC
+	}
+	setDSNParam(cfg, params, "time_zone", "'UTC'")
+	return cfg.FormatDSN()
+}
+
+func nativeDSNParams(dsn string) url.Values {
+	slash := strings.LastIndexByte(dsn, '/')
+	if slash < 0 || slash+1 >= len(dsn) {
+		return url.Values{}
+	}
+	query := dsn[slash+1:]
+	question := strings.IndexByte(query, '?')
+	if question < 0 {
+		return url.Values{}
+	}
+	values, err := url.ParseQuery(query[question+1:])
+	if err != nil {
+		return url.Values{}
+	}
+	return values
+}
+
+func setDSNParam(cfg *mysql.Config, params url.Values, name, value string) {
+	if _, present := params[name]; present {
+		return
+	}
+	if cfg.Params == nil {
+		cfg.Params = make(map[string]string)
+	}
+	cfg.Params[name] = value
+}
+
+func normalizeURLDSN(dsn string) string {
 	parsed, err := url.Parse(dsn)
-	if err != nil || parsed.Scheme != "mysql" {
+	if err != nil || parsed.Scheme != "mysql" || parsed.Host == "" {
 		return dsn
 	}
 
-	user := parsed.User.Username()
-	password, _ := parsed.User.Password()
-	host := parsed.Host
-	dbname := strings.TrimPrefix(parsed.Path, "/")
-
+	// Parse query options through the driver, while assigning credentials and
+	// the address from net/url. This avoids mistaking a password's '@', '/', or
+	// '?' for DSN delimiters and keeps the returned native DSN compatible with
+	// the driver.
+	raw := "placeholder@tcp(" + parsed.Host + ")/placeholder"
 	query := parsed.Query()
-	if query.Get("parseTime") == "" {
-		query.Set("parseTime", "true")
+	if encoded := query.Encode(); encoded != "" {
+		raw += "?" + encoded
 	}
-	if query.Get("charset") == "" {
-		query.Set("charset", "utf8mb4")
+	cfg, err := mysql.ParseDSN(raw)
+	if err != nil {
+		return dsn
 	}
-	if query.Get("collation") == "" {
-		query.Set("collation", "utf8mb4_unicode_ci")
+	cfg.User = ""
+	cfg.Passwd = ""
+	if parsed.User != nil {
+		cfg.User = parsed.User.Username()
+		cfg.Passwd, _ = parsed.User.Password()
 	}
-	if query.Get("timeout") == "" {
-		query.Set("timeout", dsnConnectTimeout)
-	}
-	if query.Get("readTimeout") == "" {
-		query.Set("readTimeout", dsnReadTimeout)
-	}
-	if query.Get("writeTimeout") == "" {
-		query.Set("writeTimeout", dsnWriteTimeout)
-	}
-	if query.Get("interpolateParams") == "" {
-		query.Set("interpolateParams", "true")
-	}
-	if query.Get("time_zone") == "" {
-		query.Set("time_zone", "'UTC'")
+	escapedPath := strings.TrimPrefix(parsed.EscapedPath(), "/")
+	cfg.DBName, err = url.PathUnescape(escapedPath)
+	if err != nil {
+		return dsn
 	}
 
-	return fmt.Sprintf("%s:%s@tcp(%s)/%s?%s", user, password, host, dbname, query.Encode())
+	if _, present := query["parseTime"]; !present {
+		cfg.ParseTime = true
+	}
+	setDSNParam(cfg, query, "charset", "utf8mb4")
+	setDSNParam(cfg, query, "collation", "utf8mb4_unicode_ci")
+	setDSNParam(cfg, query, "timeout", dsnConnectTimeout)
+	setDSNParam(cfg, query, "readTimeout", dsnReadTimeout)
+	setDSNParam(cfg, query, "writeTimeout", dsnWriteTimeout)
+	setDSNParam(cfg, query, "interpolateParams", "true")
+	setDSNParam(cfg, query, "time_zone", "'UTC'")
+	return cfg.FormatDSN()
 }
 
 func intEnvOrDefault(key string, def int) int {

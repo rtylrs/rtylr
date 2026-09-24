@@ -23,7 +23,7 @@ func NewEquipmentAPI(service *application.Service) *EquipmentAPI {
 func (a *EquipmentAPI) ListAssets(ctx context.Context, req *hrequipmentv1.ListAssetsRequest) (*hrequipmentv1.ListAssetsResponse, error) {
 	result, err := (&ListAssetsHandler{Service: a.Service}).Serve(ctx, &ListAssetsRequest{
 		EmployeeID: req.GetEmployeeId(),
-		Status:     req.GetCondition(),
+		Condition:  req.GetCondition(),
 	})
 	if err != nil {
 		return nil, err

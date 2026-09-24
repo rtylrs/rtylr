@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/testutil"
@@ -22,6 +23,44 @@ const (
 // coincide, the eviction targeted an empty scope and the workspaces list kept
 // serving pre-provisioning rows until the TTL expired. This pins the fix: the
 // caller's business-scope entries are evicted while unrelated scopes survive.
+func TestBusinessMyTasksCacheIsolatedByBusiness(t *testing.T) {
+	ctx := initCache(t)
+	const userID = int64(990011)
+	const page = int64(1)
+	const limit = int64(50)
+	businessA := int64(7001)
+	businessB := int64(7002)
+
+	key := func(businessID int64) string {
+		return cacheKeys.Scoped(
+			"user",
+			userID,
+			fmt.Sprintf("business_tasks:business=%d:workspace_tasks:page=%d:limit=%d", businessID, page, limit),
+		)
+	}
+	cacher.Of[myTasksPage]().Put(ctx, key(businessA), myTasksPage{
+		Tasks: []domain.Task{{ID: 101}},
+		Total: 1,
+	}, cacher.WithExpiry(ctx, workspacesTTL))
+	cacher.Of[myTasksPage]().Put(ctx, key(businessB), myTasksPage{
+		Tasks: []domain.Task{{ID: 202}},
+		Total: 1,
+	}, cacher.WithExpiry(ctx, workspacesTTL))
+
+	svc := &Service{}
+	fromA, _, err := svc.GetMyTasksForBusiness(ctx, userID, businessA, page, limit)
+	if err != nil {
+		t.Fatalf("business A cache read: %v", err)
+	}
+	fromB, _, err := svc.GetMyTasksForBusiness(ctx, userID, businessB, page, limit)
+	if err != nil {
+		t.Fatalf("business B cache read: %v", err)
+	}
+	if len(fromA) != 1 || fromA[0].ID != 101 || len(fromB) != 1 || fromB[0].ID != 202 {
+		t.Fatalf("business cache isolation failed: A=%+v B=%+v", fromA, fromB)
+	}
+}
+
 func TestEnsureMyTasksProjectEvictsBusinessScope(t *testing.T) {
 	ctx := initCache(t)
 	db := testutil.OpenDB(t)

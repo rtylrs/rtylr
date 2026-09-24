@@ -63,14 +63,16 @@ func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoy
 	if bizErr != nil {
 		return ListLoyaltyTransactionsResponse{}, onekiterrors.PermissionDenied()
 	}
-
-	if req.Page < 1 {
-		req.Page = 1
+	if req == nil {
+		return ListLoyaltyTransactionsResponse{}, onekiterrors.New(http.StatusBadRequest, "Loyalty transaction request is required")
 	}
 
-	if req.PageSize < 1 {
-		req.PageSize = 20
+	page, pageSize, err := normalizeLoyaltyTransactionPage(int64(req.Page), int64(req.PageSize))
+	if err != nil {
+		return ListLoyaltyTransactionsResponse{}, err
 	}
+	req.Page = int(page)
+	req.PageSize = int(pageSize)
 
 	txs, total, err := h.CRMService.ListLoyaltyTransactions(ctx, businessID, req.CustomerID, req.Page, req.PageSize)
 	if err != nil {

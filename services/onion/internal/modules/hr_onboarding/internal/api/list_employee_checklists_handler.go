@@ -61,9 +61,14 @@ func (h *ListEmployeeChecklistsHandler) Serve(ctx context.Context, req *ListEmpl
 		limit = maxListEmployeeChecklistsLimit
 	}
 
+	offset := req.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
 	checklists, total, err := h.Service.ListEmployeeChecklists(ctx, businessID, req.EmployeeID, domain.ListEmployeeChecklistsParams{
 		Limit:  limit,
-		Offset: req.Offset,
+		Offset: offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list employee checklists", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
@@ -75,5 +80,5 @@ func (h *ListEmployeeChecklistsHandler) Serve(ctx context.Context, req *ListEmpl
 		payloads = append(payloads, employeeChecklistToProto(c))
 	}
 
-	return ListEmployeeChecklistsResponse{Checklists: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
+	return ListEmployeeChecklistsResponse{Checklists: payloads, Total: total, Limit: limit, Offset: offset}, nil
 }

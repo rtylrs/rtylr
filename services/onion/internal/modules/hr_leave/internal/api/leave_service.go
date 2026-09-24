@@ -124,29 +124,42 @@ func (s *LeaveService) CreateLeaveType(ctx context.Context, req *hrleavev1.Creat
 }
 
 func (s *LeaveService) UpdateLeaveType(ctx context.Context, req *hrleavev1.UpdateLeaveTypeRequest) (*hrleavev1.UpdateLeaveTypeResponse, error) {
-	body := req.GetBody()
-	in := &UpdateLeaveTypeRequest{
-		ID:                             req.GetId(),
-		Name:                           body.GetName(),
-		IsPaid:                         body.GetIsPaid(),
-		RequiresApproval:               body.GetRequiresApproval(),
-		AccrualRule:                    body.GetAccrualRule(),
-		MaxCarryoverDays:               body.GetMaxCarryoverDays(),
-		MinNoticeDays:                  body.GetMinNoticeDays(),
-		RequiresDocumentationAfterDays: body.GetRequiresDocumentationAfterDays(),
-		IsActive:                       body.GetIsActive(),
+	if req == nil {
+		return nil, (&UpdateLeaveTypeHandler{Service: s.service}).Validate(ctx, nil)
 	}
+	body := req.GetBody()
+	in := updateLeaveTypeRequestFromProto(req.GetId(), body)
 	handler := &UpdateLeaveTypeHandler{Service: s.service}
 	if err := handler.Validate(ctx, in); err != nil {
 		return nil, err
 	}
-	if _, err := handler.Serve(ctx, in); err != nil {
+	res, err := handler.Serve(ctx, in)
+	if err != nil {
 		return nil, err
 	}
-	return &hrleavev1.UpdateLeaveTypeResponse{}, nil
+	return &hrleavev1.UpdateLeaveTypeResponse{LeaveType: res.LeaveType}, nil
+}
+
+func updateLeaveTypeRequestFromProto(id int64, body *hrleavev1.UpdateLeaveTypeBody) *UpdateLeaveTypeRequest {
+	in := &UpdateLeaveTypeRequest{ID: id}
+	if body == nil {
+		return in
+	}
+	in.Name = body.Name
+	in.IsPaid = body.IsPaid
+	in.RequiresApproval = body.RequiresApproval
+	in.AccrualRule = body.AccrualRule
+	in.MaxCarryoverDays = body.MaxCarryoverDays
+	in.MinNoticeDays = body.MinNoticeDays
+	in.RequiresDocumentationAfterDays = body.RequiresDocumentationAfterDays
+	in.IsActive = body.IsActive
+	return in
 }
 
 func (s *LeaveService) ListLeaveBalances(ctx context.Context, req *hrleavev1.ListLeaveBalancesRequest) (*hrleavev1.ListLeaveBalancesResponse, error) {
+	if req == nil {
+		req = &hrleavev1.ListLeaveBalancesRequest{}
+	}
 	res, err := (&GetLeaveBalancesHandler{Service: s.service}).Serve(ctx, &GetLeaveBalancesRequest{
 		EmployeeID: req.GetEmployeeId(),
 		Year:       req.GetYear(),
@@ -156,5 +169,8 @@ func (s *LeaveService) ListLeaveBalances(ctx context.Context, req *hrleavev1.Lis
 	}
 	return &hrleavev1.ListLeaveBalancesResponse{
 		Balances: res.Balances,
+		Total:    res.Total,
+		Limit:    res.Limit,
+		Offset:   res.Offset,
 	}, nil
 }

@@ -15,8 +15,43 @@ func NewOvertimeService(service *application.Service) *OvertimeService {
 	return &OvertimeService{service: service}
 }
 
-func (s *OvertimeService) ListOvertimeRequests(ctx context.Context, _ *hrovertimev1.ListOvertimeRequestsRequest) (*hrovertimev1.ListOvertimeRequestsResponse, error) {
-	res, err := (&ListOvertimeRequestsHandler{Service: s.service}).Serve(ctx, &ListOvertimeRequestsRequest{})
+func overtimeListRequestFromProto(req *hrovertimev1.ListOvertimeRequestsRequest) (*ListOvertimeRequestsRequest, error) {
+	in := &ListOvertimeRequestsRequest{}
+	if req != nil {
+		if req.EmployeeId != nil {
+			employeeID := req.GetEmployeeId()
+			in.EmployeeID = &employeeID
+		}
+		if req.Status != nil {
+			status := req.GetStatus()
+			in.Status = &status
+		}
+	}
+	if err := (&ListOvertimeRequestsHandler{}).Validate(context.Background(), in); err != nil {
+		return nil, err
+	}
+	return in, nil
+}
+
+func overtimeApprovalRequestFromProto(req *hrovertimev1.ApproveOvertimeRequest) *ApproveOvertimeRequestReq {
+	in := &ApproveOvertimeRequestReq{}
+	if req != nil {
+		body := req.GetBody()
+		in.RequestID = req.GetOvertimeRequestId()
+		in.Approved = body.GetApproved()
+		in.MultiplierApplied = body.GetMultiplierApplied()
+		in.RejectionReason = body.GetRejectionReason()
+	}
+	return in
+}
+
+func (s *OvertimeService) ListOvertimeRequests(ctx context.Context, req *hrovertimev1.ListOvertimeRequestsRequest) (*hrovertimev1.ListOvertimeRequestsResponse, error) {
+	in, err := overtimeListRequestFromProto(req)
+	if err != nil {
+		return nil, err
+	}
+	handler := &ListOvertimeRequestsHandler{Service: s.service}
+	res, err := handler.Serve(ctx, in)
 	if err != nil {
 		return nil, err
 	}
@@ -47,12 +82,7 @@ func (s *OvertimeService) CreateOvertimeRequest(ctx context.Context, req *hrover
 }
 
 func (s *OvertimeService) ApproveOvertime(ctx context.Context, req *hrovertimev1.ApproveOvertimeRequest) (*hrovertimev1.ApproveOvertimeResponse, error) {
-	body := req.GetBody()
-	in := &ApproveOvertimeRequestReq{
-		RequestID:         req.GetOvertimeRequestId(),
-		Approved:          body.GetApproved(),
-		MultiplierApplied: body.GetMultiplierApplied(),
-	}
+	in := overtimeApprovalRequestFromProto(req)
 	handler := &ApproveOvertimeHandler{Service: s.service}
 	if err := handler.Validate(ctx, in); err != nil {
 		return nil, err

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -95,6 +96,27 @@ type GetSegmentCustomersResponse struct {
 	PageSize  int                       `json:"page_size"`
 }
 
+const (
+	segmentCustomersDefaultPageSize = 20
+	segmentCustomersMaxPageSize     = 100
+)
+
+func normalizeSegmentCustomersPage(page, pageSize int) (int, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = segmentCustomersDefaultPageSize
+	}
+	if pageSize > segmentCustomersMaxPageSize {
+		pageSize = segmentCustomersMaxPageSize
+	}
+	if int64(page-1) > math.MaxInt32/int64(pageSize) {
+		return 0, 0, onekiterrors.New(http.StatusBadRequest, "page offset is too large")
+	}
+	return page, pageSize, nil
+}
+
 func (h *GetSegmentCustomersHandler) Validate(_ context.Context, req *GetSegmentCustomersRequest) error {
 	if req.SegmentID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Segment ID is required")
@@ -113,14 +135,16 @@ func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentC
 	if bizErr != nil {
 		return GetSegmentCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
-
-	if req.Page < 1 {
-		req.Page = 1
+	if req == nil {
+		return GetSegmentCustomersResponse{}, onekiterrors.New(http.StatusBadRequest, "Segment customer request is required")
 	}
 
-	if req.PageSize < 1 {
-		req.PageSize = 20
+	page, pageSize, err := normalizeSegmentCustomersPage(req.Page, req.PageSize)
+	if err != nil {
+		return GetSegmentCustomersResponse{}, err
 	}
+	req.Page = page
+	req.PageSize = pageSize
 
 	customers, total, err := h.CRMService.GetSegmentCustomers(ctx, businessID, req.SegmentID, req.Page, req.PageSize)
 	if err != nil {

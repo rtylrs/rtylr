@@ -18,13 +18,12 @@ const stockTransfersCacheTTL = 5 * time.Minute
 type repository interface {
 	ListStockTransfers(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTransfer, bool, error)
 	GetByID(ctx context.Context, businessID, id int64) (domain.StockTransfer, error)
-	CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error)
-	UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error
+	CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput, events ...audit.Event) (int64, error)
+	UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus, events ...audit.Event) error
 }
 
 type Service struct {
 	repo repository
-	db   *sql.DB
 }
 
 type stockTransfersPageResult struct {
@@ -35,10 +34,7 @@ type stockTransfersPageResult struct {
 func NewService(_ context.Context, db *sql.DB) *Service {
 	repo := infrastructure.NewRepository(db)
 
-	return &Service{
-		repo: repo,
-		db:   db,
-	}
+	return &Service{repo: repo}
 }
 
 func paginateStockTransfers(page, pageSize int64) (int, int) {
@@ -76,11 +72,14 @@ func (s *Service) CreateStockTransfer(ctx context.Context, businessID int64, inp
 	if err := domain.ValidateStockTransferInput(input); err != nil {
 		return 0, fmt.Errorf("%w: %w", domain.ErrInvalidStockTransfer, err)
 	}
-	id, err := s.repo.CreateStockTransfer(ctx, businessID, input)
+	id, err := s.repo.CreateStockTransfer(ctx, businessID, input, audit.Event{
+		BusinessID: businessID,
+		ActorID:    businessID,
+		EntityType: "stock_transfer",
+		Action:     "created",
+		NewValues:  input,
+	})
 	if err != nil {
-		return 0, err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_transfer", EntityID: id, Action: "created", NewValues: input}); err != nil {
 		return 0, err
 	}
 
@@ -94,11 +93,16 @@ func (s *Service) UpdateStockTransferStatus(ctx context.Context, businessID, id 
 	if err != nil {
 		return err
 	}
-	err = s.repo.UpdateStockTransferStatus(ctx, businessID, id, status)
+	err = s.repo.UpdateStockTransferStatus(ctx, businessID, id, status, audit.Event{
+		BusinessID: businessID,
+		ActorID:    businessID,
+		EntityType: "stock_transfer",
+		EntityID:   id,
+		Action:     "status_changed",
+		OldValues:  old,
+		NewValues:  map[string]domain.StockTransferStatus{"status": status},
+	})
 	if err != nil {
-		return err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_transfer", EntityID: id, Action: "status_changed", OldValues: old, NewValues: map[string]domain.StockTransferStatus{"status": status}}); err != nil {
 		return err
 	}
 

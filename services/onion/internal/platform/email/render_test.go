@@ -66,6 +66,16 @@ func TestHTMLToTextRemovesMarkupAndUnescapesEntities(t *testing.T) {
 	}
 }
 
+func TestHTMLToTextDropsStyleAndScriptContents(t *testing.T) {
+	got := htmlToText(`<style>body { color: #123456; }</style><script>alert("secret")</script><p>Readable message</p>`)
+	if strings.Contains(got, "color") || strings.Contains(got, "alert") {
+		t.Fatalf("htmlToText() leaked raw CSS/script: %q", got)
+	}
+	if !strings.Contains(got, "Readable message") {
+		t.Fatalf("htmlToText() = %q, want readable body", got)
+	}
+}
+
 // TestWiredTemplatesCovered fails if a Go-wired Template has no render case,
 // keeping the typed templates and their tests in lockstep.
 func TestWiredTemplatesCovered(t *testing.T) {

@@ -167,7 +167,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, crmService *applicatio
 	)
 
 	// Loyalty Tiers
-	http.RegisterGET[ListLoyaltyTiersRequest, ListLoyaltyTiersResponse](
+	http.RegisterGETWithValidation[ListLoyaltyTiersRequest, ListLoyaltyTiersResponse](
 		ctx,
 		router,
 		LoyaltyTiersListRoutes(),

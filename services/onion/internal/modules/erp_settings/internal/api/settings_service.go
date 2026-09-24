@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/erp_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/erp_settings/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpsettingsv1 "github.com/voxire/voxie/gen/go/erp/settings/v1"
@@ -22,7 +23,7 @@ func NewSettingsAPI(service *application.Service) *SettingsAPI {
 }
 
 func (a *SettingsAPI) GetErpSettings(ctx context.Context, _ *erpsettingsv1.GetErpSettingsRequest) (*erpsettingsv1.GetErpSettingsResponse, error) {
-	businessID, err := businessIDFromContext(ctx)
+	businessID, err := businessIDFromContext(ctx, "erp:settings:view")
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +44,7 @@ func (a *SettingsAPI) UpdateErpSettings(ctx context.Context, req *erpsettingsv1.
 		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 
-	businessID, err := businessIDFromContext(ctx)
+	businessID, err := businessIDFromContext(ctx, "erp:settings:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -67,13 +68,13 @@ func (a *SettingsAPI) UpdateErpSettings(ctx context.Context, req *erpsettingsv1.
 	}, nil
 }
 
-func businessIDFromContext(ctx context.Context) (int64, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+func businessIDFromContext(ctx context.Context, permission string) (int64, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
 		return 0, onekiterrors.PermissionDenied()
 	}
 
-	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if err != nil {
 		return 0, onekiterrors.PermissionDenied()
 	}

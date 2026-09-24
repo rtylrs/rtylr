@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
@@ -31,14 +33,25 @@ type CreateGoalResponse struct {
 }
 
 func (h *CreateGoalHandler) Validate(_ context.Context, req *CreateGoalRequest) error {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
 	if strings.TrimSpace(req.Title) == "" {
 		return onekiterrors.New(http.StatusBadRequest, "title is required")
 	}
-	if req.EmployeeID == 0 {
+	if req.EmployeeID <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
-	if req.ReviewCycleID == 0 {
+	if req.ReviewCycleID <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "review_cycle_id is required")
+	}
+	if err := domain.ValidateGoal(domain.CreateGoalParams{
+		EmployeeID:    req.EmployeeID,
+		ReviewCycleID: req.ReviewCycleID,
+		Title:         req.Title,
+		Weight:        req.Weight,
+	}); err != nil {
+		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return nil
 }
@@ -48,8 +61,16 @@ func (h *CreateGoalHandler) Serve(ctx context.Context, req *CreateGoalRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return CreateGoalResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := h.Validate(ctx, req); err != nil {
+		return CreateGoalResponse{}, err
+	}
 
-	goal, err := h.Service.CreateGoal(ctx, device.User.UserID, domain.CreateGoalParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateGoalResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	goal, err := h.Service.CreateGoal(ctx, businessID, domain.CreateGoalParams{
 		EmployeeID:      req.EmployeeID,
 		ReviewCycleID:   req.ReviewCycleID,
 		Title:           req.Title,
@@ -58,7 +79,19 @@ func (h *CreateGoalHandler) Serve(ctx context.Context, req *CreateGoalRequest) (
 		SuccessCriteria: req.SuccessCriteria,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create goal", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		if errors.Is(err, domain.ErrReviewCycleNotFound) {
+			return CreateGoalResponse{}, onekiterrors.New(http.StatusBadRequest, "review_cycle_id is invalid for this business")
+		}
+		if errors.Is(err, domain.ErrEmployeeNotFound) {
+			return CreateGoalResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found in this business")
+		}
+		if errors.Is(err, domain.ErrGoalSubjectNotAllowed) {
+			return CreateGoalResponse{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrNegativeGoalWeight) || errors.Is(err, domain.ErrInvalidGoalWeight) || errors.Is(err, domain.ErrEmptyGoalTitle) {
+			return CreateGoalResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		logger.Ctx(ctx).Error("failed to create goal", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateGoalResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create goal")
 	}
 

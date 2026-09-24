@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"math"
 	"strings"
 )
 
@@ -12,6 +13,7 @@ var (
 	ErrInvalidReviewType  = errors.New("invalid review type")
 	ErrEmptyGoalTitle     = errors.New("goal title is required")
 	ErrNegativeGoalWeight = errors.New("goal weight must be non-negative")
+	ErrInvalidGoalWeight  = errors.New("goal weight must be between 0 and 100")
 	ErrInvalidGoalStatus  = errors.New("invalid goal status")
 	ErrInvalidRatingScale = errors.New("invalid rating scale type")
 	ErrInvalidRatingRange = errors.New("rating min must be less than rating max")
@@ -29,7 +31,7 @@ func IsValidCycleStatus(status string) bool {
 // IsValidCycleType returns true when the cycle type is recognised.
 func IsValidCycleType(cycleType string) bool {
 	switch cycleType {
-	case CycleTypeQuarterly, CycleTypeAnnual, CycleTypeMidYear, CycleTypeCustom:
+	case CycleTypeQuarterly, CycleTypeAnnual, CycleTypeMidYear, CycleTypeCustom, CycleTypeProbation, CycleTypeAdHoc:
 		return true
 	}
 	return false
@@ -77,6 +79,9 @@ func ValidateReviewCycle(p CreateReviewCycleParams) error {
 func ValidateGoal(p CreateGoalParams) error {
 	if strings.TrimSpace(p.Title) == "" {
 		return ErrEmptyGoalTitle
+	}
+	if math.IsNaN(p.Weight) || math.IsInf(p.Weight, 0) || p.Weight > 100 {
+		return ErrInvalidGoalWeight
 	}
 	if p.Weight < 0 {
 		return ErrNegativeGoalWeight

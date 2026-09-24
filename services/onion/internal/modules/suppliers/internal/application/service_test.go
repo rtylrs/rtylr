@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
+	"github.com/voxire/onion/internal/platform/audit"
 )
 
 type mockRepo struct {
@@ -23,15 +24,15 @@ func (m *mockRepo) GetSupplierByID(_ context.Context, _, _ int64) (domain.Suppli
 	return domain.Supplier{}, nil
 }
 
-func (m *mockRepo) CreateSupplier(_ context.Context, _ int64, _ domain.SupplierInput) (int64, error) {
+func (m *mockRepo) CreateSupplier(_ context.Context, _ int64, _ domain.SupplierInput, _ ...audit.Event) (int64, error) {
 	return m.createID, m.createErr
 }
 
-func (m *mockRepo) UpdateSupplier(_ context.Context, _, _ int64, _ domain.SupplierInput) error {
+func (m *mockRepo) UpdateSupplier(_ context.Context, _, _ int64, _ domain.SupplierInput, _ ...audit.Event) error {
 	return m.updateErr
 }
 
-func (m *mockRepo) DeleteSupplier(_ context.Context, _, _ int64) error {
+func (m *mockRepo) DeleteSupplier(_ context.Context, _, _ int64, _ ...audit.Event) error {
 	return m.deleteErr
 }
 

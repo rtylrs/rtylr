@@ -10,6 +10,7 @@ import (
 
 var (
 	ErrBillNotFound            = errors.New("bill not found")
+	ErrBillReferenceNotFound   = errors.New("bill reference not found in business")
 	ErrInvalidStatusTransition = errors.New("invalid bill status transition")
 	ErrPaidBillImmutable       = errors.New("paid bill is immutable")
 )

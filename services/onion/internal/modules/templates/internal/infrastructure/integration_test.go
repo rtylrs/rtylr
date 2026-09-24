@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
@@ -474,6 +475,47 @@ func TestTemplates_Create_ThenDeleteThenNotInList(t *testing.T) {
 	for _, tmpl := range items {
 		if tmpl.ID == id {
 			t.Errorf("deleted template id=%d still in list", id)
+		}
+	}
+}
+
+func TestTemplates_List_IncludesRowsBeyondFormerHundredCap(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ids := make([]int64, 0, 101)
+	t.Cleanup(func() {
+		for _, id := range ids {
+			_ = repo.Delete(context.Background(), testutil.OwnerID, id)
+		}
+	})
+
+	for i := 0; i < 101; i++ {
+		id, err := repo.Create(context.Background(), domain.TemplateInput{
+			OwnerID:    testutil.OwnerID,
+			BusinessID: testutil.BusinessID,
+			Name:       fmt.Sprintf("Round3 template %d", i),
+			Type:       "email",
+			Body:       "body",
+			Variables:  []byte(`[]`),
+		})
+		if err != nil {
+			t.Fatalf("Create template %d: %v", i, err)
+		}
+		ids = append(ids, id)
+	}
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	found := make(map[int64]struct{}, len(items))
+	for _, item := range items {
+		found[item.ID] = struct{}{}
+	}
+	for _, id := range ids {
+		if _, ok := found[id]; !ok {
+			t.Fatalf("template id=%d was omitted from the list", id)
 		}
 	}
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
@@ -25,6 +27,10 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) CreateDocument(ctx context.Context, businessID int64, params domain.CreateDocumentParams) (*domain.EmployeeDocumentRecord, error) {
+	if err := r.ensureEmployeeBelongsToBusiness(ctx, businessID, params.EmployeeID); err != nil {
+		return nil, err
+	}
+
 	result, err := r.queries.CreateDocument(ctx, sqlc.CreateDocumentParams{
 		OwnerID:      businessID,
 		BusinessID:   businessID,
@@ -34,6 +40,7 @@ func (r *Repository) CreateDocument(ctx context.Context, businessID int64, param
 		StorageMode:  params.StorageMode,
 		FileUrl:      sqlutil.NullString(params.FileURL),
 		ExternalUrl:  sqlutil.NullString(params.ExternalURL),
+		ExpiryDate:   nullableTime(params.ExpiryDate),
 		UploadedBy:   params.UploadedBy,
 	})
 	if err != nil {
@@ -65,6 +72,7 @@ func (r *Repository) GetDocument(ctx context.Context, businessID, id int64) (*do
 }
 
 func (r *Repository) ListDocuments(ctx context.Context, businessID, employeeID int64, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
+	limit, offset = normalizeDocumentPage(limit, offset)
 	total, err := r.queries.CountDocuments(ctx, sqlc.CountDocumentsParams{
 		BusinessID: businessID,
 		EmployeeID: employeeID,
@@ -87,15 +95,124 @@ func (r *Repository) ListDocuments(ctx context.Context, businessID, employeeID i
 	for _, row := range rows {
 		records = append(records, documentFromRow(row))
 	}
+	if err := r.populateEmployeeNames(ctx, businessID, records); err != nil {
+		return nil, 0, err
+	}
 
 	return records, total, nil
 }
 
 func (r *Repository) DeleteDocument(ctx context.Context, businessID, id int64) error {
-	return r.queries.DeleteDocument(ctx, sqlc.DeleteDocumentParams{
+	result, err := r.queries.DeleteDocument(ctx, sqlc.DeleteDocumentParams{
 		BusinessID: businessID,
 		ID:         id,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrDocumentNotFound
+	}
+	return nil
+}
+
+// ensureEmployeeBelongsToBusiness prevents the document table's intentionally
+// loose employee_id column from becoming a cross-tenant association.  The
+// check is deliberately scoped by both identifiers; an id alone is not a
+// tenant boundary.
+func (r *Repository) ensureEmployeeBelongsToBusiness(ctx context.Context, businessID, employeeID int64) error {
+	if businessID <= 0 || employeeID <= 0 {
+		return domain.ErrDocumentNotFound
+	}
+	if r.db == nil {
+		return errors.New("document repository database is unavailable")
+	}
+
+	var exists int
+	err := r.db.QueryRowContext(ctx, `
+		SELECT 1
+		FROM hr_employees
+		WHERE id = ? AND business_id = ?
+		LIMIT 1`, employeeID, businessID).Scan(&exists)
+	if errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("employee %d is not in business %d: %w", employeeID, businessID, domain.ErrDocumentNotFound)
+	}
+	return err
+}
+
+func nullableTime(value *time.Time) sql.NullTime {
+	if value == nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: *value, Valid: true}
+}
+
+func (r *Repository) populateEmployeeNames(ctx context.Context, businessID int64, records []domain.EmployeeDocumentRecord) error {
+	if len(records) == 0 {
+		return nil
+	}
+	if r.db == nil {
+		return errors.New("document repository database is unavailable")
+	}
+
+	ids := make([]int64, 0, len(records))
+	seen := make(map[int64]struct{}, len(records))
+	for _, record := range records {
+		if _, ok := seen[record.EmployeeID]; ok {
+			continue
+		}
+		seen[record.EmployeeID] = struct{}{}
+		ids = append(ids, record.EmployeeID)
+	}
+
+	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(ids)), ",")
+	args := make([]any, 0, len(ids)+1)
+	args = append(args, businessID)
+	for _, id := range ids {
+		args = append(args, id)
+	}
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, TRIM(CONCAT(first_name, ' ', last_name))
+		FROM hr_employees
+		WHERE business_id = ? AND id IN (`+placeholders+`)`, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	names := make(map[int64]string, len(ids))
+	for rows.Next() {
+		var id int64
+		var name string
+		if err := rows.Scan(&id, &name); err != nil {
+			return err
+		}
+		names[id] = name
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for i := range records {
+		records[i].EmployeeName = names[records[i].EmployeeID]
+	}
+	return nil
+}
+
+func normalizeDocumentPage(limit, offset int32) (int32, int32) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return limit, offset
 }
 
 func documentFromRow(row sqlc.HrEmployeeDocument) domain.EmployeeDocumentRecord {
@@ -122,6 +239,7 @@ func documentFromRow(row sqlc.HrEmployeeDocument) domain.EmployeeDocumentRecord 
 }
 
 func (r *Repository) ListExpiringDocuments(ctx context.Context, businessID int64, days, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
+	limit, offset = normalizeDocumentPage(limit, offset)
 	cutoff := time.Now().AddDate(0, 0, int(days))
 
 	total, err := r.queries.CountExpiringDocuments(ctx, sqlc.CountExpiringDocumentsParams{
@@ -145,6 +263,9 @@ func (r *Repository) ListExpiringDocuments(ctx context.Context, businessID int64
 	records := make([]domain.EmployeeDocumentRecord, 0, len(rows))
 	for _, row := range rows {
 		records = append(records, documentFromRow(row))
+	}
+	if err := r.populateEmployeeNames(ctx, businessID, records); err != nil {
+		return nil, 0, err
 	}
 
 	return records, total, nil

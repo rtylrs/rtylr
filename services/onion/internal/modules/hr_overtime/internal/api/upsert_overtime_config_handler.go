@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/application"
@@ -47,12 +48,15 @@ func (h *UpsertOvertimeConfigHandler) Serve(ctx context.Context, req *UpsertOver
 		return UpsertOvertimeConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.Service.UpsertOvertimeConfig(ctx, businessID, domain.OvertimeConfigRecord{
+	err := h.Service.UpsertOvertimeConfig(ctx, businessID, device.User.UserID, domain.OvertimeConfigRecord{
 		DailyThresholdMinutes: req.DailyThresholdMinutes,
 		DefaultMultiplier:     req.DefaultMultiplier,
 		AutoDetectEnabled:     req.AutoDetectEnabled,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrOvertimeAccessDenied) {
+			return UpsertOvertimeConfigResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to upsert overtime config", logger.Any("business_id", businessID), logger.Error(err))
 		return UpsertOvertimeConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update overtime config")
 	}

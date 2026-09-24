@@ -40,18 +40,26 @@ func (a *AttendanceAPI) resolveIdentity(ctx context.Context) (int64, int64, erro
 	return businessID, employeeID, nil
 }
 
+// ResolveIdentity exposes the same self-service scope used by the generated
+// attendance service to the compatibility routes registered by this module.
+func (a *AttendanceAPI) ResolveIdentity(ctx context.Context) (int64, int64, error) {
+	return a.resolveIdentity(ctx)
+}
+
 func (a *AttendanceAPI) ListAttendance(ctx context.Context, req *hrattendancev1.ListAttendanceRequest) (*hrattendancev1.ListAttendanceResponse, error) {
 	ownerID, employeeID, err := a.resolveIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 	date := req.GetDate()
+	pagination := attendancePaginationFromContext(ctx)
 	result, err := (&GetAttendanceHandler{Service: a.Service, Resolve: a.resolveIdentity}).Serve(ctx, &GetAttendanceRequest{
 		OwnerID:    ownerID,
 		EmployeeID: employeeID,
 		DateFrom:   date,
 		DateTo:     date,
-		Limit:      50,
+		Limit:      pagination.limit,
+		Offset:     pagination.offset,
 	})
 	if err != nil {
 		return nil, err

@@ -80,7 +80,16 @@ WHERE flow_tasks.id = ?
     OR EXISTS (
       SELECT 1 FROM flow_project_columns c
       WHERE c.id = sqlc.arg('column_id')
-        AND (c.project_id = flow_tasks.project_id OR c.workspace_id = flow_tasks.workspace_id)
+        AND (
+          c.project_id = flow_tasks.project_id
+          -- Legacy workspace-era rows have no reliable project boundary. Keep
+          -- that compatibility path, but only for a real non-zero workspace;
+          -- v2 rows use workspace_id=0 and must take the project branch above.
+          OR (
+            flow_tasks.workspace_id <> 0
+            AND c.workspace_id = flow_tasks.workspace_id
+          )
+        )
     )
   );
 

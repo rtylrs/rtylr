@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -11,6 +12,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
@@ -31,6 +33,9 @@ type CreateCycleResponse struct {
 }
 
 func (h *CreateCycleHandler) Validate(_ context.Context, req *CreateCycleRequest) error {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
 	if strings.TrimSpace(req.Name) == "" {
 		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
@@ -46,6 +51,11 @@ func (h *CreateCycleHandler) Validate(_ context.Context, req *CreateCycleRequest
 	if _, err := time.Parse("2006-01-02", req.PeriodEnd); err != nil {
 		return onekiterrors.New(http.StatusBadRequest, "period_end must be in YYYY-MM-DD format")
 	}
+	start, _ := time.Parse("2006-01-02", req.PeriodStart)
+	end, _ := time.Parse("2006-01-02", req.PeriodEnd)
+	if end.Before(start) {
+		return onekiterrors.New(http.StatusBadRequest, "period_end must not be before period_start")
+	}
 	return nil
 }
 
@@ -54,15 +64,32 @@ func (h *CreateCycleHandler) Serve(ctx context.Context, req *CreateCycleRequest)
 	if device.IsAnonymous || device.User == nil {
 		return CreateCycleResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := h.Validate(ctx, req); err != nil {
+		return CreateCycleResponse{}, err
+	}
+	if err := requirePerformanceManagePermission(ctx); err != nil {
+		return CreateCycleResponse{}, err
+	}
 
-	cycle, err := h.Service.CreateReviewCycle(ctx, device.User.UserID, domain.CreateReviewCycleParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateCycleResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	cycle, err := h.Service.CreateReviewCycle(ctx, businessID, domain.CreateReviewCycleParams{
 		Name:        req.Name,
 		CycleType:   req.CycleType,
 		PeriodStart: req.PeriodStart,
 		PeriodEnd:   req.PeriodEnd,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create review cycle", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		if errors.Is(err, domain.ErrPerformanceAccessDenied) {
+			return CreateCycleResponse{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrEmptyCycleName) || errors.Is(err, domain.ErrInvalidCycleType) {
+			return CreateCycleResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		logger.Ctx(ctx).Error("failed to create review cycle", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateCycleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create review cycle")
 	}
 

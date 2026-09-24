@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/segmentrules"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
@@ -104,18 +106,21 @@ type CreateSegmentResponse struct {
 }
 
 func (h *CreateSegmentHandler) Validate(_ context.Context, req *CreateSegmentRequest) error {
-	if req.Name == "" {
+	if req == nil || req.Name == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Segment name is required")
 	}
 
-	if len(req.Rules) == 0 {
-		return onekiterrors.New(http.StatusBadRequest, "Segment rules are required")
-	}
-
-	return nil
+	return validateSegmentRules(req.Rules)
 }
 
 func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequest) (CreateSegmentResponse, error) {
+	if req == nil {
+		return CreateSegmentResponse{}, onekiterrors.New(http.StatusBadRequest, "Segment name is required")
+	}
+	if err := validateSegmentRules(req.Rules); err != nil {
+		return CreateSegmentResponse{}, err
+	}
+
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return CreateSegmentResponse{}, onekiterrors.PermissionDenied()
@@ -127,9 +132,6 @@ func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequ
 	}
 
 	rules := []byte(req.Rules)
-	if rules == nil {
-		rules = []byte("[]")
-	}
 
 	id, err := h.CRMService.CreateSegment(ctx, domain.SegmentInput{
 		OwnerID:     device.User.UserID,
@@ -163,7 +165,7 @@ type UpdateSegmentResponse struct {
 }
 
 func (h *UpdateSegmentHandler) Validate(_ context.Context, req *UpdateSegmentRequest) error {
-	if req.ID == 0 {
+	if req == nil || req.ID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Segment ID is required")
 	}
 
@@ -171,10 +173,17 @@ func (h *UpdateSegmentHandler) Validate(_ context.Context, req *UpdateSegmentReq
 		return onekiterrors.New(http.StatusBadRequest, "Segment name is required")
 	}
 
-	return nil
+	return validateSegmentRules(req.Rules)
 }
 
 func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequest) (UpdateSegmentResponse, error) {
+	if req == nil {
+		return UpdateSegmentResponse{}, onekiterrors.New(http.StatusBadRequest, "Segment ID is required")
+	}
+	if err := validateSegmentRules(req.Rules); err != nil {
+		return UpdateSegmentResponse{}, err
+	}
+
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return UpdateSegmentResponse{}, onekiterrors.PermissionDenied()
@@ -186,9 +195,6 @@ func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequ
 	}
 
 	rules := []byte(req.Rules)
-	if rules == nil {
-		rules = []byte("[]")
-	}
 
 	if err := h.CRMService.UpdateSegment(ctx, domain.SegmentUpdateInput{
 		ID:          req.ID,
@@ -253,4 +259,34 @@ func (h *DeleteSegmentHandler) Serve(ctx context.Context, req *DeleteSegmentRequ
 	}
 
 	return DeleteSegmentResponse{Message: "Segment deleted successfully"}, nil
+}
+
+func validateSegmentRules(raw json.RawMessage) error {
+	if len(raw) == 0 {
+		return onekiterrors.New(http.StatusBadRequest, "Segment rules are required")
+	}
+
+	var document struct {
+		Rules *[]string `json:"rules"`
+	}
+	if err := json.Unmarshal(raw, &document); err != nil || document.Rules == nil {
+		return onekiterrors.New(http.StatusBadRequest, "Segment rules must be a JSON array")
+	}
+
+	// An explicit empty rules array is the supported all-customers segment.
+	// Omission is still rejected above, so an omitted field cannot erase rules.
+	for _, rule := range *document.Rules {
+		if strings.TrimSpace(rule) == "" {
+			return onekiterrors.New(http.StatusBadRequest, "Segment rules contain an empty rule")
+		}
+		wrapped, err := json.Marshal(map[string][]string{"rules": []string{rule}})
+		if err != nil {
+			return onekiterrors.New(http.StatusBadRequest, "Segment rules are invalid")
+		}
+		fragment, _ := segmentrules.Filter(wrapped)
+		if fragment == "" {
+			return onekiterrors.New(http.StatusBadRequest, "Segment rules contain an unsupported rule")
+		}
+	}
+	return nil
 }

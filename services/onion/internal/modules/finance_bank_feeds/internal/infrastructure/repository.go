@@ -17,6 +17,14 @@ type Repository struct {
 	queries *sqlc.Queries
 }
 
+const listBankFeedTransactionsQuery = `
+SELECT id, owner_id, business_id, bank_account_id, amount_minor_units, currency, occurred_at,
+       description, external_id, matched_expense_id, matched_invoice_id, created_at
+FROM finance_bank_feeds
+WHERE business_id = ? AND (? = 0 OR bank_account_id = ?)
+ORDER BY occurred_at DESC, id DESC
+LIMIT ? OFFSET ?`
+
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
@@ -25,47 +33,94 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
-	rows, err := r.queries.ListBankFeedTransactions(ctx, sqlc.ListBankFeedTransactionsParams{
-		BusinessID: businessID,
-		Limit:      limit,
-		Offset:     offset,
-	})
+	return r.ListByAccount(ctx, businessID, 0, limit, offset)
+}
+
+func (r *Repository) ListByAccount(ctx context.Context, businessID, bankAccountID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
+	rows, err := r.pool.QueryContext(ctx, listBankFeedTransactionsQuery,
+		businessID, bankAccountID, bankAccountID, limit, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list bank feed transactions",
 			logger.Error(err),
 			logger.Any("business_id", businessID),
+			logger.Any("bank_account_id", bankAccountID),
 		)
 		return nil, 0, err
 	}
+	defer rows.Close()
 
-	items := make([]domain.BankFeedTransaction, 0, len(rows))
-	for _, row := range rows {
-		items = append(items, domain.BankFeedTransaction{
-			ID:               row.ID,
-			OwnerID:          row.OwnerID,
-			BusinessID:       row.BusinessID,
-			BankAccountID:    row.BankAccountID,
-			AmountMinorUnits: row.AmountMinorUnits,
-			Currency:         row.Currency,
-			OccurredAt:       row.OccurredAt,
-			Description:      nullStr(row.Description),
-			ExternalID:       row.ExternalID,
-			MatchedExpenseID: nullInt64Ptr(row.MatchedExpenseID),
-			MatchedInvoiceID: nullInt64Ptr(row.MatchedInvoiceID),
-			CreatedAt:        nullTime(row.CreatedAt),
-		})
+	items := make([]domain.BankFeedTransaction, 0)
+	for rows.Next() {
+		var row sqlc.FinanceBankFeed
+		if err := rows.Scan(
+			&row.ID,
+			&row.OwnerID,
+			&row.BusinessID,
+			&row.BankAccountID,
+			&row.AmountMinorUnits,
+			&row.Currency,
+			&row.OccurredAt,
+			&row.Description,
+			&row.ExternalID,
+			&row.MatchedExpenseID,
+			&row.MatchedInvoiceID,
+			&row.CreatedAt,
+		); err != nil {
+			return nil, 0, err
+		}
+		items = append(items, bankFeedTransactionFromRow(row))
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
 	}
 
-	total, err := r.queries.CountBankFeedTransactions(ctx, businessID)
+	var total int64
+	if bankAccountID == 0 {
+		total, err = r.queries.CountBankFeedTransactions(ctx, businessID)
+	} else {
+		err = r.pool.QueryRowContext(ctx, `
+			SELECT COUNT(*)
+			FROM finance_bank_feeds
+			WHERE business_id = ? AND bank_account_id = ?`, businessID, bankAccountID).Scan(&total)
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count bank feed transactions",
 			logger.Error(err),
 			logger.Any("business_id", businessID),
+			logger.Any("bank_account_id", bankAccountID),
 		)
 		return nil, 0, err
 	}
 
 	return items, total, nil
+}
+
+func (r *Repository) BankAccountExists(ctx context.Context, businessID, bankAccountID int64) (bool, error) {
+	var exists bool
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT EXISTS(
+			SELECT 1
+			FROM finance_bank_accounts
+			WHERE id = ? AND business_id = ?
+		)`, bankAccountID, businessID).Scan(&exists)
+	return exists, err
+}
+
+func bankFeedTransactionFromRow(row sqlc.FinanceBankFeed) domain.BankFeedTransaction {
+	return domain.BankFeedTransaction{
+		ID:               row.ID,
+		OwnerID:          row.OwnerID,
+		BusinessID:       row.BusinessID,
+		BankAccountID:    row.BankAccountID,
+		AmountMinorUnits: row.AmountMinorUnits,
+		Currency:         row.Currency,
+		OccurredAt:       row.OccurredAt,
+		Description:      nullStr(row.Description),
+		ExternalID:       row.ExternalID,
+		MatchedExpenseID: nullInt64Ptr(row.MatchedExpenseID),
+		MatchedInvoiceID: nullInt64Ptr(row.MatchedInvoiceID),
+		CreatedAt:        nullTime(row.CreatedAt),
+	}
 }
 
 // SumAmountByAccountID returns the net amount (sum of AmountMinorUnits) for
@@ -118,30 +173,19 @@ func (r *Repository) Sync(ctx context.Context, businessID int64) (int, error) {
 		return 0, err
 	}
 
-	imported := 0
+	imported := int64(0)
 	for _, account := range accounts {
-		var amounts []int64
+		var cursor *time.Time
 		if account.LastSyncedAt.Valid {
-			amounts, err = qtx.ListBankFeedAmountsSince(ctx, sqlc.ListBankFeedAmountsSinceParams{
-				BusinessID:    businessID,
-				BankAccountID: account.ID,
-				CreatedAt:     account.LastSyncedAt,
-			})
-		} else {
-			amounts, err = qtx.ListBankFeedAmounts(ctx, sqlc.ListBankFeedAmountsParams{
-				BusinessID:    businessID,
-				BankAccountID: account.ID,
-			})
+			cursor = &account.LastSyncedAt.Time
 		}
+		amountTotal, count, err := sumBankFeedAmounts(ctx, tx, businessID, account.ID, cursor)
 		if err != nil {
 			_ = tx.Rollback()
 			return 0, err
 		}
 
-		balance := parseFloatNull(account.Balance)
-		for _, amount := range amounts {
-			balance += float64(amount) / 100
-		}
+		balance := parseFloatNull(account.Balance) + float64(amountTotal)/100
 		if _, err := qtx.UpdateSyncedBankAccount(ctx, sqlc.UpdateSyncedBankAccountParams{
 			Balance:    nullableString(fmtFloat(balance)),
 			ID:         account.ID,
@@ -150,13 +194,32 @@ func (r *Repository) Sync(ctx context.Context, businessID int64) (int, error) {
 			_ = tx.Rollback()
 			return 0, err
 		}
-		imported += len(amounts)
+		imported += count
 	}
 
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return imported, nil
+	return int(imported), nil // #nosec G115 -- imported row count is bounded by the database and the API uses int.
+}
+
+func sumBankFeedAmounts(ctx context.Context, tx *sql.Tx, businessID, bankAccountID int64, cursor *time.Time) (int64, int64, error) {
+	query := `
+		SELECT COALESCE(SUM(amount_minor_units), 0), COUNT(*)
+		FROM finance_bank_feeds
+		WHERE business_id = ? AND bank_account_id = ?`
+	args := []any{businessID, bankAccountID}
+	if cursor != nil {
+		query += " AND created_at > ?"
+		args = append(args, *cursor)
+	}
+
+	var rawTotal interface{}
+	var count int64
+	if err := tx.QueryRowContext(ctx, query, args...).Scan(&rawTotal, &count); err != nil {
+		return 0, 0, err
+	}
+	return toInt64(rawTotal), count, nil
 }
 
 // ---------------------------------------------------------------------------

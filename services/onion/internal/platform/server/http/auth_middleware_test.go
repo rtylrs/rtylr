@@ -100,6 +100,10 @@ func TestFeaturePermissionForRequestUsesCanonicalMatrixPermissions(t *testing.T)
 	}{
 		{method: "GET", path: "/finance/invoices/v1/invoices", app: authorization.AppFinance, permission: "finance:invoices:view"},
 		{method: "POST", path: "/finance/invoices/v1/invoices/12/send", app: authorization.AppFinance, permission: "finance:invoices:send"},
+		{method: "GET", path: "/finance/quote/v1/quotes", app: authorization.AppFinance, permission: "finance:quotes:view"},
+		{method: "POST", path: "/finance/quote/v1/quotes/12/convert", app: authorization.AppFinance, permission: "finance:quotes:manage"},
+		{method: "GET", path: "/finance/recurring-invoice/v1/recurring-invoices", app: authorization.AppFinance, permission: "finance:recurring_invoices:view"},
+		{method: "POST", path: "/finance/recurring-invoice/v1/recurring-invoices/12/pause", app: authorization.AppFinance, permission: "finance:recurring_invoices:manage"},
 		{method: "GET", path: "/crm/sales/contacts", app: authorization.AppCRM, permission: "crm:customers:view"},
 		{method: "DELETE", path: "/erp/product/v1/products/12", app: authorization.AppERP, permission: "erp:products:delete"},
 		{method: "GET", path: "/hr/attendance/v1/attendance", app: authorization.AppHR, permission: "hr:employees:view"},

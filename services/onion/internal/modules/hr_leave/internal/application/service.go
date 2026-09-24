@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -40,22 +41,28 @@ func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalC
 
 // --- Leave Types ---
 
-func (s *Service) ListLeaveTypes(ctx context.Context, ownerID int64, params domain.ListLeaveTypesParams) ([]domain.LeaveTypeRecord, int64, error) {
+func (s *Service) ListLeaveTypes(ctx context.Context, businessID int64, params domain.ListLeaveTypesParams) ([]domain.LeaveTypeRecord, int64, error) {
+	if businessID <= 0 {
+		return nil, 0, domain.ErrLeaveAccessDenied
+	}
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
+	if params.Offset < 0 {
+		params.Offset = 0
+	}
 
 	type lr struct {
 		Types []domain.LeaveTypeRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("types|l=%d|o=%d", params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrLeaveScope, businessID, fmt.Sprintf("types|l=%d|o=%d", params.Limit, params.Offset))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
-			types, total, err := s.repo.ListLeaveTypes(ctx, ownerID, params)
+			types, total, err := s.repo.ListLeaveTypes(ctx, businessID, params)
 			if err != nil {
 				return lr{}, err
 			}
@@ -69,24 +76,85 @@ func (s *Service) ListLeaveTypes(ctx context.Context, ownerID int64, params doma
 	return res.Types, res.Total, err
 }
 
-func (s *Service) CreateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) (*domain.LeaveTypeRecord, error) {
+func (s *Service) CreateLeaveType(ctx context.Context, businessID int64, lt domain.LeaveTypeRecord) (*domain.LeaveTypeRecord, error) {
+	if businessID <= 0 {
+		return nil, domain.ErrLeaveAccessDenied
+	}
 	if lt.Name == "" {
 		lt.Name = "Unnamed Leave Type"
 	}
+	lt.AccrualRule = strings.ToLower(strings.TrimSpace(lt.AccrualRule))
 	lt.IsActive = true
-	rec, err := s.repo.CreateLeaveType(ctx, ownerID, lt)
+	if err := domain.ValidateLeaveType(lt); err != nil {
+		return nil, err
+	}
+	rec, err := s.repo.CreateLeaveType(ctx, businessID, lt)
 	if err == nil {
-		invalidateHRLeaveScope(ctx, ownerID)
+		invalidateHRLeaveScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) UpdateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) error {
-	if err := s.repo.UpdateLeaveType(ctx, ownerID, lt); err != nil {
+func (s *Service) GetLeaveType(ctx context.Context, businessID, leaveTypeID int64) (*domain.LeaveTypeRecord, error) {
+	if businessID <= 0 {
+		return nil, domain.ErrLeaveAccessDenied
+	}
+	return s.repo.GetLeaveType(ctx, businessID, leaveTypeID)
+}
+
+func (s *Service) UpdateLeaveType(ctx context.Context, businessID int64, lt domain.LeaveTypeRecord) error {
+	if businessID <= 0 {
+		return domain.ErrLeaveAccessDenied
+	}
+	if err := domain.ValidateLeaveType(lt); err != nil {
 		return err
 	}
-	invalidateHRLeaveScope(ctx, ownerID)
+	// The repository update is scoped by business and id. The existence probe
+	// also turns a foreign or deleted id into the module's not-found error
+	// instead of an apparent success.
+	if _, err := s.repo.GetLeaveType(ctx, businessID, lt.ID); err != nil {
+		return err
+	}
+	if err := s.repo.UpdateLeaveType(ctx, businessID, lt); err != nil {
+		return err
+	}
+	invalidateHRLeaveScope(ctx, businessID)
 	return nil
+}
+
+// UpdateLeaveTypePatch applies the generated update contract without turning
+// omitted pointer fields into zeroes. The current row is loaded for validation
+// and the repository updates only fields whose pointers are present.
+func (s *Service) UpdateLeaveTypePatch(ctx context.Context, businessID, leaveTypeID int64, patch domain.LeaveTypePatch) (*domain.LeaveTypeRecord, error) {
+	if businessID <= 0 {
+		return nil, domain.ErrLeaveAccessDenied
+	}
+	if leaveTypeID <= 0 || patch.Empty() {
+		return nil, domain.ErrEmptyLeaveTypeUpdate
+	}
+	current, err := s.repo.GetLeaveType(ctx, businessID, leaveTypeID)
+	if err != nil {
+		return nil, err
+	}
+	if patch.Name != nil {
+		name := strings.TrimSpace(*patch.Name)
+		patch.Name = &name
+	}
+	if patch.AccrualRule != nil {
+		rule := strings.ToLower(strings.TrimSpace(*patch.AccrualRule))
+		patch.AccrualRule = &rule
+	}
+	updated := domain.ApplyLeaveTypePatch(*current, patch)
+	updated.Name = strings.TrimSpace(updated.Name)
+	updated.AccrualRule = strings.ToLower(strings.TrimSpace(updated.AccrualRule))
+	if err := domain.ValidateLeaveType(updated); err != nil {
+		return nil, err
+	}
+	if err := s.repo.UpdateLeaveTypePatch(ctx, businessID, leaveTypeID, patch); err != nil {
+		return nil, err
+	}
+	invalidateHRLeaveScope(ctx, businessID)
+	return s.repo.GetLeaveType(ctx, businessID, leaveTypeID)
 }
 
 // --- Leave Requests ---
@@ -108,6 +176,12 @@ func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID, callerUserID 
 	lt, err := s.repo.GetLeaveType(ctx, ownerID, req.LeaveTypeID)
 	if err != nil {
 		return nil, err
+	}
+	// ListLeaveTypes above only proves that the business has at least one
+	// active policy. The selected type is loaded by id, so enforce its own
+	// availability before any balance or overlap mutation.
+	if !lt.IsActive {
+		return nil, domain.ErrLeaveTypeNotFound
 	}
 
 	// Validate date range
@@ -428,36 +502,82 @@ func (s *Service) approverMatchesChain(ctx context.Context, ownerID, employeeID 
 // holding the approval permission sees another employee's. Balances are
 // financial-adjacent data (days entitled/used/remaining), so this was never
 // safe to leave open the way it was found.
-func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, callerUserID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
-	scopedEmployeeID, err := s.scopeLeaveRequests(ctx, ownerID, callerUserID, employeeID)
-	if err != nil {
-		return nil, err
-	}
-
-	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("balances|e=%d|y=%d", scopedEmployeeID, year))
-	return cacher.Of[[]domain.LeaveBalanceRecord]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.LeaveBalanceRecord, error) {
-			return s.fetchBalances(ctx, ownerID, scopedEmployeeID, year)
-		},
-		cacher.WithExpiry(ctx, hrLeaveTTL),
-	)
+func (s *Service) GetLeaveBalances(ctx context.Context, businessID, callerUserID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
+	balances, _, err := s.GetLeaveBalancesWithTotal(ctx, businessID, callerUserID, employeeID, year)
+	return balances, err
 }
 
-func (s *Service) fetchBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
+func (s *Service) GetLeaveBalancesWithTotal(ctx context.Context, businessID, callerUserID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, int64, error) {
+	if businessID <= 0 {
+		return nil, 0, domain.ErrLeaveAccessDenied
+	}
+	scopedEmployeeID, err := s.scopeLeaveRequests(ctx, businessID, callerUserID, employeeID)
+	if err != nil {
+		return nil, 0, err
+	}
 	if year == 0 {
 		year = int32(time.Now().UTC().Year()) // #nosec G115 -- calendar years returned by the application clock fit the int32 contract field.
 	}
-	return s.repo.ListLeaveBalances(ctx, ownerID, employeeID, year)
-}
 
-func (s *Service) GetLeaveCalendar(ctx context.Context, ownerID int64, params domain.LeaveCalendarParams) ([]domain.LeaveRequestRecord, error) {
-	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("calendar|f=%s|t=%s", params.DateFrom, params.DateTo))
-	return cacher.Of[[]domain.LeaveRequestRecord]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.LeaveRequestRecord, error) {
-			return s.repo.ListLeaveCalendar(ctx, ownerID, params.DateFrom, params.DateTo)
+	key := cacheKeys.Scoped(hrLeaveScope, businessID, fmt.Sprintf("balances|v2|e=%d|y=%d", scopedEmployeeID, year))
+	type result struct {
+		Items []domain.LeaveBalanceRecord
+		Total int64
+	}
+	res, err := cacher.Of[result]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (result, error) {
+			items, listErr := s.repo.ListLeaveBalances(ctx, businessID, scopedEmployeeID, year)
+			if listErr != nil {
+				return result{}, listErr
+			}
+			total, countErr := s.repo.CountLeaveBalances(ctx, businessID, scopedEmployeeID, year)
+			if countErr != nil {
+				return result{}, countErr
+			}
+			return result{Items: items, Total: total}, nil
 		},
 		cacher.WithExpiry(ctx, hrLeaveTTL),
 	)
+	return res.Items, res.Total, err
+}
+
+func (s *Service) GetLeaveCalendar(ctx context.Context, businessID int64, params domain.LeaveCalendarParams) ([]domain.LeaveRequestRecord, error) {
+	if businessID <= 0 {
+		return nil, domain.ErrLeaveAccessDenied
+	}
+	normalized, err := normalizeLeaveCalendarParams(params)
+	if err != nil {
+		return nil, err
+	}
+	key := leaveCalendarCacheKey(businessID, normalized)
+	return cacher.Of[[]domain.LeaveRequestRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.LeaveRequestRecord, error) {
+			return s.repo.ListLeaveCalendar(ctx, businessID, normalized.LocationID, normalized.DateFrom, normalized.DateTo)
+		},
+		cacher.WithExpiry(ctx, hrLeaveTTL),
+	)
+}
+
+func leaveCalendarCacheKey(businessID int64, params domain.LeaveCalendarParams) string {
+	return cacheKeys.Scoped(hrLeaveScope, businessID, fmt.Sprintf("calendar|l=%d|f=%s|t=%s", params.LocationID, params.DateFrom, params.DateTo))
+}
+
+func normalizeLeaveCalendarParams(params domain.LeaveCalendarParams) (domain.LeaveCalendarParams, error) {
+	// Location 0 is the documented unfiltered value; negative values are
+	// rejected before they can become a cache key or repository parameter.
+	if params.LocationID < 0 {
+		return domain.LeaveCalendarParams{}, domain.ErrInvalidCalendarLocation
+	}
+	from := strings.TrimSpace(params.DateFrom)
+	to := strings.TrimSpace(params.DateTo)
+	if err := domain.ValidateDateRange(from, to); err != nil {
+		return domain.LeaveCalendarParams{}, err
+	}
+	return domain.LeaveCalendarParams{
+		LocationID: params.LocationID,
+		DateFrom:   from,
+		DateTo:     to,
+	}, nil
 }
 
 // --- Background Job: Monthly Accrual ---
@@ -473,14 +593,17 @@ func (s *Service) RunMonthlyAccrual(ctx context.Context) error {
 		return err
 	}
 
+	var runErrs []error
 	for _, ownerID := range ownerIDs {
 		if err := s.accrueForOwner(ctx, ownerID, currentYear, currentMonth); err != nil {
+			wrappedErr := fmt.Errorf("leave accrual failed for owner %d: %w", ownerID, err)
+			runErrs = append(runErrs, wrappedErr)
 			logger.Ctx(ctx).Error("leave accrual: failed for owner",
-				logger.Any("owner_id", ownerID), logger.Error(err))
+				logger.Any("owner_id", ownerID), logger.Error(wrappedErr))
 		}
 	}
 
-	return nil
+	return errors.Join(runErrs...)
 }
 
 func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month int32) error {
@@ -508,6 +631,7 @@ func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month
 		balancesByType[bal.LeaveTypeID] = append(balancesByType[bal.LeaveTypeID], bal)
 	}
 
+	var accrualErrs []error
 	for _, lt := range leaveTypes {
 		if lt.AccrualRule == "" || lt.AccrualRule == "none" || lt.AccrualAmount <= 0 {
 			continue
@@ -520,14 +644,19 @@ func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month
 		for _, bal := range balancesByType[lt.ID] {
 			addErr := s.repo.AddToEntitledDays(ctx, ownerID, bal.EmployeeID, lt.ID, year, lt.AccrualAmount, month)
 			if addErr != nil {
+				wrappedErr := fmt.Errorf(
+					"add entitled days for owner %d, employee %d, leave type %d: %w",
+					ownerID, bal.EmployeeID, lt.ID, addErr,
+				)
+				accrualErrs = append(accrualErrs, wrappedErr)
 				logger.Ctx(ctx).Error("leave accrual: failed to add entitled days",
 					logger.Any("owner_id", ownerID), logger.Any("employee_id", bal.EmployeeID),
-					logger.Any("leave_type_id", lt.ID), logger.Error(addErr))
+					logger.Any("leave_type_id", lt.ID), logger.Error(wrappedErr))
 			}
 		}
 	}
 
-	return nil
+	return errors.Join(accrualErrs...)
 }
 
 // leaveDayAllocations computes the authoritative whole-calendar-day count

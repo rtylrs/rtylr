@@ -2,7 +2,11 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"net/url"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -64,11 +68,17 @@ func RegisterRuntimeConfigRoutes(r *chi.Mux, validator *license.CachedValidator)
 		if selfHosted {
 			mode = "self_hosted"
 		}
+		urls, err := runtimeURLsForMode(cfg, selfHosted, req)
+		if err != nil {
+			http.Error(w, "self-hosted runtime configuration requires a non-hosted API URL", http.StatusInternalServerError)
+			return
+		}
+
 		resp := runtimeConfigResponse{
 			DeploymentMode:     mode,
 			SelfHosted:         selfHosted,
 			Version:            Version,
-			URLs:               platformconfig.RuntimeURLs(cfg),
+			URLs:               urls,
 			AllFeaturesEnabled: selfHosted,
 			License:            runtimeLicenseFrom(validator.Current(req.Context()), selfHosted),
 			Apps: runtimeAppsBlock{
@@ -84,6 +94,79 @@ func RegisterRuntimeConfigRoutes(r *chi.Mux, validator *license.CachedValidator)
 	}
 	r.Get("/runtime-config", handler)
 	r.Get("/.well-known/rtylr.json", handler)
+}
+
+// runtimeURLsForMode keeps hosted defaults for hosted deployments, but never
+// lets a self-hosted response point a prebuilt frontend at the hosted Voxire
+// service. A self-host API URL is preferred; when it is omitted, derive a safe
+// local origin from the request host so single-origin self-host installations
+// still receive a usable response.
+func runtimeURLsForMode(cfg *platformconfig.AppConfig, selfHosted bool, req *http.Request) (map[string]string, error) {
+	urls := platformconfig.RuntimeURLs(cfg)
+	if !selfHosted {
+		return urls, nil
+	}
+
+	apiURL, err := selfHostedAPIURL(req)
+	if err != nil {
+		return nil, err
+	}
+	apiURL = strings.TrimRight(apiURL, "/")
+
+	// RuntimeURLs supplies the hosted constants for omitted variables. Replace
+	// every such default with the self-host API origin, while preserving any
+	// explicitly configured customer URL.
+	for key, value := range urls {
+		if key == "api" || isHostedRuntimeURL(value) {
+			urls[key] = apiURL
+		}
+	}
+	urls["api"] = apiURL
+	return urls, nil
+}
+
+func selfHostedAPIURL(req *http.Request) (string, error) {
+	raw := strings.TrimSpace(os.Getenv("API_URL"))
+	if raw == "" {
+		if req == nil {
+			return "", errors.New("self-hosted API URL is missing")
+		}
+		host := strings.TrimSpace(req.Host)
+		if host == "" && req.URL != nil {
+			host = strings.TrimSpace(req.URL.Host)
+		}
+		if host == "" {
+			return "", errors.New("self-hosted API URL is missing")
+		}
+		scheme := "http"
+		if req.TLS != nil {
+			scheme = "https"
+		}
+		raw = scheme + "://" + host
+	}
+
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return "", errors.New("self-hosted API URL must be an absolute http(s) URL")
+	}
+	scheme := strings.ToLower(parsed.Scheme)
+	if parsed.Scheme == "" || parsed.Host == "" || (scheme != "http" && scheme != "https") {
+		return "", errors.New("self-hosted API URL must be an absolute http(s) URL")
+	}
+	if isHostedRuntimeURL(raw) {
+		return "", errors.New("self-hosted API URL must not point at hosted Voxire URLs")
+	}
+	return raw, nil
+}
+
+func isHostedRuntimeURL(raw string) bool {
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(strings.TrimSuffix(parsed.Hostname(), "."))
+	return host == "voxire.com" || host == "rtylr.com" ||
+		strings.HasSuffix(host, ".voxire.com") || strings.HasSuffix(host, ".rtylr.com")
 }
 
 func runtimeLicenseFrom(report license.StatusReport, selfHosted bool) runtimeLicenseSummary {

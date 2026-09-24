@@ -391,6 +391,10 @@ func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID 
 }
 
 func (r *Repository) UpdateCustomerLoyalty(ctx context.Context, businessID, customerID int64, newPoints int, newTier string) error {
+	if newPoints < 0 || int64(newPoints) > domain.MaxLoyaltyPoints {
+		return domain.ErrLoyaltyPointsOutOfRange
+	}
+
 	err := r.queries.UpdateCustomerLoyalty(ctx, sqlc.UpdateCustomerLoyaltyParams{
 		LoyaltyPoints: sql.NullInt32{Int32: int32(newPoints), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		LoyaltyTier: sqlc.NullCrmCustomersLoyaltyTier{
@@ -422,6 +426,12 @@ func (r *Repository) RecordVisit(ctx context.Context, businessID, customerID int
 // ─── Loyalty Transactions ─────────────────────────────────────────────────────
 
 func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.LoyaltyTransaction) error {
+	if int64(tx.Points) < -domain.MaxLoyaltyPoints || int64(tx.Points) > domain.MaxLoyaltyPoints ||
+		tx.BalanceBefore < 0 || int64(tx.BalanceBefore) > domain.MaxLoyaltyPoints ||
+		tx.BalanceAfter < 0 || int64(tx.BalanceAfter) > domain.MaxLoyaltyPoints {
+		return domain.ErrLoyaltyPointsOutOfRange
+	}
+
 	err := r.queries.CreateLoyaltyTransaction(ctx, sqlc.CreateLoyaltyTransactionParams{
 		OwnerID:       tx.OwnerID,
 		BusinessID:    tx.BusinessID,
@@ -447,6 +457,13 @@ func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.Loy
 // transaction commits, so callers can invalidate caches without racing a
 // rollback.
 func (r *Repository) ApplyLoyaltyDelta(ctx context.Context, input domain.LoyaltyTransaction, delta int, tierFor func(int) string, onCommitted func()) error {
+	if err := domain.ValidateLoyaltyPoints(int64(input.Points)); err != nil {
+		return err
+	}
+	if delta == 0 || int64(delta) > domain.MaxLoyaltyPoints || int64(delta) < -domain.MaxLoyaltyPoints {
+		return domain.ErrLoyaltyPointsOutOfRange
+	}
+
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -464,9 +481,25 @@ func (r *Repository) ApplyLoyaltyDelta(ctx context.Context, input domain.Loyalty
 	if err != nil {
 		return err
 	}
+	if balanceBefore < 0 || int64(balanceBefore) > domain.MaxLoyaltyPoints {
+		return domain.ErrLoyaltyBalanceCapacity
+	}
+
+	// Check the cumulative result while the row lock is held. Checking only
+	// the request amount, or calculating after releasing the lock, lets two
+	// valid awards race past the signed INT capacity.
+	if delta > 0 && int64(balanceBefore) > domain.MaxLoyaltyPoints-int64(delta) {
+		return domain.ErrLoyaltyBalanceCapacity
+	}
+	if delta < 0 && int64(balanceBefore) < -int64(delta) {
+		return domain.ErrInsufficientPoints
+	}
 	balanceAfter := balanceBefore + delta
 	if balanceAfter < 0 {
 		return domain.ErrInsufficientPoints
+	}
+	if int64(balanceAfter) > domain.MaxLoyaltyPoints {
+		return domain.ErrLoyaltyBalanceCapacity
 	}
 	if _, err = tx.ExecContext(ctx,
 		"UPDATE crm_customers SET loyalty_points = ?, loyalty_tier = ? WHERE id = ? AND business_id = ?",
@@ -1180,19 +1213,47 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 
 // ─── Loyalty Tiers ──────────────────────────────────────────────────────────
 
-func (r *Repository) ListLoyaltyTiers(ctx context.Context, businessID int64) ([]domain.LoyaltyTier, error) {
-	rows, err := r.queries.ListLoyaltyTiers(ctx, businessID)
+func normalizeLoyaltyTierRepositoryPage(page, pageSize int) (int, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = domain.DefaultLoyaltyTierPageSize
+	}
+	if pageSize > domain.MaxLoyaltyTierPageSize {
+		pageSize = domain.MaxLoyaltyTierPageSize
+	}
+	if page-1 > math.MaxInt32/pageSize {
+		return 0, 0, domain.ErrLoyaltyTierPageOutOfRange
+	}
+	return page, pageSize, nil
+}
+
+func (r *Repository) ListLoyaltyTiersPage(ctx context.Context, businessID int64, page, pageSize int) ([]domain.LoyaltyTier, int64, error) {
+	page, pageSize, err := normalizeLoyaltyTierRepositoryPage(page, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.queries.CountLoyaltyTiers(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count loyalty tiers", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListLoyaltyTiers(ctx, sqlc.ListLoyaltyTiersParams{
+		BusinessID: businessID,
+		Limit:      int32(pageSize),
+		Offset:     int32((page - 1) * pageSize),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty tiers", logger.Error(err))
-
-		return nil, err
+		return nil, 0, err
 	}
 
 	tiers := make([]domain.LoyaltyTier, 0, len(rows))
-
 	for _, row := range rows {
 		dp := parseDecimal(row.DiscountPct.String)
-
 		t := domain.LoyaltyTier{
 			ID:          row.ID,
 			OwnerID:     row.OwnerID,
@@ -1204,17 +1265,34 @@ func (r *Repository) ListLoyaltyTiers(ctx context.Context, businessID int64) ([]
 			CreatedAt:   row.CreatedAt.Time,
 			UpdatedAt:   row.UpdatedAt.Time,
 		}
-
 		if row.Perks != nil {
 			t.Perks = []byte(row.Perks)
 		} else {
 			t.Perks = []byte("[]")
 		}
-
 		tiers = append(tiers, t)
 	}
 
-	return tiers, nil
+	return tiers, total, nil
+}
+
+// ListLoyaltyTiers keeps the original complete-list API for callers that do
+// not have pagination metadata. It walks the bounded query instead of silently
+// treating the first 100 rows as the complete business catalogue.
+func (r *Repository) ListLoyaltyTiers(ctx context.Context, businessID int64) ([]domain.LoyaltyTier, error) {
+	const pageSize = 100
+	all := make([]domain.LoyaltyTier, 0)
+
+	for page := 1; ; page++ {
+		rows, total, err := r.ListLoyaltyTiersPage(ctx, businessID, page, pageSize)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, rows...)
+		if int64(len(all)) >= total || len(rows) < pageSize {
+			return all, nil
+		}
+	}
 }
 
 func (r *Repository) CreateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierInput) (int64, error) {

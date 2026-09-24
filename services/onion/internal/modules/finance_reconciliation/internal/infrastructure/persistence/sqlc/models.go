@@ -1757,8 +1757,10 @@ type FinanceBankAccount struct {
 	Name         string         `db:"name" json:"name"`
 	Institution  sql.NullString `db:"institution" json:"institution"`
 	AccountType  sql.NullString `db:"account_type" json:"account_type"`
+	LastFour     sql.NullString `db:"last_four" json:"last_four"`
 	Balance      sql.NullString `db:"balance" json:"balance"`
 	Currency     sql.NullString `db:"currency" json:"currency"`
+	IsPrimary    bool           `db:"is_primary" json:"is_primary"`
 	IsConnected  sql.NullBool   `db:"is_connected" json:"is_connected"`
 	LastSyncedAt sql.NullTime   `db:"last_synced_at" json:"last_synced_at"`
 	CreatedAt    sql.NullTime   `db:"created_at" json:"created_at"`

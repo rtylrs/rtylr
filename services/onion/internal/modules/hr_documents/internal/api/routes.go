@@ -13,10 +13,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[UploadDocumentRequest, UploadDocumentResponse](
 		ctx, router, UploadDocumentRoutes(), &UploadDocumentHandler{Service: service},
 	)
-	serverHttp.RegisterGET[ListDocumentsRequest, ListDocumentsResponse](
+	serverHttp.RegisterGET[ListDocumentsRequest, any](
 		ctx, router, ListDocumentsRoutes(), &ListDocumentsHandler{Service: service},
 	)
-	serverHttp.RegisterGET[ListExpiringDocumentsRequest, ListDocumentsResponse](
+	serverHttp.RegisterGET[ListExpiringDocumentsRequest, any](
 		ctx, router, ListExpiringDocumentsRoutes(), &ListExpiringDocumentsHandler{Service: service},
 	)
 	serverHttp.RegisterGET[GetDocumentRequest, GetDocumentResponse](

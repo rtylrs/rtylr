@@ -71,6 +71,24 @@ func TestCachedValidatorFallsBackToTheHostedAuthority(t *testing.T) {
 	}
 }
 
+func TestCachedValidatorSendsInternalAuthorityToken(t *testing.T) {
+	const token = "authority-secret"
+	authority := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("Internal-Token"); got != token {
+			t.Errorf("Internal-Token = %q, want %q", got, token)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"valid":true,"status":"valid"}`))
+	}))
+	defer authority.Close()
+
+	cfg := selfHostConfig(t, authority.URL)
+	cfg.InternalToken = token
+	if report := NewCachedValidator(cfg).Refresh(context.Background()); !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+}
+
 // A nil config must not panic the constructor; it is how several helpers in
 // this package are already called.
 func TestCachedValidatorHandlesANilConfig(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
@@ -35,6 +36,14 @@ func (h *ListEquipmentRequestsHandler) Serve(ctx context.Context, req *ListEquip
 	if device.IsAnonymous || device.User == nil {
 		return ListEquipmentRequestsResponse{}, onekiterrors.PermissionDenied()
 	}
+	if req == nil {
+		req = &ListEquipmentRequestsRequest{}
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListEquipmentRequestsResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	if req.Limit <= 0 {
 		req.Limit = 20
@@ -42,15 +51,18 @@ func (h *ListEquipmentRequestsHandler) Serve(ctx context.Context, req *ListEquip
 	if req.Limit > 100 {
 		req.Limit = 100
 	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
 
-	requests, total, err := h.Service.ListEquipmentRequests(ctx, device.User.UserID, domain.ListEquipmentRequestsParams{
+	requests, total, err := h.Service.ListEquipmentRequests(ctx, businessID, domain.ListEquipmentRequestsParams{
 		EmployeeID: req.EmployeeID,
 		Status:     req.Status,
 		Limit:      req.Limit,
 		Offset:     req.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list equipment requests", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list equipment requests", logger.Any("business_id", businessID), logger.Error(err))
 		return ListEquipmentRequestsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list equipment requests")
 	}
 

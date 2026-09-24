@@ -4,12 +4,22 @@ import (
 	"crypto/subtle"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/voxire/onion/internal/platform/config"
 )
 
 func hasValidInternalToken(r *http.Request) bool {
+	return hasValidInternalTokenForConfig(r, nil)
+}
+
+func hasValidInternalTokenForConfig(r *http.Request, cfg *config.AppConfig) bool {
 	expected := internalToken()
+	if cfg != nil {
+		if configured := strings.TrimSpace(cfg.InternalToken); configured != "" {
+			expected = configured
+		}
+	}
 	if expected == "" {
 		return false
 	}

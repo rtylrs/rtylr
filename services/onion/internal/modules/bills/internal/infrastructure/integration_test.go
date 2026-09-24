@@ -402,7 +402,7 @@ func TestUpdate_Bill_OmittedSupplierFieldsKeepStoredValues(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	purchaseOrderID := int64(981234)
+	purchaseOrderID := insertRound3PurchaseOrder(t, db, testutil.OwnerID, "round3-merge-po")
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
 		SupplierID:      5101,
 		SupplierName:    "Acme Supply",
@@ -415,7 +415,10 @@ func TestUpdate_Bill_OmittedSupplierFieldsKeepStoredValues(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() {
+		_ = repo.Delete(context.Background(), testutil.OwnerID, id)
+		_, _ = db.ExecContext(context.Background(), `DELETE FROM erp_purchase_orders WHERE id = ?`, purchaseOrderID)
+	})
 
 	// The partial update body omits supplier_id, supplier_name and
 	// purchase_order_id; those keep the stored values.

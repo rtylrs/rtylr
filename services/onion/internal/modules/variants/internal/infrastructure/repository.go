@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
@@ -27,35 +28,68 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListVariants(ctx context.Context, businessID, productID int64) ([]domain.Variant, error) {
+	items, _, _, err := r.ListVariantsPage(ctx, businessID, productID, 100, 0)
+	return items, err
+}
+
+func (r *Repository) ListVariantsPage(ctx context.Context, businessID, productID int64, limit, offset int) ([]domain.Variant, bool, int64, error) {
+	if productID > 0 {
+		if err := ensureProductReference(ctx, r.queries, businessID, productID); err != nil {
+			return nil, false, 0, err
+		}
+	}
+
 	var rows []sqlc.ErpProductVariant
 	var err error
-
 	if productID > 0 {
 		rows, err = r.queries.ListVariantsByProduct(ctx, sqlc.ListVariantsByProductParams{
 			BusinessID: businessID,
 			ProductID:  productID,
+			Limit:      int32(limit + 1), // #nosec G115 -- limit is validated by the application service.
+			Offset:     int32(offset),    // #nosec G115 -- offset is derived from validated service bounds.
 		})
 	} else {
-		rows, err = r.queries.ListVariantsByOwner(ctx, businessID)
+		rows, err = r.queries.ListVariantsByOwner(ctx, sqlc.ListVariantsByOwnerParams{
+			BusinessID: businessID,
+			Limit:      int32(limit + 1), // #nosec G115 -- limit is validated by the application service.
+			Offset:     int32(offset),    // #nosec G115 -- offset is derived from validated service bounds.
+		})
 	}
-
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list variants", logger.Error(err))
-
-		return nil, err
+		return nil, false, 0, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
 	}
 
+	total, err := r.CountVariants(ctx, businessID, productID)
+	if err != nil {
+		return nil, false, 0, err
+	}
 	variants := make([]domain.Variant, 0, len(rows))
-
 	for _, row := range rows {
 		variants = append(variants, variantFromRow(row))
 	}
-
-	return variants, nil
+	return variants, hasMore, total, nil
 }
 
-func (r *Repository) CreateVariant(ctx context.Context, businessID int64, input domain.VariantInput) (int64, error) {
-	result, err := r.queries.CreateVariant(ctx, sqlc.CreateVariantParams{
+func (r *Repository) CreateVariant(ctx context.Context, businessID int64, input domain.VariantInput) (id int64, err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	qtx := r.queries.WithTx(tx)
+	if err = ensureProductReference(ctx, qtx, businessID, input.ProductID); err != nil {
+		return 0, err
+	}
+	result, err := qtx.CreateVariant(ctx, sqlc.CreateVariantParams{
 		OwnerID:       businessID,
 		BusinessID:    businessID,
 		ProductID:     input.ProductID,
@@ -70,20 +104,31 @@ func (r *Repository) CreateVariant(ctx context.Context, businessID int64, input 
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create variant", logger.Error(err))
-
 		return 0, err
 	}
-
-	id, err := result.LastInsertId()
+	id, err = result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
-
-	return id, nil
+	err = tx.Commit()
+	return id, err
 }
 
-func (r *Repository) UpdateVariant(ctx context.Context, businessID, id int64, input domain.VariantInput) error {
-	err := r.queries.UpdateVariant(ctx, sqlc.UpdateVariantParams{
+func (r *Repository) UpdateVariant(ctx context.Context, businessID, id int64, input domain.VariantInput) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	qtx := r.queries.WithTx(tx)
+	if err = ensureProductReference(ctx, qtx, businessID, input.ProductID); err != nil {
+		return err
+	}
+	updated, err := qtx.UpdateVariant(ctx, sqlc.UpdateVariantParams{
 		ProductID:     input.ProductID,
 		Name:          input.Name,
 		Sku:           sqlutil.NullString(input.SKU),
@@ -98,24 +143,24 @@ func (r *Repository) UpdateVariant(ctx context.Context, businessID, id int64, in
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update variant", logger.Error(err))
-
 		return err
 	}
-
-	return nil
+	if updated != 1 {
+		return domain.ErrVariantNotFound
+	}
+	err = tx.Commit()
+	return err
 }
 
 func (r *Repository) DeleteVariant(ctx context.Context, businessID, id int64) error {
-	err := r.queries.DeleteVariant(ctx, sqlc.DeleteVariantParams{
-		BusinessID: businessID,
-		ID:         id,
-	})
+	deleted, err := r.queries.DeleteVariant(ctx, sqlc.DeleteVariantParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete variant", logger.Error(err))
-
 		return err
 	}
-
+	if deleted != 1 {
+		return domain.ErrVariantNotFound
+	}
 	return nil
 }
 
@@ -143,6 +188,19 @@ func (r *Repository) CountVariants(ctx context.Context, businessID, productID in
 	}
 
 	return count, nil
+}
+
+func ensureProductReference(ctx context.Context, q *sqlc.Queries, businessID, productID int64) error {
+	if productID <= 0 {
+		return domain.ErrVariantProductNotFound
+	}
+	if _, err := q.GetProductReference(ctx, sqlc.GetProductReferenceParams{BusinessID: businessID, ID: productID}); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrVariantProductNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {

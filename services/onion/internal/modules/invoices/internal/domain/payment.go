@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	ErrPaymentNotFound      = errors.New("payment not found")
-	ErrInvalidPaymentAmount = errors.New("payment amount must be greater than zero")
+	ErrPaymentNotFound       = errors.New("payment not found")
+	ErrInvalidPaymentAmount  = errors.New("payment amount must be greater than zero")
+	ErrPaymentExceedsBalance = errors.New("payment cannot exceed the remaining amount due")
 )
 
 type Payment struct {

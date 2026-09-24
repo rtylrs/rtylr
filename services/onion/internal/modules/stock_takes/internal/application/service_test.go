@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
+	"github.com/voxire/onion/internal/platform/audit"
 )
 
 type mockRepo struct {
@@ -18,11 +19,11 @@ func (m *mockRepo) ListStockTakes(_ context.Context, _ int64, _, _ int) ([]domai
 	return nil, false, nil
 }
 
-func (m *mockRepo) CreateStockTake(_ context.Context, _ int64, _ domain.StockTakeInput) (int64, error) {
+func (m *mockRepo) CreateStockTake(_ context.Context, _ int64, _ domain.StockTakeInput, _ ...audit.Event) (int64, error) {
 	return m.createID, m.createErr
 }
 
-func (m *mockRepo) UpdateStockTake(_ context.Context, _ int64, _ domain.StockTakeUpdateInput) error {
+func (m *mockRepo) UpdateStockTake(_ context.Context, _ int64, _ domain.StockTakeUpdateInput, _ ...audit.Event) error {
 	return m.updErr
 }
 

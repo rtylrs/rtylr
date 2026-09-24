@@ -6,22 +6,24 @@ import (
 	"math"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/infrastructure"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-)
-
-const (
-	financeReconScope = "finance_reconciliation"
-	financeReconTTL   = 2 * time.Minute
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // maxSuggestions caps the suggestion list so the response stays small even
 // when both sides have hundreds of rows.
 const maxSuggestions = 50
+
+// Reconciliation changes the bank-feed projection consumed by the finance
+// feed UI. Keep this scope name in sync with finance_bank_feeds' service
+// cache so a successful match is visible immediately.
+const financeBankFeedsCacheScope = "finance_bank_feeds"
 
 // reconciliationPreviewLimit keeps the overview and its suggestion matrix
 // bounded. Truncation is explicit in the response so callers never mistake a
@@ -49,20 +51,18 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	pool *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db)}
+	return &Service{repo: infrastructure.NewRepository(db), pool: db}
 }
 
 func (s *Service) Overview(ctx context.Context, businessID int64) (domain.ReconciliationOverview, error) {
-	return cacher.Of[domain.ReconciliationOverview]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(financeReconScope, businessID, "overview"),
-		func(ctx context.Context) (domain.ReconciliationOverview, error) {
-			return s.computeOverview(ctx, businessID)
-		},
-		cacher.WithExpiry(ctx, financeReconTTL),
-	)
+	if err := requireReconciliationPermission(ctx); err != nil {
+		return domain.ReconciliationOverview{}, err
+	}
+	return s.computeOverview(ctx, businessID)
 }
 
 func (s *Service) computeOverview(ctx context.Context, businessID int64) (domain.ReconciliationOverview, error) {
@@ -73,6 +73,9 @@ func (s *Service) computeOverview(ctx context.Context, businessID int64) (domain
 
 	invoices, err := s.repo.ListUnmatchedInvoices(ctx, businessID)
 	if err != nil {
+		return domain.ReconciliationOverview{}, err
+	}
+	if err := s.useOutstandingInvoiceAmounts(ctx, businessID, invoices); err != nil {
 		return domain.ReconciliationOverview{}, err
 	}
 
@@ -98,6 +101,48 @@ func (s *Service) computeOverview(ctx context.Context, businessID int64) (domain
 	}, nil
 }
 
+func (s *Service) useOutstandingInvoiceAmounts(ctx context.Context, businessID int64, invoices []domain.UnmatchedInvoice) error {
+	if s.pool == nil || len(invoices) == 0 {
+		return nil
+	}
+
+	placeholders := make([]string, len(invoices))
+	args := make([]any, 0, len(invoices)+1)
+	args = append(args, businessID)
+	for i, invoice := range invoices {
+		placeholders[i] = "?"
+		args = append(args, invoice.ID)
+	}
+
+	query := `
+		SELECT id, CAST(ROUND(COALESCE(amount_due, 0) * 100) AS SIGNED)
+		FROM finance_invoices
+		WHERE business_id = ? AND id IN (` + strings.Join(placeholders, ",") + `)`
+	rows, err := s.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	outstanding := make(map[int64]int64, len(invoices))
+	for rows.Next() {
+		var id, amountMinorUnits int64
+		if err := rows.Scan(&id, &amountMinorUnits); err != nil {
+			return err
+		}
+		outstanding[id] = amountMinorUnits
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for i := range invoices {
+		if amountMinorUnits, ok := outstanding[invoices[i].ID]; ok {
+			invoices[i].AmountMinorUnits = amountMinorUnits
+		}
+	}
+	return nil
+}
+
 func truncatePreview[T any](items []T) ([]T, bool) {
 	if len(items) <= reconciliationPreviewLimit {
 		return items, false
@@ -107,6 +152,9 @@ func truncatePreview[T any](items []T) ([]T, bool) {
 }
 
 func (s *Service) Match(ctx context.Context, businessID int64, input domain.MatchInput) (int64, error) {
+	if err := requireReconciliationPermission(ctx); err != nil {
+		return 0, err
+	}
 	if input.TargetType != domain.TargetTypeInvoice && input.TargetType != domain.TargetTypeExpense {
 		return 0, domain.ErrInvalidTarget
 	}
@@ -131,9 +179,24 @@ func (s *Service) Match(ctx context.Context, businessID int64, input domain.Matc
 
 	id, err := s.repo.CreateMatch(ctx, businessID, input)
 	if err == nil {
-		cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(financeReconScope, businessID))
+		// CreateMatch updates the bank-feed projection in the same database
+		// transaction. Invalidate the independent feed-list cache only after
+		// that transaction commits; a failed match must not evict a valid
+		// cached list or report success for a rolled-back write.
+		cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(financeBankFeedsCacheScope, businessID))
 	}
 	return id, err
+}
+
+func requireReconciliationPermission(ctx context.Context) error {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return nil
+	}
+	if authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:reconciliation:manage") {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
 }
 
 // computeSuggestions scores every same-currency (bank_txn × target) pair by

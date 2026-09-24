@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
@@ -137,6 +138,13 @@ func (r *Repository) UpdateEquipmentRequestStatus(ctx context.Context, businessI
 }
 
 func (r *Repository) CreateAsset(ctx context.Context, businessID int64, params domain.CreateAssetParams) (*domain.AssetRecord, error) {
+	condition := strings.TrimSpace(params.Condition)
+	if condition == "" {
+		condition = domain.AssetConditionGood
+	}
+	if !domain.IsValidAssetCondition(condition) {
+		return nil, domain.ErrInvalidAssetCondition
+	}
 	result, err := r.queries.CreateAsset(ctx, sqlc.CreateAssetParams{
 		OwnerID:       businessID,
 		BusinessID:    businessID,
@@ -145,6 +153,7 @@ func (r *Repository) CreateAsset(ctx context.Context, businessID int64, params d
 		SerialNumber:  sqlutil.NullString(params.SerialNumber),
 		LocationID:    sqlutil.NullInt64(params.LocationID),
 		Status:        "available",
+		Condition:     condition,
 		PurchaseDate:  nullTimeFromDateStr(params.PurchaseDate),
 		PurchasePrice: nullStringFromMinorUnits(params.PurchasePriceMinorUnits),
 		Notes:         sqlutil.NullString(params.Notes),
@@ -189,6 +198,9 @@ func (r *Repository) ListAssets(ctx context.Context, businessID int64, params do
 	if params.Status != nil && *params.Status != "" {
 		filters.Status = sql.NullString{String: *params.Status, Valid: true}
 	}
+	if params.Condition != nil && *params.Condition != "" {
+		filters.Condition = sql.NullString{String: *params.Condition, Valid: true}
+	}
 	if params.AssignedTo != nil && *params.AssignedTo != 0 {
 		filters.AssignedTo = sql.NullInt64{Int64: *params.AssignedTo, Valid: true}
 	}
@@ -197,6 +209,7 @@ func (r *Repository) ListAssets(ctx context.Context, businessID int64, params do
 		BusinessID: filters.BusinessID,
 		LocationID: filters.LocationID,
 		Status:     filters.Status,
+		Condition:  filters.Condition,
 		AssignedTo: filters.AssignedTo,
 	})
 	if err != nil {
@@ -271,6 +284,7 @@ func assetFromRow(row sqlc.HrAsset) domain.AssetRecord {
 		LocationID:              row.LocationID.Int64,
 		AssignedTo:              row.AssignedTo.Int64,
 		Status:                  row.Status,
+		Condition:               row.Condition,
 		PurchaseDate:            purchaseDate,
 		PurchasePriceMinorUnits: decimalStringToMinorUnits(row.PurchasePrice.String),
 		Notes:                   row.Notes.String,

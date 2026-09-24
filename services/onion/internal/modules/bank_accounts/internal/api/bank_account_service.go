@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	commonpaginationv1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	financebankaccountv1 "github.com/voxire/voxie/gen/go/finance/bank_account/v1"
 )
 
@@ -23,20 +24,35 @@ func NewBankAccountAPI(service *application.Service) *BankAccountAPI {
 	return &BankAccountAPI{Service: service}
 }
 
-func (a *BankAccountAPI) ListBankAccounts(ctx context.Context, _ *financebankaccountv1.ListBankAccountsRequest) (*financebankaccountv1.ListBankAccountsResponse, error) {
+func (a *BankAccountAPI) ListBankAccounts(ctx context.Context, req *financebankaccountv1.ListBankAccountsRequest) (*financebankaccountv1.ListBankAccountsResponse, error) {
 	businessID, err := bankAccountBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	accounts, listErr := a.Service.List(ctx, businessID)
+	page, listErr := a.Service.ListPage(ctx, businessID, application.ListOptions{
+		Page:    req.GetPage(),
+		Limit:   req.GetLimit(),
+		SortBy:  req.GetSortBy(),
+		SortDir: req.GetSortDir(),
+	})
 	if listErr != nil {
 		return nil, bankAccountStatusError(http.StatusInternalServerError, "Failed to list bank accounts")
 	}
-	out := make([]*financebankaccountv1.BankAccount, 0, len(accounts))
-	for _, account := range accounts {
+	out := make([]*financebankaccountv1.BankAccount, 0, len(page.Accounts))
+	for _, account := range page.Accounts {
 		out = append(out, newBankAccountProto(account))
 	}
-	return &financebankaccountv1.ListBankAccountsResponse{Accounts: out}, nil
+	return &financebankaccountv1.ListBankAccountsResponse{
+		Accounts: out,
+		Pagination: &commonpaginationv1.PaginationResponse{
+			Page:       page.Page,
+			Limit:      page.Limit,
+			Total:      page.Total,
+			TotalPages: totalPages(page.Limit, page.Total),
+			HasNext:    page.HasNext,
+			HasPrev:    page.HasPrev,
+		},
+	}, nil
 }
 
 func (a *BankAccountAPI) CreateBankAccount(ctx context.Context, req *financebankaccountv1.CreateBankAccountRequest) (*financebankaccountv1.CreateBankAccountResponse, error) {
@@ -52,9 +68,13 @@ func (a *BankAccountAPI) CreateBankAccount(ctx context.Context, req *financebank
 		Name:        strings.TrimSpace(req.GetName()),
 		Institution: req.GetBankName(),
 		AccountType: req.GetAccountType(),
+		LastFour:    req.GetLastFour(),
 		Balance:     balance,
 		Currency:    req.GetCurrency(),
-		IsConnected: req.GetIsPrimary(),
+		IsPrimary:   req.GetIsPrimary(),
+		// The public create flow is the bank-feed connection flow. A false
+		// is_primary value must not disable feed eligibility.
+		IsConnected: true,
 	}
 	if validationErr := domain.ValidateBankAccountInput(input); validationErr != nil {
 		return nil, bankAccountStatusError(http.StatusBadRequest, validationErr.Error())
@@ -65,7 +85,16 @@ func (a *BankAccountAPI) CreateBankAccount(ctx context.Context, req *financebank
 	}
 	account, getErr := a.Service.GetByID(ctx, businessID, id)
 	if getErr != nil {
-		return &financebankaccountv1.CreateBankAccountResponse{Account: &financebankaccountv1.BankAccount{Id: id, Name: input.Name, BankName: input.Institution, AccountType: input.AccountType, Balance: input.Balance.Float64(), Currency: input.Currency, IsPrimary: input.IsConnected}}, nil
+		return &financebankaccountv1.CreateBankAccountResponse{Account: &financebankaccountv1.BankAccount{
+			Id:          id,
+			Name:        input.Name,
+			BankName:    input.Institution,
+			AccountType: input.AccountType,
+			LastFour:    input.LastFour,
+			Balance:     input.Balance.Float64(),
+			Currency:    input.Currency,
+			IsPrimary:   input.IsPrimary,
+		}}, nil
 	}
 	return &financebankaccountv1.CreateBankAccountResponse{Account: newBankAccountProto(account)}, nil
 }
@@ -91,11 +120,23 @@ func newBankAccountProto(account domain.BankAccount) *financebankaccountv1.BankA
 		Name:        account.Name,
 		BankName:    account.Institution,
 		AccountType: account.AccountType,
+		LastFour:    account.LastFour,
 		Balance:     account.Balance.Float64(),
 		Currency:    account.Currency,
-		IsPrimary:   account.IsConnected,
+		IsPrimary:   account.IsPrimary,
 		CreatedAt:   account.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
+}
+
+func totalPages(limit, total int32) int32 {
+	if limit <= 0 || total <= 0 {
+		return 0
+	}
+	pages := (int64(total) + int64(limit) - 1) / int64(limit)
+	if pages > int64(^uint32(0)>>1) {
+		return int32(^uint32(0) >> 1)
+	}
+	return int32(pages)
 }
 
 func bankAccountBusinessID(ctx context.Context) (int64, error) {

@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -18,9 +19,19 @@ const (
 	bankAccountsScope = "bank_accounts"
 )
 
+var (
+	ErrBankAccountNotFound = errors.New("bank account not found")
+	ErrInvalidBankAccount  = errors.New("invalid bank account")
+)
+
 type repository interface {
 	List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error)
 	Sync(ctx context.Context, businessID int64) (int, error)
+}
+
+type accountRepository interface {
+	ListByAccount(ctx context.Context, businessID, bankAccountID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error)
+	BankAccountExists(ctx context.Context, businessID, bankAccountID int64) (bool, error)
 }
 
 type Service struct {
@@ -37,6 +48,32 @@ type bankFeedsListResult struct {
 }
 
 func (s *Service) List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
+	return s.list(ctx, businessID, 0, limit, offset)
+}
+
+func (s *Service) ListByAccount(ctx context.Context, businessID, bankAccountID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
+	if bankAccountID < 0 {
+		return nil, 0, ErrInvalidBankAccount
+	}
+	if bankAccountID == 0 {
+		return s.list(ctx, businessID, 0, limit, offset)
+	}
+
+	repo, ok := s.repo.(accountRepository)
+	if !ok {
+		return nil, 0, errors.New("bank-feed repository does not support account filtering")
+	}
+	exists, err := repo.BankAccountExists(ctx, businessID, bankAccountID)
+	if err != nil {
+		return nil, 0, err
+	}
+	if !exists {
+		return nil, 0, ErrBankAccountNotFound
+	}
+	return s.list(ctx, businessID, bankAccountID, limit, offset)
+}
+
+func (s *Service) list(ctx context.Context, businessID, bankAccountID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -46,10 +83,17 @@ func (s *Service) List(ctx context.Context, businessID int64, limit, offset int3
 	if offset < 0 {
 		offset = 0
 	}
-	key := cacheKeys.Scoped(bankFeedsScope, businessID, fmt.Sprintf("list|l=%d|o=%d", limit, offset))
+	key := cacheKeys.Scoped(bankFeedsScope, businessID, fmt.Sprintf("list|a=%d|l=%d|o=%d", bankAccountID, limit, offset))
 	res, err := cacher.Of[bankFeedsListResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (bankFeedsListResult, error) {
-			items, total, err := s.repo.List(ctx, businessID, limit, offset)
+			var items []domain.BankFeedTransaction
+			var total int64
+			var err error
+			if bankAccountID > 0 {
+				items, total, err = s.repo.(accountRepository).ListByAccount(ctx, businessID, bankAccountID, limit, offset)
+			} else {
+				items, total, err = s.repo.List(ctx, businessID, limit, offset)
+			}
 			return bankFeedsListResult{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, bankFeedsTTL),

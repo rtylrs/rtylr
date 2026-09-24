@@ -85,30 +85,63 @@ func documentFromRow(row sqlc.HrDocument) domain.Document {
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.DocumentInput) (int64, error) {
-	res, err := r.queries.CreateDocument(ctx, sqlc.CreateDocumentParams{
-		OwnerID:    businessID,
-		BusinessID: businessID,
-		StaffID:    sql.NullInt64{Int64: input.StaffID, Valid: input.StaffID != 0},
-		Name:       input.Name,
-		Type:       sql.NullString{String: input.Type, Valid: input.Type != ""},
-		FileUrl:    sql.NullString{String: input.FileURL, Valid: input.FileURL != ""},
-		ExpiryDate: parseNullTime(input.ExpiryDate),
-	})
+	var (
+		res sql.Result
+		err error
+	)
+	if input.StaffID == 0 {
+		res, err = r.queries.CreateDocument(ctx, sqlc.CreateDocumentParams{
+			OwnerID:    businessID,
+			BusinessID: businessID,
+			Name:       input.Name,
+			Type:       sql.NullString{String: input.Type, Valid: input.Type != ""},
+			FileUrl:    sql.NullString{String: input.FileURL, Valid: input.FileURL != ""},
+			ExpiryDate: parseNullTime(input.ExpiryDate),
+		})
+	} else {
+		res, err = r.queries.CreateDocumentForStaff(ctx, sqlc.CreateDocumentForStaffParams{
+			OwnerID:         businessID,
+			BusinessID:      businessID,
+			StaffID:         input.StaffID,
+			StaffBusinessID: businessID,
+			Name:            input.Name,
+			Type:            sql.NullString{String: input.Type, Valid: input.Type != ""},
+			FileUrl:         sql.NullString{String: input.FileURL, Valid: input.FileURL != ""},
+			ExpiryDate:      parseNullTime(input.ExpiryDate),
+		})
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create document", logger.Error(err))
 		return 0, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if affected == 0 {
+		if input.StaffID != 0 {
+			return 0, domain.ErrDocumentStaffNotFound
+		}
+		return 0, sql.ErrNoRows
 	}
 	return res.LastInsertId()
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
-	err := r.queries.DeleteDocument(ctx, sqlc.DeleteDocumentParams{
+	res, err := r.queries.DeleteDocument(ctx, sqlc.DeleteDocumentParams{
 		ID:         id,
 		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete document", logger.Error(err))
 		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrDocumentNotFound
 	}
 	return nil
 }

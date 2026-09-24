@@ -17,8 +17,10 @@ type BankAccount struct {
 	Name         string       `json:"name"`
 	Institution  string       `json:"institution"`
 	AccountType  string       `json:"account_type"`
+	LastFour     string       `json:"last_four"`
 	Balance      money.Amount `json:"balance"`
 	Currency     string       `json:"currency"`
+	IsPrimary    bool         `json:"is_primary"`
 	IsConnected  bool         `json:"is_connected"`
 	LastSyncedAt time.Time    `json:"last_synced_at"`
 	CreatedAt    time.Time    `json:"created_at"`
@@ -28,13 +30,16 @@ func (b *BankAccount) FromRow(row *sql.Rows) error {
 	var (
 		institution  sql.NullString
 		accountType  sql.NullString
+		lastFour     sql.NullString
 		currency     sql.NullString
+		isPrimary    sql.NullBool
+		isConnected  sql.NullBool
 		lastSyncedAt sql.NullTime
 	)
 
 	err := row.Scan(
-		&b.ID, &b.OwnerID, &b.BusinessID, &b.Name, &institution, &accountType,
-		&b.Balance, &currency, &b.IsConnected, &lastSyncedAt, &b.CreatedAt,
+		&b.ID, &b.OwnerID, &b.BusinessID, &b.Name, &institution, &accountType, &lastFour,
+		&b.Balance, &currency, &isPrimary, &isConnected, &lastSyncedAt, &b.CreatedAt,
 	)
 	if err != nil {
 		return err
@@ -46,8 +51,17 @@ func (b *BankAccount) FromRow(row *sql.Rows) error {
 	if accountType.Valid {
 		b.AccountType = accountType.String
 	}
+	if lastFour.Valid {
+		b.LastFour = lastFour.String
+	}
 	if currency.Valid {
 		b.Currency = currency.String
+	}
+	if isPrimary.Valid {
+		b.IsPrimary = isPrimary.Bool
+	}
+	if isConnected.Valid {
+		b.IsConnected = isConnected.Bool
 	}
 	if lastSyncedAt.Valid {
 		b.LastSyncedAt = lastSyncedAt.Time
@@ -60,7 +74,9 @@ type BankAccountInput struct {
 	Name        string       `json:"name"`
 	Institution string       `json:"institution"`
 	AccountType string       `json:"account_type"`
+	LastFour    string       `json:"last_four"`
 	Balance     money.Amount `json:"balance"`
 	Currency    string       `json:"currency"`
+	IsPrimary   bool         `json:"is_primary"`
 	IsConnected bool         `json:"is_connected"`
 }

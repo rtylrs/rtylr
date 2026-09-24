@@ -32,6 +32,20 @@ SELECT id FROM finance_bank_feeds
 WHERE id = ? AND business_id = ?
 FOR UPDATE;
 
+-- name: SetBankFeedInvoiceMatch :execresult
+UPDATE finance_bank_feeds
+SET matched_invoice_id = ?, matched_expense_id = NULL
+WHERE id = ? AND business_id = ?
+  AND matched_invoice_id IS NULL
+  AND matched_expense_id IS NULL;
+
+-- name: SetBankFeedExpenseMatch :execresult
+UPDATE finance_bank_feeds
+SET matched_expense_id = ?, matched_invoice_id = NULL
+WHERE id = ? AND business_id = ?
+  AND matched_invoice_id IS NULL
+  AND matched_expense_id IS NULL;
+
 -- name: GetMatchForBankFeed :one
 SELECT id FROM finance_reconciliation_matches
 WHERE business_id = ? AND bank_feed_id = ?

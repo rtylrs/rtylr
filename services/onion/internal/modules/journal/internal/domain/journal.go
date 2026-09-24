@@ -52,15 +52,16 @@ func (j *JournalEntry) FromRow(row *sql.Rows) error {
 }
 
 type JournalLine struct {
-	ID        int64   `json:"id"`
-	EntryID   int64   `json:"entry_id"`
-	AccountID int64   `json:"account_id"`
-	Debit     float64 `json:"debit"`
-	Credit    float64 `json:"credit"`
+	ID          int64   `json:"id"`
+	EntryID     int64   `json:"entry_id"`
+	AccountID   int64   `json:"account_id"`
+	AccountName string  `json:"account_name"`
+	Debit       float64 `json:"debit"`
+	Credit      float64 `json:"credit"`
 }
 
 func (l *JournalLine) FromRow(row *sql.Rows) error {
-	return row.Scan(&l.ID, &l.EntryID, &l.AccountID, &l.Debit, &l.Credit)
+	return row.Scan(&l.ID, &l.EntryID, &l.AccountID, &l.Debit, &l.Credit, &l.AccountName)
 }
 
 type JournalEntryInput struct {

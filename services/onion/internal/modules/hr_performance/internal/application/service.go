@@ -7,10 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/infrastructure"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -72,13 +75,32 @@ func (s *Service) UpsertPerformanceConfig(ctx context.Context, ownerID int64, pa
 
 // ===== Review Cycles =====
 
-func (s *Service) CreateReviewCycle(ctx context.Context, ownerID int64, params domain.CreateReviewCycleParams) (*domain.ReviewCycleRecord, error) {
-	if params.CycleType == "" {
-		params.CycleType = "annual"
+func (s *Service) CreateReviewCycle(ctx context.Context, businessID int64, params domain.CreateReviewCycleParams) (*domain.ReviewCycleRecord, error) {
+	if businessID <= 0 || !performanceUserCanManage(ctx, businessID) {
+		return nil, domain.ErrPerformanceAccessDenied
 	}
-	rec, err := s.repo.CreateReviewCycle(ctx, ownerID, params)
+	params.Name = strings.TrimSpace(params.Name)
+	if params.CycleType == "" {
+		params.CycleType = domain.CycleTypeAnnual
+	}
+	if err := domain.ValidateReviewCycle(params); err != nil {
+		return nil, err
+	}
+	start, err := time.Parse("2006-01-02", params.PeriodStart)
+	if err != nil {
+		return nil, fmt.Errorf("invalid period_start: %w", err)
+	}
+	end, err := time.Parse("2006-01-02", params.PeriodEnd)
+	if err != nil {
+		return nil, fmt.Errorf("invalid period_end: %w", err)
+	}
+	if end.Before(start) {
+		return nil, errors.New("period_end must not be before period_start")
+	}
+
+	rec, err := s.repo.CreateReviewCycle(ctx, businessID, params)
 	if err == nil {
-		invalidateHRPerformanceScope(ctx, ownerID)
+		invalidateHRPerformanceScope(ctx, businessID)
 	}
 	return rec, err
 }
@@ -111,21 +133,16 @@ func (s *Service) OpenReviewCycle(ctx context.Context, ownerID, cycleID int64) e
 	return nil
 }
 
-func (s *Service) ListReviewCycles(ctx context.Context, ownerID int64, params domain.ListCyclesParams) ([]domain.ReviewCycleRecord, int64, error) {
-	if params.Limit <= 0 {
-		params.Limit = 20
-	}
-	if params.Limit > 100 {
-		params.Limit = 100
-	}
+func (s *Service) ListReviewCycles(ctx context.Context, businessID int64, params domain.ListCyclesParams) ([]domain.ReviewCycleRecord, int64, error) {
+	params.Limit, params.Offset = normalizeListPage(params.Limit, params.Offset)
 	type lr struct {
 		Items []domain.ReviewCycleRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrPerformanceScope, ownerID, fmt.Sprintf("cycles|l=%d|o=%d", params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrPerformanceScope, businessID, fmt.Sprintf("cycles|l=%d|o=%d", params.Limit, params.Offset))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
-			items, total, err := s.repo.ListReviewCycles(ctx, ownerID, params.Limit, params.Offset)
+			items, total, err := s.repo.ListReviewCycles(ctx, businessID, params.Limit, params.Offset)
 			return lr{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrPerformanceTTL),
@@ -135,10 +152,29 @@ func (s *Service) ListReviewCycles(ctx context.Context, ownerID int64, params do
 
 // ===== Goals =====
 
-func (s *Service) CreateGoal(ctx context.Context, ownerID int64, params domain.CreateGoalParams) (*domain.ReviewGoalRecord, error) {
-	rec, err := s.repo.CreateGoal(ctx, ownerID, params)
+func (s *Service) CreateGoal(ctx context.Context, businessID int64, params domain.CreateGoalParams) (*domain.ReviewGoalRecord, error) {
+	if businessID <= 0 {
+		return nil, domain.ErrPerformanceAccessDenied
+	}
+	if params.EmployeeID <= 0 {
+		return nil, domain.ErrEmployeeNotFound
+	}
+	if params.ReviewCycleID <= 0 {
+		return nil, domain.ErrReviewCycleNotFound
+	}
+	if err := domain.ValidateGoal(params); err != nil {
+		return nil, err
+	}
+	if err := s.authorizeGoalSubject(ctx, businessID, params.EmployeeID); err != nil {
+		return nil, err
+	}
+	if _, err := s.repo.GetReviewCycle(ctx, businessID, params.ReviewCycleID); err != nil {
+		return nil, err
+	}
+
+	rec, err := s.repo.CreateGoal(ctx, businessID, params)
 	if err == nil {
-		invalidateHRPerformanceScope(ctx, ownerID)
+		invalidateHRPerformanceScope(ctx, businessID)
 	}
 	return rec, err
 }
@@ -158,21 +194,22 @@ func (s *Service) UpdateGoal(ctx context.Context, ownerID, goalID int64, params 
 	return nil
 }
 
-func (s *Service) ListGoals(ctx context.Context, ownerID int64, params domain.ListGoalsParams) ([]domain.ReviewGoalRecord, int64, error) {
-	if params.Limit <= 0 {
-		params.Limit = 20
+func (s *Service) ListGoals(ctx context.Context, businessID int64, params domain.ListGoalsParams) ([]domain.ReviewGoalRecord, int64, error) {
+	params.Limit, params.Offset = normalizeListPage(params.Limit, params.Offset)
+	if params.EmployeeID < 0 {
+		params.EmployeeID = 0
 	}
-	if params.Limit > 100 {
-		params.Limit = 100
+	if params.ReviewCycleID < 0 {
+		params.ReviewCycleID = 0
 	}
 	type lr struct {
 		Items []domain.ReviewGoalRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrPerformanceScope, ownerID, fmt.Sprintf("goals|e=%d|c=%d|l=%d|o=%d", params.EmployeeID, params.ReviewCycleID, params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrPerformanceScope, businessID, fmt.Sprintf("goals|e=%d|c=%d|l=%d|o=%d", params.EmployeeID, params.ReviewCycleID, params.Limit, params.Offset))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
-			items, total, err := s.repo.ListGoals(ctx, ownerID, params.EmployeeID, params.ReviewCycleID, params.Limit, params.Offset)
+			items, total, err := s.repo.ListGoals(ctx, businessID, params.EmployeeID, params.ReviewCycleID, params.Limit, params.Offset)
 			return lr{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrPerformanceTTL),
@@ -267,6 +304,64 @@ func (s *Service) ShareReviewWithEmployee(ctx context.Context, ownerID, reviewID
 }
 
 // ===== Helpers =====
+
+func normalizeListPage(limit, offset int32) (int32, int32) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return limit, offset
+}
+
+func performanceUserCanManage(ctx context.Context, businessID int64) bool {
+	device := authPkg.DeviceCtx(ctx)
+	user := device.User
+	if device.IsAnonymous || user == nil || user.UserID <= 0 || businessID <= 0 {
+		return false
+	}
+	if user.BusinessID > 0 && user.BusinessID != businessID {
+		return false
+	}
+	if user.EffectiveAccess != nil && user.EffectiveAccess.BusinessID > 0 && user.EffectiveAccess.BusinessID != businessID {
+		return false
+	}
+	if !authPkg.HasAnyAppScope(user, authorization.AppHR) {
+		return false
+	}
+	return authPkg.IsBusinessAdmin(user) ||
+		authPkg.HasAppPermission(user, authorization.AppHR, "hr:employees:manage")
+}
+
+func (s *Service) authorizeGoalSubject(ctx context.Context, businessID, employeeID int64) error {
+	belongs, err := s.repo.EmployeeBelongsToBusiness(ctx, businessID, employeeID)
+	if err != nil {
+		return err
+	}
+	if !belongs {
+		return domain.ErrEmployeeNotFound
+	}
+
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil || device.User.UserID <= 0 {
+		return domain.ErrGoalSubjectNotAllowed
+	}
+	actorEmployeeID, err := s.repo.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+	if err == nil && actorEmployeeID == employeeID {
+		return nil
+	}
+	if err != nil && !errors.Is(err, domain.ErrEmployeeNotFound) {
+		return err
+	}
+	if performanceUserCanManage(ctx, businessID) {
+		return nil
+	}
+	return domain.ErrGoalSubjectNotAllowed
+}
 
 func validateRating(cfg *domain.PerformanceConfigRecord, rating string) error {
 	switch cfg.RatingScaleType {

@@ -66,6 +66,36 @@ func TestLoadAndValidate_TrimsAndFiltersRedisHosts(t *testing.T) {
 	}
 }
 
+func TestGetRedisHostsNormalizesBeforeConfigLoad(t *testing.T) {
+	GlobalConfig = nil
+	t.Cleanup(func() { GlobalConfig = nil })
+	t.Setenv(RedisHostsEnvVar, " redis-a:6379, , redis-b:6380, ")
+
+	got := GetRedisHosts()
+	want := []string{"redis-a:6379", "redis-b:6380"}
+	if len(got) != len(want) {
+		t.Fatalf("GetRedisHosts() = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("GetRedisHosts() = %v, want %v", got, want)
+		}
+	}
+}
+
+func TestTrustedProxyCIDRsRequirePeerNetwork(t *testing.T) {
+	t.Setenv(TrustedProxyCIDRsEnvVar, "203.0.113.0/24,2001:db8::/32")
+	if !IsTrustedProxyIP("203.0.113.7:443") {
+		t.Fatal("configured IPv4 proxy was not trusted")
+	}
+	if !IsTrustedProxyIP("[2001:db8::7]:443") {
+		t.Fatal("configured IPv6 proxy was not trusted")
+	}
+	if IsTrustedProxyIP("198.51.100.7:443") {
+		t.Fatal("unconfigured peer was trusted")
+	}
+}
+
 func TestLoadAndValidate_DefaultsJWTDuration(t *testing.T) {
 	setLicenseConfigEnv(t)
 

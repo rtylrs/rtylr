@@ -11,6 +11,8 @@ import (
 
 type mockRepo struct {
 	list      []domain.RecurringInvoice
+	get       domain.RecurringInvoice
+	getErr    error
 	createID  int64
 	createErr error
 	updErr    error
@@ -21,8 +23,12 @@ type mockRepo struct {
 	}
 }
 
-func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.RecurringInvoice, error) {
+func (m *mockRepo) ListPage(_ context.Context, _ int64, _, _ int32) ([]domain.RecurringInvoice, error) {
 	return m.list, nil
+}
+
+func (m *mockRepo) Get(_ context.Context, _, _ int64) (domain.RecurringInvoice, error) {
+	return m.get, m.getErr
 }
 
 func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.RecurringInvoiceInput) (int64, error) {
@@ -46,9 +52,30 @@ func (m *mockRepo) ProcessDue(_ context.Context, _ time.Time) ([]int64, error) {
 
 func TestList_Delegates(t *testing.T) {
 	s := &Service{repo: &mockRepo{list: []domain.RecurringInvoice{{ID: 1}}}}
-	got, _ := s.List(context.Background(), 1)
+	got, hasMore, err := s.List(context.Background(), 1, 1, 50)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
 	if len(got) != 1 {
 		t.Errorf("got %d", len(got))
+	}
+	if hasMore {
+		t.Error("single short page reported hasMore=true")
+	}
+}
+
+func TestList_ReportsAndTrimsContinuationRow(t *testing.T) {
+	rows := make([]domain.RecurringInvoice, 4)
+	s := &Service{repo: &mockRepo{list: rows}}
+	got, hasMore, err := s.List(context.Background(), 1, 2, 3)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if !hasMore {
+		t.Error("expected hasMore=true")
+	}
+	if len(got) != 3 {
+		t.Errorf("got %d rows, want 3", len(got))
 	}
 }
 

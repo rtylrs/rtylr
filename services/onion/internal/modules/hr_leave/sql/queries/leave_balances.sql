@@ -7,9 +7,18 @@
 SELECT id, owner_id, business_id, employee_id, leave_type_id, year, entitled_days, used_days,
        pending_days, last_accrual_month, created_at, updated_at
 FROM hr_leave_balances
-WHERE business_id = ? AND employee_id = ? AND year = ?
+WHERE business_id = ?
+  AND (sqlc.narg(employee_id) IS NULL OR employee_id = sqlc.narg(employee_id))
+  AND year = ?
 ORDER BY leave_type_id ASC
 LIMIT 500;
+
+-- name: CountLeaveBalances :one
+SELECT COUNT(*) AS total
+FROM hr_leave_balances
+WHERE business_id = ?
+  AND (sqlc.narg(employee_id) IS NULL OR employee_id = sqlc.narg(employee_id))
+  AND year = ?;
 
 -- name: GetLeaveBalance :one
 SELECT id, owner_id, business_id, employee_id, leave_type_id, year, entitled_days, used_days,

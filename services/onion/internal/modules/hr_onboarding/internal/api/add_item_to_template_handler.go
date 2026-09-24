@@ -46,6 +46,9 @@ func (h *AddItemToTemplateHandler) Serve(ctx context.Context, req *AddItemToTemp
 	if device.IsAnonymous || device.User == nil {
 		return AddItemToTemplateResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireOnboardingManagePermission(ctx); err != nil {
+		return AddItemToTemplateResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -66,6 +69,9 @@ func (h *AddItemToTemplateHandler) Serve(ctx context.Context, req *AddItemToTemp
 		RequiresAttachment: req.RequiresAttachment,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrChecklistAccessDenied) {
+			return AddItemToTemplateResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return AddItemToTemplateResponse{}, onekiterrors.New(http.StatusNotFound, "Template not found")
 		}

@@ -2,12 +2,14 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/documents/internal/application"
 	"github.com/voxire/onion/internal/modules/documents/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
@@ -33,6 +35,10 @@ func NewDocumentAPI(service *application.Service) *DocumentAPI {
 }
 
 func (a *DocumentAPI) ListDocuments(ctx context.Context, _ *hrdocumentv1.ListDocumentsRequest) (*hrdocumentv1.ListDocumentsResponse, error) {
+	if err := requireDocumentPermission(ctx, "hr:employees:view"); err != nil {
+		return nil, err
+	}
+
 	businessID, errModel := resolveBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -52,8 +58,14 @@ func (a *DocumentAPI) ListDocuments(ctx context.Context, _ *hrdocumentv1.ListDoc
 }
 
 func (a *DocumentAPI) CreateDocument(ctx context.Context, req *hrdocumentv1.CreateDocumentRequest) (*hrdocumentv1.CreateDocumentResponse, error) {
-	if req.GetName() == "" {
+	if err := requireDocumentPermission(ctx, "hr:employees:manage"); err != nil {
+		return nil, err
+	}
+	if req == nil || req.GetName() == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "name is required")
+	}
+	if req.GetStaffId() < 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "staff_id must be positive or zero")
 	}
 	if req.GetExpiryDate() != "" && !isValidExpiryDate(req.GetExpiryDate()) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "expiry_date is not a valid date")
@@ -71,6 +83,9 @@ func (a *DocumentAPI) CreateDocument(ctx context.Context, req *hrdocumentv1.Crea
 		FileURL:    req.GetFileUrl(),
 		ExpiryDate: req.GetExpiryDate(),
 	})
+	if errors.Is(err, domain.ErrDocumentStaffNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Staff member not found in this business")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create document")
 	}
@@ -79,7 +94,10 @@ func (a *DocumentAPI) CreateDocument(ctx context.Context, req *hrdocumentv1.Crea
 }
 
 func (a *DocumentAPI) DeleteDocument(ctx context.Context, req *hrdocumentv1.DeleteDocumentRequest) (*hrdocumentv1.DeleteDocumentResponse, error) {
-	if req.GetId() == 0 {
+	if err := requireDocumentPermission(ctx, "hr:employees:manage"); err != nil {
+		return nil, err
+	}
+	if req == nil || req.GetId() == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 
@@ -89,10 +107,23 @@ func (a *DocumentAPI) DeleteDocument(ctx context.Context, req *hrdocumentv1.Dele
 	}
 
 	if err := a.service.Delete(ctx, businessID, req.GetId()); err != nil {
+		if errors.Is(err, domain.ErrDocumentNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Document not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete document")
 	}
 
 	return &hrdocumentv1.DeleteDocumentResponse{Message: "Document deleted successfully"}, nil
+}
+
+func requireDocumentPermission(ctx context.Context, permission string) error {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil ||
+		!authPkg.HasAppPermission(device.User, authorization.AppHR, permission) ||
+		!authPkg.HasAnyAppScope(device.User, authorization.AppHR) {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
 }
 
 func resolveBusinessID(ctx context.Context) (int64, error) {

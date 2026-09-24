@@ -11,8 +11,11 @@ func TestIsValidTriggerType_AllValid(t *testing.T) {
 	for _, tt := range []string{
 		domain.TriggerTypeHire,
 		domain.TriggerTypeTerminate,
+		domain.TriggerTypeTermination,
 		domain.TriggerTypeTransfer,
 		domain.TriggerTypePromotion,
+		domain.TriggerTypeOnboarding,
+		domain.TriggerTypeOffboarding,
 	} {
 		if !domain.IsValidTriggerType(tt) {
 			t.Errorf("expected %q to be valid", tt)
@@ -142,5 +145,16 @@ func TestValidateCreateTemplateItemParams_InvalidAssigneeRole(t *testing.T) {
 	p := domain.CreateTemplateItemParams{Title: "Task", AssigneeRole: "cfo"}
 	if err := domain.ValidateCreateTemplateItemParams(p); !errors.Is(err, domain.ErrInvalidAssigneeRole) {
 		t.Errorf("expected ErrInvalidAssigneeRole, got %v", err)
+	}
+}
+
+func TestValidateAttachmentURL(t *testing.T) {
+	if err := domain.ValidateAttachmentURL("https://cdn.example.test/proof.pdf"); err != nil {
+		t.Fatalf("valid attachment URL rejected: %v", err)
+	}
+	for _, raw := range []string{"", "javascript:alert(1)", "/relative/path"} {
+		if err := domain.ValidateAttachmentURL(raw); !errors.Is(err, domain.ErrInvalidAttachmentURL) {
+			t.Errorf("attachment URL %q error = %v, want ErrInvalidAttachmentURL", raw, err)
+		}
 	}
 }

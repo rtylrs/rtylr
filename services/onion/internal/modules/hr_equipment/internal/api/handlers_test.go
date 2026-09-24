@@ -150,6 +150,13 @@ func TestCreateAssetHandler_Validate_ZeroPriceIsValid(t *testing.T) {
 	}
 }
 
+func TestListAssetsHandler_RejectsLifecycleStatusAsCondition(t *testing.T) {
+	_, err := (&ListAssetsHandler{}).Serve(authenticatedCtx(), &ListAssetsRequest{Condition: "available"})
+	if err == nil || oneKitStatus(err) != http.StatusBadRequest {
+		t.Fatalf("expected lifecycle status to be rejected as a physical condition, got %v", err)
+	}
+}
+
 // --- ApproveEquipmentRequestHandler ---
 
 func TestApproveEquipmentRequestHandler_Validate_RejectWithoutReason(t *testing.T) {

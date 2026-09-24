@@ -113,3 +113,32 @@ func TestUploadDocumentHandler_Validate_LinkedMode_ReturnsNil(t *testing.T) {
 		t.Errorf("expected nil for valid linked request, got %v", se)
 	}
 }
+
+func TestUploadDocumentHandler_Validate_ExpiryDate(t *testing.T) {
+	expiryDate := "2027-01-01"
+	h := &UploadDocumentHandler{}
+	if err := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID:  5,
+		Title:       "Passport",
+		StorageMode: "stored",
+		FileURL:     "https://storage.example.com/passport.pdf",
+		ExpiryDate:  &expiryDate,
+	}); err != nil {
+		t.Fatalf("expected valid expiry date, got %v", err)
+	}
+}
+
+func TestUploadDocumentHandler_Validate_RejectsInvalidExpiryDate(t *testing.T) {
+	expiryDate := "2027-02-30"
+	h := &UploadDocumentHandler{}
+	err := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID:  5,
+		Title:       "Passport",
+		StorageMode: "stored",
+		FileURL:     "https://storage.example.com/passport.pdf",
+		ExpiryDate:  &expiryDate,
+	})
+	if oneKitStatus(err) != http.StatusBadRequest {
+		t.Fatalf("expected 400 for invalid expiry date, got %v", err)
+	}
+}

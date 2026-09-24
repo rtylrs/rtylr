@@ -13,4 +13,7 @@ var (
 	ErrCycleAlreadyOpen          = errors.New("review cycle is already open")
 	ErrReviewNotSubmitted        = errors.New("review has not been submitted")
 	ErrReviewNotCompleted        = errors.New("review has not been completed")
+	ErrEmployeeNotFound          = errors.New("employee not found")
+	ErrGoalSubjectNotAllowed     = errors.New("caller is not allowed to manage this employee")
+	ErrPerformanceAccessDenied   = errors.New("performance management access denied")
 )

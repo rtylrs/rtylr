@@ -14,6 +14,7 @@ import (
 func TestLicenseAuthorityRoutes(t *testing.T) {
 	r := chi.NewRouter()
 	cfg := &platformconfig.AppConfig{
+		RunMode:        "license",
 		DeploymentMode: "hosted",
 	}
 
@@ -44,5 +45,71 @@ func TestLicenseAuthorityRoutes(t *testing.T) {
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected status 400 from /license/activate without instance_id, got %d", rec.Code)
+	}
+}
+
+func TestLicenseActivationDoesNotUseConfiguredKeyAsAnonymousFallback(t *testing.T) {
+	previousConfig := platformconfig.GlobalConfig
+	platformconfig.GlobalConfig = nil
+	t.Cleanup(func() { platformconfig.GlobalConfig = previousConfig })
+	r := chi.NewRouter()
+	cfg := &platformconfig.AppConfig{
+		RunMode:        "license",
+		DeploymentMode: "self_hosted",
+		LicenseKey:     "server-side-license-key",
+	}
+	RegisterLicenseAuthorityRoutes(r, cfg, nil)
+
+	req := httptest.NewRequest(http.MethodPost, "/license/activate", strings.NewReader(`{"instance_id":"attacker-1"}`))
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("activation without an explicit key = %d, want 400: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestLicenseAuthorityRoutesAreNotMountedOnPublicAPI(t *testing.T) {
+	r := chi.NewRouter()
+	RegisterLicenseAuthorityRoutes(r, &platformconfig.AppConfig{
+		RunMode:        "api",
+		DeploymentMode: "self_hosted",
+		LicenseKey:     "server-side-license-key",
+	}, nil)
+
+	req := httptest.NewRequest(http.MethodPost, "/license/activate", strings.NewReader(`{"instance_id":"attacker-1","license_key":"provided"}`))
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("public API authority route status = %d, want 404", rec.Code)
+	}
+}
+
+func TestLicenseActivationRequiresInternalTokenWhenConfigured(t *testing.T) {
+	r := chi.NewRouter()
+	previousConfig := platformconfig.GlobalConfig
+	t.Cleanup(func() { platformconfig.GlobalConfig = previousConfig })
+	cfg := &platformconfig.AppConfig{
+		RunMode:        "license",
+		DeploymentMode: "self_hosted",
+		InternalToken:  "authority-secret",
+	}
+	platformconfig.GlobalConfig = cfg
+	RegisterLicenseAuthorityRoutes(r, cfg, nil)
+
+	req := httptest.NewRequest(http.MethodPost, "/license/activate", strings.NewReader(`{"instance_id":"legitimate","license_key":"provided"}`))
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("activation without internal token = %d, want 401", rec.Code)
+	}
+
+	req = httptest.NewRequest(http.MethodPost, "/license/activate", strings.NewReader(`{"instance_id":"legitimate","license_key":"provided"}`))
+	req.Header.Set("Internal-Token", "authority-secret")
+	rec = httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+	if rec.Code == http.StatusUnauthorized {
+		t.Fatal("valid internal token was rejected")
 	}
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -23,6 +24,7 @@ type CreateAssetRequest struct {
 	Category                string `json:"category"`
 	SerialNumber            string `json:"serial_number"`
 	LocationID              int64  `json:"location_id"`
+	Condition               string `json:"condition"`
 	PurchaseDate            string `json:"purchase_date"`
 	PurchasePriceMinorUnits int64  `json:"purchase_price_minor_units"`
 	Notes                   string `json:"notes"`
@@ -40,6 +42,13 @@ func (h *CreateAssetHandler) Validate(_ context.Context, req *CreateAssetRequest
 	req.Category = strings.TrimSpace(req.Category)
 	if req.Category == "" {
 		return onekiterrors.New(http.StatusBadRequest, "category is required")
+	}
+	req.Condition = strings.TrimSpace(req.Condition)
+	if req.Condition == "" {
+		req.Condition = domain.AssetConditionGood
+	}
+	if !domain.IsValidAssetCondition(req.Condition) {
+		return onekiterrors.New(http.StatusBadRequest, "condition must be one of new, good, fair, damaged")
 	}
 	if req.PurchasePriceMinorUnits < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "purchase_price_minor_units must be non-negative")
@@ -63,11 +72,15 @@ func (h *CreateAssetHandler) Serve(ctx context.Context, req *CreateAssetRequest)
 		Category:                req.Category,
 		SerialNumber:            req.SerialNumber,
 		LocationID:              req.LocationID,
+		Condition:               req.Condition,
 		PurchaseDate:            req.PurchaseDate,
 		PurchasePriceMinorUnits: req.PurchasePriceMinorUnits,
 		Notes:                   req.Notes,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrInvalidAssetCondition) {
+			return CreateAssetResponse{}, onekiterrors.New(http.StatusBadRequest, "condition must be one of new, good, fair, damaged")
+		}
 		logger.Ctx(ctx).Error("failed to create asset", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateAssetResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create asset")
 	}

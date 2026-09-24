@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"net/url"
 	"strings"
 )
 
@@ -17,10 +18,27 @@ var (
 // IsValidTriggerType returns true when the trigger type is recognised.
 func IsValidTriggerType(t string) bool {
 	switch t {
-	case TriggerTypeHire, TriggerTypeTerminate, TriggerTypeTransfer, TriggerTypePromotion:
+	case TriggerTypeHire, TriggerTypeTerminate, TriggerTypeTermination, TriggerTypeTransfer,
+		TriggerTypePromotion, TriggerTypeOnboarding, TriggerTypeOffboarding:
 		return true
 	}
 	return false
+}
+
+// ValidateAttachmentURL keeps completion payloads to ordinary web URLs. The
+// value is persisted as an attachment reference; accepting javascript or other
+// schemes would make the returned payload unsafe for clients to render.
+func ValidateAttachmentURL(raw string) error {
+	raw = strings.TrimSpace(raw)
+	if raw == "" || len(raw) > 2048 {
+		return ErrInvalidAttachmentURL
+	}
+
+	parsed, err := url.ParseRequestURI(raw)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return ErrInvalidAttachmentURL
+	}
+	return nil
 }
 
 // IsValidChecklistStatus returns true when the status is recognised.
@@ -35,7 +53,7 @@ func IsValidChecklistStatus(s string) bool {
 // IsValidItemStatus returns true when the item status is recognised.
 func IsValidItemStatus(s string) bool {
 	switch s {
-	case ItemStatusPending, ItemStatusCompleted, ItemStatusSkipped:
+	case ItemStatusPending, ItemStatusCompleted, ItemStatusCompletedLegacy, ItemStatusSkipped:
 		return true
 	}
 	return false

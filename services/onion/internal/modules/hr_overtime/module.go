@@ -48,6 +48,10 @@ func (a *hrCoreApprovalAdapter) GetEmployeeIDByUserID(ctx context.Context, owner
 	return a.core.GetEmployeeIDByUserID(ctx, ownerID, userID)
 }
 
+func (a *hrCoreApprovalAdapter) GetEmployeeBusinessID(ctx context.Context, ownerID, employeeID int64) (int64, error) {
+	return a.core.GetEmployeeBusinessID(ctx, ownerID, employeeID)
+}
+
 func (a *hrCoreApprovalAdapter) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
 	return a.core.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }

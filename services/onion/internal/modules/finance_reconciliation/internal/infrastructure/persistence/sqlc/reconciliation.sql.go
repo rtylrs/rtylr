@@ -421,3 +421,39 @@ type ReserveReconciliationTargetParams struct {
 func (q *Queries) ReserveReconciliationTarget(ctx context.Context, arg ReserveReconciliationTargetParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, reserveReconciliationTarget, arg.BusinessID, arg.TargetType, arg.TargetID)
 }
+
+const setBankFeedExpenseMatch = `-- name: SetBankFeedExpenseMatch :execresult
+UPDATE finance_bank_feeds
+SET matched_expense_id = ?, matched_invoice_id = NULL
+WHERE id = ? AND business_id = ?
+  AND matched_invoice_id IS NULL
+  AND matched_expense_id IS NULL
+`
+
+type SetBankFeedExpenseMatchParams struct {
+	MatchedExpenseID sql.NullInt64 `db:"matched_expense_id" json:"matched_expense_id"`
+	ID               int64         `db:"id" json:"id"`
+	BusinessID       int64         `db:"business_id" json:"business_id"`
+}
+
+func (q *Queries) SetBankFeedExpenseMatch(ctx context.Context, arg SetBankFeedExpenseMatchParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, setBankFeedExpenseMatch, arg.MatchedExpenseID, arg.ID, arg.BusinessID)
+}
+
+const setBankFeedInvoiceMatch = `-- name: SetBankFeedInvoiceMatch :execresult
+UPDATE finance_bank_feeds
+SET matched_invoice_id = ?, matched_expense_id = NULL
+WHERE id = ? AND business_id = ?
+  AND matched_invoice_id IS NULL
+  AND matched_expense_id IS NULL
+`
+
+type SetBankFeedInvoiceMatchParams struct {
+	MatchedInvoiceID sql.NullInt64 `db:"matched_invoice_id" json:"matched_invoice_id"`
+	ID               int64         `db:"id" json:"id"`
+	BusinessID       int64         `db:"business_id" json:"business_id"`
+}
+
+func (q *Queries) SetBankFeedInvoiceMatch(ctx context.Context, arg SetBankFeedInvoiceMatchParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, setBankFeedInvoiceMatch, arg.MatchedInvoiceID, arg.ID, arg.BusinessID)
+}

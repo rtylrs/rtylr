@@ -16,7 +16,11 @@ func NewPerformanceService(service *application.Service) *PerformanceService {
 }
 
 func (s *PerformanceService) ListReviewCycles(ctx context.Context, _ *hrperformancev1.ListReviewCyclesRequest) (*hrperformancev1.ListReviewCyclesResponse, error) {
-	res, err := (&ListCyclesHandler{Service: s.service}).Serve(ctx, &ListCyclesRequest{})
+	pagination := performancePaginationFromContext(ctx)
+	res, err := (&ListCyclesHandler{Service: s.service}).Serve(ctx, &ListCyclesRequest{
+		Limit:  pagination.limit,
+		Offset: pagination.offset,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +62,15 @@ func (s *PerformanceService) OpenReviewCycle(ctx context.Context, req *hrperform
 }
 
 func (s *PerformanceService) ListGoals(ctx context.Context, req *hrperformancev1.ListGoalsRequest) (*hrperformancev1.ListGoalsResponse, error) {
+	if req == nil {
+		req = &hrperformancev1.ListGoalsRequest{}
+	}
+	pagination := performancePaginationFromContext(ctx)
 	res, err := (&ListGoalsHandler{Service: s.service}).Serve(ctx, &ListGoalsRequest{
 		EmployeeID:    req.GetEmployeeId(),
 		ReviewCycleID: req.GetReviewCycleId(),
+		Limit:         pagination.limit,
+		Offset:        pagination.offset,
 	})
 	if err != nil {
 		return nil, err

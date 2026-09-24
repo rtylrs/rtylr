@@ -99,6 +99,9 @@ func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequ
 		if errors.Is(err, domain.ErrInvalidPaymentAmount) {
 			return RecordPaymentResponse{}, onekiterrors.New(http.StatusBadRequest, "Amount must be greater than zero")
 		}
+		if errors.Is(err, domain.ErrPaymentExceedsBalance) {
+			return RecordPaymentResponse{}, onekiterrors.New(http.StatusBadRequest, "Payment cannot exceed the remaining amount due")
+		}
 
 		return RecordPaymentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to record payment")
 	}

@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS erp_stock_take_items (
     stock_take_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     expected_qty DECIMAL(10,3) NOT NULL DEFAULT 0,
-    counted_qty DECIMAL(10,3) NOT NULL DEFAULT 0,
-    variance DECIMAL(10,3) NOT NULL DEFAULT 0,
+    counted_qty DECIMAL(10,3) NULL,
+    variance DECIMAL(10,3) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

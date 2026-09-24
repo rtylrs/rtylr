@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
@@ -142,15 +143,17 @@ func TestListCampaigns_AfterCreate_CountIncreases(t *testing.T) {
 	}
 }
 
-func TestDeleteCampaign_NonExistent_NoError(t *testing.T) {
+func TestDeleteCampaign_NonExistent_ReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Deleting a non-existent campaign with the correct owner should be a noop
+	// Deleting a non-existent campaign must report not-found: the previous
+	// behaviour answered nil and the caller reported a delete that never
+	// happened.
 	err := repo.Delete(ctx, testutil.OwnerID, 9999999)
-	if err != nil {
-		t.Fatalf("unexpected error deleting non-existent campaign: %v", err)
+	if !errors.Is(err, domain.ErrCampaignNotFound) {
+		t.Fatalf("expected ErrCampaignNotFound, got %v", err)
 	}
 }
 

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
@@ -21,7 +23,10 @@ const (
 )
 
 func invalidateHROvertimeScope(ctx context.Context, businessID int64) {
-	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
+	// The database write has already committed when this is called. Preserve
+	// the invalidation even if the request context is canceled while the
+	// response is being serialized.
+	cacher.InvalidateScope(context.WithoutCancel(ctx), cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
 }
 
 type repository interface {
@@ -30,13 +35,17 @@ type repository interface {
 	CreateOvertimeRequest(ctx context.Context, businessID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error)
 	ApproveOvertimeRequest(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error
 	AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64, currentLevel int32) error
-	RejectOvertimeRequest(ctx context.Context, businessID, requestID int64) error
+	RejectOvertimeRequest(ctx context.Context, businessID, requestID int64, rejectionReason string) error
 	CreateFlaggedOvertimeRequest(ctx context.Context, businessID, employeeID int64, date string, extraMinutes int32) error
 	ListFlaggedForDate(ctx context.Context, businessID int64, date string) ([]domain.OvertimeRequestRecord, error)
 	ListOvertimeCandidates(ctx context.Context, businessID int64, date string, thresholdMinutes int32) ([]domain.OvertimeDetectionCandidate, error)
 	GetOvertimeConfig(ctx context.Context, businessID int64) (*domain.OvertimeConfigRecord, error)
 	UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg domain.OvertimeConfigRecord) error
 	ListAllConfiguredOwnerIDs(ctx context.Context, limit, offset int32) ([]int64, error)
+}
+
+type employeeBusinessProvider interface {
+	GetEmployeeBusinessID(ctx context.Context, businessID, employeeID int64) (int64, error)
 }
 
 type Service struct {
@@ -54,13 +63,26 @@ func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalC
 }
 
 func (s *Service) ListOvertimeRequests(ctx context.Context, businessID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
+	params = domain.NormalizeOvertimeListParams(params)
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	key := cacheKeys.Scoped(hrOvertimeScope, businessID, fmt.Sprintf("reqs|l=%d|o=%d", params.Limit, params.Offset))
+
+	employeeFilter := "-"
+	if params.EmployeeID != nil {
+		employeeFilter = strconv.FormatInt(*params.EmployeeID, 10)
+	}
+	statusFilter := "-"
+	if params.Status != nil {
+		statusFilter = strconv.Quote(*params.Status)
+	}
+	key := cacheKeys.Scoped(hrOvertimeScope, businessID, fmt.Sprintf(
+		"reqs|l=%d|o=%d|e=%s|s=%s",
+		params.Limit, params.Offset, employeeFilter, statusFilter,
+	))
 	type listResult struct {
 		Items []domain.OvertimeRequestRecord
 		Total int64
@@ -75,8 +97,56 @@ func (s *Service) ListOvertimeRequests(ctx context.Context, businessID int64, pa
 	return res.Items, res.Total, err
 }
 
-func (s *Service) CreateOvertimeRequest(ctx context.Context, businessID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
-	req.Status = "pending"
+func (s *Service) callerEmployeeID(ctx context.Context, businessID, userID int64) (int64, error) {
+	if s.permissions == nil || businessID <= 0 || userID <= 0 {
+		return 0, domain.ErrOvertimeAccessDenied
+	}
+	employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, businessID, userID)
+	if err != nil || employeeID <= 0 {
+		return 0, domain.ErrOvertimeAccessDenied
+	}
+	return employeeID, nil
+}
+
+// authorizeOvertimeSubject permits self-service requests and requires the
+// existing employee-management permission for requests submitted for somebody
+// else. The target is checked against the same resolved business before any
+// insert, so a numerically valid employee from another tenant cannot be used
+// as a subject id.
+func (s *Service) authorizeOvertimeSubject(ctx context.Context, businessID, callerUserID, targetEmployeeID int64) error {
+	callerEmployeeID, err := s.callerEmployeeID(ctx, businessID, callerUserID)
+	if err != nil {
+		return err
+	}
+
+	businessProvider, ok := s.permissions.(employeeBusinessProvider)
+	if !ok {
+		return domain.ErrOvertimeAccessDenied
+	}
+	targetBusinessID, err := businessProvider.GetEmployeeBusinessID(ctx, businessID, targetEmployeeID)
+	if err != nil || targetBusinessID != businessID {
+		return domain.ErrOvertimeAccessDenied
+	}
+	if targetEmployeeID == callerEmployeeID {
+		return nil
+	}
+
+	allowed, err := s.permissions.HasPermission(ctx, businessID, callerEmployeeID, domain.PermissionManageEmployees)
+	if err != nil {
+		return domain.ErrOvertimeAccessDenied
+	}
+	if !allowed {
+		return domain.ErrOvertimeAccessDenied
+	}
+	return nil
+}
+
+func (s *Service) CreateOvertimeRequest(ctx context.Context, businessID, callerUserID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
+	if err := s.authorizeOvertimeSubject(ctx, businessID, callerUserID, req.EmployeeID); err != nil {
+		return nil, err
+	}
+
+	req.Status = domain.OvertimeStatusPending
 	req.CurrentApprovalLevel = 0
 	rec, err := s.repo.CreateOvertimeRequest(ctx, businessID, req)
 	if err == nil {
@@ -92,7 +162,11 @@ func (s *Service) ApproveOvertime(ctx context.Context, businessID, requestID, ap
 	}
 
 	if req.CurrentApprovalLevel+1 < chain.TotalLevels {
-		return s.repo.AdvanceOvertimeApprovalLevel(ctx, businessID, requestID, req.CurrentApprovalLevel)
+		if err := s.repo.AdvanceOvertimeApprovalLevel(ctx, businessID, requestID, req.CurrentApprovalLevel); err != nil {
+			return err
+		}
+		invalidateHROvertimeScope(ctx, businessID)
+		return nil
 	}
 
 	if multiplier <= 0 {
@@ -113,11 +187,14 @@ func (s *Service) ApproveOvertime(ctx context.Context, businessID, requestID, ap
 	return nil
 }
 
-func (s *Service) RejectOvertime(ctx context.Context, businessID, requestID, approverID int64) error {
+func (s *Service) RejectOvertime(ctx context.Context, businessID, requestID, approverID int64, rejectionReason string) error {
+	if err := domain.ValidateOvertimeDecision(false, rejectionReason); err != nil {
+		return err
+	}
 	if _, _, _, err := s.authorizedOvertimeDecision(ctx, businessID, requestID, approverID); err != nil {
 		return err
 	}
-	if err := s.repo.RejectOvertimeRequest(ctx, businessID, requestID); err != nil {
+	if err := s.repo.RejectOvertimeRequest(ctx, businessID, requestID, strings.TrimSpace(rejectionReason)); err != nil {
 		return err
 	}
 	invalidateHROvertimeScope(ctx, businessID)
@@ -143,7 +220,16 @@ func (s *Service) GetOvertimeConfig(ctx context.Context, businessID int64) (*dom
 	)
 }
 
-func (s *Service) UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg domain.OvertimeConfigRecord) error {
+func (s *Service) UpsertOvertimeConfig(ctx context.Context, businessID, callerUserID int64, cfg domain.OvertimeConfigRecord) error {
+	employeeID, err := s.callerEmployeeID(ctx, businessID, callerUserID)
+	if err != nil {
+		return err
+	}
+	allowed, err := s.permissions.HasPermission(ctx, businessID, employeeID, domain.PermissionManageHRConfig)
+	if err != nil || !allowed {
+		return domain.ErrOvertimeAccessDenied
+	}
+
 	if err := s.repo.UpsertOvertimeConfig(ctx, businessID, cfg); err != nil {
 		return err
 	}

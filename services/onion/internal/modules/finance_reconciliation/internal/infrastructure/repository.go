@@ -228,6 +228,40 @@ func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input do
 	if err != nil {
 		return 0, err
 	}
+
+	// Keep the denormalized bank-feed projection in lockstep with the
+	// reconciliation ledger. This update is deliberately inside the same
+	// transaction as CreateReconciliationMatch: a failure here rolls back the
+	// match rather than leaving a successful-looking row that still appears
+	// unmatched to every bank-feed consumer.
+	var projection sql.Result
+	switch input.TargetType {
+	case domain.TargetTypeInvoice:
+		projection, err = queries.SetBankFeedInvoiceMatch(ctx, sqlc.SetBankFeedInvoiceMatchParams{
+			MatchedInvoiceID: sql.NullInt64{Int64: input.TargetID, Valid: true},
+			ID:               input.BankFeedID,
+			BusinessID:       businessID,
+		})
+	case domain.TargetTypeExpense:
+		projection, err = queries.SetBankFeedExpenseMatch(ctx, sqlc.SetBankFeedExpenseMatchParams{
+			MatchedExpenseID: sql.NullInt64{Int64: input.TargetID, Valid: true},
+			ID:               input.BankFeedID,
+			BusinessID:       businessID,
+		})
+	default:
+		return 0, domain.ErrInvalidTarget
+	}
+	if err != nil {
+		return 0, err
+	}
+	updated, err := projection.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if updated != 1 {
+		return 0, domain.ErrAlreadyMatched
+	}
+
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}

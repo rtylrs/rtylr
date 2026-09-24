@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
@@ -35,23 +36,32 @@ func (h *ListGoalsHandler) Serve(ctx context.Context, req *ListGoalsRequest) (Li
 	if device.IsAnonymous || device.User == nil {
 		return ListGoalsResponse{}, onekiterrors.PermissionDenied()
 	}
-
-	limit := req.Limit
-	if limit <= 0 {
-		limit = 20
-	}
-	if limit > 100 {
-		limit = 100
+	if req == nil {
+		req = &ListGoalsRequest{}
 	}
 
-	goals, total, err := h.Service.ListGoals(ctx, device.User.UserID, domain.ListGoalsParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListGoalsResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	page, err := normalizePerformancePagination(req.Limit, req.Offset)
+	if err != nil {
+		return ListGoalsResponse{}, err
+	}
+	limit, offset := page.limit, page.offset
+	if req.EmployeeID < 0 || req.ReviewCycleID < 0 {
+		return ListGoalsResponse{}, onekiterrors.New(http.StatusBadRequest, "filter ids must be positive when supplied")
+	}
+
+	goals, total, err := h.Service.ListGoals(ctx, businessID, domain.ListGoalsParams{
 		EmployeeID:    req.EmployeeID,
 		ReviewCycleID: req.ReviewCycleID,
 		Limit:         limit,
-		Offset:        req.Offset,
+		Offset:        offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list goals", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list goals", logger.Any("business_id", businessID), logger.Error(err))
 		return ListGoalsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list goals")
 	}
 
@@ -60,5 +70,5 @@ func (h *ListGoalsHandler) Serve(ctx context.Context, req *ListGoalsRequest) (Li
 		payloads = append(payloads, goalToProto(g))
 	}
 
-	return ListGoalsResponse{Goals: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
+	return ListGoalsResponse{Goals: payloads, Total: total, Limit: limit, Offset: offset}, nil
 }

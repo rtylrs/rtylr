@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"math"
 	"strconv"
 	"time"
 
@@ -94,6 +95,62 @@ func (s *Service) ListPage(ctx context.Context, businessID, page, pageSize int64
 		bills = bills[:int(pageSize)]
 	}
 	return BillPage{Bills: bills, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
+}
+
+// ListFilteredPage applies the optional supplier and purchase-order filters
+// before applying the requested page. The legacy repository exposes a
+// business-wide paginated query, so scan it in bounded chunks rather than
+// filtering the first page (or the legacy 500-row preview) in memory.
+func (s *Service) ListFilteredPage(ctx context.Context, businessID int64, supplierID, purchaseOrderID *int64, page, pageSize int64) (BillPage, error) {
+	if supplierID == nil && purchaseOrderID == nil {
+		return s.ListPage(ctx, businessID, page, pageSize)
+	}
+
+	page, pageSize, offset := normalizeListPage(page, pageSize)
+	filtered := make([]domain.Bill, 0)
+	var scanOffset int32
+	for {
+		rows, err := s.repo.ListPaginated(ctx, businessID, maxListLimit, scanOffset)
+		if err != nil {
+			return BillPage{}, err
+		}
+		for _, bill := range rows {
+			if supplierID != nil && bill.SupplierID != *supplierID {
+				continue
+			}
+			if purchaseOrderID != nil && (bill.PurchaseOrderID == nil || *bill.PurchaseOrderID != *purchaseOrderID) {
+				continue
+			}
+			filtered = append(filtered, bill)
+		}
+
+		if len(rows) < int(maxListLimit) {
+			break
+		}
+		// Do not wrap the scan cursor if a database contains an unexpectedly
+		// large number of rows.
+		if scanOffset > int32(math.MaxInt32)-maxListLimit {
+			break
+		}
+		scanOffset += maxListLimit
+	}
+
+	total := int64(len(filtered))
+	start := int64(offset)
+	if start > total {
+		start = total
+	}
+	end := start + pageSize
+	if end > total {
+		end = total
+	}
+	selected := filtered[int(start):int(end)]
+	return BillPage{
+		Bills:    selected,
+		Page:     page,
+		PageSize: pageSize,
+		HasMore:  end < total,
+	}, nil
 }
 
 func normalizeListPage(page, pageSize int64) (int64, int64, int32) {

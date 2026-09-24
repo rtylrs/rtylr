@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -24,6 +25,11 @@ type campaignService interface {
 	UpdateStatus(context.Context, int64, int64, string) error
 }
 
+const (
+	campaignListDefaultLimit int64 = 20
+	campaignListMaxLimit     int64 = 100
+)
+
 // CampaignAPI adapts the campaign application service to the generated CRM
 // campaign/v1 contract. The legacy /crm/campaigns routes remain registered for
 // older clients, while this adapter serves the contract used by the frontend.
@@ -44,40 +50,31 @@ func (a *CampaignAPI) ListCampaigns(ctx context.Context, req *crmcampaignv1.List
 		return nil, err
 	}
 
-	limit := req.GetLimit()
-	if limit <= 0 {
-		limit = 20
+	limit := int64(0)
+	offset := int64(0)
+	status := ""
+	if req != nil {
+		limit = req.GetLimit()
+		offset = req.GetOffset()
+		status = strings.TrimSpace(req.GetStatus())
 	}
-	if limit > 100 {
-		limit = 100
-	}
-	offset := req.GetOffset()
-	if offset < 0 {
-		offset = 0
+	limit, offset, err = normalizeCampaignListPage(limit, offset)
+	if err != nil {
+		return nil, err
 	}
 
-	if status := strings.TrimSpace(req.GetStatus()); status != "" {
-		items, listErr := a.service.ListByStatus(ctx, businessID, status)
+	if status != "" {
+		items, total, listErr := a.listCampaignsByStatusPage(ctx, businessID, status, int32(offset), int32(limit))
 		if listErr != nil {
 			return nil, campaignAPIError(listErr, "Failed to list campaigns")
 		}
-
-		start := int(offset)
-		if start > len(items) {
-			start = len(items)
-		}
-		end := start + int(limit)
-		if end > len(items) {
-			end = len(items)
-		}
-
-		payloads := make([]*crmcampaignv1.Campaign, 0, end-start)
-		for _, item := range items[start:end] {
+		payloads := make([]*crmcampaignv1.Campaign, 0, len(items))
+		for _, item := range items {
 			payloads = append(payloads, newCampaignProto(item))
 		}
 		return &crmcampaignv1.ListCampaignsResponse{
 			Campaigns: payloads,
-			Total:     int64(len(items)),
+			Total:     total,
 			Limit:     limit,
 			Offset:    offset,
 		}, nil
@@ -97,6 +94,62 @@ func (a *CampaignAPI) ListCampaigns(ctx context.Context, req *crmcampaignv1.List
 		Limit:     int64(page.Limit),
 		Offset:    int64(page.Offset),
 	}, nil
+}
+
+func normalizeCampaignListPage(limit, offset int64) (int64, int64, error) {
+	if limit <= 0 {
+		limit = campaignListDefaultLimit
+	}
+	if limit > campaignListMaxLimit {
+		limit = campaignListMaxLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	if offset > math.MaxInt32 {
+		return 0, 0, onekiterrors.New(http.StatusBadRequest, "page offset is too large")
+	}
+	return limit, offset, nil
+}
+
+// listCampaignsByStatusPage uses the complete, paginated business query to
+// build the status-filtered view. ListByStatus is retained for legacy callers,
+// but its SQL is intentionally bounded to 100 rows and cannot be the source of
+// a paginated API total.
+func (a *CampaignAPI) listCampaignsByStatusPage(ctx context.Context, businessID int64, status string, offset, limit int32) ([]domain.Campaign, int64, error) {
+	const scanLimit int32 = 100
+	filtered := make([]domain.Campaign, 0)
+	var scanOffset int32
+	for {
+		page, err := a.service.ListPaginated(ctx, businessID, scanLimit, scanOffset)
+		if err != nil {
+			return nil, 0, err
+		}
+		for _, campaign := range page.Campaigns {
+			if campaign.Status == status {
+				filtered = append(filtered, campaign)
+			}
+		}
+		consumed := int64(scanOffset) + int64(len(page.Campaigns))
+		if len(page.Campaigns) == 0 || (page.Total > 0 && consumed >= page.Total) || len(page.Campaigns) < int(scanLimit) {
+			break
+		}
+		if scanOffset > int32(math.MaxInt32)-scanLimit {
+			break
+		}
+		scanOffset += scanLimit
+	}
+
+	total := int64(len(filtered))
+	start := int64(offset)
+	if start > total {
+		start = total
+	}
+	end := start + int64(limit)
+	if end > total {
+		end = total
+	}
+	return filtered[int(start):int(end)], total, nil
 }
 
 func (a *CampaignAPI) CreateCampaign(ctx context.Context, req *crmcampaignv1.CreateCampaignRequest) (*crmcampaignv1.CreateCampaignResponse, error) {

@@ -12,6 +12,7 @@ type OvertimeRequestRecord struct {
 	Reason               string    `json:"reason"`
 	Status               string    `json:"status"`
 	CurrentApprovalLevel int32     `json:"current_approval_level"`
+	RejectionReason      string    `json:"rejection_reason"`
 	ApprovedBy           int64     `json:"approved_by"`
 	MultiplierApplied    float64   `json:"multiplier_applied"`
 	CreatedAt            time.Time `json:"created_at"`
@@ -36,8 +37,10 @@ type OvertimeDetectionCandidate struct {
 }
 
 type ListOvertimeRequestsParams struct {
-	Limit  int32
-	Offset int32
+	EmployeeID *int64
+	Status     *string
+	Limit      int32
+	Offset     int32
 }
 
 type ApprovalChainInfo struct {

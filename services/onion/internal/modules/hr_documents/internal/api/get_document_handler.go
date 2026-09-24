@@ -32,6 +32,9 @@ func (h *GetDocumentHandler) Serve(ctx context.Context, _ *GetDocumentRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return GetDocumentResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireDocumentPermission(ctx, "hr:employees:view"); err != nil {
+		return GetDocumentResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

@@ -10,6 +10,7 @@ var (
 	ErrNonPositiveQuantity    = errors.New("quantity must be at least 1")
 	ErrInvalidEquipmentStatus = errors.New("invalid equipment request status")
 	ErrInvalidAssetStatus     = errors.New("invalid asset status")
+	ErrInvalidAssetCondition  = errors.New("invalid asset condition")
 	ErrEmptyAssetName         = errors.New("asset name is required")
 )
 
@@ -26,6 +27,17 @@ func IsValidEquipmentStatus(status string) bool {
 func IsValidAssetStatus(status string) bool {
 	switch status {
 	case AssetStatusAvailable, AssetStatusAssigned, AssetStatusRetired, AssetStatusRepair:
+		return true
+	}
+	return false
+}
+
+// IsValidAssetCondition reports whether a physical-condition value matches
+// the generated AssetPayload contract. It is intentionally separate from the
+// lifecycle status predicate.
+func IsValidAssetCondition(condition string) bool {
+	switch condition {
+	case AssetConditionNew, AssetConditionGood, AssetConditionFair, AssetConditionDamaged:
 		return true
 	}
 	return false
@@ -49,6 +61,9 @@ func ValidateAsset(a AssetRecord) error {
 	}
 	if a.Status != "" && !IsValidAssetStatus(a.Status) {
 		return ErrInvalidAssetStatus
+	}
+	if a.Condition != "" && !IsValidAssetCondition(a.Condition) {
+		return ErrInvalidAssetCondition
 	}
 	return nil
 }

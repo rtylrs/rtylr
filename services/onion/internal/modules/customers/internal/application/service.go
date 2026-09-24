@@ -23,10 +23,13 @@ const (
 	customerCacheTTL  = 2 * time.Minute
 )
 
-// invalidateCustomerScope wipes every customer-related cache entry for the
-// business. Called by every mutation (create/update/delete/loyalty change).
+// invalidateCustomerScope wipes every cache entry derived from a customer for
+// the business. Customer CRUD and loyalty mutations feed both the customer
+// list/detail cache and the dashboard aggregate, so the two derived families
+// must be invalidated together.
 func invalidateCustomerScope(ctx context.Context, businessID int64) {
 	cacher.InvalidateScope(ctx, cacheKeys.CustomerPrefix(businessID))
+	cacher.Of[domain.DashboardStats]().Invalidate(ctx, []string{fmt.Sprintf("crm:dashboard:%d", businessID)})
 }
 
 type Service struct {
@@ -165,6 +168,10 @@ func loyaltyPointsFromCents(amount, pointsPerCurrencyUnit float64) int {
 // ─── Loyalty ──────────────────────────────────────────────────────────────────
 
 func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput) error {
+	if err := domain.ValidateLoyaltyPoints(int64(input.Points)); err != nil {
+		return err
+	}
+
 	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.BusinessID)
 	if cfgErr != nil {
 		logger.Ctx(ctx).Error("Failed to get loyalty config, using default tier", logger.Error(cfgErr))
@@ -182,11 +189,14 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput
 		s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.CustomerID,
 			"award", input.Description, map[string]any{"points": input.Points})
 		invalidateCustomerScope(ctx, input.BusinessID)
-		s.invalidateDashboardCache(ctx, input.BusinessID)
 	})
 }
 
 func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInput) error {
+	if err := domain.ValidateLoyaltyPoints(int64(input.Points)); err != nil {
+		return err
+	}
+
 	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.BusinessID)
 	if cfgErr != nil {
 		logger.Ctx(ctx).Error("Failed to get loyalty config, using default tier", logger.Error(cfgErr))
@@ -204,7 +214,6 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 		s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.CustomerID,
 			"reward", input.Description, map[string]any{"points": input.Points})
 		invalidateCustomerScope(ctx, input.BusinessID)
-		s.invalidateDashboardCache(ctx, input.BusinessID)
 	})
 }
 
@@ -380,7 +389,6 @@ func (s *Service) ImportCustomers(ctx context.Context, businessID, ownerID int64
 	}
 
 	invalidateCustomerScope(ctx, businessID)
-	s.invalidateDashboardCache(ctx, businessID)
 
 	return domain.CustomerImportResult{
 		TotalProcessed: len(items),
@@ -405,7 +413,6 @@ func (s *Service) MergeCustomers(ctx context.Context, input domain.MergeCustomer
 	// Without this, the merged-away secondary keeps being served from the
 	// per-customer cache even though the DB no longer has it.
 	invalidateCustomerScope(ctx, input.BusinessID)
-	s.invalidateDashboardCache(ctx, input.BusinessID)
 
 	s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.PrimaryID,
 		"note", fmt.Sprintf("Merged customer #%d into this profile", input.SecondaryID),
@@ -436,6 +443,45 @@ func (s *Service) insertTimeline(ctx context.Context, businessID, ownerID, custo
 
 // -- Loyalty Tiers -----------------------------------------------------------
 
+func normalizeLoyaltyTierPage(page, pageSize int) (int, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = domain.DefaultLoyaltyTierPageSize
+	}
+	if pageSize > domain.MaxLoyaltyTierPageSize {
+		pageSize = domain.MaxLoyaltyTierPageSize
+	}
+	if page-1 > math.MaxInt32/pageSize {
+		return 0, 0, domain.ErrLoyaltyTierPageOutOfRange
+	}
+	return page, pageSize, nil
+}
+
+func (s *Service) ListLoyaltyTiersPage(ctx context.Context, businessID int64, page, pageSize int) (domain.LoyaltyTierPage, error) {
+	page, pageSize, err := normalizeLoyaltyTierPage(page, pageSize)
+	if err != nil {
+		return domain.LoyaltyTierPage{}, err
+	}
+
+	tiers, total, err := s.repo.ListLoyaltyTiersPage(ctx, businessID, page, pageSize)
+	if err != nil {
+		return domain.LoyaltyTierPage{}, err
+	}
+	end := int64(page-1)*int64(pageSize) + int64(len(tiers))
+	return domain.LoyaltyTierPage{
+		Tiers:    tiers,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		HasMore:  end < total,
+	}, nil
+}
+
+// ListLoyaltyTiers retains the unpaginated service API for existing internal
+// callers. The repository implementation follows every page, so this method
+// remains complete even when a business has more than one database page.
 func (s *Service) ListLoyaltyTiers(ctx context.Context, businessID int64) ([]domain.LoyaltyTier, error) {
 	return s.repo.ListLoyaltyTiers(ctx, businessID)
 }

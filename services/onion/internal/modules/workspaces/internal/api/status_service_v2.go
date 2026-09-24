@@ -3,11 +3,13 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/wsbus"
 	flowstatusv2 "github.com/voxire/voxie/gen/go/flow/status/v2"
 )
 
@@ -15,6 +17,18 @@ import (
 type StatusAPIV2 struct{ Service *application.Service }
 
 func NewStatusAPIV2(s *application.Service) *StatusAPIV2 { return &StatusAPIV2{Service: s} }
+
+func publishStatusEvent(eventType string, projectID, statusID, actorID int64) {
+	if projectID == 0 {
+		return
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("project:%d", projectID),
+		Type:     eventType,
+		EntityID: statusID,
+		ActorID:  actorID,
+	})
+}
 
 func toStatusPayload(s domain.Status) *flowstatusv2.Status {
 	return &flowstatusv2.Status{
@@ -100,6 +114,7 @@ func (a *StatusAPIV2) CreateStatus(ctx context.Context, req *flowstatusv2.Create
 	if err != nil {
 		return nil, statusError(err, "Failed to create status")
 	}
+	publishStatusEvent("status.created", status.ProjectID, status.ID, caller.UserID)
 	return &flowstatusv2.CreateStatusResponse{Status: toStatusPayload(status)}, nil
 }
 
@@ -124,6 +139,7 @@ func (a *StatusAPIV2) UpdateStatus(ctx context.Context, req *flowstatusv2.Update
 	if err != nil {
 		return nil, statusError(err, "Failed to update status")
 	}
+	publishStatusEvent("status.updated", status.ProjectID, status.ID, caller.UserID)
 	return &flowstatusv2.UpdateStatusResponse{Status: toStatusPayload(status)}, nil
 }
 
@@ -132,10 +148,15 @@ func (a *StatusAPIV2) DeleteStatus(ctx context.Context, req *flowstatusv2.Delete
 	if err != nil {
 		return nil, err
 	}
+	existing, err := a.Service.GetProjectStatus(ctx, req.GetId(), businessID)
+	if err != nil {
+		return nil, statusError(err, "Failed to delete status")
+	}
 	moved, err := a.Service.DeleteProjectStatus(ctx, req.GetId(), caller.UserID, businessID)
 	if err != nil {
 		return nil, statusError(err, "Failed to delete status")
 	}
+	publishStatusEvent("status.deleted", existing.ProjectID, existing.ID, caller.UserID)
 	return &flowstatusv2.DeleteStatusResponse{
 		Message:             "Status deleted",
 		ReassignedTaskCount: int32(moved), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.

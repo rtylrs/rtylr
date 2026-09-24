@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
-	"strings"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
@@ -34,20 +34,32 @@ func loyaltyBusinessID(ctx context.Context) (int64, int64, error) {
 	return device.User.UserID, businessID, nil
 }
 
-// requireLoyaltyManager mirrors the HTTP layer's requireCRMManager gate:
-// authentication alone is not sufficient for changing loyalty rules or
-// mutating point balances through the RPC surface.
+// requireLoyaltyManager uses the same server-resolved permission as the chi
+// handlers. The token's coarse role label is not authoritative for delegated
+// CRM managers and can lag behind role/assignment changes.
 func requireLoyaltyManager(ctx context.Context) error {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return onekiterrors.PermissionDenied()
+	return requireCRMFeaturePermission(ctx, "crm:loyalty:manage")
+}
+
+const (
+	loyaltyTransactionsDefaultPageSize int64 = 20
+	loyaltyTransactionsMaxPageSize     int64 = 100
+)
+
+func normalizeLoyaltyTransactionPage(page, pageSize int64) (int64, int64, error) {
+	if page < 1 {
+		page = 1
 	}
-	switch strings.ToLower(strings.TrimSpace(device.User.Role)) {
-	case "owner", "admin", "console_admin":
-		return nil
-	default:
-		return onekiterrors.PermissionDenied()
+	if pageSize < 1 {
+		pageSize = loyaltyTransactionsDefaultPageSize
 	}
+	if pageSize > loyaltyTransactionsMaxPageSize {
+		pageSize = loyaltyTransactionsMaxPageSize
+	}
+	if page-1 > math.MaxInt32/pageSize {
+		return 0, 0, onekiterrors.New(http.StatusBadRequest, "page offset is too large")
+	}
+	return page, pageSize, nil
 }
 
 func newLoyaltyConfigProto(cfg domain.LoyaltyConfig) *crmloyaltyv1.LoyaltyConfig {
@@ -84,6 +96,16 @@ func newLoyaltyTierProto(t domain.LoyaltyTier) *crmloyaltyv1.LoyaltyTier {
 	}
 }
 
+func validateLoyaltyTierUpdateBody(body *crmloyaltyv1.UpdateLoyaltyTierBody) error {
+	if body == nil {
+		return onekiterrors.New(http.StatusBadRequest, "Loyalty tier body is required")
+	}
+	if err := body.Validate(); err != nil {
+		return onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+	return nil
+}
+
 func newLoyaltyTransactionProto(tx domain.LoyaltyTransaction) *crmloyaltyv1.LoyaltyTransaction {
 	return &crmloyaltyv1.LoyaltyTransaction{
 		Id:            tx.ID,
@@ -118,6 +140,12 @@ func (a *LoyaltyAPI) UpdateLoyaltyConfig(ctx context.Context, req *crmloyaltyv1.
 	if err := requireLoyaltyManager(ctx); err != nil {
 		return nil, err
 	}
+	if req == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Loyalty config is required")
+	}
+	if err := req.Validate(); err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
 
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
@@ -132,6 +160,15 @@ func (a *LoyaltyAPI) UpdateLoyaltyConfig(ctx context.Context, req *crmloyaltyv1.
 		req.GetBronzeDiscountPct() < 0, req.GetSilverDiscountPct() < 0,
 		req.GetGoldDiscountPct() < 0, req.GetPlatinumDiscountPct() < 0:
 		return nil, onekiterrors.New(http.StatusBadRequest, "Loyalty config values must not be negative")
+	}
+	if err := validateLoyaltyConfigBounds(
+		req.GetBronzeMin(),
+		req.GetSilverMin(),
+		req.GetGoldMin(),
+		req.GetPlatinumMin(),
+		req.GetPointsExpiryDays(),
+	); err != nil {
+		return nil, err
 	}
 
 	input := domain.LoyaltyConfigInput{
@@ -158,14 +195,43 @@ func (a *LoyaltyAPI) UpdateLoyaltyConfig(ctx context.Context, req *crmloyaltyv1.
 	return &crmloyaltyv1.UpdateLoyaltyConfigResponse{Message: "Loyalty config updated successfully"}, nil
 }
 
-func (a *LoyaltyAPI) ListLoyaltyTiers(ctx context.Context, _ *crmloyaltyv1.ListLoyaltyTiersRequest) (*crmloyaltyv1.ListLoyaltyTiersResponse, error) {
+func (a *LoyaltyAPI) ListLoyaltyTiers(ctx context.Context, req *crmloyaltyv1.ListLoyaltyTiersRequest) (*crmloyaltyv1.ListLoyaltyTiersResponse, error) {
 	_, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tiers, svcErr := a.Service.ListLoyaltyTiers(ctx, businessID)
-	if svcErr != nil {
+	var (
+		tiers    []domain.LoyaltyTier
+		total    int64
+		page     int
+		pageSize int
+		hasMore  bool
+	)
+	if req == nil || (req.GetPage() == 0 && req.GetPageSize() == 0) {
+		// Older clients predate the pagination fields. Preserve their complete
+		// list contract while new callers can opt into bounded pages.
+		tiers, err = a.Service.ListLoyaltyTiers(ctx, businessID)
+		if err == nil {
+			total = int64(len(tiers))
+			page = 1
+			pageSize = len(tiers)
+		}
+	} else {
+		var result domain.LoyaltyTierPage
+		result, err = a.Service.ListLoyaltyTiersPage(ctx, businessID, int(req.GetPage()), int(req.GetPageSize()))
+		if err == nil {
+			tiers = result.Tiers
+			total = result.Total
+			page = result.Page
+			pageSize = result.PageSize
+			hasMore = result.HasMore
+		}
+	}
+	if err != nil {
+		if errors.Is(err, domain.ErrLoyaltyTierPageOutOfRange) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Loyalty tier page offset is too large")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty tiers")
 	}
 
@@ -174,7 +240,13 @@ func (a *LoyaltyAPI) ListLoyaltyTiers(ctx context.Context, _ *crmloyaltyv1.ListL
 		payloads[i] = newLoyaltyTierProto(t)
 	}
 
-	return &crmloyaltyv1.ListLoyaltyTiersResponse{Tiers: payloads}, nil
+	return &crmloyaltyv1.ListLoyaltyTiersResponse{
+		Tiers:    payloads,
+		Total:    total,
+		Page:     int64(page),
+		PageSize: int64(pageSize),
+		HasMore:  hasMore,
+	}, nil
 }
 
 func (a *LoyaltyAPI) CreateLoyaltyTier(ctx context.Context, req *crmloyaltyv1.CreateLoyaltyTierRequest) (*crmloyaltyv1.CreateLoyaltyTierResponse, error) {
@@ -219,6 +291,9 @@ func (a *LoyaltyAPI) UpdateLoyaltyTier(ctx context.Context, req *crmloyaltyv1.Up
 	}
 
 	body := req.GetBody()
+	if err := validateLoyaltyTierUpdateBody(body); err != nil {
+		return nil, err
+	}
 	perks := []byte(body.GetPerks())
 	if len(perks) == 0 {
 		perks = []byte("[]")
@@ -250,16 +325,16 @@ func (a *LoyaltyAPI) ListLoyaltyTransactions(ctx context.Context, req *crmloyalt
 		return nil, err
 	}
 
-	page := int(req.GetPage())
-	if page < 1 {
-		page = 1
+	var page, pageSize int64
+	if req != nil {
+		page, pageSize = req.GetPage(), req.GetPageSize()
 	}
-	pageSize := int(req.GetPageSize())
-	if pageSize < 1 {
-		pageSize = 20
+	page, pageSize, err = normalizeLoyaltyTransactionPage(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
 
-	txs, total, svcErr := a.Service.ListLoyaltyTransactions(ctx, businessID, req.GetCustomerId(), page, pageSize)
+	txs, total, svcErr := a.Service.ListLoyaltyTransactions(ctx, businessID, req.GetCustomerId(), int(page), int(pageSize))
 	if svcErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty transactions")
 	}
@@ -272,8 +347,8 @@ func (a *LoyaltyAPI) ListLoyaltyTransactions(ctx context.Context, req *crmloyalt
 	return &crmloyaltyv1.ListLoyaltyTransactionsResponse{
 		Transactions: payloads,
 		Total:        int64(total),
-		Page:         int64(page),
-		PageSize:     int64(pageSize),
+		Page:         page,
+		PageSize:     pageSize,
 	}, nil
 }
 
@@ -281,17 +356,21 @@ func (a *LoyaltyAPI) AwardPoints(ctx context.Context, req *crmloyaltyv1.AwardPoi
 	if err := requireLoyaltyManager(ctx); err != nil {
 		return nil, err
 	}
+	if req == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Award points request is required")
+	}
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Mirrors the HTTP handler's Validate: a non-positive award would move a
-	// customer's balance backwards through the "earn" path.
 	if req.GetCustomerId() == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
-	if req.GetPoints() <= 0 {
+	if err := domain.ValidateLoyaltyPoints(req.GetPoints()); err != nil {
+		if errors.Is(err, domain.ErrLoyaltyPointsOutOfRange) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
 		return nil, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 
@@ -308,6 +387,15 @@ func (a *LoyaltyAPI) AwardPoints(ctx context.Context, req *crmloyaltyv1.AwardPoi
 		if errors.Is(svcErr, domain.ErrCustomerNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
+		if errors.Is(svcErr, domain.ErrLoyaltyBalanceCapacity) {
+			return nil, onekiterrors.New(http.StatusConflict, "Loyalty balance capacity exceeded")
+		}
+		if errors.Is(svcErr, domain.ErrLoyaltyPointsOutOfRange) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
+		if errors.Is(svcErr, domain.ErrLoyaltyPointsNotPositive) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to award points")
 	}
 
@@ -318,18 +406,21 @@ func (a *LoyaltyAPI) RedeemPoints(ctx context.Context, req *crmloyaltyv1.RedeemP
 	if err := requireLoyaltyManager(ctx); err != nil {
 		return nil, err
 	}
+	if req == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Redeem points request is required")
+	}
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Mirrors the HTTP handler's Validate. Redeem applies -Points as the
-	// balance delta, so a negative input would credit points instead of
-	// spending them.
 	if req.GetCustomerId() == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
-	if req.GetPoints() <= 0 {
+	if err := domain.ValidateLoyaltyPoints(req.GetPoints()); err != nil {
+		if errors.Is(err, domain.ErrLoyaltyPointsOutOfRange) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
 		return nil, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 
@@ -348,6 +439,15 @@ func (a *LoyaltyAPI) RedeemPoints(ctx context.Context, req *crmloyaltyv1.RedeemP
 		}
 		if errors.Is(svcErr, domain.ErrInsufficientPoints) {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Insufficient loyalty points")
+		}
+		if errors.Is(svcErr, domain.ErrLoyaltyBalanceCapacity) {
+			return nil, onekiterrors.New(http.StatusConflict, "Loyalty balance capacity exceeded")
+		}
+		if errors.Is(svcErr, domain.ErrLoyaltyPointsOutOfRange) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
+		}
+		if errors.Is(svcErr, domain.ErrLoyaltyPointsNotPositive) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem points")
 	}

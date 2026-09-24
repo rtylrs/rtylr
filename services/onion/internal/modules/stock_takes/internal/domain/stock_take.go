@@ -9,6 +9,7 @@ import (
 var (
 	ErrStockTakeNotFound          = errors.New("stock take not found")
 	ErrStockTakeReferenceNotFound = errors.New("stock take reference not found in business")
+	ErrStockTakeIncomplete        = errors.New("every stock-take item requires a physical count")
 )
 
 type StockTakeStatus string

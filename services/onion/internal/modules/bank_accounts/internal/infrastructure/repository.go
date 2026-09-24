@@ -3,7 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
@@ -25,36 +27,92 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.BankAccount, error) {
-	rows, err := r.queries.ListBankAccounts(ctx, businessID)
+	accounts, _, err := r.ListPage(ctx, businessID, 1, 500, "name", "asc")
+	return accounts, err
+}
+
+func (r *Repository) ListPage(ctx context.Context, businessID int64, page, limit int32, sortBy, sortDir string) ([]domain.BankAccount, int64, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 100
+	}
+	if limit > 500 {
+		limit = 500
+	}
+	offset := int64(page-1) * int64(limit)
+	sortColumn := bankAccountSortColumn(sortBy)
+	direction := "ASC"
+	if strings.EqualFold(strings.TrimSpace(sortDir), "desc") {
+		direction = "DESC"
+	}
+
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, `SELECT COUNT(*) FROM finance_bank_accounts WHERE business_id = ?`, businessID).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("Failed to count bank accounts", logger.Error(err))
+		return nil, 0, err
+	}
+
+	query := fmt.Sprintf(`
+		SELECT id, owner_id, business_id, name, institution, account_type, last_four,
+		       balance, currency, is_primary, is_connected, last_synced_at, created_at
+		FROM finance_bank_accounts
+		WHERE business_id = ?
+		ORDER BY %s %s, id %s
+		LIMIT ? OFFSET ?`, sortColumn, direction, direction)
+	rows, err := r.pool.QueryContext(ctx, query, businessID, limit, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list bank accounts", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
+	defer rows.Close()
 
-	items := make([]domain.BankAccount, 0, len(rows))
-	for _, row := range rows {
-		items = append(items, bankAccountFromSqlc(row))
+	items := make([]domain.BankAccount, 0, limit)
+	for rows.Next() {
+		account, scanErr := scanBankAccount(rows)
+		if scanErr != nil {
+			return nil, 0, scanErr
+		}
+		items = append(items, account)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	return items, total, nil
+}
 
-	return items, nil
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.BankAccount, error) {
+	row := r.pool.QueryRowContext(ctx, `
+		SELECT id, owner_id, business_id, name, institution, account_type, last_four,
+		       balance, currency, is_primary, is_connected, last_synced_at, created_at
+		FROM finance_bank_accounts
+		WHERE business_id = ? AND id = ?`, businessID, id)
+	account, err := scanBankAccount(row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.BankAccount{}, domain.ErrBankAccountNotFound
+	}
+	if err != nil {
+		return domain.BankAccount{}, err
+	}
+	return account, nil
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.BankAccountInput) (int64, error) {
-	currency := input.Currency
+	currency := strings.ToUpper(strings.TrimSpace(input.Currency))
 	if currency == "" {
 		currency = "USD"
 	}
 
-	res, err := r.queries.CreateBankAccount(ctx, sqlc.CreateBankAccountParams{
-		OwnerID:     businessID,
-		BusinessID:  businessID,
-		Name:        input.Name,
-		Institution: nullableString(input.Institution),
-		AccountType: nullableString(input.AccountType),
-		Balance:     nullableString(input.Balance.String()),
-		Currency:    nullableString(currency),
-		IsConnected: sql.NullBool{Bool: input.IsConnected, Valid: true},
-	})
+	res, err := r.pool.ExecContext(ctx, `
+		INSERT INTO finance_bank_accounts
+		(owner_id, business_id, name, institution, account_type, last_four, balance, currency, is_primary, is_connected)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		businessID, businessID, input.Name, nullableString(input.Institution),
+		nullableString(input.AccountType), nullableString(input.LastFour),
+		nullableString(input.Balance.String()), nullableString(currency),
+		input.IsPrimary, input.IsConnected,
+	)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create bank account", logger.Error(err))
 		return 0, err
@@ -63,9 +121,16 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 	return res.LastInsertId()
 }
 
-// TotalBalance returns the sum of all account balances for the owner.
+// TotalBalance returns the sum of balances in the business reporting currency.
 func (r *Repository) TotalBalance(ctx context.Context, businessID int64) (money.Amount, error) {
-	result, err := r.queries.SumBankAccountBalances(ctx, businessID)
+	var result any
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(CAST(COALESCE(a.balance, 0) AS DECIMAL(30,2))), 0)
+		FROM finance_bank_accounts a
+		JOIN businesses b ON b.id = a.business_id
+		WHERE a.business_id = ?
+		  AND COALESCE(NULLIF(UPPER(TRIM(a.currency)), ''), 'USD') =
+		      COALESCE(NULLIF(UPPER(TRIM(b.currency)), ''), 'USD')`, businessID).Scan(&result)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bank account balances", logger.Error(err))
 		return 0, err
@@ -88,6 +153,69 @@ func (r *Repository) CountConnected(ctx context.Context, businessID int64) (int6
 // ---------------------------------------------------------------------------
 // Mapping helpers
 // ---------------------------------------------------------------------------
+
+type bankAccountScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanBankAccount(scanner bankAccountScanner) (domain.BankAccount, error) {
+	var (
+		account     domain.BankAccount
+		institution sql.NullString
+		accountType sql.NullString
+		lastFour    sql.NullString
+		balance     sql.NullString
+		currency    sql.NullString
+		isPrimary   sql.NullBool
+		isConnected sql.NullBool
+		lastSynced  sql.NullTime
+		createdAt   sql.NullTime
+	)
+	if err := scanner.Scan(
+		&account.ID,
+		&account.OwnerID,
+		&account.BusinessID,
+		&account.Name,
+		&institution,
+		&accountType,
+		&lastFour,
+		&balance,
+		&currency,
+		&isPrimary,
+		&isConnected,
+		&lastSynced,
+		&createdAt,
+	); err != nil {
+		return domain.BankAccount{}, err
+	}
+	account.Institution = nullStr(institution)
+	account.AccountType = nullStr(accountType)
+	account.LastFour = nullStr(lastFour)
+	account.Balance = parseMoneyNull(balance)
+	account.Currency = nullStr(currency)
+	account.IsPrimary = nullBool(isPrimary)
+	account.IsConnected = nullBool(isConnected)
+	account.LastSyncedAt = nullTime(lastSynced)
+	account.CreatedAt = nullTime(createdAt)
+	return account, nil
+}
+
+func bankAccountSortColumn(sortBy string) string {
+	switch strings.ToLower(strings.TrimSpace(sortBy)) {
+	case "balance":
+		return "balance"
+	case "currency":
+		return "currency"
+	case "created_at", "createdat":
+		return "created_at"
+	case "institution", "bank_name":
+		return "institution"
+	case "account_type":
+		return "account_type"
+	default:
+		return "name"
+	}
+}
 
 func bankAccountFromSqlc(row sqlc.FinanceBankAccount) domain.BankAccount {
 	ba := domain.BankAccount{

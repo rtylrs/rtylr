@@ -2,6 +2,8 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -543,5 +545,78 @@ func TestCountMatchesByTargetType_ZeroOwnerReturnsEmpty(t *testing.T) {
 	}
 	if len(counts) != 0 {
 		t.Errorf("expected empty map for ownerID=0, got %v", counts)
+	}
+}
+
+func TestCreateMatchUpdatesBankFeedProjection(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	businessID := time.Now().UnixNano()
+	externalID := fmt.Sprintf("projection-feed-%d", businessID)
+
+	insert := func(query string, args ...any) int64 {
+		result, err := db.ExecContext(ctx, query, args...)
+		if err != nil {
+			t.Fatalf("insert fixture: %v", err)
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			t.Fatalf("fixture id: %v", err)
+		}
+		return id
+	}
+
+	bankFeedID := insert(
+		"INSERT INTO finance_bank_feeds (owner_id, business_id, bank_account_id, amount_minor_units, occurred_at, external_id) VALUES (?, ?, ?, ?, NOW(), ?)",
+		businessID, businessID, 1, 12345, externalID,
+	)
+	invoiceID := insert(
+		"INSERT INTO finance_invoices (owner_id, business_id, invoice_number, client_name, issue_date, due_date, total) VALUES (?, ?, ?, ?, CURDATE(), CURDATE(), ?)",
+		businessID, businessID, fmt.Sprintf("PROJECTION-%d", businessID), "Projection client", 123.45,
+	)
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_reconciliation_matches WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_reconciliation_targets WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_bank_feeds WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_invoices WHERE business_id = ?", businessID)
+	})
+
+	if _, err := repo.CreateMatch(ctx, businessID, domain.MatchInput{
+		BankFeedID: bankFeedID,
+		TargetType: domain.TargetTypeInvoice,
+		TargetID:   invoiceID,
+	}); err != nil {
+		t.Fatalf("CreateMatch: %v", err)
+	}
+
+	var matchedInvoiceID, matchedExpenseID sql.NullInt64
+	if err := db.QueryRowContext(ctx,
+		"SELECT matched_invoice_id, matched_expense_id FROM finance_bank_feeds WHERE id = ? AND business_id = ?",
+		bankFeedID, businessID,
+	).Scan(&matchedInvoiceID, &matchedExpenseID); err != nil {
+		t.Fatalf("read bank-feed projection: %v", err)
+	}
+	if !matchedInvoiceID.Valid || matchedInvoiceID.Int64 != invoiceID {
+		t.Fatalf("matched_invoice_id = %+v, want %d", matchedInvoiceID, invoiceID)
+	}
+	if matchedExpenseID.Valid {
+		t.Fatalf("matched_expense_id = %+v, want NULL", matchedExpenseID)
+	}
+
+	feeds, err := repo.ListUnmatchedBankFeeds(ctx, businessID)
+	if err != nil {
+		t.Fatalf("ListUnmatchedBankFeeds after match: %v", err)
+	}
+	if containsBankFeed(feeds, bankFeedID) {
+		t.Fatal("matched bank feed remained in the unmatched projection")
+	}
+
+	if _, err := repo.CreateMatch(ctx, businessID, domain.MatchInput{
+		BankFeedID: bankFeedID,
+		TargetType: domain.TargetTypeInvoice,
+		TargetID:   invoiceID,
+	}); !errors.Is(err, domain.ErrAlreadyMatched) {
+		t.Fatalf("second match error = %v, want ErrAlreadyMatched", err)
 	}
 }

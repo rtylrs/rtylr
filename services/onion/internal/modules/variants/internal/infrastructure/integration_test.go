@@ -2,6 +2,8 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
@@ -62,6 +64,34 @@ func TestVariants_CreateVariant_ReturnsPositiveID(t *testing.T) {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
 	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+}
+
+func TestCreateVariant_RejectsForeignBusinessProduct(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	foreignBusinessID := testutil.OwnerID + 9000
+
+	result, err := db.ExecContext(ctx, `
+		INSERT INTO erp_products (owner_id, business_id, name)
+		VALUES (?, ?, 'Foreign product')`, testutil.OwnerID+9001, foreignBusinessID)
+	if err != nil {
+		t.Fatalf("insert foreign product: %v", err)
+	}
+	foreignProductID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("foreign product id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM erp_products WHERE id = ?", foreignProductID)
+	})
+
+	id, err := repo.CreateVariant(ctx, testutil.OwnerID, domain.VariantInput{
+		ProductID: foreignProductID, Name: "Cross-tenant variant", IsActive: true,
+	})
+	if !errors.Is(err, domain.ErrVariantProductNotFound) {
+		t.Fatalf("CreateVariant foreign product id=%d err=%v, want ErrVariantProductNotFound", id, err)
+	}
 }
 
 func TestVariants_CreateVariant_AppearsInList(t *testing.T) {
@@ -201,16 +231,12 @@ func TestListVariants_ZeroOwner_ReturnsEmpty(t *testing.T) {
 	}
 }
 
-func TestListVariants_NoVariants_ReturnsEmpty(t *testing.T) {
+func TestListVariants_UnknownProductIsRejected(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	// product ID 9999999 does not exist for this owner
-	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, 9999999)
-	if err != nil {
-		t.Fatalf("ListVariants(productID=9999999): %v", err)
-	}
-	if len(variants) != 0 {
-		t.Fatalf("expected 0 variants for non-existent product, got %d", len(variants))
+	_, err := repo.ListVariants(context.Background(), testutil.OwnerID, 9999999)
+	if !errors.Is(err, domain.ErrVariantProductNotFound) {
+		t.Fatalf("ListVariants unknown product error = %v, want ErrVariantProductNotFound", err)
 	}
 }
 
@@ -406,13 +432,12 @@ func TestDeleteVariant_RemovesRow(t *testing.T) {
 	}
 }
 
-func TestDeleteVariant_NonExistentIsNoop(t *testing.T) {
+func TestDeleteVariant_NonExistentReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	// Deleting a non-existent variant should not return an error
 	err := repo.DeleteVariant(context.Background(), testutil.OwnerID, 9999999)
-	if err != nil {
-		t.Fatalf("DeleteVariant(non-existent): expected no error, got %v", err)
+	if !errors.Is(err, domain.ErrVariantNotFound) {
+		t.Fatalf("DeleteVariant(non-existent) error = %v, want ErrVariantNotFound", err)
 	}
 }
 
@@ -443,6 +468,42 @@ func TestCreate_ThenList_FindsVariant(t *testing.T) {
 	}
 	if !found {
 		t.Fatalf("created variant id=%d not found in list", id)
+	}
+}
+
+func TestListVariantsPage_ReturnsBoundedPagesAndTotal(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	ids := make([]int64, 0, 3)
+	for i := 0; i < 3; i++ {
+		id, err := repo.CreateVariant(ctx, testutil.OwnerID, domain.VariantInput{
+			ProductID: variantsProductID, Name: fmt.Sprintf("Pagination variant %d", i), IsActive: true,
+		})
+		if err != nil {
+			t.Fatalf("CreateVariant[%d]: %v", i, err)
+		}
+		ids = append(ids, id)
+	}
+	t.Cleanup(func() {
+		for _, id := range ids {
+			_ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id)
+		}
+	})
+
+	first, hasMore, total, err := repo.ListVariantsPage(ctx, testutil.OwnerID, variantsProductID, 2, 0)
+	if err != nil {
+		t.Fatalf("first page: %v", err)
+	}
+	second, _, _, err := repo.ListVariantsPage(ctx, testutil.OwnerID, variantsProductID, 2, 2)
+	if err != nil {
+		t.Fatalf("second page: %v", err)
+	}
+	if len(first) != 2 || !hasMore || total < 3 {
+		t.Fatalf("first page len=%d hasMore=%t total=%d", len(first), hasMore, total)
+	}
+	if len(second) == 0 || first[0].ID == second[0].ID {
+		t.Fatalf("second page did not advance: first=%v second=%v", first, second)
 	}
 }
 
@@ -518,26 +579,11 @@ func TestCountVariants_UnknownProduct_ReturnsZero(t *testing.T) {
 	}
 }
 
-func TestListVariants_WrongOwner_ReturnsEmpty(t *testing.T) {
+func TestListVariants_WrongOwnerRejectsForeignProduct(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	// Create a variant for the real owner
-	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
-		ProductID: variantsProductID, Name: "OwnerScopedVariant", SalePrice: 5.0, IsActive: true,
-	})
-	if err != nil {
-		t.Fatalf("CreateVariant: %v", err)
-	}
-	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
-
-	// Query with a different owner — should not see the above variant
-	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID+9999, variantsProductID)
-	if err != nil {
-		t.Fatalf("ListVariants(wrong owner): %v", err)
-	}
-	for _, v := range variants {
-		if v.OwnerID == testutil.OwnerID {
-			t.Errorf("wrong-owner query returned variant with ownerID=%d", testutil.OwnerID)
-		}
+	_, err := repo.ListVariants(context.Background(), testutil.OwnerID+9999, variantsProductID)
+	if !errors.Is(err, domain.ErrVariantProductNotFound) {
+		t.Fatalf("ListVariants wrong owner error = %v, want ErrVariantProductNotFound", err)
 	}
 }

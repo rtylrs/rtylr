@@ -25,8 +25,10 @@ const (
 type ListOvertimeRequestsHandler struct{ Service *application.Service }
 
 type ListOvertimeRequestsRequest struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	EmployeeID *int64  `json:"employee_id,omitempty"`
+	Status     *string `json:"status,omitempty"`
+	Limit      int32   `json:"limit"`
+	Offset     int32   `json:"offset"`
 }
 
 type ListOvertimeRequestsResponse struct {
@@ -36,7 +38,29 @@ type ListOvertimeRequestsResponse struct {
 	Offset   int32                                  `json:"offset"`
 }
 
+func (h *ListOvertimeRequestsHandler) Validate(_ context.Context, req *ListOvertimeRequestsRequest) error {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request is required")
+	}
+	if req.EmployeeID != nil && *req.EmployeeID <= 0 {
+		return onekiterrors.New(http.StatusBadRequest, "employee_id must be greater than 0")
+	}
+	normalized := domain.NormalizeOvertimeListParams(domain.ListOvertimeRequestsParams{
+		EmployeeID: req.EmployeeID,
+		Status:     req.Status,
+		Limit:      req.Limit,
+		Offset:     req.Offset,
+	})
+	req.EmployeeID = normalized.EmployeeID
+	req.Status = normalized.Status
+	req.Offset = normalized.Offset
+	return nil
+}
+
 func (h *ListOvertimeRequestsHandler) Serve(ctx context.Context, req *ListOvertimeRequestsRequest) (ListOvertimeRequestsResponse, error) {
+	if err := h.Validate(ctx, req); err != nil {
+		return ListOvertimeRequestsResponse{}, err
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListOvertimeRequestsResponse{}, onekiterrors.PermissionDenied()
@@ -56,7 +80,10 @@ func (h *ListOvertimeRequestsHandler) Serve(ctx context.Context, req *ListOverti
 	}
 
 	requests, total, err := h.Service.ListOvertimeRequests(ctx, businessID, domain.ListOvertimeRequestsParams{
-		Limit: limit, Offset: req.Offset,
+		EmployeeID: req.EmployeeID,
+		Status:     req.Status,
+		Limit:      limit,
+		Offset:     req.Offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list overtime requests", logger.Any("business_id", businessID), logger.Error(err))

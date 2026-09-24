@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/infrastructure"
@@ -218,5 +219,104 @@ func TestGetDocument_WrongOwnerReturnsNotFound(t *testing.T) {
 	_, err = repo.GetDocument(ctx, 0, created.ID)
 	if !errors.Is(err, domain.ErrDocumentNotFound) {
 		t.Errorf("expected ErrDocumentNotFound for wrong owner, got %v", err)
+	}
+}
+
+func TestCreateDocument_PersistsExpiryAndAppearsInExpiringList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	expiry := time.Now().UTC().AddDate(0, 0, 5)
+
+	created, err := repo.CreateDocument(ctx, testutil.OwnerID, domain.CreateDocumentParams{
+		EmployeeID:   4101,
+		DocumentType: "passport",
+		Title:        "Passport Expiry Regression",
+		StorageMode:  "url",
+		FileURL:      "https://example.com/passport.pdf",
+		ExpiryDate:   &expiry,
+		UploadedBy:   4101,
+	})
+	if err != nil {
+		t.Fatalf("CreateDocument: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteDocument(ctx, testutil.OwnerID, created.ID) })
+
+	stored, err := repo.GetDocument(ctx, testutil.OwnerID, created.ID)
+	if err != nil {
+		t.Fatalf("GetDocument: %v", err)
+	}
+	if stored.ExpiryDate == nil || !stored.ExpiryDate.Equal(expiry.Truncate(24*time.Hour)) {
+		t.Fatalf("expiry date was not persisted: got %v, want %v", stored.ExpiryDate, expiry)
+	}
+
+	expiring, _, err := repo.ListExpiringDocuments(ctx, testutil.OwnerID, 30, 100, 0)
+	if err != nil {
+		t.Fatalf("ListExpiringDocuments: %v", err)
+	}
+	found := false
+	for _, record := range expiring {
+		if record.ID == created.ID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("created document %d was not returned by the expiring query", created.ID)
+	}
+}
+
+func TestListDocuments_ZeroEmployeeIDReturnsAllEmployeesAndNames(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	first, err := repo.CreateDocument(ctx, testutil.OwnerID, domain.CreateDocumentParams{
+		EmployeeID: 4101, DocumentType: "contract", Title: "All Employees Alice",
+		StorageMode: "url", FileURL: "https://example.com/alice.pdf", UploadedBy: 4101,
+	})
+	if err != nil {
+		t.Fatalf("create Alice document: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteDocument(ctx, testutil.OwnerID, first.ID) })
+	second, err := repo.CreateDocument(ctx, testutil.OwnerID, domain.CreateDocumentParams{
+		EmployeeID: 4102, DocumentType: "contract", Title: "All Employees Bob",
+		StorageMode: "url", FileURL: "https://example.com/bob.pdf", UploadedBy: 4102,
+	})
+	if err != nil {
+		t.Fatalf("create Bob document: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteDocument(ctx, testutil.OwnerID, second.ID) })
+
+	records, _, err := repo.ListDocuments(ctx, testutil.OwnerID, 0, 100, 0)
+	if err != nil {
+		t.Fatalf("ListDocuments all employees: %v", err)
+	}
+	found := map[int64]string{}
+	for _, record := range records {
+		found[record.EmployeeID] = record.EmployeeName
+	}
+	if found[4101] != "Alice Worker" || found[4102] != "Bob Hourly" {
+		t.Fatalf("all-employee list did not include both fixture employees and names: %+v", found)
+	}
+}
+
+func TestDeleteDocument_SecondDeleteReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateDocument(ctx, testutil.OwnerID, domain.CreateDocumentParams{
+		EmployeeID: 4101, DocumentType: "other", Title: "Delete Fail Closed",
+		StorageMode: "url", FileURL: "https://example.com/delete.pdf", UploadedBy: 4101,
+	})
+	if err != nil {
+		t.Fatalf("CreateDocument: %v", err)
+	}
+	if err := repo.DeleteDocument(ctx, testutil.OwnerID, created.ID); err != nil {
+		t.Fatalf("first DeleteDocument: %v", err)
+	}
+	if err := repo.DeleteDocument(ctx, testutil.OwnerID, created.ID); !errors.Is(err, domain.ErrDocumentNotFound) {
+		t.Fatalf("second DeleteDocument returned %v, want ErrDocumentNotFound", err)
 	}
 }

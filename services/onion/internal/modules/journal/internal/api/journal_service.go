@@ -126,9 +126,10 @@ func newJournalEntryPayload(entry domain.JournalEntry) *financejournalv1.Journal
 	lines := make([]*financejournalv1.JournalLine, 0, len(entry.Lines))
 	for _, line := range entry.Lines {
 		lines = append(lines, &financejournalv1.JournalLine{
-			AccountId: line.AccountID,
-			Debit:     line.Debit,
-			Credit:    line.Credit,
+			AccountId:   line.AccountID,
+			AccountName: line.AccountName,
+			Debit:       line.Debit,
+			Credit:      line.Credit,
 		})
 	}
 	return &financejournalv1.JournalEntry{

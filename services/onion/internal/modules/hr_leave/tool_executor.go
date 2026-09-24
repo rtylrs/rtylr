@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -43,7 +44,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeListLeaveTypesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrLeaveToolOwnerID(ctx)
+	ownerID, _, err := hrLeaveToolScope(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func (m *Module) executeListLeaveTypesTool(ctx context.Context, input map[string
 }
 
 func (m *Module) executeListLeaveRequestsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrLeaveToolOwnerID(ctx)
+	ownerID, callerUserID, err := hrLeaveToolScope(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (m *Module) executeListLeaveRequestsTool(ctx context.Context, input map[str
 		return nil, err
 	}
 
-	requests, total, err := m.service.ListLeaveRequests(ctx, ownerID, ownerID, domain.ListLeaveRequestsParams{
+	requests, total, err := m.service.ListLeaveRequests(ctx, ownerID, callerUserID, domain.ListLeaveRequestsParams{
 		Limit:  limit,
 		Offset: offset,
 	})
@@ -107,7 +108,7 @@ func (m *Module) executeListLeaveRequestsTool(ctx context.Context, input map[str
 }
 
 func (m *Module) executeGetLeaveBalancesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrLeaveToolOwnerID(ctx)
+	ownerID, callerUserID, err := hrLeaveToolScope(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +124,7 @@ func (m *Module) executeGetLeaveBalancesTool(ctx context.Context, input map[stri
 		year = int32(time.Now().UTC().Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 
-	balances, err := m.service.GetLeaveBalances(ctx, ownerID, ownerID, employeeID, year)
+	balances, err := m.service.GetLeaveBalances(ctx, ownerID, callerUserID, employeeID, year)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +143,7 @@ func (m *Module) executeGetLeaveBalancesTool(ctx context.Context, input map[stri
 }
 
 func (m *Module) executeGetLeaveCalendarTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrLeaveToolOwnerID(ctx)
+	ownerID, _, err := hrLeaveToolScope(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -194,12 +195,24 @@ func (m *Module) executeGetLeaveCalendarTool(ctx context.Context, input map[stri
 	}, nil
 }
 
-func hrLeaveToolOwnerID(ctx context.Context) (int64, error) {
+func hrLeaveToolScope(ctx context.Context) (businessID, callerUserID int64, err error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
-		return 0, errors.New("authentication is required")
+		return 0, 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err = tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, 0, fmt.Errorf("business scope could not be resolved: %w", err)
+	}
+	return businessID, authUser.UserID, nil
+}
+
+// hrLeaveToolOwnerID is retained for callers that only need the verified
+// tenant scope; repository operations must never receive the platform user id
+// in this position.
+func hrLeaveToolOwnerID(ctx context.Context) (int64, error) {
+	businessID, _, err := hrLeaveToolScope(ctx)
+	return businessID, err
 }
 
 func hrLeaveToolPagination(input map[string]any) (int32, int32, error) {

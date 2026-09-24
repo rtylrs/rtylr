@@ -93,11 +93,12 @@ func (r *Repository) getLinesForEntries(ctx context.Context, entryIDs []int64) (
 
 	for _, row := range rows {
 		out[row.EntryID] = append(out[row.EntryID], domain.JournalLine{
-			ID:        row.ID,
-			EntryID:   row.EntryID,
-			AccountID: row.AccountID,
-			Debit:     parseFloatNull(row.Debit),
-			Credit:    parseFloatNull(row.Credit),
+			ID:          row.ID,
+			EntryID:     row.EntryID,
+			AccountID:   row.AccountID,
+			AccountName: nullStr(row.AccountName),
+			Debit:       parseFloatNull(row.Debit),
+			Credit:      parseFloatNull(row.Credit),
 		})
 	}
 
@@ -367,11 +368,12 @@ func (r *Repository) GetLines(ctx context.Context, entryID int64) ([]domain.Jour
 	lines := make([]domain.JournalLine, 0, len(rows))
 	for _, row := range rows {
 		lines = append(lines, domain.JournalLine{
-			ID:        row.ID,
-			EntryID:   row.EntryID,
-			AccountID: row.AccountID,
-			Debit:     parseFloatNull(row.Debit),
-			Credit:    parseFloatNull(row.Credit),
+			ID:          row.ID,
+			EntryID:     row.EntryID,
+			AccountID:   row.AccountID,
+			AccountName: nullStr(row.AccountName),
+			Debit:       parseFloatNull(row.Debit),
+			Credit:      parseFloatNull(row.Credit),
 		})
 	}
 
@@ -399,6 +401,28 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		}
 	}()
 	qtx := r.queries.WithTx(tx)
+
+	accountIDs := make([]int64, 0, len(input.Lines))
+	seenAccounts := make(map[int64]struct{}, len(input.Lines))
+	for _, line := range input.Lines {
+		if _, seen := seenAccounts[line.AccountID]; seen {
+			continue
+		}
+		seenAccounts[line.AccountID] = struct{}{}
+		accountIDs = append(accountIDs, line.AccountID)
+	}
+	lockedAccounts, err := qtx.LockJournalAccounts(ctx, sqlc.LockJournalAccountsParams{
+		BusinessID: businessID,
+		AccountIds: accountIDs,
+	})
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	if len(lockedAccounts) != len(accountIDs) {
+		_ = tx.Rollback()
+		return 0, fmt.Errorf("%w: every account_id must belong to the active business chart of accounts", domain.ErrInvalidJournalEntry)
+	}
 
 	res, err := qtx.CreateJournalEntry(ctx, sqlc.CreateJournalEntryParams{
 		OwnerID:     ownerID,

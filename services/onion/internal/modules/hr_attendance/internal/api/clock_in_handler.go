@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
@@ -44,7 +45,8 @@ func (h *ClockInHandler) Validate(ctx context.Context, req *ClockInRequest) erro
 	if !domain.IsValidClockInMethod(req.ClockInMethod) {
 		return onekiterrors.New(http.StatusBadRequest, "invalid clock_in_method")
 	}
-	if req.ClockInMethod != domain.ClockInMethodPin && req.ClockInMethod != domain.ClockInMethodQR {
+	device := authPkg.DeviceCtx(ctx)
+	if (device.IsAnonymous || device.User == nil) && req.ClockInMethod != domain.ClockInMethodPin && req.ClockInMethod != domain.ClockInMethodQR {
 		return onekiterrors.New(http.StatusForbidden, "This clock-in method requires authenticated app access")
 	}
 

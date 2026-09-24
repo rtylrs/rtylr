@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	financerecurringinvoicev1 "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1"
 )
@@ -43,6 +44,12 @@ func seedRecurringUpdateTest(t *testing.T, sqlDB *sql.DB) (context.Context, *Rec
 	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     recurringUpdateTestUserID,
 		BusinessID: recurringUpdateTestBusinessID,
+		EffectiveAccess: &authorization.EffectiveAccess{Apps: []authorization.EffectiveAppAccess{{
+			AppID:       authorization.AppFinance,
+			Licensed:    true,
+			HasAccess:   true,
+			Permissions: []string{"finance:recurring_invoices:view", "finance:recurring_invoices:manage"},
+		}}},
 	})
 
 	id, err := repo.Create(ctx, recurringUpdateTestBusinessID, domain.RecurringInvoiceInput{
@@ -159,6 +166,38 @@ func TestUpdateRecurringInvoice_MalformedEndDate_Returns400(t *testing.T) {
 
 // Regression: pausing a schedule that is already paused returned 404 because
 // MySQL reports zero changed rows for the no-op update.
+func TestRecurringInvoiceAPI_RequiresExactFeaturePermission(t *testing.T) {
+	viewer := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
+		UserID:     1,
+		BusinessID: 2,
+		EffectiveAccess: &authorization.EffectiveAccess{Apps: []authorization.EffectiveAppAccess{{
+			AppID:       authorization.AppFinance,
+			Licensed:    true,
+			HasAccess:   true,
+			Permissions: []string{"finance:recurring_invoices:view"},
+		}}},
+	})
+	api := &RecurringInvoiceAPI{}
+
+	if _, err := api.PauseRecurringInvoice(viewer, &financerecurringinvoicev1.PauseRecurringInvoiceRequest{Id: 1}); recurringInvoiceStatus(err) != 403 {
+		t.Fatalf("viewer pause status = %d, want 403", recurringInvoiceStatus(err))
+	}
+
+	noView := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
+		UserID:     1,
+		BusinessID: 2,
+		EffectiveAccess: &authorization.EffectiveAccess{Apps: []authorization.EffectiveAppAccess{{
+			AppID:       authorization.AppFinance,
+			Licensed:    true,
+			HasAccess:   true,
+			Permissions: []string{"finance:recurring_invoices:manage"},
+		}}},
+	})
+	if _, err := api.ListRecurringInvoices(noView, &financerecurringinvoicev1.ListRecurringInvoicesRequest{}); recurringInvoiceStatus(err) != 403 {
+		t.Fatalf("manager-without-view list status = %d, want 403", recurringInvoiceStatus(err))
+	}
+}
+
 func TestPauseRecurringInvoice_AlreadyPaused_Succeeds(t *testing.T) {
 	sqlDB := testutil.OpenDB(t)
 	testutil.GrantBusinessAccess(t, sqlDB, recurringUpdateTestBusinessID, recurringUpdateTestUserID)

@@ -2,10 +2,13 @@ package domain
 
 // Checklist trigger types.
 const (
-	TriggerTypeHire      = "hire"
-	TriggerTypeTerminate = "terminate"
-	TriggerTypeTransfer  = "transfer"
-	TriggerTypePromotion = "promotion"
+	TriggerTypeHire        = "hire"
+	TriggerTypeTerminate   = "terminate"
+	TriggerTypeTermination = "termination"
+	TriggerTypeTransfer    = "transfer"
+	TriggerTypePromotion   = "promotion"
+	TriggerTypeOnboarding  = "onboarding"
+	TriggerTypeOffboarding = "offboarding"
 )
 
 // Employee checklist statuses.
@@ -18,9 +21,10 @@ const (
 
 // Checklist item statuses.
 const (
-	ItemStatusPending   = "pending"
-	ItemStatusCompleted = "completed"
-	ItemStatusSkipped   = "skipped"
+	ItemStatusPending         = "pending"
+	ItemStatusCompleted       = "complete"
+	ItemStatusCompletedLegacy = "completed"
+	ItemStatusSkipped         = "skipped"
 )
 
 // Assignee role values for checklist items.

@@ -145,6 +145,10 @@ func (s *Service) ListStaffUsersByBusiness(ctx context.Context, businessID, page
 	return rows, hasMore, nil
 }
 
+func (s *Service) CountStaffUsersByBusiness(ctx context.Context, businessID int64) (int64, error) {
+	return s.repo.CountStaffUsersByBusinessID(ctx, businessID)
+}
+
 func paginateTeam(page, pageSize int64) (int, int) {
 	if page < 1 {
 		page = 1

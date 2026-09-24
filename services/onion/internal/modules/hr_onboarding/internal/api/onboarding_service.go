@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
@@ -22,8 +23,13 @@ func NewOnboardingService(service *application.Service) *OnboardingService {
 	return &OnboardingService{service: service}
 }
 
-func (s *OnboardingService) ListChecklistTemplates(ctx context.Context, _ *hronboardingv1.ListChecklistTemplatesRequest) (*hronboardingv1.ListChecklistTemplatesResponse, error) {
-	res, err := (&ListTemplatesHandler{Service: s.service}).Serve(ctx, &ListTemplatesRequest{})
+func (s *OnboardingService) ListChecklistTemplates(ctx context.Context, req *hronboardingv1.ListChecklistTemplatesRequest) (*hronboardingv1.ListChecklistTemplatesResponse, error) {
+	if req == nil {
+		req = &hronboardingv1.ListChecklistTemplatesRequest{}
+	}
+	res, err := (&ListTemplatesHandler{Service: s.service}).Serve(ctx, &ListTemplatesRequest{
+		TriggerType: req.TriggerType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +56,12 @@ func (s *OnboardingService) CreateChecklistTemplate(ctx context.Context, req *hr
 
 func (s *OnboardingService) UpdateChecklistTemplate(ctx context.Context, req *hronboardingv1.UpdateChecklistTemplateRequest) (*hronboardingv1.UpdateChecklistTemplateResponse, error) {
 	body := req.GetBody()
+	if body == nil || strings.TrimSpace(body.Name) == "" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "name is required")
+	}
+	if err := requireOnboardingManagePermission(ctx); err != nil {
+		return nil, err
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -59,13 +71,18 @@ func (s *OnboardingService) UpdateChecklistTemplate(ctx context.Context, req *hr
 		return nil, onekiterrors.PermissionDenied()
 	}
 	err := s.service.UpdateTemplate(ctx, businessID, req.GetRoleId(), domain.UpdateTemplateParams{
-		Name:        body.GetName(),
-		TriggerType: body.GetTriggerType(),
-		RoleID:      req.GetRoleId(),
+		Name:        body.Name,
+		TriggerType: body.TriggerType,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrChecklistAccessDenied) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Template not found")
+		}
+		if errors.Is(err, domain.ErrEmptyTemplateName) || errors.Is(err, domain.ErrInvalidTriggerType) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
 		}
 		logger.Ctx(ctx).Error("failed to update onboarding template", logger.Any("owner_id", device.User.UserID), logger.Any("template_id", req.GetRoleId()), logger.Error(err))
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update template")
@@ -74,6 +91,9 @@ func (s *OnboardingService) UpdateChecklistTemplate(ctx context.Context, req *hr
 }
 
 func (s *OnboardingService) AddItemToChecklistTemplate(ctx context.Context, req *hronboardingv1.AddItemToChecklistTemplateRequest) (*hronboardingv1.AddItemToChecklistTemplateResponse, error) {
+	if err := requireOnboardingManagePermission(ctx); err != nil {
+		return nil, err
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -90,6 +110,9 @@ func (s *OnboardingService) AddItemToChecklistTemplate(ctx context.Context, req 
 		RequiresAttachment: req.GetRequiresAttachment(),
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrChecklistAccessDenied) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Template not found")
 		}

@@ -9,14 +9,21 @@ type OrderTotals struct {
 }
 
 // ComputeTotals derives totals from a slice of order item inputs.
-// Tax is applied after the per-item flat discount (not percentage discounts,
-// which are resolved by the application layer before calling this).
+// Tax is applied after both percentage and flat per-item discounts.
 func ComputeTotals(items []OrderItemInput) OrderTotals {
 	var subtotal, taxAmount float64
 	for _, item := range items {
 		lineSubtotal := item.UnitPrice * item.Quantity
 		lineDiscount := lineSubtotal * (item.DiscountPct / 100)
-		lineAfterDiscount := lineSubtotal - lineDiscount
+		lineAfterPercentage := lineSubtotal - lineDiscount
+		flatDiscount := item.DiscountAmount
+		if flatDiscount < 0 {
+			flatDiscount = 0
+		}
+		if flatDiscount > lineAfterPercentage {
+			flatDiscount = lineAfterPercentage
+		}
+		lineAfterDiscount := lineAfterPercentage - flatDiscount
 		lineTax := lineAfterDiscount * (item.TaxRate / 100)
 		subtotal += lineAfterDiscount
 		taxAmount += lineTax

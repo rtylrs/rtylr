@@ -54,6 +54,11 @@ UPDATE erp_stock_takes
 SET status = ?, notes = ?, completed_at = NOW()
 WHERE business_id = ? AND id = ?;
 
+-- name: UpdateStockTakeItemCount :execrows
+UPDATE erp_stock_take_items
+SET counted_qty = ?, variance = ?
+WHERE stock_take_id = ? AND product_id = ?;
+
 -- name: DeleteStockTakeItems :exec
 DELETE FROM erp_stock_take_items WHERE stock_take_id = ?;
 

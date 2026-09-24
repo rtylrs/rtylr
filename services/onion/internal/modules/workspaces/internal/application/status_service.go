@@ -25,6 +25,13 @@ func (s *Service) ListProjectStatuses(ctx context.Context, projectID, callerID, 
 	return s.repo.ListStatusesByProject(ctx, businessID, projectID)
 }
 
+// GetProjectStatus returns a business-scoped status for callers that need its
+// project before performing a mutation (for example, to publish the realtime
+// invalidation after deletion).
+func (s *Service) GetProjectStatus(ctx context.Context, id, businessID int64) (domain.Status, error) {
+	return s.repo.GetStatusByID(ctx, id, businessID)
+}
+
 // CreateProjectStatus adds a status to a project's set.
 //
 // Admin, not member. Changing which states exist reshapes the board for everyone

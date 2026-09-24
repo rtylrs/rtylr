@@ -25,18 +25,27 @@ const maxOfflineGrace = 24 * time.Hour
 
 // Client talks to the hosted license authority (license.voxire.com).
 type Client struct {
-	authorityURL string
-	httpClient   *http.Client
+	authorityURL  string
+	internalToken string
+	httpClient    *http.Client
 }
 
 func NewClient(authorityURL string) *Client {
+	return NewClientWithInternalToken(authorityURL, "")
+}
+
+// NewClientWithInternalToken configures the credential used by the dedicated
+// license authority. It is kept separate from NewClient so callers that only
+// need a public verifier retain the existing constructor contract.
+func NewClientWithInternalToken(authorityURL, internalToken string) *Client {
 	authorityURL = strings.TrimRight(strings.TrimSpace(authorityURL), "/")
 	if authorityURL == "" {
 		authorityURL = platformconfig.DefaultLicenseAuthorityURL
 	}
 	return &Client{
-		authorityURL: authorityURL,
-		httpClient:   &http.Client{Timeout: 10 * time.Second},
+		authorityURL:  authorityURL,
+		internalToken: strings.TrimSpace(internalToken),
+		httpClient:    &http.Client{Timeout: 10 * time.Second},
 	}
 }
 
@@ -53,6 +62,9 @@ func (c *Client) Verify(ctx context.Context, key string) (StatusReport, error) {
 		return StatusReport{}, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if c.internalToken != "" {
+		req.Header.Set("Internal-Token", c.internalToken)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -118,13 +130,15 @@ func NewCachedValidator(cfg *platformconfig.AppConfig) *CachedValidator {
 	// back to the same value for an empty string, so a deployment that sets
 	// nothing is unchanged.
 	authority := ""
+	internalToken := ""
 	if cfg != nil {
 		authority = cfg.LicenseAuthorityURL
+		internalToken = cfg.InternalToken
 	}
 
 	return &CachedValidator{
 		cfg:    cfg,
-		client: NewClient(authority),
+		client: NewClientWithInternalToken(authority, internalToken),
 		key:    strings.TrimSpace(key),
 		grace:  grace,
 		clock:  NewClockGuard(clockStateFile(cfg)),

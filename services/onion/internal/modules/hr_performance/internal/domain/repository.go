@@ -29,6 +29,8 @@ type Repository interface {
 	UpdateGoal(ctx context.Context, ownerID, id int64, params UpdateGoalParams) error
 	ListGoals(ctx context.Context, ownerID, employeeID, cycleID int64, limit, offset int32) ([]ReviewGoalRecord, int64, error)
 
-	// Employees (cross-schema read for OpenReviewCycle)
+	// Employees (cross-schema reads for subject and cycle initialization)
 	ListActiveEmployeeIDs(ctx context.Context, ownerID int64) ([]int64, error)
+	EmployeeBelongsToBusiness(ctx context.Context, businessID, employeeID int64) (bool, error)
+	GetEmployeeIDByUserID(ctx context.Context, businessID, userID int64) (int64, error)
 }

@@ -8,9 +8,10 @@ import (
 func TestIsProductionHost(t *testing.T) {
 	cases := map[string]bool{
 		// the real production database, with and without a port, any casing
-		"voxire-db.rds.amazonaws.com:3306": true,
-		"voxire-db.rds.amazonaws.com":      true,
-		"VOXIRE-DB.RDS.AMAZONAWS.COM:3306": true,
+		"voxire-db.rds.amazonaws.com:3306":                        true,
+		"voxire-db.rds.amazonaws.com":                             true,
+		"voxire-db.c32oko2gqonb.eu-west-1.rds.amazonaws.com:3306": true,
+		"VOXIRE-DB.RDS.AMAZONAWS.COM:3306":                        true,
 
 		// other RDS endpoints are NOT this app's production database: a staging
 		// or self-host deployment on its own RDS instance must not be blocked
@@ -81,11 +82,11 @@ func TestCheckProductionSafety(t *testing.T) {
 		}
 	})
 
-	t.Run("unparseable DSN is not blocked", func(t *testing.T) {
+	t.Run("unparseable DSN is blocked instead of treated as local", func(t *testing.T) {
 		t.Setenv("APP_ENV", "development")
 		t.Setenv(envAllowProductionDB, "")
-		if err := checkProductionSafety("database", "not-a-dsn"); err != nil {
-			t.Fatalf("expected no error, got %v", err)
+		if err := checkProductionSafety("database", "not-a-dsn"); err == nil {
+			t.Fatal("expected malformed DSN to be rejected")
 		}
 	})
 
@@ -263,7 +264,6 @@ func TestIsLocalDBHost(t *testing.T) {
 		"db:3306",     //
 		"mysql",       // the same shape under another name
 		"onion_mysql", // the local-env volume/container naming
-		"",            // unparseable DSN: nothing to judge
 	}
 	for _, h := range local {
 		if !isLocalDBHost(h) {
@@ -279,6 +279,7 @@ func TestIsLocalDBHost(t *testing.T) {
 		"10.0.0.4",
 		"192.168.1.50",
 		"192.168.1.50:3306",
+		"", // unknown endpoints must not be treated as local
 	}
 	for _, h := range remote {
 		if isLocalDBHost(h) {

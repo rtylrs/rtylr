@@ -14,6 +14,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, ListOrdersRoutes(), &ListOrdersHandler{Service: service},
 	)
 
+	serverHttp.RegisterPOSTWithValidation[CreateOrderCompatRequest, CreateOrderCompatResponse](
+		ctx, router, []string{"/pos/orders/compat"}, &CreateOrderCompatHandler{Service: service},
+	)
+	serverHttp.RegisterPUTWithValidation[ResumeOrderRequest, ResumeOrderResponse](
+		ctx, router, []string{"/pos/orders/{id}/resume"}, &ResumeOrderHandler{Service: service},
+	)
+
 	serverHttp.RegisterPOSTWithValidation[VoidOrderApprovalRequest, VoidOrderApprovalResponse](
 		ctx, router, ApproveVoidOrderRoutes(), &ApproveVoidOrderHandler{Service: service},
 	)

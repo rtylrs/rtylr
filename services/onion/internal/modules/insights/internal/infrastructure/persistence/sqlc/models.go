@@ -2697,6 +2697,19 @@ type EmailJob struct {
 	DedupeKey   sql.NullString  `db:"dedupe_key" json:"dedupe_key"`
 }
 
+type ErpBusinessSetting struct {
+	ID                 int64     `db:"id" json:"id"`
+	BusinessID         int64     `db:"business_id" json:"business_id"`
+	Currency           string    `db:"currency" json:"currency"`
+	TaxRate            float64   `db:"tax_rate" json:"tax_rate"`
+	LowStockThreshold  float64   `db:"low_stock_threshold" json:"low_stock_threshold"`
+	DefaultWarehouseID int64     `db:"default_warehouse_id" json:"default_warehouse_id"`
+	NotifyOnLowStock   bool      `db:"notify_on_low_stock" json:"notify_on_low_stock"`
+	NotifyOnExpiry     bool      `db:"notify_on_expiry" json:"notify_on_expiry"`
+	CreatedAt          time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt          time.Time `db:"updated_at" json:"updated_at"`
+}
+
 type ErpCategory struct {
 	ID          int64          `db:"id" json:"id"`
 	OwnerID     int64          `db:"owner_id" json:"owner_id"`
@@ -2869,8 +2882,10 @@ type FinanceBankAccount struct {
 	Name         string         `db:"name" json:"name"`
 	Institution  sql.NullString `db:"institution" json:"institution"`
 	AccountType  sql.NullString `db:"account_type" json:"account_type"`
+	LastFour     sql.NullString `db:"last_four" json:"last_four"`
 	Balance      sql.NullString `db:"balance" json:"balance"`
 	Currency     sql.NullString `db:"currency" json:"currency"`
+	IsPrimary    bool           `db:"is_primary" json:"is_primary"`
 	IsConnected  sql.NullBool   `db:"is_connected" json:"is_connected"`
 	LastSyncedAt sql.NullTime   `db:"last_synced_at" json:"last_synced_at"`
 	CreatedAt    sql.NullTime   `db:"created_at" json:"created_at"`

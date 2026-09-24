@@ -58,8 +58,9 @@ type EmployeeChecklistItemRecord struct {
 }
 
 type ListTemplatesParams struct {
-	Limit  int32
-	Offset int32
+	Limit       int32
+	Offset      int32
+	TriggerType *string
 }
 
 type ListEmployeeChecklistsParams struct {
@@ -74,9 +75,9 @@ type CreateTemplateParams struct {
 }
 
 type UpdateTemplateParams struct {
-	Name        string `json:"name"`
-	TriggerType string `json:"trigger_type"`
-	RoleID      int64  `json:"role_id"`
+	Name        string  `json:"name"`
+	TriggerType *string `json:"trigger_type,omitempty"`
+	RoleID      *int64  `json:"role_id,omitempty"`
 }
 
 type CreateTemplateItemParams struct {

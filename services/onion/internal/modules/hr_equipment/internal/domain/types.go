@@ -29,6 +29,7 @@ type AssetRecord struct {
 	LocationID              int64     `json:"location_id"`
 	AssignedTo              int64     `json:"assigned_to"`
 	Status                  string    `json:"status"`
+	Condition               string    `json:"condition"`
 	PurchaseDate            string    `json:"purchase_date"`
 	PurchasePriceMinorUnits int64     `json:"purchase_price_minor_units"`
 	Notes                   string    `json:"notes"`
@@ -56,6 +57,7 @@ type CreateAssetParams struct {
 	Category                string `json:"category"`
 	SerialNumber            string `json:"serial_number"`
 	LocationID              int64  `json:"location_id"`
+	Condition               string `json:"condition"`
 	PurchaseDate            string `json:"purchase_date"`
 	PurchasePriceMinorUnits int64  `json:"purchase_price_minor_units"`
 	Notes                   string `json:"notes"`
@@ -63,7 +65,10 @@ type CreateAssetParams struct {
 
 type ListAssetsParams struct {
 	LocationID *int64
-	Status     *string
+	// Status is retained for the legacy lifecycle filter.
+	Status *string
+	// Condition is the physical-condition filter used by the generated API.
+	Condition  *string
 	AssignedTo *int64
 	Limit      int32
 	Offset     int32

@@ -17,7 +17,8 @@ func TestAssetToProtoDoesNotReportPurchaseDateAsAssignedDate(t *testing.T) {
 		OwnerID:      2,
 		Name:         "MacBook",
 		PurchaseDate: "2025-01-15",
-		Status:       "good",
+		Status:       "available",
+		Condition:    "good",
 		CreatedAt:    time.Unix(0, 0),
 		UpdatedAt:    time.Unix(0, 0),
 	})

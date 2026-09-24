@@ -28,7 +28,25 @@ func wsRequest(path string) *http.Request {
 	return httptest.NewRequestWithContext(ctx, http.MethodGet, path, http.NoBody)
 }
 
+// forceLocalWebSocketTicketStore makes the fallback contract explicit for unit
+// tests that inspect the process-local store. Redis is selected during package
+// initialization, before a test can set its environment, so REDIS_ENABLED=true
+// must not silently change this test's storage contract.
+func forceLocalWebSocketTicketStore(t *testing.T) {
+	t.Helper()
+	if cacher.RedisAvailable() {
+		cacher.DisableRedisForProcess(context.Background())
+	}
+
+	websocketTickets.Lock()
+	for hash := range websocketTickets.entries {
+		delete(websocketTickets.entries, hash)
+	}
+	websocketTickets.Unlock()
+}
+
 func TestAuthUserFromWebSocketRequest_Ticket(t *testing.T) {
+	forceLocalWebSocketTicketStore(t)
 	ticket, err := IssueWebSocketTicket(context.Background(), &AuthUser{
 		UserID:         7,
 		BusinessID:     3,
@@ -130,6 +148,7 @@ func TestAuthUserFromWebSocketRequest_MissingUser(t *testing.T) {
 }
 
 func TestWebSocketTicketIsOneUseAndStoresOnlyHash(t *testing.T) {
+	forceLocalWebSocketTicketStore(t)
 	const rawJWT = "eyJhbGciOiJIUzI1NiJ9.secret.signature"
 	ticket, err := IssueWebSocketTicket(context.Background(), &AuthUser{UserID: 11, Token: rawJWT})
 	if err != nil {
@@ -155,6 +174,7 @@ func TestWebSocketTicketIsOneUseAndStoresOnlyHash(t *testing.T) {
 }
 
 func TestWebSocketTicketExpires(t *testing.T) {
+	forceLocalWebSocketTicketStore(t)
 	ticket, err := issueWebSocketTicketAt(
 		context.Background(),
 		&AuthUser{UserID: 12},
@@ -172,9 +192,7 @@ func TestWebSocketTicketExpires(t *testing.T) {
 // Tickets that are issued but never consumed must not accumulate in the local
 // fallback map for the process lifetime.
 func TestWebSocketTicketFallbackMapEvictsExpiredTickets(t *testing.T) {
-	if cacher.RedisAvailable() {
-		t.Skip("the local fallback map is only populated when Redis is unavailable")
-	}
+	forceLocalWebSocketTicketStore(t)
 
 	expiredTicket, err := issueWebSocketTicketAt(
 		context.Background(),
@@ -195,5 +213,18 @@ func TestWebSocketTicketFallbackMapEvictsExpiredTickets(t *testing.T) {
 	websocketTickets.Unlock()
 	if stillStored {
 		t.Fatal("expired ticket remained in the fallback map after a new ticket was stored")
+	}
+}
+
+func TestWebSocketTicketRedisWriteFailureIsReturned(t *testing.T) {
+	err := storeWebSocketTicketWithPut(
+		context.Background(),
+		"ticket-that-must-not-be-issued",
+		websocketTicketRecord{UserID: 15, ExpiresAt: time.Now().Add(webSocketTicketLifetime).UnixNano()},
+		true,
+		func(context.Context, string, []byte, time.Duration) bool { return false },
+	)
+	if !errors.Is(err, ErrWebSocketTicketStorage) {
+		t.Fatalf("storeWebSocketTicketWithPut() error = %v, want %v", err, ErrWebSocketTicketStorage)
 	}
 }

@@ -42,3 +42,34 @@ func ValidateOvertimeConfig(cfg OvertimeConfigRecord) error {
 	}
 	return nil
 }
+
+// ValidateOvertimeDecision enforces the reason requirement at the domain
+// boundary as well as at the HTTP adapter. Approved decisions do not need a
+// rejection reason; rejected decisions must carry a non-blank explanation.
+func ValidateOvertimeDecision(approved bool, rejectionReason string) error {
+	if !approved && strings.TrimSpace(rejectionReason) == "" {
+		return ErrOvertimeRejectionReason
+	}
+	return nil
+}
+
+// NormalizeOvertimeListParams canonicalizes optional filters before they reach
+// the repository or cache. Empty/whitespace status is treated as absent.
+func NormalizeOvertimeListParams(params ListOvertimeRequestsParams) ListOvertimeRequestsParams {
+	if params.EmployeeID != nil {
+		employeeID := *params.EmployeeID
+		params.EmployeeID = &employeeID
+	}
+	if params.Status != nil {
+		status := strings.ToLower(strings.TrimSpace(*params.Status))
+		if status == "" {
+			params.Status = nil
+		} else {
+			params.Status = &status
+		}
+	}
+	if params.Offset < 0 {
+		params.Offset = 0
+	}
+	return params
+}

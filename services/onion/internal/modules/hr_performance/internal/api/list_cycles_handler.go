@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
@@ -33,21 +34,27 @@ func (h *ListCyclesHandler) Serve(ctx context.Context, req *ListCyclesRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return ListCyclesResponse{}, onekiterrors.PermissionDenied()
 	}
-
-	limit := req.Limit
-	if limit <= 0 {
-		limit = 20
-	}
-	if limit > 100 {
-		limit = 100
+	if req == nil {
+		req = &ListCyclesRequest{}
 	}
 
-	cycles, total, err := h.Service.ListReviewCycles(ctx, device.User.UserID, domain.ListCyclesParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListCyclesResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	page, err := normalizePerformancePagination(req.Limit, req.Offset)
+	if err != nil {
+		return ListCyclesResponse{}, err
+	}
+	limit, offset := page.limit, page.offset
+
+	cycles, total, err := h.Service.ListReviewCycles(ctx, businessID, domain.ListCyclesParams{
 		Limit:  limit,
-		Offset: req.Offset,
+		Offset: offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list review cycles", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list review cycles", logger.Any("business_id", businessID), logger.Error(err))
 		return ListCyclesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list review cycles")
 	}
 
@@ -56,5 +63,5 @@ func (h *ListCyclesHandler) Serve(ctx context.Context, req *ListCyclesRequest) (
 		payloads = append(payloads, cycleToProto(c))
 	}
 
-	return ListCyclesResponse{Cycles: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
+	return ListCyclesResponse{Cycles: payloads, Total: total, Limit: limit, Offset: offset}, nil
 }

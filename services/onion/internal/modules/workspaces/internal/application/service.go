@@ -679,6 +679,50 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 	}, nil
 }
 
+func (s *Service) applyFocusPins(ctx context.Context, userID, businessID int64, tasks []domain.Task) error {
+	if len(tasks) == 0 {
+		return nil
+	}
+	ids := make([]int64, 0, len(tasks))
+	for _, task := range tasks {
+		ids = append(ids, task.ID)
+	}
+	pins, err := s.repo.GetFocusPins(ctx, userID, businessID, ids)
+	if err != nil {
+		return err
+	}
+	for i := range tasks {
+		tasks[i].FocusPin = pins[tasks[i].ID]
+	}
+	return nil
+}
+
+// GetTaskDetailForViewer adds the per-user Today projection to a detail read
+// and refuses a task from another business before exposing its pin state.
+func (s *Service) GetTaskDetailForViewer(ctx context.Context, taskID, userID, businessID int64) (domain.TaskDetail, error) {
+	detail, err := s.GetTaskDetail(ctx, taskID)
+	if err != nil {
+		return domain.TaskDetail{}, err
+	}
+	if businessID == 0 || detail.Task.BusinessID != businessID {
+		return domain.TaskDetail{}, domain.ErrUnauthorized
+	}
+	for _, subtask := range detail.Subtasks {
+		if subtask.BusinessID != businessID {
+			return domain.TaskDetail{}, domain.ErrUnauthorized
+		}
+	}
+	tasks := make([]domain.Task, 0, 1+len(detail.Subtasks))
+	tasks = append(tasks, detail.Task)
+	tasks = append(tasks, detail.Subtasks...)
+	if err := s.applyFocusPins(ctx, userID, businessID, tasks); err != nil {
+		return domain.TaskDetail{}, err
+	}
+	detail.Task = tasks[0]
+	detail.Subtasks = tasks[1:]
+	return detail, nil
+}
+
 func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, userID int64) error {
 	// Registered ahead of the cache evictions below so that it runs after all
 	// of them: announcing tells the affected clients to refetch, and that
@@ -695,6 +739,9 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 	existing, err := s.repo.GetTaskByID(ctx, input.ID)
 	if err != nil {
 		return err
+	}
+	if input.BusinessID == 0 || existing.BusinessID != input.BusinessID {
+		return domain.ErrUnauthorized
 	}
 
 	// Any edit changes what the current assignee's my-tasks list should show,
@@ -763,6 +810,12 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 
 	if updateErr := s.repo.UpdateTask(ctx, input); updateErr != nil {
 		return updateErr
+	}
+	if input.FocusPin != nil {
+		if pinErr := s.repo.SetTaskFocusPin(ctx, input.ID, userID, input.BusinessID, *input.FocusPin); pinErr != nil {
+			return pinErr
+		}
+		defer invalidateUserScope(ctx, userID)
 	}
 
 	// The only place UpdateTask writes activity, and it is past the point of
@@ -1072,16 +1125,49 @@ type myTasksPage struct {
 }
 
 func (s *Service) GetMyTasks(ctx context.Context, userID, page, limit int64) ([]domain.Task, int64, error) {
+	return s.getMyTasks(ctx, userID, 0, page, limit)
+}
+
+// GetMyTasksForBusiness is the v2/Today read. Its cache key includes the
+// verified business as well as the user, page, and limit; otherwise switching
+// businesses could serve the previous tenant's rows until the two-minute TTL.
+func (s *Service) GetMyTasksForBusiness(ctx context.Context, userID, businessID, page, limit int64) ([]domain.Task, int64, error) {
+	if businessID <= 0 {
+		return nil, 0, domain.ErrUnauthorized
+	}
+	return s.getMyTasks(ctx, userID, businessID, page, limit)
+}
+
+func (s *Service) getMyTasks(ctx context.Context, userID, businessID, page, limit int64) ([]domain.Task, int64, error) {
 	offset := (page - 1) * limit
+	keyDetail := fmt.Sprintf("workspace_tasks:page=%d:limit=%d", page, limit)
+	if businessID != 0 {
+		keyDetail = fmt.Sprintf("business_tasks:business=%d:%s", businessID, keyDetail)
+	}
 	result, err := cacher.Of[myTasksPage]().GetOrComputeSingle(ctx,
-		// page/limit are part of the cache key, not just the fetch - otherwise
-		// page 2 would return page 1's cached rows until the 2-minute TTL expires.
-		cacheKeys.Scoped("user", userID, fmt.Sprintf("workspace_tasks:page=%d:limit=%d", page, limit)),
+		cacheKeys.Scoped("user", userID, keyDetail),
 		func(ctx context.Context) (myTasksPage, error) {
 			// workspaceID=0: this is the cross-workspace "My tasks" board, which
-			// intentionally spans every workspace the user belongs to.
-			tasks, total, fetchErr := s.repo.GetMyTasks(ctx, userID, 0, limit, offset)
-			return myTasksPage{Tasks: tasks, Total: total}, fetchErr
+			// intentionally spans every workspace the user belongs to within the
+			// selected business. The zero-business path is retained for legacy
+			// workspace-era callers; v2 always supplies a verified business id.
+			var tasks []domain.Task
+			var total int64
+			var fetchErr error
+			if businessID != 0 {
+				tasks, total, fetchErr = s.repo.GetMyTasksForBusiness(ctx, userID, businessID, 0, limit, offset)
+			} else {
+				tasks, total, fetchErr = s.repo.GetMyTasks(ctx, userID, 0, limit, offset)
+			}
+			if fetchErr != nil {
+				return myTasksPage{}, fetchErr
+			}
+			if businessID != 0 {
+				if pinErr := s.applyFocusPins(ctx, userID, businessID, tasks); pinErr != nil {
+					return myTasksPage{}, pinErr
+				}
+			}
+			return myTasksPage{Tasks: tasks, Total: total}, nil
 		},
 		cacher.WithExpiry(ctx, workspacesTTL),
 	)

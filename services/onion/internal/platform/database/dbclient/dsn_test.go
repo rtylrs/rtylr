@@ -3,6 +3,8 @@ package dbclient
 import (
 	"strings"
 	"testing"
+
+	mysql "github.com/go-sql-driver/mysql"
 )
 
 func TestHostFromDSN(t *testing.T) {
@@ -46,5 +48,48 @@ func TestNormalizeDSNPinsMySQLSessionTimezoneToUTC(t *testing.T) {
 		if !strings.Contains(got, "time_zone=%27UTC%27") {
 			t.Errorf("normalizeDSN(%q) missing UTC session timezone: %q", dsn, got)
 		}
+	}
+}
+
+func TestDSNMetadataDoesNotTreatCredentialPunctuationAsEndpoint(t *testing.T) {
+	cases := map[string]string{
+		"u:tcp(foo)@tcp(host.example:3306)/db":            "host.example:3306",
+		"u:p?ss@tcp(host.example:3306)/db?parseTime=true": "host.example:3306",
+		"u:p@ss@tcp(host.example:3306)/db":                "host.example:3306",
+		"u:p/ss@tcp(host.example:3306)/db":                "host.example:3306",
+		"u:mysql://ss@tcp(host.example:3306)/db":          "host.example:3306",
+	}
+	for dsn, wantHost := range cases {
+		if got := hostFromDSN(dsn); got != wantHost {
+			t.Errorf("hostFromDSN(%q) = %q, want %q", dsn, got, wantHost)
+		}
+		if got := dbNameFromDSN(dsn); got != "db" {
+			t.Errorf("dbNameFromDSN(%q) = %q, want db", dsn, got)
+		}
+	}
+}
+
+func TestNormalizeDSNPreservesCredentialPunctuation(t *testing.T) {
+	const password = "tcp(foo)/p?ss@word"
+	normalized := normalizeDSN("u:" + password + "@tcp(host.example:3306)/db?parseTime=true")
+	cfg, err := mysql.ParseDSN(normalized)
+	if err != nil {
+		t.Fatalf("ParseDSN(normalized) error = %v; DSN = %q", err, normalized)
+	}
+	if cfg.Passwd != password {
+		t.Fatalf("normalized password = %q, want %q", cfg.Passwd, password)
+	}
+	if cfg.Addr != "host.example:3306" || cfg.DBName != "db" {
+		t.Fatalf("normalized endpoint = %q/%q, want host.example:3306/db", cfg.Addr, cfg.DBName)
+	}
+}
+
+func TestNormalizeURLDSNDoesNotInventCredentials(t *testing.T) {
+	cfg, err := mysql.ParseDSN(normalizeDSN("mysql://host.example:3306/db?parseTime=true"))
+	if err != nil {
+		t.Fatalf("ParseDSN(normalized URL) error = %v", err)
+	}
+	if cfg.User != "" || cfg.Passwd != "" || cfg.Addr != "host.example:3306" || cfg.DBName != "db" {
+		t.Fatalf("normalized URL config = user %q pass %q addr %q db %q", cfg.User, cfg.Passwd, cfg.Addr, cfg.DBName)
 	}
 }

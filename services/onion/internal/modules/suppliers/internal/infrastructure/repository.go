@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/sqlutil"
 )
@@ -49,8 +50,18 @@ func (r *Repository) ListSuppliers(ctx context.Context, businessID int64, limit,
 	return suppliers, hasMore, nil
 }
 
-func (r *Repository) CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error) {
-	result, err := r.queries.CreateSupplier(ctx, sqlc.CreateSupplierParams{
+func (r *Repository) CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput, events ...audit.Event) (id int64, err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	result, err := r.queries.WithTx(tx).CreateSupplier(ctx, sqlc.CreateSupplierParams{
 		OwnerID:      businessID,
 		BusinessID:   businessID,
 		Name:         input.Name,
@@ -69,11 +80,31 @@ func (r *Repository) CreateSupplier(ctx context.Context, businessID int64, input
 		return 0, err
 	}
 
-	return result.LastInsertId()
+	id, err = result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err = appendSupplierAuditEvents(ctx, tx, events, id); err != nil {
+		return 0, err
+	}
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
-func (r *Repository) UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error {
-	err := r.queries.UpdateSupplier(ctx, sqlc.UpdateSupplierParams{
+func (r *Repository) UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput, events ...audit.Event) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	err = r.queries.WithTx(tx).UpdateSupplier(ctx, sqlc.UpdateSupplierParams{
 		Name:         input.Name,
 		Email:        sqlutil.NullString(input.Email),
 		Phone:        sqlutil.NullString(input.Phone),
@@ -91,12 +122,25 @@ func (r *Repository) UpdateSupplier(ctx context.Context, businessID, id int64, i
 		logger.Ctx(ctx).Error("Failed to update supplier", logger.Error(err))
 		return err
 	}
-
-	return nil
+	if err = appendSupplierAuditEvents(ctx, tx, events, id); err != nil {
+		return err
+	}
+	err = tx.Commit()
+	return err
 }
 
-func (r *Repository) DeleteSupplier(ctx context.Context, businessID, id int64) error {
-	err := r.queries.DeleteSupplier(ctx, sqlc.DeleteSupplierParams{
+func (r *Repository) DeleteSupplier(ctx context.Context, businessID, id int64, events ...audit.Event) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	err = r.queries.WithTx(tx).DeleteSupplier(ctx, sqlc.DeleteSupplierParams{
 		BusinessID: businessID,
 		ID:         id,
 	})
@@ -106,10 +150,22 @@ func (r *Repository) DeleteSupplier(ctx context.Context, businessID, id int64) e
 			logger.Any("supplier_id", id),
 			logger.Error(err),
 		)
-
 		return err
 	}
+	if err = appendSupplierAuditEvents(ctx, tx, events, id); err != nil {
+		return err
+	}
+	err = tx.Commit()
+	return err
+}
 
+func appendSupplierAuditEvents(ctx context.Context, tx *sql.Tx, events []audit.Event, entityID int64) error {
+	for _, event := range events {
+		event.EntityID = entityID
+		if err := audit.AppendTx(ctx, tx, event); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -45,6 +45,25 @@ func TestIsValidAssetStatus_Invalid(t *testing.T) {
 	}
 }
 
+func TestIsValidAssetCondition_AllValid(t *testing.T) {
+	for _, condition := range []string{
+		domain.AssetConditionNew,
+		domain.AssetConditionGood,
+		domain.AssetConditionFair,
+		domain.AssetConditionDamaged,
+	} {
+		if !domain.IsValidAssetCondition(condition) {
+			t.Errorf("expected %q to be a valid asset condition", condition)
+		}
+	}
+}
+
+func TestIsValidAssetCondition_Invalid(t *testing.T) {
+	if domain.IsValidAssetCondition("available") {
+		t.Fatal("lifecycle status must not be accepted as a physical condition")
+	}
+}
+
 func TestValidateEquipmentRequest_Valid(t *testing.T) {
 	req := domain.EquipmentRequestRecord{
 		ItemName: "Laptop",
@@ -109,5 +128,12 @@ func TestValidateAsset_EmptyStatusIsAllowed(t *testing.T) {
 	a := domain.AssetRecord{Name: "Desk", Status: ""}
 	if err := domain.ValidateAsset(a); err != nil {
 		t.Errorf("unexpected error for empty status: %v", err)
+	}
+}
+
+func TestValidateAsset_InvalidCondition(t *testing.T) {
+	a := domain.AssetRecord{Name: "Desk", Status: domain.AssetStatusAvailable, Condition: "available"}
+	if err := domain.ValidateAsset(a); !errors.Is(err, domain.ErrInvalidAssetCondition) {
+		t.Errorf("expected ErrInvalidAssetCondition, got %v", err)
 	}
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -22,8 +23,10 @@ func ListRoutes() []string { return []string{"/finance/bank-feeds"} }
 type ListHandler struct{ Service *application.Service }
 
 type ListRequest struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	BankAccountID int64 `json:"bank_account_id"`
+	AccountID     int64 `json:"account_id"`
+	Limit         int32 `json:"limit"`
+	Offset        int32 `json:"offset"`
 }
 
 type BankFeedTransactionPayload struct {
@@ -101,9 +104,34 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 		offset = 0
 	}
 
-	items, total, err := h.Service.List(ctx, businessID, limit, offset)
+	bankAccountID := req.BankAccountID
+	if bankAccountID != 0 && req.AccountID != 0 && bankAccountID != req.AccountID {
+		return ListResponse{}, onekiterrors.New(http.StatusBadRequest, "account_id and bank_account_id must match when both are provided")
+	}
+	if bankAccountID == 0 {
+		bankAccountID = req.AccountID
+	}
+	if bankAccountID < 0 {
+		return ListResponse{}, onekiterrors.New(http.StatusBadRequest, "bank_account_id must be positive")
+	}
+
+	var items []domain.BankFeedTransaction
+	var total int64
+	var err error
+	if bankAccountID > 0 {
+		items, total, err = h.Service.ListByAccount(ctx, businessID, bankAccountID, limit, offset)
+	} else {
+		items, total, err = h.Service.List(ctx, businessID, limit, offset)
+	}
 	if err != nil {
-		return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list bank feed transactions")
+		switch {
+		case errors.Is(err, application.ErrInvalidBankAccount):
+			return ListResponse{}, onekiterrors.New(http.StatusBadRequest, "bank_account_id must be positive")
+		case errors.Is(err, application.ErrBankAccountNotFound):
+			return ListResponse{}, onekiterrors.New(http.StatusNotFound, "Bank account not found")
+		default:
+			return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list bank feed transactions")
+		}
 	}
 
 	payloads := make([]BankFeedTransactionPayload, 0, len(items))
@@ -127,12 +155,37 @@ type (
 	}
 )
 
+const (
+	// A feed sync is a state-changing bank operation, not a read of the feed.
+	// Keep the dedicated permission available for installations that grant it,
+	// while accepting the existing finance reconciliation-management grant for
+	// tenants whose role model already treats bank reconciliation as a manage
+	// capability. A view-only grant must never satisfy this check.
+	bankFeedSyncPermission           = "finance:bank_feeds:sync"
+	bankFeedReconciliationPermission = "finance:reconciliation:manage"
+)
+
+func canSyncBankFeeds(user *authPkg.AuthUser) bool {
+	if user == nil || !authPkg.HasAppAccess(user, authorization.AppFinance) {
+		return false
+	}
+	// HasAppPermission intentionally degrades to app membership in legacy
+	// mode. Do not let that compatibility fallback turn a view-only legacy
+	// session into a mutation grant; use the explicit role boundary instead.
+	if authPkg.LegacyAuthorizationMode() {
+		return authPkg.IsBusinessAdmin(user) ||
+			authPkg.HasAnyRole(user, "finance.manager", "manager", "finance.admin", "admin", "owner", "console_admin")
+	}
+	return authPkg.HasAppPermission(user, authorization.AppFinance, bankFeedSyncPermission) ||
+		authPkg.HasAppPermission(user, authorization.AppFinance, bankFeedReconciliationPermission)
+}
+
 func (h *SyncHandler) Serve(ctx context.Context, _ *SyncRequest) (SyncResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return SyncResponse{}, onekiterrors.PermissionDenied()
 	}
-	if !authPkg.HasAppPermission(device.User, authorization.AppFinance, "finance:bank_feeds:view") {
+	if !canSyncBankFeeds(device.User) {
 		return SyncResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

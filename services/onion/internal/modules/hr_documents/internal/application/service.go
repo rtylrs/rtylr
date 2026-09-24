@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -19,11 +20,13 @@ const (
 
 type Service struct {
 	repo *infrastructure.Repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
 		repo: infrastructure.NewRepository(db),
+		db:   db,
 	}
 }
 
@@ -42,11 +45,112 @@ func (s *Service) UploadDocument(ctx context.Context, businessID int64, params d
 		return nil, domain.ErrStorageModeInvalid
 	}
 
-	rec, err := s.repo.CreateDocument(ctx, businessID, params)
+	// Keep the repository path for the db-less unit-test seam, but production
+	// services use the transactional path below so a readback failure cannot
+	// leave a committed row behind an error response.
+	if s.db == nil {
+		if s.repo == nil {
+			return nil, errors.New("document repository database is unavailable")
+		}
+		rec, err := s.repo.CreateDocument(ctx, businessID, params)
+		if err != nil {
+			invalidateHRDocumentsScope(context.WithoutCancel(ctx), businessID)
+			return nil, err
+		}
+		invalidateHRDocumentsScope(ctx, businessID)
+		return rec, nil
+	}
+
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	invalidateHRDocumentsScope(ctx, businessID)
+	committed := false
+	defer func() {
+		if !committed {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var employeeExists int
+	if err := tx.QueryRowContext(ctx, `
+		SELECT 1
+		FROM hr_employees
+		WHERE id = ? AND business_id = ?
+		LIMIT 1`, params.EmployeeID, businessID).Scan(&employeeExists); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrDocumentNotFound
+		}
+		return nil, err
+	}
+
+	var fileURL any
+	if params.FileURL != "" {
+		fileURL = params.FileURL
+	}
+	var externalURL any
+	if params.ExternalURL != "" {
+		externalURL = params.ExternalURL
+	}
+	var insertExpiryDate any
+	if params.ExpiryDate != nil {
+		insertExpiryDate = *params.ExpiryDate
+	}
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO hr_employee_documents
+		(owner_id, business_id, employee_id, document_type, title, storage_mode,
+		 file_url, external_url, expiry_date, uploaded_by)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		businessID, businessID, params.EmployeeID, params.DocumentType, params.Title,
+		params.StorageMode, fileURL, externalURL, insertExpiryDate, params.UploadedBy)
+	if err != nil {
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	rec := &domain.EmployeeDocumentRecord{}
+	var storedFileURL, storedExternalURL sql.NullString
+	var expiryDate sql.NullTime
+	if err := tx.QueryRowContext(ctx, `
+		SELECT id, owner_id, business_id, employee_id, document_type, title,
+		       storage_mode, file_url, external_url, expiry_date, uploaded_by,
+		       created_at, updated_at
+		FROM hr_employee_documents
+		WHERE business_id = ? AND id = ?`, businessID, id).Scan(
+		&rec.ID,
+		&rec.OwnerID,
+		&rec.BusinessID,
+		&rec.EmployeeID,
+		&rec.DocumentType,
+		&rec.Title,
+		&rec.StorageMode,
+		&storedFileURL,
+		&storedExternalURL,
+		&expiryDate,
+		&rec.UploadedBy,
+		&rec.CreatedAt,
+		&rec.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	rec.FileURL = storedFileURL.String
+	rec.ExternalURL = storedExternalURL.String
+	if expiryDate.Valid {
+		t := expiryDate.Time
+		rec.ExpiryDate = &t
+	}
+
+	if err := tx.Commit(); err != nil {
+		// A commit error can be ambiguous at the network boundary. Even if
+		// the server committed, do not leave a stale cached list behind.
+		invalidateHRDocumentsScope(context.WithoutCancel(ctx), businessID)
+		return nil, err
+	}
+	committed = true
+	invalidateHRDocumentsScope(context.WithoutCancel(ctx), businessID)
 	return rec, nil
 }
 
@@ -61,6 +165,9 @@ func (s *Service) ListDocuments(ctx context.Context, businessID, employeeID int6
 	}
 	if limit > 100 {
 		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
 	}
 	key := cacheKeys.Scoped(hrDocumentsScope, businessID, fmt.Sprintf("list|e=%d|l=%d|o=%d", employeeID, limit, offset))
 	res, err := cacher.Of[listDocumentsResult]().GetOrComputeSingle(ctx, key,
@@ -82,6 +189,9 @@ func (s *Service) ListExpiringDocuments(ctx context.Context, businessID int64, d
 	}
 	if limit > 100 {
 		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
 	}
 	key := cacheKeys.Scoped(hrDocumentsScope, businessID, fmt.Sprintf("exp|d=%d|l=%d|o=%d", days, limit, offset))
 	res, err := cacher.Of[listDocumentsResult]().GetOrComputeSingle(ctx, key,
@@ -105,12 +215,12 @@ func (s *Service) GetDocument(ctx context.Context, businessID, id int64) (*domai
 }
 
 func (s *Service) DeleteDocument(ctx context.Context, businessID, id int64) error {
-	if _, err := s.repo.GetDocument(ctx, businessID, id); err != nil {
-		return err
+	if s.repo == nil {
+		return errors.New("document repository database is unavailable")
 	}
 	if err := s.repo.DeleteDocument(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidateHRDocumentsScope(ctx, businessID)
+	invalidateHRDocumentsScope(context.WithoutCancel(ctx), businessID)
 	return nil
 }

@@ -45,8 +45,7 @@ LEFT JOIN (
  AND img.product_id = p.id
 WHERE p.business_id = ?
   AND p.is_active = TRUE
-ORDER BY c.name, p.name
-LIMIT 100;
+ORDER BY c.name, p.name, p.id;
 
 -- name: GetMenuBusinessOwnerID :one
 SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE;
@@ -57,8 +56,7 @@ SELECT id, owner_id, business_id, category_id, name, sku, barcode,
        sale_price, tax_rate, is_active, created_at, updated_at
 FROM erp_products
 WHERE business_id = ? AND is_active = TRUE
-ORDER BY name
-LIMIT 100;
+ORDER BY name, id;
 
 -- name: QuickCreateMenuItem :execresult
 -- cross-schema write to erp_products (products module) — create a product from the POS menu workflow.

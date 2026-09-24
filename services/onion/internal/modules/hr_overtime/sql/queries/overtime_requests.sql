@@ -1,17 +1,23 @@
 -- name: ListOvertimeRequests :many
 SELECT id, owner_id, business_id, employee_id, date, planned_extra_minutes, reason, status,
-       current_approval_level, approved_by, multiplier_applied, created_at, updated_at
+       current_approval_level, rejection_reason, approved_by, multiplier_applied, created_at, updated_at
 FROM hr_overtime_requests
 WHERE business_id = ?
+  AND (sqlc.narg('employee_id') IS NULL OR employee_id = sqlc.narg('employee_id'))
+  AND (sqlc.narg('status') IS NULL OR status = sqlc.narg('status'))
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
 -- name: CountOvertimeRequests :one
-SELECT COUNT(*) AS total FROM hr_overtime_requests WHERE business_id = ?;
+SELECT COUNT(*) AS total
+FROM hr_overtime_requests
+WHERE business_id = ?
+  AND (sqlc.narg('employee_id') IS NULL OR employee_id = sqlc.narg('employee_id'))
+  AND (sqlc.narg('status') IS NULL OR status = sqlc.narg('status'));
 
 -- name: GetOvertimeRequest :one
 SELECT id, owner_id, business_id, employee_id, date, planned_extra_minutes, reason, status,
-       current_approval_level, approved_by, multiplier_applied, created_at, updated_at
+       current_approval_level, rejection_reason, approved_by, multiplier_applied, created_at, updated_at
 FROM hr_overtime_requests
 WHERE business_id = ? AND id = ?;
 
@@ -22,7 +28,7 @@ INSERT INTO hr_overtime_requests (
 
 -- name: ApproveOvertimeRequest :execresult
 UPDATE hr_overtime_requests
-SET status = 'approved', approved_by = ?, multiplier_applied = ?, updated_at = NOW()
+SET status = 'approved', approved_by = ?, multiplier_applied = ?, rejection_reason = NULL, updated_at = NOW()
 WHERE id = ? AND business_id = ? AND status = 'pending';
 
 -- name: AdvanceOvertimeApprovalLevel :execresult
@@ -32,7 +38,7 @@ WHERE id = ? AND business_id = ? AND status = 'pending' AND current_approval_lev
 
 -- name: RejectOvertimeRequest :execresult
 UPDATE hr_overtime_requests
-SET status = 'rejected', updated_at = NOW()
+SET status = 'rejected', rejection_reason = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ? AND status = 'pending';
 
 -- name: CreateFlaggedOvertimeRequest :execresult
@@ -47,7 +53,7 @@ WHERE NOT EXISTS (
 
 -- name: ListFlaggedForDate :many
 SELECT id, owner_id, business_id, employee_id, date, planned_extra_minutes, reason, status,
-       current_approval_level, approved_by, multiplier_applied, created_at, updated_at
+       current_approval_level, rejection_reason, approved_by, multiplier_applied, created_at, updated_at
 FROM hr_overtime_requests
 WHERE business_id = ? AND date = ? AND status IN ('flagged', 'pending', 'approved');
 -- The detector must treat an existing pending/approved request as a dedupe

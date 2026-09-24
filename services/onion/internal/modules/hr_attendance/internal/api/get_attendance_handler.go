@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 	"net/http"
+	"time"
 
-	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -15,8 +15,17 @@ import (
 
 func GetAttendanceRoutes() []string { return []string{"/hr/attendance"} }
 
+const (
+	minimumAttendanceDate = "1000-01-01"
+	maximumAttendanceDate = "9999-12-31"
+)
+
+type getAttendanceService interface {
+	GetMyAttendance(ctx context.Context, businessID, employeeID int64, params domain.ListAttendanceParams) ([]domain.AttendanceRecordRecord, int64, error)
+}
+
 type GetAttendanceHandler struct {
-	Service *application.Service
+	Service getAttendanceService
 	Resolve func(ctx context.Context) (businessID, employeeID int64, err error)
 }
 
@@ -36,8 +45,30 @@ type GetAttendanceResponse struct {
 	Offset  int32                                     `json:"offset"`
 }
 
+func normalizeAttendanceDateRange(dateFrom, dateTo string) (string, string, error) {
+	if dateFrom == "" {
+		dateFrom = minimumAttendanceDate
+	}
+	if dateTo == "" {
+		dateTo = maximumAttendanceDate
+	}
+
+	from, err := time.Parse(time.DateOnly, dateFrom)
+	if err != nil {
+		return "", "", onekiterrors.New(http.StatusBadRequest, "date_from must use YYYY-MM-DD")
+	}
+	to, err := time.Parse(time.DateOnly, dateTo)
+	if err != nil {
+		return "", "", onekiterrors.New(http.StatusBadRequest, "date_to must use YYYY-MM-DD")
+	}
+	if from.After(to) {
+		return "", "", onekiterrors.New(http.StatusBadRequest, "date_from must not be after date_to")
+	}
+	return dateFrom, dateTo, nil
+}
+
 func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequest) (GetAttendanceResponse, error) {
-	if h.Resolve == nil {
+	if h.Resolve == nil || req == nil {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
 	device := authPkg.DeviceCtx(ctx)
@@ -51,20 +82,29 @@ func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequ
 	if err != nil {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
-	if req.OwnerID <= 0 || req.EmployeeID <= 0 || req.OwnerID != businessID || req.EmployeeID != employeeID {
+	// This is a self-service endpoint. Older clients sent these ids, while
+	// the current client omits them; a supplied value may only agree with the
+	// identity resolved above.
+	if (req.OwnerID != 0 && req.OwnerID != businessID) ||
+		(req.EmployeeID != 0 && req.EmployeeID != employeeID) {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	limit := req.Limit
-	if limit <= 0 || limit > 100 {
-		limit = 50
+	dateFrom, dateTo, err := normalizeAttendanceDateRange(req.DateFrom, req.DateTo)
+	if err != nil {
+		return GetAttendanceResponse{}, err
+	}
+
+	pagination, err := normalizeAttendancePagination(req.Limit, req.Offset)
+	if err != nil {
+		return GetAttendanceResponse{}, err
 	}
 
 	records, total, err := h.Service.GetMyAttendance(ctx, businessID, employeeID, domain.ListAttendanceParams{
-		DateFrom: req.DateFrom,
-		DateTo:   req.DateTo,
-		Limit:    limit,
-		Offset:   req.Offset,
+		DateFrom: dateFrom,
+		DateTo:   dateTo,
+		Limit:    pagination.limit,
+		Offset:   pagination.offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to get attendance", logger.Any("owner_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
@@ -76,5 +116,5 @@ func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequ
 		payloads = append(payloads, attendanceToProto(r))
 	}
 
-	return GetAttendanceResponse{Records: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
+	return GetAttendanceResponse{Records: payloads, Total: total, Limit: pagination.limit, Offset: pagination.offset}, nil
 }

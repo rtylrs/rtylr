@@ -166,7 +166,12 @@ VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: ListLoyaltyTiers :many
 SELECT id, owner_id, business_id, name, min_points, discount_pct, perks, sort_order, created_at, updated_at
-FROM crm_loyalty_tiers WHERE business_id = ? ORDER BY sort_order ASC LIMIT 100;
+FROM crm_loyalty_tiers WHERE business_id = ?
+ORDER BY sort_order ASC, id ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountLoyaltyTiers :one
+SELECT COUNT(*) FROM crm_loyalty_tiers WHERE business_id = ?;
 
 -- name: CreateLoyaltyTier :execresult
 INSERT INTO crm_loyalty_tiers (owner_id, business_id, name, min_points, discount_pct, perks, sort_order)

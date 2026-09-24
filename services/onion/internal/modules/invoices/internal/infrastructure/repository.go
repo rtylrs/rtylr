@@ -558,6 +558,15 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 		return nil, domain.ErrInvoiceNotDraft
 	}
 
+	// Compare in integer cents while the invoice row is locked. This prevents
+	// concurrent payments from each appearing valid against the same balance.
+	paymentCents := paymentAmountToCents(input.Amount)
+	totalCents := nullDecimalToCents(row.Total)
+	paidCents := nullDecimalToCents(row.AmountPaid)
+	if paymentCents > totalCents-paidCents {
+		return nil, domain.ErrPaymentExceedsBalance
+	}
+
 	currency := input.Currency
 	if currency == "" {
 		currency = inv.Currency
@@ -581,12 +590,9 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 	}
 	p.ID = paymentID
 
-	// Accumulate and compare in integer cents: float64 residue from parsed
-	// DECIMAL strings could otherwise leave newAmountDue at +2.4e-15 and keep
-	// a fully paid invoice in "partial" forever (or flip one early).
-	paymentCents := paymentAmountToCents(p.Amount)
-	totalCents := nullDecimalToCents(row.Total)
-	paidCents := nullDecimalToCents(row.AmountPaid)
+	// Accumulate in integer cents: float64 residue from parsed DECIMAL strings
+	// could otherwise leave newAmountDue at +2.4e-15 and keep a fully paid
+	// invoice in "partial" forever (or flip one early).
 	newPaidCents := paidCents + paymentCents
 	newDueCents := totalCents - newPaidCents
 	if newDueCents < 0 {

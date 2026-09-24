@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrVariantNotFound = errors.New("variant not found")
+var (
+	ErrVariantNotFound        = errors.New("variant not found")
+	ErrVariantProductNotFound = errors.New("product not found in business")
+)
 
 type Variant struct {
 	ID            int64     `json:"id"`

@@ -260,8 +260,7 @@ func TestUpdateTemplate_NameChanges(t *testing.T) {
 	})
 
 	err = repo.UpdateTemplate(ctx, testutil.OwnerID, tmpl.ID, domain.UpdateTemplateParams{
-		Name:        "After Update Template",
-		TriggerType: "hire",
+		Name: "After Update Template",
 	})
 	if err != nil {
 		t.Fatalf("UpdateTemplate: %v", err)

@@ -34,23 +34,50 @@ func main() {
 		log.Fatalf("ping: %v", err)
 	}
 
-	// Clear all setup step completions
-	res, err := db.Exec(`DELETE FROM hr_setup_steps`)
+	deleted, reset, err := resetHRSetup(db)
 	if err != nil {
-		log.Fatalf("delete hr_setup_steps: %v", err)
+		log.Fatalf("reset HR setup: %v", err)
 	}
-	rows, _ := res.RowsAffected()
-	fmt.Printf("  ✓ Deleted %d rows from hr_setup_steps\n", rows)
 
-	// Reset setup_completed_at on hr_configs
-	res, err = db.Exec(`UPDATE hr_configs SET setup_completed_at = NULL`)
-	if err != nil {
-		log.Fatalf("update hr_configs: %v", err)
-	}
-	rows, _ = res.RowsAffected()
-	fmt.Printf("  ✓ Reset setup_completed_at on %d hr_configs rows\n", rows)
-
+	fmt.Printf("  ✓ Deleted %d rows from hr_setup_steps\n", deleted)
+	fmt.Printf("  ✓ Reset setup_completed_at on %d hr_configs rows\n", reset)
 	fmt.Println("\n✅ HR setup state cleared. Reload the app to see the wizard.")
+}
+
+// resetHRSetup performs both writes in one transaction. In particular, do not
+// let the DELETE autocommit before the hr_configs update: a failed second
+// statement must not leave the setup wizard permanently half-reset.
+func resetHRSetup(db *sql.DB) (deleted, reset int64, err error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return 0, 0, fmt.Errorf("begin transaction: %w", err)
+	}
+	// Rollback is a no-op after Commit and is the safety net for every error
+	// path below (including RowsAffected failures).
+	defer func() { _ = tx.Rollback() }()
+
+	res, err := tx.Exec(`DELETE FROM hr_setup_steps`)
+	if err != nil {
+		return 0, 0, fmt.Errorf("delete hr_setup_steps: %w", err)
+	}
+	deleted, err = res.RowsAffected()
+	if err != nil {
+		return 0, 0, fmt.Errorf("read deleted hr_setup_steps count: %w", err)
+	}
+
+	res, err = tx.Exec(`UPDATE hr_configs SET setup_completed_at = NULL`)
+	if err != nil {
+		return 0, 0, fmt.Errorf("update hr_configs: %w", err)
+	}
+	reset, err = res.RowsAffected()
+	if err != nil {
+		return 0, 0, fmt.Errorf("read reset hr_configs count: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, 0, fmt.Errorf("commit transaction: %w", err)
+	}
+	return deleted, reset, nil
 }
 
 func env(key, fallback string) string {

@@ -2,12 +2,14 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/variants/internal/application"
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpvariantv1 "github.com/voxire/voxie/gen/go/erp/variant/v1"
@@ -22,23 +24,32 @@ func NewVariantAPI(service *application.Service) *VariantAPI {
 }
 
 func (a *VariantAPI) ListVariants(ctx context.Context, req *erpvariantv1.ListVariantsRequest) (*erpvariantv1.ListVariantsResponse, error) {
-	ownerID, err := variantOwnerID(ctx)
+	ownerID, err := variantOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
-	variants, listErr := a.Service.ListVariants(ctx, ownerID, req.GetProductId())
+	page, listErr := a.Service.ListVariantsPage(ctx, ownerID, req.GetProductId(), int64(req.GetLimit()), int64(req.GetOffset()))
+	if errors.Is(listErr, domain.ErrVariantProductNotFound) {
+		return nil, variantStatusError(http.StatusNotFound, "Product not found")
+	}
 	if listErr != nil {
 		return nil, variantStatusError(http.StatusInternalServerError, "Failed to list variants")
 	}
-	out := make([]*erpvariantv1.Variant, 0, len(variants))
-	for _, v := range variants {
+	out := make([]*erpvariantv1.Variant, 0, len(page.Items))
+	for _, v := range page.Items {
 		out = append(out, newVariantProto(v))
 	}
-	return &erpvariantv1.ListVariantsResponse{Variants: out}, nil
+	return &erpvariantv1.ListVariantsResponse{
+		Variants: out,
+		HasMore:  page.HasMore,
+		Limit:    int64(page.Limit),
+		Offset:   int64(page.Offset),
+		Total:    page.Total,
+	}, nil
 }
 
 func (a *VariantAPI) CreateVariant(ctx context.Context, req *erpvariantv1.CreateVariantRequest) (*erpvariantv1.CreateVariantResponse, error) {
-	ownerID, err := variantOwnerID(ctx)
+	ownerID, err := variantOwnerID(ctx, "erp:products:create")
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +64,9 @@ func (a *VariantAPI) CreateVariant(ctx context.Context, req *erpvariantv1.Create
 		Attributes:    req.GetAttributes(),
 		IsActive:      req.GetIsActive(),
 	})
+	if errors.Is(createErr, domain.ErrVariantProductNotFound) {
+		return nil, variantStatusError(http.StatusNotFound, "Product not found")
+	}
 	if createErr != nil {
 		return nil, variantStatusError(http.StatusInternalServerError, "Failed to create variant")
 	}
@@ -60,7 +74,7 @@ func (a *VariantAPI) CreateVariant(ctx context.Context, req *erpvariantv1.Create
 }
 
 func (a *VariantAPI) UpdateVariant(ctx context.Context, req *erpvariantv1.UpdateVariantRequest) (*erpvariantv1.UpdateVariantResponse, error) {
-	ownerID, err := variantOwnerID(ctx)
+	ownerID, err := variantOwnerID(ctx, "erp:products:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -79,17 +93,25 @@ func (a *VariantAPI) UpdateVariant(ctx context.Context, req *erpvariantv1.Update
 		Attributes:    body.GetAttributes(),
 		IsActive:      body.GetIsActive(),
 	}); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrVariantProductNotFound) {
+			return nil, variantStatusError(http.StatusNotFound, "Product not found")
+		}
+		if errors.Is(updateErr, domain.ErrVariantNotFound) {
+			return nil, variantStatusError(http.StatusNotFound, "Variant not found")
+		}
 		return nil, variantStatusError(http.StatusInternalServerError, "Failed to update variant")
 	}
 	return &erpvariantv1.UpdateVariantResponse{Message: "Variant updated successfully"}, nil
 }
 
 func (a *VariantAPI) DeleteVariant(ctx context.Context, req *erpvariantv1.DeleteVariantRequest) (*erpvariantv1.DeleteVariantResponse, error) {
-	ownerID, err := variantOwnerID(ctx)
+	ownerID, err := variantOwnerID(ctx, "erp:products:delete")
 	if err != nil {
 		return nil, err
 	}
-	if deleteErr := a.Service.DeleteVariant(ctx, ownerID, req.GetId()); deleteErr != nil {
+	if deleteErr := a.Service.DeleteVariant(ctx, ownerID, req.GetId()); errors.Is(deleteErr, domain.ErrVariantNotFound) {
+		return nil, variantStatusError(http.StatusNotFound, "Variant not found")
+	} else if deleteErr != nil {
 		return nil, variantStatusError(http.StatusInternalServerError, "Failed to delete variant")
 	}
 	return &erpvariantv1.DeleteVariantResponse{Message: "Variant deleted successfully"}, nil
@@ -114,10 +136,10 @@ func newVariantProto(v domain.Variant) *erpvariantv1.Variant {
 	}
 }
 
-func variantOwnerID(ctx context.Context) (int64, error) {
+func variantOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, variantStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

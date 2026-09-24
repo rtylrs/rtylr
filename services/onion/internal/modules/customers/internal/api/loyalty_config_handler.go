@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -96,7 +97,32 @@ type UpdateLoyaltyConfigResponse struct {
 	Message string `json:"message"`
 }
 
+func validateLoyaltyConfigBounds(bronzeMin, silverMin, goldMin, platinumMin, pointsExpiryDays int64) error {
+	values := []struct {
+		name  string
+		value int64
+	}{
+		{name: "bronze_min", value: bronzeMin},
+		{name: "silver_min", value: silverMin},
+		{name: "gold_min", value: goldMin},
+		{name: "platinum_min", value: platinumMin},
+		{name: "points_expiry_days", value: pointsExpiryDays},
+	}
+	for _, item := range values {
+		if item.value < 0 || item.value > math.MaxInt32 {
+			return onekiterrors.New(http.StatusBadRequest, item.name+" must be between 0 and 2147483647")
+		}
+	}
+	if bronzeMin > silverMin || silverMin > goldMin || goldMin > platinumMin {
+		return onekiterrors.New(http.StatusBadRequest, "loyalty tier thresholds must be in ascending order")
+	}
+	return nil
+}
+
 func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoyaltyConfigRequest) error {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "Loyalty config is required")
+	}
 	if req.PointsPerCurrencyUnit < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Points per currency unit must not be negative")
 	}
@@ -105,6 +131,15 @@ func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoya
 	}
 	if req.BronzeDiscountPct < 0 || req.SilverDiscountPct < 0 || req.GoldDiscountPct < 0 || req.PlatinumDiscountPct < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Discount percentages must not be negative")
+	}
+	if err := validateLoyaltyConfigBounds(
+		int64(req.BronzeMin),
+		int64(req.SilverMin),
+		int64(req.GoldMin),
+		int64(req.PlatinumMin),
+		int64(req.PointsExpiryDays),
+	); err != nil {
+		return err
 	}
 	return nil
 }
@@ -115,6 +150,9 @@ func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyal
 		return UpdateLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := requireCRMFeaturePermission(ctx, "crm:loyalty:manage"); err != nil {
+		return UpdateLoyaltyConfigResponse{}, err
+	}
+	if err := h.Validate(ctx, req); err != nil {
 		return UpdateLoyaltyConfigResponse{}, err
 	}
 

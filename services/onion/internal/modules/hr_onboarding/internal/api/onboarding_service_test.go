@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
@@ -29,7 +30,28 @@ func oneKitStatus(err error) int {
 // memberCtx authenticates a member whose user id (1002) differs from the
 // business id (1001), the case the endpoints used to confuse.
 func memberCtx(ctx context.Context) context.Context {
-	return authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: 1002, BusinessID: testutil.BusinessID, Role: "member"})
+	return authPkg.WithAuthUser(ctx, &authPkg.AuthUser{
+		UserID: 1002, BusinessID: testutil.BusinessID, Role: "member",
+		EffectiveAccess: &authorization.EffectiveAccess{
+			BusinessID: testutil.BusinessID, AuthorizationVersion: 1,
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID: authorization.AppHR, Licensed: true, HasAccess: true,
+				Permissions: []string{"hr:employees:manage"},
+				Scopes:      []authorization.Scope{{Type: "department", ID: "1"}},
+			}},
+		},
+	})
+}
+
+func ensureMemberBusinessAccess(t *testing.T, db *sql.DB) {
+	t.Helper()
+	testutil.EnsureBusiness(t, db, testutil.BusinessID, testutil.OwnerID)
+	if _, err := db.ExecContext(context.Background(),
+		`INSERT IGNORE INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'member')`,
+		1002, testutil.BusinessID,
+	); err != nil {
+		t.Fatalf("grant member business access: %v", err)
+	}
 }
 
 func createTemplateWithItem(t *testing.T, db *sql.DB, repo *infrastructure.Repository, name string) *domain.ChecklistTemplateRecord {
@@ -66,6 +88,7 @@ func createTemplateWithItem(t *testing.T, db *sql.DB, repo *infrastructure.Repos
 // employee id.
 func TestOnboardingServiceGetEmployeeChecklistReturnsEmployeeChecklist(t *testing.T) {
 	db := testutil.OpenDB(t)
+	ensureMemberBusinessAccess(t, db)
 	ctx := context.Background()
 	repo := infrastructure.NewRepository(db)
 	service := application.NewService(ctx, db)
@@ -105,6 +128,7 @@ func TestOnboardingServiceGetEmployeeChecklistReturnsEmployeeChecklist(t *testin
 // businesses.id, and in the normal case their own tenant's template 404ed.
 func TestOnboardingServiceUpdateChecklistTemplateResolvesBusinessID(t *testing.T) {
 	db := testutil.OpenDB(t)
+	ensureMemberBusinessAccess(t, db)
 	ctx := context.Background()
 	repo := infrastructure.NewRepository(db)
 	service := application.NewService(ctx, db)
@@ -119,17 +143,21 @@ func TestOnboardingServiceUpdateChecklistTemplateResolvesBusinessID(t *testing.T
 		t.Fatalf("UpdateChecklistTemplate: %v (status %d)", err, oneKitStatus(err))
 	}
 
-	var name string
-	if err := db.QueryRowContext(ctx, "SELECT name FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID).Scan(&name); err != nil {
+	var name, triggerType string
+	if err := db.QueryRowContext(ctx, "SELECT name, trigger_type FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID).Scan(&name, &triggerType); err != nil {
 		t.Fatalf("read template after update: %v", err)
 	}
 	if name != "Updated By Member" {
 		t.Errorf("template name = %q, want %q", name, "Updated By Member")
 	}
+	if triggerType != "hire" {
+		t.Errorf("template trigger_type = %q, want preserved value %q", triggerType, "hire")
+	}
 }
 
 func TestUpdateChecklistTemplateMissingTemplateReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
+	ensureMemberBusinessAccess(t, db)
 	ctx := context.Background()
 	service := application.NewService(ctx, db)
 

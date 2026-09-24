@@ -17,30 +17,90 @@ import (
 // encryptedPrefix marks a stored email body as AES-256-GCM ciphertext. Rows
 // written before a key was configured carry no prefix and are sent as-is, so
 // rolling out the key never breaks queued mail.
-const encryptedPrefix = "enc:v1:"
+const (
+	encryptedPrefix      = "enc:v1:"
+	invalidEncryptedBody = encryptedPrefix + "invalid-key"
+	// Keep the comma-separated old keys here until their queued jobs have drained.
+	previousEncryptionKeys = "EMAIL_ENCRYPTION_PREVIOUS_KEYS"
+)
 
 // The key is read from the environment on every use so rotating or adding it
 // takes effect without a restart; the "unset" warning fires only once.
-var warnPlaintextOnce sync.Once
+var (
+	warnPlaintextOnce  sync.Once
+	warnInvalidKeyOnce sync.Once
+)
 
-func encryptionKey() []byte {
+// encryptionKeys returns the current key followed by explicitly retained
+// fallback keys. The current key is always the first key used for new bodies;
+// older keys are only tried while opening existing rows during a rotation.
+func encryptionKeys() (keys [][]byte, configured bool, invalidCurrent bool) {
 	raw := strings.TrimSpace(os.Getenv("EMAIL_ENCRYPTION_KEY"))
-	if raw == "" {
+	previous := os.Getenv(previousEncryptionKeys)
+	if raw == "" && strings.TrimSpace(previous) == "" {
 		warnPlaintextOnce.Do(func() {
 			logger.Global().Warn("EMAIL_ENCRYPTION_KEY not set; email_jobs bodies stored in PLAINTEXT — reset/invite tokens readable from DB dumps")
 		})
+		return nil, false, false
+	}
+
+	keys = make([][]byte, 0, 2)
+	seen := make(map[string]struct{})
+	if raw == "" {
+		invalidCurrent = true
+		warnInvalidKeyOnce.Do(func() {
+			logger.Global().Error("EMAIL_ENCRYPTION_KEY is required when EMAIL_ENCRYPTION_PREVIOUS_KEYS is set; refusing to store sensitive mail in plaintext")
+		})
+	} else if current, err := parseEncryptionKey(raw); err != nil {
+		invalidCurrent = true
+		warnInvalidKeyOnce.Do(func() {
+			logger.Global().Error("EMAIL_ENCRYPTION_KEY invalid (want 32 bytes hex or base64); refusing to store sensitive mail in plaintext")
+		})
+	} else {
+		keys = append(keys, current)
+		seen[string(current)] = struct{}{}
+	}
+
+	for _, part := range strings.Split(previous, ",") {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		key, keyErr := parseEncryptionKey(part)
+		if keyErr != nil {
+			logger.Global().Error("EMAIL_ENCRYPTION_PREVIOUS_KEYS contains an invalid key; ignoring it")
+			continue
+		}
+		if _, duplicate := seen[string(key)]; duplicate {
+			continue
+		}
+		seen[string(key)] = struct{}{}
+		keys = append(keys, key)
+	}
+	return keys, true, invalidCurrent
+}
+
+func parseEncryptionKey(raw string) ([]byte, error) {
+	key, err := base64.StdEncoding.DecodeString(raw)
+	if err == nil && len(key) == 32 {
+		return key, nil
+	}
+	key, hexErr := DecodeHex(raw)
+	if hexErr == nil && len(key) == 32 {
+		return key, nil
+	}
+	return nil, errors.New("invalid encryption key")
+}
+
+// encryptionKey is retained for package-local compatibility. New encryption
+// must use encryptionKeys so an invalid current key cannot be mistaken for a
+// valid fallback key.
+func encryptionKey() []byte {
+	keys, _, invalid := encryptionKeys()
+	if invalid || len(keys) == 0 {
 		return nil
 	}
-	key, err := base64.StdEncoding.DecodeString(raw)
-	if err != nil || len(key) != 32 {
-		keyB, hexErr := DecodeHex(raw)
-		if hexErr != nil || len(keyB) != 32 {
-			logger.Global().Error("EMAIL_ENCRYPTION_KEY invalid (want 32 bytes hex or base64); storing plaintext")
-			return nil
-		}
-		key = keyB
-	}
-	return key
+	return keys[0]
 }
 
 // DecodeHex decodes the hexadecimal key representation accepted by
@@ -77,26 +137,33 @@ func hexVal(c byte) (byte, bool) {
 // SealHTML encrypts an email body at rest when a key is configured. It is
 // idempotent, so callers may safely pass a body that was already sealed.
 func SealHTML(html string) string {
-	key := encryptionKey()
-	if key == nil || html == "" || strings.HasPrefix(html, encryptedPrefix) {
+	if html == "" || strings.HasPrefix(html, encryptedPrefix) {
 		return html
 	}
 
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		logger.Global().Error("email encryption unavailable; storing plaintext", logger.Error(err))
+	keys, configured, invalid := encryptionKeys()
+	if !configured {
 		return html
+	}
+	if invalid || len(keys) == 0 {
+		return invalidEncryptedBody
+	}
+
+	block, err := aes.NewCipher(keys[0])
+	if err != nil {
+		logger.Global().Error("email encryption unavailable; quarantining body", logger.Error(err))
+		return invalidEncryptedBody
 	}
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		logger.Global().Error("email encryption unavailable; storing plaintext", logger.Error(err))
-		return html
+		logger.Global().Error("email encryption unavailable; quarantining body", logger.Error(err))
+		return invalidEncryptedBody
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		logger.Global().Error("email nonce generation failed; storing plaintext", logger.Error(err))
-		return html
+		logger.Global().Error("email nonce generation failed; quarantining body", logger.Error(err))
+		return invalidEncryptedBody
 	}
 
 	sealed := gcm.Seal(nonce, nonce, []byte(html), nil)
@@ -110,10 +177,8 @@ func OpenHTML(stored string) string {
 	if !strings.HasPrefix(stored, encryptedPrefix) {
 		return stored
 	}
-
-	key := encryptionKey()
-	if key == nil {
-		logger.Global().Error("encrypted email row found but EMAIL_ENCRYPTION_KEY is not configured; skipping body")
+	if stored == invalidEncryptedBody {
+		logger.Global().Error("email row was quarantined because EMAIL_ENCRYPTION_KEY was invalid; skipping body")
 		return ""
 	}
 
@@ -123,26 +188,38 @@ func OpenHTML(stored string) string {
 		return ""
 	}
 
+	keys, configured, _ := encryptionKeys()
+	if !configured || len(keys) == 0 {
+		logger.Global().Error("encrypted email row found but no usable EMAIL_ENCRYPTION_KEY is configured; skipping body")
+		return ""
+	}
+	for _, key := range keys {
+		if plaintext, ok := openHTMLWithKey(raw, key); ok {
+			return plaintext
+		}
+	}
+
+	logger.Global().Error("email row decryption failed with every configured key; skipping body")
+	return ""
+}
+
+func openHTMLWithKey(raw, key []byte) (string, bool) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		logger.Global().Error("email decryption unavailable; skipping body", logger.Error(err))
-		return ""
+		return "", false
 	}
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		logger.Global().Error("email decryption unavailable; skipping body", logger.Error(err))
-		return ""
+		return "", false
 	}
 	if len(raw) < gcm.NonceSize() {
-		logger.Global().Error("email row too short to decrypt; skipping body")
-		return ""
+		return "", false
 	}
 
 	nonce, ciphertext := raw[:gcm.NonceSize()], raw[gcm.NonceSize():]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		logger.Global().Error("email row decryption failed; skipping body", logger.Error(err))
-		return ""
+		return "", false
 	}
-	return string(plaintext)
+	return string(plaintext), true
 }

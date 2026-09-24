@@ -17,13 +17,12 @@ const stockTakesCacheTTL = 5 * time.Minute
 
 type repository interface {
 	ListStockTakes(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTake, bool, error)
-	CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput) (int64, error)
-	UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error
+	CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput, events ...audit.Event) (int64, error)
+	UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput, events ...audit.Event) error
 }
 
 type Service struct {
 	repo repository
-	db   *sql.DB
 }
 
 type stockTakesPageResult struct {
@@ -34,10 +33,7 @@ type stockTakesPageResult struct {
 func NewService(_ context.Context, db *sql.DB) *Service {
 	repo := infrastructure.NewRepository(db)
 
-	return &Service{
-		repo: repo,
-		db:   db,
-	}
+	return &Service{repo: repo}
 }
 
 func paginateStockTakes(page, pageSize int64) (int, int) {
@@ -68,30 +64,35 @@ func (s *Service) ListStockTakes(ctx context.Context, businessID, page, pageSize
 }
 
 func (s *Service) CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput) (int64, error) {
-	id, err := s.repo.CreateStockTake(ctx, businessID, input)
+	id, err := s.repo.CreateStockTake(ctx, businessID, input, audit.Event{
+		BusinessID: businessID,
+		ActorID:    businessID,
+		EntityType: "stock_take",
+		Action:     "created",
+		NewValues:  input,
+	})
 	if err != nil {
-		return 0, err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_take", EntityID: id, Action: "created", NewValues: input}); err != nil {
 		return 0, err
 	}
 
 	s.invalidateCache(ctx, businessID)
-
 	return id, nil
 }
 
 func (s *Service) UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error {
-	err := s.repo.UpdateStockTake(ctx, businessID, input)
+	err := s.repo.UpdateStockTake(ctx, businessID, input, audit.Event{
+		BusinessID: businessID,
+		ActorID:    businessID,
+		EntityType: "stock_take",
+		EntityID:   input.ID,
+		Action:     "updated",
+		NewValues:  input,
+	})
 	if err != nil {
-		return err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_take", EntityID: input.ID, Action: "updated", NewValues: input}); err != nil {
 		return err
 	}
 
 	s.invalidateCache(ctx, businessID)
-
 	return nil
 }
 

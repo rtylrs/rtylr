@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -21,9 +22,9 @@ func UpdateTemplateRoutes() []string { return []string{"/hr/onboarding/templates
 type UpdateTemplateHandler struct{ Service *application.Service }
 
 type UpdateTemplateRequest struct {
-	Name        string `json:"name"`
-	TriggerType string `json:"trigger_type"`
-	RoleID      int64  `json:"role_id"`
+	Name        string  `json:"name"`
+	TriggerType *string `json:"trigger_type"`
+	RoleID      *int64  `json:"role_id"`
 }
 
 type UpdateTemplateResponse struct {
@@ -31,8 +32,21 @@ type UpdateTemplateResponse struct {
 }
 
 func (h *UpdateTemplateHandler) Validate(_ context.Context, req *UpdateTemplateRequest) error {
-	if req.Name == "" {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
+	if strings.TrimSpace(req.Name) == "" {
 		return onekiterrors.New(http.StatusBadRequest, "name is required")
+	}
+	if req.TriggerType != nil {
+		if err := domain.ValidateCreateTemplateParams(domain.CreateTemplateParams{
+			Name: req.Name, TriggerType: *req.TriggerType,
+		}); err != nil {
+			return onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+	}
+	if req.RoleID != nil && *req.RoleID <= 0 {
+		return onekiterrors.New(http.StatusBadRequest, "role_id must be greater than 0")
 	}
 	return nil
 }
@@ -41,6 +55,9 @@ func (h *UpdateTemplateHandler) Serve(ctx context.Context, req *UpdateTemplateRe
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateTemplateResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireOnboardingManagePermission(ctx); err != nil {
+		return UpdateTemplateResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -60,8 +77,14 @@ func (h *UpdateTemplateHandler) Serve(ctx context.Context, req *UpdateTemplateRe
 		RoleID:      req.RoleID,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrChecklistAccessDenied) {
+			return UpdateTemplateResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return UpdateTemplateResponse{}, onekiterrors.New(http.StatusNotFound, "Template not found")
+		}
+		if errors.Is(err, domain.ErrEmptyTemplateName) || errors.Is(err, domain.ErrInvalidTriggerType) {
+			return UpdateTemplateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 		}
 		logger.Ctx(ctx).Error("failed to update onboarding template", logger.Any("owner_id", device.User.UserID), logger.Any("template_id", id), logger.Error(err))
 		return UpdateTemplateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update template")

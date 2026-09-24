@@ -12,7 +12,7 @@ import (
 var oneKitServiceMethodPattern = regexp.MustCompile(`func \([^)]*\) [A-Z][A-Za-z0-9]+\([^)]*\) \(\*[^,]+, error\)`)
 
 func TestGeneratedServiceImplementationsDoNotUseLegacyErrors(t *testing.T) {
-	root := repoRoot(t)
+	root := findRepositoryRoot(t)
 	modulesDir := filepath.Join(root, "internal", "modules")
 
 	var offenders []string
@@ -57,17 +57,37 @@ func TestGeneratedServiceImplementationsDoNotUseLegacyErrors(t *testing.T) {
 	}
 }
 
-func repoRoot(t *testing.T) string {
+// findRepositoryRoot works in both normal and -trimpath test builds. Under
+// -trimpath runtime.Caller returns an import path, not a filesystem path, so
+// walk upward from the test working directory before using that fallback.
+func findRepositoryRoot(t *testing.T) string {
 	t.Helper()
 
-	_, currentFile, _, ok := runtime.Caller(0)
-	if !ok {
-		t.Fatal("resolve current file")
+	candidates := make([]string, 0, 2)
+	if workingDir, err := os.Getwd(); err == nil {
+		candidates = append(candidates, workingDir)
+	}
+	if _, sourceFile, _, ok := runtime.Caller(0); ok && filepath.IsAbs(sourceFile) {
+		candidates = append(candidates, filepath.Dir(sourceFile))
 	}
 
-	root := filepath.Clean(filepath.Join(filepath.Dir(currentFile), "..", "..", ".."))
-	if _, err := os.Stat(filepath.Join(root, "go.mod")); err != nil {
-		t.Fatalf("resolve repo root from %s: %v", currentFile, err)
+	for _, candidate := range candidates {
+		dir, err := filepath.Abs(candidate)
+		if err != nil {
+			continue
+		}
+		for {
+			if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+				return dir
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				break
+			}
+			dir = parent
+		}
 	}
-	return root
+
+	t.Fatal("could not locate the repository root from the test working directory")
+	return ""
 }

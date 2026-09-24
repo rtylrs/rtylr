@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
@@ -111,8 +113,12 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 			StockTakeID: row.StockTakeID,
 			ProductID:   row.ProductID,
 			ExpectedQty: sqlutil.ParseDecimal(row.ExpectedQty),
-			CountedQty:  sqlutil.ParseDecimal(row.CountedQty),
-			Variance:    sqlutil.ParseDecimal(row.Variance),
+		}
+		if row.CountedQty.Valid {
+			item.CountedQty = sqlutil.ParseDecimal(row.CountedQty.String)
+		}
+		if row.Variance.Valid {
+			item.Variance = sqlutil.ParseDecimal(row.Variance.String)
 		}
 		if row.CreatedAt.Valid {
 			item.CreatedAt = row.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00")
@@ -123,11 +129,10 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 	return result, nil
 }
 
-func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput) (int64, error) {
+func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput, events ...audit.Event) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin transaction", logger.Error(err))
-
 		return 0, err
 	}
 
@@ -138,7 +143,11 @@ func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, inpu
 	}()
 
 	qtx := r.queries.WithTx(tx)
-	if err := validateStockTakeReferences(ctx, qtx, businessID, input); err != nil {
+	if err = validateStockTakeReferences(ctx, qtx, businessID, input); err != nil {
+		return 0, err
+	}
+	items, err := snapshotStockTakeItems(ctx, tx, businessID, input.WarehouseID, input.Items)
+	if err != nil {
 		return 0, err
 	}
 
@@ -150,7 +159,6 @@ func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, inpu
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create stock take", logger.Error(err))
-
 		return 0, err
 	}
 
@@ -159,29 +167,76 @@ func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, inpu
 		return 0, err
 	}
 
-	for _, item := range input.Items {
-		variance := item.CountedQty - item.ExpectedQty
+	for _, item := range items {
+		// Draft creation snapshots expected stock only; physical counts remain
+		// absent until an explicit in-progress or completion update arrives.
 		_, err = qtx.InsertStockTakeItem(ctx, sqlc.InsertStockTakeItemParams{
 			StockTakeID: stockTakeID,
 			ProductID:   item.ProductID,
 			ExpectedQty: strconv.FormatFloat(item.ExpectedQty, 'f', -1, 64),
-			CountedQty:  strconv.FormatFloat(item.CountedQty, 'f', -1, 64),
-			Variance:    strconv.FormatFloat(variance, 'f', -1, 64),
+			CountedQty:  sql.NullString{},
+			Variance:    sql.NullString{},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to create stock take item", logger.Error(err))
-
 			return 0, err
 		}
 	}
 
+	if err = appendStockTakeAuditEvents(ctx, tx, events, stockTakeID); err != nil {
+		return 0, err
+	}
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit stock take", logger.Error(err))
-
 		return 0, err
 	}
 
 	return stockTakeID, nil
+}
+
+func snapshotStockTakeItems(ctx context.Context, tx *sql.Tx, businessID, warehouseID int64, requested []domain.StockTakeItemInput) ([]domain.StockTakeItemInput, error) {
+	var (
+		locationID int64
+		err        error
+	)
+	if warehouseID > 0 {
+		locationID, err = stock_core.WarehouseLocationID(ctx, tx, businessID, warehouseID)
+	} else {
+		locationID, err = stock_core.DefaultLocationID(ctx, tx, businessID)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.QueryContext(ctx, `
+		SELECT product_id, on_hand
+		FROM stock_levels
+		WHERE owner_id = ? AND location_id = ?`, businessID, locationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	onHand := make(map[int64]float64, len(requested))
+	for rows.Next() {
+		var productID int64
+		var quantity string
+		if err := rows.Scan(&productID, &quantity); err != nil {
+			return nil, err
+		}
+		onHand[productID] = sqlutil.ParseDecimal(quantity)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	items := make([]domain.StockTakeItemInput, 0, len(requested))
+	for _, item := range requested {
+		item.ExpectedQty = math.Max(0, onHand[item.ProductID])
+		item.CountedQty = 0
+		items = append(items, item)
+	}
+	return items, nil
 }
 
 func validateStockTakeReferences(ctx context.Context, qtx *sqlc.Queries, businessID int64, input domain.StockTakeInput) error {
@@ -204,14 +259,12 @@ func validateStockTakeReferences(ctx context.Context, qtx *sqlc.Queries, busines
 	return nil
 }
 
-func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error {
+func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput, events ...audit.Event) (err error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin transaction", logger.Error(err))
-
 		return err
 	}
-
 	defer func() {
 		if err != nil {
 			_ = tx.Rollback()
@@ -219,10 +272,6 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 	}()
 
 	qtx := r.queries.WithTx(tx)
-
-	// Lock the row before any status update so unknown IDs fail closed. This
-	// also lets repeated completion requests remain idempotent when MySQL
-	// reports zero changed rows for an unchanged status.
 	prior, err := qtx.GetStockTakeStatusForUpdate(ctx, sqlc.GetStockTakeStatusForUpdateParams{
 		BusinessID: businessID,
 		ID:         input.ID,
@@ -235,83 +284,110 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 		return err
 	}
 	alreadyCompleted := prior.Status.Valid && prior.Status.ErpStockTakesStatus == sqlc.ErpStockTakesStatus(domain.StockTakeStatusCompleted)
-	warehouseID := prior.WarehouseID
+
+	if !alreadyCompleted {
+		if err = updateStockTakeCounts(ctx, qtx, input.ID, input.Items, input.Status == domain.StockTakeStatusCompleted); err != nil {
+			return err
+		}
+	}
 
 	statusVal := sqlc.NullErpStockTakesStatus{
 		ErpStockTakesStatus: sqlc.ErpStockTakesStatus(input.Status),
 		Valid:               true,
 	}
-
 	switch input.Status {
 	case domain.StockTakeStatusInProgress:
 		err = qtx.UpdateStockTakeStatusInProgress(ctx, sqlc.UpdateStockTakeStatusInProgressParams{
-			Status:     statusVal,
-			Notes:      sqlutil.NullString(input.Notes),
-			BusinessID: businessID,
-			ID:         input.ID,
+			Status: statusVal, Notes: sqlutil.NullString(input.Notes), BusinessID: businessID, ID: input.ID,
 		})
 	case domain.StockTakeStatusCompleted:
 		err = qtx.UpdateStockTakeStatusCompleted(ctx, sqlc.UpdateStockTakeStatusCompletedParams{
-			Status:     statusVal,
-			Notes:      sqlutil.NullString(input.Notes),
-			BusinessID: businessID,
-			ID:         input.ID,
+			Status: statusVal, Notes: sqlutil.NullString(input.Notes), BusinessID: businessID, ID: input.ID,
 		})
 	default:
 		err = qtx.UpdateStockTakeStatus(ctx, sqlc.UpdateStockTakeStatusParams{
-			Status:     statusVal,
-			Notes:      sqlutil.NullString(input.Notes),
-			BusinessID: businessID,
-			ID:         input.ID,
+			Status: statusVal, Notes: sqlutil.NullString(input.Notes), BusinessID: businessID, ID: input.ID,
 		})
 	}
-
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update stock take", logger.Error(err))
-
 		return err
 	}
 
-	if len(input.Items) > 0 {
-		err = qtx.DeleteStockTakeItems(ctx, input.ID)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to clear stock take items", logger.Error(err))
-
-			return err
-		}
-
-		for _, item := range input.Items {
-			variance := item.CountedQty - item.ExpectedQty
-			_, err = qtx.InsertStockTakeItem(ctx, sqlc.InsertStockTakeItemParams{
-				StockTakeID: input.ID,
-				ProductID:   item.ProductID,
-				ExpectedQty: strconv.FormatFloat(item.ExpectedQty, 'f', -1, 64),
-				CountedQty:  strconv.FormatFloat(item.CountedQty, 'f', -1, 64),
-				Variance:    strconv.FormatFloat(variance, 'f', -1, 64),
-			})
-			if err != nil {
-				logger.Ctx(ctx).Error("Failed to insert stock take item", logger.Error(err))
-
-				return err
-			}
-		}
-	}
-
-	// On the draft/in_progress -> completed transition, reconcile on-hand stock
-	// to the counted quantities and ledger the variance.
 	if input.Status == domain.StockTakeStatusCompleted && !alreadyCompleted {
-		if err = r.reconcileStockTake(ctx, tx, qtx, businessID, input.ID, warehouseID); err != nil {
+		if err = r.reconcileStockTake(ctx, tx, qtx, businessID, input.ID, prior.WarehouseID); err != nil {
 			logger.Ctx(ctx).Error("Failed to reconcile stock take", logger.Error(err))
 			return err
 		}
 	}
-
-	if err = tx.Commit(); err != nil {
-		logger.Ctx(ctx).Error("Failed to commit stock take update", logger.Error(err))
-
+	if err = appendStockTakeAuditEvents(ctx, tx, events, input.ID); err != nil {
 		return err
 	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit stock take update", logger.Error(err))
+		return err
+	}
+	return nil
+}
 
+func updateStockTakeCounts(ctx context.Context, qtx *sqlc.Queries, stockTakeID int64, submitted []domain.StockTakeItemInput, requireAll bool) error {
+	existing, err := qtx.GetStockTakeItems(ctx, stockTakeID)
+	if err != nil {
+		return err
+	}
+	if requireAll && len(submitted) != len(existing) {
+		return domain.ErrStockTakeIncomplete
+	}
+	if len(submitted) == 0 {
+		return nil
+	}
+
+	byProduct := make(map[int64]sqlc.ErpStockTakeItem, len(existing))
+	for _, item := range existing {
+		byProduct[item.ProductID] = item
+	}
+	matched := make(map[int64]struct{}, len(submitted))
+	for _, item := range submitted {
+		if item.CountedQty < 0 || math.IsNaN(item.CountedQty) || math.IsInf(item.CountedQty, 0) {
+			return domain.ErrStockTakeIncomplete
+		}
+		if _, duplicate := matched[item.ProductID]; duplicate {
+			return domain.ErrStockTakeIncomplete
+		}
+		stored, ok := byProduct[item.ProductID]
+		if !ok {
+			return domain.ErrStockTakeReferenceNotFound
+		}
+		expected := sqlutil.ParseDecimal(stored.ExpectedQty)
+		counted := strconv.FormatFloat(item.CountedQty, 'f', -1, 64)
+		variance := strconv.FormatFloat(item.CountedQty-expected, 'f', -1, 64)
+		updated, err := qtx.UpdateStockTakeItemCount(ctx, sqlc.UpdateStockTakeItemCountParams{
+			CountedQty:  sql.NullString{String: counted, Valid: true},
+			Variance:    sql.NullString{String: variance, Valid: true},
+			StockTakeID: stockTakeID,
+			ProductID:   item.ProductID,
+		})
+		if err != nil {
+			return err
+		}
+		if updated != 1 {
+			return domain.ErrStockTakeReferenceNotFound
+		}
+		matched[item.ProductID] = struct{}{}
+	}
+	if requireAll && len(matched) != len(existing) {
+		return domain.ErrStockTakeIncomplete
+	}
+	return nil
+}
+
+func appendStockTakeAuditEvents(ctx context.Context, tx *sql.Tx, events []audit.Event, entityID int64) error {
+	for _, event := range events {
+		event.EntityID = entityID
+		if err := audit.AppendTx(ctx, tx, event); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -337,7 +413,10 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 	}
 
 	for _, it := range items {
-		counted, perr := strconv.ParseFloat(it.CountedQty, 64)
+		if !it.CountedQty.Valid {
+			continue
+		}
+		counted, perr := strconv.ParseFloat(it.CountedQty.String, 64)
 		if perr != nil {
 			return perr
 		}

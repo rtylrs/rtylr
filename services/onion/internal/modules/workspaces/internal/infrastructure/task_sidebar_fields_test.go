@@ -479,3 +479,34 @@ func TestWorkspaces_SetTaskFocusPin_IsIdempotentAndUnpins(t *testing.T) {
 		t.Fatalf("pin count after unpin = %d, want 0", got)
 	}
 }
+
+func TestWorkspaces_GetFocusPinsIsBusinessAndUserScoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "PinReadScope")
+	const alice = int64(90103)
+	const otherBusiness = int64(9010301)
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM flow_task_focus_pins WHERE task_id = ?", taskID)
+	})
+
+	if err := repo.SetTaskFocusPin(ctx, taskID, alice, businessID, true); err != nil {
+		t.Fatalf("pin: %v", err)
+	}
+	pins, err := repo.GetFocusPins(ctx, alice, businessID, []int64{taskID})
+	if err != nil {
+		t.Fatalf("GetFocusPins: %v", err)
+	}
+	if !pins[taskID] {
+		t.Fatal("caller's pin was not returned")
+	}
+	pins, err = repo.GetFocusPins(ctx, alice, otherBusiness, []int64{taskID})
+	if err != nil {
+		t.Fatalf("GetFocusPins other business: %v", err)
+	}
+	if pins[taskID] {
+		t.Fatal("pin leaked across business scope")
+	}
+}

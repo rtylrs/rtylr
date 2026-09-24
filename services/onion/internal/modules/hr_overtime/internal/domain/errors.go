@@ -11,4 +11,5 @@ var (
 	ErrOvertimeApproverNotAllowed   = errors.New("approver is not allowed by the overtime approval chain")
 	ErrOvertimeSelfApproval         = errors.New("employees cannot approve their own overtime requests")
 	ErrApprovalChainNotConfigured   = errors.New("approval chain not configured for overtime requests")
+	ErrOvertimeRejectionReason      = errors.New("rejection reason is required when rejecting an overtime request")
 )

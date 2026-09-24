@@ -2,12 +2,38 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
 	"github.com/voxire/onion/internal/modules/journal/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func ensureJournalTestAccounts(t *testing.T, db *sql.DB, count int) []int64 {
+	t.Helper()
+	ids := make([]int64, 0, count)
+	for i := 0; i < count; i++ {
+		result, err := db.ExecContext(context.Background(), `
+			INSERT INTO finance_accounts (owner_id, business_id, name, type, currency, balance, is_active)
+			VALUES (?, ?, ?, 'asset', 'USD', 0, TRUE)`,
+			testutil.OwnerID, testutil.BusinessID, fmt.Sprintf("Journal test account %d", i+1))
+		if err != nil {
+			t.Fatalf("insert journal test account: %v", err)
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			t.Fatalf("journal test account id: %v", err)
+		}
+		ids = append(ids, id)
+		t.Cleanup(func() {
+			_, _ = db.ExecContext(context.Background(), `DELETE FROM finance_accounts WHERE id = ?`, id)
+		})
+	}
+	return ids
+}
 
 func TestListJournalEntries_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
@@ -59,13 +85,14 @@ func TestCreateJournalEntry_WithLines_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	accounts := ensureJournalTestAccounts(t, db, 2)
 
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-02",
 		Description: "Test entry with lines",
 		Lines: []domain.JournalLineInput{
-			{AccountID: 1, Debit: 100.00, Credit: 0},
-			{AccountID: 2, Debit: 0, Credit: 100.00},
+			{AccountID: accounts[0], Debit: 100.00, Credit: 0},
+			{AccountID: accounts[1], Debit: 0, Credit: 100.00},
 		},
 	})
 	if err != nil {
@@ -73,6 +100,58 @@ func TestCreateJournalEntry_WithLines_NoError(t *testing.T) {
 	}
 	if id == 0 {
 		t.Fatal("Create returned id=0")
+	}
+}
+
+func TestCreateJournalEntry_RejectsAccountFromAnotherBusiness(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const (
+		businessA int64 = 907301
+		businessB int64 = 907302
+		ownerA    int64 = 907201
+		ownerB    int64 = 907202
+	)
+	testutil.EnsureBusiness(t, db, businessA, ownerA)
+	testutil.EnsureBusiness(t, db, businessB, ownerB)
+
+	insertAccount := func(businessID, ownerID int64, name string) int64 {
+		t.Helper()
+		result, err := db.ExecContext(ctx, `
+			INSERT INTO finance_accounts (owner_id, business_id, name, type, currency, balance, is_active)
+			VALUES (?, ?, ?, 'asset', 'USD', 0, TRUE)`, ownerID, businessID, name)
+		if err != nil {
+			t.Fatalf("insert account for business %d: %v", businessID, err)
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			t.Fatalf("account id for business %d: %v", businessID, err)
+		}
+		t.Cleanup(func() { _, _ = db.ExecContext(context.Background(), `DELETE FROM finance_accounts WHERE id = ?`, id) })
+		return id
+	}
+	accountA := insertAccount(businessA, ownerA, "Business A cash")
+	accountB := insertAccount(businessB, ownerB, "Business B cash")
+
+	_, err := repo.Create(ctx, ownerA, businessA, domain.JournalEntryInput{
+		Date: "2026-09-20",
+		Lines: []domain.JournalLineInput{
+			{AccountID: accountA, Debit: 100},
+			{AccountID: accountB, Credit: 100},
+		},
+	})
+	if !errors.Is(err, domain.ErrInvalidJournalEntry) {
+		t.Fatalf("cross-business account error = %v, want ErrInvalidJournalEntry", err)
+	}
+
+	var entries int
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM finance_journal_entries WHERE business_id = ?`, businessA).Scan(&entries); err != nil {
+		t.Fatalf("count rejected journal entries: %v", err)
+	}
+	if entries != 0 {
+		t.Fatalf("rejected cross-tenant entry left %d header rows", entries)
 	}
 }
 
@@ -116,13 +195,14 @@ func TestGetLines_AfterCreateWithLines(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	accounts := ensureJournalTestAccounts(t, db, 2)
 
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-04",
 		Description: "Lines test",
 		Lines: []domain.JournalLineInput{
-			{AccountID: 1, Debit: 50.00, Credit: 0},
-			{AccountID: 3, Debit: 0, Credit: 50.00},
+			{AccountID: accounts[0], Debit: 50.00, Credit: 0},
+			{AccountID: accounts[1], Debit: 0, Credit: 50.00},
 		},
 	})
 	if err != nil {
@@ -350,13 +430,14 @@ func TestGetLines_LineDeltaMatch(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	accounts := ensureJournalTestAccounts(t, db, 2)
 
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-10-03",
 		Description: "Delta check",
 		Lines: []domain.JournalLineInput{
-			{AccountID: 1, Debit: 200, Credit: 0},
-			{AccountID: 2, Debit: 0, Credit: 200},
+			{AccountID: accounts[0], Debit: 200, Credit: 0},
+			{AccountID: accounts[1], Debit: 0, Credit: 200},
 		},
 	})
 	if err != nil {
@@ -493,14 +574,15 @@ func TestCreateJournalEntry_MultipleLines_CountMatches(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	accounts := ensureJournalTestAccounts(t, db, 3)
 
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2026-01-10",
 		Description: "Multi-line count",
 		Lines: []domain.JournalLineInput{
-			{AccountID: 1, Debit: 100, Credit: 0},
-			{AccountID: 2, Debit: 50, Credit: 0},
-			{AccountID: 3, Debit: 0, Credit: 150},
+			{AccountID: accounts[0], Debit: 100, Credit: 0},
+			{AccountID: accounts[1], Debit: 50, Credit: 0},
+			{AccountID: accounts[2], Debit: 0, Credit: 150},
 		},
 	})
 	if err != nil {

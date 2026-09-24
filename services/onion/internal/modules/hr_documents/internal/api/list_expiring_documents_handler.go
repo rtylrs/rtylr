@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
-	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
 func ListExpiringDocumentsRoutes() []string { return []string{"/hr/documents/expiring"} }
@@ -22,10 +21,13 @@ type ListExpiringDocumentsRequest struct {
 	Offset int32 `json:"offset"`
 }
 
-func (h *ListExpiringDocumentsHandler) Serve(ctx context.Context, req *ListExpiringDocumentsRequest) (ListDocumentsResponse, error) {
+func (h *ListExpiringDocumentsHandler) Serve(ctx context.Context, req *ListExpiringDocumentsRequest) (any, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListDocumentsResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireDocumentPermission(ctx, "hr:employees:view"); err != nil {
+		return nil, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -44,17 +46,15 @@ func (h *ListExpiringDocumentsHandler) Serve(ctx context.Context, req *ListExpir
 	if req.Limit > 100 {
 		req.Limit = 100
 	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
 
-	docs, total, err := h.Service.ListExpiringDocuments(ctx, businessID, days, req.Limit, req.Offset)
+	docs, _, err := h.Service.ListExpiringDocuments(ctx, businessID, days, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list expiring documents", logger.Any("owner_id", device.User.UserID), logger.Any("days", days), logger.Error(err))
 		return ListDocumentsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list expiring documents")
 	}
 
-	payloads := make([]*hrdocumentv1.EmployeeDocumentPayload, 0, len(docs))
-	for _, d := range docs {
-		payloads = append(payloads, documentToProto(d))
-	}
-
-	return ListDocumentsResponse{Documents: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return legacyDocumentsResponse(docs), nil
 }

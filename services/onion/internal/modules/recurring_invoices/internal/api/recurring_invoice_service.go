@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	financerecurringinvoicev1 "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1"
@@ -21,6 +22,14 @@ type RecurringInvoiceAPI struct {
 
 func NewRecurringInvoiceAPI(service *application.Service) *RecurringInvoiceAPI {
 	return &RecurringInvoiceAPI{Service: service}
+}
+
+func requireRecurringInvoicePermission(ctx context.Context, permission string) error {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppFinance, permission) {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
 }
 
 func recurringInvoiceBusinessID(ctx context.Context) (int64, error) {
@@ -91,12 +100,25 @@ func recurringInvoiceInput(templateID *int64, frequency, nextInvoiceDate string,
 	}, nil
 }
 
-func (a *RecurringInvoiceAPI) ListRecurringInvoices(ctx context.Context, _ *financerecurringinvoicev1.ListRecurringInvoicesRequest) (*financerecurringinvoicev1.ListRecurringInvoicesResponse, error) {
+func (a *RecurringInvoiceAPI) ListRecurringInvoices(ctx context.Context, req *financerecurringinvoicev1.ListRecurringInvoicesRequest) (*financerecurringinvoicev1.ListRecurringInvoicesResponse, error) {
+	if err := requireRecurringInvoicePermission(ctx, "finance:recurring_invoices:view"); err != nil {
+		return nil, err
+	}
 	businessID, err := recurringInvoiceBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := a.Service.List(ctx, businessID)
+	page, pageSize := req.GetPage(), req.GetPageSize()
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	rows, hasMore, err := a.Service.List(ctx, businessID, page, pageSize)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list recurring invoices")
 	}
@@ -104,10 +126,18 @@ func (a *RecurringInvoiceAPI) ListRecurringInvoices(ctx context.Context, _ *fina
 	for _, row := range rows {
 		out = append(out, recurringInvoiceToProto(row))
 	}
-	return &financerecurringinvoicev1.ListRecurringInvoicesResponse{RecurringInvoices: out}, nil
+	return &financerecurringinvoicev1.ListRecurringInvoicesResponse{
+		RecurringInvoices: out,
+		Page:              page,
+		PageSize:          pageSize,
+		HasMore:           hasMore,
+	}, nil
 }
 
 func (a *RecurringInvoiceAPI) CreateRecurringInvoice(ctx context.Context, req *financerecurringinvoicev1.CreateRecurringInvoiceRequest) (*financerecurringinvoicev1.CreateRecurringInvoiceResponse, error) {
+	if err := requireRecurringInvoicePermission(ctx, "finance:recurring_invoices:manage"); err != nil {
+		return nil, err
+	}
 	businessID, err := recurringInvoiceBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -128,23 +158,27 @@ func (a *RecurringInvoiceAPI) CreateRecurringInvoice(ctx context.Context, req *f
 }
 
 func (a *RecurringInvoiceAPI) GetRecurringInvoice(ctx context.Context, req *financerecurringinvoicev1.GetRecurringInvoiceRequest) (*financerecurringinvoicev1.GetRecurringInvoiceResponse, error) {
+	if err := requireRecurringInvoicePermission(ctx, "finance:recurring_invoices:view"); err != nil {
+		return nil, err
+	}
 	businessID, err := recurringInvoiceBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := a.Service.List(ctx, businessID)
+	row, err := a.Service.Get(ctx, businessID, req.GetId())
+	if errors.Is(err, domain.ErrRecurringInvoiceNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Recurring invoice not found")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get recurring invoice")
 	}
-	for _, row := range rows {
-		if row.ID == req.GetId() {
-			return &financerecurringinvoicev1.GetRecurringInvoiceResponse{Invoice: recurringInvoiceToProto(row)}, nil
-		}
-	}
-	return nil, onekiterrors.New(http.StatusNotFound, "Recurring invoice not found")
+	return &financerecurringinvoicev1.GetRecurringInvoiceResponse{Invoice: recurringInvoiceToProto(row)}, nil
 }
 
 func (a *RecurringInvoiceAPI) UpdateRecurringInvoice(ctx context.Context, req *financerecurringinvoicev1.UpdateRecurringInvoiceRequest) (*financerecurringinvoicev1.UpdateRecurringInvoiceResponse, error) {
+	if err := requireRecurringInvoicePermission(ctx, "finance:recurring_invoices:manage"); err != nil {
+		return nil, err
+	}
 	businessID, err := recurringInvoiceBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -167,6 +201,9 @@ func (a *RecurringInvoiceAPI) UpdateRecurringInvoice(ctx context.Context, req *f
 }
 
 func (a *RecurringInvoiceAPI) PauseRecurringInvoice(ctx context.Context, req *financerecurringinvoicev1.PauseRecurringInvoiceRequest) (*financerecurringinvoicev1.PauseRecurringInvoiceResponse, error) {
+	if err := requireRecurringInvoicePermission(ctx, "finance:recurring_invoices:manage"); err != nil {
+		return nil, err
+	}
 	businessID, err := recurringInvoiceBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -181,6 +218,9 @@ func (a *RecurringInvoiceAPI) PauseRecurringInvoice(ctx context.Context, req *fi
 }
 
 func (a *RecurringInvoiceAPI) ResumeRecurringInvoice(ctx context.Context, req *financerecurringinvoicev1.ResumeRecurringInvoiceRequest) (*financerecurringinvoicev1.ResumeRecurringInvoiceResponse, error) {
+	if err := requireRecurringInvoicePermission(ctx, "finance:recurring_invoices:manage"); err != nil {
+		return nil, err
+	}
 	businessID, err := recurringInvoiceBusinessID(ctx)
 	if err != nil {
 		return nil, err

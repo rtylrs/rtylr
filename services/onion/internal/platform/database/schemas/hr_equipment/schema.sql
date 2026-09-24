@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS hr_assets (
     location_id BIGINT,
     assigned_to BIGINT,
     status VARCHAR(20) NOT NULL DEFAULT 'available',
+    `condition` VARCHAR(20) NOT NULL DEFAULT 'good',
     purchase_date DATE,
     purchase_price DECIMAL(12,2),
     notes TEXT,

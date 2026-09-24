@@ -455,6 +455,20 @@ const myTasksDoneWindowDays = 14
 // for the global "My tasks" board, which intentionally spans every workspace
 // the user belongs to.
 func (r *Repository) GetMyTasks(ctx context.Context, userID, workspaceID, limit, offset int64) ([]domain.Task, int64, error) {
+	return r.getMyTasks(ctx, userID, 0, workspaceID, limit, offset)
+}
+
+// GetMyTasksForBusiness is the tenant-safe v2 read used by Today. The legacy
+// GetMyTasks method above remains available to workspace-era callers that do
+// not carry a business scope; v2 callers must use this method.
+func (r *Repository) GetMyTasksForBusiness(ctx context.Context, userID, businessID, workspaceID, limit, offset int64) ([]domain.Task, int64, error) {
+	if businessID <= 0 {
+		return nil, 0, domain.ErrUnauthorized
+	}
+	return r.getMyTasks(ctx, userID, businessID, workspaceID, limit, offset)
+}
+
+func (r *Repository) getMyTasks(ctx context.Context, userID, businessID, workspaceID, limit, offset int64) ([]domain.Task, int64, error) {
 	// All active work assigned to the user, plus tasks they completed within the
 	// recent window so the board's Done column isn't always empty. Cancelled tasks
 	// stay hidden. completed_at is stamped by both the status and partial-update
@@ -473,6 +487,9 @@ func (r *Repository) GetMyTasks(ctx context.Context, userID, workspaceID, limit,
 	}
 	if workspaceID != 0 {
 		conds = append(conds, sq.Eq{"t.workspace_id": workspaceID})
+	}
+	if businessID != 0 {
+		conds = append(conds, sq.Eq{"t.business_id": businessID})
 	}
 
 	total, err := r.countTasks(ctx, conds)
@@ -621,14 +638,51 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	return nil
 }
 
+// GetFocusPins returns the caller's pins for the supplied tasks. The task
+// business predicate is repeated on the join so a stale pin row can never turn
+// into a response for a different tenant.
+func (r *Repository) GetFocusPins(ctx context.Context, userID, businessID int64, taskIDs []int64) (map[int64]bool, error) {
+	pins := make(map[int64]bool, len(taskIDs))
+	if len(taskIDs) == 0 {
+		return pins, nil
+	}
+
+	q, args, err := sq.
+		Select("fp.task_id").
+		From("flow_task_focus_pins fp").
+		Join("flow_tasks t ON t.id = fp.task_id").
+		Where(sq.Eq{
+			"fp.user_id":     userID,
+			"fp.business_id": businessID,
+			"t.business_id":  businessID,
+			"fp.task_id":     taskIDs,
+		}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.pool.QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var taskID int64
+		if err := rows.Scan(&taskID); err != nil {
+			return nil, err
+		}
+		pins[taskID] = true
+	}
+	return pins, rows.Err()
+}
+
 // SetTaskFocusPin pins or unpins a task in one user's Today view. The pin is
 // per-user by design: Today is a personal view, so a column on flow_tasks would
 // put one member's planning in another member's list.
 //
-// businessID is written as a plain column value here, not a WHERE guard, so
-// this method trusts the caller to have already confirmed the task belongs to
-// that business. The API handler enforces that via RequireTaskRole before
-// calling in.
+// The pin row is still guarded by the task's business on insert; callers do
+// not get to attach a pin to a task outside the resolved tenant.
 func (r *Repository) SetTaskFocusPin(ctx context.Context, taskID, userID, businessID int64, pinned bool) error {
 	if !pinned {
 		_, err := r.pool.ExecContext(ctx,
@@ -640,11 +694,13 @@ func (r *Repository) SetTaskFocusPin(ctx context.Context, taskID, userID, busine
 		}
 		return err
 	}
-	// INSERT IGNORE rather than a read-then-write: the unique key on
-	// (task_id, user_id) makes a repeat pin a no-op without a round trip.
+	// INSERT ... SELECT keeps the business boundary in the write itself. The
+	// service also checks the task before calling this, but a repository method
+	// must not rely solely on that caller convention.
 	_, err := r.pool.ExecContext(ctx,
-		"INSERT IGNORE INTO flow_task_focus_pins (task_id, user_id, business_id) VALUES (?, ?, ?)",
-		taskID, userID, businessID,
+		`INSERT IGNORE INTO flow_task_focus_pins (task_id, user_id, business_id)
+		 SELECT ?, ?, ? FROM flow_tasks WHERE id = ? AND business_id = ?`,
+		taskID, userID, businessID, taskID, businessID,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("SetTaskFocusPin insert failed", logger.Error(err))
@@ -813,7 +869,7 @@ func enrichedTaskColumns(includeDescription bool) []string {
 		"t.id", "t.project_id", "t.workspace_id", "t.owner_id", "t.business_id", "t.parent_task_id", "t.section_id",
 		"t.title", descriptionColumn, "COALESCE(t.status, 'todo') AS status", "COALESCE(t.priority, 'none') AS priority",
 		"t.assignee_id", "t.reporter_id", "t.due_date", "t.start_date", "t.completed_at",
-		"t.estimated_hours", "t.actual_hours", "t.sort_order", "t.labels",
+		"t.estimated_hours", "t.actual_hours", "t.effort_minutes", "t.sort_order", "t.labels",
 		"COALESCE(t.archived, FALSE) AS archived",
 		"t.created_at", "t.updated_at",
 		"COALESCE(p.name, '')  AS project_name",
@@ -890,6 +946,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 	var parentID, sectionID, assigneeID, statusID sql.NullInt64
 	var dueDate, startDate, completedAt sql.NullTime
 	var estHours, actHours sql.NullFloat64
+	var effortMinutes sql.NullInt64
 	var labelsRaw []byte
 
 	err := rows.Scan(
@@ -897,7 +954,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		&t.Title, &desc, &t.Status, &t.Priority,
 		&assigneeID, &t.ReporterID,
 		&dueDate, &startDate, &completedAt,
-		&estHours, &actHours, &t.SortOrder, &labelsRaw, &t.Archived,
+		&estHours, &actHours, &effortMinutes, &t.SortOrder, &labelsRaw, &t.Archived,
 		&t.CreatedAt, &t.UpdatedAt,
 		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
 		&statusID, &t.StatusName, &t.StatusColor,
@@ -934,6 +991,10 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 	}
 	if actHours.Valid {
 		t.ActualHours = &actHours.Float64
+	}
+	if effortMinutes.Valid {
+		value := int32(effortMinutes.Int64) // #nosec G115 -- effort_minutes is an INT column.
+		t.EffortMinutes = &value
 	}
 	if len(labelsRaw) > 0 {
 		if unErr := json.Unmarshal(labelsRaw, &t.Labels); unErr != nil {
@@ -1394,23 +1455,49 @@ func (r *Repository) DeleteColumn(ctx context.Context, id, actorID int64) error 
 	return requireAffected(res)
 }
 
+const moveTaskToColumnSQL = `UPDATE flow_tasks
+SET section_id = ?, updated_at = NOW()
+WHERE flow_tasks.id = ?
+  AND (
+    EXISTS (SELECT 1 FROM flow_project_members pm
+            WHERE pm.project_id = flow_tasks.project_id AND pm.user_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_projects p
+               WHERE p.id = flow_tasks.project_id
+                 AND (p.owner_id = ? OR p.created_by = ?))
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_tasks.workspace_id AND w.owner_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_tasks.workspace_id AND wm.user_id = ?)
+  )
+  AND (
+    ? = 0
+    OR EXISTS (
+      SELECT 1 FROM flow_project_columns c
+      WHERE c.id = ?
+        AND (
+          c.project_id = flow_tasks.project_id
+          OR (
+            flow_tasks.workspace_id <> 0
+            AND c.workspace_id = flow_tasks.workspace_id
+          )
+        )
+    )
+  )`
+
 func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorID int64) error {
 	var sectionID sql.NullInt64
 	if columnID != 0 {
 		sectionID = sql.NullInt64{Int64: columnID, Valid: true}
 	}
-	res, err := r.queries.MoveTaskToColumn(ctx, sqlc.MoveTaskToColumnParams{
-		SectionID: sectionID,
-		ID:        taskID,
-		// One actor across every branch: project member, project owner, project
-		// creator, then the two legacy workspace branches.
-		UserID:    actorID,
-		OwnerID:   actorID,
-		CreatedBy: actorID,
-		OwnerID_2: actorID,
-		UserID_2:  actorID,
-		ColumnID:  columnID,
-	})
+	res, err := r.pool.ExecContext(ctx, moveTaskToColumnSQL,
+		sectionID,
+		taskID,
+		actorID,
+		actorID,
+		actorID,
+		actorID,
+		actorID,
+		columnID,
+		columnID,
+	)
 	if err != nil {
 		logger.Ctx(ctx).Error("MoveTaskToColumn failed", logger.Error(err))
 		return err

@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -125,10 +127,16 @@ func buildConfig() (*trinodriver.Config, error) {
 	user := config.GetTrinoUser()
 	password := config.GetTrinoPassword()
 
-	serverURI := fmt.Sprintf("%s://%s@%s:%s", scheme, user, host, port)
-	if password != "" {
-		serverURI = fmt.Sprintf("%s://%s:%s@%s:%s", scheme, user, password, host, port)
+	serverURL := &url.URL{
+		Scheme: scheme,
+		Host:   net.JoinHostPort(strings.Trim(host, "[]"), port),
 	}
+	if password == "" {
+		serverURL.User = url.User(user)
+	} else {
+		serverURL.User = url.UserPassword(user, password)
+	}
+	serverURI := serverURL.String()
 
 	queryTimeout := defaultQueryTimeout
 	cfg := &trinodriver.Config{

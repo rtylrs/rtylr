@@ -287,6 +287,22 @@ func (s *Service) CreateOrder(ctx context.Context, businessID, ownerID, staffID 
 	return orderID, nil
 }
 
+// ResumeOrder atomically replaces the lines of an editable held/pending order
+// and returns it to the pending workflow. Paid, refunded, voided, and
+// kitchen-started orders are rejected by the repository before any write.
+func (s *Service) ResumeOrder(ctx context.Context, ownerID, staffID, orderID int64, input domain.OrderInput) error {
+	if err := s.repo.ResumeOrder(ctx, ownerID, staffID, orderID, input); err != nil {
+		return err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	wsbus.Publish(wsbus.Event{
+		Topic:    ownerTopic(ownerID),
+		Type:     "pos:order:resumed",
+		EntityID: orderID,
+	})
+	return nil
+}
+
 func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64, status domain.OrderStatus) error {
 	if !domain.IsOrderStatus(status) {
 		return domain.ErrInvalidOrderStatus

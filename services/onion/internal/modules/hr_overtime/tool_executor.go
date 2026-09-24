@@ -180,6 +180,7 @@ func hrOvertimeRequestToolPayload(request domain.OvertimeRequestRecord) map[stri
 		"reason":                 request.Reason,
 		"status":                 request.Status,
 		"current_approval_level": request.CurrentApprovalLevel,
+		"rejection_reason":       request.RejectionReason,
 		"approved_by":            request.ApprovedBy,
 		"multiplier_applied":     request.MultiplierApplied,
 	}

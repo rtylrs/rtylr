@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
@@ -31,7 +33,10 @@ type CreateEquipmentRequestResponse struct {
 }
 
 func (h *CreateEquipmentRequestHandler) Validate(_ context.Context, req *CreateEquipmentRequestRequest) error {
-	if req.EmployeeID == 0 {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
+	if req.EmployeeID <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
 	req.ItemName = strings.TrimSpace(req.ItemName)
@@ -41,6 +46,14 @@ func (h *CreateEquipmentRequestHandler) Validate(_ context.Context, req *CreateE
 	if req.Quantity <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "quantity must be greater than 0")
 	}
+	req.NeededByDate = strings.TrimSpace(req.NeededByDate)
+	if req.NeededByDate != "" {
+		parsed, err := time.Parse("2006-01-02", req.NeededByDate)
+		if err != nil {
+			return onekiterrors.New(http.StatusBadRequest, "needed_by_date must be in YYYY-MM-DD format")
+		}
+		req.NeededByDate = parsed.Format("2006-01-02")
+	}
 	return nil
 }
 
@@ -48,6 +61,9 @@ func (h *CreateEquipmentRequestHandler) Serve(ctx context.Context, req *CreateEq
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return CreateEquipmentRequestResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := h.Validate(ctx, req); err != nil {
+		return CreateEquipmentRequestResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -63,7 +79,19 @@ func (h *CreateEquipmentRequestHandler) Serve(ctx context.Context, req *CreateEq
 		NeededByDate: req.NeededByDate,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create equipment request", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		if errors.Is(err, application.ErrEquipmentEmployeeNotFound) {
+			return CreateEquipmentRequestResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found in this business")
+		}
+		if errors.Is(err, application.ErrEquipmentAccessDenied) {
+			return CreateEquipmentRequestResponse{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, application.ErrInvalidNeededByDate) {
+			return CreateEquipmentRequestResponse{}, onekiterrors.New(http.StatusBadRequest, "needed_by_date must be in YYYY-MM-DD format")
+		}
+		if errors.Is(err, domain.ErrEmptyItemName) || errors.Is(err, domain.ErrNonPositiveQuantity) {
+			return CreateEquipmentRequestResponse{}, onekiterrors.New(http.StatusBadRequest, "invalid equipment request")
+		}
+		logger.Ctx(ctx).Error("failed to create equipment request", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateEquipmentRequestResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create equipment request")
 	}
 

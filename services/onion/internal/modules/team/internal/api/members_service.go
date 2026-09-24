@@ -21,7 +21,7 @@ func NewMembersAPI(service *application.Service) *MembersAPI {
 	return &MembersAPI{Service: service}
 }
 
-func (a *MembersAPI) ListTeam(ctx context.Context, _ *hubteammembersv1.ListTeamRequest) (*hubteammembersv1.ListTeamResponse, error) {
+func (a *MembersAPI) ListTeam(ctx context.Context, req *hubteammembersv1.ListTeamRequest) (*hubteammembersv1.ListTeamResponse, error) {
 	device, permissionErr := requireHubPermission(ctx, "hub:team:view")
 	if permissionErr != nil {
 		return nil, permissionErr
@@ -31,9 +31,28 @@ func (a *MembersAPI) ListTeam(ctx context.Context, _ *hubteammembersv1.ListTeamR
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	users, _, err := a.Service.ListStaffUsersByBusiness(ctx, businessID, 1, 50)
+	page := req.GetPage()
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.GetPageSize()
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	users, _, err := a.Service.ListStaffUsersByBusiness(ctx, businessID, int64(page), int64(pageSize))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list users")
+	}
+	total, err := a.Service.CountStaffUsersByBusiness(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to count users")
+	}
+	const maxInt32 = int64(1<<31 - 1)
+	if total > maxInt32 {
+		total = maxInt32
 	}
 
 	payloads := make([]*hubteammembersv1.StaffUserPayload, 0, len(users))
@@ -41,7 +60,7 @@ func (a *MembersAPI) ListTeam(ctx context.Context, _ *hubteammembersv1.ListTeamR
 		payloads = append(payloads, newProtoStaffUser(u))
 	}
 
-	return &hubteammembersv1.ListTeamResponse{Users: payloads}, nil
+	return &hubteammembersv1.ListTeamResponse{Users: payloads, Total: int32(total)}, nil
 }
 
 func (a *MembersAPI) GetMember(ctx context.Context, req *hubteammembersv1.GetMemberRequest) (*hubteammembersv1.GetMemberResponse, error) {

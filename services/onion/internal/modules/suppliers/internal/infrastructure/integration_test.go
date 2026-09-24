@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -460,6 +461,59 @@ func TestGetSupplierByID_WrongOwner_NotFound(t *testing.T) {
 	_, err := repo.GetSupplierByID(ctx, 9999999, 5101)
 	if !errors.Is(err, domain.ErrSupplierNotFound) {
 		t.Fatalf("expected ErrSupplierNotFound for wrong owner, got %v", err)
+	}
+}
+
+func TestCreateSupplier_AuditFailureRollsBackSupplier(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const name = "Audit rollback supplier"
+
+	id, err := repo.CreateSupplier(ctx, testutil.OwnerID, domain.SupplierInput{Name: name, IsActive: true}, audit.Event{
+		BusinessID: testutil.OwnerID,
+		EntityType: "supplier",
+		Action:     "created",
+		NewValues:  make(chan struct{}),
+	})
+	if err == nil {
+		t.Fatalf("CreateSupplier succeeded with id=%d despite audit failure", id)
+	}
+
+	var count int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM erp_suppliers
+		WHERE business_id = ? AND name = ?`, testutil.OwnerID, name).Scan(&count); err != nil {
+		t.Fatalf("count rolled-back supplier: %v", err)
+	}
+	if count != 0 {
+		t.Fatalf("supplier count after audit rollback = %d, want 0", count)
+	}
+}
+
+func TestUpdateSupplier_AuditFailureRollsBackUpdate(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	id, err := repo.CreateSupplier(ctx, testutil.OwnerID, domain.SupplierInput{Name: "Before audit", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateSupplier: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteSupplier(context.Background(), testutil.OwnerID, id) })
+
+	err = repo.UpdateSupplier(ctx, testutil.OwnerID, id, domain.SupplierInput{Name: "After audit", IsActive: true}, audit.Event{
+		BusinessID: testutil.OwnerID, EntityType: "supplier", EntityID: id,
+		Action: "updated", NewValues: make(chan struct{}),
+	})
+	if err == nil {
+		t.Fatal("UpdateSupplier succeeded despite audit failure")
+	}
+	stored, err := repo.GetSupplierByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetSupplierByID: %v", err)
+	}
+	if stored.Name != "Before audit" {
+		t.Fatalf("name after audit rollback = %q, want Before audit", stored.Name)
 	}
 }
 

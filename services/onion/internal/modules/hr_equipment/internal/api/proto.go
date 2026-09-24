@@ -43,6 +43,12 @@ func assetToProto(a domain.AssetRecord) *hrequipmentv1.AssetPayload {
 	// hr_assets stores only purchase_date, so there is no assignment timestamp
 	// to report. Leaving assigned_date unset keeps it from advertising the
 	// purchase date as an assignment that never happened.
+	condition := a.Condition
+	if condition == "" {
+		// Rows created before the physical-condition column was introduced are
+		// lifecycle-status records, not evidence that the condition is empty.
+		condition = domain.AssetConditionGood
+	}
 	return &hrequipmentv1.AssetPayload{
 		Id:           a.ID,
 		OwnerId:      a.OwnerID,
@@ -50,7 +56,7 @@ func assetToProto(a domain.AssetRecord) *hrequipmentv1.AssetPayload {
 		Name:         a.Name,
 		SerialNumber: serialNumber,
 		ReturnedDate: returnedDate,
-		Condition:    a.Status,
+		Condition:    condition,
 		CreatedAt:    a.CreatedAt.Unix(),
 		UpdatedAt:    a.UpdatedAt.Unix(),
 	}
