@@ -64,10 +64,23 @@ jobs:
       - name: Typecheck generated TypeScript code
         run: make typecheck
 
+      - name: Commit regenerated contracts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if [ -z "$(git status --porcelain -- gen/ go.mod go.sum pnpm-lock.yaml)" ]; then
+            echo "Generated contracts are already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- gen/ go.mod go.sum pnpm-lock.yaml
+          git commit -m "chore: regenerate contracts"
+          git push
+
       - name: Verify generated contracts are current
         run: |
-          if ! git diff --quiet -- gen/ go.mod go.sum pnpm-lock.yaml; then
-            echo "::error::Generated contracts are out of date. Run 'make generate' locally and commit gen/, go.mod, go.sum, and pnpm-lock.yaml."
+          if [ -n "$(git status --porcelain -- gen/ go.mod go.sum pnpm-lock.yaml)" ]; then
+            echo "::error::Generated contracts are out of date after regeneration."
             exit 1
           fi
           echo "Generated contracts are up to date."
