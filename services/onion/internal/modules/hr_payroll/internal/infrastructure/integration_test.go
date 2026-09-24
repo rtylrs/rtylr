@@ -82,6 +82,25 @@ func TestGetProjectLabourCostReportsUncostedBillableMinutes(t *testing.T) {
 	}
 }
 
+func TestGetProjectLabourCostReturnsZeroForProjectWithoutBillableTime(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const businessID int64 = 9100687
+	const projectID int64 = 9900687
+
+	cost, err := repo.GetProjectLabourCost(ctx, businessID, projectID)
+	if err != nil {
+		t.Fatalf("GetProjectLabourCost on a project with no time entries: %v", err)
+	}
+	if cost.BusinessID != businessID || cost.ProjectID != projectID {
+		t.Fatalf("scope = business %d, project %d; want %d, %d", cost.BusinessID, cost.ProjectID, businessID, projectID)
+	}
+	if cost.CostCents != 0 || cost.CostedMinutes != 0 || cost.UncostedMinutes != 0 || cost.UncostedEmployeeCount != 0 {
+		t.Fatalf("aggregate = %+v; want all zero", cost)
+	}
+}
+
 func TestListPayrollRuns_ReturnsMarch2026Approved(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

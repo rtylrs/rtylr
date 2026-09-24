@@ -482,6 +482,11 @@ func (r *Repository) GetProjectLabourCost(ctx context.Context, businessID, proje
 		BusinessID_2: businessID,
 		ProjectID:    sql.NullInt64{Int64: projectID, Valid: true},
 	})
+	if errors.Is(err, sql.ErrNoRows) {
+		// The aggregate groups by project, so a project with no billable time
+		// yields no row. That is a zero cost, not a failure.
+		return labourcost.ProjectCost{BusinessID: businessID, ProjectID: projectID}, nil
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to get project labour cost",
 			logger.Any("business_id", businessID), logger.Any("project_id", projectID), logger.Error(err))
