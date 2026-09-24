@@ -337,6 +337,14 @@ describe('flowApi.updateTask sends a genuine partial update', () => {
       expect.objectContaining({ priority: 'none', title: 'Task' })
     );
   });
+
+  it('forwards the per-user pin and effort fields on a task update', async () => {
+    await flowApi.updateTask('9', { focusPin: true, effortMinutes: 30 });
+
+    expect(sentKeys()).toEqual(['effortMinutes', 'focusPin']);
+    expect(sentBody().focusPin).toBe(true);
+    expect(sentBody().effortMinutes).toBe(30);
+  });
 });
 
 describe('flowApi project icon writes (#1045)', () => {

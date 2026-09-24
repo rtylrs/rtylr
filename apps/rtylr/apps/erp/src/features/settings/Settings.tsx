@@ -87,14 +87,16 @@ const ConfigField: React.FC<{ label: string; description?: string; children: Rea
   </div>
 );
 
-const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
-  value,
-  onChange,
-}) => (
+const Toggle: React.FC<{
+  value: boolean;
+  onChange: (v: boolean) => void;
+  disabled?: boolean;
+}> = ({ value, onChange, disabled = false }) => (
   <button
     type="button"
+    disabled={disabled}
     onClick={() => onChange(!value)}
-    className="relative h-5 w-9 rounded-full transition-colors"
+    className="relative h-5 w-9 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
     style={{ background: value ? 'var(--erp-accent)' : 'var(--hub-hover)' }}
   >
     <span
@@ -104,10 +106,39 @@ const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
   </button>
 );
 
+const AppearanceSection: React.FC = () => {
+  const theme = useSettings((state) => state.theme);
+  const setTheme = useSettings((state) => state.setTheme);
+  return (
+    <Section title="Appearance" icon={Palette}>
+      <ConfigField label="Theme" description="Light, dark, or follow system">
+        <div className="flex gap-1">
+          {(['light', 'dark', 'system'] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setTheme(option)}
+              className="px-2 py-1 rounded-md text-[11px] font-medium"
+              style={{
+                background: theme === option ? 'var(--hub-active)' : 'var(--hub-hover)',
+                color: theme === option ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
+              }}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </ConfigField>
+    </Section>
+  );
+};
+
 // ── General Tab ───────────────────────────────────────────────────────────────
 
 const GeneralTab: React.FC = () => {
   const settings = useSettings();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageSettings = canErpPermission(role, 'erp:settings:manage');
   const { data: serverSettings, isError, isFetching, isLoading, refetch } = useErpSettings();
   const update = useUpdateErpSettings();
   const { data: warehouses = [] } = useWarehouses();
@@ -126,35 +157,41 @@ const GeneralTab: React.FC = () => {
 
   if (isError && !serverSettings) {
     return (
-      <div
-        role="alert"
-        className="rounded-xl p-5 space-y-3"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-      >
-        <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-          Unable to load ERP settings
-        </p>
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-          Business settings could not be loaded from the tenant API.
-        </p>
-        <button
-          type="button"
-          onClick={() => void refetch()}
-          disabled={isFetching}
-          className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
-          style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+      <>
+        <div
+          role="alert"
+          className="rounded-xl p-5 mb-5 space-y-3"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
-          {isFetching ? 'Retrying…' : 'Retry'}
-        </button>
-      </div>
+          <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+            Unable to load ERP settings
+          </p>
+          <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+            Business settings could not be loaded from the tenant API.
+          </p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            disabled={isFetching}
+            className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+          >
+            {isFetching ? 'Retrying…' : 'Retry'}
+          </button>
+        </div>
+        <AppearanceSection />
+      </>
     );
   }
 
   if (isLoading || !serverSettings) {
     return (
-      <div className="rounded-xl p-5 text-sm" style={{ color: 'var(--hub-text-muted)' }}>
-        Loading ERP settings…
-      </div>
+      <>
+        <div className="rounded-xl p-5 mb-5 text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+          Loading ERP settings…
+        </div>
+        <AppearanceSection />
+      </>
     );
   }
 
@@ -162,6 +199,7 @@ const GeneralTab: React.FC = () => {
     field: K,
     value: ErpBusinessSettings[K]
   ): void => {
+    if (!canManageSettings) return;
     setForm((current) => ({ ...current, [field]: value }));
   };
 
@@ -175,6 +213,7 @@ const GeneralTab: React.FC = () => {
         <ConfigField label="Currency" description="Default currency for pricing and reports">
           <select
             value={form.currency}
+            disabled={!canManageSettings}
             onChange={(e) => updateField('currency', e.target.value)}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
@@ -195,6 +234,7 @@ const GeneralTab: React.FC = () => {
             type="number"
             step="0.01"
             value={form.taxRate}
+            disabled={!canManageSettings}
             onChange={(e) => {
               const v = parseFloat(e.target.value);
               if (!isNaN(v) && v >= 0) updateField('taxRate', v);
@@ -210,6 +250,7 @@ const GeneralTab: React.FC = () => {
         <ConfigField label="Default Warehouse" description="Used for new products and transfers">
           <select
             value={form.defaultWarehouseId}
+            disabled={!canManageSettings}
             onChange={(e) => updateField('defaultWarehouseId', parseInt(e.target.value, 10))}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
@@ -235,6 +276,7 @@ const GeneralTab: React.FC = () => {
           <input
             type="number"
             value={form.lowStockThreshold}
+            disabled={!canManageSettings}
             onChange={(e) => {
               const v = parseInt(e.target.value, 10);
               if (!isNaN(v) && v >= 0) updateField('lowStockThreshold', v);
@@ -257,48 +299,33 @@ const GeneralTab: React.FC = () => {
           <Toggle
             value={form.notifyOnLowStock}
             onChange={(value) => updateField('notifyOnLowStock', value)}
+            disabled={!canManageSettings}
           />
         </ConfigField>
         <ConfigField label="Expiry Alerts" description="Get notified when items approach expiry">
           <Toggle
             value={form.notifyOnExpiry}
             onChange={(value) => updateField('notifyOnExpiry', value)}
+            disabled={!canManageSettings}
           />
         </ConfigField>
       </Section>
 
-      <Section title="Appearance" icon={Palette}>
-        <ConfigField label="Theme" description="Light, dark, or follow system">
-          <div className="flex gap-1">
-            {(['light', 'dark', 'system'] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => settings.setTheme(t)}
-                className="px-2 py-1 rounded-md text-[11px] font-medium"
-                style={{
-                  background: settings.theme === t ? 'var(--hub-active)' : 'var(--hub-hover)',
-                  color: settings.theme === t ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
-                }}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </ConfigField>
-      </Section>
+      <AppearanceSection />
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => update.mutate(form)}
-          disabled={update.isPending}
-          className="rounded-lg px-4 py-2 text-xs font-semibold disabled:opacity-40"
-          style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
-        >
-          {update.isPending ? 'Saving…' : 'Save settings'}
-        </button>
-      </div>
+      {canManageSettings && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => update.mutate(form)}
+            disabled={update.isPending}
+            className="rounded-lg px-4 py-2 text-xs font-semibold disabled:opacity-40"
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+          >
+            {update.isPending ? 'Saving…' : 'Save settings'}
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -307,7 +334,8 @@ const GeneralTab: React.FC = () => {
 
 const TeamTab: React.FC = () => {
   const { t } = useTranslation('erp');
-  const { data: members = [], isLoading, refetch } = useErpTeam();
+  const { data: members = [], isLoading, isFetching, isError, refetch } = useErpTeam();
+  const activeMembers = members.filter((member) => member.isActive !== false);
   const invite = useErpInviteMember();
   const deactivate = useErpDeactivateMember();
   const { data: sub } = useErpSubscription();
@@ -355,6 +383,7 @@ const TeamTab: React.FC = () => {
       </div>
 
       {canInviteMember &&
+        !isError &&
         (showInvite ? (
           <div
             className="rounded-xl p-4 space-y-3"
@@ -462,7 +491,29 @@ const TeamTab: React.FC = () => {
             />
           ))}
         </div>
-      ) : members.length === 0 ? (
+      ) : isError ? (
+        <div
+          role="alert"
+          className="rounded-xl p-5 space-y-3"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+            Unable to load team members
+          </p>
+          <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+            The current ERP team could not be loaded from the tenant API.
+          </p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            disabled={isFetching}
+            className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+          >
+            {isFetching ? 'Retrying…' : 'Retry'}
+          </button>
+        </div>
+      ) : activeMembers.length === 0 ? (
         <EmptyState
           icon={Users}
           title={t('erp.settings.team.empty.title')}
@@ -475,7 +526,7 @@ const TeamTab: React.FC = () => {
         />
       ) : (
         <div className="rounded-xl divide-y" style={{ border: '1px solid var(--hub-border)' }}>
-          {members.map((m) => (
+          {activeMembers.map((m) => (
             <div key={m.id} className="flex items-center gap-3 px-4 py-3">
               <div
                 className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"

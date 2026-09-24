@@ -1,3 +1,5 @@
 {
-  "emptyMatchTitle": "Aucune intégration ne correspond à votre recherche"
+  "emptyMatchTitle": "Aucune intégration ne correspond à votre recherche",
+  "loadFailed": "Impossible de charger les intégrations",
+  "loadFailedDescription": "Actualisez la liste avant de modifier les intégrations connectées."
 }

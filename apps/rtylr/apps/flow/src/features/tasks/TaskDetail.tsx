@@ -774,6 +774,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           estimateHours={estimatedHours}
           canLog={canEdit}
           canLogForOthers={false}
+          canDelete={canRemove}
           currentUserId={user?.id ?? null}
         />
 

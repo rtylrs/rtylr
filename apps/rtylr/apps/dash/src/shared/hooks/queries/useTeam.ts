@@ -38,6 +38,7 @@ interface UseTeamParams {
 export interface TeamListResult {
   members: TeamMember[];
   hasMore: boolean;
+  total: number;
   page: number;
   pageSize: number;
 }
@@ -104,11 +105,15 @@ export const useTeam = (params: UseTeamParams = {}) => {
     queryFn: async (): Promise<TeamListResult> => {
       const res = await membersClient.listTeam({ page, pageSize });
       const allMembers = (res.users ?? []).map(fromApiMember);
-      const total = res.total ?? allMembers.length;
-      const hasMore = page * pageSize < total;
+      const total =
+        typeof res.total === 'number' && Number.isSafeInteger(res.total) && res.total >= 0
+          ? res.total
+          : allMembers.length;
+      const hasMore = typeof res.total === 'number' ? page * pageSize < total : false;
       return {
         members: allMembers,
         hasMore,
+        total,
         page,
         pageSize,
       };

@@ -33,6 +33,9 @@ export const ShortcutsProvider: React.FC<React.PropsWithChildren> = ({ children 
       // cmd+k / ctrl+k opens palette (always works)
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
+        // Caret also owns Cmd/Ctrl+K. Handle the shortcut in the capture
+        // phase so this palette is the single owner for CRM.
+        e.stopImmediatePropagation();
         setPaletteOpen((o) => !o);
         return;
       }
@@ -58,8 +61,8 @@ export const ShortcutsProvider: React.FC<React.PropsWithChildren> = ({ children 
         return;
       }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
   }, [navigate]);
 
   return (

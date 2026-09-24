@@ -14,7 +14,13 @@ const quote = {
   expiresAt: '2026-07-24',
 };
 
-const { useQuotesMock } = vi.hoisted(() => ({ useQuotesMock: vi.fn() }));
+const mocks = vi.hoisted(() => ({ useQuotesMock: vi.fn(), role: 'admin' as string | null }));
+
+vi.mock('@voxire/auth', () => ({
+  useUserStore: (
+    selector: (state: { user: { role: string | null }; role: string | null }) => unknown
+  ) => selector({ user: { role: mocks.role }, role: mocks.role }),
+}));
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -33,7 +39,7 @@ vi.mock('motion/react', () => ({
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 vi.mock('./useQuotes', () => ({
-  useQuotes: useQuotesMock,
+  useQuotes: mocks.useQuotesMock,
   useCreateQuote: () => ({ mutate: vi.fn(), isPending: false }),
   useConvertQuote: () => ({ mutate: vi.fn(), isPending: false }),
   useUpdateQuoteStatus: () => ({ mutate: vi.fn(), isPending: false }),
@@ -74,7 +80,11 @@ beforeAll(async () => {
 describe('Quotes table', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useQuotesMock.mockReturnValue({ data: { quotes: [quote], hasMore: false }, isLoading: false });
+    mocks.useQuotesMock.mockReturnValue({
+      data: { quotes: [quote], hasMore: false },
+      isLoading: false,
+    });
+    mocks.role = 'admin';
   });
 
   it('formats the Issued timestamp as a readable date', () => {
@@ -83,12 +93,39 @@ describe('Quotes table', () => {
     expect(screen.getByRole('cell', { name: 'Jun 24, 2026' })).toBeInTheDocument();
     expect(screen.queryByText('2026-06-24T08:50:45Z')).not.toBeInTheDocument();
   });
+
+  it('does not offer conversion again after a quote is converted', () => {
+    mocks.useQuotesMock.mockReturnValue({
+      data: { quotes: [{ ...quote, status: 'Converted' }], hasMore: false },
+      isLoading: false,
+    });
+
+    render(<Quotes />);
+
+    expect(screen.getByText('Converted')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Convert quote/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /View quote/ })).toBeInTheDocument();
+  });
+
+  it('hides quote mutations from a viewer', () => {
+    mocks.role = 'viewer';
+
+    render(<Quotes />);
+
+    expect(screen.queryByRole('button', { name: 'New Quote' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Mark quote/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /View quote/ })).toBeInTheDocument();
+  });
 });
 
 describe('Quotes empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useQuotesMock.mockReturnValue({ data: { quotes: [], hasMore: false }, isLoading: false });
+    mocks.useQuotesMock.mockReturnValue({
+      data: { quotes: [], hasMore: false },
+      isLoading: false,
+    });
+    mocks.role = 'admin';
   });
 
   it('renders the shared EmptyState CTA and opens the new quote modal on click', () => {

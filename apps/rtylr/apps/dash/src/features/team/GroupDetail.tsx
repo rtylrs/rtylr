@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -39,18 +39,26 @@ const PRESET_COLORS = [
   '#f97316',
 ];
 
+const GROUP_MEMBER_DISPLAY_LIMIT = 500;
+
 const GroupDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const isNew = id === 'new';
 
-  const { data: group, isLoading } = useGroup(isNew ? undefined : id);
+  const { data: group, isLoading, isError, refetch } = useGroup(isNew ? undefined : id);
   const createGroup = useCreateGroup();
   const updateGroup = useUpdateGroup(id);
   const addMembers = useAddGroupMembers(id);
   const removeMember = useRemoveGroupMember(id);
-  const { data: teamData } = useTeam({ pageSize: 50 });
+  const [teamPage, setTeamPage] = useState(1);
+  const {
+    data: teamData,
+    isLoading: teamLoading,
+    isError: teamError,
+    refetch: refetchTeam,
+  } = useTeam({ page: teamPage, pageSize: 50 });
   const allMembers = teamData?.members ?? [];
 
   const [tab, setTab] = useState<'apps' | 'members'>('apps');
@@ -61,9 +69,13 @@ const GroupDetail = (): React.JSX.Element => {
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [selectedToAdd, setSelectedToAdd] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
+  const initializedGroupId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (group) {
+    if (group && !isNew) {
+      const groupKey = String(group.id);
+      if (initializedGroupId.current === groupKey) return;
+      initializedGroupId.current = groupKey;
       setName(group.name);
       setDescription(group.description ?? '');
       setColor(group.color ?? '#6366f1');
@@ -73,7 +85,8 @@ const GroupDetail = (): React.JSX.Element => {
       }
       setResourcePerms(perms);
       setDirty(false);
-    } else if (isNew) {
+    } else if (isNew && initializedGroupId.current !== 'new') {
+      initializedGroupId.current = 'new';
       setResourcePerms(new Map());
     }
   }, [group, isNew]);
@@ -132,8 +145,18 @@ const GroupDetail = (): React.JSX.Element => {
     }
   };
 
-  const currentMemberIds = new Set((group?.members ?? []).map((m) => m.userId));
+  const openAddMembers = () => {
+    setTeamPage(1);
+    setShowAddMembers(true);
+  };
+
+  const groupMembers = group?.members ?? [];
+  const currentMemberIds = new Set(groupMembers.map((m) => m.userId));
   const addableMembersList = allMembers.filter((m) => !currentMemberIds.has(Number(m.id)));
+  const teamHasNextPage = teamData?.hasMore ?? false;
+  const teamTotalPages = teamData?.total
+    ? Math.max(1, Math.ceil(teamData.total / teamData.pageSize))
+    : undefined;
 
   const isSaving = createGroup.isPending || updateGroup.isPending;
 
@@ -141,6 +164,22 @@ const GroupDetail = (): React.JSX.Element => {
     return (
       <div className="p-4">
         <SkeletonList rows={6} />
+      </div>
+    );
+  }
+
+  if (isError && !isNew) {
+    return (
+      <div className="p-4">
+        <EmptyState
+          icon={Users}
+          title={t('team.groupDetail.loadFailed', 'Unable to load this group')}
+          description={t(
+            'team.groupDetail.loadFailedDescription',
+            'The group could not be loaded. Try again before editing its members.'
+          )}
+          action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+        />
       </div>
     );
   }
@@ -371,7 +410,7 @@ const GroupDetail = (): React.JSX.Element => {
               </p>
               <button
                 type="button"
-                onClick={() => setShowAddMembers(true)}
+                onClick={openAddMembers}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                 style={{
                   background: 'var(--accent-muted)',
@@ -382,6 +421,23 @@ const GroupDetail = (): React.JSX.Element => {
                 <Plus size={12} /> {t('team.groupDetail.addMembersButton')}
               </button>
             </div>
+
+            {groupMembers.length >= GROUP_MEMBER_DISPLAY_LIMIT && (
+              <p
+                role="status"
+                className="rounded-lg px-3 py-2 text-xs"
+                style={{
+                  background: 'var(--dash-hover)',
+                  color: 'var(--dash-text-muted)',
+                }}
+              >
+                {t(
+                  'team.groupDetail.membersTruncated',
+                  'Showing the first {{count}} members. Additional members require a paginated group-member API.',
+                  { count: GROUP_MEMBER_DISPLAY_LIMIT }
+                )}
+              </p>
+            )}
 
             <div
               className="rounded-xl overflow-hidden"
@@ -395,7 +451,7 @@ const GroupDetail = (): React.JSX.Element => {
                     description={t('team.groupDetail.noMembersDescription')}
                     action={{
                       label: t('team.groupDetail.addMembersButton'),
-                      onClick: () => setShowAddMembers(true),
+                      onClick: openAddMembers,
                     }}
                   />
                 </div>
@@ -450,52 +506,106 @@ const GroupDetail = (): React.JSX.Element => {
                 <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                   {t('team.groupDetail.addMembersTitle')}
                 </p>
-                {addableMembersList.length === 0 ? (
+                {teamLoading ? (
+                  <SkeletonList rows={3} withAvatar={false} />
+                ) : teamError ? (
                   <EmptyState
-                    icon={UserCheck}
-                    title={t('team.groupDetail.allMembersInGroup')}
-                    action={{
-                      label: t('common.close'),
-                      onClick: () => setShowAddMembers(false),
-                    }}
+                    icon={Users}
+                    title={t('team.groupDetail.loadMembersFailed', 'Unable to load team members')}
+                    description={t(
+                      'team.groupDetail.loadMembersFailedDescription',
+                      'Refresh the candidate list before adding members.'
+                    )}
+                    action={{ label: t('common.refresh'), onClick: () => void refetchTeam() }}
                     size="compact"
                   />
                 ) : (
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {addableMembersList.map((m) => {
-                      const mid = Number(m.id);
-                      const checked = selectedToAdd.includes(mid);
-                      return (
-                        <label
-                          key={m.id}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-[var(--dash-hover)] transition-colors"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() =>
-                              setSelectedToAdd((prev) =>
-                                checked ? prev.filter((x) => x !== mid) : [...prev, mid]
-                              )
-                            }
-                            className="rounded"
-                            style={{ accentColor: 'var(--accent)' }}
-                          />
-                          <div>
-                            <p
-                              className="text-sm font-medium"
-                              style={{ color: 'var(--dash-text)' }}
+                  <>
+                    {addableMembersList.length === 0 && !teamHasNextPage ? (
+                      <EmptyState
+                        icon={UserCheck}
+                        title={t('team.groupDetail.allMembersInGroup')}
+                        action={{
+                          label: t('common.close'),
+                          onClick: () => setShowAddMembers(false),
+                        }}
+                        size="compact"
+                      />
+                    ) : (
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {addableMembersList.map((m) => {
+                          const mid = Number(m.id);
+                          const checked = selectedToAdd.includes(mid);
+                          return (
+                            <label
+                              key={m.id}
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-[var(--dash-hover)] transition-colors"
                             >
-                              {m.name || m.email}
-                            </p>
-                            <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                              {m.email}
-                            </p>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() =>
+                                  setSelectedToAdd((prev) =>
+                                    checked ? prev.filter((x) => x !== mid) : [...prev, mid]
+                                  )
+                                }
+                                className="rounded"
+                                style={{ accentColor: 'var(--accent)' }}
+                              />
+                              <div>
+                                <p
+                                  className="text-sm font-medium"
+                                  style={{ color: 'var(--dash-text)' }}
+                                >
+                                  {m.name || m.email}
+                                </p>
+                                <p
+                                  className="text-[11px]"
+                                  style={{ color: 'var(--dash-text-dim)' }}
+                                >
+                                  {m.email}
+                                </p>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {(teamHasNextPage || teamPage > 1) && (
+                      <div
+                        className="flex items-center justify-between gap-2 pt-2"
+                        role="navigation"
+                        aria-label={t('team.groupDetail.candidatePagination', 'Member pages')}
+                      >
+                        <span className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                          {t('team.groupDetail.candidatePage', 'Page {{page}}', {
+                            page: teamPage,
+                            total: teamTotalPages,
+                          })}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={teamPage <= 1 || teamLoading}
+                            onClick={() => setTeamPage((page) => Math.max(1, page - 1))}
+                            aria-label={t('common.pagination.previous', 'Previous')}
+                          >
+                            {t('common.pagination.previous', 'Previous')}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!teamHasNextPage || teamLoading}
+                            onClick={() => setTeamPage((page) => page + 1)}
+                            aria-label={t('common.pagination.next', 'Next')}
+                          >
+                            {t('common.pagination.next', 'Next')}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
                 <div className="flex items-center justify-end gap-2">
                   <button

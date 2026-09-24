@@ -1,12 +1,12 @@
-import { createOneKitClient } from '@voxire/api';
-import { CustomerServiceClient } from '@voxire/voxie/pos/customer/v1/client';
-import { useEffect, useState } from 'react';
-import type { Customer } from '../../shared/types/pos';
-import { mapCustomers } from './customerLookupWorkflow';
+import { createOneKitClient } from "@voxire/api";
+import { CustomerServiceClient } from "@voxire/voxie/pos/customer/v1/client";
+import { useEffect, useState } from "react";
+import type { Customer } from "../../shared/types/pos";
+import { mapCustomers } from "./customerLookupWorkflow";
 
-const customerClient = createOneKitClient(CustomerServiceClient, 'pos');
+const customerClient = createOneKitClient(CustomerServiceClient, "pos");
 
-export function useCustomerLookup(initialQuery = '') {
+export function useCustomerLookup(initialQuery = "") {
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +15,8 @@ export function useCustomerLookup(initialQuery = '') {
   useEffect(() => {
     let cancelled = false;
     const trimmed = query.trim();
+    // A new query should not keep showing the previous request's error.
+    setError(null);
     // Don't hit the search API for a single character.
     if (trimmed.length < 2) {
       setResults([]);
@@ -23,14 +25,15 @@ export function useCustomerLookup(initialQuery = '') {
     }
     const handle = window.setTimeout(async () => {
       setLoading(true);
-      setError(null);
       try {
         const res = await customerClient.searchCustomers({ query: trimmed });
         if (cancelled) return;
         setResults(mapCustomers(res.customers ?? []));
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error && e.message ? e.message : 'Search failed');
+          setError(
+            e instanceof Error && e.message ? e.message : "Search failed",
+          );
           setResults([]);
         }
       } finally {

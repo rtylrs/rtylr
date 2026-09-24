@@ -4,7 +4,7 @@ import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { rest } from '../../lib/clients';
-import { dashOrderSchema } from '../../schemas/orders';
+import { dashOrderSchema, type HubOrder } from '../../schemas/orders';
 
 export type { HubOrder } from '../../schemas/orders';
 
@@ -14,13 +14,38 @@ interface UseOrdersParams {
   status?: string;
 }
 
+export interface OrdersPage {
+  orders: HubOrder[];
+  total: number;
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+function positiveInteger(value: unknown): number | undefined {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function nonNegativeInteger(value: unknown): number | undefined {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+function responseRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 export const useOrders = (params: UseOrdersParams = {}) => {
   const { limit = 50, offset = 0, status } = params;
-  return useQuery({
+  return useQuery<OrdersPage>({
     queryKey: ['dash-orders', { limit, offset, status }],
     queryFn: async () => {
-      const pageSize = Number.isFinite(limit) && limit > 0 ? Math.min(200, Math.floor(limit)) : 50;
-      const normalizedOffset = Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0;
+      const requestedPageSize = positiveInteger(limit);
+      const pageSize = requestedPageSize ? Math.min(200, requestedPageSize) : 50;
+      const normalizedOffset = nonNegativeInteger(offset) ?? 0;
       const page = Math.floor(normalizedOffset / pageSize) + 1;
       const searchParams = new URLSearchParams({
         page: String(page),
@@ -29,9 +54,25 @@ export const useOrders = (params: UseOrdersParams = {}) => {
       if (status && status !== 'all') {
         searchParams.set('status', status);
       }
-      const res = await unwrap(rest.get(`/pos/orders?${searchParams.toString()}`));
-      const raw = res?.orders ?? res;
-      return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
+      const response = await unwrap(rest.get(`/pos/orders?${searchParams.toString()}`));
+      const source = responseRecord(response);
+      const rawOrders = Array.isArray(response)
+        ? response
+        : Array.isArray(source.orders)
+          ? source.orders
+          : [];
+      const orders = z.array(dashOrderSchema).parse(rawOrders);
+      const responsePage = positiveInteger(source.page) ?? page;
+      const responsePageSize = positiveInteger(source.page_size ?? source.pageSize) ?? pageSize;
+      const total = nonNegativeInteger(source.total) ?? orders.length;
+      const hasMore =
+        typeof source.has_more === 'boolean'
+          ? source.has_more
+          : typeof source.hasMore === 'boolean'
+            ? source.hasMore
+            : responsePage * responsePageSize < total;
+
+      return { orders, total, hasMore, page: responsePage, pageSize: responsePageSize };
     },
     refetchOnWindowFocus: true,
   });

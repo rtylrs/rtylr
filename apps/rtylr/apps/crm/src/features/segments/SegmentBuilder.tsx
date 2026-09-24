@@ -7,6 +7,14 @@ import { Plus, Save } from 'lucide-react';
 import { useCreateSegment } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, Input, Textarea, PageHeader } from '../../shared/components/ui';
 import { SegmentRuleRow } from '../../shared/components/crm';
+import {
+  SEGMENT_RULE_FIELDS,
+  SEGMENT_RULE_VALUES,
+  getSegmentRuleOperators,
+  serializeSegmentRule,
+  type SegmentRuleField,
+  type SegmentRuleOperator,
+} from '../../shared/lib/segmentRules';
 
 interface Rule {
   id: number;
@@ -16,6 +24,30 @@ interface Rule {
 }
 
 let nextRuleId = 1;
+
+function isSegmentRuleField(value: string): value is SegmentRuleField {
+  return (SEGMENT_RULE_FIELDS as readonly string[]).includes(value);
+}
+
+function isValidRule(rule: Rule): boolean {
+  if (!isSegmentRuleField(rule.field)) return false;
+  if (!getSegmentRuleOperators(rule.field).includes(rule.operator as SegmentRuleOperator)) {
+    return false;
+  }
+
+  const value = rule.value.trim();
+  if (!value) return false;
+  if (rule.field === 'tier') {
+    return (SEGMENT_RULE_VALUES.tier as readonly string[]).includes(value);
+  }
+  return /^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(value);
+}
+
+function normalizeRuleChange(current: Rule, updated: Omit<Rule, 'id'>): Omit<Rule, 'id'> {
+  if (updated.field === current.field || !isSegmentRuleField(updated.field)) return updated;
+  const valueIsStillValid = isValidRule({ ...current, ...updated });
+  return valueIsStillValid ? updated : { ...updated, value: SEGMENT_RULE_VALUES[updated.field][0] };
+}
 
 const SegmentBuilder: React.FC = () => {
   const { t } = useTranslation();
@@ -27,7 +59,7 @@ const SegmentBuilder: React.FC = () => {
   const [rules, setRules] = useState<Rule[]>([
     { id: nextRuleId++, field: 'totalSpent', operator: '>', value: '500' },
   ]);
-  const [matchAll, setMatchAll] = useState(true);
+  const rulesAreValid = rules.length > 0 && rules.every(isValidRule);
 
   const updateRule = (i: number, rule: Rule) => {
     setRules((r) => r.map((x, idx) => (idx === i ? rule : x)));
@@ -38,7 +70,11 @@ const SegmentBuilder: React.FC = () => {
   const removeRule = (i: number) => setRules((r) => r.filter((_, idx) => idx !== i));
 
   const handleSave = () => {
-    const ruleStrings = rules.map((r) => `${r.field} ${r.operator} ${r.value}`);
+    if (!name.trim() || !rulesAreValid) {
+      toast.error(t('errors.generic'));
+      return;
+    }
+    const ruleStrings = rules.map(serializeSegmentRule);
     create.mutate(
       {
         name,
@@ -75,7 +111,11 @@ const SegmentBuilder: React.FC = () => {
           title={t('crm.segmentBuilder.pageTitle')}
           subtitle={t('crm.segmentBuilder.subtitle')}
           actions={
-            <Button variant="primary" onClick={handleSave} disabled={!name || create.isPending}>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={!name.trim() || !rulesAreValid || create.isPending}
+            >
               <Save size={13} />
               {create.isPending ? 'Saving…' : 'Save segment'}
             </Button>
@@ -144,6 +184,7 @@ const SegmentBuilder: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                gap: '12px',
                 marginBottom: '12px',
               }}
             >
@@ -159,45 +200,18 @@ const SegmentBuilder: React.FC = () => {
               >
                 {t('crm.segmentBuilder.rules')}
               </h4>
-              <div
-                style={{
-                  display: 'flex',
-                  borderRadius: '8px',
-                  background: 'var(--hub-hover)',
-                  padding: '3px',
-                  border: '1px solid var(--hub-border)',
-                }}
-              >
-                {[
-                  { key: true, label: t('crm.segmentBuilder.matchAll') },
-                  { key: false, label: t('crm.segmentBuilder.matchAny') },
-                ].map((o) => (
-                  <button
-                    type="button"
-                    key={String(o.key)}
-                    onClick={() => setMatchAll(o.key)}
-                    style={{
-                      padding: '4px 12px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      border: 'none',
-                      background: matchAll === o.key ? '#3b82f6' : 'transparent',
-                      color: matchAll === o.key ? '#fff' : 'var(--hub-text-muted)',
-                    }}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </div>
+              <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+                {t('crm.segmentBuilder.matchAll')}
+              </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {rules.map((r, i) => (
                 <SegmentRuleRow
                   key={r.id}
                   rule={r}
-                  onChange={(updated) => updateRule(i, { ...r, ...updated })}
+                  onChange={(updated) =>
+                    updateRule(i, { ...r, ...normalizeRuleChange(r, updated) })
+                  }
                   onRemove={() => removeRule(i)}
                 />
               ))}

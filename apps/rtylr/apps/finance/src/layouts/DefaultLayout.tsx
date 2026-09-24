@@ -68,8 +68,18 @@ const navGroups: NavGroup[] = [
     titleKey: 'nav.groups.sales',
     items: [
       { labelKey: 'nav.invoices', path: '/invoices', icon: FileText },
-      { labelKey: 'nav.recurring', path: '/invoices/recurring', icon: Repeat },
-      { labelKey: 'nav.quotes', path: '/quotes', icon: ClipboardList },
+      {
+        labelKey: 'nav.recurring',
+        path: '/invoices/recurring',
+        icon: Repeat,
+        requiredPermission: 'finance:recurring_invoices:view',
+      },
+      {
+        labelKey: 'nav.quotes',
+        path: '/quotes',
+        icon: ClipboardList,
+        requiredPermission: 'finance:quotes:view',
+      },
     ],
   },
   {

@@ -39,7 +39,10 @@ export function useCreateStockTransfer() {
   return useMutation<CreateStockTransferResponse, Error, CreateStockTransferRequest>({
     mutationFn: (data) => stockTransferClient.createStockTransfer(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-transfers'] }),
-    onError: () => toast.error('Failed to create stock transfer'),
+    onError: () => {
+      void qc.invalidateQueries({ queryKey: ['stock-transfers'] });
+      toast.error('Failed to create stock transfer');
+    },
   });
 }
 
@@ -51,6 +54,10 @@ export function useUpdateStockTransferStatus() {
       void qc.invalidateQueries({ queryKey: ['stock-transfers'] });
       invalidateStockDerivedQueries(qc);
     },
-    onError: () => toast.error('Failed to update stock transfer'),
+    onError: () => {
+      void qc.invalidateQueries({ queryKey: ['stock-transfers'] });
+      invalidateStockDerivedQueries(qc);
+      toast.error('Failed to update stock transfer');
+    },
   });
 }

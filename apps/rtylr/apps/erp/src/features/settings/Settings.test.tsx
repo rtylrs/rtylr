@@ -3,9 +3,12 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Settings from './Settings';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { ERP_THEME_STORAGE_KEY, useSettings } from '../../shared/lib/settingsStore';
 
 const mocks = vi.hoisted(() => ({
   role: 'admin' as string,
+  useErpSettings: vi.fn(),
+  updateSettings: vi.fn(),
   useErpTeam: vi.fn(),
   refetch: vi.fn(),
 }));
@@ -30,14 +33,8 @@ vi.mock('@voxire/auth', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useErpSettings', () => ({
-  useErpSettings: () => ({
-    data: undefined,
-    isError: false,
-    isFetching: false,
-    isLoading: true,
-    refetch: vi.fn(),
-  }),
-  useUpdateErpSettings: () => ({ mutate: vi.fn(), isPending: false }),
+  useErpSettings: mocks.useErpSettings,
+  useUpdateErpSettings: () => ({ mutate: mocks.updateSettings, isPending: false }),
 }));
 
 vi.mock('../warehouses/useWarehouses', () => ({
@@ -69,9 +66,83 @@ beforeAll(async () => {
   await initTestI18n('en');
 });
 
+describe('Settings business controls', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.useErpSettings.mockReturnValue({
+      data: {
+        currency: 'USD',
+        taxRate: 8.25,
+        lowStockThreshold: 10,
+        defaultWarehouseId: 1,
+        notifyOnLowStock: true,
+        notifyOnExpiry: true,
+      },
+      isError: false,
+      isFetching: false,
+      isLoading: false,
+      refetch: vi.fn(),
+    });
+    window.localStorage.clear();
+    document.documentElement.removeAttribute('data-theme');
+    useSettings.getState().setTheme('light');
+  });
+
+  it('gates tenant-wide fields while keeping appearance personal', () => {
+    mocks.role = 'operator';
+    render(<Settings />);
+
+    expect(screen.queryByRole('button', { name: 'Save settings' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('combobox')[0]).toBeDisabled();
+  });
+
+  it('keeps personal appearance available when business settings fail to load', () => {
+    mocks.role = 'operator';
+    mocks.useErpSettings.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isFetching: false,
+      isLoading: false,
+      refetch: vi.fn(),
+    });
+    render(<Settings />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load ERP settings');
+    fireEvent.click(screen.getByRole('button', { name: 'dark' }));
+    expect(useSettings.getState().theme).toBe('dark');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+  });
+
+  it('uses the shared theme source for document colors and layout persistence', () => {
+    mocks.role = 'admin';
+    render(<Settings />);
+
+    expect(screen.getByRole('button', { name: 'Save settings' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'dark' }));
+
+    expect(useSettings.getState().theme).toBe('dark');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(window.localStorage.getItem(ERP_THEME_STORAGE_KEY)).toBe('dark');
+  });
+});
+
 describe('Settings team empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.useErpSettings.mockReturnValue({
+      data: {
+        currency: 'USD',
+        taxRate: 8.25,
+        lowStockThreshold: 10,
+        defaultWarehouseId: 1,
+        notifyOnLowStock: true,
+        notifyOnExpiry: true,
+      },
+      isError: false,
+      isFetching: false,
+      isLoading: false,
+      refetch: vi.fn(),
+    });
     mocks.useErpTeam.mockReturnValue({ data: [], isLoading: false, refetch: mocks.refetch });
   });
 

@@ -10,6 +10,7 @@ const invoiceLineSchema = z
   .passthrough();
 
 const historyEntrySchema = z.object({
+  id: z.string().optional(),
   label: z.string(),
   at: z.string(),
 });
@@ -27,6 +28,8 @@ export const invoiceSchema = z.object({
   items: z.array(invoiceLineSchema).optional().nullable(),
   notes: z.string().optional().nullable(),
   discount: z.number().optional().nullable(),
+  discountType: z.string().optional().nullable(),
+  discountAmount: z.number().optional().nullable(),
   tax: z.number().optional().nullable(),
   subtotal: z.number().optional().nullable(),
   number: z.string().optional().nullable(),

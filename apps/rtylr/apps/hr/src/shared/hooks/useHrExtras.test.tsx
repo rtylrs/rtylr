@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   getSettings: vi.fn(),
   getMyEmployee: vi.fn(),
   listBenefits: vi.fn(),
+  listMyBenefitEnrollments: vi.fn(),
 }));
 
 vi.mock('../services/hrExtras', () => ({
@@ -21,6 +22,7 @@ vi.mock('@voxire/api', () => ({
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
   createOneKitClient: () => ({
     listBenefits: mocks.listBenefits,
+    listMyBenefitEnrollments: mocks.listMyBenefitEnrollments,
   }),
 }));
 
@@ -28,7 +30,12 @@ vi.mock('sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));
 
-import { useHrSettings, useMyEmployeeId, useBenefits } from './useHrExtras';
+import {
+  useHrSettings,
+  useMyEmployeeId,
+  useBenefits,
+  useMyBenefitEnrollments,
+} from './useHrExtras';
 
 const settings = {
   workWeekStart: 'Monday' as const,
@@ -113,5 +120,53 @@ describe('useBenefits', () => {
       },
     ]);
     expect(mocks.listBenefits).toHaveBeenCalledWith({});
+  });
+});
+
+describe('useMyBenefitEnrollments', () => {
+  beforeEach(() => {
+    mocks.listMyBenefitEnrollments.mockReset();
+  });
+
+  it('loads every enrollment page so older history is not hidden', async () => {
+    const firstPage = Array.from({ length: 500 }, (_, index) => ({
+      id: String(index + 1),
+      planId: String(index + 1),
+      status: 'active',
+      enrolledAt: '2026-01-01T00:00:00Z',
+    }));
+    const secondPage = [
+      {
+        id: '501',
+        planId: '501',
+        status: 'cancelled',
+        enrolledAt: '2026-01-01T00:00:00Z',
+      },
+    ];
+    mocks.listMyBenefitEnrollments.mockImplementation(async ({ page }: { page?: number }) => ({
+      enrollments: page === 1 ? firstPage : secondPage,
+      pagination: {
+        page: page ?? 1,
+        limit: 500,
+        total: 501,
+        hasNext: page === 1,
+      },
+    }));
+
+    const { result } = renderHook(() => useMyBenefitEnrollments(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toHaveLength(501);
+    expect(mocks.listMyBenefitEnrollments).toHaveBeenNthCalledWith(1, {
+      page: 1,
+      limit: 500,
+    });
+    expect(mocks.listMyBenefitEnrollments).toHaveBeenNthCalledWith(2, {
+      page: 2,
+      limit: 500,
+    });
   });
 });

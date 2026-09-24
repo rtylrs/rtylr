@@ -4,10 +4,16 @@ import { Plus, ClipboardList, CheckCircle2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
+import { canEffectiveAccess } from '@voxire/permissions';
 import { useTranslation } from 'react-i18next';
-import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStockTakes';
+import {
+  useStockTakes,
+  useCreateStockTake,
+  useUpdateStockTake,
+  type StockTake,
+} from './useStockTakes';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
-import { stockTakeStatusLabel, stockTakeProgress, stockTakeVariance } from './stockTakeSchema';
+import { stockTakeStatusLabel, stockTakeProgress } from './stockTakeSchema';
 import type { UpdateStockTakeItemBody } from '@voxire/voxie/erp/stock_take/v1/types';
 import { useWarehouses } from '../warehouses/useWarehouses';
 import { useInventoryReport } from '../inventory/useInventory';
@@ -34,11 +40,29 @@ const inputStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 };
 
+type StockTakeItem = NonNullable<NonNullable<StockTake['items']>[number]>;
+
+function stockTakeItemKey(stockTakeId: string | undefined, productId: string | undefined): string {
+  return `${stockTakeId ?? ''}:${productId ?? ''}`;
+}
+
+function parseCountedQuantity(value: string | number | null | undefined): number | null {
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return null;
+  const count = Number(value);
+  return Number.isFinite(count) && count >= 0 ? count : null;
+}
+
 const StockTakes: React.FC = () => {
   const { t } = useTranslation('erp');
   const [page, setPage] = useState(1);
   const pageSize = 50;
-  const { data: stockTakeResult, isLoading, refetch } = useStockTakes({ page, pageSize });
+  const {
+    data: stockTakeResult,
+    isLoading,
+    isFetching: stockTakesFetching,
+    isError: stockTakesError,
+    refetch,
+  } = useStockTakes({ page, pageSize });
   const stockTakes = stockTakeResult?.stockTakes ?? [];
   const hasMore = stockTakeResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
@@ -50,14 +74,54 @@ const StockTakes: React.FC = () => {
   const createMut = useCreateStockTake();
   const updateMut = useUpdateStockTake();
   const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageStockTakes = canErpPermission(role, 'erp:stock_takes');
+  const effectiveAccess = useUserStore(
+    (state) => state.user?.effectiveAccess ?? state.effectiveAccess
+  );
+  const canCreateStockTakes = canErpPermission(role, 'erp:inventory:adjust');
+  const canCompleteStockTakes = effectiveAccess
+    ? canEffectiveAccess(effectiveAccess, 'erp:inventory:approve')
+    : role === 'admin' || role === 'owner';
   const [showCreate, setShowCreate] = useState(false);
   const [newWarehouseId, setNewWarehouseId] = useState('');
   const [newNotes, setNewNotes] = useState('');
-  const itemsToCount = buildStockTakeItems(inventoryItems);
+  const [countInputs, setCountInputs] = useState<Record<string, string>>({});
+  const itemsToCount = buildStockTakeItems(inventoryItems).map(({ productId, expectedQty }) => ({
+    productId,
+    expectedQty,
+  }));
 
   const warehouseName = (id: string): string =>
     warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
+
+  const getCountValue = (st: StockTake, item: StockTakeItem): number | null => {
+    const key = stockTakeItemKey(st.id, item.productId);
+    if (Object.prototype.hasOwnProperty.call(countInputs, key)) {
+      return parseCountedQuantity(countInputs[key]);
+    }
+    if (item.countedQty == null) return null;
+    if (st.status === 'completed' || item.countedQty !== 0) {
+      return parseCountedQuantity(item.countedQty);
+    }
+    return null;
+  };
+
+  const getCompletionItems = (st: StockTake): UpdateStockTakeItemBody[] | null => {
+    const sourceItems = st.items ?? [];
+    if (sourceItems.length === 0) return null;
+
+    const items: UpdateStockTakeItemBody[] = [];
+    for (const item of sourceItems) {
+      const countedQty = getCountValue(st, item);
+      if (!item.productId || item.expectedQty == null || countedQty == null) return null;
+      items.push({ productId: item.productId, expectedQty: item.expectedQty, countedQty });
+    }
+    return items;
+  };
+
+  const updateCount = (st: StockTake, item: StockTakeItem, value: string): void => {
+    const key = stockTakeItemKey(st.id, item.productId);
+    setCountInputs((current) => ({ ...current, [key]: value }));
+  };
 
   const handleCreate = async (): Promise<void> => {
     if (!newWarehouseId) {
@@ -71,8 +135,8 @@ const StockTakes: React.FC = () => {
     if (itemsToCount.length === 0) {
       toast.error(
         inventoryError
-          ? 'Unable to load inventory for this stock take'
-          : 'No inventory items to count'
+          ? t('erp.stockTakes.inventoryRequiredForCreate')
+          : t('erp.stockTakes.noInventoryToCount')
       );
       return;
     }
@@ -91,25 +155,21 @@ const StockTakes: React.FC = () => {
     }
   };
 
-  const handleComplete = async (id: string, items: UpdateStockTakeItemBody[]): Promise<void> => {
-    const uncounted = items.filter(
-      (item) => (item.expectedQty ?? 0) > 0 && item.countedQty == null
-    ).length;
-    const doComplete = async (): Promise<void> => {
-      try {
-        await updateMut.mutateAsync({ id, body: { status: 'completed', notes: '', items } });
-        toast.success(t('erp.stockTakes.completed'));
-      } catch {
-        toast.error(t('erp.stockTakes.completeFailed'));
-      }
-    };
-    if (uncounted > 0) {
-      toast.warning(t('erp.stockTakes.uncountedWarning', { count: uncounted }), {
-        action: { label: t('erp.stockTakes.complete'), onClick: () => void doComplete() },
-      });
+  const handleComplete = async (st: StockTake): Promise<void> => {
+    const items = getCompletionItems(st);
+    if (!st.id || !items) {
+      toast.error(t('erp.stockTakes.completeFailed'));
       return;
     }
-    await doComplete();
+    try {
+      await updateMut.mutateAsync({
+        id: st.id,
+        body: { status: 'completed', notes: st.notes ?? '', items },
+      });
+      toast.success(t('erp.stockTakes.completed'));
+    } catch {
+      toast.error(t('erp.stockTakes.completeFailed'));
+    }
   };
 
   return (
@@ -123,7 +183,8 @@ const StockTakes: React.FC = () => {
         title={t(routeLabels['/stock-takes'].title)}
         description={t('erp.stockTakes.subtitle')}
         actions={
-          canManageStockTakes && (
+          canCreateStockTakes &&
+          !stockTakesError && (
             <button
               type="button"
               onClick={() => setShowCreate(true)}
@@ -139,25 +200,54 @@ const StockTakes: React.FC = () => {
       <div className="space-y-3">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={5} />)
+        ) : stockTakesError ? (
+          <div
+            role="alert"
+            className="rounded-xl p-5 space-y-3"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+              Unable to load stock takes
+            </p>
+            <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+              Stock-take history could not be loaded from the tenant API.
+            </p>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={stockTakesFetching}
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            >
+              {stockTakesFetching ? 'Retrying…' : 'Retry'}
+            </button>
+          </div>
         ) : stockTakes.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
             title={t('erp.stockTakes.empty.title')}
             description={t('erp.stockTakes.empty.description')}
             action={
-              canManageStockTakes
+              canCreateStockTakes
                 ? { label: t('erp.stockTakes.newStockTake'), onClick: () => setShowCreate(true) }
                 : { label: t('erp.stockTakes.refresh'), onClick: () => void refetch() }
             }
           />
         ) : (
           stockTakes.map((st) => {
+            const items = st.items ?? [];
+            const completionItems = getCompletionItems(st);
             const progress = stockTakeProgress(
-              (st.items ?? []).map((item) => ({ countedQty: item.countedQty ?? 0 }))
+              items.map((item) => ({ countedQty: getCountValue(st, item) == null ? -1 : 0 }))
             );
-            const variance = stockTakeVariance(
-              (st.items ?? []).map((item) => ({ variance: item.variance ?? 0 }))
-            );
+            const variance =
+              items.length > 0 && items.every((item) => getCountValue(st, item) != null)
+                ? items.reduce(
+                    (sum, item) => sum + (getCountValue(st, item) ?? 0) - (item.expectedQty ?? 0),
+                    0
+                  )
+                : null;
+            const canComplete = completionItems !== null;
             const statusColor =
               st.status === 'completed'
                 ? 'var(--erp-success)'
@@ -190,21 +280,13 @@ const StockTakes: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {st.status !== 'completed' && canManageStockTakes && (
+                    {st.status !== 'completed' && canCompleteStockTakes && (
                       <button
                         type="button"
                         aria-label={t('erp.stockTakes.completeAria')}
-                        onClick={() =>
-                          handleComplete(
-                            st.id ?? '',
-                            (st.items ?? []).map((item) => ({
-                              productId: item.productId,
-                              expectedQty: item.expectedQty,
-                              countedQty: item.countedQty,
-                            }))
-                          )
-                        }
-                        disabled={updateMut.isPending}
+                        onClick={() => void handleComplete(st)}
+                        disabled={updateMut.isPending || !canComplete}
+                        title={!canComplete ? 'Enter a count for every item first' : undefined}
                         className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg disabled:opacity-40"
                         style={{
                           background: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
@@ -225,6 +307,53 @@ const StockTakes: React.FC = () => {
                     </span>
                   </div>
                 </div>
+                {st.status !== 'completed' && items.length > 0 && (
+                  <div className="space-y-2 mb-4">
+                    {items.map((item) => {
+                      const key = stockTakeItemKey(st.id, item.productId);
+                      const productName =
+                        inventoryItems.find(
+                          (inventoryItem) => inventoryItem.productId === item.productId
+                        )?.productName ?? `Product #${item.productId ?? ''}`;
+                      const inputValue =
+                        countInputs[key] ??
+                        (item.countedQty != null && item.countedQty !== 0
+                          ? String(item.countedQty)
+                          : '');
+                      return (
+                        <label
+                          key={key}
+                          className="flex items-center gap-3 text-xs"
+                          style={{ color: 'var(--hub-text-muted)' }}
+                        >
+                          <span className="min-w-0 flex-1 truncate">{productName}</span>
+                          <span
+                            className="shrink-0 text-[10px]"
+                            style={{ color: 'var(--hub-text-dim)' }}
+                          >
+                            Expected {item.expectedQty ?? 0}
+                          </span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            inputMode="decimal"
+                            value={inputValue}
+                            onChange={(event) => updateCount(st, item, event.target.value)}
+                            disabled={!canCompleteStockTakes}
+                            aria-label={`Counted quantity for ${productName}`}
+                            className="w-24 rounded-lg px-2 py-1.5 text-xs outline-none disabled:opacity-50"
+                            style={{
+                              background: 'var(--hub-input-bg)',
+                              border: '1px solid var(--hub-border)',
+                              color: 'var(--hub-text)',
+                            }}
+                          />
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="flex items-center gap-4 text-xs">
                   <div className="flex-1">
                     <div className="flex justify-between mb-1">
@@ -247,10 +376,15 @@ const StockTakes: React.FC = () => {
                     <p
                       className="text-sm font-bold"
                       style={{
-                        color: variance !== 0 ? 'var(--erp-danger)' : 'var(--erp-success)',
+                        color:
+                          variance === null
+                            ? 'var(--hub-text-dim)'
+                            : variance !== 0
+                              ? 'var(--erp-danger)'
+                              : 'var(--erp-success)',
                       }}
                     >
-                      {variance !== 0 ? `${variance} items` : 'None'}
+                      {variance === null ? '—' : variance !== 0 ? `${variance} items` : 'None'}
                     </p>
                   </div>
                 </div>
@@ -302,10 +436,10 @@ const StockTakes: React.FC = () => {
             />
             <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }} aria-live="polite">
               {inventoryLoading
-                ? 'Loading current inventory…'
+                ? t('erp.stockTakes.loadingInventory')
                 : inventoryError
-                  ? 'Inventory could not be loaded.'
-                  : `${itemsToCount.length} inventory item${itemsToCount.length === 1 ? '' : 's'} will be included with current stock as the expected quantity.`}
+                  ? t('erp.stockTakes.inventoryLoadFailed')
+                  : t('erp.stockTakes.itemsWillBeIncluded')}
             </p>
             <div className="flex gap-2 justify-end">
               <button

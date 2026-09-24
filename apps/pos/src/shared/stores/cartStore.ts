@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -9,8 +9,28 @@ export interface CartItemModifier {
   priceDelta: number;
 }
 
+export interface CartProductInput {
+  id?: string;
+  lineId?: string;
+  productId: number;
+  name: string;
+  sku?: string;
+  barcode?: string;
+  unitPrice: number;
+  price?: number;
+  quantity?: number;
+  taxRate?: number;
+  notes?: string;
+  modifiers?: CartItemModifier[];
+  comboId?: number;
+  variantName?: string;
+  discountPct?: number;
+  discountAmount?: number;
+  [key: string]: unknown;
+}
+
 export interface CartItem {
-  /** Unique key for this line item (product + variant + modifiers hash) */
+  /** Unique key for this line item (product, kind, variant, modifiers, and note). */
   lineId: string;
   /** Alias for lineId - used in legacy components */
   id: string;
@@ -32,11 +52,11 @@ export interface CartItem {
   discountAmount: number;
   taxRate: number;
   /** Status for KDS tracking */
-  status: 'pending' | 'preparing' | 'ready' | 'served' | 'cancelled';
+  status: "pending" | "preparing" | "ready" | "served" | "cancelled";
 }
 
 export interface CartPayment {
-  method: 'cash' | 'card' | 'online' | 'gift_card' | 'store_credit' | 'other';
+  method: "cash" | "card" | "online" | "gift_card" | "store_credit" | "other";
   amount: number;
   reference?: string;
   cardLast4?: string;
@@ -44,7 +64,7 @@ export interface CartPayment {
 }
 
 export interface CartDiscount {
-  type: 'percentage' | 'fixed';
+  type: "percentage" | "fixed";
   value: number;
   reason?: string;
   approvedBy?: number;
@@ -55,7 +75,7 @@ export interface CartState {
   localOrderId: string | null;
   serverOrderId: number | null;
   orderNumber: string | null;
-  orderType: 'dine_in' | 'takeaway' | 'delivery' | 'online';
+  orderType: "dine_in" | "takeaway" | "delivery" | "online";
 
   // ── Location context ──
   branchId: number | null;
@@ -98,17 +118,104 @@ export interface CartState {
 function generateLineId(
   productId: number,
   variantName?: string,
-  modifiers?: CartItemModifier[]
+  modifiers?: CartItemModifier[],
+  comboId?: number,
+  notes?: string,
 ): string {
   const modKey = (modifiers ?? [])
     .map((m) => m.id)
     .sort()
-    .join(',');
-  return `${productId}:${variantName ?? ''}:${modKey}`;
+    .join(",");
+  const comboKey = comboId != null ? `:combo:${comboId}` : "";
+  const noteKey = notes?.trim() ? `:note:${notes.trim()}` : "";
+  return `${productId}:${variantName ?? ""}:${modKey}${comboKey}${noteKey}`;
+}
+
+function normalizedText(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function normalizedModifiers(value: unknown): CartItemModifier[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((modifier) => {
+    if (!modifier || typeof modifier !== "object") return [];
+    const candidate = modifier as Partial<CartItemModifier>;
+    const id = positiveInteger(Number(candidate.id));
+    if (id == null) return [];
+    return [
+      {
+        id,
+        name: normalizedText(candidate.name),
+        priceDelta: nonNegativeNumber(Number(candidate.priceDelta)),
+      },
+    ];
+  });
+}
+
+function normalizedQuantity(value: unknown): number {
+  return positiveInteger(Number(value)) ?? 1;
+}
+
+function normalizedProductId(value: unknown): number {
+  return positiveInteger(Number(value)) ?? 0;
+}
+
+function explicitLineId(product: CartProductInput): string | undefined {
+  const value = typeof product.lineId === "string" ? product.lineId.trim() : "";
+  if (value) return value;
+  const legacyId = typeof product.id === "string" ? product.id.trim() : "";
+  return legacyId.includes("::") ||
+    legacyId.startsWith("combo_") ||
+    legacyId.startsWith("server-")
+    ? legacyId
+    : undefined;
+}
+
+function cartItemFromProduct(product: CartProductInput): CartItem {
+  const productId = normalizedProductId(product.productId);
+  const modifiers = normalizedModifiers(product.modifiers);
+  const notes = normalizedText(product.notes);
+  const comboId = positiveInteger(Number(product.comboId));
+  const explicit =
+    typeof product.lineId === "string" ? product.lineId.trim() : "";
+  const legacyLineId = explicit || explicitLineId(product);
+  const lineId =
+    explicit ||
+    (legacyLineId && !notes
+      ? legacyLineId
+      : generateLineId(
+          productId,
+          normalizedText(product.variantName) || undefined,
+          modifiers,
+          comboId ?? undefined,
+          notes,
+        ));
+  return {
+    lineId,
+    id: lineId,
+    productId,
+    name: normalizedText(product.name),
+    sku: typeof product.sku === "string" ? product.sku : undefined,
+    barcode: typeof product.barcode === "string" ? product.barcode : undefined,
+    unitPrice: nonNegativeNumber(Number(product.unitPrice)),
+    price: nonNegativeNumber(Number(product.unitPrice)),
+    quantity: normalizedQuantity(product.quantity),
+    notes: notes || undefined,
+    modifiers,
+    comboId: comboId ?? undefined,
+    variantName: normalizedText(product.variantName) || undefined,
+    discountPct: clampNumber(Number(product.discountPct), 0, 100),
+    discountAmount: nonNegativeNumber(Number(product.discountAmount)),
+    taxRate: nonNegativeNumber(Number(product.taxRate)),
+    status: "pending",
+  };
 }
 
 function computeItemTotal(item: CartItem): number {
-  const modifierTotal = item.modifiers.reduce((s, m) => s + nonNegativeNumber(m.priceDelta), 0);
+  const modifierTotal = item.modifiers.reduce(
+    (s, m) => s + nonNegativeNumber(m.priceDelta),
+    0,
+  );
   const basePrice = (item.unitPrice + modifierTotal) * item.quantity;
   const discountedPrice =
     item.discountPct > 0
@@ -138,7 +245,7 @@ function normalizeContextId(id: number): number | null {
 }
 
 function trimmedOrNull(value: string | null): string | null {
-  const trimmed = value?.trim() ?? '';
+  const trimmed = value?.trim() ?? "";
   return trimmed || null;
 }
 
@@ -146,30 +253,22 @@ function trimmedOrNull(value: string | null): string | null {
 
 interface CartActions {
   // Items
-  addItem: (product: {
-    id?: number | string;
-    productId: number;
-    name: string;
-    sku?: string;
-    barcode?: string;
-    unitPrice: number;
-    price?: number;
-    taxRate?: number;
-    modifiers?: CartItemModifier[];
-    comboId?: number;
-    variantName?: string;
-    [key: string]: unknown;
-  }) => void;
+  addItem: (product: CartProductInput) => void;
+  replaceItemsFromProducts: (products: CartProductInput[]) => void;
   removeItem: (lineId: string) => void;
   updateQuantity: (lineId: string, quantity: number) => void;
   updateItemNotes: (lineId: string, notes: string) => void;
-  setItemDiscount: (lineId: string, discountPct: number, discountAmount: number) => void;
-  setItemStatus: (lineId: string, status: CartItem['status']) => void;
+  setItemDiscount: (
+    lineId: string,
+    discountPct: number,
+    discountAmount: number,
+  ) => void;
+  setItemStatus: (lineId: string, status: CartItem["status"]) => void;
 
   // Order-level
   setOrderDiscount: (discount: CartDiscount | null) => void;
   setTip: (amount: number) => void;
-  setOrderType: (type: CartState['orderType']) => void;
+  setOrderType: (type: CartState["orderType"]) => void;
   setNotes: (notes: string) => void;
   setKitchenNotes: (notes: string) => void;
 
@@ -180,7 +279,11 @@ interface CartActions {
   setTable: (tableId: number | null, floorId?: number | null) => void;
 
   // Context
-  setContext: (branchId: number, terminalId: number, employeeId: number) => void;
+  setContext: (
+    branchId: number,
+    terminalId: number,
+    employeeId: number,
+  ) => void;
 
   // Payments
   addPayment: (payment: CartPayment) => void;
@@ -192,7 +295,7 @@ interface CartActions {
   resumeOrder: () => void;
 
   // Order tracking
-  setServerOrderId: (id: number) => void;
+  setServerOrderId: (id: number | null) => void;
   setOrderNumber: (num: string) => void;
 
   // Table number
@@ -219,7 +322,7 @@ const initialState: CartState = {
   localOrderId: null,
   serverOrderId: null,
   orderNumber: null,
-  orderType: 'takeaway',
+  orderType: "takeaway",
   branchId: null,
   terminalId: null,
   employeeId: null,
@@ -231,10 +334,10 @@ const initialState: CartState = {
   orderDiscount: null,
   tipAmount: 0,
   payments: [],
-  notes: '',
-  kitchenNotes: '',
+  notes: "",
+  kitchenNotes: "",
   isHeld: false,
-  holdLabel: '',
+  holdLabel: "",
   orderId: null,
   tableNumber: null,
 };
@@ -244,246 +347,284 @@ export const useCartStore = create<CartState & CartActions>()(
     (set, get) => ({
       ...initialState,
 
-  // ── Items ──────────────────────────────────────────────────────
+      // ── Items ──────────────────────────────────────────────────────
 
-  addItem: (product) => {
-    const modifiers = (product.modifiers ?? []).map((modifier) => ({
-      ...modifier,
-      priceDelta: nonNegativeNumber(modifier.priceDelta),
-    }));
-    const lineId = generateLineId(product.productId, product.variantName, modifiers);
-    set((state) => {
-      const existing = state.items.find((i) => i.lineId === lineId);
-      if (existing) {
-        return {
-          items: state.items.map((i) =>
-            i.lineId === lineId ? { ...i, quantity: i.quantity + 1 } : i
-          ),
-        };
-      }
-      const newItem: CartItem = {
-        lineId,
-        id: lineId,
-        productId: product.productId,
-        name: product.name,
-        sku: product.sku,
-        barcode: product.barcode,
-        unitPrice: nonNegativeNumber(product.unitPrice),
-        price: nonNegativeNumber(product.unitPrice),
-        quantity: 1,
-        modifiers,
-        comboId: product.comboId,
-        variantName: product.variantName,
-        discountPct: 0,
-        discountAmount: 0,
-        taxRate: nonNegativeNumber(product.taxRate ?? 0),
-        status: 'pending',
-      };
-      return { items: [...state.items, newItem] };
-    });
-  },
-
-  removeItem: (lineId) =>
-    set((state) => ({ items: state.items.filter((i) => i.lineId !== lineId) })),
-
-  updateQuantity: (lineId, quantity) => {
-    const normalizedQuantity = positiveInteger(quantity);
-    if (!normalizedQuantity) {
-      get().removeItem(lineId);
-    } else {
-      set((state) => ({
-        items: state.items.map((i) =>
-          i.lineId === lineId ? { ...i, quantity: normalizedQuantity } : i
-        ),
-      }));
-    }
-  },
-
-  updateItemNotes: (lineId, notes) =>
-    set((state) => ({
-      items: state.items.map((i) => (i.lineId === lineId ? { ...i, notes } : i)),
-    })),
-
-  setItemDiscount: (lineId, discountPct, discountAmount) =>
-    set((state) => ({
-      items: state.items.map((i) =>
-        i.lineId === lineId
-          ? {
-              ...i,
-              discountPct: clampNumber(discountPct, 0, 100),
-              discountAmount: nonNegativeNumber(discountAmount),
-            }
-          : i
-      ),
-    })),
-
-  setItemStatus: (lineId, status) =>
-    set((state) => ({
-      items: state.items.map((i) => (i.lineId === lineId ? { ...i, status } : i)),
-    })),
-
-  // ── Order-level ───────────────────────────────────────────────
-
-  setOrderDiscount: (discount) =>
-    set({
-      orderDiscount: discount
-        ? {
-            ...discount,
-            value:
-              discount.type === 'percentage'
-                ? clampNumber(discount.value, 0, 100)
-                : nonNegativeNumber(discount.value),
+      addItem: (product) => {
+        const newItem = cartItemFromProduct(product);
+        set((state) => {
+          const existing = state.items.find((i) => i.lineId === newItem.lineId);
+          if (existing) {
+            return {
+              items: state.items.map((i) =>
+                i.lineId === newItem.lineId
+                  ? { ...i, quantity: i.quantity + newItem.quantity }
+                  : i,
+              ),
+            };
           }
-        : null,
-    }),
-  setTip: (tipAmount) => set({ tipAmount: nonNegativeNumber(tipAmount) }),
-  setOrderType: (orderType) => set({ orderType }),
-  setNotes: (notes) => set({ notes }),
-  setKitchenNotes: (kitchenNotes) => set({ kitchenNotes }),
+          return { items: [...state.items, newItem] };
+        });
+      },
 
-  // ── Customer ──────────────────────────────────────────────────
+      replaceItemsFromProducts: (products) => {
+        const replacements = products.map(cartItemFromProduct);
+        const merged = new Map<string, CartItem>();
+        for (const item of replacements) {
+          const existing = merged.get(item.lineId);
+          if (existing) {
+            existing.quantity += item.quantity;
+          } else {
+            merged.set(item.lineId, { ...item });
+          }
+        }
+        set({
+          items: Array.from(merged.values()),
+          orderDiscount: null,
+          tipAmount: 0,
+          payments: [],
+          notes: "",
+          kitchenNotes: "",
+          customerId: null,
+          customerName: null,
+          serverOrderId: null,
+          orderId: null,
+          orderNumber: null,
+          isHeld: false,
+          holdLabel: "",
+        });
+      },
 
-  setCustomer: (customerId, customerName) => {
-    const normalizedCustomerId = customerId === null ? null : positiveInteger(customerId);
-    set({
-      customerId: normalizedCustomerId,
-      customerName: normalizedCustomerId ? trimmedOrNull(customerName) : null,
-    });
-  },
+      removeItem: (lineId) =>
+        set((state) => ({
+          items: state.items.filter((i) => i.lineId !== lineId),
+        })),
 
-  // ── Table ─────────────────────────────────────────────────────
+      updateQuantity: (lineId, quantity) => {
+        const normalizedQuantity = positiveInteger(quantity);
+        if (!normalizedQuantity) {
+          get().removeItem(lineId);
+        } else {
+          set((state) => ({
+            items: state.items.map((i) =>
+              i.lineId === lineId ? { ...i, quantity: normalizedQuantity } : i,
+            ),
+          }));
+        }
+      },
 
-  setTable: (tableId, floorId) =>
-    set({
-      tableId: tableId === null ? null : positiveInteger(tableId),
-      floorId: floorId === undefined || floorId === null ? null : positiveInteger(floorId),
-    }),
+      updateItemNotes: (lineId, notes) =>
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.lineId === lineId ? { ...i, notes } : i,
+          ),
+        })),
 
-  // ── Context ───────────────────────────────────────────────────
+      setItemDiscount: (lineId, discountPct, discountAmount) =>
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.lineId === lineId
+              ? {
+                  ...i,
+                  discountPct: clampNumber(discountPct, 0, 100),
+                  discountAmount: nonNegativeNumber(discountAmount),
+                }
+              : i,
+          ),
+        })),
 
-  setContext: (branchId, terminalId, employeeId) => {
-    const normalizedBranchId = normalizeContextId(branchId);
-    const normalizedTerminalId = normalizeContextId(terminalId);
-    const normalizedEmployeeId = normalizeContextId(employeeId);
-    if (!normalizedBranchId || !normalizedTerminalId || !normalizedEmployeeId) {
-      set({ branchId: null, terminalId: null, employeeId: null });
-      return;
-    }
-    set({
-      branchId: normalizedBranchId,
-      terminalId: normalizedTerminalId,
-      employeeId: normalizedEmployeeId,
-    });
-  },
+      setItemStatus: (lineId, status) =>
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.lineId === lineId ? { ...i, status } : i,
+          ),
+        })),
 
-  // ── Payments ──────────────────────────────────────────────────
+      // ── Order-level ───────────────────────────────────────────────
 
-  addPayment: (payment) =>
-    set((state) => ({
-      payments: [...state.payments, { ...payment, amount: nonNegativeNumber(payment.amount) }],
-    })),
+      setOrderDiscount: (discount) =>
+        set({
+          orderDiscount: discount
+            ? {
+                ...discount,
+                value:
+                  discount.type === "percentage"
+                    ? clampNumber(discount.value, 0, 100)
+                    : nonNegativeNumber(discount.value),
+              }
+            : null,
+        }),
+      setTip: (tipAmount) => set({ tipAmount: nonNegativeNumber(tipAmount) }),
+      setOrderType: (orderType) => set({ orderType }),
+      setNotes: (notes) => set({ notes }),
+      setKitchenNotes: (kitchenNotes) => set({ kitchenNotes }),
 
-  removePayment: (index) =>
-    set((state) => ({ payments: state.payments.filter((_, i) => i !== index) })),
+      // ── Customer ──────────────────────────────────────────────────
 
-  clearPayments: () => set({ payments: [] }),
+      setCustomer: (customerId, customerName) => {
+        const normalizedCustomerId =
+          customerId === null ? null : positiveInteger(customerId);
+        set({
+          customerId: normalizedCustomerId,
+          customerName: normalizedCustomerId
+            ? trimmedOrNull(customerName)
+            : null,
+        });
+      },
 
-  // ── Hold/park ─────────────────────────────────────────────────
+      // ── Table ─────────────────────────────────────────────────────
 
-  holdOrder: (label) => set({ isHeld: true, holdLabel: label }),
-  resumeOrder: () => set({ isHeld: false, holdLabel: '' }),
+      setTable: (tableId, floorId) =>
+        set({
+          tableId: tableId === null ? null : positiveInteger(tableId),
+          floorId:
+            floorId === undefined || floorId === null
+              ? null
+              : positiveInteger(floorId),
+        }),
 
-  // ── Order tracking ────────────────────────────────────────────
+      // ── Context ───────────────────────────────────────────────────
 
-  setServerOrderId: (serverOrderId) => set({ serverOrderId: positiveInteger(serverOrderId) }),
-  setOrderNumber: (orderNumber) => set({ orderNumber: trimmedOrNull(orderNumber) }),
+      setContext: (branchId, terminalId, employeeId) => {
+        const normalizedBranchId = normalizeContextId(branchId);
+        const normalizedTerminalId = normalizeContextId(terminalId);
+        const normalizedEmployeeId = normalizeContextId(employeeId);
+        if (
+          !normalizedBranchId ||
+          !normalizedTerminalId ||
+          !normalizedEmployeeId
+        ) {
+          set({ branchId: null, terminalId: null, employeeId: null });
+          return;
+        }
+        set({
+          branchId: normalizedBranchId,
+          terminalId: normalizedTerminalId,
+          employeeId: normalizedEmployeeId,
+        });
+      },
 
-  // ── Table number ──────────────────────────────────────────────
-  setTableNumber: (num) => set({ tableNumber: trimmedOrNull(num) }),
+      // ── Payments ──────────────────────────────────────────────────
 
-  // ── Notes update ─────────────────────────────────────────────
-  updateNotes: (notes) => set({ notes }),
+      addPayment: (payment) =>
+        set((state) => ({
+          payments: [
+            ...state.payments,
+            { ...payment, amount: nonNegativeNumber(payment.amount) },
+          ],
+        })),
 
-  // ── Reset ─────────────────────────────────────────────────────
+      removePayment: (index) =>
+        set((state) => ({
+          payments: state.payments.filter((_, i) => i !== index),
+        })),
 
-  clearCart: () => set({ ...initialState }),
+      clearPayments: () => set({ payments: [] }),
 
-  newOrder: () => {
-    const { branchId, terminalId, employeeId } = get();
-    set({
-      ...initialState,
-      branchId,
-      terminalId,
-      employeeId,
-      localOrderId: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    });
-  },
+      // ── Hold/park ─────────────────────────────────────────────────
 
-  // ── Computed ──────────────────────────────────────────────────
+      holdOrder: (label) => set({ isHeld: true, holdLabel: label }),
+      resumeOrder: () => set({ isHeld: false, holdLabel: "" }),
 
-  subtotal: () => {
-    return get().items.reduce((sum, item) => sum + computeItemTotal(item), 0);
-  },
+      // ── Order tracking ────────────────────────────────────────────
 
-  discountTotal: () => {
-    const { items, orderDiscount } = get();
-    const itemDiscounts = items.reduce((sum, item) => {
-      const modTotal = item.modifiers.reduce((s, m) => s + m.priceDelta, 0);
-      const gross = (item.unitPrice + modTotal) * item.quantity;
-      const net = computeItemTotal(item);
-      return sum + (gross - net);
-    }, 0);
+      setServerOrderId: (serverOrderId) =>
+        set({
+          serverOrderId:
+            serverOrderId == null ? null : positiveInteger(serverOrderId),
+        }),
+      setOrderNumber: (orderNumber) =>
+        set({ orderNumber: trimmedOrNull(orderNumber) }),
 
-    let orderDiscountAmount = 0;
-    if (orderDiscount) {
-      const sub = get().subtotal();
-      orderDiscountAmount =
-        orderDiscount.type === 'percentage'
-          ? sub * (orderDiscount.value / 100)
-          : orderDiscount.value;
-    }
+      // ── Table number ──────────────────────────────────────────────
+      setTableNumber: (num) => set({ tableNumber: trimmedOrNull(num) }),
 
-    return itemDiscounts + orderDiscountAmount;
-  },
+      // ── Notes update ─────────────────────────────────────────────
+      updateNotes: (notes) => set({ notes }),
 
-  taxTotal: () => {
-    const { items, orderDiscount } = get();
-    const sub = get().subtotal();
-    const orderDiscountRatio = orderDiscount
-      ? orderDiscount.type === 'percentage'
-        ? orderDiscount.value / 100
-        : orderDiscount.value / (sub || 1)
-      : 0;
+      // ── Reset ─────────────────────────────────────────────────────
 
-    return items.reduce((sum, item) => {
-      const itemTotal = computeItemTotal(item);
-      const afterOrderDiscount = itemTotal * (1 - orderDiscountRatio);
-      return sum + afterOrderDiscount * (item.taxRate / 100);
-    }, 0);
-  },
+      clearCart: () => set({ ...initialState }),
 
-  total: () => {
-    const sub = get().subtotal();
-    const disc = get().orderDiscount;
-    const tax = get().taxTotal();
-    const tip = get().tipAmount;
+      newOrder: () => {
+        const { branchId, terminalId, employeeId } = get();
+        set({
+          ...initialState,
+          branchId,
+          terminalId,
+          employeeId,
+          localOrderId: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        });
+      },
 
-    let orderDiscountAmount = 0;
-    if (disc) {
-      orderDiscountAmount = disc.type === 'percentage' ? sub * (disc.value / 100) : disc.value;
-    }
+      // ── Computed ──────────────────────────────────────────────────
 
-    return Math.max(0, sub - orderDiscountAmount + tax + tip);
-  },
+      subtotal: () => {
+        return get().items.reduce(
+          (sum, item) => sum + computeItemTotal(item),
+          0,
+        );
+      },
 
-  amountPaid: () => get().payments.reduce((sum, p) => sum + p.amount, 0),
+      discountTotal: () => {
+        const { items, orderDiscount } = get();
+        const itemDiscounts = items.reduce((sum, item) => {
+          const modTotal = item.modifiers.reduce((s, m) => s + m.priceDelta, 0);
+          const gross = (item.unitPrice + modTotal) * item.quantity;
+          const net = computeItemTotal(item);
+          return sum + (gross - net);
+        }, 0);
 
-  amountDue: () => Math.max(0, get().total() - get().amountPaid()),
+        let orderDiscountAmount = 0;
+        if (orderDiscount) {
+          const sub = get().subtotal();
+          orderDiscountAmount =
+            orderDiscount.type === "percentage"
+              ? sub * (orderDiscount.value / 100)
+              : orderDiscount.value;
+        }
+
+        return itemDiscounts + orderDiscountAmount;
+      },
+
+      taxTotal: () => {
+        const { items, orderDiscount } = get();
+        const sub = get().subtotal();
+        const orderDiscountRatio = orderDiscount
+          ? orderDiscount.type === "percentage"
+            ? orderDiscount.value / 100
+            : orderDiscount.value / (sub || 1)
+          : 0;
+
+        return items.reduce((sum, item) => {
+          const itemTotal = computeItemTotal(item);
+          const afterOrderDiscount = itemTotal * (1 - orderDiscountRatio);
+          return sum + afterOrderDiscount * (item.taxRate / 100);
+        }, 0);
+      },
+
+      total: () => {
+        const sub = get().subtotal();
+        const disc = get().orderDiscount;
+        const tax = get().taxTotal();
+        const tip = get().tipAmount;
+
+        let orderDiscountAmount = 0;
+        if (disc) {
+          orderDiscountAmount =
+            disc.type === "percentage" ? sub * (disc.value / 100) : disc.value;
+        }
+
+        return Math.max(0, sub - orderDiscountAmount + tax + tip);
+      },
+
+      amountPaid: () => get().payments.reduce((sum, p) => sum + p.amount, 0),
+
+      amountDue: () => Math.max(0, get().total() - get().amountPaid()),
 
       itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
     {
-      name: 'pos-active-cart',
+      name: "pos-active-cart",
       version: 1,
       partialize: (state): CartState => ({
         localOrderId: state.localOrderId,
@@ -508,6 +649,6 @@ export const useCartStore = create<CartState & CartActions>()(
         orderId: state.orderId,
         tableNumber: state.tableNumber,
       }),
-    }
-  )
+    },
+  ),
 );

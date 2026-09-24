@@ -79,7 +79,12 @@ describe('BoardSettingsPanel: columns', () => {
     fireEvent.change(first, { target: { value: 'Icebox' } });
     fireEvent.blur(first);
 
-    expect(updateColumn).toHaveBeenCalledWith({ id: '1', name: 'Icebox', sortOrder: 0 });
+    expect(updateColumn).toHaveBeenCalledWith({
+      id: '1',
+      name: 'Icebox',
+      color: '#6b7280',
+      sortOrder: 0,
+    });
   });
 
   it('does not send a rename when the name is unchanged', () => {
@@ -149,8 +154,18 @@ describe('BoardSettingsPanel: reordering', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'flow.board.moveUpLabel:In progress' }));
 
-    expect(updateColumn).toHaveBeenCalledWith({ id: '2', name: 'In progress', sortOrder: 0 });
-    expect(updateColumn).toHaveBeenCalledWith({ id: '1', name: 'Backlog', sortOrder: 1 });
+    expect(updateColumn).toHaveBeenCalledWith({
+      id: '2',
+      name: 'In progress',
+      color: '#6b7280',
+      sortOrder: 0,
+    });
+    expect(updateColumn).toHaveBeenCalledWith({
+      id: '1',
+      name: 'Backlog',
+      color: '#6b7280',
+      sortOrder: 1,
+    });
   });
 
   it('cannot move the first column up or the last down', () => {
@@ -168,7 +183,12 @@ describe('BoardSettingsPanel: reordering', () => {
       altKey: true,
     });
 
-    expect(updateColumn).toHaveBeenCalledWith({ id: '1', name: 'Backlog', sortOrder: 1 });
+    expect(updateColumn).toHaveBeenCalledWith({
+      id: '1',
+      name: 'Backlog',
+      color: '#6b7280',
+      sortOrder: 1,
+    });
   });
 
   it('announces the move for a screen reader', () => {

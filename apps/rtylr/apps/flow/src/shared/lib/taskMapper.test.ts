@@ -128,6 +128,16 @@ describe('apiTaskToTask', () => {
     const out = apiTaskToTask(baseApiTask());
     expect(out.archived).toBe(false);
   });
+
+  it('derives quick-create effort minutes when only estimated hours are returned', () => {
+    const out = apiTaskToTask(baseApiTask({ estimatedHours: 1.5 }));
+    expect(out.effortMinutes).toBe(90);
+  });
+
+  it('prefers an explicit effort value over the estimated-hours fallback', () => {
+    const out = apiTaskToTask(baseApiTask({ effortMinutes: 30, estimatedHours: 1.5 }));
+    expect(out.effortMinutes).toBe(30);
+  });
 });
 
 describe('assignee initials cannot disagree with the assignee name (#1097 D-040)', () => {

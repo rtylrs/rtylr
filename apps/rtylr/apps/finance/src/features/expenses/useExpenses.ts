@@ -10,6 +10,29 @@ import type {
 import type { Expense, ExpenseCategory } from '../../shared/services/financeApi';
 
 const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
+const EXPENSES_PAGE_SIZE = 500;
+
+async function fetchAllExpenses(): Promise<ApiExpense[]> {
+  const all: ApiExpense[] = [];
+  let page = 1;
+  let firstRequest = true;
+
+  while (true) {
+    const response = await expensesClient.listExpenses(
+      firstRequest ? {} : { page, pageSize: EXPENSES_PAGE_SIZE }
+    );
+    const rows = response.expenses ?? [];
+    all.push(...rows);
+
+    // Current responses carry this flag. An older response without pagination
+    // metadata is treated as a complete response rather than looping forever.
+    if (response.hasMore !== true || rows.length === 0) break;
+    page += 1;
+    firstRequest = false;
+  }
+
+  return all;
+}
 
 interface UseExpensesParams {
   page?: number;
@@ -33,6 +56,7 @@ function fromApiExpense(e: ApiExpense): Expense {
     vendor: e.vendor,
     receiptUrl: e.receiptUrl,
     expenseDate: e.expenseDate ?? '',
+    notes: e.notes ?? '',
     status: e.status ?? '',
     createdAt: e.createdAt,
     updatedAt: e.updatedAt,
@@ -44,12 +68,16 @@ function fromApiCategory(c: ApiExpenseCategory): ExpenseCategory {
 }
 
 export function useExpenses(params: UseExpensesParams = {}) {
-  const { page = 1, pageSize = 25 } = params;
+  const requestedPage = params.page ?? 1;
+  const requestedPageSize = params.pageSize ?? 25;
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageSize =
+    Number.isSafeInteger(requestedPageSize) && requestedPageSize > 0 ? requestedPageSize : 25;
+
   return useQuery<ExpenseListResult>({
     queryKey: ['expenses', 'filter', { page, pageSize }],
     queryFn: async (): Promise<ExpenseListResult> => {
-      const res = await expensesClient.listExpenses({});
-      const all = (res.expenses ?? []).map(fromApiExpense);
+      const all = (await fetchAllExpenses()).map(fromApiExpense);
       const start = (page - 1) * pageSize;
       const pageItems = all.slice(start, start + pageSize);
       return {
@@ -84,6 +112,7 @@ export function useCreateExpense() {
         description: data.description ?? '',
         vendor: data.vendor ?? '',
         receiptUrl: data.receiptUrl ?? '',
+        notes: data.notes ?? '',
         expenseDate: data.expenseDate ?? '',
       });
       return { expenseId: res.expenseId ?? '', message: res.message ?? '' };
@@ -113,6 +142,7 @@ export function useUpdateExpense() {
           description: data.description ?? '',
           vendor: data.vendor ?? '',
           receiptUrl: data.receiptUrl ?? '',
+          notes: data.notes ?? '',
           expenseDate: data.expenseDate ?? '',
         },
       });

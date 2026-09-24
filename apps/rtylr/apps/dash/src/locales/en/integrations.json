@@ -1,3 +1,5 @@
 {
-  "emptyMatchTitle": "No integrations match your search"
+  "emptyMatchTitle": "No integrations match your search",
+  "loadFailed": "Unable to load integrations",
+  "loadFailedDescription": "Refresh the list before changing connected integrations."
 }

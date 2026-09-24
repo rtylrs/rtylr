@@ -57,6 +57,10 @@
     "addNButton_many": "إضافة {{count}} عضو",
     "addNButton_other": "إضافة {{count}} عضو",
     "removeMemberAriaLabel": "إزالة {{name}} من المجموعة",
+    "loadMembersFailed": "تعذر تحميل أعضاء الفريق",
+    "loadMembersFailedDescription": "حدّث قائمة المرشحين قبل إضافة أعضاء.",
+    "candidatePagination": "صفحات الأعضاء",
+    "candidatePage": "الصفحة {{page}}",
     "pageTitle": "تفاصيل المجموعة"
   },
   "list": {

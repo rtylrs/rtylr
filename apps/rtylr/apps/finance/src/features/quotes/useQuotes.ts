@@ -17,7 +17,7 @@ const STATUS_FROM_API: Record<string, string> = {
   accepted: 'Accepted',
   rejected: 'Declined',
   expired: 'Expired',
-  converted: 'Accepted',
+  converted: 'Converted',
 };
 
 function fromApiQuote(q: ApiQuote): ReturnType<typeof quoteSchema.parse> {

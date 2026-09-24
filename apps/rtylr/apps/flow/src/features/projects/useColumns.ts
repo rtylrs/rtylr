@@ -8,13 +8,34 @@ function key(projectId: string) {
   return ['columns', projectId];
 }
 
+const COLUMNS_PAGE_SIZE = 500;
+
+/** The board needs every column, not only the server's first page. */
+export async function fetchAllProjectColumns(projectId: string): Promise<ApiProjectColumn[]> {
+  const all: ApiProjectColumn[] = [];
+  let page = 1;
+
+  for (;;) {
+    const res = await unwrap(
+      flowApi.getProjectColumns(projectId, { page, limit: COLUMNS_PAGE_SIZE })
+    );
+    const rows = res.columns ?? [];
+    all.push(...rows);
+
+    const pagination = res.pagination;
+    const hasNext =
+      pagination?.hasNext ??
+      (typeof pagination?.total === 'number' && pagination.total > all.length);
+    if (!hasNext || rows.length === 0) return all;
+
+    page = (pagination?.page ?? page) + 1;
+  }
+}
+
 export function useProjectColumns(projectId: string) {
   return useQuery<ApiProjectColumn[]>({
     queryKey: key(projectId),
-    queryFn: async () => {
-      const res = await unwrap(flowApi.getProjectColumns(projectId));
-      return res.columns ?? [];
-    },
+    queryFn: () => fetchAllProjectColumns(projectId),
     enabled: !!projectId,
   });
 }

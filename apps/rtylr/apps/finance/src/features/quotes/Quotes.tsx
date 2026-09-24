@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
+import { useUserStore } from '@voxire/auth';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -14,12 +15,16 @@ import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
 import { formatDate, toLocalIso } from '../../shared/lib/date';
+import { minorToMajor } from '../../shared/lib/money';
+import { useSettings } from '../../shared/lib/settings';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
   Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-accent-blue)' },
   Accepted: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  Converted: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
   Declined: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
   Expired: { background: 'var(--finance-warning-soft)', color: 'var(--finance-warning)' },
 };
@@ -33,6 +38,7 @@ interface NewQuoteForm {
 
 const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { t } = useTranslation();
+  const currency = useSettings((state) => state.currency);
   const createQuote = useCreateQuote();
   const [form, setForm] = useState<NewQuoteForm>({
     client: '',
@@ -51,10 +57,11 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       toast.error(t('quotes.amountPositive'));
       return;
     }
+    // CurrencyInput emits minor units, while the quote API stores major units.
     createQuote.mutate(
       {
         client: form.client,
-        amount: form.amount,
+        amount: minorToMajor(form.amount, currency),
         expiresAt: form.expiresAt,
         description: form.description || undefined,
       },
@@ -110,6 +117,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
           <label style={labelStyle}>{t('quotes.amount')}</label>
           <CurrencyInput
             value={form.amount}
+            currency={currency}
             onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
           />
         </div>
@@ -141,15 +149,29 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
 const Quotes: React.FC = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const { data: result, isLoading } = useQuotes({ page });
+  const {
+    data: result,
+    isLoading,
+    isPending,
+    isError = false,
+    isFetching = false,
+    refetch,
+  } = useQuotes({ page });
   const data = result?.quotes ?? [];
   const hasMore = result?.hasMore ?? false;
+  const isPaginated = hasMore || page > 1;
+  const loading = Boolean(isLoading || isPending);
+  const listUnavailable = !result && !loading && !isError;
   const convertQuote = useConvertQuote();
   const updateStatus = useUpdateQuoteStatus();
   const total = data.reduce((s: number, q) => s + (q.amount ?? 0), 0);
   const [showCreate, setShowCreate] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState<(typeof data)[number] | null>(null);
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageQuotes = canFinancePermission(role, 'finance:quotes:manage');
 
   const handleConvert = (id: string): void => {
+    if (!canManageQuotes) return;
     convertQuote.mutate(id, {
       onSuccess: () => toast.success(t('quotes.converted')),
       onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to convert quote')),
@@ -157,6 +179,7 @@ const Quotes: React.FC = () => {
   };
 
   const handleMarkAccepted = (id: string): void => {
+    if (!canManageQuotes) return;
     updateStatus.mutate(
       { id, status: 'accepted' },
       { onSuccess: () => toast.success(t('quotes.accepted')) }
@@ -173,25 +196,50 @@ const Quotes: React.FC = () => {
       <PageHeader
         title={t('quotes.title')}
         subtitle={
-          <>
-            {data.length} quotes <>&middot;</> <MoneyDisplay amount={total} /> total
-          </>
+          isError || loading || listUnavailable ? undefined : (
+            <>
+              {data.length} quotes <>&middot;</> <MoneyDisplay amount={total} />{' '}
+              {isPaginated ? t('common.subtotal') : t('common.total')}
+            </>
+          )
         }
         actions={
-          <button
-            type="button"
-            style={primaryBtn}
-            aria-label={t('quotes.newQuote')}
-            onClick={() => setShowCreate(true)}
-          >
-            <Plus size={13} /> New Quote
-          </button>
+          canManageQuotes ? (
+            <button
+              type="button"
+              style={primaryBtn}
+              aria-label={t('quotes.newQuote')}
+              onClick={() => setShowCreate(true)}
+            >
+              <Plus size={13} /> New Quote
+            </button>
+          ) : undefined
         }
       />
 
-      <NewQuoteModal open={showCreate} onClose={() => setShowCreate(false)} />
+      {canManageQuotes && <NewQuoteModal open={showCreate} onClose={() => setShowCreate(false)} />}
 
-      {isLoading ? (
+      {isError || listUnavailable ? (
+        <div
+          role="alert"
+          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FileSignature size={16} style={{ color: 'var(--finance-danger)' }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+              {t('errors.generic')}
+            </span>
+          </div>
+          <button
+            type="button"
+            style={{ ...ghostBtn, cursor: isFetching ? 'wait' : 'pointer' }}
+            disabled={isFetching}
+            onClick={() => void refetch?.()}
+          >
+            {t('common.refresh')}
+          </button>
+        </div>
+      ) : loading ? (
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
         </div>
@@ -200,10 +248,14 @@ const Quotes: React.FC = () => {
           icon={FileSignature}
           title={t('quotes.emptyTitle')}
           description={t('quotes.emptyDescription')}
-          action={{
-            label: t('quotes.emptyCta'),
-            onClick: () => setShowCreate(true),
-          }}
+          action={
+            canManageQuotes
+              ? {
+                  label: t('quotes.emptyCta'),
+                  onClick: () => setShowCreate(true),
+                }
+              : { label: t('common.refresh'), onClick: () => void refetch?.() }
+          }
         />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
@@ -273,7 +325,7 @@ const Quotes: React.FC = () => {
                     {q.expiresAt}
                   </td>
                   <td style={{ padding: '12px 16px' }}>
-                    {q.status === 'Accepted' ? (
+                    {q.status === 'Accepted' && canManageQuotes ? (
                       <button
                         type="button"
                         style={{
@@ -289,7 +341,7 @@ const Quotes: React.FC = () => {
                       >
                         <ArrowRight size={12} /> Convert
                       </button>
-                    ) : q.status === 'Sent' ? (
+                    ) : q.status === 'Sent' && canManageQuotes ? (
                       <button
                         type="button"
                         style={{
@@ -308,6 +360,7 @@ const Quotes: React.FC = () => {
                         type="button"
                         style={{ ...ghostBtn, padding: '4px 10px' }}
                         aria-label={`View quote ${q.id}`}
+                        onClick={() => setSelectedQuote(q)}
                       >
                         {t('quotes.view')}
                       </button>
@@ -320,7 +373,55 @@ const Quotes: React.FC = () => {
         </div>
       )}
 
-      {(page > 1 || hasMore) && (
+      <Modal
+        open={selectedQuote !== null}
+        onClose={() => setSelectedQuote(null)}
+        title={selectedQuote ? `${t('quotes.view')} ${selectedQuote.id}` : t('quotes.view')}
+        width={480}
+      >
+        {selectedQuote && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+              <span style={{ color: 'var(--hub-text-muted)', fontSize: 12 }}>
+                {t('quotes.client')}
+              </span>
+              <strong style={{ color: 'var(--hub-text)', fontSize: 13, textAlign: 'end' }}>
+                {selectedQuote.client}
+              </strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+              <span style={{ color: 'var(--hub-text-muted)', fontSize: 12 }}>
+                {t('common.amount')}
+              </span>
+              <MoneyDisplay amount={selectedQuote.amount ?? 0} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+              <span style={{ color: 'var(--hub-text-muted)', fontSize: 12 }}>
+                {t('common.status')}
+              </span>
+              <span style={{ color: 'var(--hub-text)', fontSize: 13 }}>{selectedQuote.status}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+              <span style={{ color: 'var(--hub-text-muted)', fontSize: 12 }}>
+                {t('common.date')}
+              </span>
+              <span style={{ color: 'var(--hub-text)', fontSize: 13 }}>
+                {formatDate(selectedQuote.issuedDate ?? '')}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+              <span style={{ color: 'var(--hub-text-muted)', fontSize: 12 }}>
+                {t('quotes.expires')}
+              </span>
+              <span style={{ color: 'var(--hub-text)', fontSize: 13 }}>
+                {selectedQuote.expiresAt}
+              </span>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {!isError && !loading && !listUnavailable && (page > 1 || hasMore) && (
         <div className="flex items-center justify-between px-1 py-3">
           <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
             Page {page}

@@ -1,4 +1,4 @@
-type RestoreResult = 'redirected' | 'restoring';
+type RestoreResult = "redirected" | "restoring";
 
 interface RestoreSessionParams {
   cookieToken: string | null;
@@ -17,16 +17,33 @@ export function restoreUserSessionFromCookie({
 }: RestoreSessionParams): RestoreResult {
   if (!cookieToken) {
     redirectToAuth();
-    return 'redirected';
+    return "redirected";
   }
 
   if (cookieToken !== storeToken) {
     setToken(cookieToken);
   }
 
-  // A rejected restore means the cookie token is expired/revoked: send the
-  // terminal back to auth instead of leaving it in limbo until some other
-  // API call happens to 401.
-  void getUserInfo().catch(() => redirectToAuth());
-  return 'restoring';
+  void getUserInfo().catch((error: unknown) => {
+    const status = httpStatus(error);
+    if (status === 401 || status === 403) {
+      redirectToAuth();
+    }
+  });
+  return "restoring";
+}
+
+function httpStatus(error: unknown): number | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  const value = error as {
+    status?: unknown;
+    statusCode?: unknown;
+    response?: { status?: unknown; statusCode?: unknown };
+  };
+  const status =
+    value.statusCode ??
+    value.status ??
+    value.response?.status ??
+    value.response?.statusCode;
+  return typeof status === "number" ? status : undefined;
 }

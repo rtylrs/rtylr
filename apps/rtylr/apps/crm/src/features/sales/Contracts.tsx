@@ -6,7 +6,7 @@ import { AlertCircle, ChevronDown, ChevronUp, Plus, FileText } from 'lucide-reac
 import { AnimatePresence, motion } from 'motion/react';
 import { EmptyState } from '@voxire/ui';
 import { useContracts, useLeads, useCreateContract } from '../../shared/hooks/queries/useSales';
-import type { Contract, ContractPlan } from '../../shared/hooks/queries/useSales';
+import type { Contract, ContractPlan, Lead } from '../../shared/hooks/queries/useSales';
 import {
   Button,
   PageHeader,
@@ -23,17 +23,50 @@ const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
   scale: { bg: 'rgba(139,92,246,0.12)', color: '#8b5cf6' },
 };
 
-function formatDate(iso: string): string {
-  if (!iso) return '-';
-  return new Date(iso).toLocaleDateString('en-US', {
+const DEFAULT_PLAN_COLORS = PLAN_COLORS.pro;
+
+function formatDate(value: string | null | undefined): string {
+  const normalized = value?.trim() ?? '';
+  if (!normalized) return '-';
+
+  // The API deliberately returns DATE columns as YYYY-MM-DD. Parsing that
+  // shape with `new Date(value)` treats it as UTC and shifts it backwards in
+  // western time zones, so construct a local calendar date for date-only input.
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalized);
+  const date = dateOnly
+    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+    : new Date(normalized);
+  if (Number.isNaN(date.getTime())) return normalized;
+
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
 }
 
-const PlanBadge: React.FC<{ plan: ContractPlan }> = ({ plan }) => {
-  const colors = PLAN_COLORS[plan];
+function getContractSigner(contract: Contract): string {
+  const wireContract = contract as Contract & {
+    signedByName?: string | null;
+    signed_by_name?: string | null;
+  };
+  return (
+    wireContract.signedByName?.trim() ||
+    wireContract.signed_by_name?.trim() ||
+    contract.signedBy ||
+    ''
+  );
+}
+
+function leadDisplayName(lead: Lead): string {
+  return lead.companyName?.trim() || lead.company?.trim() || `Lead #${lead.id}`;
+}
+
+const PlanBadge: React.FC<{ plan: ContractPlan | string }> = ({ plan }) => {
+  const colors = Object.prototype.hasOwnProperty.call(PLAN_COLORS, plan)
+    ? PLAN_COLORS[plan as ContractPlan]
+    : DEFAULT_PLAN_COLORS;
+  const label = plan || 'unknown';
   return (
     <span
       style={{
@@ -46,7 +79,7 @@ const PlanBadge: React.FC<{ plan: ContractPlan }> = ({ plan }) => {
         textTransform: 'capitalize',
       }}
     >
-      {plan}
+      {label}
     </span>
   );
 };
@@ -65,7 +98,15 @@ const Contracts: React.FC = () => {
     isError,
     refetch,
   } = useContracts(pageSize, offset);
-  const { data: leads } = useLeads();
+  const [leadOffset, setLeadOffset] = useState(0);
+  const [leadExhausted, setLeadExhausted] = useState(false);
+  const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
+  const {
+    data: fetchedLeadOptions,
+    isFetching: isFetchingLeadOptions,
+    isError: leadOptionsError,
+    refetch: refetchLeadOptions,
+  } = useLeads(pageSize, leadOffset);
   const createContract = useCreateContract();
 
   useEffect(() => {
@@ -83,8 +124,25 @@ const Contracts: React.FC = () => {
     });
   }, [fetchedContracts, offset]);
 
+  useEffect(() => {
+    if (!fetchedLeadOptions) return;
+    if (leadOffset === 0) {
+      setLeadExhausted(false);
+    } else if (fetchedLeadOptions.length === 0) {
+      setLeadExhausted(true);
+    }
+    setLoadedLeads((previous) => {
+      if (leadOffset === 0) return fetchedLeadOptions;
+      const byId = new Map(previous.map((lead) => [lead.id, lead]));
+      fetchedLeadOptions.forEach((lead) => byId.set(lead.id, lead));
+      return Array.from(byId.values());
+    });
+  }, [fetchedLeadOptions, leadOffset]);
+
   const contracts = loadedContracts;
-  const hasMore = !exhausted && fetchedContracts?.length === pageSize;
+  const hasMore = !exhausted && !isError && fetchedContracts?.length === pageSize;
+  const hasCompleteContractSet = !isLoading && !isFetching && !isError && !hasMore;
+  const hasMoreLeadOptions = !leadExhausted && fetchedLeadOptions?.length === pageSize;
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({
@@ -99,14 +157,16 @@ const Contracts: React.FC = () => {
   });
 
   const totalMrr = contracts.reduce((sum, c) => sum + c.mrr, 0);
+  const trimmedSigner = form.signedBy.trim();
+  const hasRequiredFields = Boolean(form.leadId && form.signedAt.trim() && trimmedSigner);
 
   const companyName = (contract: Contract): string => {
-    const lead = (leads ?? []).find((l) => l.id === contract.leadId);
-    return lead?.companyName ?? lead?.company ?? contract.company ?? `Lead #${contract.leadId}`;
+    const lead = loadedLeads.find((l) => l.id === contract.leadId);
+    return lead ? leadDisplayName(lead) : contract.company || `Lead #${contract.leadId}`;
   };
 
   const handleSubmit = (): void => {
-    if (!form.leadId || !form.signedAt || !form.signedBy) {
+    if (!hasRequiredFields) {
       toast.error(t('crm.contracts.requiredFields'));
       return;
     }
@@ -117,12 +177,15 @@ const Contracts: React.FC = () => {
         mrr: Number(form.mrr),
         seats: Number(form.seats),
         signedAt: form.signedAt,
-        signedBy: form.signedBy,
+        signedBy: trimmedSigner,
         closedBy: form.closedBy,
         notes: form.notes,
       },
       {
         onSuccess: () => {
+          setOffset(0);
+          setExhausted(false);
+          setLoadedContracts([]);
           setCreateOpen(false);
           setForm({
             leadId: '',
@@ -156,7 +219,7 @@ const Contracts: React.FC = () => {
         />
 
         {/* Total MRR banner */}
-        {contracts.length > 0 && (
+        {contracts.length > 0 && hasCompleteContractSet && (
           <div
             style={{
               padding: '14px 20px',
@@ -236,6 +299,27 @@ const Contracts: React.FC = () => {
             />
           ) : (
             <div>
+              {isError && (
+                <div
+                  role="alert"
+                  style={{
+                    padding: '12px 16px',
+                    borderBottom: '1px solid var(--hub-border)',
+                    color: '#ef4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <AlertCircle size={15} />
+                  <span style={{ flex: 1, fontSize: '12px' }}>
+                    {t('crm.contracts.loadFailedTitle')}
+                  </span>
+                  <Button variant="outline" onClick={() => void refetch()} disabled={isFetching}>
+                    {t('crm.actions.retry')}
+                  </Button>
+                </div>
+              )}
               {contracts.map((c: Contract) => {
                 const isExpanded = expandedId === c.id;
                 const name = companyName(c);
@@ -348,7 +432,10 @@ const Contracts: React.FC = () => {
                               label={t('crm.leadDetail.signedAt')}
                               value={formatDate(c.signedAt)}
                             />
-                            <DetailItem label={t('crm.leadDetail.signedBy')} value={c.signedBy} />
+                            <DetailItem
+                              label={t('crm.leadDetail.signedBy')}
+                              value={getContractSigner(c)}
+                            />
                             <DetailItem label={t('crm.leadDetail.closedBy')} value={c.closedBy} />
                             {c.notes && (
                               <div style={{ gridColumn: '1 / -1' }}>
@@ -412,9 +499,7 @@ const Contracts: React.FC = () => {
               <Button
                 variant="primary"
                 onClick={handleSubmit}
-                disabled={
-                  createContract.isPending || !form.leadId || !form.signedAt || !form.signedBy
-                }
+                disabled={createContract.isPending || !hasRequiredFields}
               >
                 {createContract.isPending ? 'Saving...' : 'Save contract'}
               </Button>
@@ -452,12 +537,44 @@ const Contracts: React.FC = () => {
                 }}
               >
                 <option value="">{t('crm.contracts.selectLead')}</option>
-                {(leads ?? []).map((l) => (
+                {loadedLeads.map((l) => (
                   <option key={l.id} value={String(l.id)}>
-                    {l.company}
+                    {leadDisplayName(l)}
                   </option>
                 ))}
               </select>
+              {leadOptionsError && (
+                <div
+                  role="alert"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: '#ef4444',
+                    fontSize: '12px',
+                  }}
+                >
+                  <span style={{ flex: 1 }}>{t('crm.leads.loadFailedTitle')}</span>
+                  <Button
+                    variant="outline"
+                    onClick={() => void refetchLeadOptions()}
+                    disabled={isFetchingLeadOptions}
+                  >
+                    {t('crm.actions.retry')}
+                  </Button>
+                </div>
+              )}
+              {hasMoreLeadOptions && !leadOptionsError && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setLeadOffset((current) => current + pageSize)}
+                    disabled={isFetchingLeadOptions}
+                  >
+                    {isFetchingLeadOptions ? 'Loading…' : 'Load more leads'}
+                  </Button>
+                </div>
+              )}
             </div>
             <Select
               label={t('crm.leadDetail.planLabel')}

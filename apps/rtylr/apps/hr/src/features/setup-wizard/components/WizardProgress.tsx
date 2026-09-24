@@ -51,10 +51,14 @@ const WizardProgress = ({
 
           return (
             <li key={key} className="flex items-center gap-2">
+              {/* Completed steps are not editable yet. Re-entering one would
+                  remount its create-only form and duplicate persisted setup data. */}
               <button
                 type="button"
-                onClick={() => onStepClick(index)}
-                disabled={!completed && !isCurrent}
+                onClick={() => {
+                  if (isCurrent) onStepClick(index);
+                }}
+                disabled={!isCurrent}
                 className="flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
                 style={{
                   background: isCurrent
@@ -64,8 +68,8 @@ const WizardProgress = ({
                       : 'var(--hr-hover)',
                   color: isCurrent ? '#fff' : completed ? '#22c55e' : 'var(--hr-text-muted)',
                   border: isCurrent ? '1px solid var(--accent)' : '1px solid var(--hr-border)',
-                  cursor: !completed && !isCurrent ? 'not-allowed' : 'pointer',
-                  opacity: !completed && !isCurrent ? 0.5 : 1,
+                  cursor: isCurrent ? 'pointer' : 'not-allowed',
+                  opacity: isCurrent || completed ? 1 : 0.5,
                 }}
                 aria-current={isCurrent ? 'step' : undefined}
               >

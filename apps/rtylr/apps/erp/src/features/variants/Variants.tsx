@@ -5,6 +5,7 @@ import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useTranslation } from 'react-i18next';
 import { parseVariantAttributes, useVariants, useCreateVariant } from '../products/useVariants';
+import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatCurrency } from '../../shared/lib/format';
@@ -12,8 +13,10 @@ import StockBadge from '../../shared/components/StockBadge';
 import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
+import PaginationControls from '../../shared/components/PaginationControls';
 
 const AMBER = 'var(--erp-accent)';
+const PRODUCT_PAGE_SIZE = 50;
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -29,16 +32,27 @@ const inputStyle: React.CSSProperties = {
 
 const Variants: React.FC = () => {
   const { t } = useTranslation('erp');
-  const { data: variants = [], isLoading } = useVariants();
+  const { data: variants = [], isLoading, isError, refetch } = useVariants();
   const createMut = useCreateVariant();
   const [showCreate, setShowCreate] = useState(false);
   const [newProductId, setNewProductId] = useState('');
   const [newName, setNewName] = useState('');
   const [newSku, setNewSku] = useState('');
   const [newPrice, setNewPrice] = useState('');
+  const [productSearch, setProductSearch] = useState('');
+  const [productPage, setProductPage] = useState(1);
+  const {
+    data: productResult,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useProducts({ page: productPage, pageSize: PRODUCT_PAGE_SIZE, search: productSearch });
+  const products = productResult?.products ?? [];
+  const productsHaveMore = productResult?.hasMore ?? false;
+  const productsTotal = productResult?.total;
 
   const handleCreate = async (): Promise<void> => {
-    if (!newProductId.trim()) {
+    const productId = Number(newProductId.trim());
+    if (!Number.isSafeInteger(productId) || productId <= 0) {
       toast.error(t('erp.variants.productIdRequired'));
       return;
     }
@@ -46,14 +60,14 @@ const Variants: React.FC = () => {
       toast.error(t('erp.variants.nameRequired'));
       return;
     }
-    const price = parseFloat(newPrice) || 0;
-    if (price < 0) {
+    const price = Number(newPrice);
+    if (!Number.isFinite(price) || price < 0) {
       toast.error(t('erp.variants.priceNegative'));
       return;
     }
     try {
       await createMut.mutateAsync({
-        productId: newProductId.trim(),
+        productId: String(productId),
         name: newName.trim(),
         sku: newSku.trim(),
         barcode: '',
@@ -69,6 +83,8 @@ const Variants: React.FC = () => {
       setNewName('');
       setNewSku('');
       setNewPrice('');
+      setProductSearch('');
+      setProductPage(1);
     } catch {
       toast.error(t('erp.variants.createFailed'));
     }
@@ -117,6 +133,32 @@ const Variants: React.FC = () => {
         </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
+        ) : isError ? (
+          <div
+            role="alert"
+            style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+          >
+            <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text)' }}>
+              {t('errors.generic')}
+            </p>
+            <button
+              type="button"
+              onClick={() => void refetch?.()}
+              style={{
+                alignSelf: 'flex-start',
+                background: 'var(--hub-hover)',
+                color: 'var(--hub-text-muted)',
+                border: 'none',
+                borderRadius: 8,
+                padding: '7px 12px',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {t('common.refresh')}
+            </button>
+          </div>
         ) : variants.length === 0 ? (
           <EmptyState
             icon={Layers}
@@ -182,11 +224,47 @@ const Variants: React.FC = () => {
               {t('erp.variants.newVariant')}
             </h3>
             <input
-              value={newProductId}
-              onChange={(e) => setNewProductId(e.target.value)}
-              placeholder={t('erp.variants.productIdPlaceholder')}
+              value={productSearch}
+              onChange={(event) => {
+                setProductSearch(event.target.value);
+                setProductPage(1);
+              }}
+              placeholder={t('erp.variants.productSearch')}
+              aria-label={t('erp.variants.productSearch')}
               style={inputStyle}
             />
+            <select
+              value={newProductId}
+              onChange={(event) => setNewProductId(event.target.value)}
+              disabled={productsLoading || productsError || products.length === 0}
+              aria-label={t('erp.variants.selectProduct')}
+              style={inputStyle}
+            >
+              <option value="">
+                {productsLoading
+                  ? t('erp.variants.loadingProducts')
+                  : productsError
+                    ? t('erp.variants.productsUnavailable')
+                    : products.length === 0
+                      ? t('erp.variants.noProducts')
+                      : t('erp.variants.selectProduct')}
+              </option>
+              {products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name} {product.sku ? `(${product.sku})` : ''}
+                </option>
+              ))}
+            </select>
+            {!productsError && (productPage > 1 || productsHaveMore) && (
+              <PaginationControls
+                page={productPage}
+                hasMore={productsHaveMore}
+                itemCount={products.length}
+                pageSize={PRODUCT_PAGE_SIZE}
+                total={productsTotal}
+                onPageChange={setProductPage}
+              />
+            )}
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}

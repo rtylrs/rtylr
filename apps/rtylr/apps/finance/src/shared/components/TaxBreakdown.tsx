@@ -6,6 +6,7 @@ import type { LineItem } from './LineItemRow';
 interface TaxBreakdownProps {
   items: LineItem[];
   discount?: number;
+  discountType?: string | null;
 }
 
 interface TaxBucket {
@@ -26,12 +27,20 @@ function bucketize(items: LineItem[]): TaxBucket[] {
   return Array.from(map.values()).sort((a, b) => a.rate - b.rate);
 }
 
-const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
+const TaxBreakdown: React.FC<TaxBreakdownProps> = ({
+  items,
+  discount = 0,
+  discountType = 'fixed',
+}) => {
   const { t } = useTranslation();
   const buckets = bucketize(items);
   const subtotal = items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
   const totalTax = buckets.reduce((s, b) => s + b.tax, 0);
-  const total = subtotal + totalTax - discount;
+  const appliedDiscount =
+    discountType === 'percentage'
+      ? (subtotal * Math.max(discount, 0)) / 100
+      : Math.max(discount, 0);
+  const total = subtotal + totalTax - appliedDiscount;
 
   return (
     <div
@@ -72,7 +81,7 @@ const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
           <MoneyDisplay amount={b.tax} />
         </div>
       ))}
-      {discount > 0 && (
+      {appliedDiscount > 0 && (
         <div
           style={{
             display: 'flex',
@@ -83,7 +92,7 @@ const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
         >
           <span>{t('common.discount')}</span>
           <span>
-            -<MoneyDisplay amount={discount} />
+            -<MoneyDisplay amount={appliedDiscount} />
           </span>
         </div>
       )}

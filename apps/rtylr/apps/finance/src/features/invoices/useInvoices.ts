@@ -9,6 +9,7 @@ import type {
   UpdateInvoiceBody,
   InvoiceSummary,
   InvoiceDetail,
+  Payment,
 } from '@voxire/voxie/finance/invoices/v1/types';
 import { InvoicePaymentServiceClient } from '@voxire/voxie/finance/invoices/payments/v1/client';
 import type { Invoice } from '../../shared/services/financeApi';
@@ -46,7 +47,7 @@ function fromApiSummary(inv: InvoiceSummary): Invoice {
   }) as Invoice;
 }
 
-function fromApiDetail(inv: InvoiceDetail): Invoice {
+function fromApiDetail(inv: InvoiceDetail, payments: Payment[] = []): Invoice {
   return invoiceSchema.parse({
     id: inv.id,
     client: inv.clientName,
@@ -60,20 +61,32 @@ function fromApiDetail(inv: InvoiceDetail): Invoice {
     items: (inv.items ?? []).map((item) => ({
       description: item.description,
       quantity: item.quantity,
+      unit: item.unit,
       unitPrice: item.unitPrice,
+      taxRate: item.taxRate,
+      discountPct: item.discountPct,
+      sortOrder: item.sortOrder,
       amount: item.total,
     })),
     notes: inv.notes,
     discount: inv.discountValue,
+    discountType: inv.discountType,
+    discountAmount: inv.discountAmount,
     tax: inv.taxAmount,
     subtotal: inv.subtotal,
     number: inv.invoiceNumber,
+    history: payments.map((payment) => ({
+      id: payment.id,
+      label: [payment.method, payment.reference].filter(Boolean).join(' · ') || 'Payment',
+      at: payment.paymentDate ?? '',
+    })),
   }) as Invoice;
 }
 
 interface UseInvoicesParams {
   page?: number;
   pageSize?: number;
+  status?: string;
 }
 
 export interface InvoiceListResult {
@@ -84,8 +97,8 @@ export interface InvoiceListResult {
 }
 
 export function useInvoices(params: UseInvoicesParams = {}) {
-  const { page = 1, pageSize = 50 } = params;
-  const query = useListInvoices({ page, pageSize });
+  const { page = 1, pageSize = 50, status } = params;
+  const query = useListInvoices({ page, pageSize, status });
   return {
     ...query,
     data: query.data
@@ -108,7 +121,7 @@ export function useInvoiceDetail(id: string | undefined) {
     queryFn: async (): Promise<Invoice> => {
       const res = await invoicesClient.getInvoice({ id: id ?? '' });
       if (!res.invoice) throw new Error(t('invoices.notFound'));
-      return fromApiDetail(res.invoice);
+      return fromApiDetail(res.invoice, res.payments ?? []);
     },
     enabled: !!id,
   });
@@ -181,7 +194,10 @@ export function useUpdateInvoiceStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
       invoicesClient.updateInvoiceStatus({ id, body: { status: STATUS_TO_API[status] } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['invoices'] });
+      qc.invalidateQueries({ queryKey: ['invoice', variables.id] });
+    },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }

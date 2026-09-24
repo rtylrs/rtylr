@@ -3,7 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { LogIn, LogOut, QrCode, KeyRound, MapPin, Delete, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
-import { useClockIn, useClockOut, useSetPin } from '../../shared/hooks/queries/useAttendance';
+import {
+  useAttendanceLocations,
+  useClockIn,
+  useClockOut,
+  useSetPin,
+} from '../../shared/hooks/queries/useAttendance';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { AttendanceRecordPayload } from '@voxire/voxie/hr/attendance/v1/types';
 import { Card, Button, Pill, Modal, ACCENT } from '../../shared/components/ui';
@@ -216,7 +221,14 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const clockIn = useClockIn();
   const clockOut = useClockOut();
   const setPin = useSetPin();
+  const {
+    data: locations = [],
+    isPending: locationsPending,
+    isError: locationsError,
+  } = useAttendanceLocations();
   const userId = Number(useUserStore((s) => s.user?.id)) || 0;
+  const location = locations.find((item) => item.isDefault) ?? locations[0];
+  const locationId = location?.id ?? '';
 
   const [pinModalOpen, setPinModalOpen] = useState(false);
   const [pinMode, setPinMode] = useState<'clockIn' | 'setPin' | 'confirmPin'>('clockIn');
@@ -231,14 +243,16 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const isQrEnabled = enabledMethods.includes('qr');
   const isPinEnabled = enabledMethods.includes('pin');
   const isGpsEnabled = enabledMethods.includes('gps');
+  const clockInDisabled = !locationId || locationsPending || locationsError;
 
   const handleClockIn = useCallback((): void => {
-    clockIn.mutate({ ownerId: userId, employeeId: userId, method: 'app', locationId: 0 });
-  }, [clockIn, userId]);
+    if (!locationId) return;
+    clockIn.mutate({ method: 'app', locationId });
+  }, [clockIn, locationId]);
 
   const handleClockOut = useCallback((): void => {
-    if (!activeRecord) return;
-    clockOut.mutate({ employeeId: Number(activeRecord.employeeId ?? 0) });
+    if (!activeRecord?.id) return;
+    clockOut.mutate({ attendanceRecordId: activeRecord.id });
   }, [activeRecord, clockOut]);
 
   /* ── PIN flow ─────────────────────────────────────────────── */
@@ -259,8 +273,9 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const handlePinSubmit = useCallback(
     (enteredPin: string): void => {
       if (pinMode === 'clockIn') {
+        if (!locationId) return;
         clockIn.mutate(
-          { ownerId: userId, employeeId: userId, method: 'pin', pin: enteredPin, locationId: 0 },
+          { method: 'pin', pin: enteredPin, locationId },
           { onSuccess: () => setPinModalOpen(false) }
         );
       } else if (pinMode === 'setPin') {
@@ -283,12 +298,13 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         );
       }
     },
-    [pinMode, pendingNewPin, clockIn, setPin, t, userId]
+    [pinMode, pendingNewPin, clockIn, setPin, t, userId, locationId]
   );
 
   /* ── GPS flow ─────────────────────────────────────────────── */
 
   const handleGpsClockIn = useCallback((): void => {
+    if (!locationId) return;
     if (!navigator.geolocation) {
       toast.error(t('attendance.gps.locationUnavailable'));
       return;
@@ -300,10 +316,8 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
       (position) => {
         setGpsLoading(false);
         clockIn.mutate({
-          ownerId: userId,
-          employeeId: userId,
           method: 'gps',
-          locationId: 0,
+          locationId,
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         });
@@ -326,7 +340,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }, [clockIn, t, userId]);
+  }, [clockIn, locationId, t]);
 
   return (
     <>
@@ -378,7 +392,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                 <Button
                   variant="primary"
                   onClick={handleClockIn}
-                  disabled={clockIn.isPending}
+                  disabled={clockIn.isPending || clockInDisabled}
                   icon={<LogIn size={14} />}
                 >
                   {t('attendance.clockWidget.clockInApp')}
@@ -397,7 +411,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                 <Button
                   variant="secondary"
                   onClick={handleOpenPinClockIn}
-                  disabled={clockIn.isPending}
+                  disabled={clockIn.isPending || clockInDisabled}
                   icon={<KeyRound size={14} />}
                 >
                   {t('attendance.clockWidget.clockInPin')}
@@ -407,7 +421,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                 <Button
                   variant="secondary"
                   onClick={handleGpsClockIn}
-                  disabled={clockIn.isPending || gpsLoading}
+                  disabled={clockIn.isPending || gpsLoading || clockInDisabled}
                   icon={<MapPin size={14} />}
                 >
                   {gpsLoading
@@ -416,6 +430,15 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                 </Button>
               )}
             </div>
+            {locationsError ? (
+              <p role="alert" style={{ margin: 0, fontSize: 11, color: 'var(--hr-error)' }}>
+                {t('errors.generic')}
+              </p>
+            ) : !locationsPending && !locationId ? (
+              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                {t('setup.locations.noLocations')}
+              </p>
+            ) : null}
             {isPinEnabled && (
               <button
                 type="button"

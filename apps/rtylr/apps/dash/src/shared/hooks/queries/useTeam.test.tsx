@@ -83,6 +83,43 @@ describe('useTeam', () => {
     expect(result.current.data?.members[0].name).toBe('Alice');
   });
 
+  it('exposes the authoritative total and continuation flag for a page', async () => {
+    mockMembersClient.listTeam.mockResolvedValue({
+      users: [
+        {
+          id: '51',
+          fullName: 'Fifty-first member',
+          email: 'member51@test.com',
+          role: 'staff',
+          apps: [],
+          isActive: true,
+          createdAt: '',
+        },
+      ],
+      total: 51,
+    });
+
+    const { result } = renderHook(() => useTeam({ page: 1, pageSize: 50 }), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toMatchObject({ total: 51, hasMore: true, page: 1, pageSize: 50 });
+  });
+
+  it('does not infer another page when the response omits total', async () => {
+    mockMembersClient.listTeam.mockResolvedValue({
+      users: [],
+    });
+
+    const { result } = renderHook(() => useTeam({ page: 2, pageSize: 50 }), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toMatchObject({ total: 0, hasMore: false, page: 2 });
+  });
+
   it('falls back to email when no full name', async () => {
     mockMembersClient.listTeam.mockResolvedValue({
       users: [

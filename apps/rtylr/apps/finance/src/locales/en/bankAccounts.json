@@ -15,6 +15,7 @@
   },
   "payment": {
     "amountPositive": "Amount must be greater than zero",
+    "amountExceedsDue": "Payment cannot exceed the remaining amount due",
     "dateAndReferenceRequired": "Payment date and reference are required",
     "method": "Method",
     "reference": "Reference",

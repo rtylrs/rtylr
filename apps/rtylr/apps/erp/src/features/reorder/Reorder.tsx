@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { CheckCircle2, Sparkles, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Sparkles, TrendingUp } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ const AMBER = 'var(--erp-accent)';
 
 const Reorder: React.FC = () => {
   const { t } = useTranslation('erp');
-  const { data, isLoading, refetch } = useReorderSuggestions();
+  const { data, isLoading, isError, refetch } = useReorderSuggestions();
   const suggestions = data?.suggestions ?? [];
 
   return (
@@ -70,6 +70,33 @@ const Reorder: React.FC = () => {
         </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
+        ) : isError ? (
+          <div
+            role="alert"
+            className="flex flex-col items-center gap-3 p-8 text-center"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <AlertTriangle size={24} style={{ color: 'var(--erp-danger)' }} />
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                {t('erp.reorder.error.title', 'Unable to load reorder suggestions')}
+              </p>
+              <p className="mt-1 text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                {t(
+                  'erp.reorder.error.description',
+                  'The current inventory data could not be loaded. Nothing is being reported as healthy.'
+                )}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold"
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            >
+              {t('erp.reorder.refresh')}
+            </button>
+          </div>
         ) : suggestions.length === 0 ? (
           <EmptyState
             icon={CheckCircle2}

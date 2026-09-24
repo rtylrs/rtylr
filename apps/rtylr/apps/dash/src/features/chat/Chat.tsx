@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { resolveApiBase } from '@voxire/config';
 import { cn, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { Send, Sparkles } from 'lucide-react';
@@ -53,7 +54,7 @@ const Chat: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useUserStore();
   const userId = Number(user?.id) || 0;
-  const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/';
+  const apiBaseUrl = resolveApiBase();
   const systemContext = React.useMemo(
     () =>
       buildDashSystemContext({

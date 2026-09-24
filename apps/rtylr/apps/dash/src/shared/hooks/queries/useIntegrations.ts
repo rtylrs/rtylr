@@ -21,9 +21,11 @@ export const useIntegrations = () => {
 export const useConnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      await integrationClient.connectIntegration({ provider: id });
-      return id;
+    mutationFn: async (provider: string) => {
+      const normalizedProvider = provider.trim();
+      if (!normalizedProvider) throw new Error('Integration provider is required');
+      await integrationClient.connectIntegration({ provider: normalizedProvider });
+      return normalizedProvider;
     },
     onSuccess: () => {
       toast.success(i18next.t('common.toasts.integrationConnected', 'Integration connected'));

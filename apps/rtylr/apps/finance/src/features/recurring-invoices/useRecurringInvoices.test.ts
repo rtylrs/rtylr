@@ -63,8 +63,37 @@ describe('useRecurringInvoices', () => {
     });
     const { result } = renderHook(() => useRecurringInvoices(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockClient.listRecurringInvoices).toHaveBeenCalledWith({});
-    expect(result.current.data).toHaveLength(1);
+    expect(mockClient.listRecurringInvoices).toHaveBeenCalledWith({ page: 1, pageSize: 50 });
+    expect(result.current.data?.invoices).toHaveLength(1);
+  });
+
+  it('requests and exposes the next recurring-invoice page', async () => {
+    mockClient.listRecurringInvoices.mockResolvedValue({
+      recurringInvoices: [
+        {
+          id: '501',
+          ownerId: '1',
+          templateInvoiceId: '42',
+          frequency: 'monthly',
+          nextInvoiceDate: '2026-07-01',
+          endDate: null,
+          isActive: true,
+          createdAt: '',
+        },
+      ],
+      page: 2,
+      pageSize: 50,
+      hasMore: false,
+    });
+
+    const { result } = renderHook(() => useRecurringInvoices({ page: 2 }), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockClient.listRecurringInvoices).toHaveBeenCalledWith({ page: 2, pageSize: 50 });
+    expect(result.current.data?.invoices[0]?.id).toBe('501');
+    expect(result.current.data?.page).toBe(2);
   });
 
   it('starts in loading state', () => {
@@ -77,7 +106,12 @@ describe('useRecurringInvoices', () => {
     mockClient.listRecurringInvoices.mockResolvedValue({ recurringInvoices: [] });
     const { result } = renderHook(() => useRecurringInvoices(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual([]);
+    expect(result.current.data).toMatchObject({
+      invoices: [],
+      hasMore: false,
+      page: 1,
+      pageSize: 50,
+    });
   });
 
   it('parses the backend payload shape', async () => {
@@ -97,8 +131,8 @@ describe('useRecurringInvoices', () => {
     });
     const { result } = renderHook(() => useRecurringInvoices(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.[0]?.id).toBe('7');
-    expect(result.current.data?.[0]?.isActive).toBe(false);
+    expect(result.current.data?.invoices[0]?.id).toBe('7');
+    expect(result.current.data?.invoices[0]?.isActive).toBe(false);
   });
 });
 

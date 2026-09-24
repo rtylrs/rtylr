@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useNavigate } from '@tanstack/react-router';
+import { resolveAppUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
 import { Bell, CheckCheck } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
@@ -13,8 +15,45 @@ import {
 
 const TABS = ['all', 'unread'] as const;
 
+type NotificationTarget = {
+  path: string;
+  isCurrentOrigin: boolean;
+  href: string;
+};
+
+export function resolveNotificationTarget(
+  link: string | undefined,
+  originOverride?: string,
+  dashOriginOverride?: string
+): NotificationTarget | null {
+  if (!link) return null;
+
+  try {
+    const currentOrigin = originOverride ?? window.location.origin;
+    const dashOrigin = dashOriginOverride ?? new URL(resolveAppUrl('dash')).origin;
+    const parsed = new URL(link, currentOrigin);
+    if (
+      (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') ||
+      parsed.username ||
+      parsed.password ||
+      (parsed.origin !== currentOrigin && parsed.origin !== dashOrigin)
+    ) {
+      return null;
+    }
+
+    return {
+      path: `${parsed.pathname}${parsed.search}${parsed.hash}`,
+      isCurrentOrigin: parsed.origin === currentOrigin,
+      href: parsed.toString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
 const Notifications: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<(typeof TABS)[number]>('all');
   const {
     data: pages,
@@ -30,6 +69,16 @@ const Notifications: React.FC = () => {
   const data = pages?.pages.flatMap((page) => page.notifications) ?? [];
   const filtered = tab === 'unread' ? data.filter((n) => !n.read) : data;
   const unreadCount = data.filter((n) => !n.read).length;
+
+  const handleNotificationClick = (notification: (typeof data)[number]) => {
+    const target = resolveNotificationTarget(notification.link ?? notification.href);
+    if (!target) return;
+    if (target.isCurrentOrigin) {
+      void navigate({ to: target.path });
+    } else {
+      window.location.assign(target.href);
+    }
+  };
 
   return (
     <>
@@ -90,34 +139,39 @@ const Notifications: React.FC = () => {
             <div className="p-2">
               <SkeletonList rows={5} />
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="p-4">
-              <EmptyState
-                icon={Bell}
-                title={t('notifications.emptyAllCaughtUpTitle')}
-                description={
-                  tab === 'unread'
-                    ? t('notifications.emptyNoUnreadDescription')
-                    : t('notifications.emptyNoneDescription')
-                }
-                action={
-                  tab === 'unread'
-                    ? { label: t('notifications.viewAll'), onClick: () => setTab('all') }
-                    : { label: t('common.refresh'), onClick: () => void refetch() }
-                }
-              />
-            </div>
           ) : (
-            <div className="p-2">
-              {filtered.map((n) => (
-                <NotificationItem
-                  key={n.id}
-                  notification={n}
-                  onRead={(id) => markRead.mutate(id)}
-                />
-              ))}
+            <>
+              {filtered.length === 0 ? (
+                <div className="p-4">
+                  <EmptyState
+                    icon={Bell}
+                    title={t('notifications.emptyAllCaughtUpTitle')}
+                    description={
+                      tab === 'unread'
+                        ? t('notifications.emptyNoUnreadDescription')
+                        : t('notifications.emptyNoneDescription')
+                    }
+                    action={
+                      tab === 'unread'
+                        ? { label: t('notifications.viewAll'), onClick: () => setTab('all') }
+                        : { label: t('common.refresh'), onClick: () => void refetch() }
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="p-2">
+                  {filtered.map((n) => (
+                    <NotificationItem
+                      key={n.id}
+                      notification={n}
+                      onRead={(id) => markRead.mutate(id)}
+                      onClick={handleNotificationClick}
+                    />
+                  ))}
+                </div>
+              )}
               {hasNextPage && (
-                <div className="pt-2 flex justify-center">
+                <div className="px-2 pb-2 pt-1 flex justify-center">
                   <Button
                     variant="secondary"
                     size="sm"
@@ -128,7 +182,7 @@ const Notifications: React.FC = () => {
                   </Button>
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>

@@ -1,10 +1,13 @@
-import type { CartItem } from '../../shared/stores/cartStore';
-import type { Order } from '../../shared/types/pos';
-import type { CreateOrderRequest, CreateOrderResponse } from '@voxire/voxie/pos/orders/v1/types';
-import type { ProcessPaymentRequest } from '@voxire/voxie/pos/orders/payments/v1/types';
-import { roundCents } from '../../shared/utils/orderCalc';
+import type { CartItem } from "../../shared/stores/cartStore";
+import type { Order } from "../../shared/types/pos";
+import type {
+  CreateOrderRequest,
+  CreateOrderResponse,
+} from "@voxire/voxie/pos/orders/v1/types";
+import type { ProcessPaymentRequest } from "@voxire/voxie/pos/orders/payments/v1/types";
+import { roundCents } from "../../shared/utils/orderCalc";
 
-export type CheckoutPaymentMethod = 'card' | 'cash' | 'qr' | 'gift_card';
+export type CheckoutPaymentMethod = "card" | "cash" | "qr" | "gift_card";
 
 interface CashTender {
   received: number;
@@ -17,6 +20,7 @@ interface BuildCheckoutOrderParams {
   items: CartItem[];
   subtotal: number;
   tax: number;
+  discount?: number;
   total: number;
   tip?: number;
   customerId?: string | number | null;
@@ -33,6 +37,7 @@ interface BuildCreateOrderPayloadParams {
   customerId?: string | number | null;
   customerName?: string | null;
   notes?: string;
+  kitchenNotes?: string;
 }
 
 interface ProcessCheckoutParams {
@@ -42,15 +47,18 @@ interface ProcessCheckoutParams {
   existingOrderId?: number | null;
   createOrder: (payload: CreateOrderRequest) => Promise<CreateOrderResponse>;
   chargeOrder: (payload: ProcessPaymentRequest) => Promise<void>;
+  persistExistingOrder?: () => Promise<void>;
   enqueueOffline: (payload: CreateOrderRequest) => void;
   recordCashSale: (amount: number, orderId: string) => void;
   onOrderCreated?: (orderId: number) => void;
 }
 
-type ProcessCheckoutResult = { status: 'online'; orderId: number } | { status: 'queued' };
+type ProcessCheckoutResult =
+  { status: "online"; orderId: number } | { status: "queued" };
 
 function positiveInteger(value: unknown): number | undefined {
-  const numeric = typeof value === 'string' ? Number(value.trim()) : Number(value);
+  const numeric =
+    typeof value === "string" ? Number(value.trim()) : Number(value);
   if (!Number.isInteger(numeric) || numeric <= 0) return undefined;
   return numeric;
 }
@@ -63,24 +71,32 @@ function idString(value: unknown): string {
 // 5xx/408/429 from the server). Definitive 4xx business rejections must not be
 // replayed offline - they would fail forever as poison queue entries.
 export function isRetryableCheckoutFailure(error: unknown): boolean {
-  if (error && typeof error === 'object' && 'statusCode' in error) {
+  if (error && typeof error === "object" && "statusCode" in error) {
     const status = (error as { statusCode?: unknown }).statusCode;
-    if (typeof status === 'number') {
+    if (typeof status === "number") {
       return status >= 500 || status === 408 || status === 429;
     }
   }
   return true;
 }
 
-export function buildCashTender(amountInput: string, totalDue: number): CashTender {
+export function buildCashTender(
+  amountInput: string,
+  totalDue: number,
+): CashTender {
   const received = Number(amountInput);
-  const normalizedReceived = Number.isFinite(received) && received > 0 ? received : 0;
-  const normalizedTotalDue = Number.isFinite(totalDue) && totalDue > 0 ? totalDue : 0;
-  const canCharge = normalizedReceived >= normalizedTotalDue && normalizedTotalDue > 0;
+  const normalizedReceived =
+    Number.isFinite(received) && received > 0 ? received : 0;
+  const normalizedTotalDue =
+    Number.isFinite(totalDue) && totalDue > 0 ? totalDue : 0;
+  const canCharge =
+    normalizedReceived >= normalizedTotalDue && normalizedTotalDue > 0;
 
   return {
     received: normalizedReceived,
-    change: canCharge ? roundCents(normalizedReceived - normalizedTotalDue) : null,
+    change: canCharge
+      ? roundCents(normalizedReceived - normalizedTotalDue)
+      : null,
     canCharge,
   };
 }
@@ -91,6 +107,7 @@ export function buildCheckoutOrder({
   items,
   subtotal,
   tax,
+  discount = 0,
   total,
   tip = 0,
   customerId,
@@ -98,22 +115,22 @@ export function buildCheckoutOrder({
 }: BuildCheckoutOrderParams): Order {
   return {
     id,
-    status: 'paid',
+    status: "paid",
     items: items.map((item) => ({
       id: item.id,
       name: item.name,
       price: item.price,
       quantity: item.quantity,
-      notes: item.notes ?? '',
+      notes: item.notes ?? "",
     })),
     subtotal,
     tax,
     tip,
-    discount: 0,
+    discount: Math.max(0, discount),
     total,
     createdAt,
     paidAt: createdAt,
-    customerId: String(customerId ?? ''),
+    customerId: String(customerId ?? ""),
   };
 }
 
@@ -129,26 +146,27 @@ export function buildCreateOrderPayload({
   customerId,
   customerName,
   notes,
+  kitchenNotes,
 }: BuildCreateOrderPayloadParams): CreateOrderRequest {
   return {
     locationId: idString(locationId),
     tableId: idString(tableId),
     sessionId: idString(sessionId),
-    type: orderType ?? '',
+    type: orderType ?? "",
     customerId: idString(customerId),
-    customerName: customerName ?? '',
+    customerName: customerName ?? "",
     paymentMethod: method,
-    notes: notes ?? '',
-    kitchenNotes: '',
+    notes: notes ?? "",
+    kitchenNotes: kitchenNotes ?? "",
     items: items.map((item) => ({
       menuItemId: String(item.productId),
       name: item.name,
-      sku: item.sku ?? '',
+      sku: item.sku ?? "",
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       discountPct: item.discountPct ?? 0,
       taxRate: item.taxRate ?? 0,
-      notes: item.notes ?? '',
+      notes: item.notes ?? "",
     })),
   };
 }
@@ -160,6 +178,7 @@ export async function processCheckout({
   existingOrderId,
   createOrder,
   chargeOrder,
+  persistExistingOrder,
   enqueueOffline,
   recordCashSale,
   onOrderCreated,
@@ -172,17 +191,28 @@ export async function processCheckout({
       const createRes = await createOrder(payload);
       orderId = positiveInteger(createRes.orderId);
     } catch (error) {
-      if (method === 'cash' && isRetryableCheckoutFailure(error)) {
+      if (method === "cash" && isRetryableCheckoutFailure(error)) {
         enqueueOffline(payload);
         recordCashSale(order.total, order.id);
-        return { status: 'queued' };
+        return { status: "queued" };
       }
-      throw new Error('Payment failed. Please try again.');
+      throw new Error("Payment failed. Please try again.");
     }
     if (!orderId || orderId <= 0) {
-      throw new Error('Payment failed. Please try again.');
+      throw new Error("Payment failed. Please try again.");
     }
     onOrderCreated?.(orderId);
+  }
+
+  // A resumed order already has a server identity. Persist the current cart
+  // before charging it; otherwise edits made after resume are silently ignored
+  // while the old lines are charged.
+  if (orderId && persistExistingOrder) {
+    try {
+      await persistExistingOrder();
+    } catch {
+      throw new Error("Could not save the resumed order. Please try again.");
+    }
   }
 
   // The order now exists server-side: a charge failure must never enqueue the
@@ -194,12 +224,12 @@ export async function processCheckout({
       amountPaid: order.total,
     });
   } catch {
-    throw new Error('Payment failed. Please try again.');
+    throw new Error("Payment failed. Please try again.");
   }
 
-  if (method === 'cash') {
+  if (method === "cash") {
     recordCashSale(order.total, order.id);
   }
 
-  return { status: 'online', orderId };
+  return { status: "online", orderId };
 }

@@ -27,7 +27,8 @@ const inputStyle: React.CSSProperties = {
 };
 
 const Warehouses: React.FC = () => {
-  const { data: warehouses = [], isLoading } = useWarehouses();
+  const { data: warehouses, isLoading, isError, refetch } = useWarehouses();
+  const warehouseList = warehouses ?? [];
   const createMut = useCreateWarehouse();
   const deleteMut = useDeleteWarehouse();
   const { t } = useTranslation('erp');
@@ -43,6 +44,12 @@ const Warehouses: React.FC = () => {
       toast.error(t('erp.warehouses.validation.nameRequired'));
       return;
     }
+    const capacityText = newCapacity.trim();
+    const capacityValue = capacityText === '' ? 0 : Number(capacityText);
+    if (!Number.isSafeInteger(capacityValue) || capacityValue < 0) {
+      toast.error(t('errors.generic'));
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),
@@ -50,7 +57,7 @@ const Warehouses: React.FC = () => {
         city: '',
         country: '',
         managerName: newManagerName.trim(),
-        capacity: newCapacity.trim() || '0',
+        capacity: String(capacityValue),
         isDefault: false,
         isActive: true,
       });
@@ -74,7 +81,9 @@ const Warehouses: React.FC = () => {
       <HelmetContainer title={pageTitle(t('erp.warehouses.title'))} />
       <PageHeader
         title={t('erp.warehouses.title')}
-        description={t('erp.warehouses.count', { count: warehouses.length })}
+        description={
+          isError ? undefined : t('erp.warehouses.count', { count: warehouseList.length })
+        }
         actions={
           <button
             type="button"
@@ -93,7 +102,25 @@ const Warehouses: React.FC = () => {
             <Skeleton key={i} className="h-40 w-full rounded-xl" />
           ))}
         </div>
-      ) : warehouses.length === 0 ? (
+      ) : isError ? (
+        <div
+          role="alert"
+          className="rounded-xl p-5 space-y-3"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <p className="text-sm" style={{ color: 'var(--hub-text)' }}>
+            {t('errors.generic')}
+          </p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="rounded-lg px-3 py-1.5 text-xs font-semibold"
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+          >
+            {t('erp.valuation.refresh')}
+          </button>
+        </div>
+      ) : warehouseList.length === 0 ? (
         <EmptyState
           icon={WarehouseIcon}
           title={t('erp.warehouses.empty.title')}
@@ -102,7 +129,7 @@ const Warehouses: React.FC = () => {
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {warehouses.map((w) => {
+          {warehouseList.map((w) => {
             const location = [w.city, w.country].filter(Boolean).join(', ');
             return (
               <div
@@ -259,6 +286,7 @@ const Warehouses: React.FC = () => {
               placeholder={t('erp.warehouses.fields.capacity')}
               type="number"
               min={0}
+              step={1}
               style={inputStyle}
             />
             <div className="flex gap-2 justify-end">

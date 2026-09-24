@@ -34,11 +34,39 @@ describe('useOrders', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.get.mockResolvedValue({
-      orders: [{ id: '1', status: 'pending', subtotal: 10, total: 10 }],
+      orders: [
+        {
+          id: '1',
+          status: 'pending',
+          subtotal: 10,
+          total: 10,
+          items: [{ id: 'i1', name: 'Coffee', quantity: 1, price: 10, total: 9 }],
+        },
+      ],
+      total: 51,
+      has_more: true,
+      page: 1,
+      page_size: 50,
     });
   });
 
-  it('uses the registered dashboard list route with page pagination', async () => {
+  it('uses the registered dashboard list route and preserves its pagination metadata', async () => {
+    mocks.get.mockResolvedValueOnce({
+      orders: [
+        {
+          id: '1',
+          status: 'pending',
+          subtotal: 10,
+          total: 10,
+          items: [{ id: 'i1', name: 'Coffee', quantity: 1, price: 10, total: 9 }],
+        },
+      ],
+      total: 51,
+      has_more: true,
+      page: 3,
+      page_size: 25,
+    });
+
     const { result } = renderHook(() => useOrders({ limit: 25, offset: 50, status: 'pending' }), {
       wrapper: createWrapper(),
     });
@@ -46,5 +74,12 @@ describe('useOrders', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(mocks.get).toHaveBeenCalledWith('/pos/orders?page=3&page_size=25&status=pending');
+    expect(result.current.data).toMatchObject({
+      total: 51,
+      hasMore: true,
+      page: 3,
+      pageSize: 25,
+    });
+    expect(result.current.data?.orders[0].items?.[0].total).toBe(9);
   });
 });

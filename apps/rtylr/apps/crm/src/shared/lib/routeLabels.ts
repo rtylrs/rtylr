@@ -25,6 +25,7 @@ export const routeLabels: Readonly<Record<string, RouteLabel>> = {
   '/customers': label('nav.customers'),
   '/customers/new': label('nav.newCustomer'),
   '/customers/import': label('nav.importCustomers'),
+  '/customers/merge': label('crm.customers.breadcrumbMerge', 'crm.mergeCustomers.title'),
   '/loyalty': label('nav.loyalty'),
   '/loyalty/members': label('nav.loyaltyMembers'),
   '/loyalty/rewards': label('nav.rewardsCatalog'),

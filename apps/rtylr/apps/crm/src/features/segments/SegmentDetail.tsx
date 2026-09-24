@@ -2,28 +2,83 @@ import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileQuestion, Mail, MessageSquare, PieChart, Users } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  FileQuestion,
+  Mail,
+  MessageSquare,
+  PieChart,
+  Users,
+} from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
 
+function errorStatus(error: unknown): number | undefined {
+  if (!error || typeof error !== 'object') return undefined;
+  const candidate = error as {
+    statusCode?: unknown;
+    status?: unknown;
+    response?: { status?: unknown };
+  };
+  if (typeof candidate.statusCode === 'number') return candidate.statusCode;
+  if (typeof candidate.status === 'number') return candidate.status;
+  if (typeof candidate.response?.status === 'number') return candidate.response.status;
+  return undefined;
+}
+
+function isNotFoundError(error: unknown, notFoundTitle: string): boolean {
+  const status = errorStatus(error);
+  if (status !== undefined) return status === 404;
+  return (
+    error instanceof Error && (error.message === notFoundTitle || /not found/i.test(error.message))
+  );
+}
+
+const LoadErrorState: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
+  const { t } = useTranslation();
+  return (
+    <EmptyState
+      icon={AlertCircle}
+      title={t('errors.generic')}
+      description={t('errors.refreshAndTryAgain')}
+      action={{ label: t('crm.actions.retry'), onClick: onRetry }}
+    />
+  );
+};
+
 const SegmentDetail: React.FC = () => {
   const { id } = useParams({ from: '/layout/segments/$id' });
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { data: fetched, isLoading: segmentLoading, error: segmentError } = useGetSegment(id);
+  const {
+    data: fetched,
+    isLoading: segmentLoading,
+    error: segmentError,
+    refetch: refetchSegment,
+  } = useGetSegment(id);
   const {
     data: fetchedCustomerPages,
     isLoading,
     isFetchingNextPage,
+    isError: customersError,
+    isFetchNextPageError: customersNextPageError,
     hasNextPage,
     fetchNextPage,
     refetch: refetchCustomers,
   } = useSegmentCustomers(id);
   const segment = fetched;
   const customers = fetchedCustomerPages?.pages.flatMap((page) => page.customers) ?? [];
+  const customerTotal = fetchedCustomerPages?.pages[0]?.total;
+  const customersQueryFailed = customersError || customersNextPageError;
+  const notFoundTitle = t('crm.segmentDetail.notFoundTitle');
+  const segmentIsMissing = segmentError ? isNotFoundError(segmentError, notFoundTitle) : !segment;
+  const retryCustomers = (): void => {
+    void (customersNextPageError ? fetchNextPage() : refetchCustomers());
+  };
 
   if (segmentLoading) {
     return (
@@ -33,12 +88,20 @@ const SegmentDetail: React.FC = () => {
     );
   }
 
-  if (segmentError || !segment) {
+  if (segmentError && !segmentIsMissing) {
+    return (
+      <div style={{ maxWidth: '1100px' }}>
+        <LoadErrorState onRetry={() => void refetchSegment()} />
+      </div>
+    );
+  }
+
+  if (!segment || segmentIsMissing) {
     return (
       <div style={{ maxWidth: '1100px' }}>
         <EmptyState
           icon={FileQuestion}
-          title={t('crm.segmentDetail.notFoundTitle')}
+          title={notFoundTitle}
           description={t('crm.segmentDetail.notFoundDescription')}
           action={{
             label: t('crm.segmentDetail.backToSegments'),
@@ -150,7 +213,12 @@ const SegmentDetail: React.FC = () => {
             {
               id: 'customers',
               label: t('crm.customers.pageTitle'),
-              value: segment.customerCount.toLocaleString(),
+              value:
+                customerTotal !== undefined
+                  ? customerTotal.toLocaleString()
+                  : customersQueryFailed
+                    ? '—'
+                    : t('common.loading'),
             },
             { id: 'trend', label: t('crm.segmentDetail.trend'), value: segment.trend },
             { id: 'avgSpend', label: t('crm.segmentDetail.avgSpend'), value: '-' },
@@ -196,10 +264,12 @@ const SegmentDetail: React.FC = () => {
               {t('crm.segmentDetail.customersIn')}
             </h4>
           </div>
-          {isLoading ? (
+          {isLoading && !fetchedCustomerPages ? (
             <div style={{ padding: '16px' }}>
               <SkeletonList count={5} />
             </div>
+          ) : customersQueryFailed && customers.length === 0 ? (
+            <LoadErrorState onRetry={retryCustomers} />
           ) : customers.length === 0 ? (
             <EmptyState
               icon={Users}
@@ -209,6 +279,26 @@ const SegmentDetail: React.FC = () => {
             />
           ) : (
             <div>
+              {customersQueryFailed && (
+                <div
+                  role="alert"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    borderBottom: '1px solid var(--hub-border)',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '12px',
+                  }}
+                >
+                  <span>{t('errors.refreshAndTryAgain')}</span>
+                  <Button variant="outline" onClick={retryCustomers}>
+                    {t('crm.actions.retry')}
+                  </Button>
+                </div>
+              )}
               {customers.map((c, i) => (
                 <div
                   key={c.id}

@@ -100,6 +100,18 @@ describe('useQuotes', () => {
     expect(result.current.data?.quotes[0]?.id).toBe('42');
   });
 
+  it('keeps converted quotes distinct from accepted quotes', async () => {
+    mockClient.listQuotes.mockResolvedValue({
+      quotes: [{ ...baseQuote, status: 'converted' }],
+      hasMore: false,
+      page: 1,
+      pageSize: 50,
+    });
+    const { result } = renderHook(() => useQuotes(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.quotes[0]?.status).toBe('Converted');
+  });
+
   it('maps backend status to the capitalized UI label', async () => {
     mockClient.listQuotes.mockResolvedValue({
       quotes: [{ ...baseQuote, status: 'rejected' }],

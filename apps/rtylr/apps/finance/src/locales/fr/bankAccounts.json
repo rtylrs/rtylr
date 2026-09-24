@@ -15,6 +15,7 @@
   },
   "payment": {
     "amountPositive": "Le montant doit être supérieur à zéro",
+    "amountExceedsDue": "Le paiement ne peut pas dépasser le montant restant dû",
     "dateAndReferenceRequired": "La date et la référence sont obligatoires",
     "method": "Méthode",
     "reference": "Référence",

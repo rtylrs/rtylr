@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { Plus, TrendingUp } from 'lucide-react';
+import { AlertCircle, Plus, TrendingUp } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { motion } from 'motion/react';
 import { usePipeline, useLeads } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
@@ -20,6 +21,19 @@ const STAGES: LeadStage[] = [
   'contracted',
   'lost',
 ];
+
+const LEADS_PAGE_SIZE = 100;
+
+function pipelineCutoff(): number {
+  const cutoff = new Date();
+  cutoff.setUTCMonth(cutoff.getUTCMonth() - 12);
+  return cutoff.getTime();
+}
+
+function isInPipelineWindow(lead: Lead, cutoff: number): boolean {
+  const createdAt = Date.parse(lead.createdAt);
+  return Number.isFinite(createdAt) && createdAt >= cutoff;
+}
 
 const STAGE_COLORS: Record<LeadStage, string> = {
   cold: 'var(--crm-sales-cold, #6b7280)',
@@ -141,38 +155,65 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
 const Pipeline: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: pipelineCols, isLoading: pipelineLoading } = usePipeline();
-  const { data: leads, isLoading: leadsLoading } = useLeads();
+  const {
+    data: pipelineCols,
+    isLoading: pipelineLoading,
+    isError: pipelineError,
+    refetch: refetchPipeline,
+  } = usePipeline();
+  const [leadOffset, setLeadOffset] = useState(0);
+  const [exhausted, setExhausted] = useState(false);
+  const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
+  const {
+    data: fetchedLeads,
+    isLoading: leadsLoading,
+    isFetching: leadsFetching,
+    isError: leadsError,
+    refetch: refetchLeads,
+  } = useLeads(LEADS_PAGE_SIZE, leadOffset);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const isLoading = pipelineLoading || leadsLoading;
+  useEffect(() => {
+    if (!fetchedLeads) return;
+    if (leadOffset > 0 && fetchedLeads.length === 0) {
+      setExhausted(true);
+    }
+    setLoadedLeads((previous) => {
+      if (leadOffset === 0) return fetchedLeads;
+      const byId = new Map(previous.map((lead) => [lead.id, lead]));
+      fetchedLeads.forEach((lead) => byId.set(lead.id, lead));
+      return Array.from(byId.values());
+    });
+  }, [fetchedLeads, leadOffset]);
 
+  const cutoff = useMemo(pipelineCutoff, []);
   const leadsByStage = useMemo((): Record<LeadStage, Lead[]> => {
-    const all = leads ?? [];
     const map = {} as Record<LeadStage, Lead[]>;
     STAGES.forEach((key) => {
-      map[key] = all.filter((l) => l.stage === key);
+      map[key] = loadedLeads.filter(
+        (lead) => lead.stage === key && isInPipelineWindow(lead, cutoff)
+      );
     });
     return map;
-  }, [leads]);
+  }, [cutoff, loadedLeads]);
 
   const colSummary = useMemo((): Record<LeadStage, { count: number; mrr: number }> => {
-    const byStage = leadsByStage;
     const result = {} as Record<LeadStage, { count: number; mrr: number }>;
     STAGES.forEach((key) => {
-      const fromApi = (pipelineCols ?? []).find((c) => c.stage === key);
-      if (fromApi) {
-        result[key] = { count: fromApi.count, mrr: fromApi.totalMrr };
-      } else {
-        const stageLeads = byStage[key] ?? [];
-        result[key] = {
-          count: stageLeads.length,
-          mrr: stageLeads.reduce((s, l) => s + (l.mrrPotential ?? l.dealValue ?? 0), 0),
-        };
-      }
+      const fromApi = (pipelineCols ?? []).find((column) => column.stage === key);
+      result[key] = fromApi
+        ? { count: fromApi.count, mrr: fromApi.totalMrr }
+        : { count: 0, mrr: 0 };
     });
     return result;
-  }, [pipelineCols, leadsByStage]);
+  }, [pipelineCols]);
+
+  const isInitialLoading = pipelineLoading || (leadsLoading && loadedLeads.length === 0);
+  const queryFailed = pipelineError || leadsError;
+  const hasMore = !exhausted && fetchedLeads?.length === LEADS_PAGE_SIZE;
+  const retryQueries = (): void => {
+    void Promise.all([refetchPipeline(), refetchLeads()]);
+  };
 
   return (
     <>
@@ -189,7 +230,14 @@ const Pipeline: React.FC = () => {
           }
         />
 
-        {isLoading ? (
+        {queryFailed ? (
+          <EmptyState
+            icon={AlertCircle}
+            title={t('crm.leads.loadFailedTitle')}
+            description={t('errors.refreshAndTryAgain')}
+            action={{ label: t('crm.actions.retry'), onClick: retryQueries }}
+          />
+        ) : isInitialLoading ? (
           <div style={{ padding: '16px' }}>
             <SkeletonList count={4} />
           </div>
@@ -314,6 +362,30 @@ const Pipeline: React.FC = () => {
                 </div>
               );
             })}
+            {leadsFetching && loadedLeads.length > 0 && (
+              <p
+                role="status"
+                style={{
+                  gridColumn: '1 / -1',
+                  margin: 0,
+                  textAlign: 'center',
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
+                {t('common.loading')}
+              </p>
+            )}
+            {hasMore && (
+              <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center' }}>
+                <Button
+                  variant="outline"
+                  onClick={() => setLeadOffset((current) => current + LEADS_PAGE_SIZE)}
+                  disabled={leadsFetching}
+                >
+                  {leadsFetching ? t('common.loading') : t('crm.customers.loadMore')}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

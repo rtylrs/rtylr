@@ -78,6 +78,20 @@ describe('useProjectRealtime', () => {
     );
   });
 
+  it('invalidates status projections when a teammate edits a status', () => {
+    const spy = mount('p-7');
+    handler?.(event({ type: 'status.updated' }));
+
+    expect(keys(spy)).toEqual(
+      expect.arrayContaining([
+        JSON.stringify(['statuses', 'p-7']),
+        JSON.stringify(['tasks']),
+        MY_TASKS,
+        JSON.stringify(['task']),
+      ])
+    );
+  });
+
   // The mutation's own onSuccess already invalidated; refetching again would
   // clobber an in-flight optimistic update.
   it('ignores a task event the current user caused', () => {

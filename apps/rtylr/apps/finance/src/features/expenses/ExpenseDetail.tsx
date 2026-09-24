@@ -40,7 +40,7 @@ const statusStyle: Record<string, React.CSSProperties> = {
 const ExpenseDetail: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams({ strict: false });
-  const { data: expense, isLoading, refetch } = useExpenseById(id);
+  const { data: expense, isLoading, isError, error, isFetching, refetch } = useExpenseById(id);
   const { data: categories = [] } = useExpenseCategories();
   const queryClient = useQueryClient();
   const approveMut = useApproveExpense();
@@ -73,6 +73,9 @@ const ExpenseDetail: React.FC = () => {
           description: expense.description,
           vendor: expense.vendor ?? '',
           receiptUrl: receiptUrl ?? '',
+          paymentMethod: expense.paymentMethod ?? '',
+          isTaxDeductible: expense.isTaxDeductible ?? false,
+          taxAmount: expense.taxAmount ?? 0,
           notes: expense.notes ?? '',
           expenseDate: expense.expenseDate,
         },
@@ -87,6 +90,33 @@ const ExpenseDetail: React.FC = () => {
       setSavingReceipt(false);
     }
   };
+
+  if (isError && !expense) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <PageHeader
+          title={t('expenses.detailTitle')}
+          breadcrumbs={[{ label: t('nav.expenses'), to: '/expenses' }, { label: id ?? '' }]}
+        />
+        <div
+          role="alert"
+          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text)' }}>
+            {getOneKitErrorMessage(error, t('errors.generic'))}
+          </p>
+          <button
+            type="button"
+            style={ghostBtn}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            {t('common.refresh')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || !expense) {
     return (

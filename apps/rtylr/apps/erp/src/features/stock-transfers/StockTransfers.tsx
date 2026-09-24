@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, ArrowLeftRight, ArrowRight, Trash2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeftRight,
+  ArrowRight,
+  CheckCircle2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
-import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
+import {
+  useStockTransfers,
+  useCreateStockTransfer,
+  useUpdateStockTransferStatus,
+} from './useStockTransfers';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import {
   stockTransferStatusLabel,
@@ -23,6 +34,7 @@ import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
 const AMBER = 'var(--erp-accent)';
+const PRODUCT_PAGE_SIZE = 100;
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -58,16 +70,69 @@ function statusConfig(status: string): { color: string; bg: string } {
   return { color: 'var(--hub-text-dim)', bg: 'var(--hub-hover)' };
 }
 
+const ReceiveTransferAction: React.FC<{ transferId?: string }> = ({ transferId }) => {
+  const { t } = useTranslation('erp');
+  const updateMutation = useUpdateStockTransferStatus();
+  if (!transferId) return null;
+
+  return (
+    <button
+      type="button"
+      aria-label={t('erp.stockTransfers.receiveAria', { id: transferId })}
+      disabled={updateMutation.isPending}
+      onClick={() =>
+        updateMutation.mutate(
+          { id: transferId, body: { status: 'received' } },
+          {
+            onSuccess: () => toast.success(t('erp.stockTransfers.received')),
+            onError: () => toast.error(t('erp.stockTransfers.receiveFailed')),
+          }
+        )
+      }
+      className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold disabled:opacity-40"
+      style={{
+        background: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
+        color: 'var(--erp-success)',
+      }}
+    >
+      <CheckCircle2 size={11} /> {t('erp.stockTransfers.receive')}
+    </button>
+  );
+};
+
 const StockTransfers: React.FC = () => {
   const { t } = useTranslation('erp');
   const [page, setPage] = useState(1);
   const pageSize = 50;
-  const { data: transferResult, isLoading, refetch } = useStockTransfers({ page, pageSize });
+  const {
+    data: transferResult,
+    isLoading,
+    isError: transfersError,
+    refetch: refetchTransfers,
+  } = useStockTransfers({ page, pageSize });
   const transfers = transferResult?.stockTransfers ?? [];
   const hasMore = transferResult?.hasMore ?? false;
-  const { data: warehouses = [] } = useWarehouses();
-  const { data: productResult, isLoading: productsLoading } = useProducts({ pageSize: 100 });
+  const {
+    data: warehouses = [],
+    isLoading: warehousesLoading,
+    isError: warehousesError,
+    refetch: refetchWarehouses,
+  } = useWarehouses();
+  const [productSearch, setProductSearch] = useState('');
+  const [productPage, setProductPage] = useState(1);
+  const {
+    data: productResult,
+    isLoading: productsLoading,
+    isError: productsError,
+    refetch: refetchProducts,
+  } = useProducts({
+    page: productPage,
+    pageSize: PRODUCT_PAGE_SIZE,
+    search: productSearch,
+  });
   const products = productResult?.products ?? [];
+  const productsHaveMore = productResult?.hasMore ?? false;
+  const productsTotal = productResult?.total;
   const createMut = useCreateStockTransfer();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canCreateTransfer = canErpPermission(role, 'erp:inventory:transfer');
@@ -84,6 +149,10 @@ const StockTransfers: React.FC = () => {
     warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
 
   const handleCreate = async (): Promise<void> => {
+    if (warehousesError || productsError || warehousesLoading || productsLoading) {
+      toast.error(t('erp.stockTransfers.reloadBeforeCreate'));
+      return;
+    }
     if (!fromWarehouseId || !toWarehouseId) {
       toast.error(t('erp.stockTransfers.warehousesRequired'));
       return;
@@ -145,7 +214,7 @@ const StockTransfers: React.FC = () => {
         <div
           className="grid px-4 py-3 text-[10px] font-semibold uppercase tracking-wider"
           style={{
-            gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr',
+            gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr 1fr',
             color: 'var(--hub-text-dim)',
             borderBottom: '1px solid var(--hub-border)',
           }}
@@ -157,10 +226,35 @@ const StockTransfers: React.FC = () => {
           <span>{t('erp.stockTransfers.items')}</span>
           <span>{t('erp.stockTransfers.created')}</span>
           <span>{t('common.status')}</span>
+          <span></span>
         </div>
         <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
           {isLoading ? (
-            Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={7} />)
+            Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={8} />)
+          ) : transfersError ? (
+            <div
+              role="alert"
+              className="flex flex-col items-center gap-3 p-8 text-center"
+              style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+            >
+              <AlertTriangle size={24} style={{ color: 'var(--erp-danger)' }} />
+              <div>
+                <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                  Unable to load stock transfers
+                </p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  The transfer history could not be loaded from the tenant API.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void refetchTransfers()}
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold"
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              >
+                {t('erp.stockTransfers.refresh')}
+              </button>
+            </div>
           ) : transfers.length === 0 ? (
             <EmptyState
               icon={ArrowLeftRight}
@@ -172,7 +266,10 @@ const StockTransfers: React.FC = () => {
                       label: t('erp.stockTransfers.newTransfer'),
                       onClick: () => setShowCreate(true),
                     }
-                  : { label: t('erp.stockTransfers.refresh'), onClick: () => void refetch() }
+                  : {
+                      label: t('erp.stockTransfers.refresh'),
+                      onClick: () => void refetchTransfers(),
+                    }
               }
             />
           ) : (
@@ -182,7 +279,7 @@ const StockTransfers: React.FC = () => {
                 <div
                   key={transfer.id}
                   className="grid px-4 py-3 items-center"
-                  style={{ gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr' }}
+                  style={{ gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr 1fr' }}
                 >
                   <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
                     #{transfer.id}
@@ -214,6 +311,11 @@ const StockTransfers: React.FC = () => {
                       {stockTransferStatusLabel(transfer.status ?? '')}
                     </span>
                   </span>
+                  {canCreateTransfer &&
+                  transfer.id &&
+                  (transfer.status === 'draft' || transfer.status === 'in_transit') ? (
+                    <ReceiveTransferAction transferId={transfer.id} />
+                  ) : null}
                 </div>
               );
             })
@@ -241,12 +343,35 @@ const StockTransfers: React.FC = () => {
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
               {t('erp.stockTransfers.newTransferTitle')}
             </h3>
+            {warehousesError ? (
+              <div
+                role="alert"
+                className="rounded-lg p-2 text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--erp-danger)' }}
+              >
+                <p>Unable to load warehouses.</p>
+                <button
+                  type="button"
+                  onClick={() => void refetchWarehouses()}
+                  className="mt-1 underline"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : null}
             <select
               value={fromWarehouseId}
               onChange={(e) => setFromWarehouseId(e.target.value)}
+              disabled={warehousesLoading || warehousesError}
               style={inputStyle}
             >
-              <option value="">{t('erp.stockTransfers.fromWarehouse')}</option>
+              <option value="">
+                {warehousesLoading
+                  ? t('erp.stockTransfers.loadingWarehouses')
+                  : warehousesError
+                    ? t('erp.stockTransfers.warehousesUnavailable')
+                    : t('erp.stockTransfers.fromWarehouse')}
+              </option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -256,9 +381,16 @@ const StockTransfers: React.FC = () => {
             <select
               value={toWarehouseId}
               onChange={(e) => setToWarehouseId(e.target.value)}
+              disabled={warehousesLoading || warehousesError}
               style={inputStyle}
             >
-              <option value="">{t('erp.stockTransfers.toWarehouse')}</option>
+              <option value="">
+                {warehousesLoading
+                  ? t('erp.stockTransfers.loadingWarehouses')
+                  : warehousesError
+                    ? t('erp.stockTransfers.warehousesUnavailable')
+                    : t('erp.stockTransfers.toWarehouse')}
+              </option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -277,6 +409,33 @@ const StockTransfers: React.FC = () => {
             >
               Items *
             </p>
+            <input
+              value={productSearch}
+              onChange={(e) => {
+                setProductSearch(e.target.value);
+                setProductPage(1);
+              }}
+              placeholder={t('erp.stockTransfers.searchProducts')}
+              aria-label={t('erp.stockTransfers.searchProducts')}
+              disabled={productsError}
+              style={inputStyle}
+            />
+            {productsError ? (
+              <div
+                role="alert"
+                className="rounded-lg p-2 text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--erp-danger)' }}
+              >
+                <p>Unable to load products.</p>
+                <button
+                  type="button"
+                  onClick={() => void refetchProducts()}
+                  className="mt-1 underline"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : null}
             {newItems.map((item, idx) => (
               <div key={idx} className="flex gap-1 items-center">
                 <select
@@ -287,15 +446,17 @@ const StockTransfers: React.FC = () => {
                     )
                   }
                   aria-label={`Product for transfer item ${idx + 1}`}
-                  disabled={productsLoading || products.length === 0}
+                  disabled={productsLoading || productsError || products.length === 0}
                   style={lineInputStyle}
                 >
                   <option value="">
                     {productsLoading
-                      ? 'Loading products…'
-                      : products.length === 0
-                        ? 'No products available'
-                        : 'Select product *'}
+                      ? t('erp.stockTransfers.loadingProducts')
+                      : productsError
+                        ? t('erp.stockTransfers.productsUnavailable')
+                        : products.length === 0
+                          ? t('erp.stockTransfers.noProducts')
+                          : t('erp.stockTransfers.selectProduct')}
                   </option>
                   {products.map((product) => (
                     <option key={product.id} value={product.id}>
@@ -330,6 +491,16 @@ const StockTransfers: React.FC = () => {
                 </button>
               </div>
             ))}
+            {!productsError && (productPage > 1 || productsHaveMore) && (
+              <PaginationControls
+                page={productPage}
+                hasMore={productsHaveMore}
+                itemCount={products.length}
+                pageSize={PRODUCT_PAGE_SIZE}
+                total={productsTotal}
+                onPageChange={setProductPage}
+              />
+            )}
             <button
               type="button"
               onClick={() => setNewItems((prev) => [...prev, { productId: '', quantity: '' }])}

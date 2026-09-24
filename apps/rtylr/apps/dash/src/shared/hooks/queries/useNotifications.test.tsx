@@ -98,6 +98,27 @@ describe('useNotifications', () => {
     expect(result.current.data![0].title).toBe('New order');
   });
 
+  it('preserves the Hub notification link field', async () => {
+    mockNotificationClient.listNotifications.mockResolvedValue({
+      notifications: [
+        {
+          id: '1',
+          title: 'Access request',
+          body: 'Review the request',
+          type: 'info',
+          read: false,
+          createdAt: '2026-01-01',
+          link: '/team',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useNotifications(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.[0].link).toBe('/team');
+  });
+
   it('fetches notifications from flat array', async () => {
     mockNotificationClient.listNotifications.mockResolvedValue(sampleNotifications);
 

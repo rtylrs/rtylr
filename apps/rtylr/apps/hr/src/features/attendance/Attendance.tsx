@@ -40,7 +40,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const Attendance = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading, isError, isFetching, refetch } = useGetMyAttendance({});
+  const { data, isPending, isError, isFetching, refetch } = useGetMyAttendance({});
 
   const records = useMemo(() => data?.records ?? [], [data]);
 
@@ -69,7 +69,7 @@ const Attendance = (): React.JSX.Element => {
 
         {isError ? (
           <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
-        ) : isLoading ? (
+        ) : isPending ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Skeleton height={56} />
             <Skeleton height={56} />

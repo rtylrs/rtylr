@@ -39,7 +39,10 @@ export function useCreateStockTake() {
   return useMutation<CreateStockTakeResponse, Error, CreateStockTakeRequest>({
     mutationFn: (data) => stockTakeClient.createStockTake(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-takes'] }),
-    onError: () => toast.error('Failed to create stock take'),
+    onError: () => {
+      void qc.invalidateQueries({ queryKey: ['stock-takes'] });
+      toast.error('Failed to create stock take');
+    },
   });
 }
 
@@ -51,6 +54,10 @@ export function useUpdateStockTake() {
       void qc.invalidateQueries({ queryKey: ['stock-takes'] });
       invalidateStockDerivedQueries(qc);
     },
-    onError: () => toast.error('Failed to update stock take'),
+    onError: () => {
+      void qc.invalidateQueries({ queryKey: ['stock-takes'] });
+      invalidateStockDerivedQueries(qc);
+      toast.error('Failed to update stock take');
+    },
   });
 }

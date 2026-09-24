@@ -1,45 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import type { LucideIcon } from 'lucide-react';
-import { Banknote, CreditCard, Smartphone } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { toast } from 'sonner';
-import { createOneKitClient } from '@voxire/api';
-import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
-import { OrderPaymentServiceClient } from '@voxire/voxie/pos/orders/payments/v1/client';
-import POSLayout from '../../layouts/POSLayout';
-import { useCartStore } from '../../shared/stores/cartStore';
-import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
-import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
+import React, { useEffect, useState } from "react";
+import type { LucideIcon } from "lucide-react";
+import { Banknote, CreditCard, Smartphone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
+import { toast } from "sonner";
+import { createOneKitClient } from "@voxire/api";
+import { OrderServiceClient } from "@voxire/voxie/pos/orders/v1/client";
+import { OrderPaymentServiceClient } from "@voxire/voxie/pos/orders/payments/v1/client";
+import POSLayout from "../../layouts/POSLayout";
+import { useCartStore } from "../../shared/stores/cartStore";
+import { useSettingsStore } from "../../shared/stores/settingsStore";
+import { useOfflineQueueStore } from "../../shared/stores/offlineQueueStore";
+import { useTerminalContextStore } from "../../shared/stores/terminalContextStore";
 import {
   buildCashTender,
   buildCheckoutOrder,
   buildCreateOrderPayload,
   processCheckout,
   type CheckoutPaymentMethod,
-} from './checkoutWorkflow';
-import { buildReceiptFromOrder } from './receiptArtifact';
-import { useReceiptsStore } from '../../shared/stores/receiptsStore';
-import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
-import { printReceiptAndOpenDrawer, openDrawer } from './paymentHardware';
-import { resetAfterCheckout } from './checkoutState';
-import QrPayPanel from './QrPayPanel';
-import TipSelector from '../../shared/components/TipSelector';
-import { earnPointsAfterPayment } from '../loyalty/loyaltyWorkflow';
+} from "./checkoutWorkflow";
+import { buildReceiptFromOrder } from "./receiptArtifact";
+import { useReceiptsStore } from "../../shared/stores/receiptsStore";
+import { useCashDrawerStore } from "../../shared/stores/cashDrawerStore";
+import { printReceiptAndOpenDrawer, openDrawer } from "./paymentHardware";
+import { resetAfterCheckout } from "./checkoutState";
+import QrPayPanel from "./QrPayPanel";
+import TipSelector from "../../shared/components/TipSelector";
+import { earnPointsAfterPayment } from "../loyalty/loyaltyWorkflow";
+import { resolveOpenSessionId } from "../close-session/closeSessionWorkflow";
+import {
+  buildOrderCompatPayload,
+  buildResumeOrderPayload,
+  createOrderCompat,
+  requiresCompatOrder,
+  persistResumedOrder,
+} from "../orders/orderCompatWorkflow";
 
-const orderClient = createOneKitClient(OrderServiceClient, 'pos');
-const orderPaymentClient = createOneKitClient(OrderPaymentServiceClient, 'pos');
+const orderClient = createOneKitClient(OrderServiceClient, "pos");
+const orderPaymentClient = createOneKitClient(OrderPaymentServiceClient, "pos");
 
 const fmt = (n: number): string =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+    n,
+  );
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
   // Slice selectors keep the checkout screen from re-rendering on unrelated
   // cart writes (branchId, kitchen notes, persisted-hydration).
   const items = useCartStore((s) => s.items);
-  const total = useCartStore((s) => s.total);
+  const subtotalFn = useCartStore((s) => s.subtotal);
+  const taxTotalFn = useCartStore((s) => s.taxTotal);
+  const discountTotalFn = useCartStore((s) => s.discountTotal);
+  const totalFn = useCartStore((s) => s.total);
+  const storedTip = useCartStore((s) => s.tipAmount);
   const clearCart = useCartStore((s) => s.clearCart);
   const newOrder = useCartStore((s) => s.newOrder);
   const customerId = useCartStore((s) => s.customerId);
@@ -47,11 +61,11 @@ const Payment: React.FC = () => {
   const orderType = useCartStore((s) => s.orderType);
   const tableId = useCartStore((s) => s.tableId);
   const notes = useCartStore((s) => s.notes);
+  const kitchenNotes = useCartStore((s) => s.kitchenNotes);
   const locationId = useTerminalContextStore((s) => s.locationId);
   // Stable local reference for the QR panel - regenerating it per render
   // would change the QR code under the customer's camera.
   const [localOrderRef] = useState(() => `local-${Date.now().toString(36)}`);
-  const taxRate = useSettingsStore((s) => s.taxRate);
   const printer = useSettingsStore((s) => s.printer);
   const business = useSettingsStore((s) => s.business);
   const tipsEnabled = useSettingsStore((s) => s.features.tips);
@@ -61,16 +75,17 @@ const Payment: React.FC = () => {
   const setServerOrderId = useCartStore((s) => s.setServerOrderId);
   const addReceipt = useReceiptsStore((s) => s.add);
   const recordCashSale = useCashDrawerStore((s) => s.recordCashSale);
-  const [method, setMethod] = useState<CheckoutPaymentMethod>('card');
+  const [method, setMethod] = useState<CheckoutPaymentMethod>("card");
   const [processing, setProcessing] = useState(false);
-  const [cashAmount, setCashAmount] = useState('');
+  const [cashAmount, setCashAmount] = useState("");
   const [qrConfirmed, setQrConfirmed] = useState(false);
   const [tip, setTip] = useState(0);
 
-  const subtotal = total();
-  const tax = subtotal * taxRate;
+  const subtotal = subtotalFn();
+  const tax = taxTotalFn();
+  const discount = discountTotalFn();
   const appliedTip = tipsEnabled ? tip : 0;
-  const grandTotal = subtotal + tax + appliedTip;
+  const grandTotal = Math.max(0, totalFn() - storedTip + appliedTip);
   const cashTender = buildCashTender(cashAmount, grandTotal);
   const serverOrderId = useCartStore((s) => s.serverOrderId);
 
@@ -82,21 +97,25 @@ const Payment: React.FC = () => {
         items,
         subtotal,
         tax,
+        discount,
         total: grandTotal,
         tip: appliedTip,
         customerId,
         createdAt: new Date().toISOString(),
       });
 
+      const sessionId = serverOrderId ? null : await resolveOpenSessionId();
       const payload = buildCreateOrderPayload({
         items,
         method,
         locationId,
+        sessionId,
         tableId: tablesEnabled ? tableId : null,
         orderType,
         customerId,
         customerName,
         notes,
+        kitchenNotes,
       });
 
       const result = await processCheckout({
@@ -104,31 +123,73 @@ const Payment: React.FC = () => {
         payload,
         method,
         existingOrderId: serverOrderId,
-        createOrder: (payload) => orderClient.createOrder(payload),
-        chargeOrder: async (payload) => {
-          await orderPaymentClient.processPayment(payload);
+        persistExistingOrder: serverOrderId
+          ? async () => {
+              await persistResumedOrder(
+                buildResumeOrderPayload({
+                  orderId: serverOrderId,
+                  items,
+                  locationId,
+                  tableId: tablesEnabled ? tableId : null,
+                  orderType,
+                  customerId,
+                  customerName,
+                  notes,
+                  kitchenNotes,
+                }),
+              );
+            }
+          : undefined,
+        createOrder: async (generatedPayload) => {
+          if (requiresCompatOrder(items)) {
+            return createOrderCompat(
+              buildOrderCompatPayload({
+                items,
+                sessionId,
+                locationId,
+                tableId: tablesEnabled ? tableId : null,
+                orderType,
+                customerId,
+                customerName,
+                paymentMethod: method,
+                notes,
+                kitchenNotes,
+              }),
+            );
+          }
+          return orderClient.createOrder(generatedPayload);
         },
-        enqueueOffline,
+        chargeOrder: async (chargePayload) => {
+          await orderPaymentClient.processPayment(chargePayload);
+        },
+        enqueueOffline: (offlinePayload) => {
+          if (requiresCompatOrder(items)) {
+            throw new Error("Combo orders require an online connection.");
+          }
+          enqueueOffline(offlinePayload);
+        },
         recordCashSale,
         onOrderCreated: setServerOrderId,
       });
 
-      const isCash = method === 'cash';
+      const isCash = method === "cash";
 
       addReceipt(
         buildReceiptFromOrder({
           order,
           method,
           printedAt: new Date().toISOString(),
-        })
+        }),
       );
       resetAfterCheckout({ newOrder, clearCart });
-      if (result.status === 'queued') {
-        toast.warning('Cash order saved offline. It will sync when connection returns.');
+      if (result.status === "queued") {
+        toast.warning(
+          "Cash order saved offline. It will sync when connection returns.",
+        );
       }
 
       // Earn loyalty points for attached customer (fire-and-forget, non-blocking)
-      if (result.status === 'online') {
+      if (result.status === "online") {
         void earnPointsAfterPayment({
           customerId,
           orderId: result.orderId,
@@ -151,11 +212,11 @@ const Payment: React.FC = () => {
         items,
         subtotal,
         taxAmount: tax,
-        discountAmount: 0,
+        discountAmount: discount,
         tipAmount: appliedTip,
         total: grandTotal,
         paymentMethod: method,
-        amountPaid: isCash ? (cashTender.received || grandTotal) : grandTotal,
+        amountPaid: isCash ? cashTender.received || grandTotal : grandTotal,
         changeDue: isCash ? (cashTender.change ?? 0) : 0,
         orderNumber: order.id,
         businessName: business.name,
@@ -163,22 +224,26 @@ const Payment: React.FC = () => {
         kickDrawer: isCash && cashDrawerEnabled && printer.cashDrawerKick,
       });
 
-      if (hwResult.kind === 'print_failed') {
+      if (hwResult.kind === "print_failed") {
         toast.warning(`Receipt not printed: ${hwResult.error}`);
         // Still open drawer if printing failed but drawer was requested
         if (isCash && cashDrawerEnabled && printer.cashDrawerKick) {
           const dr = await openDrawer(printer);
-          if (dr.kind === 'drawer_failed') {
+          if (dr.kind === "drawer_failed") {
             toast.warning(`Cash drawer did not open: ${dr.error}`);
           }
         }
-      } else if (hwResult.kind === 'drawer_failed') {
+      } else if (hwResult.kind === "drawer_failed") {
         toast.warning(`Cash drawer did not open: ${hwResult.error}`);
       }
 
-      navigate('/receipt');
+      navigate("/receipt");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Payment failed. Please try again.",
+      );
     } finally {
       setProcessing(false);
     }
@@ -186,16 +251,20 @@ const Payment: React.FC = () => {
 
   useEffect(() => {
     if (items.length === 0) {
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     }
   }, [items.length, navigate]);
 
   if (items.length === 0) return null;
 
-  const methods: { id: CheckoutPaymentMethod; label: string; icon: LucideIcon }[] = [
-    { id: 'card', label: 'Card', icon: CreditCard },
-    { id: 'cash', label: 'Cash', icon: Banknote },
-    { id: 'qr', label: 'QR Pay', icon: Smartphone },
+  const methods: {
+    id: CheckoutPaymentMethod;
+    label: string;
+    icon: LucideIcon;
+  }[] = [
+    { id: "card", label: "Card", icon: CreditCard },
+    { id: "cash", label: "Cash", icon: Banknote },
+    { id: "qr", label: "QR Pay", icon: Smartphone },
   ];
 
   return (
@@ -204,7 +273,7 @@ const Payment: React.FC = () => {
         <div className="w-full max-w-md bg-pos-card border border-pos-border rounded-2xl p-6 space-y-5">
           <button
             className="text-sm text-pos-muted hover:text-pos-text transition-colors"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
           >
             ← Back to POS
           </button>
@@ -213,7 +282,13 @@ const Payment: React.FC = () => {
             <div className="flex gap-2">
               <button
                 className="text-xs text-pos-muted hover:text-pos-text border border-pos-border rounded-lg px-3 py-1.5 transition-colors"
-                onClick={() => navigate(serverOrderId ? `/split-bill/${serverOrderId}` : '/split-bill/current')}
+                onClick={() =>
+                  navigate(
+                    serverOrderId
+                      ? `/split-bill/${serverOrderId}`
+                      : "/split-bill/current",
+                  )
+                }
               >
                 Split Payment
               </button>
@@ -231,7 +306,10 @@ const Payment: React.FC = () => {
           {/* Summary */}
           <div className="space-y-2 text-sm">
             {items.map((item) => (
-              <div key={item.id} className="flex justify-between text-pos-muted">
+              <div
+                key={item.id}
+                className="flex justify-between text-pos-muted"
+              >
                 <span>
                   {item.quantity}× {item.name}
                 </span>
@@ -243,8 +321,14 @@ const Payment: React.FC = () => {
               <span>Subtotal</span>
               <span>{fmt(subtotal)}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-pos-muted">
+                <span>Discount</span>
+                <span>-{fmt(discount)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-pos-muted">
-              <span>Tax ({(taxRate * 100).toFixed(0)}%)</span>
+              <span>Tax</span>
               <span>{fmt(tax)}</span>
             </div>
             {appliedTip > 0 && (
@@ -259,7 +343,9 @@ const Payment: React.FC = () => {
             </div>
           </div>
 
-          {tipsEnabled && <TipSelector subtotal={subtotal} onTipChange={setTip} />}
+          {tipsEnabled && (
+            <TipSelector subtotal={subtotal} onTipChange={setTip} />
+          )}
 
           {/* Method selector */}
           <div className="flex gap-2">
@@ -270,8 +356,8 @@ const Payment: React.FC = () => {
                   key={m.id}
                   className={`flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                     method === m.id
-                      ? 'bg-pos-text text-pos-bg border-transparent'
-                      : 'border-pos-border text-pos-muted hover:border-white/20'
+                      ? "bg-pos-text text-pos-bg border-transparent"
+                      : "border-pos-border text-pos-muted hover:border-white/20"
                   }`}
                   onClick={() => setMethod(m.id)}
                 >
@@ -282,13 +368,13 @@ const Payment: React.FC = () => {
             })}
           </div>
 
-          {method === 'card' && (
+          {method === "card" && (
             <p className="text-sm text-pos-muted text-center">
               Present card to terminal or tap to pay.
             </p>
           )}
 
-          {method === 'cash' && (
+          {method === "cash" && (
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wide text-pos-muted">
                 Amount received
@@ -314,7 +400,7 @@ const Payment: React.FC = () => {
             </div>
           )}
 
-          {method === 'qr' && (
+          {method === "qr" && (
             <QrPayPanel
               orderId={localOrderRef}
               amount={grandTotal}
@@ -322,7 +408,7 @@ const Payment: React.FC = () => {
             />
           )}
 
-          {method === 'qr' && qrConfirmed && (
+          {method === "qr" && qrConfirmed && (
             <motion.div
               className="text-center text-sm text-emerald-400 font-medium"
               initial={{ opacity: 0 }}
@@ -337,8 +423,8 @@ const Payment: React.FC = () => {
             onClick={handleCharge}
             disabled={
               processing ||
-              (method === 'cash' && !cashTender.canCharge) ||
-              (method === 'qr' && !qrConfirmed)
+              (method === "cash" && !cashTender.canCharge) ||
+              (method === "qr" && !qrConfirmed)
             }
           >
             {processing ? (

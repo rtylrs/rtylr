@@ -49,6 +49,10 @@
     "addNButton_one": "Add {{count}} member",
     "addNButton_other": "Add {{count}} members",
     "removeMemberAriaLabel": "Remove {{name}} from group",
+    "loadMembersFailed": "Unable to load team members",
+    "loadMembersFailedDescription": "Refresh the candidate list before adding members.",
+    "candidatePagination": "Member pages",
+    "candidatePage": "Page {{page}}",
     "pageTitle": "Group detail"
   },
   "list": {

@@ -39,6 +39,12 @@ describe('parseDurationInput', () => {
     expect(parseDurationInput('1:60')).toBeNull();
     expect(parseDurationInput('1:75')).toBeNull();
   });
+
+  it('rejects values outside the safe database duration range', () => {
+    expect(parseDurationInput('9'.repeat(400))).toBeNull();
+    expect(parseDurationInput('2147483648')).toBeNull();
+    expect(parseDurationInput('999999999999999999999999999999999999h')).toBeNull();
+  });
 });
 
 describe('formatDuration', () => {

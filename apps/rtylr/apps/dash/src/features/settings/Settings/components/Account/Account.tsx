@@ -86,11 +86,16 @@ function getDeviceDetails(userAgent: string): DeviceDetails {
     return { kind: 'unknown', browser: '', platform: '' };
   }
 
-  const kind: DeviceKind = /ipad|tablet/.test(ua)
+  const isTablet =
+    /ipad|tablet|playbook|silk/.test(ua) ||
+    (/android/.test(ua) && !/android tv|googletv|smart-tv|tv/.test(ua));
+  const kind: DeviceKind = isTablet
     ? 'tablet'
     : /iphone|android.*mobile|mobile/.test(ua)
       ? 'mobile'
-      : 'desktop';
+      : /android tv|googletv|smart-tv|tv/.test(ua)
+        ? 'unknown'
+        : 'desktop';
 
   const browser = /edg\//.test(ua)
     ? 'Edge'
@@ -165,7 +170,7 @@ const LOGIN_HISTORY_PAGE_SIZE = 20;
 
 const Account: React.FC = () => {
   const { t } = useTranslation();
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [confirmInvalidateOpen, setConfirmInvalidateOpen] = useState(false);
@@ -239,7 +244,14 @@ const Account: React.FC = () => {
 
   const updateProfile = useMutation({
     mutationFn: () => userClient.updateProfile({ name: formData.name }),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const savedName = response?.user?.fullName;
+      if (savedName !== undefined) {
+        setFormData((current) => ({ ...current, name: savedName }));
+        if (user && setUser) {
+          setUser({ ...user, fullName: savedName });
+        }
+      }
       toast.success(t('settings.accountPage.profileSaved'));
       setIsEditing(false);
     },
@@ -285,7 +297,13 @@ const Account: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="name">{t('settings.accountPage.fullName')}</Label>
-                <Input id="name" name="name" value={formData.name} onChange={handleInputChange} />
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  disabled={updateProfile.isPending}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="email">{t('settings.accountPage.email')}</Label>
@@ -354,6 +372,32 @@ const Account: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
+            {isLoginHistoryError && loginHistoryData.entries.length > 0 && (
+              <div
+                role="alert"
+                className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2 text-xs"
+                style={{
+                  background: 'rgba(239,68,68,0.08)',
+                  borderColor: 'rgba(239,68,68,0.25)',
+                  color: 'var(--dash-text-muted)',
+                }}
+              >
+                <span>
+                  {t('settings.accountPage.loginHistoryStale', {
+                    defaultValue:
+                      'Unable to refresh login history. Showing the last available data.',
+                  })}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void refetchLoginHistory()}
+                  disabled={isLoginHistoryFetching}
+                >
+                  {t('common.refresh')}
+                </Button>
+              </div>
+            )}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -372,7 +416,19 @@ const Account: React.FC = () => {
                       {isLoginHistoryLoading ? (
                         'Loading login history…'
                       ) : isLoginHistoryError ? (
-                        'Unable to load login history.'
+                        <div className="flex flex-col items-center gap-2">
+                          <span>
+                            {t('errors.generic', { defaultValue: 'Unable to load login history.' })}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => void refetchLoginHistory()}
+                            disabled={isLoginHistoryFetching}
+                          >
+                            {t('common.refresh')}
+                          </Button>
+                        </div>
                       ) : (
                         <EmptyState
                           icon={History}

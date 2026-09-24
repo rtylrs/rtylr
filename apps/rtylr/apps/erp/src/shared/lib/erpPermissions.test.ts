@@ -8,6 +8,8 @@ describe('canErpPermission', () => {
     expect(canErpPermission('owner', 'erp:inventory:transfer')).toBe(true);
     expect(canErpPermission('owner', 'erp:purchase_orders:approve')).toBe(true);
     expect(canErpPermission('owner', 'erp:stock_takes')).toBe(true);
+    expect(canErpPermission('owner', 'erp:settings:manage')).toBe(true);
+    expect(canErpPermission('owner', 'erp:suppliers:create')).toBe(true);
     expect(canErpPermission('owner', 'hub:team:invite')).toBe(true);
     expect(canErpPermission('owner', 'hub:team:remove')).toBe(true);
   });
@@ -18,6 +20,8 @@ describe('canErpPermission', () => {
     expect(canErpPermission('admin', 'erp:inventory:transfer')).toBe(true);
     expect(canErpPermission('admin', 'erp:purchase_orders:approve')).toBe(true);
     expect(canErpPermission('admin', 'erp:stock_takes')).toBe(true);
+    expect(canErpPermission('admin', 'erp:settings:manage')).toBe(true);
+    expect(canErpPermission('admin', 'erp:suppliers:create')).toBe(true);
     expect(canErpPermission('admin', 'hub:team:invite')).toBe(true);
     expect(canErpPermission('admin', 'hub:team:remove')).toBe(true);
   });
@@ -30,6 +34,8 @@ describe('canErpPermission', () => {
     expect(canErpPermission('operator', 'erp:suppliers')).toBe(true);
     expect(canErpPermission('operator', 'erp:purchase_orders')).toBe(true);
 
+    expect(canErpPermission('operator', 'erp:suppliers:create')).toBe(false);
+    expect(canErpPermission('operator', 'erp:settings:manage')).toBe(false);
     expect(canErpPermission('operator', 'erp:products:delete')).toBe(false);
     expect(canErpPermission('operator', 'erp:inventory:adjust')).toBe(false);
     expect(canErpPermission('operator', 'erp:inventory:transfer')).toBe(false);

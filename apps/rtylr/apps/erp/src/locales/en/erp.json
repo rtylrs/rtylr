@@ -265,6 +265,11 @@
     "subtitle": "Individual SKUs for sizes, colors, flavors and more",
     "newVariant": "New Variant",
     "productIdPlaceholder": "Product ID",
+    "productSearch": "Search products",
+    "selectProduct": "Select a product",
+    "loadingProducts": "Loading products…",
+    "productsUnavailable": "Products unavailable",
+    "noProducts": "No products available",
     "namePlaceholder": "Variant name (e.g. Large / Red)",
     "skuPlaceholder": "SKU (optional)",
     "attributes": "Attributes"
@@ -330,7 +335,19 @@
     "created": "Created",
     "fromWarehouse": "From warehouse…",
     "toWarehouse": "To warehouse…",
-    "newTransferTitle": "New Stock Transfer"
+    "newTransferTitle": "New Stock Transfer",
+    "receive": "Receive",
+    "received": "Transfer received",
+    "receiveFailed": "Failed to receive transfer",
+    "receiveAria": "Receive stock transfer #{{id}}",
+    "reloadBeforeCreate": "Reload the transfer form before creating a transfer",
+    "loadingWarehouses": "Loading warehouses…",
+    "warehousesUnavailable": "Warehouses unavailable",
+    "searchProducts": "Search products",
+    "loadingProducts": "Loading products…",
+    "productsUnavailable": "Products unavailable",
+    "noProducts": "No products available",
+    "selectProduct": "Select product"
   },
   "lowStockAlerts": {
     "empty": {
@@ -357,6 +374,11 @@
     "completeAria": "Complete stock take",
     "variance": "VARIANCE",
     "selectWarehouse": "Select warehouse…",
+    "loadingInventory": "Loading current inventory…",
+    "inventoryLoadFailed": "Inventory could not be loaded.",
+    "inventoryRequiredForCreate": "Unable to load inventory for this stock take",
+    "noInventoryToCount": "No inventory items to count",
+    "itemsWillBeIncluded": "Products will be snapshotted from the selected warehouse.",
     "uncountedWarning_one": "{{count}} uncounted item. Complete anyway?",
     "uncountedWarning_other": "{{count}} uncounted items. Complete anyway?"
   },

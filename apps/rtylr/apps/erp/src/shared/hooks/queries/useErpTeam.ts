@@ -27,21 +27,40 @@ interface InvitePayload {
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
+export async function fetchAllErpTeam(pageSize = 100): Promise<ErpTeamMember[]> {
+  const members: ErpTeamMember[] = [];
+  const seenPages = new Set<string>();
+  let page = 1;
+
+  while (true) {
+    const res = await unwrap(oneKitResult(() => teamMembersClient.listTeam({ page, pageSize })));
+    const raw = res.users ?? [];
+    const pageMembers = raw.map((member) => ({
+      id: member.id ?? '',
+      name: member.fullName || member.email || '',
+      email: member.email ?? '',
+      role: member.role ?? '',
+      apps: member.apps ?? [],
+      isActive: member.isActive ?? false,
+    }));
+    const signature = pageMembers.map((member) => member.id || member.email).join('|');
+    if (pageMembers.length > 0 && seenPages.has(signature)) {
+      throw new Error('Team pagination did not advance');
+    }
+    if (pageMembers.length > 0) seenPages.add(signature);
+    members.push(...pageMembers);
+
+    const hasMore =
+      res.total !== undefined ? members.length < res.total : pageMembers.length === pageSize;
+    if (!hasMore || pageMembers.length === 0) return members;
+    page += 1;
+  }
+}
+
 export const useErpTeam = (): UseQueryResult<ErpTeamMember[]> =>
   useQuery<ErpTeamMember[]>({
     queryKey: ['erp-team'],
-    queryFn: async (): Promise<ErpTeamMember[]> => {
-      const res = await unwrap(oneKitResult(() => teamMembersClient.listTeam({})));
-      const raw = res.users ?? [];
-      return raw.map((m) => ({
-        id: m.id ?? '',
-        name: m.fullName || m.email || '',
-        email: m.email ?? '',
-        role: m.role ?? '',
-        apps: m.apps ?? [],
-        isActive: m.isActive ?? false,
-      }));
-    },
+    queryFn: () => fetchAllErpTeam(),
     staleTime: 30_000,
   });
 

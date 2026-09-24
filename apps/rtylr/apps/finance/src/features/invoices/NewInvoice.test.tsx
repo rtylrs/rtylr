@@ -4,19 +4,21 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import NewInvoice from './NewInvoice';
 import { initTestI18n } from '../../shared/testing/i18n';
 
-const { createInvoiceMock, listCrmCustomersMock } = vi.hoisted(() => ({
+const mocks = vi.hoisted(() => ({
   createInvoiceMock: vi.fn(),
   listCrmCustomersMock: vi.fn(),
+  routeSearch: { clone: undefined as string | undefined, client: '42' as string | undefined },
+  sourceInvoice: undefined as unknown,
 }));
 
 vi.mock('../../shared/lib/clients', () => ({
-  listCrmCustomers: listCrmCustomersMock,
+  listCrmCustomers: mocks.listCrmCustomersMock,
 }));
 
 // The route's search params are the input under test: the same shape the
 // global search links to (/invoices/new?client=<id>).
 vi.mock('@tanstack/react-router', () => ({
-  getRouteApi: () => ({ useSearch: () => ({ clone: undefined, client: '42' }) }),
+  getRouteApi: () => ({ useSearch: () => mocks.routeSearch }),
   useNavigate: () => vi.fn(),
 }));
 
@@ -34,9 +36,9 @@ vi.mock('motion/react', () => ({
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 vi.mock('./useInvoices', () => ({
-  useCreateInvoice: () => ({ mutate: createInvoiceMock, isPending: false }),
+  useCreateInvoice: () => ({ mutate: mocks.createInvoiceMock, isPending: false }),
   useUpdateInvoiceStatus: () => ({ mutate: vi.fn(), isPending: false }),
-  useInvoiceDetail: () => ({ data: undefined, isLoading: false }),
+  useInvoiceDetail: () => ({ data: mocks.sourceInvoice, isLoading: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useSignedContracts', () => ({
@@ -52,13 +54,15 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  createInvoiceMock.mockReset();
-  listCrmCustomersMock.mockReset();
+  mocks.createInvoiceMock.mockReset();
+  mocks.listCrmCustomersMock.mockReset();
+  mocks.routeSearch = { clone: undefined, client: '42' };
+  mocks.sourceInvoice = undefined;
 });
 
 describe('NewInvoice deep-linked client', () => {
   it('carries the CRM customer id from a ?client= deep link into the create payload', async () => {
-    listCrmCustomersMock.mockResolvedValue({
+    mocks.listCrmCustomersMock.mockResolvedValue({
       customers: [{ id: 42, name: 'Acme Corp', email: 'billing@acme.test' }],
     });
 
@@ -77,10 +81,53 @@ describe('NewInvoice deep-linked client', () => {
     fireEvent.click(screen.getByRole('button', { name: /Next/ }));
     fireEvent.click(screen.getByRole('button', { name: /Save as Draft/ }));
 
-    expect(createInvoiceMock).toHaveBeenCalledTimes(1);
-    expect(createInvoiceMock.mock.calls[0][0]).toMatchObject({
+    expect(mocks.createInvoiceMock).toHaveBeenCalledTimes(1);
+    expect(mocks.createInvoiceMock.mock.calls[0][0]).toMatchObject({
       clientName: 'Acme Corp',
       customerId: '42',
     });
+  });
+
+  it('preserves the cloned line tax rate and percentage discount', async () => {
+    mocks.routeSearch = { clone: 'INV-9', client: undefined };
+    mocks.sourceInvoice = {
+      id: 'INV-9',
+      client: 'Source Client',
+      clientEmail: 'source@example.test',
+      amount: 90,
+      currency: 'USD',
+      paid: 0,
+      status: 'Sent',
+      issuedDate: '2026-08-01',
+      dueDate: '2026-08-31',
+      notes: '',
+      discount: 10,
+      discountType: 'percentage',
+      items: [
+        {
+          id: 'source-1',
+          description: 'Taxed line',
+          quantity: 1,
+          unitPrice: 100,
+          taxRate: 17.5,
+        },
+      ],
+    };
+
+    render(<NewInvoice />);
+    await screen.findByText('Source Client');
+
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Save as Draft/ }));
+
+    expect(mocks.createInvoiceMock.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({
+        discountType: 'percentage',
+        discountValue: 10,
+        items: [expect.objectContaining({ taxRate: 17.5 })],
+      })
+    );
   });
 });

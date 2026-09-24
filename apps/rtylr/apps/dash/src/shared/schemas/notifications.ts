@@ -13,6 +13,9 @@ export const notificationSchema = z.object({
   // arrives without the key. Absence means unread, not invalid.
   read: z.boolean().default(false),
   createdAt: z.string(),
+  // The Hub contract calls this field `link`; keep `href` as a compatibility
+  // alias for older cached responses while the UI migrates to the contract.
+  link: z.string().optional(),
   href: z.string().optional(),
 });
 

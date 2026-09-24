@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { useUserStore } from '@voxire/auth';
 import { createOneKitClient } from '@voxire/api';
 import { X, Clock, Zap } from 'lucide-react';
 import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/client';
@@ -15,28 +16,75 @@ function daysLeft(trialEndsAt: string | null): number {
   return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000));
 }
 
-const DISMISSED_KEY = 'trial_banner_dismissed_date';
+const DISMISSED_KEY_PREFIX = 'trial_banner_dismissed_date';
+
+function nonEmptyString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value : null;
+}
 
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
   const { t } = useTranslation();
-  const today = todayIso();
-  const [dismissed, setDismissed] = useState(() => readLocalStorage(DISMISSED_KEY) === today);
+  const user = useUserStore((state) => state.user);
+  const [today, setToday] = useState(todayIso);
+  const [dismissedScope, setDismissedScope] = useState<string | null>(null);
+  const [dismissedDate, setDismissedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    let timeout: number | undefined;
+    const refresh = (): void => setToday(todayIso());
+    const schedule = (): void => {
+      const now = new Date();
+      const nextMidnight = new Date(now);
+      nextMidnight.setHours(24, 0, 0, 0);
+      timeout = window.setTimeout(
+        () => {
+          refresh();
+          schedule();
+        },
+        Math.max(1000, nextMidnight.getTime() - now.getTime())
+      );
+    };
+
+    schedule();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      if (timeout !== undefined) window.clearTimeout(timeout);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, []);
+
+  const userId = nonEmptyString(user?.id) ?? nonEmptyString(user?.userId);
+  const businessId =
+    nonEmptyString(user?.effectiveAccess?.businessId) ??
+    nonEmptyString(user?.businessId) ??
+    nonEmptyString(user?.business_id);
+  const dismissalScope = userId
+    ? `${DISMISSED_KEY_PREFIX}:${userId}:${businessId ?? 'business'}`
+    : null;
+  const dismissed =
+    dismissalScope !== null &&
+    ((dismissedScope === dismissalScope && dismissedDate === today) ||
+      readLocalStorage(dismissalScope) === today);
 
   const { data } = useQuery({
-    queryKey: ['subscription-banner'],
+    queryKey: ['subscription-banner', dismissalScope],
     queryFn: () => subscriptionClient.getMySubscription({}),
     select: (d) => d.subscription,
+    enabled: dismissalScope !== null,
     staleTime: 5 * 60 * 1000,
   });
 
-  if (!data || data.status !== 'trial' || dismissed) return null;
+  if (dismissalScope === null || !data || data.status !== 'trial' || dismissed) return null;
 
   const days = daysLeft(data.trialEndsAt ?? null);
   if (days > 7) return null;
 
   const dismiss = (): void => {
-    writeLocalStorage(DISMISSED_KEY, today);
-    setDismissed(true);
+    writeLocalStorage(dismissalScope, today);
+    setDismissedScope(dismissalScope);
+    setDismissedDate(today);
   };
 
   return (

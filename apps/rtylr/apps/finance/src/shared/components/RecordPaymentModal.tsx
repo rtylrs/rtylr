@@ -7,7 +7,7 @@ import Modal from './Modal';
 import CurrencyInput from './CurrencyInput';
 import { inputStyle, primaryBtn, ghostBtn, labelStyle } from '../lib/tokens';
 import { useRecordPayment } from '../../features/invoices/useInvoices';
-import { formatMoney } from '../lib/money';
+import { formatMoney, majorToMinor, minorToMajor, type Currency } from '../lib/money';
 import { todayIso } from '../lib/date';
 
 interface RecordPaymentModalProps {
@@ -39,34 +39,44 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   onRecorded,
 }) => {
   const { t } = useTranslation();
-  const [value, setValue] = useState(amount);
+  const resolvedCurrency = (currency || 'USD') as Currency;
+  const [value, setValue] = useState(() => majorToMinor(amount, resolvedCurrency));
   const [method, setMethod] = useState(METHODS[0]);
   const [date, setDate] = useState(todayIso());
   const [reference, setReference] = useState('');
   const recordPayment = useRecordPayment();
+
+  React.useEffect(() => {
+    if (open) setValue(majorToMinor(amount, resolvedCurrency));
+  }, [amount, open, resolvedCurrency]);
 
   const handle = (): void => {
     if (value <= 0) {
       toast.error(t('bankAccounts.payment.amountPositive'));
       return;
     }
+    if (value > majorToMinor(amount, resolvedCurrency)) {
+      toast.error(t('bankAccounts.payment.amountExceedsDue'));
+      return;
+    }
     if (!date || !reference.trim()) {
       toast.error(t('bankAccounts.payment.dateAndReferenceRequired'));
       return;
     }
+    const majorAmount = minorToMajor(value, resolvedCurrency);
     recordPayment.mutate(
       {
         id: invoiceId,
-        amount: value,
-        currency: currency || 'USD',
+        amount: majorAmount,
+        currency: resolvedCurrency,
         paymentDate: date,
         method,
         reference: reference.trim(),
       },
       {
         onSuccess: () => {
-          onRecorded?.(value);
-          toast.success(`Recorded ${formatMoney(value)} payment`);
+          onRecorded?.(majorAmount);
+          toast.success(`Recorded ${formatMoney(majorAmount, resolvedCurrency)} payment`);
           onClose();
         },
         onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to record payment')),
@@ -105,7 +115,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>{t('common.amount')}</label>
-          <CurrencyInput value={value} onChange={setValue} />
+          <CurrencyInput value={value} currency={resolvedCurrency} onChange={setValue} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>{t('bankAccounts.payment.method')}</label>

@@ -20,6 +20,8 @@ interface TimePanelProps {
   canLog: boolean;
   /** Logging against another person needs "manage team time". */
   canLogForOthers: boolean;
+  /** Deleting a time entry is a project-admin operation on the server. */
+  canDelete: boolean;
   currentUserId: string | null;
 }
 
@@ -39,6 +41,7 @@ const TimePanel = ({
   estimateHours,
   canLog,
   canLogForOthers,
+  canDelete,
   currentUserId,
 }: TimePanelProps): React.JSX.Element => {
   const { t, i18n } = useTranslation();
@@ -52,6 +55,10 @@ const TimePanel = ({
   const [formOpen, setFormOpen] = useState(false);
   const [duration, setDuration] = useState('');
   const [description, setDescription] = useState('');
+  const currentTaskIdRef = useRef(taskId);
+  currentTaskIdRef.current = taskId;
+  const submissionGenerationRef = useRef(0);
+  const pendingTaskIdsRef = useRef(new Set<string>());
   // Wraps whichever trigger is currently mounted - the plain "log time"
   // button, or the shared EmptyState's own action button when the list is
   // empty. The shared component exposes no ref of its own, so focus is
@@ -61,7 +68,10 @@ const TimePanel = ({
 
   const logs = data?.timeLogs ?? [];
   const totalMinutes = logs.reduce((sum, l) => sum + l.durationMinutes, 0);
-  const estimateMinutes = estimateHours != null ? Math.round(estimateHours * 60) : null;
+  const estimateMinutes =
+    estimateHours != null && Number.isFinite(estimateHours) && estimateHours > 0
+      ? Math.round(estimateHours * 60)
+      : null;
 
   const nameFor = useMemo(() => {
     const byId = new Map((team ?? []).map((m) => [m.id, m.name]));
@@ -70,11 +80,15 @@ const TimePanel = ({
 
   // The mutation's own in-flight variables are the optimistic row. Holding a
   // duplicate copy in local state would leave a phantom entry behind whenever
-  // the mutation settled through a path this component did not observe.
-  const pendingMinutes =
-    logTime.isPending && logTime.variables ? logTime.variables.duration_minutes : null;
-  const pendingDescription =
-    logTime.isPending && logTime.variables ? logTime.variables.description : undefined;
+  // the mutation settled through a path this component did not observe. A
+  // mutation for a previous task must not be rendered under the current task.
+  const pendingTaskId = logTime.variables ? String(logTime.variables.task_id) : null;
+  const isCurrentTaskPending =
+    pendingTaskIdsRef.current.has(taskId) || (logTime.isPending && pendingTaskId === taskId);
+  const pendingMinutes = isCurrentTaskPending
+    ? (logTime.variables?.duration_minutes ?? null)
+    : null;
+  const pendingDescription = isCurrentTaskPending ? logTime.variables?.description : undefined;
   // Drives both the empty-state illustration below and whether the regular
   // "log time" trigger also renders - showing both would just be the same
   // action offered twice.
@@ -92,6 +106,16 @@ const TimePanel = ({
     }
   }, [formOpen]);
 
+  // The drawer can swap tasks without remounting this panel. Do not carry a
+  // draft, open form, or an old submission callback into the new task.
+  useEffect(() => {
+    submissionGenerationRef.current += 1;
+    restoreFocus.current = false;
+    setFormOpen(false);
+    setDuration('');
+    setDescription('');
+  }, [taskId]);
+
   const closeForm = (): void => {
     restoreFocus.current = true;
     setFormOpen(false);
@@ -101,7 +125,16 @@ const TimePanel = ({
 
   const submit = (): void => {
     const minutes = parseDurationInput(duration);
-    if (minutes === null) return;
+    if (
+      minutes === null ||
+      pendingTaskIdsRef.current.has(taskId) ||
+      (logTime.isPending && pendingTaskId === taskId)
+    ) {
+      return;
+    }
+
+    const submissionId = ++submissionGenerationRef.current;
+    pendingTaskIdsRef.current.add(taskId);
     logTime.mutate(
       {
         task_id: Number(taskId),
@@ -109,10 +142,22 @@ const TimePanel = ({
         description: description.trim() || undefined,
       },
       {
-        onSuccess: () => closeForm(),
+        onSuccess: () => {
+          // A late response for a task the user has since left (or revisited)
+          // must not close a newer form for the current task.
+          if (
+            currentTaskIdRef.current === taskId &&
+            submissionGenerationRef.current === submissionId
+          ) {
+            closeForm();
+          }
+        },
         // On failure the form stays open with the values still in it. An entry
         // that vanished silently is the one outcome worth guarding against.
         onError: () => undefined,
+        onSettled: () => {
+          pendingTaskIdsRef.current.delete(taskId);
+        },
       }
     );
   };
@@ -235,11 +280,10 @@ const TimePanel = ({
         <ul className="mt-2 space-y-1">
           {logs.map((log) => {
             const authorName = nameFor(log.userId);
-            // Deleting is gated on the same permission as logging, not on
-            // ownership alone: a view-only user who could delete but not add
-            // would be a strictly stranger permission than either.
-            const canDelete =
-              canLog && currentUserId != null && String(log.userId) === currentUserId;
+            // Ownership is necessary but not sufficient: the server also
+            // requires project-admin authorization.
+            const canDeleteEntry =
+              canDelete && canLog && currentUserId != null && String(log.userId) === currentUserId;
             // flowApi substitutes '-' when a description is omitted, because
             // the contract marks it @required. Do not render the placeholder.
             const body = log.description === '-' ? '' : log.description;
@@ -268,7 +312,7 @@ const TimePanel = ({
                     {formatEntryTimestamp(log.loggedAt || log.createdAt, i18n.language)}
                   </p>
                 </div>
-                {canDelete && (
+                {canDeleteEntry && (
                   <button
                     type="button"
                     onClick={() => deleteTimeLog.mutate({ id: log.id, taskId })}
@@ -337,6 +381,7 @@ const TimePanel = ({
             hint={t('flow.time.durationHint')}
             invalidMessage={t('flow.time.durationInvalid')}
             autoFocus
+            disabled={isCurrentTaskPending}
           />
 
           {/* The create RPC has no date field, so this is fixed to today and
@@ -383,13 +428,14 @@ const TimePanel = ({
               id={`time-description-${taskId}`}
               type="text"
               value={description}
+              disabled={isCurrentTaskPending}
               onChange={(e) => setDescription(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   submit();
                 }
-                if (e.key === 'Escape') {
+                if (e.key === 'Escape' && !isCurrentTaskPending) {
                   e.preventDefault();
                   closeForm();
                 }
@@ -420,7 +466,7 @@ const TimePanel = ({
             <button
               type="button"
               onClick={submit}
-              disabled={parsedPreview === null || logTime.isPending}
+              disabled={parsedPreview === null || isCurrentTaskPending}
               className="flow-focus min-h-[44px] flex-1 rounded-sm px-3 text-meta font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
@@ -431,7 +477,8 @@ const TimePanel = ({
             <button
               type="button"
               onClick={closeForm}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-meta md:min-h-0 md:py-1.5"
+              disabled={isCurrentTaskPending}
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-meta disabled:opacity-40 md:min-h-0 md:py-1.5"
               style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
             >
               {t('flow.time.cancel')}
@@ -474,7 +521,9 @@ const EstimateBar = ({
   label,
   overLabel,
   percentLabel,
-}: EstimateBarProps): React.JSX.Element => {
+}: EstimateBarProps): React.JSX.Element | null => {
+  if (!Number.isFinite(estimateMinutes) || estimateMinutes <= 0) return null;
+
   const percent = Math.round((loggedMinutes / estimateMinutes) * 100);
   const over = loggedMinutes > estimateMinutes;
   const tone = over ? 'var(--flow-capacity-over)' : 'var(--flow-capacity-at)';
