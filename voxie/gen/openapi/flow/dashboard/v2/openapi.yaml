@@ -47,6 +47,12 @@ components:
                         my_tasks lists tasks assigned to the caller across their visible
                         projects. With workspaces gone there is exactly one scope, so v1's
                         workspace-scoped my-tasks concern dissolves.
+            required:
+                - open_tasks
+                - in_progress_tasks
+                - completed_this_week
+                - overdue_tasks
+                - my_tasks
         flow.dashboard.v2.DashboardTask:
             type: object
             properties:
@@ -78,6 +84,15 @@ components:
                 assignee_initials:
                     type: string
                     description: assignee_initials are two-letter uppercase initials. Empty if unassigned.
+            required:
+                - id
+                - title
+                - status
+                - priority
+                - project_name
+                - project_color
+                - assignee_name
+                - assignee_initials
             description: |-
                 DashboardTask is the compact task shape the dashboard's my-tasks widget
                 renders. v1 reused the fat Task message from the task domain; with both

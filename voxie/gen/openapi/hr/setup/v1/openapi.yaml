@@ -40,6 +40,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.setup.v1.SetupWizardStepPayload'
                     description: The step after being marked complete.
+            required:
+                - step
         hr.setup.v1.SetupWizardStepPayload:
             type: object
             properties:
@@ -66,4 +68,10 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this step record was last updated.
+            required:
+                - id
+                - owner_id
+                - step_key
+                - created_at
+                - updated_at
             description: SetupWizardStepPayload is a single step in the HR setup wizard.

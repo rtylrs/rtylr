@@ -47,6 +47,7 @@ components:
                 reason:
                     type: string
             required:
+                - order_id
                 - discount_type
                 - discount_value
                 - reason
@@ -55,3 +56,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

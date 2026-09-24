@@ -67,6 +67,8 @@ components:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.financial.v1.GetCashFlowAnalyticsResponse:
             type: object
             properties:
@@ -74,6 +76,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.financial.v1.CashFlowAnalytics'
                     description: analytics is the analytics value for this contract.
+            required:
+                - analytics
         insights.financial.v1.CashFlowAnalytics:
             type: object
             properties:
@@ -94,6 +98,11 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.financial.v1.CashFlowPoint'
                     description: trend is the trend value for this contract.
+            required:
+                - inflows
+                - outflows
+                - net
+                - trend
         insights.financial.v1.CashFlowPoint:
             type: object
             properties:
@@ -112,12 +121,19 @@ components:
                     type: number
                     format: double
                     description: net is the net value for this contract.
+            required:
+                - date
+                - inflow
+                - outflow
+                - net
         insights.financial.v1.GetExpenseAnalyticsRequest:
             type: object
             properties:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.financial.v1.GetExpenseAnalyticsResponse:
             type: object
             properties:
@@ -125,6 +141,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.financial.v1.ExpenseAnalytics'
                     description: analytics is the analytics value for this contract.
+            required:
+                - analytics
         insights.financial.v1.ExpenseAnalytics:
             type: object
             properties:
@@ -146,6 +164,11 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.financial.v1.ExpensePoint'
                     description: trend is the trend value for this contract.
+            required:
+                - total
+                - change
+                - by_category
+                - trend
         insights.financial.v1.ExpenseByCategory:
             type: object
             properties:
@@ -168,6 +191,12 @@ components:
                     type: number
                     format: double
                     description: utilization is the utilization value for this contract.
+            required:
+                - category
+                - amount
+                - percentage
+                - budget
+                - utilization
         insights.financial.v1.ExpensePoint:
             type: object
             properties:
@@ -178,6 +207,9 @@ components:
                     type: number
                     format: double
                     description: amount is the amount value for this contract.
+            required:
+                - date
+                - amount
         insights.financial.v1.GetInvoiceAgingRequest:
             type: object
         insights.financial.v1.GetInvoiceAgingResponse:
@@ -187,6 +219,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.financial.v1.InvoiceAging'
                     description: aging is the aging value for this contract.
+            required:
+                - aging
         insights.financial.v1.InvoiceAging:
             type: object
             properties:
@@ -199,6 +233,9 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.financial.v1.InvoiceAgingBucket'
                     description: buckets is the buckets value for this contract.
+            required:
+                - total_outstanding
+                - buckets
         insights.financial.v1.InvoiceAgingBucket:
             type: object
             properties:
@@ -215,3 +252,7 @@ components:
                     type: number
                     format: double
                     description: amount is the amount value for this contract.
+            required:
+                - bucket
+                - count
+                - amount

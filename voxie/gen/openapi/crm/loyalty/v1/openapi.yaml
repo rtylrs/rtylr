@@ -181,6 +181,8 @@ components:
                 config:
                     allOf:
                         - $ref: '#/components/schemas/crm.loyalty.v1.LoyaltyConfig'
+            required:
+                - config
         crm.loyalty.v1.LoyaltyConfig:
             type: object
             properties:
@@ -227,6 +229,22 @@ components:
                     format: int64
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - is_enabled
+                - points_per_currency_unit
+                - currency_per_point
+                - bronze_min
+                - silver_min
+                - gold_min
+                - platinum_min
+                - bronze_discount_pct
+                - silver_discount_pct
+                - gold_discount_pct
+                - platinum_discount_pct
+                - points_expiry_days
+                - updated_at
             description: LoyaltyConfig is a business's loyalty program configuration.
         crm.loyalty.v1.UpdateLoyaltyConfigRequest:
             type: object
@@ -278,6 +296,7 @@ components:
                     type: string
                     format: int64
             required:
+                - is_enabled
                 - points_per_currency_unit
                 - currency_per_point
                 - bronze_min
@@ -294,6 +313,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         crm.loyalty.v1.ListLoyaltyTiersRequest:
             type: object
         crm.loyalty.v1.ListLoyaltyTiersResponse:
@@ -303,6 +324,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/crm.loyalty.v1.LoyaltyTier'
+            required:
+                - tiers
         crm.loyalty.v1.LoyaltyTier:
             type: object
             properties:
@@ -329,6 +352,16 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - min_points
+                - discount_pct
+                - perks
+                - sort_order
+                - created_at
+                - updated_at
             description: LoyaltyTier is a spend-based tier with an associated discount.
         crm.loyalty.v1.CreateLoyaltyTierRequest:
             type: object
@@ -366,6 +399,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - tier_id
+                - message
         crm.loyalty.v1.UpdateLoyaltyTierRequest:
             type: object
             properties:
@@ -376,6 +412,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyTierBody'
+            required:
+                - id
+                - body
         crm.loyalty.v1.UpdateLoyaltyTierBody:
             type: object
             properties:
@@ -409,6 +448,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         crm.loyalty.v1.ListLoyaltyTransactionsRequest:
             type: object
             properties:
@@ -422,6 +463,10 @@ components:
                 page_size:
                     type: string
                     format: int64
+            required:
+                - customer_id
+                - page
+                - page_size
         crm.loyalty.v1.ListLoyaltyTransactionsResponse:
             type: object
             properties:
@@ -438,6 +483,11 @@ components:
                 page_size:
                     type: string
                     format: int64
+            required:
+                - transactions
+                - total
+                - page
+                - page_size
         crm.loyalty.v1.LoyaltyTransaction:
             type: object
             properties:
@@ -470,6 +520,17 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - customer_id
+                - type
+                - points
+                - balance_before
+                - balance_after
+                - description
+                - reference_type
+                - created_at
             description: LoyaltyTransaction is a single points award or redemption event.
         crm.loyalty.v1.AwardPointsRequest:
             type: object
@@ -499,6 +560,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         crm.loyalty.v1.RedeemPointsRequest:
             type: object
             properties:
@@ -527,3 +590,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

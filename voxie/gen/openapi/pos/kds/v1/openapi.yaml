@@ -63,6 +63,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.kds.v1.KDSOrder'
+            required:
+                - orders
         pos.kds.v1.KDSOrder:
             type: object
             properties:
@@ -90,6 +92,16 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.kds.v1.KDSItem'
+            required:
+                - id
+                - order_number
+                - type
+                - status
+                - table_id
+                - customer_name
+                - kitchen_notes
+                - created_at
+                - items
             description: KDSOrder is an order shown on the kitchen display.
         pos.kds.v1.KDSItem:
             type: object
@@ -110,6 +122,13 @@ components:
                 status:
                     type: string
                     description: status is the current lifecycle state.
+            required:
+                - id
+                - order_id
+                - name
+                - quantity
+                - notes
+                - status
             description: KDSItem is a single line item on a kitchen display order.
         pos.kds.v1.UpdateKDSItemStatusRequest:
             type: object
@@ -128,6 +147,10 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.kds.v1.UpdateKDSItemStatusBody'
                     description: body carries the new KDS item status bound from the HTTP payload.
+            required:
+                - order_id
+                - item_id
+                - body
         pos.kds.v1.UpdateKDSItemStatusBody:
             type: object
             properties:
@@ -141,3 +164,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

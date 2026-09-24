@@ -36,13 +36,13 @@ return violations;
 }
 
 export interface QueryRequest {
-slug?: string;
-careerSlug?: string;
-careerId?: number;
-submissionId?: number;
-status?: string;
-limit?: number;
-offset?: number;
+slug?: string | undefined;
+careerSlug?: string | undefined;
+careerId?: number | undefined;
+submissionId?: number | undefined;
+status?: string | undefined;
+limit?: number | undefined;
+offset?: number | undefined;
 }
 
 export function decodeQueryRequest(v: any): QueryRequest {
@@ -83,7 +83,7 @@ return violations;
 }
 
 export interface BodyRequest {
-body?: unknown;
+body?: unknown | undefined;
 }
 
 export function decodeBodyRequest(v: any): BodyRequest {
@@ -106,7 +106,7 @@ return violations;
 }
 
 export interface IdQueryRequest {
-id?: string;
+id?: string | undefined;
 }
 
 export function decodeIdQueryRequest(v: any): IdQueryRequest {

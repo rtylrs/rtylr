@@ -45,6 +45,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/booking.reminder.v1.Reminder'
+            required:
+                - reminders
         booking.reminder.v1.Reminder:
             type: object
             properties:
@@ -68,6 +70,15 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - business_id
+                - appointment_id
+                - type
+                - scheduled_at
+                - sent_at
+                - created_at
         booking.reminder.v1.CreateReminderRequest:
             type: object
             properties:
@@ -91,3 +102,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message

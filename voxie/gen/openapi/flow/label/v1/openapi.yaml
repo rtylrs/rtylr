@@ -155,6 +155,12 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - workspace_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.label.v1.ListLabelsResponse:
             type: object
             properties:
@@ -166,6 +172,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - labels
+                - pagination
         flow.label.v1.Label:
             type: object
             properties:
@@ -186,6 +195,12 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - workspace_id
+                - name
+                - color
+                - created_at
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -211,6 +226,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.label.v1.CreateLabelRequest:
             type: object
@@ -237,6 +259,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.label.v1.Label'
                     description: label is the label value for this contract.
+            required:
+                - label
         flow.label.v1.UpdateLabelRequest:
             type: object
             properties:
@@ -252,6 +276,7 @@ components:
                     type: string
                     description: color is the label color.
             required:
+                - id
                 - name
                 - color
         flow.label.v1.UpdateLabelResponse:
@@ -260,6 +285,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.label.v1.DeleteLabelRequest:
             type: object
             properties:
@@ -268,12 +295,16 @@ components:
                     type: string
                     format: int64
                     description: id is the label identifier.
+            required:
+                - id
         flow.label.v1.DeleteLabelResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.label.v1.SetTaskLabelsRequest:
             type: object
             properties:
@@ -288,8 +319,11 @@ components:
                         format: int64
             required:
                 - task_id
+                - label_ids
         flow.label.v1.SetTaskLabelsResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

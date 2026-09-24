@@ -164,6 +164,9 @@ components:
                 product_id:
                     type: string
                     format: int64
+            required:
+                - branch_id
+                - product_id
         pos.stock.v1.ListStockMovementsResponse:
             type: object
             properties:
@@ -171,6 +174,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.stock.v1.StockMovement'
+            required:
+                - movements
         pos.stock.v1.StockMovement:
             type: object
             properties:
@@ -205,6 +210,14 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - product_id
+                - type
+                - quantity
+                - created_at
             description: StockMovement is a recorded inventory movement.
         pos.stock.v1.ReceiveStockRequest:
             type: object
@@ -241,6 +254,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - movement_id
+                - message
         pos.stock.v1.AdjustStockRequest:
             type: object
             properties:
@@ -266,6 +282,7 @@ components:
                 - branch_id
                 - product_id
                 - quantity
+                - note
                 - employee_id
         pos.stock.v1.AdjustStockResponse:
             type: object
@@ -275,6 +292,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - movement_id
+                - message
         pos.stock.v1.WasteStockRequest:
             type: object
             properties:
@@ -310,6 +330,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - movement_id
+                - message
         pos.stock.v1.TransferStockRequest:
             type: object
             properties:
@@ -350,12 +373,17 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - movement_id
+                - message
         pos.stock.v1.ListInventoryRequest:
             type: object
             properties:
                 branch_id:
                     type: string
                     format: int64
+            required:
+                - branch_id
         pos.stock.v1.ListInventoryResponse:
             type: object
             properties:
@@ -363,6 +391,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.stock.v1.BranchInventory'
+            required:
+                - inventory
         pos.stock.v1.BranchInventory:
             type: object
             properties:
@@ -410,6 +440,21 @@ components:
                     type: number
                     format: double
                     description: low_stock_threshold is the ERP product low-stock threshold.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - product_id
+                - quantity
+                - reorder_point
+                - reorder_quantity
+                - updated_at
+                - item_id
+                - name
+                - sku
+                - unit
+                - current_qty
+                - low_stock_threshold
             description: BranchInventory is a per-branch inventory row for a product.
         pos.stock.v1.LowStockRequest:
             type: object
@@ -427,3 +472,5 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.stock.v1.BranchInventory'
+            required:
+                - items

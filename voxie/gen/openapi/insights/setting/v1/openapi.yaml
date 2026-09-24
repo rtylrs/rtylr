@@ -47,6 +47,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.setting.v1.InsightsSettings'
                     description: settings is the settings value for this contract.
+            required:
+                - settings
         insights.setting.v1.InsightsSettings:
             type: object
             properties:
@@ -71,6 +73,12 @@ components:
                     items:
                         type: string
                     description: favorite_reports is the favorite reports value for this contract.
+            required:
+                - default_period
+                - currency
+                - compare_previous
+                - dashboard_widgets
+                - favorite_reports
         insights.setting.v1.UpdateInsightsSettingsRequest:
             type: object
             properties:
@@ -87,3 +95,5 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.setting.v1.InsightsSettings'
                     description: settings is the settings value for this contract.
+            required:
+                - settings

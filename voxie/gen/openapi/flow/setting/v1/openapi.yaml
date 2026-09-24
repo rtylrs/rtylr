@@ -56,6 +56,13 @@ components:
                 sidebar_preferences:
                     type: string
                     description: JSON-encoded per-user Flow sidebar layout and visibility preferences.
+            required:
+                - task_assigned
+                - task_comments
+                - mentions
+                - status_changes
+                - weekly_digest
+                - email_notifications
         flow.setting.v1.UpdateUserSettingsRequest:
             type: object
             properties:

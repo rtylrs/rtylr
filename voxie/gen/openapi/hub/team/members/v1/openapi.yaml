@@ -86,6 +86,9 @@ components:
                     type: integer
                     format: int32
                     description: page_size is the maximum number of members per page; server caps at 500.
+            required:
+                - page
+                - page_size
         hub.team.members.v1.ListTeamResponse:
             type: object
             properties:
@@ -97,6 +100,9 @@ components:
                     type: integer
                     format: int32
                     description: total is the total number of members across all pages, for pagination math.
+            required:
+                - users
+                - total
         hub.team.members.v1.StaffUserPayload:
             type: object
             properties:
@@ -131,6 +137,15 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hub.user.v1.EffectiveAccess'
                     description: Server-resolved effective access.
+            required:
+                - id
+                - email
+                - full_name
+                - created_at
+                - apps
+                - role
+                - is_active
+                - app_assignments
         hub.user.v1.AppRoleAssignment:
             type: object
             properties:
@@ -159,6 +174,12 @@ components:
                 group_id:
                     type: string
                     description: Group target when the assignment is group-derived.
+            required:
+                - app_id
+                - role_ids
+                - assignment_source
+                - status
+                - scopes
         hub.user.v1.RoleScope:
             type: object
             properties:
@@ -168,6 +189,9 @@ components:
                 scope_id:
                     type: string
                     description: Tenant-owned resource identifier.
+            required:
+                - scope_type
+                - scope_id
         hub.user.v1.EffectiveAccess:
             type: object
             properties:
@@ -210,6 +234,15 @@ components:
                     type: string
                     format: int64
                     description: Monotonic authorization version for cache refresh.
+            required:
+                - business_id
+                - dash_permissions
+                - subscribed_apps
+                - licenses
+                - apps
+                - is_owner
+                - is_admin
+                - authorization_version
         hub.user.v1.LicenseAssignment:
             type: object
             properties:
@@ -231,6 +264,11 @@ components:
                 revoked_at:
                     type: string
                     description: Time the license was revoked, when revoked.
+            required:
+                - app_id
+                - status
+                - assignment_source
+                - granted_at
         hub.user.v1.EffectiveAppAccess:
             type: object
             properties:
@@ -274,6 +312,15 @@ components:
                     additionalProperties:
                         type: string
                     description: Permission-to-role source explanation.
+            required:
+                - app_id
+                - licensed
+                - has_access
+                - role_ids
+                - permissions
+                - scopes
+                - sources
+                - permission_sources
         hub.team.members.v1.GetMemberRequest:
             type: object
             properties:
@@ -282,12 +329,16 @@ components:
                     type: string
                     format: int64
                     description: Identifies the member to fetch.
+            required:
+                - user_id
         hub.team.members.v1.GetMemberResponse:
             type: object
             properties:
                 user:
                     allOf:
                         - $ref: '#/components/schemas/hub.team.members.v1.StaffUserWithGroups'
+            required:
+                - user
         hub.team.members.v1.StaffUserWithGroups:
             type: object
             properties:
@@ -327,6 +378,16 @@ components:
                     items:
                         $ref: '#/components/schemas/hub.team.groups.v1.GroupSummary'
                     description: Groups the staff user belongs to.
+            required:
+                - id
+                - email
+                - full_name
+                - created_at
+                - apps
+                - role
+                - is_active
+                - app_assignments
+                - groups
         hub.team.groups.v1.GroupSummary:
             type: object
             properties:
@@ -337,6 +398,10 @@ components:
                     type: string
                 color:
                     type: string
+            required:
+                - id
+                - name
+                - color
         hub.team.members.v1.RemoveMemberRequest:
             type: object
             properties:
@@ -344,8 +409,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - user_id
         hub.team.members.v1.RemoveMemberResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

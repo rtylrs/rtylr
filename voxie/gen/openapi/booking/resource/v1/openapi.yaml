@@ -90,6 +90,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/booking.resource.v1.Resource'
+            required:
+                - resources
         booking.resource.v1.Resource:
             type: object
             properties:
@@ -113,6 +115,15 @@ components:
                     type: boolean
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - business_id
+                - name
+                - type
+                - capacity
+                - is_active
+                - created_at
         booking.resource.v1.CreateResourceRequest:
             type: object
             properties:
@@ -127,6 +138,9 @@ components:
                     type: boolean
             required:
                 - name
+                - type
+                - capacity
+                - is_active
         booking.resource.v1.CreateResourceResponse:
             type: object
             properties:
@@ -135,6 +149,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message
         booking.resource.v1.UpdateResourceRequest:
             type: object
             properties:
@@ -151,11 +168,19 @@ components:
                     format: int32
                 is_active:
                     type: boolean
+            required:
+                - id
+                - name
+                - type
+                - capacity
+                - is_active
         booking.resource.v1.UpdateResourceResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         booking.resource.v1.DeleteResourceRequest:
             type: object
             properties:
@@ -163,8 +188,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         booking.resource.v1.DeleteResourceResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

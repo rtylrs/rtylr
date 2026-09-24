@@ -20,7 +20,7 @@ return violations;
 }
 
 export interface MarkOnboardedResponse {
-message?: string;
+message?: string | undefined;
 }
 
 export function decodeMarkOnboardedResponse(v: any): MarkOnboardedResponse {

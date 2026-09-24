@@ -20,11 +20,11 @@ return violations;
 }
 
 export interface GetFinanceDashboardResponse {
-totalRevenueMtd?: number;
-totalReceivable?: number;
-overdueAmount?: number;
-totalExpensesMtd?: number;
-netProfitMtd?: number;
+totalRevenueMtd?: number | undefined;
+totalReceivable?: number | undefined;
+overdueAmount?: number | undefined;
+totalExpensesMtd?: number | undefined;
+netProfitMtd?: number | undefined;
 }
 
 export function decodeGetFinanceDashboardResponse(v: any): GetFinanceDashboardResponse {

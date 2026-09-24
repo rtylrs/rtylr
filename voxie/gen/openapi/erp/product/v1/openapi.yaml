@@ -281,6 +281,11 @@ components:
                     type: integer
                     format: int64
                     description: The number of records to skip.
+            required:
+                - search
+                - category_id
+                - limit
+                - offset
         erp.product.v1.ListProductsResponse:
             type: object
             properties:
@@ -299,6 +304,12 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - products
+                - has_more
+                - page
+                - page_size
+                - total
         erp.product.v1.Product:
             type: object
             properties:
@@ -391,6 +402,41 @@ components:
                     format: int32
                 image_url:
                     type: string
+            required:
+                - id
+                - owner_id
+                - category_id
+                - supplier_id
+                - name
+                - sku
+                - barcode
+                - description
+                - unit
+                - cost_price
+                - sale_price
+                - stock_quantity
+                - low_stock_threshold
+                - reorder_quantity
+                - is_active
+                - track_inventory
+                - created_at
+                - updated_at
+                - business_id
+                - brand_id
+                - compare_at_price
+                - tax_rate
+                - currency
+                - weight
+                - weight_unit
+                - length
+                - width
+                - height
+                - dimension_unit
+                - country_of_origin
+                - hs_code
+                - allow_backorder
+                - lead_time_days
+                - image_url
         erp.product.v1.CreateProductRequest:
             type: object
             properties:
@@ -491,6 +537,28 @@ components:
                 - barcode
                 - description
                 - unit
+                - cost_price
+                - sale_price
+                - low_stock_threshold
+                - reorder_quantity
+                - is_active
+                - track_inventory
+                - stock_quantity
+                - brand_id
+                - compare_at_price
+                - tax_rate
+                - currency
+                - weight
+                - weight_unit
+                - length
+                - width
+                - height
+                - dimension_unit
+                - country_of_origin
+                - hs_code
+                - allow_backorder
+                - lead_time_days
+                - image_url
         erp.product.v1.CreateProductResponse:
             type: object
             properties:
@@ -500,6 +568,9 @@ components:
                 message:
                     type: string
                     description: A human-readable result message.
+            required:
+                - product_id
+                - message
         erp.product.v1.GetProductByBarcodeRequest:
             type: object
             properties:
@@ -513,6 +584,8 @@ components:
                 product:
                     allOf:
                         - $ref: '#/components/schemas/erp.product.v1.Product'
+            required:
+                - product
         erp.product.v1.GetProductRequest:
             type: object
             properties:
@@ -520,12 +593,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.product.v1.GetProductResponse:
             type: object
             properties:
                 product:
                     allOf:
                         - $ref: '#/components/schemas/erp.product.v1.Product'
+            required:
+                - product
         erp.product.v1.GetProductFullRequest:
             type: object
             properties:
@@ -533,12 +610,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.product.v1.GetProductFullResponse:
             type: object
             properties:
                 product:
                     allOf:
                         - $ref: '#/components/schemas/erp.product.v1.FullProduct'
+            required:
+                - product
         erp.product.v1.FullProduct:
             type: object
             properties:
@@ -629,6 +710,41 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - business_id
+                - category_id
+                - supplier_id
+                - name
+                - sku
+                - barcode
+                - description
+                - unit
+                - cost_price
+                - sale_price
+                - stock_quantity
+                - low_stock_threshold
+                - reorder_quantity
+                - is_active
+                - track_inventory
+                - brand_id
+                - compare_at_price
+                - tax_rate
+                - currency
+                - weight
+                - weight_unit
+                - length
+                - width
+                - height
+                - dimension_unit
+                - country_of_origin
+                - hs_code
+                - allow_backorder
+                - lead_time_days
+                - image_url
+                - created_at
+                - updated_at
         erp.product.v1.ListProductAttributesRequest:
             type: object
             properties:
@@ -636,6 +752,8 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.product.v1.ListProductAttributesResponse:
             type: object
             properties:
@@ -643,6 +761,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/erp.product.v1.ProductAttribute'
+            required:
+                - attributes
         erp.product.v1.ProductAttribute:
             type: object
             properties:
@@ -656,6 +776,11 @@ components:
                 position:
                     type: integer
                     format: int32
+            required:
+                - id
+                - name
+                - value
+                - position
         erp.product.v1.UpdateProductRequest:
             type: object
             properties:
@@ -666,6 +791,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/erp.product.v1.UpdateProductBody'
+            required:
+                - id
+                - body
         erp.product.v1.UpdateProductBody:
             type: object
             properties:
@@ -766,11 +894,35 @@ components:
                 - barcode
                 - description
                 - unit
+                - cost_price
+                - sale_price
+                - low_stock_threshold
+                - reorder_quantity
+                - is_active
+                - track_inventory
+                - stock_quantity
+                - brand_id
+                - compare_at_price
+                - tax_rate
+                - currency
+                - weight
+                - weight_unit
+                - length
+                - width
+                - height
+                - dimension_unit
+                - country_of_origin
+                - hs_code
+                - allow_backorder
+                - lead_time_days
+                - image_url
         erp.product.v1.UpdateProductResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         erp.product.v1.DeleteProductRequest:
             type: object
             properties:
@@ -778,11 +930,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.product.v1.DeleteProductResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         erp.product.v1.GetDashboardRequest:
             type: object
         erp.product.v1.GetDashboardResponse:
@@ -815,6 +971,15 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/erp.product.v1.DashboardTopCategory'
+            required:
+                - total_products
+                - low_stock_count
+                - pending_orders
+                - total_suppliers
+                - inventory_value
+                - low_stock_items
+                - recent_orders
+                - top_categories
         erp.product.v1.DashboardLowStockItem:
             type: object
             properties:
@@ -833,6 +998,13 @@ components:
                     format: double
                 warehouse_name:
                     type: string
+            required:
+                - product_id
+                - name
+                - sku
+                - current_stock
+                - reorder_point
+                - warehouse_name
         erp.product.v1.DashboardRecentOrder:
             type: object
             properties:
@@ -850,6 +1022,13 @@ components:
                     format: double
                 created_at:
                     type: string
+            required:
+                - id
+                - po_number
+                - supplier_name
+                - status
+                - total
+                - created_at
         erp.product.v1.DashboardTopCategory:
             type: object
             properties:
@@ -858,6 +1037,9 @@ components:
                 product_count:
                     type: integer
                     format: int32
+            required:
+                - name
+                - product_count
         erp.product.v1.ListReorderSuggestionsRequest:
             type: object
             properties:
@@ -869,6 +1051,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of reorder suggestions to skip.
+            required:
+                - limit
+                - offset
         erp.product.v1.ListReorderSuggestionsResponse:
             type: object
             properties:
@@ -887,6 +1072,12 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - suggestions
+                - has_more
+                - limit
+                - offset
+                - total
         erp.product.v1.ReorderSuggestion:
             type: object
             properties:
@@ -914,6 +1105,16 @@ components:
                     format: int32
                 confidence:
                     type: string
+            required:
+                - product_id
+                - name
+                - sku
+                - current_stock
+                - reorder_point
+                - suggested_quantity
+                - avg_daily_sales
+                - lead_time_days
+                - confidence
         erp.product.v1.ListExpiringItemsRequest:
             type: object
             properties:
@@ -928,6 +1129,10 @@ components:
                     type: integer
                     format: int64
                     description: Number of expiring items to skip.
+            required:
+                - days_ahead
+                - limit
+                - offset
         erp.product.v1.ListExpiringItemsResponse:
             type: object
             properties:
@@ -946,6 +1151,12 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - items
+                - has_more
+                - limit
+                - offset
+                - total
         erp.product.v1.ExpiringItem:
             type: object
             properties:
@@ -965,3 +1176,11 @@ components:
                     format: double
                 warehouse_name:
                     type: string
+            required:
+                - product_id
+                - name
+                - sku
+                - batch_id
+                - expiry_date
+                - quantity
+                - warehouse_name

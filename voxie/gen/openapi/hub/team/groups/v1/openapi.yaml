@@ -189,6 +189,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.team.groups.v1.Group'
+            required:
+                - groups
         hub.team.groups.v1.Group:
             type: object
             properties:
@@ -218,6 +220,16 @@ components:
                 updated_at:
                     type: string
                     description: When the record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - color
+                - resource_permissions
+                - member_count
+                - created_at
+                - updated_at
         hub.team.groups.v1.ResourcePermission:
             type: object
             properties:
@@ -225,6 +237,9 @@ components:
                     type: string
                 permission_level:
                     type: string
+            required:
+                - resource_key
+                - permission_level
         hub.team.groups.v1.CreateGroupRequest:
             type: object
             properties:
@@ -240,12 +255,17 @@ components:
                         $ref: '#/components/schemas/hub.team.groups.v1.ResourcePermission'
             required:
                 - name
+                - description
+                - color
+                - resource_permissions
         hub.team.groups.v1.CreateGroupResponse:
             type: object
             properties:
                 group:
                     allOf:
                         - $ref: '#/components/schemas/hub.team.groups.v1.Group'
+            required:
+                - group
         hub.team.groups.v1.GetGroupDetailRequest:
             type: object
             properties:
@@ -253,12 +273,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.team.groups.v1.GetGroupDetailResponse:
             type: object
             properties:
                 group:
                     allOf:
                         - $ref: '#/components/schemas/hub.team.groups.v1.GroupDetail'
+            required:
+                - group
         hub.team.groups.v1.GroupDetail:
             type: object
             properties:
@@ -292,6 +316,17 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.team.groups.v1.GroupMember'
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - color
+                - resource_permissions
+                - member_count
+                - created_at
+                - updated_at
+                - members
             description: |-
                 GroupDetail mirrors Group with the member list flattened alongside it
                 (the legacy payload embeds the group fields at the top level).
@@ -310,6 +345,11 @@ components:
                 added_at:
                     type: string
                     description: When the member was added to the group.
+            required:
+                - user_id
+                - email
+                - full_name
+                - added_at
         hub.team.groups.v1.UpdateGroupRequest:
             type: object
             properties:
@@ -328,13 +368,19 @@ components:
                     items:
                         $ref: '#/components/schemas/hub.team.groups.v1.ResourcePermission'
             required:
+                - id
                 - name
+                - description
+                - color
+                - resource_permissions
         hub.team.groups.v1.UpdateGroupResponse:
             type: object
             properties:
                 group:
                     allOf:
                         - $ref: '#/components/schemas/hub.team.groups.v1.Group'
+            required:
+                - group
         hub.team.groups.v1.DeleteGroupRequest:
             type: object
             properties:
@@ -342,11 +388,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.team.groups.v1.DeleteGroupResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.team.groups.v1.AddGroupMembersRequest:
             type: object
             properties:
@@ -360,6 +410,9 @@ components:
                         type: string
                         format: int64
                     minItems: 1
+            required:
+                - id
+                - user_ids
         hub.team.groups.v1.AddGroupMembersResponse:
             type: object
             properties:
@@ -369,6 +422,9 @@ components:
                     description: Number of members added.
                 message:
                     type: string
+            required:
+                - added
+                - message
         hub.team.groups.v1.RemoveGroupMemberRequest:
             type: object
             properties:
@@ -380,11 +436,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
+                - user_id
         hub.team.groups.v1.RemoveGroupMemberResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.team.groups.v1.GetUserGroupsRequest:
             type: object
             properties:
@@ -392,6 +453,8 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - user_id
         hub.team.groups.v1.GetUserGroupsResponse:
             type: object
             properties:
@@ -399,6 +462,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.team.groups.v1.GroupSummary'
+            required:
+                - groups
         hub.team.groups.v1.GroupSummary:
             type: object
             properties:
@@ -409,3 +474,7 @@ components:
                     type: string
                 color:
                     type: string
+            required:
+                - id
+                - name
+                - color

@@ -129,6 +129,8 @@ components:
                 config:
                     allOf:
                         - $ref: '#/components/schemas/pos.loyalty.v1.LoyaltyConfig'
+            required:
+                - config
         pos.loyalty.v1.LoyaltyConfig:
             type: object
             properties:
@@ -156,6 +158,15 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - business_id
+                - is_enabled
+                - points_per_dollar
+                - redemption_rate
+                - min_redeem_points
+                - created_at
+                - updated_at
             description: LoyaltyConfig is the loyalty program configuration for a business.
         pos.loyalty.v1.UpdateLoyaltyConfigRequest:
             type: object
@@ -175,19 +186,25 @@ components:
                     type: integer
                     format: int32
             required:
+                - is_enabled
                 - points_per_dollar
+                - redemption_rate
                 - min_redeem_points
         pos.loyalty.v1.UpdateLoyaltyConfigResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         pos.loyalty.v1.ListLoyaltyTransactionsRequest:
             type: object
             properties:
                 customer_id:
                     type: string
                     format: int64
+            required:
+                - customer_id
         pos.loyalty.v1.ListLoyaltyTransactionsResponse:
             type: object
             properties:
@@ -195,6 +212,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.loyalty.v1.LoyaltyTransaction'
+            required:
+                - transactions
         pos.loyalty.v1.LoyaltyTransaction:
             type: object
             properties:
@@ -225,6 +244,16 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - business_id
+                - customer_id
+                - order_id
+                - type
+                - points
+                - balance_after
+                - note
+                - created_at
             description: LoyaltyTransaction is a recorded loyalty points earn or redeem event.
         pos.loyalty.v1.EarnPointsRequest:
             type: object
@@ -253,6 +282,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - transaction_id
+                - message
         pos.loyalty.v1.RedeemPointsRequest:
             type: object
             properties:
@@ -275,6 +307,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - transaction_id
+                - message
         pos.loyalty.v1.GetLoyaltyBalanceRequest:
             type: object
             properties:
@@ -293,3 +328,6 @@ components:
                 balance:
                     type: integer
                     format: int32
+            required:
+                - customer_id
+                - balance

@@ -224,6 +224,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - templates
+                - total
+                - limit
+                - offset
         hr.onboarding.v1.ChecklistTemplatePayload:
             type: object
             properties:
@@ -258,6 +263,14 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - trigger_type
+                - items
+                - created_at
+                - updated_at
             description: ChecklistTemplatePayload is a reusable onboarding/offboarding checklist definition.
         hr.onboarding.v1.ChecklistItemPayload:
             type: object
@@ -298,6 +311,17 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - template_id
+                - title
+                - description
+                - assignee_role
+                - due_offset_days
+                - requires_attachment
+                - created_at
+                - updated_at
             description: ChecklistItemPayload is a single item within a checklist template.
         hr.onboarding.v1.CreateChecklistTemplateRequest:
             type: object
@@ -321,6 +345,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.onboarding.v1.ChecklistTemplatePayload'
                     description: The newly created checklist template.
+            required:
+                - template
         hr.onboarding.v1.UpdateChecklistTemplateRequest:
             type: object
             properties:
@@ -332,6 +358,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hr.onboarding.v1.UpdateChecklistTemplateBody'
+            required:
+                - role_id
+                - body
         hr.onboarding.v1.UpdateChecklistTemplateBody:
             type: object
             properties:
@@ -350,6 +379,8 @@ components:
                 success:
                     type: boolean
                     description: success indicates the checklist template was updated.
+            required:
+                - success
         hr.onboarding.v1.AddItemToChecklistTemplateRequest:
             type: object
             properties:
@@ -375,6 +406,7 @@ components:
                     type: boolean
                     description: requires_attachment indicates whether completion needs an uploaded attachment.
             required:
+                - role_id
                 - title
         hr.onboarding.v1.AddItemToChecklistTemplateResponse:
             type: object
@@ -383,6 +415,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.onboarding.v1.ChecklistItemPayload'
                     description: item is the checklist template item that was created.
+            required:
+                - item
         hr.onboarding.v1.ListEmployeeChecklistsRequest:
             type: object
             properties:
@@ -421,6 +455,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - checklists
+                - total
+                - limit
+                - offset
         hr.onboarding.v1.EmployeeChecklistPayload:
             type: object
             properties:
@@ -457,6 +496,15 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - template_id
+                - triggered_at
+                - items
+                - created_at
+                - updated_at
             description: EmployeeChecklistPayload is a checklist instantiated for a specific employee.
         hr.onboarding.v1.EmployeeChecklistItemPayload:
             type: object
@@ -502,6 +550,16 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_checklist_id
+                - checklist_item_id
+                - assigned_to_employee_id
+                - due_date
+                - status
+                - created_at
+                - updated_at
             description: EmployeeChecklistItemPayload is one instantiated checklist item assigned to an employee.
         hr.onboarding.v1.GetEmployeeChecklistRequest:
             type: object
@@ -511,6 +569,8 @@ components:
                     type: string
                     format: int64
                     description: employee_id is the employee whose checklist should be fetched.
+            required:
+                - employee_id
         hr.onboarding.v1.GetEmployeeChecklistResponse:
             type: object
             properties:
@@ -518,6 +578,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.onboarding.v1.EmployeeChecklistPayload'
                     description: checklist is the employee checklist returned for the path id.
+            required:
+                - checklist
         hr.onboarding.v1.TriggerChecklistRequest:
             type: object
             properties:
@@ -536,6 +598,7 @@ components:
                     pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}$
                     description: trigger_date is the date the checklist starts, formatted as YYYY-MM-DD.
             required:
+                - employee_id
                 - template_id
                 - trigger_date
         hr.onboarding.v1.TriggerChecklistResponse:
@@ -545,6 +608,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.onboarding.v1.EmployeeChecklistPayload'
                     description: The employee checklist that was created.
+            required:
+                - checklist
         hr.onboarding.v1.CompleteChecklistItemRequest:
             type: object
             description: |-
@@ -558,3 +623,5 @@ components:
                 success:
                     type: boolean
                     description: success indicates the checklist item was marked complete.
+            required:
+                - success

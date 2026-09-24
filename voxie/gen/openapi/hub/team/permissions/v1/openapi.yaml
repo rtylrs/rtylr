@@ -61,6 +61,11 @@ components:
                         type: string
                         format: int64
                     description: Groups that provide inherited access.
+            required:
+                - user_id
+                - apps
+                - app_assignments
+                - group_ids
         hub.user.v1.AppRoleAssignment:
             type: object
             properties:
@@ -89,6 +94,12 @@ components:
                 group_id:
                     type: string
                     description: Group target when the assignment is group-derived.
+            required:
+                - app_id
+                - role_ids
+                - assignment_source
+                - status
+                - scopes
         hub.user.v1.RoleScope:
             type: object
             properties:
@@ -98,6 +109,9 @@ components:
                 scope_id:
                     type: string
                     description: Tenant-owned resource identifier.
+            required:
+                - scope_type
+                - scope_id
         hub.team.permissions.v1.UpdatePermissionsResponse:
             type: object
             properties:
@@ -147,6 +161,15 @@ components:
                     type: string
                     format: int64
                     description: Monotonic authorization version for cache refresh.
+            required:
+                - business_id
+                - dash_permissions
+                - subscribed_apps
+                - licenses
+                - apps
+                - is_owner
+                - is_admin
+                - authorization_version
         hub.user.v1.LicenseAssignment:
             type: object
             properties:
@@ -168,6 +191,11 @@ components:
                 revoked_at:
                     type: string
                     description: Time the license was revoked, when revoked.
+            required:
+                - app_id
+                - status
+                - assignment_source
+                - granted_at
         hub.user.v1.EffectiveAppAccess:
             type: object
             properties:
@@ -211,3 +239,12 @@ components:
                     additionalProperties:
                         type: string
                     description: Permission-to-role source explanation.
+            required:
+                - app_id
+                - licensed
+                - has_access
+                - role_ids
+                - permissions
+                - scopes
+                - sources
+                - permission_sources

@@ -118,6 +118,13 @@ components:
                 to_date:
                     type: string
                     description: The inclusive end date filter.
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
+                - from_date
+                - to_date
         finance.journal.v1.ListJournalEntriesResponse:
             type: object
             properties:
@@ -128,6 +135,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - entries
+                - pagination
         finance.journal.v1.JournalEntry:
             type: object
             properties:
@@ -150,6 +160,14 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - number
+                - date
+                - description
+                - lines
+                - status
+                - created_at
         finance.journal.v1.JournalLine:
             type: object
             properties:
@@ -166,6 +184,12 @@ components:
                     format: double
                 description:
                     type: string
+            required:
+                - account_id
+                - account_name
+                - debit
+                - credit
+                - description
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -191,6 +215,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         finance.journal.v1.CreateJournalEntryRequest:
             type: object
@@ -207,12 +238,15 @@ components:
             required:
                 - date
                 - description
+                - lines
         finance.journal.v1.CreateJournalEntryResponse:
             type: object
             properties:
                 entry:
                     allOf:
                         - $ref: '#/components/schemas/finance.journal.v1.JournalEntry'
+            required:
+                - entry
         finance.journal.v1.GetJournalEntryRequest:
             type: object
             properties:
@@ -220,9 +254,13 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         finance.journal.v1.GetJournalEntryResponse:
             type: object
             properties:
                 entry:
                     allOf:
                         - $ref: '#/components/schemas/finance.journal.v1.JournalEntry'
+            required:
+                - entry

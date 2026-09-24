@@ -54,12 +54,15 @@ components:
                 reason:
                     type: string
             required:
+                - order_id
                 - reason
         pos.orders.holds.v1.HoldOrderResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         pos.orders.holds.v1.ListHeldOrdersRequest:
             type: object
         pos.orders.holds.v1.ListHeldOrdersResponse:
@@ -69,6 +72,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.orders.v1.Order'
+            required:
+                - orders
         pos.orders.v1.Order:
             type: object
             properties:
@@ -141,6 +146,32 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.orders.v1.OrderItem'
+            required:
+                - id
+                - owner_id
+                - session_id
+                - table_id
+                - location_id
+                - order_number
+                - type
+                - status
+                - customer_id
+                - customer_name
+                - staff_id
+                - subtotal
+                - discount_amount
+                - tax_amount
+                - total
+                - payment_method
+                - payment_status
+                - amount_paid
+                - change_due
+                - notes
+                - kitchen_notes
+                - created_at
+                - updated_at
+                - paid_at
+                - items
         pos.orders.v1.OrderItem:
             type: object
             properties:
@@ -183,3 +214,18 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - order_id
+                - menu_item_id
+                - name
+                - sku
+                - quantity
+                - unit_price
+                - discount_pct
+                - discount_amount
+                - tax_rate
+                - total
+                - notes
+                - status
+                - created_at

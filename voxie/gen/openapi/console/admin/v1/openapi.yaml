@@ -464,6 +464,8 @@ components:
                 stats:
                     allOf:
                         - $ref: '#/components/schemas/console.admin.v1.Stats'
+            required:
+                - stats
         console.admin.v1.Stats:
             type: object
             properties:
@@ -488,6 +490,14 @@ components:
                 console_admins:
                     type: integer
                     format: int64
+            required:
+                - total_users
+                - banned_users
+                - active_subscriptions
+                - total_businesses
+                - total_grants
+                - manual_addon_grants
+                - console_admins
         console.admin.v1.ListUsersRequest:
             type: object
             properties:
@@ -504,6 +514,11 @@ components:
                     type: string
                 name:
                     type: string
+            required:
+                - limit
+                - offset
+                - email
+                - name
         console.admin.v1.ListUsersResponse:
             type: object
             properties:
@@ -514,6 +529,9 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - users
+                - total
         console.admin.v1.User:
             type: object
             properties:
@@ -537,6 +555,13 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - email
+                - full_name
+                - is_console_admin
+                - is_banned
+                - created_at
         console.admin.v1.GetUserRequest:
             type: object
             properties:
@@ -544,12 +569,16 @@ components:
                     exclusiveMinimum: 0
                     type: integer
                     format: int64
+            required:
+                - id
         console.admin.v1.GetUserResponse:
             type: object
             properties:
                 user:
                     allOf:
                         - $ref: '#/components/schemas/console.admin.v1.User'
+            required:
+                - user
         console.admin.v1.CreateUserRequest:
             type: object
             properties:
@@ -562,6 +591,11 @@ components:
                     type: string
                 is_console_admin:
                     type: boolean
+            required:
+                - email
+                - password
+                - full_name
+                - is_console_admin
         console.admin.v1.CreateUserResponse:
             type: object
             properties:
@@ -570,6 +604,9 @@ components:
                         - $ref: '#/components/schemas/console.admin.v1.User'
                 message:
                     type: string
+            required:
+                - user
+                - message
         console.admin.v1.UpdateUserRequest:
             type: object
             properties:
@@ -581,11 +618,15 @@ components:
                     type: string
                 email:
                     type: string
+            required:
+                - id
         console.admin.v1.UpdateUserResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.DeleteUserRequest:
             type: object
             properties:
@@ -593,11 +634,15 @@ components:
                     exclusiveMinimum: 0
                     type: integer
                     format: int64
+            required:
+                - id
         console.admin.v1.DeleteUserResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.BanUserRequest:
             type: object
             properties:
@@ -607,11 +652,16 @@ components:
                     format: int64
                 reason:
                     type: string
+            required:
+                - id
+                - reason
         console.admin.v1.BanUserResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.UnbanUserRequest:
             type: object
             properties:
@@ -619,11 +669,15 @@ components:
                     exclusiveMinimum: 0
                     type: integer
                     format: int64
+            required:
+                - id
         console.admin.v1.UnbanUserResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.SetConsoleAdminRequest:
             type: object
             properties:
@@ -633,11 +687,16 @@ components:
                     format: int64
                 is_console_admin:
                     type: boolean
+            required:
+                - id
+                - is_console_admin
         console.admin.v1.SetConsoleAdminResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.GetUserSubscriptionRequest:
             type: object
             properties:
@@ -645,6 +704,8 @@ components:
                     exclusiveMinimum: 0
                     type: integer
                     format: int64
+            required:
+                - user_id
         console.admin.v1.GetUserSubscriptionResponse:
             type: object
             properties:
@@ -708,6 +769,21 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - owner_name
+                - owner_email
+                - business_name
+                - plan_id
+                - plan_name
+                - status
+                - seat_count
+                - active_seat_count
+                - included_seat_limit
+                - included_seat_count
+                - billable_seat_count
+                - created_at
         console.admin.v1.ListBusinessesRequest:
             type: object
             properties:
@@ -725,6 +801,10 @@ components:
                 owner_id:
                     type: integer
                     format: int64
+            required:
+                - limit
+                - offset
+                - name
         console.admin.v1.ListBusinessesResponse:
             type: object
             properties:
@@ -735,6 +815,9 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - businesses
+                - total
         console.admin.v1.Business:
             type: object
             properties:
@@ -750,6 +833,12 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - slug
+                - created_at
         console.admin.v1.UpdateBusinessRequest:
             type: object
             properties:
@@ -759,11 +848,16 @@ components:
                     format: int64
                 name:
                     type: string
+            required:
+                - id
+                - name
         console.admin.v1.UpdateBusinessResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.DeleteBusinessRequest:
             type: object
             properties:
@@ -771,11 +865,15 @@ components:
                     exclusiveMinimum: 0
                     type: integer
                     format: int64
+            required:
+                - id
         console.admin.v1.DeleteBusinessResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.CreateBusinessOwnerRequest:
             type: object
             properties:
@@ -806,6 +904,17 @@ components:
                 grant_days:
                     type: integer
                     format: int32
+            required:
+                - email
+                - password
+                - full_name
+                - business_name
+                - industry
+                - country
+                - timezone
+                - currency
+                - grant_plan
+                - subscription_status
         console.admin.v1.CreateBusinessOwnerResponse:
             type: object
             properties:
@@ -820,6 +929,10 @@ components:
                         - $ref: '#/components/schemas/console.admin.v1.Subscription'
                 message:
                     type: string
+            required:
+                - owner
+                - business
+                - message
         console.admin.v1.ListSubscriptionsRequest:
             type: object
             properties:
@@ -831,6 +944,10 @@ components:
                     format: int32
                 status:
                     type: string
+            required:
+                - limit
+                - offset
+                - status
         console.admin.v1.ListSubscriptionsResponse:
             type: object
             properties:
@@ -841,6 +958,9 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - subscriptions
+                - total
         console.admin.v1.UpsertSubscriptionRequest:
             type: object
             properties:
@@ -870,11 +990,17 @@ components:
                     type: string
                 paddle_customer_id:
                     type: string
+            required:
+                - owner_id
+                - plan_id
+                - status
         console.admin.v1.UpsertSubscriptionResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.DeleteSubscriptionRequest:
             type: object
             properties:
@@ -882,11 +1008,15 @@ components:
                     exclusiveMinimum: 0
                     type: integer
                     format: int64
+            required:
+                - id
         console.admin.v1.DeleteSubscriptionResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         console.admin.v1.ListPlansRequest:
             type: object
         console.admin.v1.ListPlansResponse:
@@ -896,6 +1026,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/console.admin.v1.Plan'
+            required:
+                - plans
         console.admin.v1.Plan:
             type: object
             properties:
@@ -914,6 +1046,13 @@ components:
                     type: boolean
                 created_at:
                     type: string
+            required:
+                - id
+                - name
+                - price_per_seat_cents
+                - annual_price_per_seat_cents
+                - is_active
+                - created_at
         console.admin.v1.UpdatePlanRequest:
             type: object
             properties:
@@ -931,8 +1070,12 @@ components:
                     format: int32
                 is_active:
                     type: boolean
+            required:
+                - id
         console.admin.v1.UpdatePlanResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

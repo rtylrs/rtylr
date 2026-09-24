@@ -165,6 +165,9 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - page
+                - page_size
         finance.expenses.v1.ListExpensesResponse:
             type: object
             properties:
@@ -181,6 +184,11 @@ components:
                     format: int64
                 has_more:
                     type: boolean
+            required:
+                - expenses
+                - page
+                - page_size
+                - has_more
         finance.expenses.v1.Expense:
             type: object
             properties:
@@ -237,6 +245,22 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - amount
+                - currency
+                - description
+                - vendor
+                - receipt_url
+                - payment_method
+                - is_tax_deductible
+                - tax_amount
+                - notes
+                - expense_date
+                - status
+                - created_at
+                - updated_at
             description: Expense is a recorded business expense.
         finance.expenses.v1.CreateExpenseRequest:
             type: object
@@ -279,10 +303,15 @@ components:
                     type: string
                     description: expense_date is the expense date value for this contract.
             required:
+                - amount
                 - currency
                 - description
                 - vendor
                 - receipt_url
+                - payment_method
+                - is_tax_deductible
+                - tax_amount
+                - notes
                 - expense_date
         finance.expenses.v1.CreateExpenseResponse:
             type: object
@@ -294,6 +323,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - expense_id
+                - message
         finance.expenses.v1.UpdateExpenseRequest:
             type: object
             properties:
@@ -306,6 +338,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.expenses.v1.UpdateExpenseBody'
                     description: body carries updatable expense fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         finance.expenses.v1.UpdateExpenseBody:
             type: object
             properties:
@@ -347,10 +382,15 @@ components:
                     type: string
                     description: expense_date is the expense date value for this contract.
             required:
+                - amount
                 - currency
                 - description
                 - vendor
                 - receipt_url
+                - payment_method
+                - is_tax_deductible
+                - tax_amount
+                - notes
                 - expense_date
         finance.expenses.v1.UpdateExpenseResponse:
             type: object
@@ -358,6 +398,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         finance.expenses.v1.DeleteExpenseRequest:
             type: object
             properties:
@@ -366,12 +408,16 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the expense.
+            required:
+                - id
         finance.expenses.v1.DeleteExpenseResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         finance.expenses.v1.GetExpenseRequest:
             type: object
             properties:
@@ -380,6 +426,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         finance.expenses.v1.GetExpenseResponse:
             type: object
             properties:
@@ -387,6 +435,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.expenses.v1.Expense'
                     description: expense is the expense value for this contract.
+            required:
+                - expense
         finance.expenses.v1.UpdateExpenseStatusRequest:
             type: object
             properties:
@@ -399,6 +449,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.expenses.v1.UpdateExpenseStatusBody'
                     description: body carries status update fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         finance.expenses.v1.UpdateExpenseStatusBody:
             type: object
             properties:
@@ -413,6 +466,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         finance.expenses.v1.ListExpenseCategoriesRequest:
             type: object
         finance.expenses.v1.ListExpenseCategoriesResponse:
@@ -423,6 +478,8 @@ components:
                     items:
                         $ref: '#/components/schemas/finance.expenses.v1.ExpenseCategory'
                     description: categories is the categories value for this contract.
+            required:
+                - categories
         finance.expenses.v1.ExpenseCategory:
             type: object
             properties:
@@ -443,4 +500,10 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - owner_id
+                - name
+                - color
+                - created_at
             description: ExpenseCategory groups expenses for reporting.

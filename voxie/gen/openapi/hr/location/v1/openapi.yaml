@@ -70,6 +70,7 @@ components:
                     description: Optional URL-safe slug; auto-generated from name if absent.
             required:
                 - name
+                - address
         hr.location.v1.CreateLocationResponse:
             type: object
             properties:
@@ -77,6 +78,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.location.v1.LocationPayload'
                     description: The newly created location.
+            required:
+                - location
         hr.location.v1.LocationPayload:
             type: object
             properties:
@@ -113,6 +116,15 @@ components:
                     description: |-
                         URL-safe slug, scoped per business. Powers public URLs like
                         menu.rtylr.com/<business-slug>/<location-slug>.
+            required:
+                - id
+                - owner_id
+                - name
+                - address
+                - is_active
+                - created_at
+                - updated_at
+                - slug
             description: LocationPayload is a physical work location for a tenant.
         hr.location.v1.UpdateLocationRequest:
             type: object
@@ -125,6 +137,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hr.location.v1.UpdateLocationBody'
+            required:
+                - id
+                - body
         hr.location.v1.UpdateLocationBody:
             type: object
             properties:
@@ -151,3 +166,5 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.location.v1.LocationPayload'
                     description: The updated location.
+            required:
+                - location

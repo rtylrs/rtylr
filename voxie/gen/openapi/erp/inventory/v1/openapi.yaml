@@ -119,6 +119,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of inventory rows to skip.
+            required:
+                - limit
+                - offset
         erp.inventory.v1.GetInventoryReportResponse:
             type: object
             properties:
@@ -140,6 +143,13 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - items
+                - total_value
+                - has_more
+                - limit
+                - offset
+                - total
         erp.inventory.v1.InventoryReportItem:
             type: object
             properties:
@@ -172,6 +182,18 @@ components:
                     format: double
                 is_low_stock:
                     type: boolean
+            required:
+                - product_id
+                - product_name
+                - sku
+                - unit
+                - stock_quantity
+                - low_stock_threshold
+                - reorder_quantity
+                - cost_price
+                - sale_price
+                - stock_value
+                - is_low_stock
         erp.inventory.v1.GetLowStockRequest:
             type: object
             properties:
@@ -183,6 +205,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of low-stock rows to skip.
+            required:
+                - limit
+                - offset
         erp.inventory.v1.GetLowStockResponse:
             type: object
             properties:
@@ -204,6 +229,13 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - items
+                - count
+                - has_more
+                - limit
+                - offset
+                - total
         erp.inventory.v1.GetValuationRequest:
             type: object
             properties:
@@ -215,6 +247,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of valuation rows to skip.
+            required:
+                - limit
+                - offset
         erp.inventory.v1.GetValuationResponse:
             type: object
             properties:
@@ -236,6 +271,13 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - items
+                - total_value
+                - has_more
+                - limit
+                - offset
+                - total
         erp.inventory.v1.ValuationItem:
             type: object
             properties:
@@ -252,6 +294,12 @@ components:
                 total_cost:
                     type: number
                     format: double
+            required:
+                - category_name
+                - warehouse_name
+                - total_items
+                - total_value
+                - total_cost
         erp.inventory.v1.AdjustInventoryRequest:
             type: object
             properties:
@@ -271,9 +319,12 @@ components:
                 - product_id
                 - change
                 - type
+                - notes
         erp.inventory.v1.AdjustInventoryResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: A human-readable result message.
+            required:
+                - message

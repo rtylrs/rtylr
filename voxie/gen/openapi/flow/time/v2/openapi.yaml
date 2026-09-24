@@ -323,6 +323,8 @@ components:
                     items:
                         $ref: '#/components/schemas/flow.time.v2.WorkDayLine'
                     description: lines are the day's pieces of work.
+            required:
+                - lines
         flow.time.v2.WorkDay:
             type: object
             properties:
@@ -410,6 +412,19 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last changed.
+            required:
+                - id
+                - employee_id
+                - date
+                - timezone
+                - work_mode
+                - break_minutes
+                - status
+                - clocked_minutes
+                - logged_minutes
+                - gap_minutes
+                - created_at
+                - updated_at
             description: |-
                 WorkDay is one person's working day: the mode, the clock, and the state of its
                 approval. The individual pieces of work are its lines.
@@ -469,6 +484,16 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last changed.
+            required:
+                - id
+                - work_day_id
+                - description
+                - duration_minutes
+                - is_billable
+                - status
+                - client_key
+                - created_at
+                - updated_at
             description: |-
                 WorkDayLine is one piece of work inside a day. It is persisted as an HR time
                 entry, so payroll and Flow read the same rows.
@@ -502,12 +527,15 @@ components:
                 - date
                 - timezone
                 - work_mode
+                - break_minutes
         flow.time.v2.UpsertWorkDayResponse:
             type: object
             properties:
                 work_day:
                     allOf:
                         - $ref: '#/components/schemas/flow.time.v2.WorkDay'
+            required:
+                - work_day
         flow.time.v2.ListWorkDaysRequest:
             type: object
             properties:
@@ -532,6 +560,8 @@ components:
             required:
                 - from_date
                 - to_date
+                - page
+                - limit
         flow.time.v2.ListWorkDaysResponse:
             type: object
             properties:
@@ -542,6 +572,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - work_days
+                - pagination
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -567,6 +600,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.time.v2.ListTeamWorkDaysRequest:
             type: object
@@ -588,6 +628,8 @@ components:
             required:
                 - from_date
                 - to_date
+                - page
+                - limit
             description: |-
                 ListTeamWorkDaysRequest replaces v1's workspace-scoped team listing. The
                 roster is the caller's business team; who may see whose days is decided by
@@ -603,6 +645,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - work_days
+                - pagination
         flow.time.v2.CreateWorkDayLineRequest:
             type: object
             properties:
@@ -637,15 +682,19 @@ components:
                 is_billable:
                     type: boolean
             required:
+                - work_day_id
                 - client_key
                 - duration_minutes
                 - description
+                - is_billable
         flow.time.v2.CreateWorkDayLineResponse:
             type: object
             properties:
                 line:
                     allOf:
                         - $ref: '#/components/schemas/flow.time.v2.WorkDayLine'
+            required:
+                - line
         flow.time.v2.UpdateWorkDayLineRequest:
             type: object
             properties:
@@ -674,14 +723,18 @@ components:
                 is_billable:
                     type: boolean
             required:
+                - id
                 - duration_minutes
                 - description
+                - is_billable
         flow.time.v2.UpdateWorkDayLineResponse:
             type: object
             properties:
                 line:
                     allOf:
                         - $ref: '#/components/schemas/flow.time.v2.WorkDayLine'
+            required:
+                - line
         flow.time.v2.DeleteWorkDayLineRequest:
             type: object
             properties:
@@ -690,18 +743,24 @@ components:
                     type: string
                     format: int64
                     description: id is the line to remove.
+            required:
+                - id
         flow.time.v2.DeleteWorkDayLineResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.time.v2.ListWorkTypesRequest:
             type: object
             properties:
                 include_archived:
                     type: boolean
                     description: include_archived returns archived nodes too, for editing the tree.
+            required:
+                - include_archived
         flow.time.v2.ListWorkTypesResponse:
             type: object
             properties:
@@ -709,6 +768,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/flow.time.v2.WorkType'
+            required:
+                - work_types
         flow.time.v2.WorkType:
             type: object
             properties:
@@ -740,6 +801,12 @@ components:
                     format: int32
                 archived:
                     type: boolean
+            required:
+                - id
+                - name
+                - description
+                - sort_order
+                - archived
             description: |-
                 TimeService is Flow's daily time logging: a work day per person per date, the
                 lines of work inside it, and the work-type tree those lines are classified by.
@@ -772,12 +839,16 @@ components:
                     format: int32
             required:
                 - name
+                - description
+                - sort_order
         flow.time.v2.CreateWorkTypeResponse:
             type: object
             properties:
                 work_type:
                     allOf:
                         - $ref: '#/components/schemas/flow.time.v2.WorkType'
+            required:
+                - work_type
         flow.time.v2.UpdateWorkTypeRequest:
             type: object
             properties:
@@ -802,13 +873,19 @@ components:
                 archived:
                     type: boolean
             required:
+                - id
                 - name
+                - description
+                - sort_order
+                - archived
         flow.time.v2.UpdateWorkTypeResponse:
             type: object
             properties:
                 work_type:
                     allOf:
                         - $ref: '#/components/schemas/flow.time.v2.WorkType'
+            required:
+                - work_type
         flow.time.v2.DeleteWorkTypeRequest:
             type: object
             properties:
@@ -816,9 +893,13 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         flow.time.v2.DeleteWorkTypeResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message

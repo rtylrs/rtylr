@@ -127,6 +127,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
+            required:
+                - items
         pos.menu_item.v1.MenuItem:
             type: object
             properties:
@@ -190,6 +192,22 @@ components:
                         unit_cost is the cost of one unit at the time of the read, copied from
                         the linked ERP product. Absent when product_id is absent. Reported for
                         display and margin only: the authoritative value is the ERP product's.
+            required:
+                - id
+                - owner_id
+                - category_id
+                - name
+                - sku
+                - sale_price
+                - is_active
+                - created_at
+                - updated_at
+                - image_url
+                - category
+                - barcode
+                - description
+                - tax_rate
+                - stock
             description: MenuItem is a sellable item on the POS menu.
         hub.menu.v1.UpdateMenuRequest:
             type: object
@@ -199,11 +217,15 @@ components:
                     items:
                         $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
                     minItems: 1
+            required:
+                - items
         hub.menu.v1.UpdateMenuResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success
         hub.menu.v1.ListMenuBannersRequest:
             type: object
         hub.menu.v1.ListMenuBannersResponse:
@@ -213,6 +235,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.menu.v1.MenuBanner'
+            required:
+                - banners
         hub.menu.v1.MenuBanner:
             type: object
             properties:
@@ -240,6 +264,17 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - title
+                - body
+                - image_url
+                - link_url
+                - position
+                - starts_at
+                - ends_at
+                - created_at
+                - updated_at
         hub.menu.v1.CreateMenuBannerRequest:
             type: object
             properties:
@@ -262,12 +297,20 @@ components:
                     type: string
             required:
                 - title
+                - body
+                - image_url
+                - link_url
+                - position
+                - starts_at
+                - ends_at
         hub.menu.v1.CreateMenuBannerResponse:
             type: object
             properties:
                 banner:
                     allOf:
                         - $ref: '#/components/schemas/hub.menu.v1.MenuBanner'
+            required:
+                - banner
         hub.menu.v1.UpdateMenuBannerRequest:
             type: object
             properties:
@@ -293,13 +336,23 @@ components:
                 ends_at:
                     type: string
             required:
+                - id
                 - title
+                - body
+                - image_url
+                - link_url
+                - position
+                - is_active
+                - starts_at
+                - ends_at
         hub.menu.v1.UpdateMenuBannerResponse:
             type: object
             properties:
                 banner:
                     allOf:
                         - $ref: '#/components/schemas/hub.menu.v1.MenuBanner'
+            required:
+                - banner
         hub.menu.v1.DeleteMenuBannerRequest:
             type: object
             properties:
@@ -307,8 +360,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.menu.v1.DeleteMenuBannerResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success

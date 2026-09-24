@@ -206,6 +206,10 @@ components:
                 status:
                     type: string
                     description: The current lifecycle state.
+            required:
+                - search
+                - department_id
+                - status
         hr.staff.v1.ListStaffResponse:
             type: object
             properties:
@@ -213,6 +217,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.staff.v1.Staff'
+            required:
+                - staff
         hr.staff.v1.Staff:
             type: object
             properties:
@@ -297,6 +303,33 @@ components:
                 updated_at:
                     type: string
                     description: When the record was last updated.
+            required:
+                - id
+                - owner_id
+                - user_id
+                - department_id
+                - manager_staff_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - role
+                - employment_type
+                - status
+                - salary
+                - hourly_rate
+                - overtime_rate
+                - start_date
+                - end_date
+                - address
+                - emergency_contact_name
+                - emergency_contact_phone
+                - apps
+                - notes
+                - photo_url
+                - bio
+                - created_at
+                - updated_at
             description: Staff is an HR staff member record.
         hr.staff.v1.CreateStaffRequest:
             type: object
@@ -385,19 +418,34 @@ components:
             required:
                 - user_id
                 - department_id
+                - manager_staff_id
                 - first_name
                 - last_name
                 - email
+                - phone
                 - role
                 - employment_type
                 - status
+                - salary
+                - hourly_rate
+                - overtime_rate
                 - start_date
+                - end_date
+                - address
+                - emergency_contact_name
+                - emergency_contact_phone
+                - apps
+                - notes
+                - photo_url
+                - bio
         hr.staff.v1.CreateStaffResponse:
             type: object
             properties:
                 id:
                     type: string
                     format: int64
+            required:
+                - id
         hr.staff.v1.GetStaffRequest:
             type: object
             properties:
@@ -405,12 +453,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hr.staff.v1.GetStaffResponse:
             type: object
             properties:
                 staff:
                     allOf:
                         - $ref: '#/components/schemas/hr.staff.v1.Staff'
+            required:
+                - staff
         hr.staff.v1.UpdateStaffRequest:
             type: object
             properties:
@@ -421,6 +473,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hr.staff.v1.UpdateStaffBody'
+            required:
+                - id
+                - body
         hr.staff.v1.UpdateStaffBody:
             type: object
             properties:
@@ -499,17 +554,32 @@ components:
                         tryrtylr/rtylr#875.
             required:
                 - department_id
+                - manager_staff_id
                 - first_name
                 - last_name
                 - email
+                - phone
                 - role
                 - employment_type
                 - status
+                - salary
+                - hourly_rate
+                - overtime_rate
+                - end_date
+                - address
+                - emergency_contact_name
+                - emergency_contact_phone
+                - apps
+                - notes
+                - photo_url
+                - bio
         hr.staff.v1.UpdateStaffResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success
         hr.staff.v1.DeleteStaffRequest:
             type: object
             properties:
@@ -517,11 +587,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hr.staff.v1.DeleteStaffResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success
         hr.staff.v1.ClockInRequest:
             type: object
             properties:
@@ -536,6 +610,8 @@ components:
             properties:
                 success:
                     type: boolean
+            required:
+                - success
         hr.staff.v1.ClockOutRequest:
             type: object
             properties:
@@ -550,6 +626,8 @@ components:
             properties:
                 success:
                     type: boolean
+            required:
+                - success
         hr.staff.v1.ListStaffDirectoryRequest:
             type: object
             properties:
@@ -580,6 +658,11 @@ components:
                 page_size:
                     type: string
                     format: int64
+            required:
+                - staff
+                - total
+                - page
+                - page_size
         hr.staff.v1.DirectoryStaffEntry:
             type: object
             properties:
@@ -604,6 +687,16 @@ components:
                     type: string
                 phone:
                     type: string
+            required:
+                - id
+                - first_name
+                - last_name
+                - department_id
+                - role
+                - employment_type
+                - status
+                - email
+                - phone
             description: |-
                 DirectoryStaffEntry is the deliberately minimal projection of Staff shown
                 in the company-wide directory. It never carries salary, hourly_rate,

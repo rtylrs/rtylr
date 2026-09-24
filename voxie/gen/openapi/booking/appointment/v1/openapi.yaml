@@ -103,6 +103,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/booking.appointment.v1.Appointment'
+            required:
+                - appointments
         booking.appointment.v1.Appointment:
             type: object
             properties:
@@ -142,6 +144,22 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - business_id
+                - service_id
+                - resource_id
+                - staff_id
+                - customer_name
+                - customer_email
+                - customer_phone
+                - start_time
+                - end_time
+                - status
+                - notes
+                - created_at
+                - updated_at
         booking.appointment.v1.ListTodayAppointmentsRequest:
             type: object
         booking.appointment.v1.ListTodayAppointmentsResponse:
@@ -151,6 +169,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/booking.appointment.v1.Appointment'
+            required:
+                - appointments
         booking.appointment.v1.CreateAppointmentRequest:
             type: object
             properties:
@@ -180,9 +200,15 @@ components:
                     type: string
             required:
                 - service_id
+                - resource_id
+                - staff_id
                 - customer_name
+                - customer_email
+                - customer_phone
                 - start_time
                 - end_time
+                - status
+                - notes
         booking.appointment.v1.CreateAppointmentResponse:
             type: object
             properties:
@@ -191,6 +217,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message
         booking.appointment.v1.UpdateAppointmentRequest:
             type: object
             properties:
@@ -221,11 +250,25 @@ components:
                     type: string
                 notes:
                     type: string
+            required:
+                - id
+                - service_id
+                - resource_id
+                - staff_id
+                - customer_name
+                - customer_email
+                - customer_phone
+                - start_time
+                - end_time
+                - status
+                - notes
         booking.appointment.v1.UpdateAppointmentResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         booking.appointment.v1.DeleteAppointmentRequest:
             type: object
             properties:
@@ -233,8 +276,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         booking.appointment.v1.DeleteAppointmentResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

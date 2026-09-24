@@ -53,3 +53,5 @@ components:
                 orders:
                     type: array
                     items: {}
+            required:
+                - orders

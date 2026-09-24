@@ -74,6 +74,8 @@ components:
             properties:
                 period_label:
                     type: string
+            required:
+                - period_label
         hr.payroll.v1.ListPayrollResponse:
             type: object
             properties:
@@ -81,6 +83,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.payroll.v1.PayrollRecord'
+            required:
+                - records
         hr.payroll.v1.PayrollRecord:
             type: object
             properties:
@@ -131,6 +135,25 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - staff_id
+                - period_start
+                - period_end
+                - period_label
+                - regular_hours
+                - overtime_hours
+                - base_pay
+                - overtime_pay
+                - bonuses
+                - deductions
+                - tax_withheld
+                - net_pay
+                - status
+                - paid_at
+                - notes
+                - created_at
         hr.payroll.v1.RunPayrollRequest:
             type: object
             properties:
@@ -150,6 +173,8 @@ components:
                 records_created:
                     type: integer
                     format: int32
+            required:
+                - records_created
         hr.payroll.v1.MarkPayrollPaidRequest:
             type: object
             properties:
@@ -157,8 +182,12 @@ components:
                     exclusiveMinimum: 0
                     type: integer
                     format: int64
+            required:
+                - id
         hr.payroll.v1.MarkPayrollPaidResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success

@@ -43,6 +43,9 @@ components:
                     items:
                         $ref: '#/components/schemas/pos.orders.v1.SplitGroup'
                     minItems: 1
+            required:
+                - order_id
+                - splits
         pos.orders.v1.SplitGroup:
             type: object
             properties:
@@ -51,6 +54,8 @@ components:
                     items:
                         type: string
                         format: int64
+            required:
+                - item_ids
         pos.orders.splits.v1.SplitOrderResponse:
             type: object
             properties:
@@ -61,3 +66,6 @@ components:
                         format: int64
                 message:
                     type: string
+            required:
+                - order_ids
+                - message

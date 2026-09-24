@@ -52,6 +52,8 @@ components:
                 - id
                 - request_type
                 - name
+                - delegation_enabled
+                - levels
         hr.approval_chain.v1.ApprovalChainLevelPayload:
             type: object
             properties:
@@ -105,6 +107,16 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - chain_id
+                - level_order
+                - approver_type
+                - timeout_days
+                - timeout_action
+                - created_at
+                - updated_at
             description: ApprovalChainLevelPayload is a single level within an approval chain pipeline.
         hr.approval_chain.v1.UpsertApprovalChainResponse:
             type: object
@@ -113,6 +125,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.approval_chain.v1.ApprovalChainPayload'
                     description: The created or updated approval chain.
+            required:
+                - chain
         hr.approval_chain.v1.ApprovalChainPayload:
             type: object
             properties:
@@ -146,4 +160,13 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - request_type
+                - name
+                - delegation_enabled
+                - levels
+                - created_at
+                - updated_at
             description: ApprovalChainPayload is the ordered approval pipeline for a request type.

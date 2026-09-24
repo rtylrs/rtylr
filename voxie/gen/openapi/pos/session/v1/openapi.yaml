@@ -75,6 +75,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.session.v1.Session'
+            required:
+                - sessions
         pos.session.v1.Session:
             type: object
             properties:
@@ -110,6 +112,15 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - owner_id
+                - opening_float
+                - closing_float
+                - total_sales
+                - status
+                - opened_at
+                - created_at
             description: Session is a POS register session.
         pos.session.v1.OpenSessionRequest:
             type: object
@@ -138,6 +149,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - session_id
+                - message
         pos.session.v1.CloseSessionRequest:
             type: object
             properties:
@@ -151,8 +165,11 @@ components:
                     format: int64
             required:
                 - closing_float
+                - id
         pos.session.v1.CloseSessionResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

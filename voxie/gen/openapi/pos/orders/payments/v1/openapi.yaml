@@ -45,6 +45,7 @@ components:
                     type: number
                     format: double
             required:
+                - order_id
                 - payment_method
                 - amount_paid
         pos.orders.payments.v1.ProcessPaymentResponse:
@@ -52,3 +53,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

@@ -131,6 +131,8 @@ components:
                 location_id:
                     type: string
                     format: int64
+            required:
+                - location_id
         pos.user.v1.ListPOSUsersResponse:
             type: object
             properties:
@@ -138,6 +140,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.user.v1.POSUser'
+            required:
+                - users
         pos.user.v1.POSUser:
             type: object
             properties:
@@ -172,6 +176,18 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
                     description: role_management identifies the authoritative Dash control-plane surface.
+            required:
+                - id
+                - business_id
+                - location_id
+                - name
+                - role
+                - is_active
+                - max_discount_pct
+                - can_void
+                - can_refund
+                - can_open_drawer
+                - can_apply_discount
             description: POSUser is a POS roster operator.
         pos.user.v1.RoleManagementManagedInDash:
             type: object
@@ -211,6 +227,7 @@ components:
                 - location_id
                 - name
                 - pin
+                - hourly_rate
         pos.user.v1.CreatePOSUserResponse:
             type: object
             properties:
@@ -221,6 +238,7 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
             required:
+                - id
                 - role_management
         pos.user.v1.UpdatePOSUserRequest:
             type: object
@@ -243,6 +261,9 @@ components:
             required:
                 - id
                 - name
+                - pin
+                - is_active
+                - hourly_rate
         pos.user.v1.UpdatePOSUserResponse:
             type: object
             properties:
@@ -252,6 +273,7 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
             required:
+                - success
                 - role_management
         pos.user.v1.DeactivatePOSUserRequest:
             type: object
@@ -267,6 +289,8 @@ components:
             properties:
                 success:
                     type: boolean
+            required:
+                - success
         pos.user.v1.VerifyPOSUserPINRequest:
             type: object
             properties:
@@ -331,6 +355,17 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.user.v1.RoleManagementManagedInDash'
             required:
+                - user_id
+                - pos_user_id
+                - location_id
+                - role
+                - display_name
+                - can_void
+                - can_refund
+                - can_open_drawer
+                - can_apply_discount
+                - max_discount_pct
+                - authorization_version
                 - role_management
         pos.user.v1.SetPINRequest:
             type: object
@@ -358,3 +393,5 @@ components:
             properties:
                 success:
                     type: boolean
+            required:
+                - success

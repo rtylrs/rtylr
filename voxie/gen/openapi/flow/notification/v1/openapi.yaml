@@ -107,6 +107,11 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.notification.v1.ListNotificationsResponse:
             type: object
             properties:
@@ -117,6 +122,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - notifications
+                - pagination
         flow.notification.v1.Notification:
             type: object
             properties:
@@ -150,6 +158,19 @@ components:
                     type: boolean
                 timestamp:
                     type: string
+            required:
+                - id
+                - type
+                - title
+                - description
+                - task_id
+                - task_title
+                - actor_name
+                - actor_initials
+                - project
+                - project_color
+                - read
+                - timestamp
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -175,6 +196,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.notification.v1.MarkNotificationReadRequest:
             type: object
@@ -182,6 +210,8 @@ components:
                 id:
                     type: string
                     format: int64
+            required:
+                - id
         flow.notification.v1.MarkNotificationReadResponse:
             type: object
         flow.notification.v1.MarkAllNotificationsReadRequest:

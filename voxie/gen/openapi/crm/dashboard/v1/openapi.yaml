@@ -37,6 +37,11 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/crm.dashboard.v1.TopCustomer'
+            required:
+                - total_customers
+                - new_this_month
+                - active_loyalty_members
+                - top_customers
         crm.dashboard.v1.TopCustomer:
             type: object
             properties:
@@ -57,4 +62,12 @@ components:
                     format: int64
                 loyalty_tier:
                     type: string
+            required:
+                - id
+                - first_name
+                - last_name
+                - email
+                - total_spent
+                - loyalty_points
+                - loyalty_tier
             description: TopCustomer is a customer ranked by spend for dashboard summaries.

@@ -132,6 +132,12 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - workspace_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.view.v1.ListViewsResponse:
             type: object
             properties:
@@ -142,6 +148,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - views
+                - pagination
         flow.view.v1.View:
             type: object
             properties:
@@ -168,6 +177,15 @@ components:
                     type: string
                 sort_dir:
                     type: string
+            required:
+                - id
+                - name
+                - icon
+                - visibility
+                - filters
+                - group_by
+                - sort_by
+                - sort_dir
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -193,6 +211,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.view.v1.CreateViewRequest:
             type: object
@@ -220,13 +245,22 @@ components:
                 sort_dir:
                     type: string
             required:
+                - workspace_id
                 - name
+                - icon
+                - visibility
+                - filters
+                - group_by
+                - sort_by
+                - sort_dir
         flow.view.v1.CreateViewResponse:
             type: object
             properties:
                 view:
                     allOf:
                         - $ref: '#/components/schemas/flow.view.v1.View'
+            required:
+                - view
         flow.view.v1.UpdateViewRequest:
             type: object
             properties:
@@ -253,6 +287,15 @@ components:
                     type: string
                 sort_dir:
                     type: string
+            required:
+                - id
+                - name
+                - icon
+                - visibility
+                - filters
+                - group_by
+                - sort_by
+                - sort_dir
         flow.view.v1.UpdateViewResponse:
             type: object
         flow.view.v1.DeleteViewRequest:
@@ -261,5 +304,7 @@ components:
                 id:
                     type: string
                     format: int64
+            required:
+                - id
         flow.view.v1.DeleteViewResponse:
             type: object

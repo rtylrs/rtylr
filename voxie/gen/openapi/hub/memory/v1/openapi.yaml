@@ -127,6 +127,9 @@ components:
                 offset:
                     type: integer
                     format: int32
+            required:
+                - limit
+                - offset
         hub.memory.v1.ListChatsResponse:
             type: object
             properties:
@@ -134,6 +137,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.memory.v1.ChatSummary'
+            required:
+                - chats
         hub.memory.v1.ChatSummary:
             type: object
             properties:
@@ -149,11 +154,20 @@ components:
                     type: boolean
                 archived:
                     type: boolean
+            required:
+                - id
+                - title
+                - summary
+                - updated_at
+                - pinned
+                - archived
         hub.memory.v1.GetChatMessagesRequest:
             type: object
             properties:
                 session_id:
                     type: string
+            required:
+                - session_id
         hub.memory.v1.GetChatMessagesResponse:
             type: object
             properties:
@@ -161,6 +175,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.memory.v1.ChatMessage'
+            required:
+                - messages
         hub.memory.v1.ChatMessage:
             type: object
             properties:
@@ -175,16 +191,26 @@ components:
                 tokens_used:
                     type: integer
                     format: int32
+            required:
+                - id
+                - role
+                - content
+                - created_at
+                - tokens_used
         hub.memory.v1.DeleteChatRequest:
             type: object
             properties:
                 session_id:
                     type: string
+            required:
+                - session_id
         hub.memory.v1.DeleteChatResponse:
             type: object
             properties:
                 deleted:
                     type: boolean
+            required:
+                - deleted
         hub.memory.v1.RenameChatRequest:
             type: object
             properties:
@@ -192,11 +218,16 @@ components:
                     type: string
                 title:
                     type: string
+            required:
+                - session_id
+                - title
         hub.memory.v1.RenameChatResponse:
             type: object
             properties:
                 updated:
                     type: boolean
+            required:
+                - updated
         hub.memory.v1.PinChatRequest:
             type: object
             properties:
@@ -204,8 +235,13 @@ components:
                     type: string
                 pinned:
                     type: boolean
+            required:
+                - session_id
+                - pinned
         hub.memory.v1.PinChatResponse:
             type: object
             properties:
                 updated:
                     type: boolean
+            required:
+                - updated

@@ -35,3 +35,8 @@ components:
                 revenue:
                     type: number
                     format: double
+            required:
+                - today_count
+                - upcoming_count
+                - cancellation_rate
+                - revenue

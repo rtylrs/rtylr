@@ -20,15 +20,15 @@ return violations;
 }
 
 export interface DashboardTask {
-id?: string;
-title?: string;
-status?: string;
-priority?: string;
-dueDate?: string;
-projectName?: string;
-projectColor?: string;
-assigneeName?: string;
-assigneeInitials?: string;
+id?: string | undefined;
+title?: string | undefined;
+status?: string | undefined;
+priority?: string | undefined;
+dueDate?: string | undefined;
+projectName?: string | undefined;
+projectColor?: string | undefined;
+assigneeName?: string | undefined;
+assigneeInitials?: string | undefined;
 }
 
 export function decodeDashboardTask(v: any): DashboardTask {
@@ -75,11 +75,11 @@ return violations;
 }
 
 export interface GetFlowDashboardResponse {
-openTasks?: string;
-inProgressTasks?: string;
-completedThisWeek?: string;
-overdueTasks?: string;
-myTasks?: (DashboardTask)[];
+openTasks?: string | undefined;
+inProgressTasks?: string | undefined;
+completedThisWeek?: string | undefined;
+overdueTasks?: string | undefined;
+myTasks?: (DashboardTask)[] | undefined;
 }
 
 export function decodeGetFlowDashboardResponse(v: any): GetFlowDashboardResponse {

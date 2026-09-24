@@ -96,6 +96,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.department.v1.DepartmentPayload'
+            required:
+                - departments
         hr.department.v1.DepartmentPayload:
             type: object
             properties:
@@ -126,6 +128,15 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this department was last updated.
+            required:
+                - id
+                - owner_id
+                - business_id
+                - name
+                - description
+                - manager_staff_id
+                - created_at
+                - updated_at
             description: DepartmentPayload is an HR department record.
         hr.department.v1.CreateDepartmentRequest:
             type: object
@@ -140,12 +151,16 @@ components:
                     format: int64
             required:
                 - name
+                - description
+                - manager_staff_id
         hr.department.v1.CreateDepartmentResponse:
             type: object
             properties:
                 id:
                     type: string
                     format: int64
+            required:
+                - id
         hr.department.v1.UpdateDepartmentRequest:
             type: object
             properties:
@@ -158,6 +173,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.department.v1.UpdateDepartmentBody'
                     description: body carries updatable department fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         hr.department.v1.UpdateDepartmentBody:
             type: object
             properties:
@@ -171,11 +189,15 @@ components:
                     format: int64
             required:
                 - name
+                - description
+                - manager_staff_id
         hr.department.v1.UpdateDepartmentResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success
         hr.department.v1.DeleteDepartmentRequest:
             type: object
             properties:
@@ -183,8 +205,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hr.department.v1.DeleteDepartmentResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success

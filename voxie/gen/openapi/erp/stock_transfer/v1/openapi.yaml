@@ -84,6 +84,9 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - page
+                - page_size
         erp.stock_transfer.v1.ListStockTransfersResponse:
             type: object
             properties:
@@ -99,6 +102,11 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - stock_transfers
+                - has_more
+                - page
+                - page_size
         erp.stock_transfer.v1.StockTransfer:
             type: object
             properties:
@@ -126,6 +134,16 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - from_warehouse_id
+                - to_warehouse_id
+                - status
+                - notes
+                - items
+                - created_at
+                - updated_at
         erp.stock_transfer.v1.StockTransferItem:
             type: object
             properties:
@@ -143,6 +161,12 @@ components:
                     format: double
                 created_at:
                     type: string
+            required:
+                - id
+                - transfer_id
+                - product_id
+                - quantity
+                - created_at
         erp.stock_transfer.v1.CreateStockTransferRequest:
             type: object
             properties:
@@ -164,6 +188,8 @@ components:
             required:
                 - from_warehouse_id
                 - to_warehouse_id
+                - notes
+                - items
         erp.stock_transfer.v1.CreateStockTransferItemRequest:
             type: object
             properties:
@@ -186,6 +212,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - transfer_id
+                - message
         erp.stock_transfer.v1.UpdateStockTransferStatusRequest:
             type: object
             properties:
@@ -196,6 +225,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/erp.stock_transfer.v1.UpdateStockTransferStatusBody'
+            required:
+                - id
+                - body
         erp.stock_transfer.v1.UpdateStockTransferStatusBody:
             type: object
             properties:
@@ -208,3 +240,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

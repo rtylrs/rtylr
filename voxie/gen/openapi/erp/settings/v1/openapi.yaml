@@ -79,10 +79,16 @@ components:
                 updated_at:
                     type: string
             required:
+                - id
+                - business_id
                 - currency
                 - tax_rate
                 - low_stock_threshold
                 - default_warehouse_id
+                - notify_on_low_stock
+                - notify_on_expiry
+                - created_at
+                - updated_at
             description: ErpBusinessSettings stores tenant-level ERP defaults shared by operators.
         erp.settings.v1.UpdateErpSettingsRequest:
             type: object
@@ -111,6 +117,8 @@ components:
                 - tax_rate
                 - low_stock_threshold
                 - default_warehouse_id
+                - notify_on_low_stock
+                - notify_on_expiry
         erp.settings.v1.UpdateErpSettingsResponse:
             type: object
             properties:
@@ -121,3 +129,4 @@ components:
                     type: string
             required:
                 - settings
+                - message

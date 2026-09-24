@@ -94,6 +94,14 @@ components:
                     type: string
                     format: int64
                     description: velocity_change is the velocity change value for this contract.
+            required:
+                - total_tasks
+                - completed_tasks
+                - in_progress_tasks
+                - overdue_tasks
+                - avg_cycle_time_days
+                - velocity
+                - velocity_change
         insights.dashboard.v1.GetRoadmapRequest:
             type: object
         insights.dashboard.v1.GetRoadmapResponse:
@@ -104,6 +112,8 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.dashboard.v1.RoadmapProject'
                     description: projects is the projects value for this contract.
+            required:
+                - projects
         insights.dashboard.v1.RoadmapProject:
             type: object
             properties:
@@ -135,6 +145,15 @@ components:
                 due_date:
                     type: string
                     description: due_date is the due date value for this contract.
+            required:
+                - project_id
+                - project_name
+                - status
+                - total_tasks
+                - completed_tasks
+                - progress_percent
+                - start_date
+                - due_date
         insights.dashboard.v1.GetWorkloadRequest:
             type: object
         insights.dashboard.v1.GetWorkloadResponse:
@@ -145,6 +164,8 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.dashboard.v1.WorkloadEntry'
                     description: workload is the workload value for this contract.
+            required:
+                - workload
         insights.dashboard.v1.WorkloadEntry:
             type: object
             properties:
@@ -172,6 +193,13 @@ components:
                     type: string
                     format: int64
                     description: total_active is the total active value for this contract.
+            required:
+                - user_id
+                - open_tasks
+                - in_progress_tasks
+                - completed_tasks
+                - overdue_tasks
+                - total_active
         insights.dashboard.v1.GetDashboardSummaryRequest:
             type: object
         insights.dashboard.v1.GetDashboardSummaryResponse:
@@ -193,6 +221,11 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.dashboard.v1.InsightsPctCard'
                     description: margin is MTD margin percentage with delta.
+            required:
+                - revenue
+                - customers
+                - orders
+                - margin
         insights.dashboard.v1.InsightsMetricCard:
             type: object
             properties:
@@ -204,6 +237,9 @@ components:
                     type: number
                     format: double
                     description: delta_pct is the period-over-period change percentage.
+            required:
+                - value
+                - delta_pct
         insights.dashboard.v1.InsightsPctCard:
             type: object
             properties:
@@ -215,3 +251,6 @@ components:
                     type: number
                     format: double
                     description: delta_pct is the period-over-period change percentage.
+            required:
+                - value
+                - delta_pct

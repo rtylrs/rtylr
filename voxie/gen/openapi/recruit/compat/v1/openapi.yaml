@@ -561,11 +561,15 @@ components:
             type: object
             properties:
                 body: {}
+            required:
+                - body
         recruit.compat.v1.IdQueryRequest:
             type: object
             properties:
                 id:
                     type: string
+            required:
+                - id
         recruit.compat.v1.QueryRequest:
             type: object
             properties:

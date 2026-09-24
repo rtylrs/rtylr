@@ -36,3 +36,8 @@ components:
                 table_turnover:
                     type: number
                     format: double
+            required:
+                - total_sales
+                - order_count
+                - avg_order
+                - table_turnover

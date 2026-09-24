@@ -255,6 +255,9 @@ components:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
+            required:
+                - limit
+                - offset
             description: |-
                 ListTimeEntriesRequest selects logged time. Every filter is optional and
                 they combine with AND. The response is always a page: callers that need
@@ -279,6 +282,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - entries
+                - total
+                - limit
+                - offset
         hr.time_entry.v1.TimeEntryPayload:
             type: object
             properties:
@@ -346,6 +354,18 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - date
+                - duration_minutes
+                - description
+                - is_billable
+                - status
+                - source
+                - created_at
+                - updated_at
             description: TimeEntryPayload is a logged unit of employee work time.
         hr.time_entry.v1.CreateTimeEntryRequest:
             type: object
@@ -395,6 +415,7 @@ components:
                 - date
                 - duration_minutes
                 - description
+                - is_billable
                 - source
         hr.time_entry.v1.CreateTimeEntryResponse:
             type: object
@@ -403,6 +424,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.time_entry.v1.TimeEntryPayload'
                     description: The newly created time entry.
+            required:
+                - entry
         hr.time_entry.v1.ListTimesheetsRequest:
             type: object
             properties:
@@ -433,6 +456,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - timesheets
+                - total
+                - limit
+                - offset
         hr.time_entry.v1.TimesheetPayload:
             type: object
             properties:
@@ -482,6 +510,18 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - period_start
+                - period_end
+                - status
+                - current_approval_level
+                - total_minutes
+                - entries
+                - created_at
+                - updated_at
             description: TimesheetPayload is an employee's time entries grouped over a period.
         hr.time_entry.v1.SubmitTimesheetRequest:
             type: object
@@ -499,6 +539,8 @@ components:
                 success:
                     type: boolean
                     description: Whether the submission was accepted.
+            required:
+                - success
         hr.time_entry.v1.ApproveTimesheetRequest:
             type: object
             properties:
@@ -511,6 +553,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.time_entry.v1.ApproveTimesheetBody'
                     description: body carries approval decision fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         hr.time_entry.v1.ApproveTimesheetBody:
             type: object
             properties:
@@ -520,12 +565,16 @@ components:
                 rejection_reason:
                     type: string
                     description: Reason for rejection; absent if approving.
+            required:
+                - approved
         hr.time_entry.v1.ApproveTimesheetResponse:
             type: object
             properties:
                 success:
                     type: boolean
                     description: Whether the approval action was processed.
+            required:
+                - success
         hr.time_entry.v1.MarkTimeEntriesInvoicedRequest:
             type: object
             properties:
@@ -537,6 +586,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.time_entry.v1.MarkTimeEntriesInvoicedBody'
                     description: body carries the batch fields bound from the HTTP payload.
+            required:
+                - id
+                - body
             description: |-
                 MarkTimeEntriesInvoicedRequest records that the listed approved billable
                 entries are settled by one finance invoice. Idempotent per entry: an entry
@@ -560,6 +612,7 @@ components:
                     format: int64
                     description: invoice_id is the finance invoice that settles them.
             required:
+                - entry_ids
                 - invoice_id
             description: MarkTimeEntriesInvoicedBody is the payload of markTimeEntriesInvoiced.
         hr.time_entry.v1.MarkTimeEntriesInvoicedResponse:
@@ -575,6 +628,9 @@ components:
                     description: |-
                         skipped_count is how many of entry_ids were already invoiced, not
                         approved billable work, or belong to another business.
+            required:
+                - marked_count
+                - skipped_count
             description: |-
                 MarkTimeEntriesInvoicedResponse reports how the batch landed, so a caller
                 can tell "all marked" from "some were already invoiced" without a second

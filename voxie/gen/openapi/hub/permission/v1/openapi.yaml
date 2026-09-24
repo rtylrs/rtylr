@@ -365,6 +365,8 @@ components:
                 matrix:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.PermissionMatrix'
+            required:
+                - matrix
         hub.permission.v1.PermissionMatrix:
             type: object
             properties:
@@ -376,6 +378,9 @@ components:
                     type: array
                     items:
                         type: string
+            required:
+                - rows
+                - roles
         hub.permission.v1.PermissionRow:
             type: object
             properties:
@@ -390,6 +395,11 @@ components:
                     additionalProperties:
                         type: boolean
                     description: role -> enabled
+            required:
+                - key
+                - category
+                - label
+                - role_values
         hub.permission.v1.ListRolesRequest:
             type: object
             properties:
@@ -428,6 +438,11 @@ components:
                     type: integer
                     format: int32
                     description: Next page number, when more results remain.
+            required:
+                - roles
+                - page
+                - page_size
+                - total
         hub.permission.v1.CustomRole:
             type: object
             properties:
@@ -485,6 +500,21 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - name
+                - description
+                - permissions
+                - app_id
+                - role_key
+                - level
+                - scope_rules
+                - is_system
+                - is_archived
+                - lifecycle
+                - version
+                - member_count
+                - created_at
         hub.permission.v1.CreateRoleRequest:
             type: object
             properties:
@@ -520,12 +550,17 @@ components:
                     description: Permission keys granted by the role.
             required:
                 - name
+                - description
+                - scope_rules
+                - permissions
         hub.permission.v1.CreateRoleResponse:
             type: object
             properties:
                 role:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
         hub.permission.v1.UpdateRoleRequest:
             type: object
             properties:
@@ -536,6 +571,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.UpdateRoleBody'
+            required:
+                - id
+                - body
         hub.permission.v1.UpdateRoleBody:
             type: object
             properties:
@@ -562,6 +600,9 @@ components:
                         type: string
             required:
                 - name
+                - description
+                - scope_rules
+                - permissions
         hub.permission.v1.UpdateRoleResponse:
             type: object
             properties:
@@ -570,6 +611,8 @@ components:
                 role:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - message
         hub.permission.v1.DeleteRoleRequest:
             type: object
             properties:
@@ -577,11 +620,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.permission.v1.DeleteRoleResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.permission.v1.GetRoleRequest:
             type: object
             properties:
@@ -589,12 +636,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.permission.v1.GetRoleResponse:
             type: object
             properties:
                 role:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
         hub.permission.v1.CloneRoleRequest:
             type: object
             properties:
@@ -607,13 +658,17 @@ components:
                 description:
                     type: string
             required:
+                - id
                 - name
+                - description
         hub.permission.v1.CloneRoleResponse:
             type: object
             properties:
                 role:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
         hub.permission.v1.ArchiveRoleRequest:
             type: object
             properties:
@@ -623,12 +678,17 @@ components:
                     format: int64
                 reason:
                     type: string
+            required:
+                - id
+                - reason
         hub.permission.v1.ArchiveRoleResponse:
             type: object
             properties:
                 role:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
         hub.permission.v1.ListRoleAssignmentsRequest:
             type: object
             properties:
@@ -671,6 +731,11 @@ components:
                     type: integer
                     format: int32
                     description: Next page number, when more results remain.
+            required:
+                - assignments
+                - page
+                - page_size
+                - total
         hub.permission.v1.RoleAssignment:
             type: object
             properties:
@@ -710,6 +775,15 @@ components:
                 granted_at:
                     type: string
                     description: Time at which the assignment was granted.
+            required:
+                - id
+                - role_id
+                - app_id
+                - status
+                - source
+                - is_primary
+                - scopes
+                - granted_at
         hub.permission.v1.AssignRoleRequest:
             type: object
             properties:
@@ -740,12 +814,16 @@ components:
             required:
                 - role_id
                 - app_id
+                - is_primary
+                - scopes
         hub.permission.v1.AssignRoleResponse:
             type: object
             properties:
                 assignment:
                     allOf:
                         - $ref: '#/components/schemas/hub.permission.v1.RoleAssignment'
+            required:
+                - assignment
         hub.permission.v1.RemoveRoleAssignmentRequest:
             type: object
             properties:
@@ -753,11 +831,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.permission.v1.RemoveRoleAssignmentResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.permission.v1.PreviewPermissionImpactRequest:
             type: object
             properties:
@@ -769,6 +851,9 @@ components:
                     type: array
                     items:
                         type: string
+            required:
+                - id
+                - permissions
         hub.permission.v1.PreviewPermissionImpactResponse:
             type: object
             properties:
@@ -786,6 +871,10 @@ components:
                     type: integer
                     format: int32
                     description: Number of active members affected by the proposed change.
+            required:
+                - added_permissions
+                - removed_permissions
+                - affected_member_count
         hub.permission.v1.ListRoleAuditRequest:
             type: object
             properties:
@@ -817,6 +906,11 @@ components:
                 next_page:
                     type: integer
                     format: int32
+            required:
+                - events
+                - page
+                - page_size
+                - total
         hub.permission.v1.RoleAuditEvent:
             type: object
             properties:
@@ -858,6 +952,14 @@ components:
                 created_at:
                     type: string
                     description: Time at which the event was created.
+            required:
+                - id
+                - action
+                - app_id
+                - before_json
+                - after_json
+                - reason
+                - created_at
         hub.permission.v1.UpdatePermissionMatrixRequest:
             type: object
             properties:
@@ -870,8 +972,11 @@ components:
             required:
                 - role
                 - permission_key
+                - enabled
         hub.permission.v1.UpdatePermissionMatrixResponse:
             type: object
             properties:
                 success:
                     type: boolean
+            required:
+                - success

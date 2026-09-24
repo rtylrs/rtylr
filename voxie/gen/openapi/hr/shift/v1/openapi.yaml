@@ -326,6 +326,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - shifts
+                - total
+                - limit
+                - offset
         hr.shift.v1.ShiftPayload:
             type: object
             properties:
@@ -402,6 +407,16 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - location_id
+                - name
+                - start_time
+                - end_time
+                - color
+                - created_at
+                - updated_at
             description: |-
                 ShiftPayload is a row in the shift table, which holds two kinds of record.
                 A template row is a reusable shift for a location: it carries location_id,
@@ -463,6 +478,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.shift.v1.ShiftPayload'
                     description: The newly created shift.
+            required:
+                - shift
         hr.shift.v1.UpdateShiftRequest:
             type: object
             properties:
@@ -504,6 +521,8 @@ components:
                 notes:
                     type: string
                     description: New free-text note.
+            required:
+                - id
             description: |-
                 UpdateShiftRequest edits an existing shift row of either kind. Only the
                 fields present are applied; absent fields keep their stored value.
@@ -514,6 +533,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.shift.v1.ShiftPayload'
                     description: The shift as stored after the update.
+            required:
+                - shift
         hr.shift.v1.DeleteShiftRequest:
             type: object
             properties:
@@ -522,12 +543,16 @@ components:
                     type: string
                     format: int64
                     description: Identifier of the shift row to delete.
+            required:
+                - id
         hr.shift.v1.DeleteShiftResponse:
             type: object
             properties:
                 success:
                     type: boolean
                     description: Whether the shift was deleted.
+            required:
+                - success
         hr.shift.v1.CreateShiftAssignmentRequest:
             type: object
             properties:
@@ -573,6 +598,9 @@ components:
 
                         Mirrors GetRosterResponse.conflicts, which already reports this class of
                         problem the same non-blocking way.
+            required:
+                - assignment
+                - warnings
         hr.shift.v1.ShiftAssignmentPayload:
             type: object
             properties:
@@ -606,6 +634,15 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - shift_id
+                - date
+                - status
+                - created_at
+                - updated_at
             description: ShiftAssignmentPayload assigns an employee to a shift on a given date.
         hr.shift.v1.GetRosterRequest:
             type: object
@@ -619,6 +656,7 @@ components:
                     type: string
                     description: Monday of the week to retrieve (ISO-8601 date).
             required:
+                - location_id
                 - week_start
         hr.shift.v1.GetRosterResponse:
             type: object
@@ -633,6 +671,9 @@ components:
                     items:
                         type: string
                     description: 'Human-readable conflict descriptions (e.g. "John Smith: double-booked on 2026-04-15").'
+            required:
+                - assignments
+                - conflicts
         hr.shift.v1.PublishRosterRequest:
             type: object
             properties:
@@ -654,6 +695,8 @@ components:
                 success:
                     type: boolean
                     description: Whether the roster was successfully published.
+            required:
+                - success
         hr.shift.v1.ListAvailabilityRequest:
             type: object
             properties:
@@ -713,6 +756,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - entries
+                - total
+                - limit
+                - offset
         hr.shift.v1.AvailabilityPayload:
             type: object
             properties:
@@ -768,6 +816,15 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this entry was last updated.
+            required:
+                - id
+                - staff_id
+                - owner_id
+                - start_time
+                - end_time
+                - is_available
+                - created_at
+                - updated_at
             description: |-
                 AvailabilityPayload is one window in which a staff member can, or explicitly
                 cannot, be scheduled for a shift. A row is either a recurring weekly pattern
@@ -839,6 +896,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.shift.v1.AvailabilityPayload'
                     description: The availability entry as stored after the write.
+            required:
+                - entry
         hr.shift.v1.DeleteAvailabilityRequest:
             type: object
             properties:
@@ -847,9 +906,13 @@ components:
                     type: string
                     format: int64
                     description: Identifier of the availability entry to delete.
+            required:
+                - id
         hr.shift.v1.DeleteAvailabilityResponse:
             type: object
             properties:
                 success:
                     type: boolean
                     description: Whether the availability entry was deleted.
+            required:
+                - success

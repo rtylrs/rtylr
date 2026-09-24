@@ -108,6 +108,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of categories to skip.
+            required:
+                - limit
+                - offset
         erp.category.v1.ListCategoriesResponse:
             type: object
             properties:
@@ -126,6 +129,12 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - categories
+                - has_more
+                - limit
+                - offset
+                - total
         erp.category.v1.Category:
             type: object
             properties:
@@ -144,6 +153,13 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - created_at
+                - updated_at
         erp.category.v1.CreateCategoryRequest:
             type: object
             properties:
@@ -153,6 +169,7 @@ components:
                     type: string
             required:
                 - name
+                - description
         erp.category.v1.CreateCategoryResponse:
             type: object
             properties:
@@ -161,6 +178,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - category_id
+                - message
         erp.category.v1.UpdateCategoryRequest:
             type: object
             properties:
@@ -171,6 +191,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/erp.category.v1.UpdateCategoryBody'
+            required:
+                - id
+                - body
         erp.category.v1.UpdateCategoryBody:
             type: object
             properties:
@@ -180,11 +203,14 @@ components:
                     type: string
             required:
                 - name
+                - description
         erp.category.v1.UpdateCategoryResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         erp.category.v1.DeleteCategoryRequest:
             type: object
             properties:
@@ -192,8 +218,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.category.v1.DeleteCategoryResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

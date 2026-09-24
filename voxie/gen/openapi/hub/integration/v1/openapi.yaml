@@ -68,6 +68,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.integration.v1.Integration'
+            required:
+                - integrations
         hub.integration.v1.Integration:
             type: object
             properties:
@@ -87,6 +89,13 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - provider
+                - status
+                - config
+                - connected_at
+                - created_at
             description: Integration is a connected third-party integration.
         hub.integration.v1.ConnectIntegrationRequest:
             type: object
@@ -98,6 +107,7 @@ components:
                     format: byte
             required:
                 - provider
+                - config
         hub.integration.v1.ConnectIntegrationResponse:
             type: object
             properties:
@@ -106,6 +116,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message
         hub.integration.v1.DisconnectIntegrationRequest:
             type: object
             properties:
@@ -120,3 +133,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

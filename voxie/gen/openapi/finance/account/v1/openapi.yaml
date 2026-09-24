@@ -117,6 +117,9 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - page
+                - page_size
         finance.account.v1.ListAccountsResponse:
             type: object
             properties:
@@ -133,6 +136,11 @@ components:
                     format: int64
                 has_more:
                     type: boolean
+            required:
+                - accounts
+                - page
+                - page_size
+                - has_more
         finance.account.v1.Account:
             type: object
             properties:
@@ -166,6 +174,16 @@ components:
                 code:
                     type: string
                     description: code is the optional account code/number.
+            required:
+                - id
+                - owner_id
+                - name
+                - type
+                - currency
+                - balance
+                - is_active
+                - created_at
+                - code
             description: Account is a chart-of-accounts ledger account.
         finance.account.v1.CreateAccountRequest:
             type: object
@@ -195,6 +213,8 @@ components:
                 - type
                 - currency
                 - balance
+                - is_active
+                - code
         finance.account.v1.CreateAccountResponse:
             type: object
             properties:
@@ -205,6 +225,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - id
+                - message
         finance.account.v1.UpdateAccountRequest:
             type: object
             properties:
@@ -215,6 +238,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/finance.account.v1.UpdateAccountBody'
+            required:
+                - id
+                - body
         finance.account.v1.UpdateAccountBody:
             type: object
             properties:
@@ -236,11 +262,17 @@ components:
             required:
                 - name
                 - type
+                - currency
+                - balance
+                - is_active
+                - code
         finance.account.v1.UpdateAccountResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         finance.account.v1.DeleteAccountRequest:
             type: object
             properties:
@@ -248,11 +280,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         finance.account.v1.DeleteAccountResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         finance.account.v1.GetChartOfAccountsRequest:
             type: object
         finance.account.v1.GetChartOfAccountsResponse:
@@ -262,6 +298,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/finance.account.v1.ChartOfAccountsNode'
+            required:
+                - tree
         finance.account.v1.ChartOfAccountsNode:
             type: object
             properties:
@@ -278,4 +316,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/finance.account.v1.ChartOfAccountsNode'
+            required:
+                - id
+                - name
+                - code
+                - type
+                - children
             description: ChartOfAccountsNode is a node in the hierarchical chart of accounts.

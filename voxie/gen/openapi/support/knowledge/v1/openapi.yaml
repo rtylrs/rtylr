@@ -103,6 +103,9 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - page
+                - page_size
         support.knowledge.v1.ListArticlesResponse:
             type: object
             properties:
@@ -119,6 +122,11 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - articles
+                - total
+                - page
+                - page_size
         support.knowledge.v1.Article:
             type: object
             properties:
@@ -145,6 +153,17 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - business_id
+                - title
+                - slug
+                - body
+                - category
+                - is_published
+                - views
+                - created_at
+                - updated_at
         support.knowledge.v1.CreateArticleRequest:
             type: object
             properties:
@@ -161,6 +180,9 @@ components:
             required:
                 - title
                 - slug
+                - body
+                - category
+                - is_published
         support.knowledge.v1.CreateArticleResponse:
             type: object
             properties:
@@ -169,6 +191,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - article_id
+                - message
         support.knowledge.v1.UpdateArticleRequest:
             type: object
             properties:
@@ -186,11 +211,20 @@ components:
                     type: string
                 is_published:
                     type: boolean
+            required:
+                - id
+                - title
+                - slug
+                - body
+                - category
+                - is_published
         support.knowledge.v1.UpdateArticleResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         support.knowledge.v1.DeleteArticleRequest:
             type: object
             properties:
@@ -198,8 +232,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         support.knowledge.v1.DeleteArticleResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

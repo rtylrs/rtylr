@@ -120,6 +120,17 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hub.user.v1.ProvisioningStatus'
                     description: Account provisioning and security state.
+            required:
+                - id
+                - email
+                - full_name
+                - apps
+                - role
+                - business_id
+                - business_name
+                - is_owner
+                - is_console_admin
+                - onboarded
         hub.user.v1.EffectiveAccess:
             type: object
             properties:
@@ -162,6 +173,15 @@ components:
                     type: string
                     format: int64
                     description: Monotonic authorization version for cache refresh.
+            required:
+                - business_id
+                - dash_permissions
+                - subscribed_apps
+                - licenses
+                - apps
+                - is_owner
+                - is_admin
+                - authorization_version
         hub.user.v1.LicenseAssignment:
             type: object
             properties:
@@ -183,6 +203,11 @@ components:
                 revoked_at:
                     type: string
                     description: Time the license was revoked, when revoked.
+            required:
+                - app_id
+                - status
+                - assignment_source
+                - granted_at
         hub.user.v1.EffectiveAppAccess:
             type: object
             properties:
@@ -226,6 +251,15 @@ components:
                     additionalProperties:
                         type: string
                     description: Permission-to-role source explanation.
+            required:
+                - app_id
+                - licensed
+                - has_access
+                - role_ids
+                - permissions
+                - scopes
+                - sources
+                - permission_sources
         hub.user.v1.RoleScope:
             type: object
             properties:
@@ -235,6 +269,9 @@ components:
                 scope_id:
                     type: string
                     description: Tenant-owned resource identifier.
+            required:
+                - scope_type
+                - scope_id
         hub.user.v1.ProvisioningStatus:
             type: object
             properties:
@@ -279,6 +316,8 @@ components:
                 user:
                     allOf:
                         - $ref: '#/components/schemas/hub.user.v1.GetMeResponse'
+            required:
+                - user
         hub.user.v1.ChangePasswordRequest:
             type: object
             properties:
@@ -307,3 +346,5 @@ components:
                 token:
                     type: string
                     description: Fresh JWT scoped to the selected business.
+            required:
+                - token

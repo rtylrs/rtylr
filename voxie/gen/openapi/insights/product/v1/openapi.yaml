@@ -98,6 +98,8 @@ components:
                     type: integer
                     format: int32
                     description: limit is the maximum number of products to return.
+            required:
+                - limit
         insights.product.v1.GetBestSellersResponse:
             type: object
             properties:
@@ -106,6 +108,8 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.product.v1.BestSeller'
                     description: products is the products value for this contract.
+            required:
+                - products
         insights.product.v1.BestSeller:
             type: object
             properties:
@@ -124,6 +128,11 @@ components:
                     type: string
                     format: int64
                     description: revenue_minor_units is the revenue minor units value for this contract.
+            required:
+                - product_id
+                - name
+                - units_sold
+                - revenue_minor_units
         insights.product.v1.GetCategoryPerformanceRequest:
             type: object
         insights.product.v1.GetCategoryPerformanceResponse:
@@ -134,6 +143,8 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.product.v1.CategorySales'
                     description: categories is the categories value for this contract.
+            required:
+                - categories
         insights.product.v1.CategorySales:
             type: object
             properties:
@@ -152,6 +163,11 @@ components:
                     type: string
                     format: int64
                     description: revenue_minor_units is the revenue minor units value for this contract.
+            required:
+                - category_id
+                - category_name
+                - units_sold
+                - revenue_minor_units
         insights.product.v1.GetProductMarginsRequest:
             type: object
         insights.product.v1.GetProductMarginsResponse:
@@ -170,6 +186,9 @@ components:
                         products is one row per product sold in the period, so margin per item
                         is answerable without pulling the ERP catalogue client-side. Absent when
                         the report is requested at distribution granularity only.
+            required:
+                - buckets
+                - products
         insights.product.v1.MarginBucket:
             type: object
             properties:
@@ -188,6 +207,11 @@ components:
                     type: string
                     format: int64
                     description: product_count is the product count value for this contract.
+            required:
+                - label
+                - lower_pct
+                - upper_pct
+                - product_count
         insights.product.v1.ProductMargin:
             type: object
             properties:
@@ -215,6 +239,11 @@ components:
                         cost_minor_units is units_sold multiplied by the product's cost price,
                         in the same minor unit. Absent when the product has no cost price on
                         record, which is distinct from a cost of zero.
+            required:
+                - product_id
+                - name
+                - units_sold
+                - revenue_minor_units
         insights.product.v1.GetSlowMoversRequest:
             type: object
             properties:
@@ -222,6 +251,8 @@ components:
                     type: integer
                     format: int32
                     description: days is the trailing sales window used to detect slow movers.
+            required:
+                - days
         insights.product.v1.GetSlowMoversResponse:
             type: object
             properties:
@@ -230,6 +261,8 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.product.v1.SlowMover'
                     description: products is the products value for this contract.
+            required:
+                - products
         insights.product.v1.SlowMover:
             type: object
             properties:
@@ -244,6 +277,10 @@ components:
                     type: number
                     format: double
                     description: stock_quantity is the stock quantity value for this contract.
+            required:
+                - product_id
+                - name
+                - stock_quantity
         insights.product.v1.GetProductPerformanceRequest:
             type: object
         insights.product.v1.GetProductPerformanceResponse:
@@ -265,3 +302,8 @@ components:
                     type: number
                     format: double
                     description: avg_margin_pct is the average margin percentage.
+            required:
+                - total_skus
+                - active_skus
+                - out_of_stock
+                - avg_margin_pct

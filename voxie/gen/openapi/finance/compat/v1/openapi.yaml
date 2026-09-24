@@ -1129,17 +1129,24 @@ components:
             type: object
             properties:
                 body: {}
+            required:
+                - body
         finance.compat.v1.PathBodyRequest:
             type: object
             properties:
                 id:
                     type: string
                 body: {}
+            required:
+                - id
+                - body
         finance.compat.v1.PathRequest:
             type: object
             properties:
                 id:
                     type: string
+            required:
+                - id
         finance.compat.v1.ReportRequest:
             type: object
             properties:

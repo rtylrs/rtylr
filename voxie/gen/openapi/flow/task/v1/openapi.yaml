@@ -649,6 +649,13 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - status
+                - priority
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.task.v1.ListTasksResponse:
             type: object
             properties:
@@ -660,6 +667,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - tasks
+                - pagination
         flow.task.v1.Task:
             type: object
             properties:
@@ -801,6 +811,31 @@ components:
                     description: |-
                         Task ids this task depends on. Read-only projection; write through the
                         addTaskDependency / removeTaskDependency RPCs.
+            required:
+                - id
+                - project_id
+                - workspace_id
+                - owner_id
+                - title
+                - description
+                - status
+                - priority
+                - reporter_id
+                - sort_order
+                - labels
+                - created_at
+                - updated_at
+                - identifier
+                - project_name
+                - project_color
+                - assignee_name
+                - assignee_initials
+                - subtask_count
+                - archived
+                - waiting_on
+                - decision_note
+                - focus_pin
+                - dependencies
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -826,6 +861,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.task.v1.GetMyTasksRequest:
             type: object
@@ -844,6 +886,11 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.task.v1.GetMyTasksResponse:
             type: object
             properties:
@@ -855,6 +902,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - tasks
+                - pagination
         flow.task.v1.GetMyTasksProjectRequest:
             type: object
         flow.task.v1.GetMyTasksProjectResponse:
@@ -866,6 +916,9 @@ components:
                 workspace_id:
                     type: string
                     format: int64
+            required:
+                - project_id
+                - workspace_id
         flow.task.v1.SearchTasksRequest:
             type: object
             properties:
@@ -888,7 +941,12 @@ components:
                     type: string
                     description: The sort direction ("asc" or "desc").
             required:
+                - q
                 - workspace_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.task.v1.SearchTasksResponse:
             type: object
             properties:
@@ -899,6 +957,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - tasks
+                - pagination
         flow.task.v1.CreateTaskRequest:
             type: object
             properties:
@@ -954,6 +1015,7 @@ components:
                 - priority
                 - due_date
                 - start_date
+                - labels
         flow.task.v1.CreateTaskResponse:
             type: object
             properties:
@@ -961,6 +1023,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.task.v1.Task'
                     description: task is the task value for this contract.
+            required:
+                - task
         flow.task.v1.GetTaskDetailRequest:
             type: object
             properties:
@@ -969,6 +1033,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.task.v1.GetTaskDetailResponse:
             type: object
             properties:
@@ -991,6 +1057,11 @@ components:
                     items:
                         $ref: '#/components/schemas/flow.task.v1.TaskActivity'
                     description: activity is the activity value for this contract.
+            required:
+                - task
+                - subtasks
+                - comments
+                - activity
         flow.task.v1.TaskComment:
             type: object
             properties:
@@ -1024,6 +1095,16 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - task_id
+                - user_id
+                - actor_name
+                - actor_initials
+                - content
+                - is_edited
+                - created_at
+                - updated_at
         flow.task.v1.TaskActivity:
             type: object
             properties:
@@ -1057,6 +1138,16 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - task_id
+                - user_id
+                - actor_name
+                - actor_initials
+                - action
+                - old_value
+                - new_value
+                - created_at
         flow.task.v1.UpdateTaskRequest:
             type: object
             properties:
@@ -1069,6 +1160,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.task.v1.UpdateTaskBody'
                     description: body carries updatable task fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         flow.task.v1.UpdateTaskBody:
             type: object
             properties:
@@ -1143,12 +1237,22 @@ components:
                         Pin this task into the caller's own Today view. Absent leaves untouched;
                         true pins, false unpins. Per-caller, not per-task: Today is a personal
                         view, so this writes flow_task_focus_pins rather than a task column.
+            required:
+                - title
+                - description
+                - status
+                - priority
+                - due_date
+                - start_date
+                - labels
         flow.task.v1.UpdateTaskResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.task.v1.UpdateTaskStatusRequest:
             type: object
             properties:
@@ -1161,6 +1265,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.task.v1.UpdateTaskStatusBody'
                     description: body carries the new task status bound from the HTTP payload.
+            required:
+                - id
+                - body
         flow.task.v1.UpdateTaskStatusBody:
             type: object
             properties:
@@ -1175,6 +1282,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.task.v1.DeleteTaskRequest:
             type: object
             properties:
@@ -1183,12 +1292,16 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.task.v1.DeleteTaskResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.task.v1.CreateSubtaskRequest:
             type: object
             properties:
@@ -1249,6 +1362,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - task_id
+                - message
         flow.task.v1.GetSubtasksRequest:
             type: object
             properties:
@@ -1271,6 +1387,12 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - task_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.task.v1.GetSubtasksResponse:
             type: object
             properties:
@@ -1282,6 +1404,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - subtasks
+                - pagination
         flow.task.v1.TaskPayloadCompact:
             type: object
             properties:
@@ -1304,6 +1429,13 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - title
+                - status
+                - priority
+                - due_date
+                - created_at
         flow.task.v1.AddCommentRequest:
             type: object
             properties:
@@ -1316,6 +1448,7 @@ components:
                     type: string
                     description: content is the content value for this contract.
             required:
+                - task_id
                 - content
         flow.task.v1.AddCommentResponse:
             type: object
@@ -1324,6 +1457,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.task.v1.TaskComment'
                     description: comment is the comment value for this contract.
+            required:
+                - comment
         flow.task.v1.DeleteCommentRequest:
             type: object
             properties:
@@ -1332,12 +1467,16 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.task.v1.DeleteCommentResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.task.v1.GetTaskActivityRequest:
             type: object
             properties:
@@ -1346,6 +1485,8 @@ components:
                     type: string
                     format: int64
                     description: task_id is the task id value for this contract.
+            required:
+                - task_id
         flow.task.v1.GetTaskActivityResponse:
             type: object
             properties:
@@ -1354,6 +1495,8 @@ components:
                     items:
                         $ref: '#/components/schemas/flow.task.v1.TaskActivity'
                     description: activity is the activity value for this contract.
+            required:
+                - activity
         flow.task.v1.CreateAttachmentRequest:
             type: object
             properties:
@@ -1374,6 +1517,7 @@ components:
                     format: int64
                     description: size is the size value for this contract.
             required:
+                - task_id
                 - name
                 - url
                 - size
@@ -1387,6 +1531,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - attachment_id
+                - message
         flow.task.v1.GetAttachmentsRequest:
             type: object
             properties:
@@ -1395,6 +1542,8 @@ components:
                     type: string
                     format: int64
                     description: task_id is the task id value for this contract.
+            required:
+                - task_id
         flow.task.v1.GetAttachmentsResponse:
             type: object
             properties:
@@ -1403,6 +1552,8 @@ components:
                     items:
                         $ref: '#/components/schemas/flow.task.v1.Attachment'
                     description: attachments is the attachments value for this contract.
+            required:
+                - attachments
         flow.task.v1.Attachment:
             type: object
             properties:
@@ -1431,6 +1582,14 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - task_id
+                - name
+                - url
+                - size
+                - uploaded_by
+                - created_at
         flow.task.v1.DeleteAttachmentRequest:
             type: object
             properties:
@@ -1439,12 +1598,16 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.task.v1.DeleteAttachmentResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.task.v1.CreateTimeLogRequest:
             type: object
             properties:
@@ -1464,6 +1627,7 @@ components:
             required:
                 - duration_minutes
                 - description
+                - task_id
         flow.task.v1.CreateTimeLogResponse:
             type: object
             properties:
@@ -1474,6 +1638,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - time_log_id
+                - message
         flow.task.v1.GetTimeLogsRequest:
             type: object
             properties:
@@ -1482,6 +1649,8 @@ components:
                     type: string
                     format: int64
                     description: task_id is the task id value for this contract.
+            required:
+                - task_id
         flow.task.v1.GetTimeLogsResponse:
             type: object
             properties:
@@ -1490,6 +1659,8 @@ components:
                     items:
                         $ref: '#/components/schemas/flow.task.v1.TimeLog'
                     description: time_logs is the time logs value for this contract.
+            required:
+                - time_logs
         flow.task.v1.TimeLog:
             type: object
             properties:
@@ -1518,6 +1689,14 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - task_id
+                - user_id
+                - duration_minutes
+                - description
+                - logged_at
+                - created_at
         flow.task.v1.DeleteTimeLogRequest:
             type: object
             properties:
@@ -1526,12 +1705,16 @@ components:
                     type: string
                     format: int64
                     description: id is the time log identifier.
+            required:
+                - id
         flow.task.v1.DeleteTimeLogResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.task.v1.AddTaskDependencyRequest:
             type: object
             properties:
@@ -1544,6 +1727,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.task.v1.AddTaskDependencyBody'
                     description: body carries the dependency target bound from the HTTP payload.
+            required:
+                - task_id
+                - body
         flow.task.v1.AddTaskDependencyBody:
             type: object
             properties:
@@ -1552,12 +1738,16 @@ components:
                     type: string
                     format: int64
                     description: depends_on_task_id is the task this task is blocked by.
+            required:
+                - depends_on_task_id
         flow.task.v1.AddTaskDependencyResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.task.v1.RemoveTaskDependencyRequest:
             type: object
             properties:
@@ -1571,9 +1761,14 @@ components:
                     type: string
                     format: int64
                     description: depends_on_task_id is the dependency being removed.
+            required:
+                - task_id
+                - depends_on_task_id
         flow.task.v1.RemoveTaskDependencyResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message

@@ -41,6 +41,8 @@ components:
                 summary:
                     allOf:
                         - $ref: '#/components/schemas/hub.billing.v1.BillingSummary'
+            required:
+                - summary
         hub.billing.v1.BillingSummary:
             type: object
             properties:
@@ -56,6 +58,12 @@ components:
                     format: double
                 next_billing_date:
                     type: string
+            required:
+                - plan
+                - status
+                - current_usage
+                - usage_limit
+                - next_billing_date
         hub.billing.v1.ListInvoicesRequest:
             type: object
         hub.billing.v1.ListInvoicesResponse:
@@ -65,6 +73,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.billing.v1.Invoice'
+            required:
+                - invoices
         hub.billing.v1.Invoice:
             type: object
             properties:
@@ -82,3 +92,10 @@ components:
                     type: string
                 paid_at:
                     type: string
+            required:
+                - id
+                - amount
+                - currency
+                - status
+                - issued_at
+                - paid_at

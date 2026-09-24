@@ -53,6 +53,9 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - page
+                - page_size
         support.inbox.v1.ListInboxResponse:
             type: object
             properties:
@@ -69,6 +72,11 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - inbox
+                - total
+                - page
+                - page_size
         support.inbox.v1.InboxItem:
             type: object
             properties:
@@ -94,6 +102,17 @@ components:
                 message_count:
                     type: integer
                     format: int32
+            required:
+                - ticket_id
+                - customer_name
+                - customer_email
+                - subject
+                - status
+                - priority
+                - channel
+                - last_message
+                - last_message_at
+                - message_count
         support.inbox.v1.GetUnreadCountRequest:
             type: object
         support.inbox.v1.GetUnreadCountResponse:
@@ -102,3 +121,5 @@ components:
                 count:
                     type: integer
                     format: int32
+            required:
+                - count

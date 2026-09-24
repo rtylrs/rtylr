@@ -45,6 +45,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.one_on_one.v1.OneOnOne'
+            required:
+                - one_on_ones
         hr.one_on_one.v1.OneOnOne:
             type: object
             properties:
@@ -70,6 +72,16 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - manager_id
+                - staff_id
+                - scheduled_at
+                - notes
+                - action_items
+                - status
+                - created_at
         hr.one_on_one.v1.CreateOneOnOneRequest:
             type: object
             properties:
@@ -93,6 +105,9 @@ components:
                 - manager_id
                 - staff_id
                 - scheduled_at
+                - notes
+                - action_items
+                - status
         hr.one_on_one.v1.CreateOneOnOneResponse:
             type: object
             properties:
@@ -101,3 +116,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message

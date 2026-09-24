@@ -40,4 +40,8 @@ components:
                     type: string
                 checked_at:
                     type: string
+            required:
+                - mode
+                - valid
+                - status
             description: LicenseState is the public, secret-free status used by admin notices.

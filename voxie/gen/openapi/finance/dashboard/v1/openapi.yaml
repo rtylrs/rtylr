@@ -43,3 +43,9 @@ components:
                     type: number
                     format: double
                     description: net_profit_mtd is the net profit mtd value for this contract.
+            required:
+                - total_revenue_mtd
+                - total_receivable
+                - overdue_amount
+                - total_expenses_mtd
+                - net_profit_mtd

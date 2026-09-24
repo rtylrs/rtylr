@@ -25,9 +25,9 @@ return violations;
 }
 
 export interface UpdateOrderItemStatusRequest {
-orderId?: string;
-itemId?: string;
-body?: UpdateOrderItemStatusBody;
+orderId?: string | undefined;
+itemId?: string | undefined;
+body?: UpdateOrderItemStatusBody | undefined;
 }
 
 export function decodeUpdateOrderItemStatusRequest(v: any): UpdateOrderItemStatusRequest {
@@ -59,7 +59,7 @@ return violations;
 }
 
 export interface UpdateOrderItemStatusResponse {
-message?: string;
+message?: string | undefined;
 }
 
 export function decodeUpdateOrderItemStatusResponse(v: any): UpdateOrderItemStatusResponse {
@@ -82,8 +82,8 @@ return violations;
 }
 
 export interface VoidOrderItemRequest {
-orderId?: string;
-itemId?: string;
+orderId?: string | undefined;
+itemId?: string | undefined;
 }
 
 export function decodeVoidOrderItemRequest(v: any): VoidOrderItemRequest {
@@ -111,7 +111,7 @@ return violations;
 }
 
 export interface VoidOrderItemResponse {
-success?: boolean;
+success?: boolean | undefined;
 }
 
 export function decodeVoidOrderItemResponse(v: any): VoidOrderItemResponse {

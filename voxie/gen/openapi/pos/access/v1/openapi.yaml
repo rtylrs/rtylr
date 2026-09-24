@@ -112,6 +112,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.access.v1.MyLocation'
+            required:
+                - locations
         pos.access.v1.MyLocation:
             type: object
             properties:
@@ -124,6 +126,11 @@ components:
                     type: string
                 phone:
                     type: string
+            required:
+                - location_id
+                - name
+                - address
+                - phone
             description: MyLocation is a location entry for the current staff member.
         pos.access.v1.GetMemberLocationsRequest:
             type: object
@@ -141,6 +148,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.access.v1.MemberLocationEntry'
+            required:
+                - locations
         pos.access.v1.MemberLocationEntry:
             type: object
             properties:
@@ -161,6 +170,12 @@ components:
                 can_view_reports:
                     type: boolean
                     description: can_view_reports controls POS reporting access.
+            required:
+                - id
+                - location_id
+                - can_manage_pos_users
+                - can_manage_terminals
+                - can_view_reports
             description: MemberLocationEntry is a location assignment for a staff member.
         pos.access.v1.GetLocationRosterRequest:
             type: object
@@ -178,6 +193,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.access.v1.RosterEntry'
+            required:
+                - roster
         pos.access.v1.RosterEntry:
             type: object
             properties:
@@ -196,6 +213,12 @@ components:
                 pos_role:
                     type: string
                     description: pos_role is the POS-specific role label.
+            required:
+                - user_id
+                - name
+                - has_pin
+                - is_manager
+                - pos_role
             description: RosterEntry is a staff member entry within a location roster.
         pos.access.v1.AssignLocationRequest:
             type: object
@@ -218,12 +241,17 @@ components:
             required:
                 - user_id
                 - location_id
+                - can_manage_pos_users
+                - can_manage_terminals
+                - can_view_reports
         pos.access.v1.AssignLocationResponse:
             type: object
             properties:
                 id:
                     type: string
                     format: int64
+            required:
+                - id
         pos.access.v1.RemoveLocationRequest:
             type: object
             properties:
@@ -238,3 +266,5 @@ components:
             properties:
                 success:
                     type: boolean
+            required:
+                - success

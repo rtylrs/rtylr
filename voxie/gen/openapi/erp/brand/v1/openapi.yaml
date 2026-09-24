@@ -108,6 +108,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of brands to skip.
+            required:
+                - limit
+                - offset
         erp.brand.v1.ListBrandsResponse:
             type: object
             properties:
@@ -126,6 +129,12 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - brands
+                - has_more
+                - limit
+                - offset
+                - total
         erp.brand.v1.Brand:
             type: object
             properties:
@@ -148,6 +157,15 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - logo_url
+                - description
+                - product_count
+                - created_at
+                - updated_at
         erp.brand.v1.CreateBrandRequest:
             type: object
             properties:
@@ -159,6 +177,8 @@ components:
                     type: string
             required:
                 - name
+                - logo_url
+                - description
         erp.brand.v1.CreateBrandResponse:
             type: object
             properties:
@@ -167,6 +187,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - brand_id
+                - message
         erp.brand.v1.UpdateBrandRequest:
             type: object
             properties:
@@ -177,6 +200,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/erp.brand.v1.UpdateBrandBody'
+            required:
+                - id
+                - body
         erp.brand.v1.UpdateBrandBody:
             type: object
             properties:
@@ -188,11 +214,15 @@ components:
                     type: string
             required:
                 - name
+                - logo_url
+                - description
         erp.brand.v1.UpdateBrandResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         erp.brand.v1.DeleteBrandRequest:
             type: object
             properties:
@@ -200,8 +230,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.brand.v1.DeleteBrandResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

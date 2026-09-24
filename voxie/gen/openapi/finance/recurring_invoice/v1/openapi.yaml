@@ -155,6 +155,9 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - page
+                - page_size
         finance.recurring_invoice.v1.ListRecurringInvoicesResponse:
             type: object
             properties:
@@ -171,6 +174,11 @@ components:
                     format: int64
                 has_more:
                     type: boolean
+            required:
+                - recurring_invoices
+                - page
+                - page_size
+                - has_more
         finance.recurring_invoice.v1.RecurringInvoice:
             type: object
             properties:
@@ -199,6 +207,14 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - owner_id
+                - template_invoice_id
+                - frequency
+                - next_invoice_date
+                - is_active
+                - created_at
         finance.recurring_invoice.v1.CreateRecurringInvoiceRequest:
             type: object
             properties:
@@ -234,6 +250,9 @@ components:
                 message:
                     type: string
                     description: The backend confirmation message.
+            required:
+                - id
+                - message
         finance.recurring_invoice.v1.GetRecurringInvoiceRequest:
             type: object
             properties:
@@ -241,12 +260,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         finance.recurring_invoice.v1.GetRecurringInvoiceResponse:
             type: object
             properties:
                 invoice:
                     allOf:
                         - $ref: '#/components/schemas/finance.recurring_invoice.v1.RecurringInvoice'
+            required:
+                - invoice
         finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest:
             type: object
             properties:
@@ -259,6 +282,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.recurring_invoice.v1.UpdateRecurringInvoiceBody'
                     description: Carries updatable recurring invoice fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         finance.recurring_invoice.v1.UpdateRecurringInvoiceBody:
             type: object
             properties:
@@ -288,6 +314,8 @@ components:
                 message:
                     type: string
                     description: The backend confirmation message.
+            required:
+                - message
         finance.recurring_invoice.v1.PauseRecurringInvoiceRequest:
             type: object
             properties:
@@ -296,12 +324,16 @@ components:
                     type: string
                     format: int64
                     description: The recurring invoice to pause.
+            required:
+                - id
         finance.recurring_invoice.v1.PauseRecurringInvoiceResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: The backend confirmation message.
+            required:
+                - message
         finance.recurring_invoice.v1.ResumeRecurringInvoiceRequest:
             type: object
             properties:
@@ -310,9 +342,13 @@ components:
                     type: string
                     format: int64
                     description: The recurring invoice to resume.
+            required:
+                - id
         finance.recurring_invoice.v1.ResumeRecurringInvoiceResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: The backend confirmation message.
+            required:
+                - message

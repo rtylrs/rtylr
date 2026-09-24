@@ -20,10 +20,10 @@ return violations;
 }
 
 export interface DashboardResponse {
-totalSales?: number;
-orderCount?: number;
-avgOrder?: number;
-tableTurnover?: number;
+totalSales?: number | undefined;
+orderCount?: number | undefined;
+avgOrder?: number | undefined;
+tableTurnover?: number | undefined;
 }
 
 export function decodeDashboardResponse(v: any): DashboardResponse {

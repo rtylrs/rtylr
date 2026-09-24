@@ -61,6 +61,12 @@ components:
                     items:
                         $ref: '#/components/schemas/flow.task.v1.Task'
                     description: my_tasks is the my tasks value for this contract.
+            required:
+                - open_tasks
+                - in_progress_tasks
+                - completed_this_week
+                - overdue_tasks
+                - my_tasks
         flow.task.v1.Task:
             type: object
             properties:
@@ -202,3 +208,28 @@ components:
                     description: |-
                         Task ids this task depends on. Read-only projection; write through the
                         addTaskDependency / removeTaskDependency RPCs.
+            required:
+                - id
+                - project_id
+                - workspace_id
+                - owner_id
+                - title
+                - description
+                - status
+                - priority
+                - reporter_id
+                - sort_order
+                - labels
+                - created_at
+                - updated_at
+                - identifier
+                - project_name
+                - project_color
+                - assignee_name
+                - assignee_initials
+                - subtask_count
+                - archived
+                - waiting_on
+                - decision_note
+                - focus_pin
+                - dependencies

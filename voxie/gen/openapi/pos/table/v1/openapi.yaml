@@ -96,6 +96,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.table.v1.Table'
+            required:
+                - tables
         pos.table.v1.Table:
             type: object
             properties:
@@ -123,6 +125,14 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - label
+                - seats
+                - status
+                - created_at
+                - updated_at
             description: Table is a POS floor table.
         pos.table.v1.CreateTableRequest:
             type: object
@@ -147,6 +157,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - table_id
+                - message
         pos.table.v1.UpdateTableRequest:
             type: object
             properties:
@@ -158,6 +171,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.table.v1.UpdateTableBody'
                     description: body carries updatable table fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         pos.table.v1.UpdateTableBody:
             type: object
             properties:
@@ -182,6 +198,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         pos.table.v1.DeleteTableRequest:
             type: object
             properties:
@@ -189,8 +207,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         pos.table.v1.DeleteTableResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

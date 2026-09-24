@@ -138,6 +138,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - assets
+                - total
+                - limit
+                - offset
         hr.equipment.v1.AssetPayload:
             type: object
             properties:
@@ -176,6 +181,15 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - name
+                - assigned_date
+                - condition
+                - created_at
+                - updated_at
             description: AssetPayload is a physical asset assigned to an employee.
         hr.equipment.v1.ListEquipmentRequestsRequest:
             type: object
@@ -207,6 +221,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - requests
+                - total
+                - limit
+                - offset
         hr.equipment.v1.EquipmentRequestPayload:
             type: object
             properties:
@@ -257,6 +276,17 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - equipment_type
+                - description
+                - urgency
+                - status
+                - current_approval_level
+                - created_at
+                - updated_at
             description: EquipmentRequestPayload is a request for equipment made on behalf of an employee.
         hr.equipment.v1.CreateEquipmentRequestRequest:
             type: object
@@ -290,6 +320,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.equipment.v1.EquipmentRequestPayload'
                     description: The newly created equipment request.
+            required:
+                - request
         hr.equipment.v1.ApproveEquipmentRequest:
             type: object
             properties:
@@ -301,12 +333,17 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hr.equipment.v1.ApproveEquipmentBody'
+            required:
+                - equipment_request_id
+                - body
         hr.equipment.v1.ApproveEquipmentBody:
             type: object
             properties:
                 approved:
                     type: boolean
                     description: True to approve, false to reject.
+            required:
+                - approved
             description: ApproveEquipmentBody carries approval decision fields bound from the HTTP payload.
         hr.equipment.v1.ApproveEquipmentResponse:
             type: object
@@ -314,3 +351,5 @@ components:
                 success:
                     type: boolean
                     description: Whether the approval action was processed.
+            required:
+                - success

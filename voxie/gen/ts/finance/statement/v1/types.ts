@@ -20,12 +20,12 @@ return violations;
 }
 
 export interface GetBalanceSheetResponse {
-totalAssets?: number;
-totalLiabilities?: number;
-totalEquity?: number;
-cashBalance?: number;
-accountsReceivable?: number;
-accountsPayable?: number;
+totalAssets?: number | undefined;
+totalLiabilities?: number | undefined;
+totalEquity?: number | undefined;
+cashBalance?: number | undefined;
+accountsReceivable?: number | undefined;
+accountsPayable?: number | undefined;
 }
 
 export function decodeGetBalanceSheetResponse(v: any): GetBalanceSheetResponse {
@@ -63,7 +63,7 @@ return violations;
 }
 
 export interface GetCashFlowRequest {
-period?: string;
+period?: string | undefined;
 }
 
 export function decodeGetCashFlowRequest(v: any): GetCashFlowRequest {
@@ -86,11 +86,11 @@ return violations;
 }
 
 export interface GetCashFlowResponse {
-period?: string;
-operatingInflow?: number;
-operatingOutflow?: number;
-netOperating?: number;
-netCashFlow?: number;
+period?: string | undefined;
+operatingInflow?: number | undefined;
+operatingOutflow?: number | undefined;
+netOperating?: number | undefined;
+netCashFlow?: number | undefined;
 }
 
 export function decodeGetCashFlowResponse(v: any): GetCashFlowResponse {

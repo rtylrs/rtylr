@@ -29,6 +29,8 @@ components:
             properties:
                 week_start:
                     type: string
+            required:
+                - week_start
         hr.timesheet.v1.ListTimesheetsResponse:
             type: object
             properties:
@@ -36,6 +38,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.timesheet.v1.TimesheetEntry'
+            required:
+                - timesheets
         hr.timesheet.v1.TimesheetEntry:
             type: object
             properties:
@@ -55,4 +59,11 @@ components:
                 overtime_hours:
                     type: number
                     format: double
+            required:
+                - staff_id
+                - staff_name
+                - week_start
+                - total_hours
+                - regular_hours
+                - overtime_hours
             description: TimesheetEntry is a weekly hours summary for a staff member.

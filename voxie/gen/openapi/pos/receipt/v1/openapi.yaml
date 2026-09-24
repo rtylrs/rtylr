@@ -64,6 +64,9 @@ components:
                     type: string
                 to_date:
                     type: string
+            required:
+                - from_date
+                - to_date
         pos.receipt.v1.ListReceiptsResponse:
             type: object
             properties:
@@ -71,6 +74,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.receipt.v1.Receipt'
+            required:
+                - receipts
         pos.receipt.v1.Receipt:
             type: object
             properties:
@@ -88,6 +93,13 @@ components:
                     type: string
                 paid_at:
                     type: string
+            required:
+                - id
+                - order_number
+                - customer_name
+                - total
+                - payment_method
+                - paid_at
             description: Receipt is a completed order receipt.
         pos.receipt.v1.EmailReceiptRequest:
             type: object
@@ -101,9 +113,12 @@ components:
                     type: string
                     description: Recipient email address for the receipt.
             required:
+                - id
                 - email
         pos.receipt.v1.EmailReceiptResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

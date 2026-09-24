@@ -2,17 +2,17 @@
 
 export interface OvertimeRequestPayload {
 id: string;
-ownerId?: string;
-employeeId?: string;
-date?: string;
-plannedExtraMinutes?: number;
-reason?: string;
-status?: string;
-currentApprovalLevel?: number;
-approvedBy?: string;
-multiplierApplied?: number;
-createdAt?: string;
-updatedAt?: string;
+ownerId?: string | undefined;
+employeeId?: string | undefined;
+date?: string | undefined;
+plannedExtraMinutes?: number | undefined;
+reason?: string | undefined;
+status?: string | undefined;
+currentApprovalLevel?: number | undefined;
+approvedBy?: string | undefined;
+multiplierApplied?: number | undefined;
+createdAt?: string | undefined;
+updatedAt?: string | undefined;
 }
 
 export function decodeOvertimeRequestPayload(v: any): OvertimeRequestPayload {
@@ -70,8 +70,8 @@ return violations;
 }
 
 export interface ListOvertimeRequestsRequest {
-employeeId?: string;
-status?: string;
+employeeId?: string | undefined;
+status?: string | undefined;
 }
 
 export function decodeListOvertimeRequestsRequest(v: any): ListOvertimeRequestsRequest {
@@ -97,10 +97,10 @@ return violations;
 }
 
 export interface ListOvertimeRequestsResponse {
-requests?: (OvertimeRequestPayload)[];
-total?: number;
-limit?: number;
-offset?: number;
+requests?: (OvertimeRequestPayload)[] | undefined;
+total?: number | undefined;
+limit?: number | undefined;
+offset?: number | undefined;
 }
 
 export function decodeListOvertimeRequestsResponse(v: any): ListOvertimeRequestsResponse {
@@ -174,7 +174,7 @@ return violations;
 }
 
 export interface CreateOvertimeRequestResponse {
-request?: OvertimeRequestPayload;
+request?: OvertimeRequestPayload | undefined;
 }
 
 export function decodeCreateOvertimeRequestResponse(v: any): CreateOvertimeRequestResponse {
@@ -198,9 +198,9 @@ return violations;
 }
 
 export interface ApproveOvertimeBody {
-approved?: boolean;
-multiplierApplied?: number;
-rejectionReason?: string;
+approved?: boolean | undefined;
+multiplierApplied?: number | undefined;
+rejectionReason?: string | undefined;
 }
 
 export function decodeApproveOvertimeBody(v: any): ApproveOvertimeBody {
@@ -229,8 +229,8 @@ return violations;
 }
 
 export interface ApproveOvertimeRequest {
-overtimeRequestId?: string;
-body?: ApproveOvertimeBody;
+overtimeRequestId?: string | undefined;
+body?: ApproveOvertimeBody | undefined;
 }
 
 export function decodeApproveOvertimeRequest(v: any): ApproveOvertimeRequest {
@@ -258,7 +258,7 @@ return violations;
 }
 
 export interface ApproveOvertimeResponse {
-success?: boolean;
+success?: boolean | undefined;
 }
 
 export function decodeApproveOvertimeResponse(v: any): ApproveOvertimeResponse {

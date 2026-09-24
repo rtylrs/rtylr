@@ -100,6 +100,11 @@ components:
                 sort_dir:
                     type: string
                     description: sort_dir is the sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         finance.bank_account.v1.ListBankAccountsResponse:
             type: object
             properties:
@@ -112,6 +117,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
                     description: pagination is the pagination value for this contract.
+            required:
+                - accounts
+                - pagination
         finance.bank_account.v1.BankAccount:
             type: object
             properties:
@@ -146,6 +154,16 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - name
+                - bank_name
+                - account_type
+                - last_four
+                - balance
+                - currency
+                - is_primary
+                - created_at
             description: BankAccount is a business's linked bank account.
         common.pagination.v1.PaginationResponse:
             type: object
@@ -172,6 +190,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         finance.bank_account.v1.CreateBankAccountRequest:
             type: object
@@ -206,6 +231,7 @@ components:
                 - last_four
                 - balance
                 - currency
+                - is_primary
         finance.bank_account.v1.CreateBankAccountResponse:
             type: object
             properties:
@@ -213,6 +239,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.bank_account.v1.BankAccount'
                     description: account is the account value for this contract.
+            required:
+                - account
         finance.bank_account.v1.GetBankAccountRequest:
             type: object
             properties:
@@ -221,6 +249,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         finance.bank_account.v1.GetBankAccountResponse:
             type: object
             properties:
@@ -228,3 +258,5 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.bank_account.v1.BankAccount'
                     description: account is the account value for this contract.
+            required:
+                - account

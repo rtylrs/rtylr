@@ -107,6 +107,9 @@ components:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
+            required:
+                - page
+                - limit
         flow.view.v2.ListViewsResponse:
             type: object
             properties:
@@ -117,6 +120,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - views
+                - pagination
         flow.view.v2.View:
             type: object
             properties:
@@ -143,6 +149,15 @@ components:
                         or "private" (only its creator). Empty means "shared", which is how every
                         view behaved before this field existed, so an older client keeps its
                         current reach rather than silently making views private.
+            required:
+                - id
+                - name
+                - icon
+                - filters
+                - group_by
+                - sort_by
+                - sort_dir
+                - visibility
             description: |-
                 View is a saved filter/sort preset. Business-shared in v2: every member of
                 the caller's business can list and use saved views, matching v1's
@@ -173,6 +188,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.view.v2.CreateViewRequest:
             type: object
@@ -199,12 +221,20 @@ components:
                         current reach rather than silently making views private.
             required:
                 - name
+                - icon
+                - filters
+                - group_by
+                - sort_by
+                - sort_dir
+                - visibility
         flow.view.v2.CreateViewResponse:
             type: object
             properties:
                 view:
                     allOf:
                         - $ref: '#/components/schemas/flow.view.v2.View'
+            required:
+                - view
         flow.view.v2.UpdateViewRequest:
             type: object
             properties:
@@ -232,6 +262,15 @@ components:
                         or "private" (only its creator). Empty means "shared", which is how every
                         view behaved before this field existed, so an older client keeps its
                         current reach rather than silently making views private.
+            required:
+                - id
+                - name
+                - icon
+                - filters
+                - group_by
+                - sort_by
+                - sort_dir
+                - visibility
         flow.view.v2.UpdateViewResponse:
             type: object
         flow.view.v2.DeleteViewRequest:
@@ -241,5 +280,7 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         flow.view.v2.DeleteViewResponse:
             type: object

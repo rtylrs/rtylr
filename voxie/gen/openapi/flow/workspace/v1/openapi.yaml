@@ -241,6 +241,11 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.workspace.v1.ListWorkspacesResponse:
             type: object
             properties:
@@ -252,6 +257,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - workspaces
+                - pagination
         flow.workspace.v1.Workspace:
             type: object
             properties:
@@ -297,6 +305,19 @@ components:
                 is_personal:
                     type: boolean
                     description: True when this is the caller's auto-created Personal workspace.
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - icon
+                - color
+                - is_default
+                - created_by
+                - created_at
+                - updated_at
+                - member_count
+                - is_personal
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -322,6 +343,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.workspace.v1.CreateWorkspaceRequest:
             type: object
@@ -350,6 +378,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.workspace.v1.Workspace'
                     description: workspace is the workspace value for this contract.
+            required:
+                - workspace
         flow.workspace.v1.UpdateWorkspaceRequest:
             type: object
             properties:
@@ -362,6 +392,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.workspace.v1.UpdateWorkspaceBody'
                     description: body carries updatable workspace fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         flow.workspace.v1.UpdateWorkspaceBody:
             type: object
             properties:
@@ -388,6 +421,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.workspace.v1.DeleteWorkspaceRequest:
             type: object
             properties:
@@ -396,12 +431,16 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.workspace.v1.DeleteWorkspaceResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.workspace.v1.ListWorkspaceMembersRequest:
             type: object
             properties:
@@ -426,6 +465,10 @@ components:
                     description: The sort direction ("asc" or "desc").
             required:
                 - workspace_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.workspace.v1.ListWorkspaceMembersResponse:
             type: object
             properties:
@@ -437,6 +480,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - members
+                - pagination
         flow.workspace.v1.WorkspaceMember:
             type: object
             properties:
@@ -468,6 +514,15 @@ components:
                 joined_at:
                     type: string
                     description: joined_at is when the member joined the workspace.
+            required:
+                - id
+                - workspace_id
+                - user_id
+                - name
+                - email
+                - role
+                - invited_by
+                - joined_at
         flow.workspace.v1.AddWorkspaceMemberRequest:
             type: object
             properties:
@@ -494,6 +549,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.workspace.v1.RemoveWorkspaceMemberRequest:
             type: object
             properties:
@@ -516,6 +573,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.workspace.v1.UpdateWorkspaceMemberRoleRequest:
             type: object
             properties:
@@ -542,3 +601,5 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message

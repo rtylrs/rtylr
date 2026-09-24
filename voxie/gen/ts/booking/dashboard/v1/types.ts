@@ -20,10 +20,10 @@ return violations;
 }
 
 export interface GetDashboardResponse {
-todayCount?: number;
-upcomingCount?: number;
-cancellationRate?: number;
-revenue?: number;
+todayCount?: number | undefined;
+upcomingCount?: number | undefined;
+cancellationRate?: number | undefined;
+revenue?: number | undefined;
 }
 
 export function decodeGetDashboardResponse(v: any): GetDashboardResponse {

@@ -42,3 +42,10 @@ components:
                 active_apps:
                     type: string
                     format: int64
+            required:
+                - revenue
+                - order_count
+                - staff_count
+                - customer_count
+                - low_stock_count
+                - active_apps

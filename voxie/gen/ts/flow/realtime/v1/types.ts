@@ -20,7 +20,7 @@ return violations;
 }
 
 export interface IssueWebSocketTicketResponse {
-ticket?: string;
+ticket?: string | undefined;
 }
 
 export function decodeIssueWebSocketTicketResponse(v: any): IssueWebSocketTicketResponse {

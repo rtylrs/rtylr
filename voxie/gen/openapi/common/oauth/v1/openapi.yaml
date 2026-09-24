@@ -112,6 +112,8 @@ components:
                 redirect_url:
                     type: string
                     description: redirect_url is the URL the browser should navigate to.
+            required:
+                - redirect_url
             description: IssueResponse returns the authorization redirect URL.
         common.oauth.v1.TokenRequest:
             type: object
@@ -130,7 +132,11 @@ components:
                     type: string
             required:
                 - grant_type
+                - code
+                - code_verifier
+                - redirect_uri
                 - client_id
+                - refresh_token
         common.oauth.v1.TokenResponse:
             type: object
             properties:
@@ -143,6 +149,11 @@ components:
                 expires_in:
                     type: integer
                     format: int32
+            required:
+                - access_token
+                - refresh_token
+                - token_type
+                - expires_in
         common.oauth.v1.RevokeRequest:
             type: object
             properties:
@@ -152,11 +163,14 @@ components:
                     type: string
             required:
                 - token
+                - client_id
         common.oauth.v1.RevokeResponse:
             type: object
             properties:
                 ok:
                     type: boolean
+            required:
+                - ok
         common.oauth.v1.MeRequest:
             type: object
         common.oauth.v1.MeResponse:
@@ -174,6 +188,10 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hub.user.v1.EffectiveAccess'
                     description: Server-resolved authorization for the active business.
+            required:
+                - user_id
+                - business_id
+                - role
         hub.user.v1.EffectiveAccess:
             type: object
             properties:
@@ -216,6 +234,15 @@ components:
                     type: string
                     format: int64
                     description: Monotonic authorization version for cache refresh.
+            required:
+                - business_id
+                - dash_permissions
+                - subscribed_apps
+                - licenses
+                - apps
+                - is_owner
+                - is_admin
+                - authorization_version
         hub.user.v1.LicenseAssignment:
             type: object
             properties:
@@ -237,6 +264,11 @@ components:
                 revoked_at:
                     type: string
                     description: Time the license was revoked, when revoked.
+            required:
+                - app_id
+                - status
+                - assignment_source
+                - granted_at
         hub.user.v1.EffectiveAppAccess:
             type: object
             properties:
@@ -280,6 +312,15 @@ components:
                     additionalProperties:
                         type: string
                     description: Permission-to-role source explanation.
+            required:
+                - app_id
+                - licensed
+                - has_access
+                - role_ids
+                - permissions
+                - scopes
+                - sources
+                - permission_sources
         hub.user.v1.RoleScope:
             type: object
             properties:
@@ -289,3 +330,6 @@ components:
                 scope_id:
                     type: string
                     description: Tenant-owned resource identifier.
+            required:
+                - scope_type
+                - scope_id

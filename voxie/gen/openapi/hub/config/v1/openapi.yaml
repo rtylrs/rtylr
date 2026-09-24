@@ -164,6 +164,9 @@ components:
                     description: business is declared in hub.business.v1 - a cross-package reference.
                 maintenance:
                     type: boolean
+            required:
+                - business
+                - maintenance
         hub.business.v1.Business:
             type: object
             properties:
@@ -200,6 +203,21 @@ components:
                 slug:
                     type: string
                     description: URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+            required:
+                - id
+                - name
+                - type
+                - logo_url
+                - address
+                - phone
+                - email
+                - website
+                - timezone
+                - currency
+                - country
+                - plan
+                - created_at
+                - slug
             description: Business is a merchant's top-level business entity.
         hub.config.v1.CreateConfigRequest:
             type: object
@@ -216,8 +234,10 @@ components:
                 description:
                     type: string
             required:
+                - owner
                 - key
                 - value
+                - description
         hub.config.v1.CreateConfigResponse:
             type: object
             properties:
@@ -227,6 +247,9 @@ components:
                     description: Identifies the created config.
                 message:
                     type: string
+            required:
+                - config_id
+                - message
         hub.config.v1.UpdateConfigRequest:
             type: object
             properties:
@@ -298,6 +321,9 @@ components:
                 config:
                     allOf:
                         - $ref: '#/components/schemas/hub.config.v1.ConfigPayload'
+            required:
+                - message
+                - config
         hub.config.v1.ConfigPayload:
             type: object
             properties:
@@ -371,6 +397,39 @@ components:
                     type: string
                 slug:
                     type: string
+            required:
+                - owner_id
+                - site_name
+                - logo_url
+                - favicon_url
+                - meta_tags
+                - contact_email
+                - contact_number
+                - sender_email
+                - email_provider
+                - sender_name
+                - reply_to_email
+                - email_notifications_enabled
+                - smtp_host
+                - smtp_port
+                - smtp_username
+                - smtp_password_configured
+                - website
+                - maps_url
+                - address
+                - city
+                - zipcode
+                - country
+                - instagram
+                - maintenance_mode
+                - maintenance_notice
+                - addons_enabled
+                - enable_reviews
+                - enable_wishlist
+                - enable_newsletter_signup
+                - about_content
+                - footer_sub_text
+                - slug
         hub.config.v1.GetCustomDomainRequest:
             type: object
         hub.config.v1.GetCustomDomainResponse:
@@ -379,6 +438,8 @@ components:
                 domain:
                     allOf:
                         - $ref: '#/components/schemas/hub.config.v1.CustomDomain'
+            required:
+                - domain
         hub.config.v1.CustomDomain:
             type: object
             properties:
@@ -402,6 +463,16 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - business_id
+                - domain
+                - status
+                - verification_token
+                - ssl_status
+                - verified_at
+                - created_at
+                - updated_at
         hub.config.v1.RegisterCustomDomainRequest:
             type: object
             properties:
@@ -415,6 +486,8 @@ components:
                 domain:
                     allOf:
                         - $ref: '#/components/schemas/hub.config.v1.CustomDomain'
+            required:
+                - domain
         hub.config.v1.VerifyCustomDomainRequest:
             type: object
             properties:
@@ -428,6 +501,8 @@ components:
                 domain:
                     allOf:
                         - $ref: '#/components/schemas/hub.config.v1.CustomDomain'
+            required:
+                - domain
         hub.config.v1.RemoveCustomDomainRequest:
             type: object
         hub.config.v1.RemoveCustomDomainResponse:
@@ -435,6 +510,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.config.v1.SendTestEmailRequest:
             type: object
             properties:
@@ -449,6 +526,9 @@ components:
                     type: string
                 queued:
                     type: boolean
+            required:
+                - message
+                - queued
         hub.config.v1.GetIndustriesRequest:
             type: object
         hub.config.v1.GetIndustriesResponse:
@@ -458,6 +538,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.config.v1.IndustryGroup'
+            required:
+                - groups
         hub.config.v1.IndustryGroup:
             type: object
             properties:
@@ -467,6 +549,9 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.config.v1.IndustryType'
+            required:
+                - category
+                - types
         hub.config.v1.IndustryType:
             type: object
             properties:
@@ -476,3 +561,7 @@ components:
                     type: string
                 icon:
                     type: string
+            required:
+                - slug
+                - label
+                - icon

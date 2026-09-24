@@ -64,6 +64,14 @@ components:
                 preview_limit:
                     type: integer
                     format: int32
+            required:
+                - unmatched_bank_txns
+                - unmatched_invoices
+                - suggestions
+                - bank_txns_truncated
+                - invoices_truncated
+                - expenses_truncated
+                - preview_limit
         finance.reconciliation.v1.UnmatchedBankTransaction:
             type: object
             properties:
@@ -84,6 +92,14 @@ components:
                     type: string
                 external_id:
                     type: string
+            required:
+                - id
+                - bank_account_id
+                - amount_minor_units
+                - currency
+                - occurred_at
+                - description
+                - external_id
         finance.reconciliation.v1.UnmatchedInvoice:
             type: object
             properties:
@@ -103,6 +119,14 @@ components:
                     type: string
                 due_date:
                     type: string
+            required:
+                - id
+                - invoice_number
+                - client_name
+                - amount_minor_units
+                - currency
+                - issue_date
+                - due_date
         finance.reconciliation.v1.MatchSuggestion:
             type: object
             properties:
@@ -123,6 +147,13 @@ components:
                 score:
                     type: number
                     format: double
+            required:
+                - bank_feed_id
+                - target_type
+                - target_id
+                - amount_minor_units
+                - days_apart
+                - score
         finance.reconciliation.v1.MatchRequest:
             type: object
             properties:
@@ -146,3 +177,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message

@@ -93,6 +93,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.gift_card.v1.GiftCard'
+            required:
+                - gift_cards
         pos.gift_card.v1.GiftCard:
             type: object
             properties:
@@ -133,6 +135,20 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - business_id
+                - customer_id
+                - code
+                - initial_amount
+                - current_balance
+                - customer_name
+                - customer_email
+                - is_active
+                - expires_at
+                - created_at
+                - updated_at
             description: GiftCard is a stored-value card that can be issued to and redeemed by a customer.
         pos.gift_card.v1.CreateGiftCardRequest:
             type: object
@@ -172,6 +188,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - gift_card_id
+                - message
         pos.gift_card.v1.RedeemGiftCardRequest:
             type: object
             properties:
@@ -198,6 +217,9 @@ components:
                         - $ref: '#/components/schemas/pos.gift_card.v1.GiftCard'
                 message:
                     type: string
+            required:
+                - gift_card
+                - message
         pos.gift_card.v1.GetGiftCardByCodeRequest:
             type: object
             properties:
@@ -211,3 +233,5 @@ components:
                 gift_card:
                     allOf:
                         - $ref: '#/components/schemas/pos.gift_card.v1.GiftCard'
+            required:
+                - gift_card

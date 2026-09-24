@@ -146,6 +146,8 @@ components:
                         statuses is the project's set in `sort_order`, and is EMPTY for a project
                         that has not configured any. Empty means "use the built-ins", never
                         "this project has no statuses".
+            required:
+                - statuses
         flow.status.v2.Status:
             type: object
             properties:
@@ -202,6 +204,16 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - project_id
+                - name
+                - bucket
+                - legacy_status
+                - color
+                - sort_order
+                - is_default
+                - created_at
             description: |-
                 Status is one entry in a project's own status set.
 
@@ -250,6 +262,10 @@ components:
                 - project_id
                 - name
                 - bucket
+                - legacy_status
+                - color
+                - sort_order
+                - is_default
         flow.status.v2.CreateStatusResponse:
             type: object
             properties:
@@ -257,6 +273,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.status.v2.Status'
                     description: status is the created status, including the derived legacy_status.
+            required:
+                - status
         flow.status.v2.UpdateStatusRequest:
             type: object
             properties:
@@ -269,6 +287,7 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.status.v2.UpdateStatusBody'
             required:
+                - id
                 - body
         flow.status.v2.UpdateStatusBody:
             type: object
@@ -298,6 +317,9 @@ components:
                 - name
                 - bucket
                 - color
+                - legacy_status
+                - sort_order
+                - is_default
             description: |-
                 UpdateStatusBody is a replacement, so send the whole status.
 
@@ -313,6 +335,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.status.v2.Status'
                     description: status is the updated status.
+            required:
+                - status
         flow.status.v2.DeleteStatusRequest:
             type: object
             properties:
@@ -321,6 +345,8 @@ components:
                     type: string
                     format: int64
                     description: id is the status identifier.
+            required:
+                - id
         flow.status.v2.DeleteStatusResponse:
             type: object
             properties:
@@ -337,6 +363,9 @@ components:
                         Deleting a status never blocks on its tasks and never deletes them. The
                         server clears their status_id, and the string status they already carry
                         keeps them where the user left them.
+            required:
+                - message
+                - reassigned_task_count
         flow.status.v2.SetTaskStatusRequest:
             type: object
             properties:
@@ -356,6 +385,7 @@ components:
                         value rather than a missing argument.
             required:
                 - task_id
+                - status_id
         flow.status.v2.SetTaskStatusResponse:
             type: object
             properties:
@@ -367,3 +397,6 @@ components:
                     description: |-
                         status is the resulting built-in string status the task now carries, so a
                         caller does not need a second request to keep its cached task correct.
+            required:
+                - message
+                - status

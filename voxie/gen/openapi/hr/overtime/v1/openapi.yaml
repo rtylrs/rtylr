@@ -110,6 +110,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - requests
+                - total
+                - limit
+                - offset
         hr.overtime.v1.OvertimeRequestPayload:
             type: object
             properties:
@@ -161,6 +166,15 @@ components:
                     description: Unix timestamp when this record was last updated.
             required:
                 - id
+                - owner_id
+                - employee_id
+                - date
+                - planned_extra_minutes
+                - reason
+                - status
+                - current_approval_level
+                - created_at
+                - updated_at
             description: OvertimeRequestPayload is a single employee's request to work overtime.
         hr.overtime.v1.CreateOvertimeRequestRequest:
             type: object
@@ -193,6 +207,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.overtime.v1.OvertimeRequestPayload'
                     description: The newly created overtime request.
+            required:
+                - request
         hr.overtime.v1.ApproveOvertimeRequest:
             type: object
             properties:
@@ -204,6 +220,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hr.overtime.v1.ApproveOvertimeBody'
+            required:
+                - overtime_request_id
+                - body
         hr.overtime.v1.ApproveOvertimeBody:
             type: object
             properties:
@@ -217,6 +236,8 @@ components:
                 rejection_reason:
                     type: string
                     description: Reason for rejection; absent if approving.
+            required:
+                - approved
             description: ApproveOvertimeBody carries approval decision fields bound from the HTTP payload.
         hr.overtime.v1.ApproveOvertimeResponse:
             type: object
@@ -224,3 +245,5 @@ components:
                 success:
                     type: boolean
                     description: Whether the approval action was processed.
+            required:
+                - success

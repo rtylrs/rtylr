@@ -114,6 +114,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.app.v1.App'
+            required:
+                - apps
         hub.app.v1.App:
             type: object
             properties:
@@ -127,6 +129,12 @@ components:
                     type: string
                 is_enabled:
                     type: boolean
+            required:
+                - id
+                - name
+                - description
+                - icon
+                - is_enabled
         hub.app.v1.ListAddonsRequest:
             type: object
         hub.app.v1.ListAddonsResponse:
@@ -136,6 +144,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.app.v1.Addon'
+            required:
+                - addons
         hub.app.v1.Addon:
             type: object
             properties:
@@ -158,6 +168,14 @@ components:
                     type: string
                 disabled_at:
                     type: string
+            required:
+                - id
+                - name
+                - description
+                - icon
+                - price
+                - is_free
+                - is_enabled
         hub.app.v1.AddonStatusRequest:
             type: object
             properties:
@@ -170,6 +188,8 @@ components:
             properties:
                 is_enabled:
                     type: boolean
+            required:
+                - is_enabled
         hub.app.v1.EnableAddonRequest:
             type: object
             properties:
@@ -182,6 +202,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.app.v1.DisableAddonRequest:
             type: object
             properties:
@@ -194,3 +216,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

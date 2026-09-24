@@ -60,10 +60,13 @@ components:
                     type: string
                     description: notes is the notes value for this contract.
             required:
+                - invoice_id
+                - amount
                 - currency
                 - payment_date
                 - method
                 - reference
+                - notes
         finance.invoices.payments.v1.RecordPaymentResponse:
             type: object
             properties:
@@ -74,6 +77,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - payment
+                - message
         finance.invoices.v1.RecordPaymentResponsePayload:
             type: object
             properties:
@@ -104,4 +110,13 @@ components:
                 notes:
                     type: string
                     description: notes is the notes value for this contract.
+            required:
+                - id
+                - invoice_id
+                - amount
+                - currency
+                - payment_date
+                - method
+                - reference
+                - notes
             description: RecordPaymentResponsePayload describes a payment just recorded against an invoice.

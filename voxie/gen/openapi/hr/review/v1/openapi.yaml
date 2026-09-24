@@ -45,6 +45,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.review.v1.Review'
+            required:
+                - reviews
         hr.review.v1.Review:
             type: object
             properties:
@@ -82,6 +84,20 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - staff_id
+                - reviewer_id
+                - period
+                - rating
+                - goals_rating
+                - values_rating
+                - skills_rating
+                - notes
+                - status
+                - created_at
+                - updated_at
         hr.review.v1.CreateReviewRequest:
             type: object
             properties:
@@ -111,7 +127,14 @@ components:
                     type: string
             required:
                 - staff_id
+                - reviewer_id
                 - period
+                - rating
+                - goals_rating
+                - values_rating
+                - skills_rating
+                - notes
+                - status
         hr.review.v1.CreateReviewResponse:
             type: object
             properties:
@@ -120,3 +143,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message

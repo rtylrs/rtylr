@@ -25,9 +25,9 @@ return violations;
 }
 
 export interface VerifyPINResponse {
-valid?: boolean;
-staffId?: string;
-message?: string;
+valid?: boolean | undefined;
+staffId?: string | undefined;
+message?: string | undefined;
 }
 
 export function decodeVerifyPINResponse(v: any): VerifyPINResponse {

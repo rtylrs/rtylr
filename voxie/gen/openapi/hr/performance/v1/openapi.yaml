@@ -129,6 +129,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - cycles
+                - total
+                - limit
+                - offset
         hr.performance.v1.ReviewCyclePayload:
             type: object
             properties:
@@ -166,6 +171,14 @@ components:
                     description: Unix timestamp when this record was last updated.
             required:
                 - id
+                - owner_id
+                - name
+                - type
+                - period_start
+                - period_end
+                - status
+                - created_at
+                - updated_at
             description: ReviewCyclePayload is a recurring performance review period (e.g. an annual cycle).
         hr.performance.v1.CreateReviewCycleRequest:
             type: object
@@ -194,6 +207,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.performance.v1.ReviewCyclePayload'
                     description: The newly created review cycle.
+            required:
+                - cycle
         hr.performance.v1.OpenReviewCycleRequest:
             type: object
             properties:
@@ -211,6 +226,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.performance.v1.ReviewCyclePayload'
                     description: The review cycle after transitioning to open status.
+            required:
+                - cycle
         hr.performance.v1.ListGoalsRequest:
             type: object
             properties:
@@ -242,6 +259,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - goals
+                - total
+                - limit
+                - offset
         hr.performance.v1.ReviewGoalPayload:
             type: object
             properties:
@@ -285,6 +307,16 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - review_cycle_id
+                - title
+                - description
+                - status
+                - created_at
+                - updated_at
             description: ReviewGoalPayload is a performance goal assigned to an employee within a review cycle.
         hr.performance.v1.SubmitReviewRequest:
             type: object
@@ -311,6 +343,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.performance.v1.PerformanceReviewPayload'
                     description: The submitted performance review.
+            required:
+                - review
         hr.performance.v1.PerformanceReviewPayload:
             type: object
             properties:
@@ -361,4 +395,12 @@ components:
                     description: Unix timestamp when this record was last updated.
             required:
                 - id
+                - owner_id
+                - employee_id
+                - review_cycle_id
+                - reviewer_employee_id
+                - review_type
+                - status
+                - created_at
+                - updated_at
             description: PerformanceReviewPayload is a single reviewer's evaluation of an employee within a review cycle.

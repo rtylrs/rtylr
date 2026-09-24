@@ -75,6 +75,9 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.team.compat.v1.TeamMember'
+            required:
+                - users
+                - members
         hub.team.compat.v1.TeamMember:
             type: object
             properties:
@@ -92,12 +95,21 @@ components:
                         type: string
                 is_active:
                     type: boolean
+            required:
+                - id
+                - name
+                - email
+                - role
+                - apps
+                - is_active
         hub.team.compat.v1.InviteMemberRequest:
             type: object
             properties:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hub.team.compat.v1.InviteMemberBody'
+            required:
+                - body
         hub.team.compat.v1.InviteMemberBody:
             type: object
             properties:
@@ -111,6 +123,11 @@ components:
                     type: array
                     items:
                         type: string
+            required:
+                - email
+                - full_name
+                - role
+                - apps
         hub.team.compat.v1.EmptyJsonResponse: {}
         hub.team.compat.v1.DeactivateMemberRequest:
             type: object
@@ -118,3 +135,6 @@ components:
                 id:
                     type: string
                 body: {}
+            required:
+                - id
+                - body

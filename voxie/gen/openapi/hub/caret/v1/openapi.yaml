@@ -29,6 +29,8 @@ components:
             properties:
                 mode:
                     type: string
+            required:
+                - mode
         hub.caret.v1.ListCaretToolsResponse:
             type: object
             properties:
@@ -36,6 +38,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.caret.v1.CaretTool'
+            required:
+                - tools
         hub.caret.v1.CaretTool:
             type: object
             properties:
@@ -55,3 +59,10 @@ components:
                         Access scope of this tool: "read" or "write". Mirrors the server-side
                         gating already applied in ask/analyst modes; exposed so the UI can
                         surface it too (e.g. counting write-scoped tools).
+            required:
+                - name
+                - label
+                - description
+                - category
+                - requires_approval
+                - scope

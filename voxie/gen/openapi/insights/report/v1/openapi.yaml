@@ -266,6 +266,12 @@ components:
                 type:
                     type: string
                     description: type is the type value for this contract.
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
+                - type
         insights.report.v1.ListReportTemplatesResponse:
             type: object
             properties:
@@ -278,6 +284,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
                     description: pagination is the pagination value for this contract.
+            required:
+                - templates
+                - pagination
         insights.report.v1.ReportTemplate:
             type: object
             properties:
@@ -309,6 +318,14 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - name
+                - description
+                - type
+                - metrics
+                - format
+                - created_at
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -334,6 +351,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         insights.report.v1.CreateReportTemplateRequest:
             type: object
@@ -360,6 +384,7 @@ components:
                 - name
                 - description
                 - type
+                - metrics
                 - format
         insights.report.v1.CreateReportTemplateResponse:
             type: object
@@ -368,6 +393,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.report.v1.ReportTemplate'
                     description: template is the template value for this contract.
+            required:
+                - template
         insights.report.v1.GetReportTemplateRequest:
             type: object
             properties:
@@ -376,6 +403,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         insights.report.v1.GetReportTemplateResponse:
             type: object
             properties:
@@ -383,6 +412,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.report.v1.ReportTemplate'
                     description: template is the template value for this contract.
+            required:
+                - template
         insights.report.v1.ListScheduledReportsRequest:
             type: object
             properties:
@@ -400,6 +431,11 @@ components:
                 sort_dir:
                     type: string
                     description: sort_dir is the sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         insights.report.v1.ListScheduledReportsResponse:
             type: object
             properties:
@@ -412,6 +448,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
                     description: pagination is the pagination value for this contract.
+            required:
+                - reports
+                - pagination
         insights.report.v1.ScheduledReport:
             type: object
             properties:
@@ -449,6 +488,17 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - template_id
+                - template_name
+                - frequency
+                - recipient_email
+                - channel
+                - is_active
+                - last_sent_at
+                - next_send_at
+                - created_at
         insights.report.v1.CreateScheduledReportRequest:
             type: object
             properties:
@@ -473,6 +523,7 @@ components:
                 - frequency
                 - channel
                 - recipient_email
+                - is_active
         insights.report.v1.CreateScheduledReportResponse:
             type: object
             properties:
@@ -480,6 +531,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.report.v1.ScheduledReport'
                     description: report is the report value for this contract.
+            required:
+                - report
         insights.report.v1.UpdateScheduledReportRequest:
             type: object
             properties:
@@ -505,10 +558,12 @@ components:
                     type: boolean
                     description: is_active toggles whether the schedule is active.
             required:
+                - id
                 - template_slug
                 - frequency
                 - channel
                 - recipient_email
+                - is_active
         insights.report.v1.UpdateScheduledReportResponse:
             type: object
             properties:
@@ -516,6 +571,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.report.v1.ScheduledReport'
                     description: report is the updated scheduled report.
+            required:
+                - report
         insights.report.v1.DeleteScheduledReportRequest:
             type: object
             properties:
@@ -524,12 +581,16 @@ components:
                     type: string
                     format: int64
                     description: id is the scheduled report identifier.
+            required:
+                - id
         insights.report.v1.DeleteScheduledReportResponse:
             type: object
             properties:
                 deleted:
                     type: boolean
                     description: deleted confirms the schedule was removed.
+            required:
+                - deleted
         insights.report.v1.GenerateRevenueReportRequest:
             type: object
             properties:
@@ -542,6 +603,10 @@ components:
                 format:
                     type: string
                     description: format is the export format (csv, pdf).
+            required:
+                - from_date
+                - to_date
+                - format
         insights.report.v1.GenerateRevenueReportResponse:
             type: object
             properties:
@@ -554,6 +619,10 @@ components:
                 status:
                     type: string
                     description: status is the queue status.
+            required:
+                - report_id
+                - url
+                - status
         insights.report.v1.ExportRevenueReportRequest:
             type: object
             properties:
@@ -563,6 +632,9 @@ components:
                 to_date:
                     type: string
                     description: to_date is the inclusive end date (YYYY-MM-DD).
+            required:
+                - from_date
+                - to_date
         insights.report.v1.ExportRevenueReportResponse:
             type: object
             properties:
@@ -580,6 +652,11 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.report.v1.ExportRevenueRow'
                     description: rows is the structured export rows.
+            required:
+                - filename
+                - content_type
+                - csv
+                - rows
         insights.report.v1.ExportRevenueRow:
             type: object
             properties:
@@ -590,3 +667,6 @@ components:
                     type: string
                     format: int64
                     description: amount_minor_units is the revenue amount in minor units.
+            required:
+                - date
+                - amount_minor_units

@@ -96,6 +96,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.terminal.v1.Terminal'
+            required:
+                - terminals
         pos.terminal.v1.Terminal:
             type: object
             properties:
@@ -119,6 +121,13 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - name
+                - is_active
+                - created_at
             description: Terminal is a registered POS terminal device.
         pos.terminal.v1.CreateTerminalRequest:
             type: object
@@ -143,6 +152,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - terminal_id
+                - message
         pos.terminal.v1.UpdateTerminalRequest:
             type: object
             properties:
@@ -154,6 +166,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.terminal.v1.UpdateTerminalBody'
                     description: body carries updatable terminal fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         pos.terminal.v1.UpdateTerminalBody:
             type: object
             properties:
@@ -171,11 +186,14 @@ components:
                 - branch_id
                 - name
                 - device_id
+                - is_active
         pos.terminal.v1.UpdateTerminalResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         pos.terminal.v1.HeartbeatTerminalRequest:
             type: object
             properties:
@@ -190,3 +208,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

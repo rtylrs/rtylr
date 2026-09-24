@@ -25,12 +25,12 @@ return violations;
 }
 
 export interface DaySummaryResponse {
-totalSales?: number;
-totalTax?: number;
-totalTips?: number;
-totalRefunds?: number;
-totalOrders?: number;
-paymentBreakdown?: Record<string, number>;
+totalSales?: number | undefined;
+totalTax?: number | undefined;
+totalTips?: number | undefined;
+totalRefunds?: number | undefined;
+totalOrders?: number | undefined;
+paymentBreakdown?: Record<string, number> | undefined;
 }
 
 export function decodeDaySummaryResponse(v: any): DaySummaryResponse {

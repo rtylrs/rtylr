@@ -84,6 +84,9 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - page
+                - page_size
         erp.stock_take.v1.ListStockTakesResponse:
             type: object
             properties:
@@ -99,6 +102,11 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - stock_takes
+                - has_more
+                - page
+                - page_size
         erp.stock_take.v1.StockTake:
             type: object
             properties:
@@ -125,6 +133,16 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - warehouse_id
+                - status
+                - notes
+                - items
+                - started_at
+                - completed_at
+                - created_at
         erp.stock_take.v1.StockTakeItem:
             type: object
             properties:
@@ -148,6 +166,14 @@ components:
                     format: double
                 created_at:
                     type: string
+            required:
+                - id
+                - stock_take_id
+                - product_id
+                - expected_qty
+                - counted_qty
+                - variance
+                - created_at
         erp.stock_take.v1.CreateStockTakeRequest:
             type: object
             properties:
@@ -163,6 +189,8 @@ components:
                         $ref: '#/components/schemas/erp.stock_take.v1.CreateStockTakeItemRequest'
             required:
                 - warehouse_id
+                - notes
+                - items
         erp.stock_take.v1.CreateStockTakeItemRequest:
             type: object
             properties:
@@ -175,6 +203,10 @@ components:
                 counted_qty:
                     type: number
                     format: double
+            required:
+                - product_id
+                - expected_qty
+                - counted_qty
         erp.stock_take.v1.CreateStockTakeResponse:
             type: object
             properties:
@@ -183,6 +215,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - stock_take_id
+                - message
         erp.stock_take.v1.UpdateStockTakeRequest:
             type: object
             properties:
@@ -193,6 +228,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeBody'
+            required:
+                - id
+                - body
         erp.stock_take.v1.UpdateStockTakeBody:
             type: object
             properties:
@@ -206,6 +244,8 @@ components:
                         $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeItemBody'
             required:
                 - status
+                - notes
+                - items
         erp.stock_take.v1.UpdateStockTakeItemBody:
             type: object
             properties:
@@ -218,8 +258,14 @@ components:
                 counted_qty:
                     type: number
                     format: double
+            required:
+                - product_id
+                - expected_qty
+                - counted_qty
         erp.stock_take.v1.UpdateStockTakeResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

@@ -33,3 +33,5 @@ components:
                 ticket:
                     type: string
                     description: Short-lived, single-use ticket accepted by the Flow WebSocket handshake.
+            required:
+                - ticket

@@ -200,6 +200,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.developer.v1.ApiKey'
+            required:
+                - keys
         hub.developer.v1.ApiKey:
             type: object
             properties:
@@ -223,6 +225,15 @@ components:
                     type: string
                 is_active:
                     type: boolean
+            required:
+                - id
+                - name
+                - key_prefix
+                - scopes
+                - created_at
+                - last_used_at
+                - expires_at
+                - is_active
         hub.developer.v1.CreateApiKeyRequest:
             type: object
             properties:
@@ -235,6 +246,7 @@ components:
                     minItems: 1
             required:
                 - name
+                - scopes
         hub.developer.v1.CreateApiKeyResponse:
             type: object
             properties:
@@ -245,6 +257,10 @@ components:
                     type: string
                 message:
                     type: string
+            required:
+                - id
+                - key
+                - message
         hub.developer.v1.RevokeApiKeyRequest:
             type: object
             properties:
@@ -252,11 +268,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.developer.v1.RevokeApiKeyResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.developer.v1.ListWebhooksRequest:
             type: object
         hub.developer.v1.ListWebhooksResponse:
@@ -266,6 +286,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.developer.v1.Webhook'
+            required:
+                - webhooks
         hub.developer.v1.Webhook:
             type: object
             properties:
@@ -284,6 +306,13 @@ components:
                     type: string
                 last_triggered_at:
                     type: string
+            required:
+                - id
+                - url
+                - events
+                - is_active
+                - created_at
+                - last_triggered_at
         hub.developer.v1.CreateWebhookRequest:
             type: object
             properties:
@@ -296,6 +325,7 @@ components:
                     minItems: 1
             required:
                 - url
+                - events
         hub.developer.v1.CreateWebhookResponse:
             type: object
             properties:
@@ -304,6 +334,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message
         hub.developer.v1.UpdateWebhookRequest:
             type: object
             properties:
@@ -321,13 +354,18 @@ components:
                 is_active:
                     type: boolean
             required:
+                - id
                 - url
+                - events
+                - is_active
         hub.developer.v1.UpdateWebhookResponse:
             type: object
             properties:
                 webhook:
                     allOf:
                         - $ref: '#/components/schemas/hub.developer.v1.Webhook'
+            required:
+                - webhook
         hub.developer.v1.DeleteWebhookRequest:
             type: object
             properties:
@@ -335,11 +373,15 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.developer.v1.DeleteWebhookResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.developer.v1.ListWebhookDeliveriesRequest:
             type: object
             properties:
@@ -360,6 +402,11 @@ components:
                 limit:
                     type: integer
                     format: int32
+            required:
+                - webhook_id
+                - status
+                - page
+                - limit
         hub.developer.v1.ListWebhookDeliveriesResponse:
             type: object
             properties:
@@ -370,6 +417,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - deliveries
+                - pagination
         hub.developer.v1.WebhookDelivery:
             type: object
             properties:
@@ -420,6 +470,19 @@ components:
                     description: delivered_at is when the endpoint accepted the event. Empty until then.
                 created_at:
                     type: string
+            required:
+                - id
+                - webhook_id
+                - event_id
+                - event_type
+                - status
+                - attempts
+                - max_attempts
+                - response_status
+                - last_error
+                - next_attempt_at
+                - delivered_at
+                - created_at
             description: WebhookDelivery is one attempt to deliver one event to one registration.
         common.pagination.v1.PaginationResponse:
             type: object
@@ -446,4 +509,11 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.

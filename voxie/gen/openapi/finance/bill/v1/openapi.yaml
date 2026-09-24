@@ -154,6 +154,9 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - page
+                - page_size
         finance.bill.v1.ListBillsResponse:
             type: object
             properties:
@@ -170,6 +173,11 @@ components:
                     format: int64
                 has_more:
                     type: boolean
+            required:
+                - bills
+                - page
+                - page_size
+                - has_more
         finance.bill.v1.Bill:
             type: object
             properties:
@@ -225,7 +233,16 @@ components:
                     type: string
                     description: updated_at is when the record was last updated.
             required:
+                - id
+                - owner_id
                 - supplier_name
+                - amount
+                - currency
+                - due_date
+                - status
+                - description
+                - created_at
+                - updated_at
             description: Bill is an accounts-payable bill owed to a supplier.
         finance.bill.v1.CreateBillRequest:
             type: object
@@ -269,6 +286,7 @@ components:
                     description: description is the description value for this contract.
             required:
                 - supplier_name
+                - amount
                 - currency
                 - due_date
                 - status
@@ -283,6 +301,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - id
+                - message
         finance.bill.v1.UpdateBillRequest:
             type: object
             properties:
@@ -295,6 +316,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.bill.v1.UpdateBillBody'
                     description: body carries updatable bill fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         finance.bill.v1.UpdateBillBody:
             type: object
             properties:
@@ -331,6 +355,8 @@ components:
                     type: string
                     description: description is the description value for this contract.
             required:
+                - supplier_name
+                - amount
                 - currency
                 - due_date
                 - status
@@ -341,6 +367,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         finance.bill.v1.GetBillRequest:
             type: object
             properties:
@@ -348,12 +376,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         finance.bill.v1.GetBillResponse:
             type: object
             properties:
                 bill:
                     allOf:
                         - $ref: '#/components/schemas/finance.bill.v1.Bill'
+            required:
+                - bill
         finance.bill.v1.DeleteBillRequest:
             type: object
             properties:
@@ -361,8 +393,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         finance.bill.v1.DeleteBillResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

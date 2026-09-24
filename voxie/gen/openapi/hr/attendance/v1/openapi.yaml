@@ -103,6 +103,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - records
+                - total
+                - limit
+                - offset
         hr.attendance.v1.AttendanceRecordPayload:
             type: object
             properties:
@@ -166,6 +171,19 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - location_id
+                - date
+                - clock_in_at
+                - clock_in_method
+                - is_late
+                - late_minutes
+                - status
+                - created_at
+                - updated_at
             description: AttendanceRecordPayload is a single clock-in/clock-out attendance record.
         hr.attendance.v1.AttendanceClockInRequest:
             type: object
@@ -202,6 +220,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.attendance.v1.AttendanceRecordPayload'
                     description: The created attendance record.
+            required:
+                - record
         hr.attendance.v1.AttendanceClockOutRequest:
             type: object
             properties:
@@ -219,3 +239,5 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.attendance.v1.AttendanceRecordPayload'
                     description: The updated attendance record with clock-out data.
+            required:
+                - record

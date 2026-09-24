@@ -46,6 +46,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/booking.calendar.v1.CalendarDay'
+            required:
+                - days
         booking.calendar.v1.CalendarDay:
             type: object
             properties:
@@ -55,6 +57,9 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/booking.calendar.v1.CalendarAppointment'
+            required:
+                - date
+                - appointments
         booking.calendar.v1.CalendarAppointment:
             type: object
             properties:
@@ -75,3 +80,11 @@ components:
                     type: string
                 status:
                     type: string
+            required:
+                - id
+                - business_id
+                - service_id
+                - customer_name
+                - start_time
+                - end_time
+                - status

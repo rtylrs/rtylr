@@ -261,6 +261,13 @@ components:
                     type: integer
                     format: int64
                     description: page_size is the maximum number of invoices to return.
+            required:
+                - status
+                - search
+                - date_from
+                - date_to
+                - page
+                - page_size
         finance.invoices.v1.ListInvoicesResponse:
             type: object
             properties:
@@ -280,6 +287,11 @@ components:
                 has_more:
                     type: boolean
                     description: has_more indicates whether additional pages are available.
+            required:
+                - invoices
+                - page
+                - page_size
+                - has_more
         finance.invoices.v1.InvoiceSummary:
             type: object
             properties:
@@ -323,6 +335,19 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - invoice_number
+                - client_name
+                - status
+                - issue_date
+                - due_date
+                - paid_date
+                - currency
+                - total
+                - amount_paid
+                - amount_due
+                - created_at
             description: InvoiceSummary is a compact invoice row for list views.
         finance.invoices.v1.ListBillableTimeEntriesRequest:
             type: object
@@ -335,6 +360,9 @@ components:
                     type: integer
                     format: int64
                     description: page_size is the maximum number of time entries to return.
+            required:
+                - page
+                - page_size
         finance.invoices.v1.ListBillableTimeEntriesResponse:
             type: object
             properties:
@@ -362,6 +390,13 @@ components:
                 has_more:
                     type: boolean
                     description: has_more indicates whether additional pages are available.
+            required:
+                - entries
+                - total
+                - total_minutes
+                - page
+                - page_size
+                - has_more
         finance.invoices.v1.BillableTimeEntry:
             type: object
             properties:
@@ -400,6 +435,15 @@ components:
                 source:
                     type: string
                     description: source identifies the system that recorded the time.
+            required:
+                - id
+                - employee_id
+                - date
+                - duration_minutes
+                - description
+                - is_billable
+                - status
+                - source
             description: |-
                 BillableTimeEntry is approved billable HR time that has not been linked to
                 a finance invoice yet.
@@ -464,10 +508,19 @@ components:
                     minItems: 1
                     description: items is the items value for this contract.
             required:
+                - client_name
+                - client_email
+                - client_address
+                - client_tax_id
                 - issue_date
                 - due_date
                 - currency
                 - discount_type
+                - discount_value
+                - tax_rate
+                - notes
+                - terms
+                - items
         finance.invoices.v1.InvoiceItem:
             type: object
             properties:
@@ -501,6 +554,15 @@ components:
                     type: number
                     format: double
                     description: total is the total number of matching records.
+            required:
+                - description
+                - quantity
+                - unit
+                - unit_price
+                - tax_rate
+                - discount_pct
+                - sort_order
+                - total
             description: InvoiceItem is a single line item on an invoice.
         finance.invoices.v1.CreateInvoiceResponse:
             type: object
@@ -509,6 +571,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.invoices.v1.InvoiceDetail'
                     description: invoice is the invoice value for this contract.
+            required:
+                - invoice
         finance.invoices.v1.InvoiceDetail:
             type: object
             properties:
@@ -611,6 +675,33 @@ components:
                     items:
                         $ref: '#/components/schemas/finance.invoices.v1.InvoiceItem'
                     description: items is the items value for this contract.
+            required:
+                - id
+                - owner_id
+                - invoice_number
+                - client_name
+                - client_email
+                - client_address
+                - client_tax_id
+                - status
+                - issue_date
+                - due_date
+                - paid_date
+                - currency
+                - subtotal
+                - discount_type
+                - discount_value
+                - discount_amount
+                - tax_rate
+                - tax_amount
+                - total
+                - amount_paid
+                - amount_due
+                - notes
+                - terms
+                - created_at
+                - updated_at
+                - items
             description: InvoiceDetail is the full invoice record.
         finance.invoices.v1.GetInvoiceRequest:
             type: object
@@ -620,6 +711,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         finance.invoices.v1.GetInvoiceResponse:
             type: object
             properties:
@@ -632,6 +725,9 @@ components:
                     items:
                         $ref: '#/components/schemas/finance.invoices.v1.Payment'
                     description: payments is the payments value for this contract.
+            required:
+                - invoice
+                - payments
         finance.invoices.v1.Payment:
             type: object
             properties:
@@ -658,6 +754,14 @@ components:
                 notes:
                     type: string
                     description: notes is the notes value for this contract.
+            required:
+                - id
+                - amount
+                - currency
+                - payment_date
+                - method
+                - reference
+                - notes
             description: Payment is a recorded payment applied to an invoice.
         finance.invoices.v1.UpdateInvoiceRequest:
             type: object
@@ -671,6 +775,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceBody'
                     description: body carries updatable invoice fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         finance.invoices.v1.UpdateInvoiceBody:
             type: object
             properties:
@@ -724,10 +831,17 @@ components:
             required:
                 - client_name
                 - client_email
+                - client_address
+                - client_tax_id
                 - issue_date
                 - due_date
                 - currency
                 - discount_type
+                - discount_value
+                - tax_rate
+                - notes
+                - terms
+                - items
         finance.invoices.v1.UpdateInvoiceResponse:
             type: object
             properties:
@@ -735,6 +849,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.invoices.v1.InvoiceDetail'
                     description: invoice is the invoice value for this contract.
+            required:
+                - invoice
         finance.invoices.v1.UpdateInvoiceStatusRequest:
             type: object
             properties:
@@ -747,6 +863,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceStatusBody'
                     description: body carries status update fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         finance.invoices.v1.UpdateInvoiceStatusBody:
             type: object
             properties:
@@ -761,6 +880,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         finance.invoices.v1.DeleteInvoiceRequest:
             type: object
             properties:
@@ -769,12 +890,16 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         finance.invoices.v1.DeleteInvoiceResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         finance.invoices.v1.SendInvoiceRequest:
             type: object
             properties:
@@ -783,9 +908,13 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         finance.invoices.v1.SendInvoiceResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message

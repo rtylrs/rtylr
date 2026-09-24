@@ -45,6 +45,8 @@ components:
                     type: integer
                     format: int32
                     description: offset is the number of records to skip, for paging through the feed.
+            required:
+                - limit
         hub.activity.v1.ListActivityResponse:
             type: object
             properties:
@@ -56,6 +58,9 @@ components:
                     type: integer
                     format: int32
                     description: total is the total number of matching activity entries, for pagination math.
+            required:
+                - activities
+                - total
         hub.activity.v1.ActivityEntry:
             type: object
             properties:
@@ -84,3 +89,14 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - owner_id
+                - app
+                - entity_type
+                - entity_id
+                - action
+                - description
+                - user_id
+                - user_name
+                - created_at

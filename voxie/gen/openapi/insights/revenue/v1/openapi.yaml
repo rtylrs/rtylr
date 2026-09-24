@@ -82,6 +82,8 @@ components:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.revenue.v1.GetRevenueOverviewResponse:
             type: object
             properties:
@@ -89,6 +91,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.revenue.v1.RevenueOverview'
                     description: overview is the overview value for this contract.
+            required:
+                - overview
         insights.revenue.v1.RevenueOverview:
             type: object
             properties:
@@ -105,6 +109,10 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.revenue.v1.RevenuePoint'
                     description: trend is the trend value for this contract.
+            required:
+                - total
+                - change
+                - trend
         insights.revenue.v1.RevenuePoint:
             type: object
             properties:
@@ -115,12 +123,17 @@ components:
                     type: number
                     format: double
                     description: amount is the amount value for this contract.
+            required:
+                - date
+                - amount
         insights.revenue.v1.GetRevenueByAppRequest:
             type: object
             properties:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.revenue.v1.GetRevenueByAppResponse:
             type: object
             properties:
@@ -129,6 +142,8 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.revenue.v1.RevenueByApp'
                     description: apps is the apps value for this contract.
+            required:
+                - apps
         insights.revenue.v1.RevenueByApp:
             type: object
             properties:
@@ -143,6 +158,10 @@ components:
                     type: number
                     format: double
                     description: percentage is the percentage value for this contract.
+            required:
+                - app
+                - amount
+                - percentage
         insights.revenue.v1.GetRevenueComparisonRequest:
             type: object
             properties:
@@ -155,6 +174,7 @@ components:
                         compare_to is the compare to value for this contract.
                         previous_period, same_period_last_year
             required:
+                - period
                 - compare_to
         insights.revenue.v1.GetRevenueComparisonResponse:
             type: object
@@ -164,6 +184,8 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.revenue.v1.RevenueComparison'
                     description: comparisons is the comparisons value for this contract.
+            required:
+                - comparisons
         insights.revenue.v1.RevenueComparison:
             type: object
             properties:
@@ -182,3 +204,8 @@ components:
                     type: number
                     format: double
                     description: change is the change value for this contract.
+            required:
+                - period
+                - current
+                - previous
+                - change

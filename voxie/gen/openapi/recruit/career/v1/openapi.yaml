@@ -63,6 +63,9 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - page
+                - page_size
             description: ListSubmissionsRequest selects submissions for this business.
         recruit.career.v1.ListSubmissionsResponse:
             type: object
@@ -80,6 +83,11 @@ components:
                 page_size:
                     type: integer
                     format: int64
+            required:
+                - submissions
+                - total
+                - page
+                - page_size
             description: ListSubmissionsResponse returns one page of submissions.
         recruit.career.v1.Submission:
             type: object
@@ -108,6 +116,18 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - career_id
+                - candidate_name
+                - email
+                - phone
+                - resume_url
+                - cover_letter
+                - status
+                - career_title
+                - created_at
+                - updated_at
             description: Submission is a candidate's application to one career.
         recruit.career.v1.UpdateSubmissionStatusRequest:
             type: object
@@ -122,6 +142,7 @@ components:
                     description: body carries the new status bound from the HTTP payload.
             required:
                 - id
+                - body
             description: UpdateSubmissionStatusRequest advances a candidate through the funnel.
         recruit.career.v1.UpdateSubmissionStatusBody:
             type: object
@@ -138,4 +159,6 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result.
+            required:
+                - message
             description: UpdateSubmissionStatusResponse confirms the transition.

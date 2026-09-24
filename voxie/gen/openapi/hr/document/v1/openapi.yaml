@@ -65,6 +65,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.document.v1.Document'
+            required:
+                - documents
         hr.document.v1.Document:
             type: object
             properties:
@@ -87,6 +89,15 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - staff_id
+                - name
+                - type
+                - file_url
+                - expiry_date
+                - created_at
         hr.document.v1.CreateDocumentRequest:
             type: object
             properties:
@@ -102,7 +113,11 @@ components:
                 expiry_date:
                     type: string
             required:
+                - staff_id
                 - name
+                - type
+                - file_url
+                - expiry_date
         hr.document.v1.CreateDocumentResponse:
             type: object
             properties:
@@ -111,6 +126,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message
         hr.document.v1.DeleteDocumentRequest:
             type: object
             properties:
@@ -118,8 +136,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hr.document.v1.DeleteDocumentResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

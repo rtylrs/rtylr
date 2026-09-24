@@ -42,3 +42,7 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - valid
+                - staff_id
+                - message

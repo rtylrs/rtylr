@@ -20,13 +20,13 @@ return violations;
 }
 
 export interface GetUserSettingsResponse {
-taskAssigned?: boolean;
-taskComments?: boolean;
-mentions?: boolean;
-statusChanges?: boolean;
-weeklyDigest?: boolean;
-emailNotifications?: boolean;
-sidebarPreferences?: string;
+taskAssigned?: boolean | undefined;
+taskComments?: boolean | undefined;
+mentions?: boolean | undefined;
+statusChanges?: boolean | undefined;
+weeklyDigest?: boolean | undefined;
+emailNotifications?: boolean | undefined;
+sidebarPreferences?: string | undefined;
 }
 
 export function decodeGetUserSettingsResponse(v: any): GetUserSettingsResponse {
@@ -67,13 +67,13 @@ return violations;
 }
 
 export interface UpdateUserSettingsRequest {
-taskAssigned?: boolean;
-taskComments?: boolean;
-mentions?: boolean;
-statusChanges?: boolean;
-weeklyDigest?: boolean;
-emailNotifications?: boolean;
-sidebarPreferences?: string;
+taskAssigned?: boolean | undefined;
+taskComments?: boolean | undefined;
+mentions?: boolean | undefined;
+statusChanges?: boolean | undefined;
+weeklyDigest?: boolean | undefined;
+emailNotifications?: boolean | undefined;
+sidebarPreferences?: string | undefined;
 }
 
 export function decodeUpdateUserSettingsRequest(v: any): UpdateUserSettingsRequest {

@@ -88,6 +88,7 @@ components:
                     description: Permissions to attach to the new role.
             required:
                 - name
+                - permissions
         hr.role.v1.PermissionPayload:
             type: object
             properties:
@@ -100,6 +101,10 @@ components:
                 is_granted:
                     type: boolean
                     description: Whether this permission is currently granted.
+            required:
+                - key
+                - label
+                - is_granted
             description: PermissionPayload is a single grantable permission on a role.
         hr.role.v1.CreateRoleResponse:
             type: object
@@ -108,6 +113,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.role.v1.RolePayload'
                     description: The newly created role.
+            required:
+                - role
         hr.role.v1.RolePayload:
             type: object
             properties:
@@ -138,6 +145,14 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this role was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - is_default
+                - permissions
+                - created_at
+                - updated_at
             description: RolePayload is an HR role with its attached permission set.
         hr.role.v1.UpdateRoleRequest:
             type: object
@@ -151,6 +166,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.role.v1.UpdateRoleBody'
                     description: body carries updatable role fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         hr.role.v1.UpdateRoleBody:
             type: object
             properties:
@@ -163,6 +181,8 @@ components:
                         $ref: '#/components/schemas/hr.role.v1.PermissionPayload'
                     minItems: 1
                     description: New permission set; if provided, replaces all existing permissions.
+            required:
+                - permissions
         hr.role.v1.UpdateRoleResponse:
             type: object
             properties:
@@ -170,6 +190,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.role.v1.RolePayload'
                     description: The updated role.
+            required:
+                - role
         hr.role.v1.AssignRoleRequest:
             type: object
             properties:
@@ -192,3 +214,5 @@ components:
                 success:
                     type: boolean
                     description: Whether the role was assigned successfully.
+            required:
+                - success

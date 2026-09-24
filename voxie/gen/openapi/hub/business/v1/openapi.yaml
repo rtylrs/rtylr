@@ -272,6 +272,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.business.v1.BusinessEntry'
+            required:
+                - businesses
         hub.business.v1.BusinessEntry:
             type: object
             properties:
@@ -291,6 +293,13 @@ components:
                 is_owned:
                     type: boolean
                     description: True when the current user owns the business; false for team access.
+            required:
+                - id
+                - name
+                - logo_url
+                - parent_id
+                - is_active
+                - is_owned
             description: BusinessEntry is a compact business row for ownership listings.
         hub.business.v1.CreateSubBusinessRequest:
             type: object
@@ -310,6 +319,8 @@ components:
                 id:
                     type: string
                     format: int64
+            required:
+                - id
         hub.business.v1.OnboardBusinessRequest:
             type: object
             properties:
@@ -324,6 +335,8 @@ components:
                 token:
                     type: string
                     description: A fresh JWT carrying the new business_id.
+            required:
+                - token
         hub.business.v1.CheckBusinessNameExistsRequest:
             type: object
             properties:
@@ -336,6 +349,8 @@ components:
             properties:
                 exists:
                     type: boolean
+            required:
+                - exists
         hub.business.v1.GetBusinessRequest:
             type: object
             properties:
@@ -343,12 +358,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - business_id
         hub.business.v1.GetBusinessResponse:
             type: object
             properties:
                 business:
                     allOf:
                         - $ref: '#/components/schemas/hub.business.v1.Business'
+            required:
+                - business
         hub.business.v1.Business:
             type: object
             properties:
@@ -385,6 +404,21 @@ components:
                 slug:
                     type: string
                     description: URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+            required:
+                - id
+                - name
+                - type
+                - logo_url
+                - address
+                - phone
+                - email
+                - website
+                - timezone
+                - currency
+                - country
+                - plan
+                - created_at
+                - slug
             description: Business is a merchant's top-level business entity.
         hub.business.v1.LookupBusinessBySlugRequest:
             type: object
@@ -404,6 +438,9 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.business.v1.PublicLocation'
+            required:
+                - business
+                - locations
         hub.business.v1.PublicBusinessSummary:
             type: object
             properties:
@@ -422,6 +459,14 @@ components:
                     type: string
                 timezone:
                     type: string
+            required:
+                - id
+                - name
+                - slug
+                - logo_url
+                - currency
+                - type
+                - timezone
             description: PublicBusinessSummary resolves a public slug into a business summary.
         hub.business.v1.PublicLocation:
             type: object
@@ -439,6 +484,13 @@ components:
                     type: string
                 is_active:
                     type: boolean
+            required:
+                - id
+                - name
+                - slug
+                - address
+                - timezone
+                - is_active
             description: PublicLocation is a location entry for public menu surfaces.
         hub.business.v1.GetPublicBusinessRequest:
             type: object
@@ -447,12 +499,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - business_id
         hub.business.v1.GetPublicBusinessResponse:
             type: object
             properties:
                 business:
                     allOf:
                         - $ref: '#/components/schemas/hub.business.v1.PublicBusinessProfile'
+            required:
+                - business
         hub.business.v1.PublicBusinessProfile:
             type: object
             properties:
@@ -467,6 +523,12 @@ components:
                     type: string
                 timezone:
                     type: string
+            required:
+                - id
+                - name
+                - logo_url
+                - currency
+                - timezone
             description: PublicBusinessProfile is public-safe business branding for anonymous menu surfaces.
         hub.business.v1.SetSlugRequest:
             type: object
@@ -481,6 +543,8 @@ components:
             properties:
                 slug:
                     type: string
+            required:
+                - slug
         hub.business.v1.UpdateBusinessRequest:
             type: object
             properties:
@@ -508,9 +572,13 @@ components:
                 slug:
                     type: string
             required:
+                - business_id
                 - name
                 - type
+                - address
+                - phone
                 - email
+                - website
                 - timezone
                 - currency
         hub.business.v1.UpdateBusinessResponse:
@@ -519,6 +587,8 @@ components:
                 business:
                     allOf:
                         - $ref: '#/components/schemas/hub.business.v1.Business'
+            required:
+                - business
         hub.business.v1.RenameBusinessRequest:
             type: object
             properties:
@@ -529,6 +599,7 @@ components:
                 name:
                     type: string
             required:
+                - business_id
                 - name
         hub.business.v1.RenameBusinessResponse:
             type: object
@@ -536,6 +607,8 @@ components:
                 business:
                     allOf:
                         - $ref: '#/components/schemas/hub.business.v1.Business'
+            required:
+                - business
         hub.business.v1.SetLogoRequest:
             type: object
             properties:
@@ -547,6 +620,7 @@ components:
                     type: string
                     description: Public URL of an already-uploaded asset (see @voxire/api uploadAsset).
             required:
+                - business_id
                 - logo_url
         hub.business.v1.SetLogoResponse:
             type: object
@@ -554,6 +628,8 @@ components:
                 business:
                     allOf:
                         - $ref: '#/components/schemas/hub.business.v1.Business'
+            required:
+                - business
         hub.business.v1.DeleteBusinessRequest:
             type: object
             properties:
@@ -561,8 +637,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - business_id
         hub.business.v1.DeleteBusinessResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

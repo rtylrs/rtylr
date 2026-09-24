@@ -124,6 +124,9 @@ components:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
+            required:
+                - limit
+                - offset
             description: |-
                 ListContractsRequest selects contracts for this business. Filters combine
                 with AND. The response is always a page: follow offset until total is
@@ -148,6 +151,11 @@ components:
                     type: integer
                     format: int32
                     description: offset echoes the applied skip.
+            required:
+                - contracts
+                - total
+                - limit
+                - offset
             description: |-
                 ListContractsResponse returns one page of contracts with paging echoes,
                 matching the rest of this module's list surfaces.
@@ -196,6 +204,15 @@ components:
                     type: string
                     format: int64
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - plan
+                - mrr
+                - seats
+                - signed_by_name
+                - notes
+                - created_at
+                - updated_at
             description: |-
                 Contract is a signed sales agreement: the plan a customer bought, what it
                 costs monthly, and who signed. This domain contracts the read surface that
@@ -212,6 +229,8 @@ components:
                     type: string
                     format: int64
                     description: id is the contract id path parameter.
+            required:
+                - id
             description: GetContractRequest selects one contract by id.
         crm.sales.v1.GetContractResponse:
             type: object
@@ -220,6 +239,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/crm.sales.v1.Contract'
                     description: contract is the full record.
+            required:
+                - contract
             description: |-
                 GetContractResponse returns the requested contract, or a 404 error when it
                 does not exist in the caller's business.
@@ -257,6 +278,9 @@ components:
                 - lead_id
                 - plan
                 - mrr
+                - seats
+                - signed_by_name
+                - notes
             description: |-
                 CreateContractRequest stages a new contract from a won lead. Signing can
                 happen now or later via update.
@@ -267,6 +291,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/crm.sales.v1.Contract'
                     description: contract is the record as stored.
+            required:
+                - contract
             description: CreateContractResponse returns the newly staged contract.
         crm.sales.v1.UpdateContractRequest:
             type: object
@@ -279,6 +305,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/crm.sales.v1.UpdateContractBody'
                     description: body carries the amendable fields bound from the HTTP payload.
+            required:
+                - id
+                - body
             description: |-
                 UpdateContractRequest amends an existing contract. Fields left absent keep
                 their current values, except status-bearing fields which replace outright.
@@ -307,6 +336,12 @@ components:
                 notes:
                     type: string
                     description: notes replace the free-text sales notes.
+            required:
+                - plan
+                - mrr
+                - seats
+                - signed_by_name
+                - notes
             description: UpdateContractBody is the amendable surface of a contract.
         crm.sales.v1.UpdateContractResponse:
             type: object
@@ -315,4 +350,6 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/crm.sales.v1.Contract'
                     description: contract is the record after amendment.
+            required:
+                - contract
             description: UpdateContractResponse returns the amended contract.

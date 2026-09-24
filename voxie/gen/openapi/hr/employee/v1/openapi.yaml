@@ -164,6 +164,9 @@ components:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
+            required:
+                - limit
+                - offset
         hr.employee.v1.ListEmployeesResponse:
             type: object
             properties:
@@ -184,6 +187,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset that was applied.
+            required:
+                - employees
+                - total
+                - limit
+                - offset
         hr.employee.v1.EmployeePayload:
             type: object
             properties:
@@ -255,6 +263,20 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - user_id
+                - department_id
+                - location_id
+                - contract_type
+                - status
+                - hire_date
+                - currency
+                - account_creation_mode
+                - job_title
+                - created_at
+                - updated_at
             description: EmployeePayload is an HR employee record.
         hr.employee.v1.CreateEmployeeRequest:
             type: object
@@ -313,11 +335,20 @@ components:
                     type: string
                     description: address is the employee address.
             required:
+                - user_id
+                - department_id
+                - location_id
+                - work_schedule_id
                 - first_name
                 - last_name
                 - email
+                - phone
                 - employment_type
+                - salary
+                - hourly_rate
+                - overtime_rate
                 - start_date
+                - address
         hr.employee.v1.CreateEmployeeResponse:
             type: object
             properties:
@@ -325,6 +356,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.staff.v1.Staff'
                     description: The newly created employee record.
+            required:
+                - employee
         hr.staff.v1.Staff:
             type: object
             properties:
@@ -409,6 +442,33 @@ components:
                 updated_at:
                     type: string
                     description: When the record was last updated.
+            required:
+                - id
+                - owner_id
+                - user_id
+                - department_id
+                - manager_staff_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - role
+                - employment_type
+                - status
+                - salary
+                - hourly_rate
+                - overtime_rate
+                - start_date
+                - end_date
+                - address
+                - emergency_contact_name
+                - emergency_contact_phone
+                - apps
+                - notes
+                - photo_url
+                - bio
+                - created_at
+                - updated_at
             description: Staff is an HR staff member record.
         hr.employee.v1.UpdateEmployeeRequest:
             type: object
@@ -422,6 +482,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.employee.v1.UpdateEmployeeBody'
                     description: body carries updatable employee fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         hr.employee.v1.UpdateEmployeeBody:
             type: object
             properties:
@@ -493,15 +556,25 @@ components:
                     type: string
                     description: notes are internal employee notes.
             required:
+                - user_id
+                - department_id
+                - location_id
+                - work_schedule_id
                 - first_name
                 - last_name
                 - email
+                - phone
                 - employment_type
                 - status
+                - salary
+                - hourly_rate
+                - overtime_rate
                 - start_date
                 - end_date
+                - address
                 - emergency_contact_name
                 - emergency_contact_phone
+                - notes
         hr.employee.v1.UpdateEmployeeResponse:
             type: object
             properties:
@@ -509,6 +582,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.staff.v1.Staff'
                     description: The updated employee record.
+            required:
+                - employee
         hr.employee.v1.InviteEmployeeRequest:
             type: object
             properties:
@@ -533,6 +608,9 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when the invite expires.
+            required:
+                - invite_token
+                - expires_at
         hr.employee.v1.AcceptInviteRequest:
             type: object
             properties:
@@ -551,3 +629,5 @@ components:
                 success:
                     type: boolean
                     description: Whether the invite was accepted successfully.
+            required:
+                - success

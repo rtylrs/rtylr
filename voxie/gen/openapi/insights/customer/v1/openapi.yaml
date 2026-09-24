@@ -114,6 +114,8 @@ components:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.customer.v1.GetCustomerAnalyticsResponse:
             type: object
             properties:
@@ -121,6 +123,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.customer.v1.CustomerAnalytics'
                     description: analytics is the analytics value for this contract.
+            required:
+                - analytics
         insights.customer.v1.CustomerAnalytics:
             type: object
             properties:
@@ -149,6 +153,13 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.customer.v1.CustomerGrowthPoint'
                     description: growth is the growth value for this contract.
+            required:
+                - total
+                - new_this_period
+                - retention_rate
+                - avg_lifetime_value
+                - churn_rate
+                - growth
         insights.customer.v1.CustomerGrowthPoint:
             type: object
             properties:
@@ -163,12 +174,18 @@ components:
                     type: integer
                     format: int32
                     description: total is the total number of matching records.
+            required:
+                - date
+                - new_customers
+                - total
         insights.customer.v1.GetChurnAnalysisRequest:
             type: object
             properties:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.customer.v1.GetChurnAnalysisResponse:
             type: object
             properties:
@@ -176,6 +193,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.customer.v1.ChurnAnalysis'
                     description: analysis is the analysis value for this contract.
+            required:
+                - analysis
         insights.customer.v1.ChurnAnalysis:
             type: object
             properties:
@@ -192,6 +211,10 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.customer.v1.ChurnReason'
                     description: reasons is the reasons value for this contract.
+            required:
+                - churn_rate
+                - churned_count
+                - reasons
         insights.customer.v1.ChurnReason:
             type: object
             properties:
@@ -206,6 +229,10 @@ components:
                     type: number
                     format: double
                     description: percentage is the percentage value for this contract.
+            required:
+                - reason
+                - count
+                - percentage
         insights.customer.v1.GetLTVAnalysisRequest:
             type: object
         insights.customer.v1.GetLTVAnalysisResponse:
@@ -215,6 +242,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.customer.v1.LTVAnalysis'
                     description: analysis is the analysis value for this contract.
+            required:
+                - analysis
         insights.customer.v1.LTVAnalysis:
             type: object
             properties:
@@ -231,6 +260,10 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.customer.v1.LTVSegment'
                     description: segments is the segments value for this contract.
+            required:
+                - average
+                - median
+                - segments
         insights.customer.v1.LTVSegment:
             type: object
             properties:
@@ -245,6 +278,10 @@ components:
                     type: integer
                     format: int32
                     description: customer_count is the customer count value for this contract.
+            required:
+                - segment
+                - avg_ltv
+                - customer_count
         insights.customer.v1.GetTopCustomersRequest:
             type: object
             properties:
@@ -265,6 +302,12 @@ components:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
+                - period
         insights.customer.v1.GetTopCustomersResponse:
             type: object
             properties:
@@ -277,6 +320,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
                     description: pagination is the pagination value for this contract.
+            required:
+                - customers
+                - pagination
         insights.customer.v1.TopCustomerEntry:
             type: object
             properties:
@@ -298,6 +344,12 @@ components:
                 last_order_at:
                     type: string
                     description: last_order_at is the last order at value for this contract.
+            required:
+                - id
+                - name
+                - total_spent
+                - order_count
+                - last_order_at
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -323,4 +375,11 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.

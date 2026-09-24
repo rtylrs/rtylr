@@ -96,6 +96,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.combo.v1.Combo'
+            required:
+                - combos
         pos.combo.v1.Combo:
             type: object
             properties:
@@ -123,6 +125,16 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - price
+                - items
+                - is_active
+                - created_at
+                - updated_at
             description: Combo is a bundled set of menu items sold as a single offering.
         pos.combo.v1.CreateComboRequest:
             type: object
@@ -142,7 +154,9 @@ components:
             required:
                 - name
                 - description
+                - price
                 - items
+                - is_active
         pos.combo.v1.CreateComboResponse:
             type: object
             properties:
@@ -151,6 +165,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - combo_id
+                - message
         pos.combo.v1.UpdateComboRequest:
             type: object
             properties:
@@ -163,6 +180,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.combo.v1.UpdateComboBody'
                     description: body carries updatable combo fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         pos.combo.v1.UpdateComboBody:
             type: object
             properties:
@@ -181,12 +201,16 @@ components:
             required:
                 - name
                 - description
+                - price
                 - items
+                - is_active
         pos.combo.v1.UpdateComboResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         pos.combo.v1.DeleteComboRequest:
             type: object
             properties:
@@ -195,8 +219,12 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the combo.
+            required:
+                - id
         pos.combo.v1.DeleteComboResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

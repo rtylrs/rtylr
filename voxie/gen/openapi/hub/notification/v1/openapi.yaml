@@ -90,6 +90,9 @@ components:
                 cursor:
                     type: string
                     description: Opaque continuation token from a previous response.
+            required:
+                - limit
+                - cursor
         hub.notification.v1.ListNotificationsResponse:
             type: object
             properties:
@@ -99,6 +102,9 @@ components:
                         $ref: '#/components/schemas/hub.notification.v1.Notification'
                 next_cursor:
                     type: string
+            required:
+                - notifications
+                - next_cursor
         hub.notification.v1.Notification:
             type: object
             properties:
@@ -119,6 +125,14 @@ components:
                     description: When the record was created.
                 link:
                     type: string
+            required:
+                - id
+                - title
+                - body
+                - type
+                - read
+                - created_at
+                - link
             description: Notification is a single hub notification entry.
         hub.notification.v1.MarkAllReadRequest:
             type: object
@@ -127,6 +141,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.notification.v1.MarkNotificationReadRequest:
             type: object
             properties:
@@ -134,8 +150,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         hub.notification.v1.MarkNotificationReadResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

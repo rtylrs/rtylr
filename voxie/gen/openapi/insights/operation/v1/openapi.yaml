@@ -109,6 +109,8 @@ components:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.operation.v1.GetHeadcountMetricsResponse:
             type: object
             properties:
@@ -116,6 +118,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.operation.v1.HeadcountMetrics'
                     description: metrics is the metrics value for this contract.
+            required:
+                - metrics
         insights.operation.v1.HeadcountMetrics:
             type: object
             properties:
@@ -140,6 +144,12 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.operation.v1.HeadcountPoint'
                     description: trend is the trend value for this contract.
+            required:
+                - current
+                - hired_this_period
+                - departed_this_period
+                - turnover_rate
+                - trend
         insights.operation.v1.HeadcountPoint:
             type: object
             properties:
@@ -150,12 +160,17 @@ components:
                     type: integer
                     format: int32
                     description: count is the count value for this contract.
+            required:
+                - date
+                - count
         insights.operation.v1.GetShiftMetricsRequest:
             type: object
             properties:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.operation.v1.GetShiftMetricsResponse:
             type: object
             properties:
@@ -163,6 +178,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.operation.v1.ShiftMetrics'
                     description: metrics is the metrics value for this contract.
+            required:
+                - metrics
         insights.operation.v1.ShiftMetrics:
             type: object
             properties:
@@ -187,6 +204,12 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.operation.v1.ShiftsByDay'
                     description: by_day is the by day value for this contract.
+            required:
+                - total_shifts
+                - covered
+                - missed
+                - coverage_rate
+                - by_day
         insights.operation.v1.ShiftsByDay:
             type: object
             properties:
@@ -201,12 +224,18 @@ components:
                     type: integer
                     format: int32
                     description: completed is the completed value for this contract.
+            required:
+                - day
+                - scheduled
+                - completed
         insights.operation.v1.GetTimeOffMetricsRequest:
             type: object
             properties:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.operation.v1.GetTimeOffMetricsResponse:
             type: object
             properties:
@@ -214,6 +243,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.operation.v1.TimeOffMetrics'
                     description: metrics is the metrics value for this contract.
+            required:
+                - metrics
         insights.operation.v1.TimeOffMetrics:
             type: object
             properties:
@@ -238,6 +269,12 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.operation.v1.TimeOffByType'
                     description: by_type is the by type value for this contract.
+            required:
+                - total_requests
+                - approved
+                - pending
+                - rejected
+                - by_type
         insights.operation.v1.TimeOffByType:
             type: object
             properties:
@@ -252,12 +289,18 @@ components:
                     type: integer
                     format: int32
                     description: requests is the requests value for this contract.
+            required:
+                - type
+                - days
+                - requests
         insights.operation.v1.GetUtilizationRequest:
             type: object
             properties:
                 period:
                     type: string
                     description: period is the period value for this contract.
+            required:
+                - period
         insights.operation.v1.GetUtilizationResponse:
             type: object
             properties:
@@ -265,6 +308,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/insights.operation.v1.UtilizationMetrics'
                     description: metrics is the metrics value for this contract.
+            required:
+                - metrics
         insights.operation.v1.UtilizationMetrics:
             type: object
             properties:
@@ -297,6 +342,14 @@ components:
                     items:
                         $ref: '#/components/schemas/insights.operation.v1.StaffUtilization'
                     description: by_staff is the by staff value for this contract.
+            required:
+                - avg_utilization
+                - total_staff
+                - active_today
+                - total_hours
+                - available_hours
+                - overtime_hours
+                - by_staff
         insights.operation.v1.StaffUtilization:
             type: object
             properties:
@@ -319,6 +372,12 @@ components:
                     type: number
                     format: double
                     description: utilization is the utilization value for this contract.
+            required:
+                - staff_id
+                - name
+                - hours_worked
+                - hours_scheduled
+                - utilization
         insights.operation.v1.GetOperationsSummaryRequest:
             type: object
         insights.operation.v1.GetOperationsSummaryResponse:
@@ -340,3 +399,8 @@ components:
                     type: string
                     format: int64
                     description: open_leave_requests is the open leave request count.
+            required:
+                - active_staff
+                - shifts_this_week
+                - pending_time_off
+                - open_leave_requests

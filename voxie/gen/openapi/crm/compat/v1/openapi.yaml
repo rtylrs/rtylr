@@ -1265,6 +1265,8 @@ components:
             type: object
             properties:
                 body: {}
+            required:
+                - body
         crm.compat.v1.ExportCustomerRequest:
             type: object
             properties:
@@ -1313,11 +1315,16 @@ components:
                 id:
                     type: string
                 body: {}
+            required:
+                - id
+                - body
         crm.compat.v1.PathRequest:
             type: object
             properties:
                 id:
                     type: string
+            required:
+                - id
         crm.compat.v1.ContactsRequest:
             type: object
             properties:

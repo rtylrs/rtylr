@@ -130,6 +130,9 @@ components:
             required:
                 - email
                 - full_name
+                - apps
+                - app_assignments
+                - group_ids
         hub.user.v1.AppRoleAssignment:
             type: object
             properties:
@@ -158,6 +161,12 @@ components:
                 group_id:
                     type: string
                     description: Group target when the assignment is group-derived.
+            required:
+                - app_id
+                - role_ids
+                - assignment_source
+                - status
+                - scopes
         hub.user.v1.RoleScope:
             type: object
             properties:
@@ -167,6 +176,9 @@ components:
                 scope_id:
                     type: string
                     description: Tenant-owned resource identifier.
+            required:
+                - scope_type
+                - scope_id
         hub.team.invitations.v1.InviteUserResponse:
             type: object
             properties:
@@ -175,6 +187,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - user_id
+                - message
         hub.team.invitations.v1.BulkInviteRequest:
             type: object
             properties:
@@ -207,6 +222,12 @@ components:
                     type: string
                     format: int64
                     description: Identifies an optional group to add invitees to.
+            required:
+                - emails
+                - apps
+                - app_assignments
+                - group_ids
+                - group_id
         hub.team.invitations.v1.BulkInviteResponse:
             type: object
             properties:
@@ -217,6 +238,9 @@ components:
                     description: Per-email invite outcome list.
                 message:
                     type: string
+            required:
+                - results
+                - message
         hub.team.invitations.v1.BulkInviteResult:
             type: object
             properties:
@@ -229,6 +253,11 @@ components:
                     type: string
                 message:
                     type: string
+            required:
+                - email
+                - user_id
+                - status
+                - message
         hub.team.invitations.v1.VerifyInviteRequest:
             type: object
             properties:
@@ -261,6 +290,12 @@ components:
                     items:
                         $ref: '#/components/schemas/hub.user.v1.AppRoleAssignment'
                     description: Application roles that will become active after acceptance.
+            required:
+                - email
+                - full_name
+                - valid
+                - apps
+                - app_assignments
         hub.team.invitations.v1.AcceptInviteRequest:
             type: object
             properties:
@@ -278,3 +313,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

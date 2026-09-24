@@ -120,6 +120,13 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - project_id
+                - workspace_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.milestone.v1.ListMilestonesResponse:
             type: object
             properties:
@@ -130,6 +137,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - milestones
+                - pagination
         flow.milestone.v1.Milestone:
             type: object
             properties:
@@ -162,6 +172,18 @@ components:
                 project:
                     allOf:
                         - $ref: '#/components/schemas/flow.milestone.v1.MilestoneProject'
+            required:
+                - id
+                - project_id
+                - name
+                - target_date
+                - progress
+                - computed_progress
+                - done_count
+                - task_count
+                - status
+                - description
+                - project
         flow.milestone.v1.MilestoneProject:
             type: object
             properties:
@@ -169,6 +191,9 @@ components:
                     type: string
                 color:
                     type: string
+            required:
+                - name
+                - color
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -194,6 +219,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.milestone.v1.CreateMilestoneRequest:
             type: object
@@ -211,13 +243,19 @@ components:
                 target_date:
                     type: string
             required:
+                - project_id
+                - workspace_id
                 - name
+                - description
+                - target_date
         flow.milestone.v1.CreateMilestoneResponse:
             type: object
             properties:
                 milestone:
                     allOf:
                         - $ref: '#/components/schemas/flow.milestone.v1.Milestone'
+            required:
+                - milestone
         flow.milestone.v1.UpdateMilestoneRequest:
             type: object
             properties:
@@ -232,5 +270,11 @@ components:
                     type: string
                 target_date:
                     type: string
+            required:
+                - id
+                - name
+                - description
+                - status
+                - target_date
         flow.milestone.v1.UpdateMilestoneResponse:
             type: object

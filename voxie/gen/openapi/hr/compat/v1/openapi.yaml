@@ -3908,6 +3908,8 @@ components:
             properties:
                 id:
                     type: string
+            required:
+                - id
         hr.compat.v1.GetStaffDetailResponse:
             type: object
             properties:
@@ -3917,6 +3919,8 @@ components:
                     type: string
                 bio:
                     type: string
+            required:
+                - id
         hr.compat.v1.GetMyEmployeeRequest:
             type: object
         hr.compat.v1.GetMyEmployeeResponse:
@@ -3925,11 +3929,15 @@ components:
                 employee:
                     allOf:
                         - $ref: '#/components/schemas/hr.compat.v1.MyEmployee'
+            required:
+                - employee
         hr.compat.v1.MyEmployee:
             type: object
             properties:
                 id:
                     type: string
+            required:
+                - id
         hr.compat.v1.EmptyRequest:
             type: object
         hr.compat.v1.JsonResponse: {}
@@ -3937,6 +3945,8 @@ components:
             type: object
             properties:
                 body: {}
+            required:
+                - body
         hr.compat.v1.QueryRequest:
             type: object
             properties:
@@ -3996,9 +4006,14 @@ components:
             properties:
                 id:
                     type: string
+            required:
+                - id
         hr.compat.v1.PathBodyRequest:
             type: object
             properties:
                 id:
                     type: string
                 body: {}
+            required:
+                - id
+                - body

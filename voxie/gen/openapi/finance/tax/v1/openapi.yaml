@@ -57,6 +57,8 @@ components:
                 config:
                     allOf:
                         - $ref: '#/components/schemas/finance.tax.v1.TaxConfig'
+            required:
+                - config
         finance.tax.v1.TaxConfig:
             type: object
             properties:
@@ -79,6 +81,15 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - tax_name
+                - tax_rate
+                - is_inclusive
+                - is_active
+                - created_at
+                - updated_at
             description: |-
                 Renamed from TaxConfig to avoid a name collision with the distinct
                 finance.report.v1.TaxConfig - onk message names are unique across the
@@ -98,11 +109,16 @@ components:
                     type: boolean
             required:
                 - tax_name
+                - tax_rate
+                - is_inclusive
+                - is_active
         finance.tax.v1.UpdateTaxConfigResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         finance.tax.v1.GetPLReportRequest:
             type: object
             description: |-
@@ -123,6 +139,11 @@ components:
                 net_profit:
                     type: number
                     format: double
+            required:
+                - total_revenue
+                - total_expenses
+                - gross_profit
+                - net_profit
             description: |-
                 Renamed from GetPLReportResponse to avoid a name collision with the
                 distinct finance.report.v1.GetPLReportResponse.

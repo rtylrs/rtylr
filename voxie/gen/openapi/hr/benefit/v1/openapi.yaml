@@ -106,6 +106,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hr.benefit.v1.BenefitPlan'
+            required:
+                - plans
         hr.benefit.v1.BenefitPlan:
             type: object
             properties:
@@ -131,6 +133,16 @@ components:
                     type: boolean
                 created_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - type
+                - provider
+                - cost_employer
+                - cost_employee
+                - is_active
+                - created_at
         hr.benefit.v1.CreateBenefitRequest:
             type: object
             properties:
@@ -150,6 +162,11 @@ components:
                     type: boolean
             required:
                 - name
+                - type
+                - provider
+                - cost_employer
+                - cost_employee
+                - is_active
         hr.benefit.v1.CreateBenefitResponse:
             type: object
             properties:
@@ -158,6 +175,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message
         hr.benefit.v1.EnrollInBenefitRequest:
             type: object
             properties:
@@ -174,6 +194,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.benefit.v1.BenefitEnrollment'
                     description: enrollment is the created BenefitEnrollment record.
+            required:
+                - enrollment
         hr.benefit.v1.BenefitEnrollment:
             type: object
             properties:
@@ -202,6 +224,13 @@ components:
                 cancelled_at:
                     type: string
                     description: cancelled_at is when the enrollment was cancelled, in ISO-8601 format; absent while the enrollment is active.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - plan_id
+                - status
+                - enrolled_at
         hr.benefit.v1.ListMyBenefitEnrollmentsRequest:
             type: object
             properties:
@@ -219,6 +248,11 @@ components:
                 sort_dir:
                     type: string
                     description: sort_dir is the sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         hr.benefit.v1.ListMyBenefitEnrollmentsResponse:
             type: object
             properties:
@@ -230,6 +264,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - enrollments
+                - pagination
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -255,4 +292,11 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.

@@ -256,6 +256,12 @@ components:
                 name:
                     type: string
                     description: name is the name value for this contract.
+            required:
+                - token
+                - message
+                - user_id
+                - email
+                - name
         common.auth.v1.LoginRequest:
             type: object
             properties:
@@ -291,6 +297,13 @@ components:
                 is_console_admin:
                     type: boolean
                     description: is_console_admin indicates the user can access the internal console.
+            required:
+                - token
+                - message
+                - user_id
+                - email
+                - name
+                - is_console_admin
         common.auth.v1.GoogleAuthRequest:
             type: object
             properties:
@@ -311,6 +324,9 @@ components:
                 is_new:
                     type: boolean
                     description: is_new is the is new value for this contract.
+            required:
+                - token
+                - is_new
         common.auth.v1.ResetPasswordRequest:
             type: object
             properties:
@@ -326,6 +342,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         common.auth.v1.ResetPasswordConfirmRequest:
             type: object
             properties:
@@ -344,6 +362,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         common.auth.v1.VerifyEmailRequest:
             type: object
             properties:
@@ -361,6 +381,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - verified
+                - message
         common.auth.v1.ResendVerificationRequest:
             type: object
             properties:
@@ -379,6 +402,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - ok
+                - message
         common.auth.v1.InviteAcceptRequest:
             type: object
             properties:
@@ -397,6 +423,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         common.auth.v1.CheckEmailExistsRequest:
             type: object
             properties:
@@ -412,6 +440,8 @@ components:
                 exists:
                     type: boolean
                     description: exists is true when an account with this email is already registered.
+            required:
+                - exists
         common.auth.v1.SocialAuthorizeRequest:
             type: object
             properties:
@@ -424,9 +454,13 @@ components:
                         - apple
                         -
                     description: provider is the social login provider (google, github, microsoft, apple).
+            required:
+                - provider
         common.auth.v1.SocialAuthorizeResponse:
             type: object
             properties:
                 url:
                     type: string
                     description: url is the provider-hosted consent URL to redirect the browser to.
+            required:
+                - url

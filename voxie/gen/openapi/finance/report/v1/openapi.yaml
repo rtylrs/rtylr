@@ -129,6 +129,7 @@ components:
                     type: string
                     description: The report anchor date.
             required:
+                - period
                 - date
         finance.report.v1.GetPLReportResponse:
             type: object
@@ -153,6 +154,14 @@ components:
                 margin_pct:
                     type: number
                     format: double
+            required:
+                - period
+                - revenue
+                - cogs
+                - gross_profit
+                - operating_expenses
+                - net_profit
+                - margin_pct
         finance.report.v1.GetTaxReportRequest:
             type: object
             properties:
@@ -163,6 +172,7 @@ components:
                     type: string
                     description: The report anchor date.
             required:
+                - period
                 - date
         finance.report.v1.GetTaxReportResponse:
             type: object
@@ -175,6 +185,10 @@ components:
                 tax_owed:
                     type: number
                     format: double
+            required:
+                - period
+                - tax_collected
+                - tax_owed
         finance.report.v1.ListExpenseCategoryDetailsRequest:
             type: object
         finance.report.v1.ListExpenseCategoryDetailsResponse:
@@ -184,6 +198,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/finance.report.v1.ExpenseCategoryDetail'
+            required:
+                - categories
         finance.report.v1.ExpenseCategoryDetail:
             type: object
             properties:
@@ -203,6 +219,13 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - owner_id
+                - name
+                - color
+                - icon
+                - created_at
         finance.report.v1.CreateExpenseCategoryDetailRequest:
             type: object
             properties:
@@ -222,6 +245,8 @@ components:
                 category:
                     allOf:
                         - $ref: '#/components/schemas/finance.report.v1.ExpenseCategoryDetail'
+            required:
+                - category
         finance.report.v1.ListTaxConfigRequest:
             type: object
         finance.report.v1.ListTaxConfigResponse:
@@ -231,6 +256,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/finance.report.v1.TaxConfig'
+            required:
+                - configs
         finance.report.v1.TaxConfig:
             type: object
             properties:
@@ -255,6 +282,15 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - owner_id
+                - name
+                - rate
+                - type
+                - is_default
+                - is_active
+                - created_at
         finance.report.v1.CreateTaxConfigRequest:
             type: object
             properties:
@@ -270,10 +306,14 @@ components:
                     type: boolean
             required:
                 - name
+                - rate
                 - type
+                - is_default
         finance.report.v1.CreateTaxConfigResponse:
             type: object
             properties:
                 config:
                     allOf:
                         - $ref: '#/components/schemas/finance.report.v1.TaxConfig'
+            required:
+                - config

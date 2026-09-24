@@ -4,8 +4,8 @@ export interface RegisterRequest {
 email: string;
 password: string;
 name: string;
-businessName?: string;
-planSlug?: string;
+businessName?: string | undefined;
+planSlug?: string | undefined;
 }
 
 export function decodeRegisterRequest(v: any): RegisterRequest {
@@ -44,11 +44,11 @@ return violations;
 }
 
 export interface RegisterResponse {
-token?: string;
-message?: string;
-userId?: string;
-email?: string;
-name?: string;
+token?: string | undefined;
+message?: string | undefined;
+userId?: string | undefined;
+email?: string | undefined;
+name?: string | undefined;
 }
 
 export function decodeRegisterResponse(v: any): RegisterResponse {
@@ -113,12 +113,12 @@ return violations;
 }
 
 export interface LoginResponse {
-token?: string;
-message?: string;
-userId?: string;
-email?: string;
-name?: string;
-isConsoleAdmin?: boolean;
+token?: string | undefined;
+message?: string | undefined;
+userId?: string | undefined;
+email?: string | undefined;
+name?: string | undefined;
+isConsoleAdmin?: boolean | undefined;
 }
 
 export function decodeLoginResponse(v: any): LoginResponse {
@@ -156,7 +156,7 @@ return violations;
 }
 
 export interface GoogleAuthRequest {
-businessName?: string;
+businessName?: string | undefined;
 code: string;
 }
 
@@ -184,8 +184,8 @@ return violations;
 }
 
 export interface GoogleAuthResponse {
-token?: string;
-isNew?: boolean;
+token?: string | undefined;
+isNew?: boolean | undefined;
 }
 
 export function decodeGoogleAuthResponse(v: any): GoogleAuthResponse {
@@ -236,7 +236,7 @@ return violations;
 }
 
 export interface ResetPasswordResponse {
-message?: string;
+message?: string | undefined;
 }
 
 export function decodeResetPasswordResponse(v: any): ResetPasswordResponse {
@@ -288,7 +288,7 @@ return violations;
 }
 
 export interface ResetPasswordConfirmResponse {
-message?: string;
+message?: string | undefined;
 }
 
 export function decodeResetPasswordConfirmResponse(v: any): ResetPasswordConfirmResponse {
@@ -335,8 +335,8 @@ return violations;
 }
 
 export interface VerifyEmailResponse {
-verified?: boolean;
-message?: string;
+verified?: boolean | undefined;
+message?: string | undefined;
 }
 
 export function decodeVerifyEmailResponse(v: any): VerifyEmailResponse {
@@ -387,8 +387,8 @@ return violations;
 }
 
 export interface ResendVerificationResponse {
-ok?: boolean;
-message?: string;
+ok?: boolean | undefined;
+message?: string | undefined;
 }
 
 export function decodeResendVerificationResponse(v: any): ResendVerificationResponse {
@@ -443,7 +443,7 @@ return violations;
 }
 
 export interface InviteAcceptResponse {
-message?: string;
+message?: string | undefined;
 }
 
 export function decodeInviteAcceptResponse(v: any): InviteAcceptResponse {
@@ -491,7 +491,7 @@ return violations;
 }
 
 export interface CheckEmailExistsResponse {
-exists?: boolean;
+exists?: boolean | undefined;
 }
 
 export function decodeCheckEmailExistsResponse(v: any): CheckEmailExistsResponse {
@@ -514,7 +514,7 @@ return violations;
 }
 
 export interface SocialAuthorizeRequest {
-provider?: string;
+provider?: string | undefined;
 }
 
 export function decodeSocialAuthorizeRequest(v: any): SocialAuthorizeRequest {
@@ -538,7 +538,7 @@ return violations;
 }
 
 export interface SocialAuthorizeResponse {
-url?: string;
+url?: string | undefined;
 }
 
 export function decodeSocialAuthorizeResponse(v: any): SocialAuthorizeResponse {

@@ -107,6 +107,9 @@ components:
                     type: integer
                     format: int32
                     description: page_size is the number of rows to return.
+            required:
+                - page
+                - page_size
         erp.supplier.v1.ListSuppliersResponse:
             type: object
             properties:
@@ -126,6 +129,11 @@ components:
                     type: integer
                     format: int32
                     description: page_size is the returned page size.
+            required:
+                - suppliers
+                - has_more
+                - page
+                - page_size
         erp.supplier.v1.Supplier:
             type: object
             properties:
@@ -173,6 +181,21 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - email
+                - phone
+                - address
+                - city
+                - country
+                - tax_id
+                - payment_terms
+                - notes
+                - is_active
+                - created_at
+                - updated_at
             description: Supplier is a business's registered supplier record.
         erp.supplier.v1.CreateSupplierRequest:
             type: object
@@ -211,8 +234,14 @@ components:
             required:
                 - name
                 - email
+                - phone
+                - address
                 - city
                 - country
+                - tax_id
+                - payment_terms
+                - notes
+                - is_active
         erp.supplier.v1.CreateSupplierResponse:
             type: object
             properties:
@@ -223,6 +252,9 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - supplier_id
+                - message
         erp.supplier.v1.UpdateSupplierRequest:
             type: object
             properties:
@@ -235,6 +267,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/erp.supplier.v1.UpdateSupplierBody'
                     description: body carries updatable supplier fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         erp.supplier.v1.UpdateSupplierBody:
             type: object
             properties:
@@ -272,14 +307,22 @@ components:
             required:
                 - name
                 - email
+                - phone
+                - address
                 - city
                 - country
+                - tax_id
+                - payment_terms
+                - notes
+                - is_active
         erp.supplier.v1.UpdateSupplierResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         erp.supplier.v1.DeleteSupplierRequest:
             type: object
             properties:
@@ -287,8 +330,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.supplier.v1.DeleteSupplierResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

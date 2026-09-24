@@ -29,6 +29,9 @@ components:
                         $ref: '#/components/schemas/flow.presence.v1.PresenceEntry'
                 date:
                     type: string
+            required:
+                - presence
+                - date
         flow.presence.v1.PresenceEntry:
             type: object
             properties:
@@ -42,3 +45,7 @@ components:
                     type: string
                 status:
                     type: string
+            required:
+                - employee_id
+                - user_id
+                - status

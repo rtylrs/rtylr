@@ -102,6 +102,8 @@ components:
                 subscription:
                     allOf:
                         - $ref: '#/components/schemas/hub.subscription.v1.Subscription'
+            required:
+                - subscription
         hub.subscription.v1.Subscription:
             type: object
             properties:
@@ -143,6 +145,19 @@ components:
                     type: string
                 paddle_subscription_id:
                     type: string
+            required:
+                - id
+                - plan_name
+                - plan_slug
+                - apps
+                - price_per_seat_cents
+                - status
+                - is_granted
+                - seat_count
+                - included_seat_limit
+                - included_seat_count
+                - billable_seat_count
+                - paddle_subscription_id
         hub.subscription.v1.ListPlansRequest:
             type: object
         hub.subscription.v1.ListPlansResponse:
@@ -152,6 +167,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.subscription.v1.Plan'
+            required:
+                - plans
         hub.subscription.v1.Plan:
             type: object
             properties:
@@ -199,6 +216,21 @@ components:
                     type: boolean
                 is_active:
                     type: boolean
+            required:
+                - id
+                - name
+                - slug
+                - apps
+                - price_per_seat_cents
+                - annual_price_per_seat_cents
+                - trial_days
+                - tagline
+                - ai_credits_per_month
+                - features
+                - tier_order
+                - is_solo
+                - is_featured
+                - is_active
         hub.subscription.v1.GetBillingDetailRequest:
             type: object
         hub.subscription.v1.GetBillingDetailResponse:
@@ -207,6 +239,8 @@ components:
                 billing:
                     allOf:
                         - $ref: '#/components/schemas/hub.subscription.v1.BillingDetail'
+            required:
+                - billing
         hub.subscription.v1.BillingDetail:
             type: object
             properties:
@@ -251,6 +285,20 @@ components:
                     type: string
                 paddle_subscription_id:
                     type: string
+            required:
+                - billing_month
+                - line_items
+                - total_cents
+                - plan_name
+                - price_per_seat_cents
+                - current_seat_count
+                - included_seat_limit
+                - included_seat_count
+                - billable_seat_count
+                - seat_discount_cents
+                - status
+                - is_granted
+                - paddle_subscription_id
         hub.subscription.v1.BillingLineItem:
             type: object
             properties:
@@ -295,6 +343,21 @@ components:
                 unit_price_cents:
                     type: integer
                     format: int32
+            required:
+                - period_start
+                - seat_count
+                - included_seat_limit
+                - included_seat_count
+                - billable_seat_count
+                - included_cents
+                - price_per_seat_cents
+                - amount_cents
+                - type
+                - description
+                - is_granted
+                - addon_id
+                - quantity
+                - unit_price_cents
         hub.subscription.v1.GetBillingHistoryRequest:
             type: object
         hub.subscription.v1.GetBillingHistoryResponse:
@@ -304,6 +367,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.subscription.v1.BillingHistoryMonth'
+            required:
+                - history
         hub.subscription.v1.BillingHistoryMonth:
             type: object
             properties:
@@ -318,16 +383,25 @@ components:
                         $ref: '#/components/schemas/hub.subscription.v1.BillingLineItem'
                 status:
                     type: string
+            required:
+                - month
+                - total_cents
+                - line_items
+                - status
         hub.subscription.v1.UpsertSubscriptionRequest:
             type: object
             properties:
                 plan_slug:
                     type: string
+            required:
+                - plan_slug
         hub.subscription.v1.UpsertSubscriptionResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.subscription.v1.CreateCheckoutRequest:
             type: object
             properties:
@@ -344,8 +418,14 @@ components:
                     type: array
                     items:
                         type: string
+            required:
+                - plan_slug
+                - email
+                - addons
         hub.subscription.v1.CreateCheckoutResponse:
             type: object
             properties:
                 checkout_url:
                     type: string
+            required:
+                - checkout_url

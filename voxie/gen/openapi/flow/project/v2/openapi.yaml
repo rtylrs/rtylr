@@ -558,6 +558,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.project.v2.GetProjectResponse:
             type: object
             properties:
@@ -565,6 +567,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.project.v2.Project'
                     description: project is the project value for this contract.
+            required:
+                - project
         flow.project.v2.Project:
             type: object
             properties:
@@ -657,6 +661,26 @@ components:
                         project why each one is visible. It is a per-caller projection, not a
                         property of the project: the same project is false for its own members and
                         true for their manager. Never persist it.
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - icon
+                - color
+                - status
+                - visibility
+                - is_personal
+                - start_date
+                - due_date
+                - created_by
+                - created_at
+                - updated_at
+                - task_count
+                - completed_count
+                - member_count
+                - code
+                - visible_via_report
             description: |-
                 Project is a business-scoped container of tasks. The workspace layer is
                 gone in v2: every project belongs directly to the caller's business,
@@ -692,6 +716,14 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - status
+                - visibility
+                - q
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.project.v2.ListProjectsResponse:
             type: object
             properties:
@@ -703,6 +735,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - projects
+                - pagination
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -728,6 +763,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.project.v2.CreateProjectRequest:
             type: object
@@ -761,6 +803,9 @@ components:
                 - description
                 - icon
                 - color
+                - visibility
+                - start_date
+                - due_date
         flow.project.v2.CreateProjectResponse:
             type: object
             properties:
@@ -768,6 +813,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.project.v2.Project'
                     description: project is the project value for this contract.
+            required:
+                - project
         flow.project.v2.UpdateProjectRequest:
             type: object
             properties:
@@ -780,6 +827,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.project.v2.UpdateProjectBody'
                     description: body carries updatable project fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         flow.project.v2.UpdateProjectBody:
             type: object
             properties:
@@ -815,12 +865,16 @@ components:
                 - icon
                 - color
                 - status
+                - start_date
+                - due_date
         flow.project.v2.UpdateProjectResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.ArchiveProjectRequest:
             type: object
             properties:
@@ -829,6 +883,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.project.v2.ArchiveProjectResponse:
             type: object
             properties:
@@ -839,6 +895,8 @@ components:
                         project is the archived project, carrying archived_at and the purge_at
                         deadline computed from the business's retention setting. Clients should
                         surface purge_at wherever they show the archive confirmation.
+            required:
+                - project
         flow.project.v2.SetProjectVisibilityRequest:
             type: object
             properties:
@@ -851,6 +909,7 @@ components:
                     type: string
                     description: 'visibility is the target visibility: "private" or "public".'
             required:
+                - id
                 - visibility
         flow.project.v2.SetProjectVisibilityResponse:
             type: object
@@ -859,6 +918,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.project.v2.Project'
                     description: project is the updated project.
+            required:
+                - project
         flow.project.v2.ListArchivedProjectsRequest:
             type: object
             properties:
@@ -870,6 +931,9 @@ components:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
+            required:
+                - page
+                - limit
         flow.project.v2.ListArchivedProjectsResponse:
             type: object
             properties:
@@ -883,6 +947,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - projects
+                - pagination
         flow.project.v2.RestoreProjectRequest:
             type: object
             properties:
@@ -891,6 +958,8 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.project.v2.RestoreProjectResponse:
             type: object
             properties:
@@ -898,6 +967,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.project.v2.Project'
                     description: project is the restored project with cleared archive timestamps.
+            required:
+                - project
         flow.project.v2.PurgeProjectRequest:
             type: object
             properties:
@@ -906,12 +977,16 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the resource.
+            required:
+                - id
         flow.project.v2.PurgeProjectResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.ListProjectColumnsRequest:
             type: object
             properties:
@@ -936,6 +1011,10 @@ components:
                     description: The sort direction ("asc" or "desc").
             required:
                 - project_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.project.v2.ListProjectColumnsResponse:
             type: object
             properties:
@@ -947,6 +1026,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - columns
+                - pagination
         flow.project.v2.ProjectColumn:
             type: object
             properties:
@@ -974,6 +1056,14 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - project_id
+                - name
+                - color
+                - sort_order
+                - created_at
+                - updated_at
         flow.project.v2.CreateProjectColumnRequest:
             type: object
             properties:
@@ -995,6 +1085,8 @@ components:
             required:
                 - project_id
                 - name
+                - color
+                - sort_order
         flow.project.v2.CreateProjectColumnResponse:
             type: object
             properties:
@@ -1002,6 +1094,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.project.v2.ProjectColumn'
                     description: column is the created column.
+            required:
+                - column
         flow.project.v2.UpdateProjectColumnRequest:
             type: object
             properties:
@@ -1021,13 +1115,18 @@ components:
                     format: int32
                     description: sort_order is the column sort order.
             required:
+                - id
                 - name
+                - color
+                - sort_order
         flow.project.v2.UpdateProjectColumnResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.DeleteProjectColumnRequest:
             type: object
             properties:
@@ -1036,12 +1135,16 @@ components:
                     type: string
                     format: int64
                     description: id is the column identifier.
+            required:
+                - id
         flow.project.v2.DeleteProjectColumnResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.MoveTaskToColumnRequest:
             type: object
             properties:
@@ -1056,12 +1159,15 @@ components:
                     description: column_id is the destination column identifier.
             required:
                 - task_id
+                - column_id
         flow.project.v2.MoveTaskToColumnResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.ListProjectMembersRequest:
             type: object
             properties:
@@ -1086,6 +1192,10 @@ components:
                     description: The sort direction ("asc" or "desc").
             required:
                 - project_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.project.v2.ListProjectMembersResponse:
             type: object
             properties:
@@ -1097,6 +1207,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - members
+                - pagination
         flow.project.v2.ProjectMember:
             type: object
             properties:
@@ -1128,6 +1241,15 @@ components:
                 added_at:
                     type: string
                     description: added_at is when the member joined the project.
+            required:
+                - id
+                - project_id
+                - user_id
+                - name
+                - email
+                - role
+                - added_by
+                - added_at
         flow.project.v2.AddProjectMemberRequest:
             type: object
             properties:
@@ -1147,12 +1269,15 @@ components:
             required:
                 - project_id
                 - user_id
+                - role
         flow.project.v2.AddProjectMemberResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.RemoveProjectMemberRequest:
             type: object
             properties:
@@ -1175,6 +1300,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.UpdateProjectMemberRoleRequest:
             type: object
             properties:
@@ -1201,6 +1328,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.InviteProjectMemberRequest:
             type: object
             properties:
@@ -1218,12 +1347,15 @@ components:
             required:
                 - project_id
                 - email
+                - role
         flow.project.v2.InviteProjectMemberResponse:
             type: object
             properties:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.TransferProjectOwnershipRequest:
             type: object
             properties:
@@ -1246,6 +1378,8 @@ components:
                 message:
                     type: string
                     description: message is a human-readable result message.
+            required:
+                - message
         flow.project.v2.GetProjectLabourCostRequest:
             type: object
             properties:
@@ -1254,6 +1388,8 @@ components:
                     type: string
                     format: int64
                     description: id is the Flow project id path parameter.
+            required:
+                - id
         flow.project.v2.GetProjectLabourCostResponse:
             type: object
             properties:
@@ -1261,6 +1397,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/flow.project.v2.ProjectLabourCost'
                     description: cost is the aggregate for the requested project.
+            required:
+                - cost
         flow.project.v2.ProjectLabourCost:
             type: object
             properties:
@@ -1294,3 +1432,9 @@ components:
                     description: |-
                         uncosted_employee_count is how many distinct contributors have no rate
                         on record.
+            required:
+                - project_id
+                - cost_minor_units
+                - costed_minutes
+                - uncosted_minutes
+                - uncosted_employee_count

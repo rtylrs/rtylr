@@ -93,6 +93,8 @@ components:
                     type: integer
                     format: int32
                     description: offset is the number of records to skip, for paging through the list.
+            required:
+                - limit
         hr.work_schedule.v1.ListWorkSchedulesResponse:
             type: object
             properties:
@@ -105,6 +107,9 @@ components:
                     type: integer
                     format: int32
                     description: total is the total number of schedules for the tenant, for pagination math.
+            required:
+                - schedules
+                - total
             description: |-
                 ListWorkSchedulesResponse lists work schedules for the tenant.
 
@@ -161,6 +166,19 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this schedule was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - working_days
+                - start_time
+                - end_time
+                - break_minutes
+                - contracted_hours_per_week
+                - daily_ot_threshold_minutes
+                - weekly_ot_threshold_minutes
+                - created_at
+                - updated_at
             description: WorkSchedulePayload is a recurring staff work schedule.
         hr.work_schedule.v1.CreateWorkScheduleRequest:
             type: object
@@ -202,9 +220,11 @@ components:
                     description: Weekly overtime threshold in minutes.
             required:
                 - name
+                - working_days
                 - start_time
                 - end_time
                 - break_minutes
+                - contracted_hours_per_week
                 - daily_ot_threshold_minutes
                 - weekly_ot_threshold_minutes
         hr.work_schedule.v1.CreateWorkScheduleResponse:
@@ -214,6 +234,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.work_schedule.v1.WorkSchedulePayload'
                     description: The newly created work schedule.
+            required:
+                - schedule
         hr.work_schedule.v1.UpdateWorkScheduleRequest:
             type: object
             properties:
@@ -226,6 +248,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.work_schedule.v1.UpdateWorkScheduleBody'
                     description: body carries updatable work schedule fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         hr.work_schedule.v1.UpdateWorkScheduleBody:
             type: object
             properties:
@@ -260,6 +285,8 @@ components:
                     type: integer
                     format: int32
                     description: New weekly OT threshold; absent to keep current.
+            required:
+                - working_days
         hr.work_schedule.v1.UpdateWorkScheduleResponse:
             type: object
             properties:
@@ -267,3 +294,5 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.work_schedule.v1.WorkSchedulePayload'
                     description: The updated work schedule.
+            required:
+                - schedule

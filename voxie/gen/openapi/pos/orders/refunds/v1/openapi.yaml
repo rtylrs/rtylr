@@ -45,6 +45,7 @@ components:
                 reason:
                     type: string
             required:
+                - order_id
                 - amount
                 - reason
         pos.orders.refunds.v1.ProcessRefundResponse:
@@ -55,3 +56,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - refund_id
+                - message

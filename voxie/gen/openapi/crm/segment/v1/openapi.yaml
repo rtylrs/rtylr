@@ -150,6 +150,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/crm.segment.v1.Segment'
+            required:
+                - segments
         crm.segment.v1.Segment:
             type: object
             properties:
@@ -175,6 +177,15 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - filters
+                - customer_count
+                - created_at
+                - updated_at
             description: Segment is a saved customer filter used for targeted campaigns.
         crm.segment.v1.CreateSegmentRequest:
             type: object
@@ -197,6 +208,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - segment_id
+                - message
         crm.segment.v1.GetSegmentDetailRequest:
             type: object
             properties:
@@ -204,6 +218,8 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         crm.segment.v1.GetSegmentDetailResponse:
             type: object
             properties:
@@ -218,6 +234,9 @@ components:
                         Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
                         projection) so consumers can render loyalty tier/points without a
                         second lookup.
+            required:
+                - segment
+                - customers
         crm.customer.v1.Customer:
             type: object
             properties:
@@ -275,6 +294,27 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - gender
+                - address
+                - city
+                - country
+                - loyalty_points
+                - total_spent
+                - visit_count
+                - loyalty_tier
+                - tags
+                - notes
+                - consent
+                - is_active
+                - created_at
+                - updated_at
             description: Customer is a CRM customer profile with loyalty and engagement data.
         crm.segment.v1.GetSegmentCustomersRequest:
             type: object
@@ -292,6 +332,7 @@ components:
                     type: string
                     format: int64
             required:
+                - segment_id
                 - page
                 - page_size
         crm.segment.v1.GetSegmentCustomersResponse:
@@ -314,6 +355,11 @@ components:
                 page_size:
                     type: string
                     format: int64
+            required:
+                - customers
+                - total
+                - page
+                - page_size
         crm.segment.v1.UpdateSegmentRequest:
             type: object
             properties:
@@ -324,6 +370,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/crm.segment.v1.UpdateSegmentBody'
+            required:
+                - id
+                - body
         crm.segment.v1.UpdateSegmentBody:
             type: object
             properties:
@@ -342,6 +391,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         crm.segment.v1.DeleteSegmentRequest:
             type: object
             properties:
@@ -349,8 +400,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         crm.segment.v1.DeleteSegmentResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

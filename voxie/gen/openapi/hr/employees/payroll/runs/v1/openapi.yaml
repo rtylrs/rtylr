@@ -108,6 +108,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - runs
+                - total
+                - limit
+                - offset
         hr.employees.payroll.runs.v1.PayrollRunPayload:
             type: object
             properties:
@@ -161,6 +166,18 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - period_start
+                - period_end
+                - status
+                - created_by
+                - total_gross
+                - total_net
+                - entries
+                - created_at
+                - updated_at
             description: PayrollRunPayload is a payroll run covering one pay period.
         hr.employees.payroll.runs.v1.PayrollEntryPayload:
             type: object
@@ -217,6 +234,20 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - payroll_run_id
+                - employee_id
+                - base_pay
+                - overtime_pay
+                - deductions
+                - bonuses
+                - net_pay
+                - hours_worked
+                - overtime_hours
+                - created_at
+                - updated_at
             description: PayrollEntryPayload is a single employee's computed pay for a payroll run.
         hr.employees.payroll.runs.v1.TriggerPayrollRunRequest:
             type: object
@@ -237,6 +268,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.employees.payroll.runs.v1.PayrollRunPayload'
                     description: The newly created payroll run with computed entries.
+            required:
+                - run
         hr.employees.payroll.runs.v1.ApprovePayrollRunRequest:
             type: object
             properties:
@@ -245,6 +278,8 @@ components:
                     type: string
                     format: int64
                     description: ID of the payroll run to approve.
+            required:
+                - id
         hr.employees.payroll.runs.v1.ApprovePayrollRunResponse:
             type: object
             properties:
@@ -252,6 +287,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.employees.payroll.runs.v1.PayrollRunPayload'
                     description: The approved payroll run.
+            required:
+                - run
         hr.employees.payroll.runs.v1.ExportPayrollRequest:
             type: object
             properties:
@@ -268,3 +305,5 @@ components:
                 batch_id:
                     type: string
                     description: Unique identifier for the generated export batch.
+            required:
+                - batch_id

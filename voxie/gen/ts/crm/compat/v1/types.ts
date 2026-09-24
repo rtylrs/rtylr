@@ -36,8 +36,8 @@ return violations;
 }
 
 export interface PageRequest {
-limit?: number;
-offset?: number;
+limit?: number | undefined;
+offset?: number | undefined;
 }
 
 export function decodePageRequest(v: any): PageRequest {
@@ -63,13 +63,13 @@ return violations;
 }
 
 export interface CustomerListRequest {
-search?: string;
-tier?: string;
-tag?: string;
-page?: number;
-pageSize?: number;
-limit?: number;
-offset?: number;
+search?: string | undefined;
+tier?: string | undefined;
+tag?: string | undefined;
+page?: number | undefined;
+pageSize?: number | undefined;
+limit?: number | undefined;
+offset?: number | undefined;
 }
 
 export function decodeCustomerListRequest(v: any): CustomerListRequest {
@@ -110,7 +110,7 @@ return violations;
 }
 
 export interface IdQueryRequest {
-id?: number;
+id?: number | undefined;
 }
 
 export function decodeIdQueryRequest(v: any): IdQueryRequest {
@@ -133,10 +133,10 @@ return violations;
 }
 
 export interface CustomerTimelineRequest {
-id?: number;
-customerId?: number;
-cursor?: string;
-limit?: number;
+id?: number | undefined;
+customerId?: number | undefined;
+cursor?: string | undefined;
+limit?: number | undefined;
 }
 
 export function decodeCustomerTimelineRequest(v: any): CustomerTimelineRequest {
@@ -168,7 +168,7 @@ return violations;
 }
 
 export interface SegmentCustomersRequest {
-segmentId?: number;
+segmentId?: number | undefined;
 }
 
 export function decodeSegmentCustomersRequest(v: any): SegmentCustomersRequest {
@@ -191,7 +191,7 @@ return violations;
 }
 
 export interface CampaignStatsRequest {
-campaignId?: number;
+campaignId?: number | undefined;
 }
 
 export function decodeCampaignStatsRequest(v: any): CampaignStatsRequest {
@@ -214,9 +214,9 @@ return violations;
 }
 
 export interface LoyaltyTransactionsRequest {
-customerId?: number;
-limit?: number;
-offset?: number;
+customerId?: number | undefined;
+limit?: number | undefined;
+offset?: number | undefined;
 }
 
 export function decodeLoyaltyTransactionsRequest(v: any): LoyaltyTransactionsRequest {
@@ -245,8 +245,8 @@ return violations;
 }
 
 export interface ExportCustomerRequest {
-id?: number;
-customerId?: number;
+id?: number | undefined;
+customerId?: number | undefined;
 }
 
 export function decodeExportCustomerRequest(v: any): ExportCustomerRequest {
@@ -272,10 +272,10 @@ return violations;
 }
 
 export interface ContactsRequest {
-leadId?: number;
-customerId?: number;
-limit?: number;
-offset?: number;
+leadId?: number | undefined;
+customerId?: number | undefined;
+limit?: number | undefined;
+offset?: number | undefined;
 }
 
 export function decodeContactsRequest(v: any): ContactsRequest {
@@ -307,7 +307,7 @@ return violations;
 }
 
 export interface BodyRequest {
-body?: unknown;
+body?: unknown | undefined;
 }
 
 export function decodeBodyRequest(v: any): BodyRequest {
@@ -330,7 +330,7 @@ return violations;
 }
 
 export interface PathRequest {
-id?: string;
+id?: string | undefined;
 }
 
 export function decodePathRequest(v: any): PathRequest {
@@ -353,8 +353,8 @@ return violations;
 }
 
 export interface PathBodyRequest {
-id?: string;
-body?: unknown;
+id?: string | undefined;
+body?: unknown | undefined;
 }
 
 export function decodePathBodyRequest(v: any): PathBodyRequest {

@@ -128,6 +128,14 @@ components:
                 done_tasks:
                     type: integer
                     format: int32
+            required:
+                - velocity
+                - burndown
+                - cycle_time
+                - time_by_member
+                - throughput
+                - total_tasks
+                - done_tasks
         flow.insights.v2.VelocityPoint:
             type: object
             properties:
@@ -142,6 +150,11 @@ components:
                 completion_rate:
                     type: number
                     format: double
+            required:
+                - cycle
+                - completed
+                - total
+                - completion_rate
         flow.insights.v2.BurndownPoint:
             type: object
             properties:
@@ -154,6 +167,10 @@ components:
                 actual:
                     type: number
                     format: double
+            required:
+                - day
+                - ideal
+                - actual
         flow.insights.v2.MemberTime:
             type: object
             properties:
@@ -164,6 +181,10 @@ components:
                 hours:
                     type: number
                     format: double
+            required:
+                - id
+                - name
+                - hours
         flow.insights.v2.ThroughputPoint:
             type: object
             properties:
@@ -172,6 +193,9 @@ components:
                 completed:
                     type: integer
                     format: int32
+            required:
+                - week
+                - completed
         flow.insights.v2.GetTeamWorkloadRequest:
             type: object
             properties:
@@ -189,6 +213,11 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.insights.v2.GetTeamWorkloadResponse:
             type: object
             properties:
@@ -199,6 +228,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - members
+                - pagination
         flow.insights.v2.TeamMemberWorkload:
             type: object
             properties:
@@ -221,6 +253,14 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/flow.insights.v2.TeamTaskSummary'
+            required:
+                - id
+                - name
+                - initials
+                - capacity
+                - assigned_hours
+                - load
+                - tasks
         flow.insights.v2.TeamTaskSummary:
             type: object
             properties:
@@ -234,6 +274,12 @@ components:
                     type: string
                 due_date:
                     type: string
+            required:
+                - id
+                - title
+                - status
+                - priority
+                - due_date
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -259,6 +305,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.insights.v2.GetRoadmapRequest:
             type: object
@@ -277,6 +330,11 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.insights.v2.GetRoadmapResponse:
             type: object
             properties:
@@ -287,6 +345,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - projects
+                - pagination
         flow.insights.v2.RoadmapProject:
             type: object
             properties:
@@ -311,6 +372,16 @@ components:
                     format: int32
                 description:
                     type: string
+            required:
+                - id
+                - name
+                - color
+                - start_date
+                - target_date
+                - progress
+                - done_count
+                - task_count
+                - description
             description: |-
                 RoadmapProject is one project row on the timeline view. v2 drops the
                 workspace field; visibility filtering (which projects a caller sees named

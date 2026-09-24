@@ -20,12 +20,12 @@ return violations;
 }
 
 export interface GetKPIsResponse {
-revenue?: number;
-orderCount?: string;
-staffCount?: string;
-customerCount?: string;
-lowStockCount?: string;
-activeApps?: string;
+revenue?: number | undefined;
+orderCount?: string | undefined;
+staffCount?: string | undefined;
+customerCount?: string | undefined;
+lowStockCount?: string | undefined;
+activeApps?: string | undefined;
 }
 
 export function decodeGetKPIsResponse(v: any): GetKPIsResponse {

@@ -60,6 +60,9 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - page
+                - page_size
         support.customer.v1.ListCustomersResponse:
             type: object
             properties:
@@ -76,6 +79,11 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - customers
+                - total
+                - page
+                - page_size
         support.customer.v1.Customer:
             type: object
             properties:
@@ -108,6 +116,15 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - business_id
+                - name
+                - email
+                - phone
+                - total_tickets
+                - last_ticket_at
+                - created_at
         support.customer.v1.GetCustomerRequest:
             type: object
             properties:
@@ -115,9 +132,13 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         support.customer.v1.GetCustomerResponse:
             type: object
             properties:
                 customer:
                     allOf:
                         - $ref: '#/components/schemas/support.customer.v1.Customer'
+            required:
+                - customer

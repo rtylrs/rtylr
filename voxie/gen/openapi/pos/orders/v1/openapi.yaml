@@ -246,6 +246,12 @@ components:
                     description: page_size is the maximum number of orders to return.
             required:
                 - session_id
+                - status
+                - date_from
+                - date_to
+                - search
+                - page
+                - page_size
         pos.orders.v1.ListOrdersResponse:
             type: object
             properties:
@@ -268,6 +274,12 @@ components:
                     type: integer
                     format: int64
                     description: page_size is the page size returned.
+            required:
+                - orders
+                - total
+                - has_more
+                - page
+                - page_size
         pos.orders.v1.Order:
             type: object
             properties:
@@ -340,6 +352,32 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.orders.v1.OrderItem'
+            required:
+                - id
+                - owner_id
+                - session_id
+                - table_id
+                - location_id
+                - order_number
+                - type
+                - status
+                - customer_id
+                - customer_name
+                - staff_id
+                - subtotal
+                - discount_amount
+                - tax_amount
+                - total
+                - payment_method
+                - payment_status
+                - amount_paid
+                - change_due
+                - notes
+                - kitchen_notes
+                - created_at
+                - updated_at
+                - paid_at
+                - items
         pos.orders.v1.OrderItem:
             type: object
             properties:
@@ -382,6 +420,21 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - order_id
+                - menu_item_id
+                - name
+                - sku
+                - quantity
+                - unit_price
+                - discount_pct
+                - discount_amount
+                - tax_rate
+                - total
+                - notes
+                - status
+                - created_at
         pos.orders.v1.CreateOrderRequest:
             type: object
             properties:
@@ -412,6 +465,17 @@ components:
                     items:
                         $ref: '#/components/schemas/pos.orders.v1.CreateOrderItemInput'
                     minItems: 1
+            required:
+                - session_id
+                - table_id
+                - location_id
+                - type
+                - customer_id
+                - customer_name
+                - payment_method
+                - notes
+                - kitchen_notes
+                - items
         pos.orders.v1.CreateOrderItemInput:
             type: object
             properties:
@@ -436,6 +500,15 @@ components:
                     format: double
                 notes:
                     type: string
+            required:
+                - menu_item_id
+                - name
+                - sku
+                - quantity
+                - unit_price
+                - discount_pct
+                - tax_rate
+                - notes
         pos.orders.v1.CreateOrderResponse:
             type: object
             properties:
@@ -446,6 +519,10 @@ components:
                     type: string
                 message:
                     type: string
+            required:
+                - order_id
+                - order_number
+                - message
         pos.orders.v1.CreatePublicOrderRequest:
             type: object
             properties:
@@ -466,6 +543,13 @@ components:
                     items:
                         $ref: '#/components/schemas/pos.orders.v1.PublicOrderItemInput'
                     minItems: 1
+            required:
+                - owner_id
+                - customer_name
+                - customer_phone
+                - customer_email
+                - notes
+                - items
         pos.orders.v1.PublicOrderItemInput:
             type: object
             properties:
@@ -484,6 +568,12 @@ components:
                     format: double
                 notes:
                     type: string
+            required:
+                - menu_item_id
+                - name
+                - quantity
+                - unit_price
+                - notes
         pos.orders.v1.CreatePublicOrderResponse:
             type: object
             properties:
@@ -497,6 +587,11 @@ components:
                 public_token:
                     type: string
                     description: Opaque credential required to retrieve this order's public status.
+            required:
+                - order_id
+                - order_number
+                - status
+                - public_token
         pos.orders.v1.GetPublicOrderStatusRequest:
             type: object
             properties:
@@ -518,6 +613,7 @@ components:
                         present repeatedly for status polling. It must never be replaced by the
                         sequential order ID alone.
             required:
+                - order_id
                 - business_id
                 - public_token
         pos.orders.v1.GetPublicOrderStatusResponse:
@@ -530,6 +626,10 @@ components:
                     type: string
                 status:
                     type: string
+            required:
+                - order_id
+                - order_number
+                - status
         pos.orders.v1.GetOrderDetailRequest:
             type: object
             properties:
@@ -537,12 +637,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - order_id
         pos.orders.v1.GetOrderDetailResponse:
             type: object
             properties:
                 order:
                     allOf:
                         - $ref: '#/components/schemas/pos.orders.v1.Order'
+            required:
+                - order
         pos.orders.v1.UpdateOrderStatusRequest:
             type: object
             properties:
@@ -554,6 +658,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.orders.v1.UpdateOrderStatusBody'
                     description: body carries the new order status bound from the HTTP payload.
+            required:
+                - order_id
+                - body
         pos.orders.v1.UpdateOrderStatusBody:
             type: object
             properties:
@@ -567,6 +674,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         pos.orders.v1.VoidOrderRequest:
             type: object
             properties:
@@ -577,9 +686,12 @@ components:
                 reason:
                     type: string
             required:
+                - order_id
                 - reason
         pos.orders.v1.VoidOrderResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

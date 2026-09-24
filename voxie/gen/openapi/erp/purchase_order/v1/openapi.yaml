@@ -144,6 +144,10 @@ components:
                     type: integer
                     format: int32
                     description: The number of rows to return.
+            required:
+                - status
+                - page
+                - page_size
         erp.purchase_order.v1.ListPurchaseOrdersResponse:
             type: object
             properties:
@@ -162,6 +166,11 @@ components:
                     type: integer
                     format: int32
                     description: The returned page size.
+            required:
+                - purchase_orders
+                - has_more
+                - page
+                - page_size
         erp.purchase_order.v1.PurchaseOrder:
             type: object
             properties:
@@ -207,6 +216,20 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/erp.purchase_order.v1.PurchaseOrderItem'
+            required:
+                - id
+                - owner_id
+                - supplier_id
+                - po_number
+                - status
+                - subtotal
+                - tax_amount
+                - total
+                - notes
+                - created_by
+                - created_at
+                - updated_at
+                - items
         erp.purchase_order.v1.PurchaseOrderItem:
             type: object
             properties:
@@ -231,6 +254,14 @@ components:
                 total_cost:
                     type: number
                     format: double
+            required:
+                - id
+                - purchase_order_id
+                - product_id
+                - quantity_ordered
+                - quantity_received
+                - unit_cost
+                - total_cost
         erp.purchase_order.v1.CreatePurchaseOrderRequest:
             type: object
             properties:
@@ -256,7 +287,10 @@ components:
             required:
                 - supplier_id
                 - po_number
+                - tax_amount
                 - expected_delivery
+                - notes
+                - items
         erp.purchase_order.v1.CreatePurchaseOrderItemRequest:
             type: object
             properties:
@@ -274,6 +308,8 @@ components:
                     format: double
             required:
                 - product_id
+                - quantity_ordered
+                - unit_cost
         erp.purchase_order.v1.CreatePurchaseOrderResponse:
             type: object
             properties:
@@ -283,6 +319,9 @@ components:
                 message:
                     type: string
                     description: A human-readable result message.
+            required:
+                - purchase_order_id
+                - message
         erp.purchase_order.v1.GetPurchaseOrderRequest:
             type: object
             properties:
@@ -290,12 +329,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.purchase_order.v1.GetPurchaseOrderResponse:
             type: object
             properties:
                 purchase_order:
                     allOf:
                         - $ref: '#/components/schemas/erp.purchase_order.v1.PurchaseOrder'
+            required:
+                - purchase_order
         erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest:
             type: object
             properties:
@@ -306,6 +349,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/erp.purchase_order.v1.UpdatePurchaseOrderStatusBody'
+            required:
+                - id
+                - body
         erp.purchase_order.v1.UpdatePurchaseOrderStatusBody:
             type: object
             properties:
@@ -319,11 +365,14 @@ components:
                     description: Per-line quantities submitted by the receiving operator.
             required:
                 - status
+                - items
         erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         erp.purchase_order.v1.ApprovePurchaseOrderRequest:
             type: object
             properties:
@@ -331,8 +380,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.purchase_order.v1.ApprovePurchaseOrderResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

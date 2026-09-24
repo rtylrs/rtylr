@@ -55,3 +55,10 @@ components:
                     additionalProperties:
                         type: number
                         format: double
+            required:
+                - total_sales
+                - total_tax
+                - total_tips
+                - total_refunds
+                - total_orders
+                - payment_breakdown

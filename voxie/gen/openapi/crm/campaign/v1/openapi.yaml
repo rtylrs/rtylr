@@ -172,6 +172,10 @@ components:
                 offset:
                     type: string
                     format: int64
+            required:
+                - status
+                - limit
+                - offset
         crm.campaign.v1.ListCampaignsResponse:
             type: object
             properties:
@@ -188,6 +192,11 @@ components:
                 offset:
                     type: string
                     format: int64
+            required:
+                - campaigns
+                - total
+                - limit
+                - offset
         crm.campaign.v1.Campaign:
             type: object
             properties:
@@ -237,6 +246,22 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - channel
+                - status
+                - subject
+                - content
+                - audience_count
+                - sent_count
+                - delivered_count
+                - opened_count
+                - clicked_count
+                - created_at
+                - updated_at
             description: Campaign is a marketing campaign sent to a segment or the full customer base.
         crm.campaign.v1.CreateCampaignRequest:
             type: object
@@ -268,7 +293,9 @@ components:
                         treats an empty scheduled_at as "not scheduled".
             required:
                 - name
+                - description
                 - channel
+                - subject
                 - content
         crm.campaign.v1.CreateCampaignResponse:
             type: object
@@ -278,6 +305,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - campaign_id
+                - message
         crm.campaign.v1.GetCampaignDetailRequest:
             type: object
             properties:
@@ -285,6 +315,8 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         crm.campaign.v1.GetCampaignDetailResponse:
             type: object
             properties:
@@ -294,6 +326,9 @@ components:
                 stats:
                     allOf:
                         - $ref: '#/components/schemas/crm.campaign.v1.CampaignStats'
+            required:
+                - campaign
+                - stats
         crm.campaign.v1.CampaignStats:
             type: object
             properties:
@@ -321,6 +356,15 @@ components:
                 failed_count:
                     type: string
                     format: int64
+            required:
+                - campaign_id
+                - audience_count
+                - sent_count
+                - delivered_count
+                - opened_count
+                - clicked_count
+                - bounced_count
+                - failed_count
             description: CampaignStats holds delivery and engagement counters for a campaign.
         crm.campaign.v1.GetCampaignStatsRequest:
             type: object
@@ -340,6 +384,8 @@ components:
                 stats:
                     allOf:
                         - $ref: '#/components/schemas/crm.campaign.v1.CampaignStats'
+            required:
+                - stats
         crm.campaign.v1.UpdateCampaignRequest:
             type: object
             properties:
@@ -350,6 +396,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignBody'
+            required:
+                - id
+                - body
         crm.campaign.v1.UpdateCampaignBody:
             type: object
             properties:
@@ -380,13 +429,17 @@ components:
                         treats an empty scheduled_at as "not scheduled".
             required:
                 - name
+                - description
                 - channel
+                - subject
                 - content
         crm.campaign.v1.UpdateCampaignResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         crm.campaign.v1.UpdateCampaignStatusRequest:
             type: object
             properties:
@@ -397,6 +450,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignStatusBody'
+            required:
+                - id
+                - body
         crm.campaign.v1.UpdateCampaignStatusBody:
             type: object
             properties:
@@ -409,3 +465,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

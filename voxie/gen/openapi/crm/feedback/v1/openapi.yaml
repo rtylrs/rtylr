@@ -90,6 +90,11 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - type
+                - source
+                - page
+                - page_size
         crm.feedback.v1.ListFeedbackResponse:
             type: object
             properties:
@@ -106,6 +111,11 @@ components:
                 page_size:
                     type: integer
                     format: int32
+            required:
+                - feedback
+                - total
+                - page
+                - page_size
         crm.feedback.v1.Feedback:
             type: object
             properties:
@@ -134,6 +144,16 @@ components:
                 customer_name:
                     type: string
                     description: Display name of the customer this feedback belongs to.
+            required:
+                - id
+                - owner_id
+                - customer_id
+                - type
+                - score
+                - comment
+                - source
+                - created_at
+                - customer_name
             description: Feedback is a single NPS score or written review from a customer.
         crm.feedback.v1.CreateFeedbackRequest:
             type: object
@@ -151,7 +171,11 @@ components:
                 source:
                     type: string
             required:
+                - customer_id
                 - type
+                - score
+                - comment
+                - source
         crm.feedback.v1.CreateFeedbackResponse:
             type: object
             properties:
@@ -160,3 +184,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - feedback_id
+                - message

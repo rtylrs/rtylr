@@ -134,6 +134,9 @@ components:
                     type: integer
                     format: int64
                     description: The maximum number of quotes to return.
+            required:
+                - page
+                - page_size
         finance.quote.v1.ListQuotesResponse:
             type: object
             properties:
@@ -152,6 +155,11 @@ components:
                 has_more:
                     type: boolean
                     description: Whether additional pages are available.
+            required:
+                - quotes
+                - page
+                - page_size
+                - has_more
         finance.quote.v1.Quote:
             type: object
             properties:
@@ -195,6 +203,21 @@ components:
                 updated_at:
                     type: string
                     description: When the record was last updated.
+            required:
+                - id
+                - owner_id
+                - customer_name
+                - customer_email
+                - status
+                - lines
+                - subtotal
+                - tax
+                - discount
+                - total
+                - valid_until
+                - notes
+                - created_at
+                - updated_at
         finance.quote.v1.QuoteLine:
             type: object
             properties:
@@ -212,6 +235,12 @@ components:
                 total:
                     type: number
                     format: double
+            required:
+                - description
+                - quantity
+                - unit_price
+                - tax_rate
+                - total
         finance.quote.v1.CreateQuoteRequest:
             type: object
             properties:
@@ -249,14 +278,23 @@ components:
                     type: string
             required:
                 - customer_name
+                - customer_email
+                - status
+                - lines
+                - subtotal
+                - tax
                 - valid_until
                 - discount
+                - total
+                - notes
         finance.quote.v1.CreateQuoteResponse:
             type: object
             properties:
                 quote:
                     allOf:
                         - $ref: '#/components/schemas/finance.quote.v1.Quote'
+            required:
+                - quote
         finance.quote.v1.GetQuoteRequest:
             type: object
             properties:
@@ -264,12 +302,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         finance.quote.v1.GetQuoteResponse:
             type: object
             properties:
                 quote:
                     allOf:
                         - $ref: '#/components/schemas/finance.quote.v1.Quote'
+            required:
+                - quote
         finance.quote.v1.UpdateQuoteStatusRequest:
             type: object
             properties:
@@ -281,6 +323,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/finance.quote.v1.UpdateQuoteStatusBody'
                     description: Carries status update fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         finance.quote.v1.UpdateQuoteStatusBody:
             type: object
             properties:
@@ -293,6 +338,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         finance.quote.v1.ConvertQuoteRequest:
             type: object
             properties:
@@ -300,6 +347,8 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         finance.quote.v1.ConvertQuoteResponse:
             type: object
             properties:
@@ -309,3 +358,6 @@ components:
                     description: The identifier of the invoice created from this quote.
                 message:
                     type: string
+            required:
+                - invoice_id
+                - message

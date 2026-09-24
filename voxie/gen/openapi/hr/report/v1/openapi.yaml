@@ -61,6 +61,11 @@ components:
                 format:
                     type: string
                     description: Output format (json | csv | pdf).
+            required:
+                - report_type
+                - date_from
+                - date_to
+                - format
             description: |-
                 ReportRequestPayload describes the parameters for an HR report.
                 Report types: attendance | timesheet | leave_utilization | leave_calendar
@@ -73,6 +78,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.report.v1.ReportPayload'
                     description: The generated report.
+            required:
+                - report
         hr.report.v1.ReportPayload:
             type: object
             properties:
@@ -90,4 +97,9 @@ components:
                 format:
                     type: string
                     description: Format of the serialised data (json | csv | pdf).
+            required:
+                - report_type
+                - generated_at
+                - data
+                - format
             description: ReportPayload is a generated HR report.

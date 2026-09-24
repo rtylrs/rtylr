@@ -176,6 +176,8 @@ components:
                 state:
                     allOf:
                         - $ref: '#/components/schemas/hub.security.v1.SecurityState'
+            required:
+                - state
         hub.security.v1.SecurityState:
             type: object
             properties:
@@ -189,6 +191,11 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.security.v1.ActiveSession'
+            required:
+                - two_factor_enabled
+                - mfa_required
+                - mfa_enrolled
+                - active_sessions
         hub.security.v1.ActiveSession:
             type: object
             properties:
@@ -203,6 +210,12 @@ components:
                     description: When the record was created.
                 is_current:
                     type: boolean
+            required:
+                - id
+                - ip
+                - user_agent
+                - created_at
+                - is_current
         hub.security.v1.LoginHistoryRequest:
             type: object
             properties:
@@ -214,6 +227,9 @@ components:
                     type: integer
                     format: int32
                     description: Maximum number of login events to return in one page.
+            required:
+                - page
+                - page_size
         hub.security.v1.LoginHistoryResponse:
             type: object
             properties:
@@ -236,6 +252,12 @@ components:
                 has_more:
                     type: boolean
                     description: Whether another page of login events is available.
+            required:
+                - history
+                - total
+                - page
+                - page_size
+                - has_more
         hub.security.v1.LoginEntry:
             type: object
             properties:
@@ -257,6 +279,14 @@ components:
                 created_at:
                     type: string
                     description: When the record was created.
+            required:
+                - id
+                - email
+                - method
+                - ip
+                - user_agent
+                - success
+                - created_at
         hub.security.v1.InvalidateSessionsRequest:
             type: object
         hub.security.v1.InvalidateSessionsResponse:
@@ -264,16 +294,22 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.security.v1.Update2FARequest:
             type: object
             properties:
                 enabled:
                     type: boolean
+            required:
+                - enabled
         hub.security.v1.Update2FAResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.security.v1.BeginMFAEnrollmentRequest:
             type: object
         hub.security.v1.BeginMFAEnrollmentResponse:
@@ -283,6 +319,9 @@ components:
                     type: string
                 otpauth_uri:
                     type: string
+            required:
+                - secret
+                - otpauth_uri
         hub.security.v1.CompleteMFAEnrollmentRequest:
             type: object
             properties:
@@ -299,6 +338,9 @@ components:
                     type: array
                     items:
                         type: string
+            required:
+                - verified
+                - recovery_codes
         hub.security.v1.VerifyMFARequest:
             type: object
             properties:
@@ -311,6 +353,8 @@ components:
             properties:
                 verified:
                     type: boolean
+            required:
+                - verified
         hub.security.v1.UseMFARecoveryCodeRequest:
             type: object
             properties:
@@ -323,3 +367,5 @@ components:
             properties:
                 verified:
                     type: boolean
+            required:
+                - verified

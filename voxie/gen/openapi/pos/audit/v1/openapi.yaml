@@ -100,8 +100,13 @@ components:
                     type: string
                     description: Opaque continuation token from a previous response.
             required:
+                - action
+                - entity_type
+                - employee_id
                 - start_date
                 - end_date
+                - limit
+                - cursor
         pos.audit.v1.ListAuditResponse:
             type: object
             properties:
@@ -111,6 +116,9 @@ components:
                         $ref: '#/components/schemas/pos.audit.v1.AuditLog'
                 next_cursor:
                     type: string
+            required:
+                - logs
+                - next_cursor
         pos.audit.v1.AuditLog:
             type: object
             properties:
@@ -143,6 +151,14 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - employee_id
+                - action
+                - entity_type
+                - created_at
             description: AuditLog is a recorded POS audit event.
         pos.audit.v1.CreateAuditRequest:
             type: object
@@ -188,3 +204,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - audit_log_id
+                - message

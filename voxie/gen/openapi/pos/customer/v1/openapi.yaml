@@ -39,6 +39,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.customer.v1.Customer'
+            required:
+                - customers
         pos.customer.v1.Customer:
             type: object
             properties:
@@ -54,6 +56,12 @@ components:
                     description: email is the email address used for lookup or contact.
                 phone:
                     type: string
+            required:
+                - id
+                - first_name
+                - last_name
+                - email
+                - phone
             description: |-
                 Customer is a lightweight customer record for POS lookups. Named
                 distinctly from crm.customer.v1's Customer (a genuine cross-directory

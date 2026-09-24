@@ -239,6 +239,9 @@ components:
                     type: object
                     additionalProperties:
                         type: string
+            required:
+                - subject
+                - attributes
         hub.feature.v1.ResolveFeaturesResponse:
             type: object
             properties:
@@ -248,6 +251,9 @@ components:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureResolution'
                 variant:
                     type: string
+            required:
+                - features
+                - variant
         hub.feature.v1.FeatureResolution:
             type: object
             properties:
@@ -257,6 +263,10 @@ components:
                     type: boolean
                 variant:
                     type: string
+            required:
+                - key
+                - enabled
+                - variant
         hub.feature.v1.ResolveMyFeaturesRequest:
             type: object
             properties:
@@ -264,6 +274,8 @@ components:
                     type: object
                     additionalProperties:
                         type: string
+            required:
+                - attributes
         hub.feature.v1.ResolveMyFeaturesResponse:
             type: object
             properties:
@@ -273,6 +285,9 @@ components:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureResolution'
                 variant:
                     type: string
+            required:
+                - features
+                - variant
         hub.feature.v1.ListFlagsRequest:
             type: object
         hub.feature.v1.ListFlagsResponse:
@@ -282,6 +297,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureFlag'
+            required:
+                - flags
         hub.feature.v1.FeatureFlag:
             type: object
             properties:
@@ -298,6 +315,13 @@ components:
                     type: string
                 variant_off:
                     type: string
+            required:
+                - key
+                - description
+                - enabled
+                - rollout_percentage
+                - variant_on
+                - variant_off
         hub.feature.v1.UpsertFlagRequest:
             type: object
             properties:
@@ -316,11 +340,18 @@ components:
                     type: string
             required:
                 - key
+                - description
+                - enabled
+                - rollout_percentage
+                - variant_on
+                - variant_off
         hub.feature.v1.UpsertFlagResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.feature.v1.DeleteFlagRequest:
             type: object
             properties:
@@ -333,6 +364,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.feature.v1.ListTargetsRequest:
             type: object
             properties:
@@ -347,6 +380,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureTarget'
+            required:
+                - targets
         hub.feature.v1.FeatureTarget:
             type: object
             properties:
@@ -359,6 +394,11 @@ components:
                     type: boolean
                 variant:
                     type: string
+            required:
+                - feature_key
+                - owner_id
+                - enabled
+                - variant
         hub.feature.v1.UpsertTargetRequest:
             type: object
             properties:
@@ -373,11 +413,16 @@ components:
                     type: string
             required:
                 - feature_key
+                - owner_id
+                - enabled
+                - variant
         hub.feature.v1.UpsertTargetResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.feature.v1.DeleteTargetRequest:
             type: object
             properties:
@@ -388,11 +433,14 @@ components:
                     format: int64
             required:
                 - feature_key
+                - owner_id
         hub.feature.v1.DeleteTargetResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.feature.v1.ListRulesRequest:
             type: object
             properties:
@@ -407,6 +455,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureRule'
+            required:
+                - rules
         hub.feature.v1.FeatureRule:
             type: object
             properties:
@@ -431,6 +481,15 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureCondition'
+            required:
+                - id
+                - feature_key
+                - priority
+                - description
+                - variant
+                - rollout_percentage
+                - enabled
+                - conditions
         hub.feature.v1.FeatureCondition:
             type: object
             properties:
@@ -440,6 +499,10 @@ components:
                     type: string
                 value:
                     type: string
+            required:
+                - attribute
+                - operator
+                - value
         hub.feature.v1.CreateRuleRequest:
             type: object
             properties:
@@ -463,6 +526,12 @@ components:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureCondition'
             required:
                 - feature_key
+                - priority
+                - description
+                - variant
+                - rollout_percentage
+                - enabled
+                - conditions
         hub.feature.v1.CreateRuleResponse:
             type: object
             properties:
@@ -471,6 +540,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - rule_id
+                - message
         hub.feature.v1.UpdateRuleRequest:
             type: object
             properties:
@@ -493,19 +565,33 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/hub.feature.v1.FeatureCondition'
+            required:
+                - id
+                - priority
+                - description
+                - variant
+                - rollout_percentage
+                - enabled
+                - conditions
         hub.feature.v1.UpdateRuleResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         hub.feature.v1.DeleteRuleRequest:
             type: object
             properties:
                 id:
                     type: string
                     format: int64
+            required:
+                - id
         hub.feature.v1.DeleteRuleResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

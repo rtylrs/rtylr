@@ -47,6 +47,8 @@ components:
                 settings:
                     allOf:
                         - $ref: '#/components/schemas/pos.settings.v1.POSBusinessSettings'
+            required:
+                - settings
             description: GetPOSSettingsResponse returns the current business POS settings.
         pos.settings.v1.POSBusinessSettings:
             type: object
@@ -77,6 +79,15 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - business_id
+                - business_profile
+                - theme
+                - features
+                - receipt_footer
+                - created_at
+                - updated_at
             description: POSBusinessSettings stores business-wide POS experience settings.
         pos.settings.v1.POSFeatureSettings:
             type: object
@@ -108,6 +119,16 @@ components:
                 cash_drawer:
                     type: boolean
                     description: cash_drawer enables cash drawer actions and cash movement surfaces.
+            required:
+                - tables
+                - kitchen_display
+                - modifiers
+                - combos
+                - tips
+                - gift_cards
+                - customers
+                - inventory
+                - cash_drawer
             description: POSFeatureSettings controls which business-specific POS modules are visible.
         pos.settings.v1.UpdatePOSSettingsRequest:
             type: object
@@ -125,6 +146,11 @@ components:
                 receipt_footer:
                     type: string
                     description: receipt_footer is the default footer printed on receipts.
+            required:
+                - business_profile
+                - theme
+                - features
+                - receipt_footer
             description: UpdatePOSSettingsRequest updates the current business POS settings.
         pos.settings.v1.UpdatePOSSettingsResponse:
             type: object
@@ -134,4 +160,7 @@ components:
                         - $ref: '#/components/schemas/pos.settings.v1.POSBusinessSettings'
                 message:
                     type: string
+            required:
+                - settings
+                - message
             description: UpdatePOSSettingsResponse returns the saved POS settings.

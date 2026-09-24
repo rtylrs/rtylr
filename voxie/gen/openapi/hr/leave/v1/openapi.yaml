@@ -257,6 +257,9 @@ components:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
+            required:
+                - limit
+                - offset
         hr.leave.v1.ListLeaveRequestsResponse:
             type: object
             properties:
@@ -277,6 +280,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - requests
+                - total
+                - limit
+                - offset
         hr.leave.v1.LeaveRequestPayload:
             type: object
             properties:
@@ -328,6 +336,18 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - leave_type_id
+                - start_date
+                - end_date
+                - total_days
+                - status
+                - current_approval_level
+                - created_at
+                - updated_at
             description: LeaveRequestPayload is a single employee's request for time off.
         hr.leave.v1.CreateLeaveRequestRequest:
             type: object
@@ -369,6 +389,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.leave.v1.LeaveRequestPayload'
                     description: The newly created leave request.
+            required:
+                - request
         hr.leave.v1.ApproveLeaveRequest:
             type: object
             properties:
@@ -380,6 +402,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hr.leave.v1.ApproveLeaveBody'
+            required:
+                - request_id
+                - body
         hr.leave.v1.ApproveLeaveBody:
             type: object
             properties:
@@ -389,6 +414,8 @@ components:
                 rejection_reason:
                     type: string
                     description: Reason for rejection; absent if approving.
+            required:
+                - approved
             description: ApproveLeaveBody carries approval decision fields bound from the HTTP payload.
         hr.leave.v1.ApproveLeaveResponse:
             type: object
@@ -396,6 +423,8 @@ components:
                 success:
                     type: boolean
                     description: Whether the approval action was processed.
+            required:
+                - success
         hr.leave.v1.CancelLeaveRequestRequest:
             type: object
             properties:
@@ -407,12 +436,16 @@ components:
                         request_id is the leave request being withdrawn. Only the request's own
                         subject may cancel it, and only while it is still pending - the leave
                         approval permission grants no override here.
+            required:
+                - request_id
         hr.leave.v1.CancelLeaveResponse:
             type: object
             properties:
                 success:
                     type: boolean
                     description: Whether the request was still pending and is now canceled.
+            required:
+                - success
         hr.leave.v1.ListLeaveTypesRequest:
             type: object
         hr.leave.v1.ListLeaveTypesResponse:
@@ -435,6 +468,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - leave_types
+                - total
+                - limit
+                - offset
         hr.leave.v1.LeaveTypePayload:
             type: object
             properties:
@@ -481,6 +519,17 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - is_paid
+                - requires_approval
+                - max_carryover_days
+                - min_notice_days
+                - is_active
+                - created_at
+                - updated_at
             description: LeaveTypePayload defines a category of leave employees can request.
         hr.leave.v1.CreateLeaveTypeRequest:
             type: object
@@ -513,6 +562,8 @@ components:
                     description: Consecutive days after which documentation is required; absent if never.
             required:
                 - name
+                - is_paid
+                - requires_approval
                 - max_carryover_days
                 - min_notice_days
         hr.leave.v1.CreateLeaveTypeResponse:
@@ -522,6 +573,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.leave.v1.LeaveTypePayload'
                     description: The newly created leave type.
+            required:
+                - leave_type
         hr.leave.v1.UpdateLeaveTypeRequest:
             type: object
             properties:
@@ -533,6 +586,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hr.leave.v1.UpdateLeaveTypeBody'
+            required:
+                - id
+                - body
         hr.leave.v1.UpdateLeaveTypeBody:
             type: object
             properties:
@@ -571,6 +627,8 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/hr.leave.v1.LeaveTypePayload'
                     description: The updated leave type.
+            required:
+                - leave_type
         hr.leave.v1.ListLeaveBalancesRequest:
             type: object
             properties:
@@ -602,6 +660,11 @@ components:
                     type: integer
                     format: int32
                     description: Offset used for this request.
+            required:
+                - balances
+                - total
+                - limit
+                - offset
         hr.leave.v1.LeaveBalancePayload:
             type: object
             properties:
@@ -649,4 +712,16 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - leave_type_id
+                - year
+                - entitled_days
+                - used_days
+                - pending_days
+                - remaining_days
+                - created_at
+                - updated_at
             description: LeaveBalancePayload tracks an employee's remaining entitlement for a leave type and year.

@@ -36,15 +36,15 @@ return violations;
 }
 
 export interface PageRequest {
-id?: string;
-page?: number;
-pageSize?: number;
-limit?: number;
-offset?: number;
-status?: string;
-category?: string;
-start?: string;
-end?: string;
+id?: string | undefined;
+page?: number | undefined;
+pageSize?: number | undefined;
+limit?: number | undefined;
+offset?: number | undefined;
+status?: string | undefined;
+category?: string | undefined;
+start?: string | undefined;
+end?: string | undefined;
 }
 
 export function decodePageRequest(v: any): PageRequest {
@@ -91,7 +91,7 @@ return violations;
 }
 
 export interface IdQueryRequest {
-id?: string;
+id?: string | undefined;
 }
 
 export function decodeIdQueryRequest(v: any): IdQueryRequest {
@@ -114,8 +114,8 @@ return violations;
 }
 
 export interface ReportRequest {
-period?: string;
-date?: string;
+period?: string | undefined;
+date?: string | undefined;
 }
 
 export function decodeReportRequest(v: any): ReportRequest {
@@ -141,7 +141,7 @@ return violations;
 }
 
 export interface BodyRequest {
-body?: unknown;
+body?: unknown | undefined;
 }
 
 export function decodeBodyRequest(v: any): BodyRequest {
@@ -164,7 +164,7 @@ return violations;
 }
 
 export interface PathRequest {
-id?: string;
+id?: string | undefined;
 }
 
 export function decodePathRequest(v: any): PathRequest {
@@ -187,8 +187,8 @@ return violations;
 }
 
 export interface PathBodyRequest {
-id?: string;
-body?: unknown;
+id?: string | undefined;
+body?: unknown | undefined;
 }
 
 export function decodePathBodyRequest(v: any): PathBodyRequest {
@@ -214,7 +214,7 @@ return violations;
 }
 
 export interface BankFeedRequest {
-accountId?: string;
+accountId?: string | undefined;
 }
 
 export function decodeBankFeedRequest(v: any): BankFeedRequest {

@@ -60,6 +60,8 @@ components:
                 stats:
                     allOf:
                         - $ref: '#/components/schemas/hr.dashboard.v1.DashboardStats'
+            required:
+                - stats
         hr.dashboard.v1.DashboardStats:
             type: object
             properties:
@@ -79,6 +81,11 @@ components:
                     type: string
                     format: int64
                     description: payroll_draft is the payroll draft value for this contract.
+            required:
+                - total_staff
+                - on_shift_today
+                - pending_time_off
+                - payroll_draft
         hr.dashboard.v1.GetDashboardWidgetsRequest:
             type: object
         hr.dashboard.v1.GetDashboardWidgetsResponse:
@@ -94,6 +101,9 @@ components:
                     additionalProperties:
                         $ref: '#/components/schemas/hr.dashboard.v1.DashboardDataPayload'
                     description: Pre-loaded data keyed by widget type.
+            required:
+                - widgets
+                - data
         hr.dashboard.v1.DashboardWidgetPayload:
             type: object
             properties:
@@ -140,6 +150,18 @@ components:
                     type: string
                     format: int64
                     description: Unix timestamp when this widget was last updated.
+            required:
+                - id
+                - owner_id
+                - role_id
+                - widget_type
+                - position_x
+                - position_y
+                - width
+                - height
+                - config
+                - created_at
+                - updated_at
             description: DashboardWidgetPayload is a widget layout definition on the HR dashboard.
         hr.dashboard.v1.DashboardDataPayload:
             type: object
@@ -151,6 +173,9 @@ components:
                     type: string
                     format: byte
                     description: Serialised widget data as JSON.
+            required:
+                - widget_type
+                - data
             description: DashboardDataPayload is pre-loaded widget data keyed by widget type.
         hr.dashboard.v1.UpdateDashboardWidgetsRequest:
             type: object
@@ -161,9 +186,13 @@ components:
                         $ref: '#/components/schemas/hr.dashboard.v1.DashboardWidgetPayload'
                     minItems: 1
                     description: Updated widget positions and sizes.
+            required:
+                - widgets
         hr.dashboard.v1.UpdateDashboardWidgetsResponse:
             type: object
             properties:
                 success:
                     type: boolean
                     description: success indicates whether the operation completed.
+            required:
+                - success

@@ -90,6 +90,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/support.canned.v1.CannedResponse'
+            required:
+                - canned_responses
         support.canned.v1.CannedResponse:
             type: object
             properties:
@@ -109,6 +111,14 @@ components:
                     type: string
                 created_at:
                     type: string
+            required:
+                - id
+                - business_id
+                - name
+                - body
+                - category
+                - shortcut
+                - created_at
         support.canned.v1.CreateCannedResponseRequest:
             type: object
             properties:
@@ -123,6 +133,8 @@ components:
             required:
                 - name
                 - body
+                - category
+                - shortcut
         support.canned.v1.CreateCannedResponseResponse:
             type: object
             properties:
@@ -131,6 +143,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - canned_response_id
+                - message
         support.canned.v1.UpdateCannedResponseRequest:
             type: object
             properties:
@@ -146,11 +161,19 @@ components:
                     type: string
                 shortcut:
                     type: string
+            required:
+                - id
+                - name
+                - body
+                - category
+                - shortcut
         support.canned.v1.UpdateCannedResponseResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         support.canned.v1.DeleteCannedResponseRequest:
             type: object
             properties:
@@ -158,8 +181,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         support.canned.v1.DeleteCannedResponseResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

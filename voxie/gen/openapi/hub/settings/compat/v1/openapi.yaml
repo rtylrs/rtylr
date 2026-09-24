@@ -31,6 +31,8 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/hub.settings.compat.v1.TestEmailBody'
+            required:
+                - body
         hub.settings.compat.v1.TestEmailBody:
             type: object
             properties:
@@ -41,4 +43,8 @@ components:
                     format: int32
                 username:
                     type: string
+            required:
+                - host
+                - port
+                - username
         hub.settings.compat.v1.TestEmailResponse: {}

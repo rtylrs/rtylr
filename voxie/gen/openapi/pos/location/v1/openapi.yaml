@@ -76,6 +76,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.location.v1.Location'
+            required:
+                - locations
         pos.location.v1.Location:
             type: object
             properties:
@@ -100,6 +102,15 @@ components:
                 updated_at:
                     type: string
                     description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - address
+                - phone
+                - is_active
+                - created_at
+                - updated_at
             description: Location is a physical POS location for a business.
         pos.location.v1.CreateLocationRequest:
             type: object
@@ -115,6 +126,8 @@ components:
                     description: Defaults to true when absent.
             required:
                 - name
+                - address
+                - phone
         pos.location.v1.CreateLocationResponse:
             type: object
             properties:
@@ -123,6 +136,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - location_id
+                - message
         pos.location.v1.UpdateLocationRequest:
             type: object
             properties:
@@ -135,6 +151,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.location.v1.UpdateLocationBody'
                     description: body carries updatable location fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         pos.location.v1.UpdateLocationBody:
             type: object
             properties:
@@ -149,8 +168,12 @@ components:
                     description: Unchanged when absent.
             required:
                 - name
+                - address
+                - phone
         pos.location.v1.UpdateLocationResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

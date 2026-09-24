@@ -54,6 +54,10 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.orders.items.v1.UpdateOrderItemStatusBody'
                     description: body carries the new order item status bound from the HTTP payload.
+            required:
+                - order_id
+                - item_id
+                - body
         pos.orders.items.v1.UpdateOrderItemStatusBody:
             type: object
             properties:
@@ -67,3 +71,5 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message

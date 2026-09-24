@@ -90,6 +90,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/booking.service.v1.BookingService'
+            required:
+                - services
         booking.service.v1.BookingService:
             type: object
             properties:
@@ -120,6 +122,18 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - business_id
+                - name
+                - description
+                - duration_minutes
+                - price
+                - color
+                - is_active
+                - created_at
+                - updated_at
         booking.service.v1.CreateServiceRequest:
             type: object
             properties:
@@ -141,7 +155,11 @@ components:
                     type: boolean
             required:
                 - name
+                - description
                 - duration_minutes
+                - price
+                - color
+                - is_active
         booking.service.v1.CreateServiceResponse:
             type: object
             properties:
@@ -150,6 +168,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - id
+                - message
         booking.service.v1.UpdateServiceRequest:
             type: object
             properties:
@@ -174,13 +195,20 @@ components:
                 is_active:
                     type: boolean
             required:
+                - id
                 - name
+                - description
                 - duration_minutes
+                - price
+                - color
+                - is_active
         booking.service.v1.UpdateServiceResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         booking.service.v1.DeleteServiceRequest:
             type: object
             properties:
@@ -188,8 +216,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         booking.service.v1.DeleteServiceResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

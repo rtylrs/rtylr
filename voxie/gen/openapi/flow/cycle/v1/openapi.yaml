@@ -113,6 +113,12 @@ components:
                 sort_dir:
                     type: string
                     description: The sort direction ("asc" or "desc").
+            required:
+                - workspace_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
         flow.cycle.v1.ListCyclesResponse:
             type: object
             properties:
@@ -123,6 +129,9 @@ components:
                 pagination:
                     allOf:
                         - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - cycles
+                - pagination
         flow.cycle.v1.Cycle:
             type: object
             properties:
@@ -146,6 +155,15 @@ components:
                 completed:
                     type: integer
                     format: int32
+            required:
+                - id
+                - workspace_id
+                - name
+                - start_date
+                - end_date
+                - status
+                - scope
+                - completed
         common.pagination.v1.PaginationResponse:
             type: object
             properties:
@@ -171,6 +189,13 @@ components:
                 has_prev:
                     type: boolean
                     description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
             description: Standard pagination response metadata.
         flow.cycle.v1.CreateCycleRequest:
             type: object
@@ -185,12 +210,17 @@ components:
                     type: string
             required:
                 - name
+                - workspace_id
+                - start_date
+                - end_date
         flow.cycle.v1.CreateCycleResponse:
             type: object
             properties:
                 cycle:
                     allOf:
                         - $ref: '#/components/schemas/flow.cycle.v1.Cycle'
+            required:
+                - cycle
         flow.cycle.v1.UpdateCycleRequest:
             type: object
             properties:
@@ -203,5 +233,10 @@ components:
                     type: string
                 end_date:
                     type: string
+            required:
+                - id
+                - name
+                - status
+                - end_date
         flow.cycle.v1.UpdateCycleResponse:
             type: object

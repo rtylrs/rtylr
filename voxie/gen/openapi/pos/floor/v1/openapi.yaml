@@ -100,6 +100,8 @@ components:
                 branch_id:
                     type: string
                     format: int64
+            required:
+                - branch_id
         pos.floor.v1.ListFloorsResponse:
             type: object
             properties:
@@ -107,6 +109,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.floor.v1.Floor'
+            required:
+                - floors
         pos.floor.v1.Floor:
             type: object
             properties:
@@ -129,6 +133,14 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - name
+                - sort_order
+                - is_active
+                - created_at
             description: Floor is a physical seating area within a branch.
         pos.floor.v1.CreateFloorRequest:
             type: object
@@ -155,6 +167,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - floor_id
+                - message
         pos.floor.v1.UpdateFloorRequest:
             type: object
             properties:
@@ -167,6 +182,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.floor.v1.UpdateFloorBody'
                     description: body carries updatable floor fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         pos.floor.v1.UpdateFloorBody:
             type: object
             properties:
@@ -184,6 +202,8 @@ components:
             properties:
                 message:
                     type: string
+            required:
+                - message
         pos.floor.v1.DeleteFloorRequest:
             type: object
             properties:
@@ -192,8 +212,12 @@ components:
                     type: string
                     format: int64
                     description: id is the unique identifier for the floor.
+            required:
+                - id
         pos.floor.v1.DeleteFloorResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

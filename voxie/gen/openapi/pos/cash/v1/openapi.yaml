@@ -103,6 +103,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.cash.v1.CashMovement'
+            required:
+                - movements
         pos.cash.v1.CashMovement:
             type: object
             properties:
@@ -137,6 +139,15 @@ components:
                 created_at:
                     type: string
                     description: created_at is when the record was created.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - session_id
+                - employee_id
+                - type
+                - amount
+                - created_at
             description: CashMovement is a recorded cash drawer movement.
         pos.cash.v1.CashDropRequest:
             type: object
@@ -178,6 +189,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - movement_id
+                - message
         pos.cash.v1.CashPickupRequest:
             type: object
             properties:
@@ -218,6 +232,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - movement_id
+                - message
         pos.cash.v1.CashAdjustRequest:
             type: object
             properties:
@@ -258,3 +275,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - movement_id
+                - message

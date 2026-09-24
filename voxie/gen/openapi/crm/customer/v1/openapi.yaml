@@ -155,6 +155,12 @@ components:
                 page_size:
                     type: string
                     format: int64
+            required:
+                - search
+                - tier
+                - tag
+                - page
+                - page_size
         crm.customer.v1.ListCustomersResponse:
             type: object
             properties:
@@ -171,6 +177,11 @@ components:
                 page_size:
                     type: string
                     format: int64
+            required:
+                - customers
+                - total
+                - page
+                - page_size
         crm.customer.v1.Customer:
             type: object
             properties:
@@ -228,6 +239,27 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - gender
+                - address
+                - city
+                - country
+                - loyalty_points
+                - total_spent
+                - visit_count
+                - loyalty_tier
+                - tags
+                - notes
+                - consent
+                - is_active
+                - created_at
+                - updated_at
             description: Customer is a CRM customer profile with loyalty and engagement data.
         crm.customer.v1.CreateCustomerRequest:
             type: object
@@ -263,6 +295,17 @@ components:
                         type: boolean
             required:
                 - first_name
+                - last_name
+                - email
+                - phone
+                - date_of_birth
+                - gender
+                - address
+                - city
+                - country
+                - tags
+                - notes
+                - consent
         crm.customer.v1.CreateCustomerResponse:
             type: object
             properties:
@@ -271,6 +314,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - customer_id
+                - message
         crm.customer.v1.GetCustomerRequest:
             type: object
             properties:
@@ -278,12 +324,16 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         crm.customer.v1.GetCustomerResponse:
             type: object
             properties:
                 customer:
                     allOf:
                         - $ref: '#/components/schemas/crm.customer.v1.Customer'
+            required:
+                - customer
         crm.customer.v1.UpdateCustomerRequest:
             type: object
             properties:
@@ -294,6 +344,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/crm.customer.v1.UpdateCustomerBody'
+            required:
+                - id
+                - body
         crm.customer.v1.UpdateCustomerBody:
             type: object
             properties:
@@ -330,11 +383,24 @@ components:
                     type: boolean
             required:
                 - first_name
+                - last_name
+                - email
+                - phone
+                - date_of_birth
+                - gender
+                - address
+                - city
+                - country
+                - tags
+                - notes
+                - consent
         crm.customer.v1.UpdateCustomerResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         crm.customer.v1.DeleteCustomerRequest:
             type: object
             properties:
@@ -342,8 +408,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         crm.customer.v1.DeleteCustomerResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

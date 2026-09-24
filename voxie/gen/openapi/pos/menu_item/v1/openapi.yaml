@@ -105,6 +105,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
+            required:
+                - items
         pos.menu_item.v1.MenuItem:
             type: object
             properties:
@@ -168,6 +170,22 @@ components:
                         unit_cost is the cost of one unit at the time of the read, copied from
                         the linked ERP product. Absent when product_id is absent. Reported for
                         display and margin only: the authoritative value is the ERP product's.
+            required:
+                - id
+                - owner_id
+                - category_id
+                - name
+                - sku
+                - sale_price
+                - is_active
+                - created_at
+                - updated_at
+                - image_url
+                - category
+                - barcode
+                - description
+                - tax_rate
+                - stock
             description: MenuItem is a sellable item on the POS menu.
         pos.menu_item.v1.ListPublicMenuItemsRequest:
             type: object
@@ -180,6 +198,9 @@ components:
                     type: string
                     format: int64
                     description: Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
+            required:
+                - business_id
+                - location_id
         pos.menu_item.v1.ListPublicMenuItemsResponse:
             type: object
             properties:
@@ -187,6 +208,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
+            required:
+                - items
         pos.menu_item.v1.CreateMenuItemRequest:
             type: object
             properties:
@@ -201,6 +224,7 @@ components:
             required:
                 - name
                 - sku
+                - sale_price
         pos.menu_item.v1.CreateMenuItemResponse:
             type: object
             properties:
@@ -209,6 +233,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - item_id
+                - message
         pos.menu_item.v1.UpdateMenuItemRequest:
             type: object
             properties:
@@ -221,6 +248,9 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/pos.menu_item.v1.UpdateMenuItemBody'
                     description: body carries updatable menu item fields bound from the HTTP payload.
+            required:
+                - id
+                - body
         pos.menu_item.v1.UpdateMenuItemBody:
             type: object
             properties:
@@ -240,8 +270,15 @@ components:
                     minimum: 0
                     format: double
                     description: Current tracked stock quantity for the menu item.
+            required:
+                - name
+                - sale_price
+                - is_active
+                - stock
         pos.menu_item.v1.UpdateMenuItemResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

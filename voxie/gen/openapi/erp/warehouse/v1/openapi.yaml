@@ -107,6 +107,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of warehouses to skip.
+            required:
+                - limit
+                - offset
         erp.warehouse.v1.ListWarehousesResponse:
             type: object
             properties:
@@ -125,6 +128,12 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - warehouses
+                - has_more
+                - limit
+                - offset
+                - total
         erp.warehouse.v1.Warehouse:
             type: object
             properties:
@@ -155,6 +164,19 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - address
+                - city
+                - country
+                - manager_name
+                - capacity
+                - is_default
+                - is_active
+                - created_at
+                - updated_at
         erp.warehouse.v1.CreateWarehouseRequest:
             type: object
             properties:
@@ -177,6 +199,13 @@ components:
                     type: boolean
             required:
                 - name
+                - address
+                - city
+                - country
+                - manager_name
+                - capacity
+                - is_default
+                - is_active
         erp.warehouse.v1.CreateWarehouseResponse:
             type: object
             properties:
@@ -185,6 +214,9 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - warehouse_id
+                - message
         erp.warehouse.v1.UpdateWarehouseRequest:
             type: object
             properties:
@@ -195,6 +227,9 @@ components:
                 body:
                     allOf:
                         - $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseBody'
+            required:
+                - id
+                - body
         erp.warehouse.v1.UpdateWarehouseBody:
             type: object
             properties:
@@ -217,11 +252,20 @@ components:
                     type: boolean
             required:
                 - name
+                - address
+                - city
+                - country
+                - manager_name
+                - capacity
+                - is_default
+                - is_active
         erp.warehouse.v1.UpdateWarehouseResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message
         erp.warehouse.v1.DeleteWarehouseRequest:
             type: object
             properties:
@@ -229,8 +273,12 @@ components:
                     exclusiveMinimum: 0
                     type: string
                     format: int64
+            required:
+                - id
         erp.warehouse.v1.DeleteWarehouseResponse:
             type: object
             properties:
                 message:
                     type: string
+            required:
+                - message

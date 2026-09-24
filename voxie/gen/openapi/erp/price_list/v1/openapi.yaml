@@ -62,6 +62,9 @@ components:
                     type: integer
                     format: int64
                     description: Number of price lists to skip.
+            required:
+                - limit
+                - offset
         erp.price_list.v1.ListPriceListsResponse:
             type: object
             properties:
@@ -80,6 +83,12 @@ components:
                 total:
                     type: integer
                     format: int64
+            required:
+                - price_lists
+                - has_more
+                - limit
+                - offset
+                - total
         erp.price_list.v1.PriceList:
             type: object
             properties:
@@ -99,6 +108,14 @@ components:
                     type: string
                 updated_at:
                     type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - currency
+                - is_default
+                - created_at
+                - updated_at
         erp.price_list.v1.CreatePriceListRequest:
             type: object
             properties:
@@ -110,6 +127,8 @@ components:
                     type: boolean
             required:
                 - name
+                - currency
+                - is_default
         erp.price_list.v1.CreatePriceListResponse:
             type: object
             properties:
@@ -118,3 +137,6 @@ components:
                     format: int64
                 message:
                     type: string
+            required:
+                - price_list_id
+                - message

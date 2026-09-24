@@ -60,11 +60,20 @@ components:
                 accounts_payable:
                     type: number
                     format: double
+            required:
+                - total_assets
+                - total_liabilities
+                - total_equity
+                - cash_balance
+                - accounts_receivable
+                - accounts_payable
         finance.statement.v1.GetCashFlowRequest:
             type: object
             properties:
                 period:
                     type: string
+            required:
+                - period
         finance.statement.v1.GetCashFlowResponse:
             type: object
             properties:
@@ -82,3 +91,9 @@ components:
                 net_cash_flow:
                     type: number
                     format: double
+            required:
+                - period
+                - operating_inflow
+                - operating_outflow
+                - net_operating
+                - net_cash_flow
