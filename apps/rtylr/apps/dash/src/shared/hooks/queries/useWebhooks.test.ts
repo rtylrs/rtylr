@@ -30,9 +30,18 @@ describe('useWebhooks', () => {
     vi.clearAllMocks();
   });
 
-  it('fetches webhooks successfully', async () => {
+  it('fetches the contract webhook fields without inventing display-only fields', async () => {
     mockDeveloperClient.listWebhooks.mockResolvedValue({
-      webhooks: [{ id: 1, url: 'https://example.com/wh', events: ['order.created'] }],
+      webhooks: [
+        {
+          id: 1,
+          url: 'https://example.com/wh',
+          events: ['order.created'],
+          isActive: false,
+          createdAt: '2026-09-01T12:00:00Z',
+          lastTriggeredAt: '2026-09-23T11:00:00Z',
+        },
+      ],
     });
 
     const client = new QueryClient({
@@ -43,7 +52,13 @@ describe('useWebhooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data?.[0].url).toBe('https://example.com/wh');
+    expect(result.current.data?.[0]).toMatchObject({
+      url: 'https://example.com/wh',
+      isActive: false,
+      lastTriggeredAt: '2026-09-23T11:00:00Z',
+    });
+    expect(result.current.data?.[0]).not.toHaveProperty('status');
+    expect(result.current.data?.[0]).not.toHaveProperty('secretPreview');
   });
 
   it('creates a webhook successfully', async () => {

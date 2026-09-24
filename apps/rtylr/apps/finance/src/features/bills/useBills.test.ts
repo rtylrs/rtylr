@@ -12,7 +12,7 @@ vi.mock('@voxire/api', () => ({
   createOneKitClient: () => mockClient,
 }));
 
-import { useBills } from './useBills';
+import { BILLS_PAGE_SIZE, useBills } from './useBills';
 
 const createWrapper = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -39,12 +39,40 @@ describe('useBills', () => {
     vi.clearAllMocks();
   });
 
-  it('fetches bills on mount', async () => {
-    mockClient.listBills.mockResolvedValue({ bills: [baseBill] });
+  it('fetches bills on mount with an explicit page', async () => {
+    mockClient.listBills.mockResolvedValue({ bills: [baseBill], hasMore: false });
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockClient.listBills).toHaveBeenCalledWith({});
+    expect(mockClient.listBills).toHaveBeenCalledWith({ page: 1, pageSize: BILLS_PAGE_SIZE });
     expect(result.current.data).toHaveLength(1);
+  });
+
+  it('follows has_more so the complete set is available for metrics and actions', async () => {
+    const firstPage = Array.from({ length: BILLS_PAGE_SIZE }, (_, index) => ({
+      ...baseBill,
+      id: String(index + 1),
+    }));
+    const secondPage = { ...baseBill, id: 'last', amount: 750 };
+
+    mockClient.listBills.mockImplementation(async ({ page }: { page: number }) =>
+      page === 1
+        ? { bills: firstPage, hasMore: true, page: 1, pageSize: BILLS_PAGE_SIZE }
+        : { bills: [secondPage], hasMore: false, page: 2, pageSize: BILLS_PAGE_SIZE }
+    );
+
+    const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toHaveLength(BILLS_PAGE_SIZE + 1);
+    expect(result.current.data?.[BILLS_PAGE_SIZE]?.id).toBe('last');
+    expect(mockClient.listBills).toHaveBeenNthCalledWith(1, {
+      page: 1,
+      pageSize: BILLS_PAGE_SIZE,
+    });
+    expect(mockClient.listBills).toHaveBeenNthCalledWith(2, {
+      page: 2,
+      pageSize: BILLS_PAGE_SIZE,
+    });
   });
 
   it('starts in loading state', () => {
@@ -66,6 +94,7 @@ describe('useBills', () => {
     // assertion cannot tell them apart.
     mockClient.listBills.mockResolvedValue({
       bills: [{ ...baseBill, supplierName: 'Acme Corp', description: 'March hosting' }],
+      hasMore: false,
     });
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -77,6 +106,7 @@ describe('useBills', () => {
     // the vendor name back as the description.
     mockClient.listBills.mockResolvedValue({
       bills: [{ ...baseBill, supplierName: 'Acme Corp', description: 'March hosting' }],
+      hasMore: false,
     });
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));

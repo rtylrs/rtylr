@@ -11,7 +11,6 @@ const receivedPoSchema = z.object({
   supplierId: z.string().optional(),
   poNumber: z.string().optional(),
   total: z.number().optional(),
-  quantityReceived: z.number().optional(),
 });
 
 export interface ReceivedPurchaseOrder {
@@ -48,7 +47,6 @@ export function useErpReceivedPurchaseOrders(options?: { enabled?: boolean }) {
         });
         const pos = (res.purchaseOrders ?? [])
           .map((po) => receivedPoSchema.parse(po))
-          .filter((po) => (po.quantityReceived ?? 0) > 0)
           .map((po) => ({
             id: po.id,
             supplierId: po.supplierId,

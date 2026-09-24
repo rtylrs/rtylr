@@ -79,10 +79,10 @@ export const useMFARecoveryCode = () => {
   });
 };
 
-export const useRevokeSession = () => {
+export const useRevokeAllSessions = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (_id: string) => {
+    mutationFn: async () => {
       await securityClient.invalidateSessions({});
     },
     onSuccess: () => {

@@ -9,6 +9,7 @@ vi.mock('react-i18next', () => ({
 interface DirectoryQueryState {
   data: Array<Record<string, unknown>> | undefined;
   isLoading: boolean;
+  isPending?: boolean;
   isError: boolean;
   isPaused?: boolean;
   failureCount?: number;
@@ -128,16 +129,18 @@ describe('DirectoryScreen', () => {
     expect(screen.queryByText('flow.directory.noMembersYet')).not.toBeInTheDocument();
   });
 
-  it('does not treat a query merely paused before its first attempt as failed', () => {
+  it('shows a loading skeleton for a query paused before its first attempt', () => {
     directoryState.value = {
       data: undefined,
       isLoading: false,
+      isPending: true,
       isError: false,
       isPaused: true,
       failureCount: 0,
     };
-    render(<DirectoryScreen />);
-    expect(screen.getByText('flow.directory.noMembersYet')).toBeInTheDocument();
+    const { container } = render(<DirectoryScreen />);
+    expect(container.querySelector('.flow-shimmer')).not.toBeNull();
+    expect(screen.queryByText('flow.directory.noMembersYet')).not.toBeInTheDocument();
     expect(screen.queryByText('flow.directory.loadFailedTitle')).not.toBeInTheDocument();
   });
 });

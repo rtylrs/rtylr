@@ -21,6 +21,11 @@ const securityState = vi.hoisted(() => ({
   refetch: vi.fn(),
 }));
 
+const revokeAllSessions = vi.hoisted(() => ({
+  mutate: vi.fn(),
+  isPending: false,
+}));
+
 vi.mock('../../shared/hooks/queries/useSecurity', () => ({
   useSecurity: () => securityState,
   useToggleTwoFactor: () => ({ mutateAsync: vi.fn(), isPending: false }),
@@ -28,7 +33,7 @@ vi.mock('../../shared/hooks/queries/useSecurity', () => ({
   useCompleteMFAEnrollment: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useVerifyMFA: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useMFARecoveryCode: () => ({ mutateAsync: vi.fn(), isPending: false }),
-  useRevokeSession: () => ({ mutate: vi.fn(), isPending: false }),
+  useRevokeAllSessions: () => revokeAllSessions,
 }));
 
 vi.mock('../../shared/stores/userStore', () => ({
@@ -78,5 +83,40 @@ describe('Security page load states', () => {
 
     expect(screen.getByText('Active sessions')).toBeInTheDocument();
     expect(screen.getByText('Trusted devices')).toBeInTheDocument();
+  });
+
+  it('offers one explicit all-sessions action instead of a per-row revoke', () => {
+    securityState.data = {
+      ...loadedState,
+      sessions: [
+        {
+          id: 'current',
+          device: 'Chrome on macOS',
+          browser: 'Chrome',
+          location: 'London',
+          ip: '127.0.0.1',
+          current: true,
+          lastActive: '2026-09-23T12:00:00Z',
+        },
+        {
+          id: 'other',
+          device: 'Safari on iPhone',
+          browser: 'Safari',
+          location: 'Paris',
+          ip: '127.0.0.2',
+          current: false,
+          lastActive: '2026-09-23T11:00:00Z',
+        },
+      ],
+    };
+
+    render(<Security />);
+
+    expect(screen.queryByRole('button', { name: 'Revoke session' })).not.toBeInTheDocument();
+    const revokeAll = screen.getByRole('button', { name: 'Sign out all sessions' });
+    fireEvent.click(revokeAll);
+
+    expect(revokeAllSessions.mutate).toHaveBeenCalledTimes(1);
+    expect(revokeAllSessions.mutate).toHaveBeenCalledWith();
   });
 });

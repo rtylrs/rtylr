@@ -1,11 +1,13 @@
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Barcodes from './Barcodes';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useProducts: vi.fn(),
+  fetchAllProducts: vi.fn(),
   navigate: vi.fn(),
 }));
 
@@ -29,6 +31,7 @@ vi.mock('@tanstack/react-router', () => ({
 
 vi.mock('../products/useProducts', () => ({
   useProducts: mocks.useProducts,
+  fetchAllProducts: mocks.fetchAllProducts,
 }));
 
 vi.mock('../../shared/components/BarcodeSvg', () => ({ default: () => null }));
@@ -37,19 +40,36 @@ beforeAll(async () => {
   await initTestI18n('en');
 });
 
+function renderBarcodes() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Barcodes />
+    </QueryClientProvider>
+  );
+}
+
 describe('Barcodes preview empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it('selects the first product on CTA click when products are available', () => {
     mocks.useProducts.mockReturnValue({
-      data: { products: [{ id: 'p1', name: 'Widget', sku: 'W-1', salePrice: 10 }] },
+      data: { products: [] },
       isLoading: false,
     });
+    mocks.fetchAllProducts.mockResolvedValue([]);
+  });
 
-    render(<Barcodes />);
+  it('selects the first product on CTA click when products are available', async () => {
+    mocks.fetchAllProducts.mockResolvedValue([
+      { id: 'p1', name: 'Widget', sku: 'W-1', salePrice: 10 },
+    ]);
 
+    renderBarcodes();
+
+    await screen.findByText('Widget');
     const title = screen.getByText('Select products to preview labels');
     expect(title).toBeInTheDocument();
     expect(
@@ -64,14 +84,26 @@ describe('Barcodes preview empty state', () => {
     expect(screen.queryByText('Select products to preview labels')).not.toBeInTheDocument();
   });
 
-  it('navigates to products on CTA click when there are no products at all', () => {
+  it('loads products beyond the first server page for the picker', async () => {
     mocks.useProducts.mockReturnValue({
-      data: { products: [] },
+      data: { products: [{ id: 'p1', name: 'Product 1', sku: 'P-1', salePrice: 10 }] },
       isLoading: false,
     });
+    mocks.fetchAllProducts.mockResolvedValue([
+      { id: 'p1', name: 'Product 1', sku: 'P-1', salePrice: 10 },
+      { id: 'p120', name: 'Product 120', sku: 'P-120', salePrice: 12 },
+    ]);
 
-    render(<Barcodes />);
+    renderBarcodes();
 
+    expect(await screen.findByText('Product 120')).toBeInTheDocument();
+    expect(mocks.fetchAllProducts).toHaveBeenCalled();
+  });
+
+  it('navigates to products on CTA click when there are no products at all', async () => {
+    renderBarcodes();
+
+    await waitFor(() => expect(mocks.fetchAllProducts).toHaveBeenCalled());
     const title = screen.getByText('Select products to preview labels');
     const emptyState = title.parentElement as HTMLElement;
     fireEvent.click(within(emptyState).getByRole('button', { name: 'Go to Products' }));

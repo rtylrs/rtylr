@@ -19,11 +19,9 @@ const PayrollConfigStep = ({
 }: PayrollConfigStepProps): React.JSX.Element => {
   const { t } = useTranslation();
   const [form, setForm] = useState<PayrollConfigFormData>({
-    payrollGrossModel: 'salary',
     payrollPeriod: 'monthly',
     enableOvertime: true,
-    enableDeductions: true,
-    enableBonuses: true,
+    payDayOfMonth: 28,
   });
 
   const handleSubmit = (): void => {
@@ -31,12 +29,6 @@ const PayrollConfigStep = ({
     if (!result.success) return;
     onNext(result.data);
   };
-
-  const grossModels = [
-    { value: 'hourly' as const, label: t('setup.payrollConfig.hourly') },
-    { value: 'salary' as const, label: t('setup.payrollConfig.salary') },
-    { value: 'both' as const, label: t('setup.payrollConfig.both') },
-  ];
 
   const periods = [
     { value: 'weekly' as const, label: t('setup.payrollConfig.weekly') },
@@ -53,30 +45,6 @@ const PayrollConfigStep = ({
       isSubmitting={isSubmitting}
     >
       <div className="flex flex-col gap-6">
-        <div>
-          <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-            {t('setup.payrollConfig.grossModel')}
-          </label>
-          <div className="flex gap-2">
-            {grossModels.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, payrollGrossModel: opt.value }))}
-                className="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
-                style={{
-                  background:
-                    form.payrollGrossModel === opt.value ? 'var(--accent)' : 'var(--hr-hover)',
-                  color: form.payrollGrossModel === opt.value ? '#fff' : 'var(--hr-text-muted)',
-                  border: `1px solid ${form.payrollGrossModel === opt.value ? 'var(--accent)' : 'var(--hr-border)'}`,
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div>
           <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
             {t('setup.payrollConfig.period')}
@@ -102,24 +70,34 @@ const PayrollConfigStep = ({
         </div>
 
         <div className="flex flex-col gap-3">
-          {[
-            { key: 'enableOvertime' as const, label: t('setup.payrollConfig.enableOvertime') },
-            { key: 'enableDeductions' as const, label: t('setup.payrollConfig.enableDeductions') },
-            { key: 'enableBonuses' as const, label: t('setup.payrollConfig.enableBonuses') },
-          ].map(({ key, label }) => (
-            <label key={key} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form[key]}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.checked }))}
-                className="h-4 w-4 rounded"
-              />
-              <span className="text-sm" style={{ color: 'var(--hr-text)' }}>
-                {label}
-              </span>
-            </label>
-          ))}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.enableOvertime}
+              onChange={(e) => setForm((f) => ({ ...f, enableOvertime: e.target.checked }))}
+              className="h-4 w-4 rounded"
+            />
+            <span className="text-sm" style={{ color: 'var(--hr-text)' }}>
+              {t('setup.payrollConfig.enableOvertime')}
+            </span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <span className="text-sm" style={{ color: 'var(--hr-text)' }}>
+              {t('setup.payrollConfig.payDayOfMonth')}
+            </span>
+            <input
+              type="number"
+              min={1}
+              max={28}
+              value={form.payDayOfMonth}
+              onChange={(e) => setForm((f) => ({ ...f, payDayOfMonth: Number(e.target.value) }))}
+              className="w-24 rounded-lg border px-3 py-2 text-sm"
+              style={{ borderColor: 'var(--hr-border)', background: 'var(--hr-input-bg)' }}
+            />
+          </label>
         </div>
+        {/* The remaining wizard options are intentionally not shown here: the
+            live payroll contract stores only period, pay day, and overtime. */}
       </div>
     </StepContainer>
   );

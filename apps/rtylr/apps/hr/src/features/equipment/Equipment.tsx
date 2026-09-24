@@ -19,12 +19,6 @@ import {
 } from '../../shared/components/ui';
 import EquipmentRequestForm from './EquipmentRequestForm';
 
-const URGENCY_COLORS: Record<string, string> = {
-  low: 'var(--hr-status-approved)',
-  medium: 'var(--hr-status-pending)',
-  high: 'var(--hr-error)',
-};
-
 const STATUS_COLORS: Record<string, string> = {
   pending: 'var(--hr-status-pending)',
   approved: 'var(--hr-status-approved)',
@@ -92,7 +86,6 @@ const Equipment = (): React.JSX.Element => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {displayRequests.map((req) => {
-              const urgencyColor = URGENCY_COLORS[req.urgency ?? ''] ?? 'var(--hr-status-draft)';
               const statusColor = STATUS_COLORS[req.status ?? ''] ?? 'var(--hr-status-draft)';
               return (
                 <Card
@@ -135,9 +128,6 @@ const Equipment = (): React.JSX.Element => {
                       {req.description}
                     </div>
                   </div>
-                  <Pill style={pillStyle(urgencyColor)}>
-                    {t(`equipment.urgencies.${req.urgency}` as const)}
-                  </Pill>
                   <Pill style={pillStyle(statusColor)}>
                     {t(`equipment.statuses.${req.status}` as const)}
                   </Pill>

@@ -71,6 +71,7 @@
       "both": "كلاهما"
     },
     "period": "فترة الدفع",
+    "payDayOfMonth": "يوم دفع الراتب من الشهر",
     "periods": {
       "weekly": "أسبوعي",
       "biweekly": "نصف شهري",

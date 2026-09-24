@@ -4,7 +4,6 @@ import { EquipmentServiceClient } from '@voxire/voxie/hr/equipment/v1/client';
 import type {
   ListEquipmentRequestsRequest,
   ListEquipmentRequestsResponse,
-  CreateEquipmentRequestRequest,
   ApproveEquipmentRequest,
   ListAssetsResponse,
 } from '@voxire/voxie/hr/equipment/v1/types';
@@ -12,6 +11,13 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 const equipmentClient = createOneKitClient(EquipmentServiceClient, 'hr');
+
+export interface CreateEquipmentRequestInput {
+  employeeId: string;
+  equipmentType: string;
+  description: string;
+  neededByDate?: string;
+}
 
 export const useListEquipmentRequests = (params?: ListEquipmentRequestsRequest) => {
   return useQuery<ListEquipmentRequestsResponse>({
@@ -26,8 +32,14 @@ export const useCreateEquipmentRequest = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: (data: CreateEquipmentRequestRequest) =>
-      equipmentClient.createEquipmentRequest(data),
+    mutationFn: (data: CreateEquipmentRequestInput) =>
+      equipmentClient.createEquipmentRequest({
+        ...data,
+        // The generated request requires urgency, but the live HR equipment
+        // adapter currently discards it. Keep the transport contract valid
+        // without presenting a choice the server cannot persist.
+        urgency: 'medium',
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['equipment-requests'] });
       toast.success(t('equipment.requestCreated'));

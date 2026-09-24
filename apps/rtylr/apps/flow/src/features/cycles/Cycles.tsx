@@ -26,7 +26,10 @@ const Cycles: React.FC = () => {
   const [projectId, setProjectId] = useState('');
   const selectedProjectId = projectId || projects[0]?.id || '';
   const cyclesQuery = useCycles(selectedProjectId || undefined);
-  const { data: cycles = [], isLoading } = cyclesQuery;
+  const { data: cycles = [] } = cyclesQuery;
+  const loadFailed = hasQueryFailed(cyclesQuery);
+  const isLoading =
+    cyclesQuery.isLoading || (Boolean(selectedProjectId) && cyclesQuery.isPending && !loadFailed);
   const createCycle = useCreateCycle();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -42,11 +45,11 @@ const Cycles: React.FC = () => {
 
   // Without this a 500 fell through to the empty state, which reads as "no
   // cycles yet" and invites the user to create one that already exists.
-  if (hasQueryFailed(cyclesQuery)) {
+  if (loadFailed) {
     return <ListLoadFailed onRetry={() => void cyclesQuery.refetch()} />;
   }
 
-  const active = cycles.find((c) => c.status === 'active');
+  const activeCycles = cycles.filter((c) => c.status === 'active');
   const upcoming = cycles.filter((c) => c.status === 'upcoming');
   const completed = cycles.filter((c) => c.status === 'completed');
 
@@ -230,8 +233,9 @@ const Cycles: React.FC = () => {
         </div>
       ) : (
         <div className="p-6 max-w-4xl space-y-8">
-          {active && (
+          {activeCycles.map((active) => (
             <motion.section
+              key={active.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               className="rounded-xl p-6"
@@ -290,7 +294,7 @@ const Cycles: React.FC = () => {
                 </div>
               </div>
             </motion.section>
-          )}
+          ))}
 
           {upcoming.length > 0 && (
             <CycleSection title={t('flow.cycles.sectionUpcoming')} cycles={upcoming} />

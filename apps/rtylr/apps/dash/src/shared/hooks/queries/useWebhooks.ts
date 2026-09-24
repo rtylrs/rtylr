@@ -1,12 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { developerClient } from '../../lib/clients';
-import { webhookSchema } from '../../schemas/webhooks';
 import { toast } from 'sonner';
 import i18next from 'i18next';
 
-export type { Webhook } from '../../schemas/webhooks';
-type Webhook = z.infer<typeof webhookSchema>;
+const webhookSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(String),
+  url: z.string(),
+  events: z.array(z.string()),
+  // The Go contract omits false, so an absent boolean means the webhook is inactive.
+  isActive: z.boolean().default(false),
+  createdAt: z.string().optional(),
+  lastTriggeredAt: z.string().optional(),
+});
+
+export type Webhook = z.infer<typeof webhookSchema>;
 
 export const useWebhooks = () => {
   return useQuery<Webhook[]>({

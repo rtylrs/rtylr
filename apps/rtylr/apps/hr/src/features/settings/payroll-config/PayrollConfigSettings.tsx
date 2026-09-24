@@ -15,13 +15,13 @@ import {
   Button,
   Label,
   Select,
+  Input,
   Checkbox,
   Skeleton,
 } from '../../../shared/components/ui';
 
 type FormData = z.infer<typeof payrollConfigSchema>;
 
-const GROSS_MODELS = ['hourly', 'salary', 'both'] as const;
 const PAY_PERIODS = ['weekly', 'biweekly', 'monthly'] as const;
 
 const PayrollConfigSettings = (): React.JSX.Element => {
@@ -35,11 +35,9 @@ const PayrollConfigSettings = (): React.JSX.Element => {
   useEffect(() => {
     if (data && !form) {
       setForm({
-        grossModel: data.grossModel,
         period: data.period,
         overtimeEnabled: data.overtimeEnabled,
-        deductionsEnabled: data.deductionsEnabled,
-        bonusesEnabled: data.bonusesEnabled,
+        payDayOfMonth: data.payDayOfMonth,
       });
     }
   }, [data, form]);
@@ -84,47 +82,6 @@ const PayrollConfigSettings = (): React.JSX.Element => {
 
         <Card>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Gross Model */}
-            <div>
-              <Label htmlFor="grossModel">{t('payroll.config.grossModel')}</Label>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {GROSS_MODELS.map((model) => (
-                  <label
-                    key={model}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '10px 16px',
-                      borderRadius: 8,
-                      border: `1px solid ${form.grossModel === model ? 'var(--accent)' : 'var(--hr-border)'}`,
-                      background: form.grossModel === model ? 'var(--accent-muted)' : 'transparent',
-                      cursor: 'pointer',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: form.grossModel === model ? 'var(--accent)' : 'var(--hr-text)',
-                      minHeight: 44,
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="grossModel"
-                      value={model}
-                      checked={form.grossModel === model}
-                      onChange={() => setForm({ ...form, grossModel: model })}
-                      style={{ display: 'none' }}
-                    />
-                    {t(`payroll.config.grossModels.${model}`)}
-                  </label>
-                ))}
-              </div>
-              {errors.grossModel && (
-                <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
-                  {errors.grossModel}
-                </span>
-              )}
-            </div>
-
             {/* Pay Period */}
             <div>
               <Label htmlFor="period">{t('payroll.config.period')}</Label>
@@ -147,22 +104,30 @@ const PayrollConfigSettings = (): React.JSX.Element => {
               )}
             </div>
 
+            <div>
+              <Label htmlFor="payDayOfMonth">{t('payroll.config.payDayOfMonth')}</Label>
+              <Input
+                id="payDayOfMonth"
+                type="number"
+                min={1}
+                max={28}
+                value={form.payDayOfMonth}
+                onChange={(e) => setForm({ ...form, payDayOfMonth: Number(e.target.value) })}
+                style={{ maxWidth: 160 }}
+              />
+              {errors.payDayOfMonth && (
+                <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
+                  {errors.payDayOfMonth}
+                </span>
+              )}
+            </div>
+
             {/* Toggles */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <Checkbox
                 checked={form.overtimeEnabled}
                 onChange={(v) => setForm({ ...form, overtimeEnabled: v })}
                 label={t('payroll.config.enableOvertime')}
-              />
-              <Checkbox
-                checked={form.deductionsEnabled}
-                onChange={(v) => setForm({ ...form, deductionsEnabled: v })}
-                label={t('payroll.config.enableDeductions')}
-              />
-              <Checkbox
-                checked={form.bonusesEnabled}
-                onChange={(v) => setForm({ ...form, bonusesEnabled: v })}
-                label={t('payroll.config.enableBonuses')}
               />
             </div>
           </div>

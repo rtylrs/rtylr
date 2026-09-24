@@ -23,6 +23,7 @@ export interface UploadDocumentPayload {
   storageMode: string;
   fileUrl: string;
   externalUrl?: string;
+  expiryDate?: string;
 }
 
 export const useListEmployeeDocuments = (employeeId?: number) => {

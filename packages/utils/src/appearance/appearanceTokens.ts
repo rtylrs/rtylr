@@ -22,8 +22,8 @@ import {
   rgbaFromHex,
   rgbaFromTriple,
   safeHex,
-} from './colorMath';
-import { ACCENT_DEFAULT, resolvePalette } from './palettes';
+} from "./colorMath";
+import { ACCENT_DEFAULT, resolvePalette } from "./palettes";
 import type {
   AppearanceContext,
   AppearancePrefs,
@@ -32,7 +32,7 @@ import type {
   Density,
   ResolvedMode,
   TextSize,
-} from './types';
+} from "./types";
 
 /**
  * Per-mode alphas, read off apps/flow/src/globals.css rather than remembered.
@@ -46,7 +46,10 @@ import type {
  * strokes that repeat an adjacent label, which is why it is allowed to sit far
  * below the contrast floor.
  */
-const TEXT_ALPHAS: Record<ResolvedMode, { text: number; muted: number; dim: number }> = {
+const TEXT_ALPHAS: Record<
+  ResolvedMode,
+  { text: number; muted: number; dim: number }
+> = {
   dark: { text: 0.92, muted: 0.58, dim: 0.28 },
   light: { text: 1, muted: 0.62, dim: 0.35 },
 };
@@ -55,9 +58,12 @@ const TEXT_ALPHAS: Record<ResolvedMode, { text: number; muted: number; dim: numb
  * Washes over the palette ground. White over dark, black over light, exactly as
  * globals.css does it: these are neutral overlays, not tints of the text colour.
  */
-const WASHES: Record<ResolvedMode, { overlay: string; border: number; hover: number }> = {
-  dark: { overlay: '255, 255, 255', border: 0.07, hover: 0.05 },
-  light: { overlay: '0, 0, 0', border: 0.08, hover: 0.05 },
+const WASHES: Record<
+  ResolvedMode,
+  { overlay: string; border: number; hover: number }
+> = {
+  dark: { overlay: "255, 255, 255", border: 0.07, hover: 0.05 },
+  light: { overlay: "0, 0, 0", border: 0.08, hover: 0.05 },
 };
 
 /**
@@ -67,7 +73,10 @@ const WASHES: Record<ResolvedMode, { overlay: string; border: number; hover: num
  * and border heavier to carry the same weight. The focus alpha is deliberately
  * the same in both: it is already strong enough either way.
  */
-const ACCENT_ALPHAS: Record<ResolvedMode, { muted: number; border: number; focus: number }> = {
+const ACCENT_ALPHAS: Record<
+  ResolvedMode,
+  { muted: number; border: number; focus: number }
+> = {
   dark: { muted: 0.12, border: 0.3, focus: 0.5 },
   light: { muted: 0.18, border: 0.42, focus: 0.5 },
 };
@@ -86,9 +95,9 @@ const ACCENT_ALPHAS: Record<ResolvedMode, { muted: number; border: number; focus
  * left to scale: at 0.75 an `h-11` becomes 33px.
  */
 const DENSITY_UNIT: Record<Density, string> = {
-  compact: '0.75',
-  cozy: '1',
-  roomy: '1.25',
+  compact: "0.75",
+  cozy: "1",
+  roomy: "1.25",
 };
 
 /**
@@ -100,16 +109,16 @@ const DENSITY_UNIT: Record<Density, string> = {
  * control ships disabled rather than pretending otherwise.
  */
 const TEXT_SIZE: Record<TextSize, string> = {
-  s: '0.92',
-  m: '1',
-  l: '1.1',
+  s: "0.92",
+  m: "1",
+  l: "1.1",
 };
 
 /** Corner radius. `soft` is 8px, matching --radius-md in the shared preset. */
 const CORNER_RADIUS: Record<Corners, string> = {
-  sharp: '4px',
-  soft: '8px',
-  round: '14px',
+  sharp: "4px",
+  soft: "8px",
+  round: "14px",
 };
 
 /**
@@ -120,7 +129,11 @@ const CORNER_RADIUS: Record<Corners, string> = {
  * localStorage entry is not bound by the type. Emitting `undefined` into a
  * custom property would drop the declaration silently.
  */
-function pick<K extends string>(scale: Record<K, string>, key: K, fallback: K): string {
+function pick<K extends string>(
+  scale: Record<K, string>,
+  key: K,
+  fallback: K,
+): string {
   return scale[key] ?? scale[fallback];
 }
 
@@ -137,8 +150,11 @@ function pick<K extends string>(scale: Record<K, string>, key: K, fallback: K): 
  * colour or a length, so it belongs on an attribute the stylesheet can select
  * on, which is the provider's business rather than this function's.
  */
-export function appearanceTokens(prefs: AppearancePrefs, ctx: AppearanceContext): AppearanceTokens {
-  const mode = ctx.resolvedMode;
+export function appearanceTokens(
+  prefs: AppearancePrefs,
+  ctx: AppearanceContext,
+): AppearanceTokens {
+  const mode: ResolvedMode = ctx.resolvedMode === "light" ? "light" : "dark";
   const palette = resolvePalette(prefs.palette, mode);
 
   const accent = safeHex(prefs.accent ?? ctx.workspaceAccent, ACCENT_DEFAULT);
@@ -148,31 +164,32 @@ export function appearanceTokens(prefs: AppearancePrefs, ctx: AppearanceContext)
 
   return {
     // ── Ground ──
-    '--flow-bg': palette.bg,
-    '--flow-surface': palette.surface,
-    '--flow-card': palette.card,
-    '--flow-border': `rgba(${wash.overlay}, ${wash.border})`,
-    '--flow-hover': `rgba(${wash.overlay}, ${wash.hover})`,
+    "--flow-bg": palette.bg,
+    "--flow-surface": palette.surface,
+    "--flow-card": palette.card,
+    "--flow-border": `rgba(${wash.overlay}, ${wash.border})`,
+    "--flow-hover": `rgba(${wash.overlay}, ${wash.hover})`,
     // Dark floats the field above the surface with a wash; light declares the
     // surface itself, which is what globals.css does with its literal #ffffff.
-    '--flow-input-bg': mode === 'dark' ? `rgba(${wash.overlay}, 0.04)` : palette.surface,
+    "--flow-input-bg":
+      mode === "dark" ? `rgba(${wash.overlay}, 0.04)` : palette.surface,
 
     // ── Text ──
-    '--flow-text': rgbaFromTriple(palette.textRgb, textAlpha.text),
-    '--flow-text-muted': rgbaFromTriple(palette.textRgb, textAlpha.muted),
-    '--flow-text-dim': rgbaFromTriple(palette.textRgb, textAlpha.dim),
+    "--flow-text": rgbaFromTriple(palette.textRgb, textAlpha.text),
+    "--flow-text-muted": rgbaFromTriple(palette.textRgb, textAlpha.muted),
+    "--flow-text-dim": rgbaFromTriple(palette.textRgb, textAlpha.dim),
 
     // ── Accent family ──
-    '--accent': accent,
-    '--accent-muted': rgbaFromHex(accent, accentAlpha.muted),
-    '--accent-border': rgbaFromHex(accent, accentAlpha.border),
-    '--accent-focus': rgbaFromHex(accent, accentAlpha.focus),
+    "--accent": accent,
+    "--accent-muted": rgbaFromHex(accent, accentAlpha.muted),
+    "--accent-border": rgbaFromHex(accent, accentAlpha.border),
+    "--accent-focus": rgbaFromHex(accent, accentAlpha.focus),
 
     // ── Derived, and the reason this function exists ──
     // Measured against the card the text actually sits on, not against the
     // page background, because a chip label is on --flow-card.
-    '--accent-fg': deriveAccentFg(accent, palette.card),
-    '--flow-on-accent': deriveOnAccent(accent),
+    "--accent-fg": deriveAccentFg(accent, palette.card),
+    "--flow-on-accent": deriveOnAccent(accent),
     // Text on the --accent-muted tint, which is a different background from the
     // card and therefore needs its own derivation. Reusing --accent-fg here put
     // 40 of the 56 light-mode palette/accent combinations below 4.5:1
@@ -183,22 +200,22 @@ export function appearanceTokens(prefs: AppearancePrefs, ctx: AppearanceContext)
     // Derived against the tint composited over all three grounds it can sit on
     // rather than a chosen one. Picking the ground is what went wrong the first
     // time, so this token does not depend on picking it right.
-    '--accent-on-muted': deriveAccentFgAcross(
+    "--accent-on-muted": deriveAccentFgAcross(
       accent,
       [palette.bg, palette.surface, palette.card].map((ground) =>
-        compositeOver(accent, accentAlpha.muted, ground)
-      )
+        compositeOver(accent, accentAlpha.muted, ground),
+      ),
     ),
     // The focus ring was the third hardcoded token, and it was missed twice:
     // once when --accent-fg and --flow-on-accent were derived, and again when a
     // browser check found a teal ring drawn around a coral-accented card. Same
     // defect, same fix. Derived against --flow-bg rather than the card, because
     // the ring sits at a 2px offset outside the control, on the page ground.
-    '--flow-focus-ring': rgbaFromHex(deriveAccentFg(accent, palette.bg), 0.9),
+    "--flow-focus-ring": rgbaFromHex(deriveAccentFg(accent, palette.bg), 0.9),
 
     // ── Shape ──
-    '--flow-u': pick(DENSITY_UNIT, prefs.density, 'cozy'),
-    '--flow-fs': pick(TEXT_SIZE, prefs.textSize, 'm'),
-    '--flow-r': pick(CORNER_RADIUS, prefs.corners, 'soft'),
+    "--flow-u": pick(DENSITY_UNIT, prefs.density, "cozy"),
+    "--flow-fs": pick(TEXT_SIZE, prefs.textSize, "m"),
+    "--flow-r": pick(CORNER_RADIUS, prefs.corners, "soft"),
   };
 }

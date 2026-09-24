@@ -35,29 +35,7 @@ import { Link } from '@tanstack/react-router';
 import { pageTitle } from '../../shared/lib/pageTitle';
 
 const AMBER = 'var(--erp-accent)';
-
-function filterAndSortProducts(rawProducts: Product[], filters: ProductFilters): Product[] {
-  let out = rawProducts;
-
-  if (filters.status) {
-    out = out.filter((product) => getProductStockStatus(product) === filters.status);
-  }
-
-  if (filters.sort) {
-    const direction = filters.sortDir === 'desc' ? -1 : 1;
-    out = [...out].sort((a, b) => {
-      if (filters.sort === 'name') return (a.name ?? '').localeCompare(b.name ?? '') * direction;
-      if (filters.sort === 'stock')
-        return ((a.stockQuantity ?? 0) - (b.stockQuantity ?? 0)) * direction;
-      if (filters.sort === 'price') return ((a.salePrice ?? 0) - (b.salePrice ?? 0)) * direction;
-      if (filters.sort === 'category')
-        return (a.categoryId ?? '').localeCompare(b.categoryId ?? '') * direction;
-      return 0;
-    });
-  }
-
-  return out;
-}
+const NO_PRODUCTS: Product[] = [];
 
 const Products: React.FC = () => {
   const { t } = useTranslation();
@@ -73,10 +51,7 @@ const Products: React.FC = () => {
 
   const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch, page, pageSize };
   const { data: productResult, isLoading } = useProducts(mergedFilters);
-  const products = useMemo(
-    () => filterAndSortProducts(productResult?.products ?? [], filters),
-    [productResult?.products, filters]
-  );
+  const products = productResult?.products ?? NO_PRODUCTS;
   const totalProducts = productResult?.total ?? products.length;
   const hasMore = productResult?.hasMore ?? false;
   const { data: categories = [] } = useCategories();
@@ -143,11 +118,8 @@ const Products: React.FC = () => {
   );
   const exportable = useMemo(() => toExportRows(products), [products, toExportRows]);
   const getAllExportable = useCallback(async () => {
-    const allProducts = await fetchAllProducts({
-      search: debouncedSearch,
-      categoryId: filters.categoryId,
-    });
-    return toExportRows(filterAndSortProducts(allProducts, filters));
+    const allProducts = await fetchAllProducts({ ...filters, search: debouncedSearch });
+    return toExportRows(allProducts);
   }, [debouncedSearch, filters, toExportRows]);
 
   return (

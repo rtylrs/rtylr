@@ -65,7 +65,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       </a>
       <button
         type="button"
-        aria-label={t('license.license.dismiss')}
+        aria-label={t('license.dismiss')}
         onClick={dismiss}
         className="h-6 w-6 flex items-center justify-center rounded shrink-0 hover:bg-amber-100 transition-colors"
         style={{ color: '#92400e' }}

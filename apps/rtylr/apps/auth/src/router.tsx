@@ -1,5 +1,11 @@
 import React, { Suspense } from 'react';
-import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router';
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  useRouterState,
+} from '@tanstack/react-router';
 import { FullScreenLoader } from '@voxire/components';
 import { ErrorBoundary } from '@voxire/ui';
 import { AnimatedRoutes } from '@voxire/components';
@@ -29,16 +35,22 @@ const rootRoute = createRootRoute({
   ),
 });
 
-const publicLayoutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: 'public-layout',
-  component: () => (
+function PublicLayout(): React.JSX.Element {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+
+  return (
     <Public hasHeader={false} hasPadding={false}>
-      <AnimatedRoutes>
+      <AnimatedRoutes animationKey={pathname}>
         <Outlet />
       </AnimatedRoutes>
     </Public>
-  ),
+  );
+}
+
+const publicLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'public-layout',
+  component: PublicLayout,
 });
 
 const indexRoute = createRoute({

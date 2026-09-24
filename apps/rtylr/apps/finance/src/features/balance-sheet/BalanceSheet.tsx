@@ -15,8 +15,8 @@ import { toLocalIso } from '../../shared/lib/date';
 const Section: React.FC<{
   title: string;
   rows: { label: string; amount: number; type: string }[];
-}> = ({ title, rows }) => {
-  const total = rows.reduce((s, r) => s + r.amount, 0);
+  total: number;
+}> = ({ title, rows, total }) => {
   return (
     <div style={{ ...cardStyle, padding: 20 }}>
       <div
@@ -136,9 +136,14 @@ const BalanceSheet: React.FC = () => {
                 ]
               : data.assets
           }
+          total={totalAssets}
         />
-        <Section title={t('finance.balanceSheet.liabilities')} rows={data.liabilities} />
-        <Section title={t('finance.balanceSheet.equity')} rows={data.equity} />
+        <Section
+          title={t('finance.balanceSheet.liabilities')}
+          rows={data.liabilities}
+          total={totalLiab}
+        />
+        <Section title={t('finance.balanceSheet.equity')} rows={data.equity} total={totalEquity} />
       </div>
 
       <div

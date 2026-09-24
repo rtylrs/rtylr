@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Webhook } from '../../shared/hooks/queries/useWebhooks';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -11,7 +12,7 @@ vi.mock('@voxire/components', () => ({
 }));
 
 const webhooksData = vi.hoisted(() => ({
-  data: [] as { id: string; url: string }[],
+  data: [] as Webhook[],
   isLoading: false,
 }));
 
@@ -55,10 +56,10 @@ describe('Webhooks empty state', () => {
       {
         id: '1',
         url: 'https://api.example.com/hooks',
-        status: 'active',
+        isActive: true,
         events: ['order.created'],
-        secretPreview: 'whsec_***',
-      } as unknown as { id: string; url: string },
+        lastTriggeredAt: '2026-09-23T11:00:00Z',
+      },
     ];
     render(<Webhooks />);
 

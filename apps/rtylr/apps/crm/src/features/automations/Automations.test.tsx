@@ -5,6 +5,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   role: 'admin' as string,
+  automations: {
+    data: [] as unknown[],
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
+  },
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -21,7 +27,7 @@ vi.mock('@voxire/auth', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useAutomations', () => ({
-  useListAutomations: () => ({ data: [], isLoading: false }),
+  useListAutomations: () => mocks.automations,
   useUpdateAutomation: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteAutomation: () => ({ mutate: vi.fn(), isPending: false }),
 }));
@@ -34,9 +40,25 @@ function renderAutomations(): void {
 
 beforeEach(() => {
   mocks.navigate.mockClear();
+  mocks.automations.data = [];
+  mocks.automations.isLoading = false;
+  mocks.automations.isError = false;
+  mocks.automations.refetch.mockClear();
 });
 
-describe('Automations empty state', () => {
+describe('Automations list states', () => {
+  it('shows a retryable error instead of a false empty state when loading fails', () => {
+    mocks.automations.isError = true;
+
+    renderAutomations();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('errors.generic');
+    expect(screen.queryByText('crm.automations.emptyTitle')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
+    expect(mocks.automations.refetch).toHaveBeenCalledTimes(1);
+  });
+
   it('shows a "create one" call-to-action that navigates to the automation builder', () => {
     renderAutomations();
 

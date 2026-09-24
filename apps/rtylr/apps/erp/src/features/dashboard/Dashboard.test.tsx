@@ -1,9 +1,11 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import Dashboard from './Dashboard';
 import { initTestI18n } from '../../shared/testing/i18n';
+
+const dashboardState = vi.hoisted(() => ({ error: false, refetch: vi.fn() }));
 
 // i18next is deliberately not mocked. An identity `t` makes an assertion and
 // the component agree on a key, so neither notices the key never resolves
@@ -44,36 +46,40 @@ vi.mock('../inventory/useInventory', () => ({
 
 vi.mock('../../shared/hooks/queries/useDashboardStats', () => ({
   useDashboardStats: () => ({
-    data: {
-      totalProducts: 234,
-      lowStockCount: 1,
-      pendingOrders: 1,
-      totalSuppliers: 1,
-      inventoryValue: 245561.2,
-      lowStockItems: [
-        {
-          productId: 1,
-          name: 'Espresso Beans',
-          sku: 'ESP-01',
-          stock: 4,
-          minStock: 8,
-          unit: 'kg',
-          warehouseName: '',
+    data: dashboardState.error
+      ? undefined
+      : {
+          totalProducts: 234,
+          lowStockCount: 1,
+          pendingOrders: 1,
+          totalSuppliers: 1,
+          inventoryValue: 245561.2,
+          lowStockItems: [
+            {
+              productId: 1,
+              name: 'Espresso Beans',
+              sku: 'ESP-01',
+              stock: 4,
+              minStock: 8,
+              unit: 'kg',
+              warehouseName: '',
+            },
+          ],
+          recentOrders: [
+            {
+              id: 17,
+              poNumber: 'PO-17',
+              status: 'Pending Approval',
+              supplier: 'North Roast',
+              total: 120,
+              date: '2026-06-05',
+            },
+          ],
+          topCategories: [],
         },
-      ],
-      recentOrders: [
-        {
-          id: 17,
-          poNumber: 'PO-17',
-          status: 'Pending Approval',
-          supplier: 'North Roast',
-          total: 120,
-          date: '2026-06-05',
-        },
-      ],
-      topCategories: [],
-    },
+    isError: dashboardState.error,
     isLoading: false,
+    refetch: dashboardState.refetch,
   }),
 }));
 
@@ -170,6 +176,11 @@ beforeAll(async () => {
 });
 
 describe('Dashboard layout', () => {
+  beforeEach(() => {
+    dashboardState.error = false;
+    dashboardState.refetch.mockClear();
+  });
+
   it('uses the full content width on large screens', () => {
     const { container } = renderDashboard();
 
@@ -177,5 +188,18 @@ describe('Dashboard layout', () => {
     expect(screen.getByText('234')).toBeInTheDocument();
     expect(container.firstElementChild).toHaveClass('w-full');
     expect(container.firstElementChild).toHaveClass('min-w-0');
+  });
+
+  it('shows an error state instead of fabricated dashboard values', () => {
+    dashboardState.error = true;
+
+    renderDashboard();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong. Please try again.');
+    expect(screen.queryByText('234')).not.toBeInTheDocument();
+    expect(screen.queryByText('$300.00')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    expect(dashboardState.refetch).toHaveBeenCalled();
   });
 });

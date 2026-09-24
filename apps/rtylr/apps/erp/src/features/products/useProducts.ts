@@ -35,9 +35,7 @@ export interface ProductFilters {
 
 const EXPORT_PAGE_SIZE = 100;
 
-export async function fetchAllProducts(
-  filters: Pick<ProductFilters, 'search' | 'categoryId'> = {}
-): Promise<Product[]> {
+export async function fetchAllProducts(filters: ProductFilters = {}): Promise<Product[]> {
   const products: Product[] = [];
   let offset = 0;
 
@@ -56,7 +54,7 @@ export async function fetchAllProducts(
       (response.total !== undefined
         ? products.length < response.total
         : page.length === EXPORT_PAGE_SIZE);
-    if (!hasMore || page.length === 0) return products;
+    if (!hasMore || page.length === 0) return filterAndSortProducts(products, filters);
     offset += page.length;
   }
 }
@@ -69,6 +67,31 @@ export function getProductStockStatus(
   return 'In Stock';
 }
 
+function filterAndSortProducts(rawProducts: Product[], filters: ProductFilters): Product[] {
+  let products = rawProducts;
+
+  if (filters.status) {
+    products = products.filter((product) => getProductStockStatus(product) === filters.status);
+  }
+
+  if (filters.sort) {
+    const direction = filters.sortDir === 'desc' ? -1 : 1;
+    products = [...products].sort((a, b) => {
+      if (filters.sort === 'name') return (a.name ?? '').localeCompare(b.name ?? '') * direction;
+      if (filters.sort === 'stock') {
+        return ((a.stockQuantity ?? 0) - (b.stockQuantity ?? 0)) * direction;
+      }
+      if (filters.sort === 'price') return ((a.salePrice ?? 0) - (b.salePrice ?? 0)) * direction;
+      if (filters.sort === 'category') {
+        return (a.categoryId ?? '').localeCompare(b.categoryId ?? '') * direction;
+      }
+      return 0;
+    });
+  }
+
+  return products;
+}
+
 function pageOffset(page: number, pageSize: number): number {
   return Math.max(page - 1, 0) * pageSize;
 }
@@ -78,17 +101,46 @@ export function useProducts(filters?: ProductFilters) {
   const pageSize = filters?.pageSize ?? 50;
   const search = filters?.search?.trim() ?? '';
   const categoryId = filters?.categoryId ?? '0';
+  const status = filters?.status;
+  const sort = filters?.sort;
+  const sortDir = filters?.sortDir;
+  const needsClientFiltering = status !== undefined || sort !== undefined;
+  const offset = pageOffset(page, pageSize);
 
-  return useQuery<ListProductsResponse>({
-    queryKey: ['products', { ...filters, search, categoryId, page, pageSize }],
-    queryFn: () =>
-      productClient.listProducts({
+  const query = useQuery<ListProductsResponse>({
+    queryKey: needsClientFiltering
+      ? ['products', { search, categoryId, status, sort, sortDir }]
+      : ['products', { search, categoryId, page, pageSize }],
+    queryFn: async () => {
+      if (needsClientFiltering) {
+        const products = await fetchAllProducts({ search, categoryId, status, sort, sortDir });
+        return { products, total: products.length };
+      }
+
+      return productClient.listProducts({
         search,
         categoryId,
         limit: pageSize,
-        offset: pageOffset(page, pageSize),
-      }),
+        offset,
+      });
+    },
   });
+
+  if (!needsClientFiltering || !query.data) return query;
+
+  const allProducts = query.data.products ?? [];
+  const products = allProducts.slice(offset, offset + pageSize);
+  return {
+    ...query,
+    data: {
+      ...query.data,
+      products,
+      page,
+      pageSize,
+      total: allProducts.length,
+      hasMore: offset + products.length < allProducts.length,
+    },
+  };
 }
 
 export function useProduct(id: string | undefined) {

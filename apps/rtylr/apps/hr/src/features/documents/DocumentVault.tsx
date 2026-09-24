@@ -73,6 +73,7 @@ const DocumentVault = ({ employeeId }: Props): React.JSX.Element => {
         title: docName || file.name,
         storageMode: 'stored',
         fileUrl: file.url,
+        expiryDate: expiryDate || undefined,
       },
       {
         onSuccess: () => {

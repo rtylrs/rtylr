@@ -1,8 +1,8 @@
-import React from 'react';
-import classNames from 'classnames';
-import { motion, AnimatePresence } from 'motion/react';
-import { MenuItemData } from '../MenuItem';
-import styles from './MenuCart.module.scss';
+import React from "react";
+import classNames from "classnames";
+import { motion, AnimatePresence } from "motion/react";
+import { formatMenuPrice, MenuItemData } from "../MenuItem";
+import styles from "./MenuCart.module.scss";
 
 export interface CartItem extends MenuItemData {
   quantity: number;
@@ -24,13 +24,18 @@ const MenuCart: React.FC<MenuCartProps> = ({
   onClose,
   onQuantityChange,
   onCheckout,
-  currency = 'USD',
+  currency = "USD",
   className,
 }) => {
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
+  const cartCurrency =
+    items.find((item) => item.currency)?.currency ?? currency;
+  const formatPrice = (price: number, itemCurrency = cartCurrency) =>
+    formatMenuPrice(price, itemCurrency);
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   return (
     <AnimatePresence>
@@ -48,14 +53,18 @@ const MenuCart: React.FC<MenuCartProps> = ({
             aria-modal="true"
             aria-label="Your Order"
             className={classNames(styles.cart, className)}
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
           >
             <div className={styles.cart__header}>
               <h2 className={styles.cart__title}>Your Order</h2>
-              <button className={styles.cart__close} onClick={onClose} aria-label="Close cart">
+              <button
+                className={styles.cart__close}
+                onClick={onClose}
+                aria-label="Close cart"
+              >
                 ✕
               </button>
             </div>
@@ -71,21 +80,34 @@ const MenuCart: React.FC<MenuCartProps> = ({
                   {items.map((item) => (
                     <li key={item.id} className={styles.cart__item}>
                       <div className={styles.cart__itemInfo}>
-                        <span className={styles.cart__itemName}>{item.name}</span>
-                        <span className={styles.cart__itemPrice}>{formatPrice(item.price)}</span>
+                        <span className={styles.cart__itemName}>
+                          {item.name}
+                        </span>
+                        <span className={styles.cart__itemPrice}>
+                          {formatPrice(
+                            item.price,
+                            item.currency ?? cartCurrency,
+                          )}
+                        </span>
                       </div>
                       <div className={styles.cart__itemControls}>
                         <button
                           className={styles.cart__qtyBtn}
-                          onClick={() => onQuantityChange(item.id, item.quantity - 1)}
+                          onClick={() =>
+                            onQuantityChange(item.id, item.quantity - 1)
+                          }
                           aria-label="Decrease quantity"
                         >
                           −
                         </button>
-                        <span className={styles.cart__qty}>{item.quantity}</span>
+                        <span className={styles.cart__qty}>
+                          {item.quantity}
+                        </span>
                         <button
                           className={styles.cart__qtyBtn}
-                          onClick={() => onQuantityChange(item.id, item.quantity + 1)}
+                          onClick={() =>
+                            onQuantityChange(item.id, item.quantity + 1)
+                          }
                           aria-label="Increase quantity"
                         >
                           +
@@ -101,10 +123,13 @@ const MenuCart: React.FC<MenuCartProps> = ({
               <div className={styles.cart__footer}>
                 <div className={styles.cart__subtotal}>
                   <span>Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span>{formatPrice(subtotal, cartCurrency)}</span>
                 </div>
-                <button className={styles.cart__checkoutBtn} onClick={() => onCheckout(items)}>
-                  Place Order · {formatPrice(subtotal)}
+                <button
+                  className={styles.cart__checkoutBtn}
+                  onClick={() => onCheckout(items)}
+                >
+                  Place Order · {formatPrice(subtotal, cartCurrency)}
                 </button>
               </div>
             )}

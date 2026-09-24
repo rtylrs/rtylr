@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, CheckCircle, Clock, Receipt } from 'lucide-react';
@@ -10,7 +10,7 @@ import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
-import { useBills } from './useBills';
+import { BILLS_PAGE_SIZE, useBills } from './useBills';
 import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
 import type { UpdateBillBody } from '@voxire/voxie/finance/bill/v1/types';
 import { useErpReceivedPurchaseOrders } from '../../shared/hooks/queries/useErpReceivedPurchaseOrders';
@@ -26,7 +26,7 @@ import {
 import { todayIso } from '../../shared/lib/date';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  unpaid: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
+  pending: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
   paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
   overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
   scheduled: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
@@ -77,7 +77,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
         amount: form.amount,
         currency: baseCurrency ?? 'USD',
         dueDate: form.dueDate,
-        status: 'unpaid',
+        status: 'pending',
         description: form.description || form.vendor,
       },
       {
@@ -159,15 +159,24 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
 
 const Bills: React.FC = () => {
   const { t } = useTranslation();
-  const { data = [], isLoading } = useBills();
+  const { data = [], isLoading, isError, refetch } = useBills();
   // ERP->FIN-03: received purchase orders are a payables commitment Finance
   // cannot see today. Hidden entirely when ERP is absent; never zero-filled.
   const { data: receivedPos } = useErpReceivedPurchaseOrders();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showCreate, setShowCreate] = useState(false);
+  const [page, setPage] = useState(1);
 
-  const unpaid = data.filter((b) => b.status === 'unpaid' || b.status === 'overdue');
-  const totalDue = unpaid.reduce((s: number, b) => s + (b.amount ?? 0), 0);
+  const maxPage = Math.max(1, Math.ceil(data.length / BILLS_PAGE_SIZE));
+  const visibleBills = data.slice((page - 1) * BILLS_PAGE_SIZE, page * BILLS_PAGE_SIZE);
+  const hasMore = page < maxPage;
+
+  useEffect(() => {
+    setPage((current) => Math.min(current, maxPage));
+  }, [maxPage]);
+
+  const outstanding = data.filter((b) => b.status === 'pending' || b.status === 'overdue');
+  const totalDue = outstanding.reduce((s: number, b) => s + (b.amount ?? 0), 0);
 
   const toggle = (id: string): void =>
     setSelected((prev) => {
@@ -253,10 +262,16 @@ const Bills: React.FC = () => {
       <PageHeader
         title={t('bills.title')}
         subtitle={
-          <>
-            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</>{' '}
-            <MoneyDisplay amount={totalDue} /> {t('bills.total')}
-          </>
+          isError ? (
+            t('errors.generic')
+          ) : isLoading ? (
+            t('common.loadingLabel')
+          ) : (
+            <>
+              {t('bills.outstanding', { count: outstanding.length })} <>&middot;</>{' '}
+              <MoneyDisplay amount={totalDue} /> {t('bills.total')}
+            </>
+          )
         }
         actions={
           <>
@@ -325,6 +340,15 @@ const Bills: React.FC = () => {
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
         </div>
+      ) : isError ? (
+        <div role="alert" style={{ ...cardStyle, padding: 20 }}>
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--hub-text)' }}>
+            {t('errors.generic')}
+          </p>
+          <button type="button" style={ghostBtn} onClick={() => void refetch()}>
+            {t('common.refresh')}
+          </button>
+        </div>
       ) : data.length === 0 ? (
         <EmptyState
           icon={Receipt}
@@ -336,107 +360,138 @@ const Bills: React.FC = () => {
           }}
         />
       ) : (
-        <div style={{ ...cardStyle, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {[
-                  '',
-                  t('bills.number'),
-                  t('bills.vendor'),
-                  t('bills.category'),
-                  t('bills.amount'),
-                  t('bills.due'),
-                  t('bills.status'),
-                  '',
-                ].map((h, i) => (
-                  <th
-                    key={i}
-                    style={{
-                      padding: '10px 16px',
-                      textAlign: 'start',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.07em',
-                      color: 'var(--hub-text-dim)',
-                    }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((b) => (
-                <tr key={b.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                  <td style={{ padding: '12px 16px', width: 32 }}>
-                    <input
-                      type="checkbox"
-                      checked={selected.has(b.id)}
-                      onChange={() => toggle(b.id)}
-                      disabled={b.status === 'paid'}
-                      style={{ accentColor: ACCENT }}
-                    />
-                  </td>
-                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>{b.id}</td>
-                  <td style={{ padding: '12px 16px', fontSize: 13 }}>{b.vendor}</td>
-                  <td
-                    style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
-                  >
-                    {b.category}
-                  </td>
-                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
-                    <MoneyDisplay amount={b.amount ?? 0} />
-                  </td>
-                  <td
-                    style={{
-                      padding: '12px 16px',
-                      fontSize: 12,
-                      color:
-                        b.status === 'overdue' ? 'var(--finance-danger)' : 'var(--hub-text-muted)',
-                    }}
-                  >
-                    {b.dueDate}
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <span
+        <>
+          <div style={{ ...cardStyle, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                  {[
+                    '',
+                    t('bills.number'),
+                    t('bills.vendor'),
+                    t('bills.category'),
+                    t('bills.amount'),
+                    t('bills.due'),
+                    t('bills.status'),
+                    '',
+                  ].map((h, i) => (
+                    <th
+                      key={i}
                       style={{
+                        padding: '10px 16px',
+                        textAlign: 'start',
                         fontSize: 11,
                         fontWeight: 600,
-                        padding: '3px 10px',
-                        borderRadius: 20,
-                        textTransform: 'capitalize',
-                        ...STATUS_STYLE[b.status ?? ''],
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.07em',
+                        color: 'var(--hub-text-dim)',
                       }}
                     >
-                      {b.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    {b.status === 'unpaid' || b.status === 'overdue' ? (
-                      <button
-                        type="button"
-                        style={{
-                          ...ghostBtn,
-                          padding: '4px 10px',
-                          opacity: 0.6,
-                          cursor: 'not-allowed',
-                        }}
-                        disabled
-                        title={t('bills.schedulingSoon')}
-                      >
-                        <Clock size={12} /> {t('bills.schedule')}
-                      </button>
-                    ) : (
-                      <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>-</span>
-                    )}
-                  </td>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {visibleBills.map((b) => (
+                  <tr key={b.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                    <td style={{ padding: '12px 16px', width: 32 }}>
+                      <input
+                        type="checkbox"
+                        checked={selected.has(b.id)}
+                        onChange={() => toggle(b.id)}
+                        disabled={b.status === 'paid'}
+                        style={{ accentColor: ACCENT }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>{b.id}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 13 }}>{b.vendor}</td>
+                    <td
+                      style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
+                    >
+                      {b.category}
+                    </td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
+                      <MoneyDisplay amount={b.amount ?? 0} />
+                    </td>
+                    <td
+                      style={{
+                        padding: '12px 16px',
+                        fontSize: 12,
+                        color:
+                          b.status === 'overdue'
+                            ? 'var(--finance-danger)'
+                            : 'var(--hub-text-muted)',
+                      }}
+                    >
+                      {b.dueDate}
+                    </td>
+                    <td style={{ padding: '12px 16px' }}>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          padding: '3px 10px',
+                          borderRadius: 20,
+                          textTransform: 'capitalize',
+                          ...STATUS_STYLE[b.status ?? ''],
+                        }}
+                      >
+                        {b.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px 16px' }}>
+                      {b.status === 'pending' || b.status === 'overdue' ? (
+                        <button
+                          type="button"
+                          style={{
+                            ...ghostBtn,
+                            padding: '4px 10px',
+                            opacity: 0.6,
+                            cursor: 'not-allowed',
+                          }}
+                          disabled
+                          title={t('bills.schedulingSoon')}
+                        >
+                          <Clock size={12} /> {t('bills.schedule')}
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {(page > 1 || hasMore) && (
+            <div className="flex items-center justify-between px-1 py-3">
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                Page {page}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page <= 1}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+                  style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                >
+                  {t('common.prev')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => current + 1)}
+                  disabled={!hasMore}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+                  style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                >
+                  {t('common.next')}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </motion.div>
   );

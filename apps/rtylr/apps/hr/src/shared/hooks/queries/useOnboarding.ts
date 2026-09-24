@@ -1,25 +1,29 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ListChecklistTemplatesResponse } from '@voxire/voxie/hr/onboarding/v1/types';
+import { OnboardingServiceClient } from '@voxire/voxie/hr/onboarding/v1/client';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import type {
+  ListChecklistTemplatesResponse,
   CreateChecklistTemplateRequest,
   CreateChecklistTemplateResponse,
+  ListEmployeeChecklistsResponse,
+  EmployeeChecklistPayload,
+  CompleteChecklistItemResponse,
 } from '@voxire/voxie/hr/onboarding/v1/types';
-import type { ListEmployeeChecklistsResponse } from '@voxire/voxie/hr/onboarding/v1/types';
-import type { CompleteChecklistItemResponse } from '@voxire/voxie/hr/onboarding/v1/types';
 import { hrTransport } from '../../lib/clients';
+import { todayIso } from '../../lib/dateUtils';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
   employeeChecklistSummaryListSchema,
+  type EmployeeChecklistSummary,
   type EmployeeChecklistSummaryList,
 } from '../../schemas/onboarding';
 
-// EmployeeChecklistSummaryPayload has no generated TS type yet - the backend
-// route (GET /hr/onboarding/checklists/summary) isn't on a bumped voxie
-// pointer at the time this hook was written. The response is validated with
-// employeeChecklistSummaryListSchema instead of a generated contract type.
-interface ListEmployeeChecklistSummariesParams {
+const onboardingClient = createOneKitClient(OnboardingServiceClient, 'hr');
+const staffClient = createOneKitClient(StaffServiceClient, 'hr');
+
+export interface ListEmployeeChecklistSummariesParams {
   limit: number;
   offset: number;
 }
@@ -32,15 +36,43 @@ interface CompleteChecklistItemInput {
   attachmentUrl?: string;
 }
 
+function today(): string {
+  return todayIso();
+}
+
+function toSummary(
+  employeeId: number,
+  checklist: EmployeeChecklistPayload
+): EmployeeChecklistSummary {
+  const items = checklist.items ?? [];
+  const completedItems = items.filter((item) => item.status === 'complete').length;
+  const overdueItemsCount = items.filter((item) => {
+    if (item.status === 'complete' || !item.dueDate) return false;
+    return item.dueDate.slice(0, 10) < today();
+  }).length;
+  const totalItems = items.length;
+  const completionPercentage =
+    totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
+
+  return {
+    employeeId,
+    checklistId: Number(checklist.id ?? 0),
+    templateId: Number(checklist.templateId ?? 0),
+    status:
+      completionPercentage === 100 ? 'complete' : completedItems > 0 ? 'in_progress' : 'incomplete',
+    totalItems,
+    completedItems,
+    completionPercentage,
+    overdueItemsCount,
+    triggeredAt: Number(checklist.triggeredAt ?? checklist.createdAt ?? 0),
+    updatedAt: Number(checklist.updatedAt ?? checklist.createdAt ?? 0),
+  };
+}
+
 export const useListChecklistTemplates = () => {
   return useQuery<ListChecklistTemplatesResponse>({
     queryKey: ['checklist-templates'],
-    queryFn: async (): Promise<ListChecklistTemplatesResponse> => {
-      const res = await unwrap(
-        hrTransport.get<ListChecklistTemplatesResponse>('/hr/onboarding/templates')
-      );
-      return res as ListChecklistTemplatesResponse;
-    },
+    queryFn: () => onboardingClient.listChecklistTemplates({}),
   });
 };
 
@@ -49,14 +81,8 @@ export const useCreateChecklistTemplate = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (
-      data: CreateChecklistTemplateRequest
-    ): Promise<CreateChecklistTemplateResponse> => {
-      const res = await unwrap(
-        hrTransport.post<CreateChecklistTemplateResponse>('/hr/onboarding/templates', data)
-      );
-      return res as CreateChecklistTemplateResponse;
-    },
+    mutationFn: (data: CreateChecklistTemplateRequest): Promise<CreateChecklistTemplateResponse> =>
+      onboardingClient.createChecklistTemplate(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['checklist-templates'] });
       toast.success(t('onboardingMgmt.templateCreated'));
@@ -70,15 +96,13 @@ export const useCreateChecklistTemplate = () => {
 export const useGetEmployeeChecklist = (employeeId?: number) => {
   return useQuery<ListEmployeeChecklistsResponse>({
     queryKey: ['employee-checklists', employeeId],
-    queryFn: async (): Promise<ListEmployeeChecklistsResponse> => {
-      const res = await unwrap(
-        hrTransport.get<ListEmployeeChecklistsResponse>('/hr/onboarding/checklists', {
-          params: employeeId ? { employeeId } : undefined,
-        })
-      );
-      return res as ListEmployeeChecklistsResponse;
-    },
-    enabled: !!employeeId,
+    queryFn: () =>
+      onboardingClient.listEmployeeChecklists({
+        employeeId: String(employeeId),
+        limit: 100,
+        offset: 0,
+      }),
+    enabled: employeeId !== undefined && employeeId > 0,
   });
 };
 
@@ -86,10 +110,36 @@ export const useListEmployeeChecklistSummaries = (params: ListEmployeeChecklistS
   return useQuery<EmployeeChecklistSummaryList>({
     queryKey: ['employee-checklist-summaries', 'filter', params],
     queryFn: async (): Promise<EmployeeChecklistSummaryList> => {
-      const res = await unwrap(
-        hrTransport.get<unknown>('/hr/onboarding/checklists/summary', { params })
-      );
-      return employeeChecklistSummaryListSchema.parse(res);
+      const staffResponse = await staffClient.listStaff({
+        search: '',
+        departmentId: '',
+        status: '',
+      });
+      const staff = staffResponse.staff ?? [];
+      const page = staff.slice(params.offset, params.offset + params.limit);
+      const summaries = (
+        await Promise.all(
+          page.map(async (member) => {
+            const employeeId = Number(member.id);
+            if (!Number.isSafeInteger(employeeId) || employeeId <= 0) return [];
+
+            const response = await onboardingClient.listEmployeeChecklists({
+              employeeId: String(employeeId),
+              limit: 100,
+              offset: 0,
+            });
+            const checklist = response.checklists?.[0];
+            return checklist ? [toSummary(employeeId, checklist)] : [];
+          })
+        )
+      ).flat();
+
+      return employeeChecklistSummaryListSchema.parse({
+        summaries,
+        total: staff.length,
+        limit: params.limit,
+        offset: params.offset,
+      });
     },
   });
 };
@@ -112,6 +162,7 @@ export const useCompleteChecklistItem = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employee-checklists'] });
+      queryClient.invalidateQueries({ queryKey: ['employee-checklist-summaries'] });
       toast.success(t('onboardingMgmt.itemCompleted'));
     },
     onError: () => {

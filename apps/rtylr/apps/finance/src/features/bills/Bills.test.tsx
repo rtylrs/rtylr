@@ -53,7 +53,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('sonner', () => ({ toast: toastMock }));
 vi.mock('@voxire/ui', () => ({ EmptyState: () => null }));
 
-vi.mock('./useBills', () => ({ useBills: useBillsMock }));
+vi.mock('./useBills', () => ({ useBills: useBillsMock, BILLS_PAGE_SIZE: 50 }));
 vi.mock('../../shared/hooks/queries/useBills', () => ({
   useCreateBill: () => ({ mutate: vi.fn(), isPending: false }),
   useUpdateBill: () => ({ mutateAsync: mutateAsyncMock, isPending: false }),

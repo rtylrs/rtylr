@@ -24,19 +24,15 @@ interface ApprovePayrollRunRequest {
 }
 
 interface PayrollConfigData {
-  grossModel: 'hourly' | 'salary' | 'both';
   period: 'weekly' | 'biweekly' | 'monthly';
   overtimeEnabled: boolean;
-  deductionsEnabled: boolean;
-  bonusesEnabled: boolean;
+  payDayOfMonth: number;
 }
 
-interface UpsertPayrollConfigRequest {
-  grossModel?: 'hourly' | 'salary' | 'both';
-  period?: 'weekly' | 'biweekly' | 'monthly';
-  overtimeEnabled?: boolean;
-  deductionsEnabled?: boolean;
-  bonusesEnabled?: boolean;
+export interface UpsertPayrollConfigRequest {
+  period: 'weekly' | 'biweekly' | 'monthly';
+  overtimeEnabled: boolean;
+  payDayOfMonth: number;
 }
 
 interface ListPayrollRunsParams {
@@ -77,22 +73,21 @@ export const useGetPayrollConfig = () => {
         const res = await unwrap(hrTransport.get<Record<string, unknown>>('/hr/payroll/config'));
         const raw = (res?.config || res || {}) as Record<string, unknown>;
         return {
-          grossModel:
-            ((raw.grossModel ?? raw.gross_model) as PayrollConfigData['grossModel']) ?? 'both',
           period:
             ((raw.period ?? raw.periodType ?? raw.period_type) as PayrollConfigData['period']) ??
             'monthly',
           overtimeEnabled: Boolean(raw.overtimeEnabled ?? raw.overtime_enabled ?? false),
-          deductionsEnabled: Boolean(raw.deductionsEnabled ?? raw.deductions_enabled ?? false),
-          bonusesEnabled: Boolean(raw.bonusesEnabled ?? raw.bonuses_enabled ?? false),
+          payDayOfMonth: Number(raw.payDayOfMonth ?? raw.pay_day_of_month ?? 28),
         };
-      } catch {
+      } catch (error) {
+        const status =
+          (error as { response?: { status?: number }; status?: number })?.response?.status ??
+          (error as { status?: number })?.status;
+        if (status !== 404) throw error;
         return {
-          grossModel: 'both',
           period: 'monthly',
           overtimeEnabled: false,
-          deductionsEnabled: false,
-          bonusesEnabled: false,
+          payDayOfMonth: 28,
         };
       }
     },
@@ -104,17 +99,14 @@ export const useUpsertPayrollConfig = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: UpsertPayrollConfigRequest): Promise<PayrollConfigData> => {
-      const res = await unwrap(
-        hrTransport.put<{ config: PayrollConfigData }>('/hr/payroll/config', {
+    mutationFn: async (data: UpsertPayrollConfigRequest): Promise<void> => {
+      await unwrap(
+        hrTransport.put('/hr/payroll/config', {
           periodType: data.period,
+          payDayOfMonth: data.payDayOfMonth,
           overtimeEnabled: data.overtimeEnabled,
-          grossModel: data.grossModel,
-          deductionsEnabled: data.deductionsEnabled,
-          bonusesEnabled: data.bonusesEnabled,
         })
       );
-      return (res as { config: PayrollConfigData }).config;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payroll-config'] });
@@ -183,6 +175,8 @@ export const useListMyPayrollRuns = (
       return res as ListPayrollRunsResponse;
     },
     enabled: options?.enabled ?? true,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: 'always',
   });
 };
 
@@ -200,6 +194,8 @@ export const useGetMyPayrollRun = (id: number | undefined, options?: PayrollQuer
       return (res as { run: PayrollRunPayload }).run;
     },
     enabled: !!id && (options?.enabled ?? true),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: 'always',
   });
 };
 
@@ -242,6 +238,8 @@ export const useExportPayrollRun = (enabled = true) => {
     onSuccess: (_data: void, runId: number) => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-run', runId] });
+      queryClient.invalidateQueries({ queryKey: ['my-payroll-runs'] });
+      queryClient.invalidateQueries({ queryKey: ['my-payroll-run', runId] });
       toast.success(t('payroll.runDetail.posted'));
     },
     onError: () => {
@@ -262,6 +260,8 @@ export const useApprovePayrollRun = (enabled = true) => {
     onSuccess: (_data: void, variables: ApprovePayrollRunRequest) => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-run', variables.runId] });
+      queryClient.invalidateQueries({ queryKey: ['my-payroll-runs'] });
+      queryClient.invalidateQueries({ queryKey: ['my-payroll-run', variables.runId] });
       toast.success(t('payroll.runApproved'));
     },
     onError: () => {

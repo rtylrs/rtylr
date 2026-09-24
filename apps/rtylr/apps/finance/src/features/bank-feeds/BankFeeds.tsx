@@ -50,7 +50,12 @@ const BankFeeds: React.FC = () => {
     balance: '0',
     currency: 'USD',
   });
-  const { data: transactions = [] } = useBankTransactions(selected);
+  const {
+    data: transactions = [],
+    isLoading: transactionsLoading,
+    isError: transactionsError,
+    refetch: refetchTransactions,
+  } = useBankTransactions(selected);
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageAccounts = canFinancePermission(role, 'finance:accounts');
 
@@ -201,73 +206,107 @@ const BankFeeds: React.FC = () => {
             >
               {selected ? 'Account transactions' : 'All recent transactions'}
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                  {['Date', 'Description', 'Category', 'Amount', 'Match'].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: '10px 16px',
-                        textAlign: h === 'Amount' ? 'end' : 'start',
-                        fontSize: 11,
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.07em',
-                        color: 'var(--hub-text-dim)',
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((t) => (
-                  <tr key={t.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                    <td
-                      style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
-                    >
-                      {t.date}
-                    </td>
-                    <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
-                      {t.description}
-                    </td>
-                    <td
-                      style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
-                    >
-                      {t.category}
-                    </td>
-                    <td
-                      style={{
-                        padding: '10px 16px',
-                        fontSize: 13,
-                        fontWeight: 600,
-                        textAlign: 'end',
-                        color: (t.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
-                      }}
-                    >
-                      <MoneyDisplay amount={t.amount ?? 0} signed />
-                    </td>
-                    <td style={{ padding: '10px 16px', fontSize: 11 }}>
-                      <span
+            {transactionsLoading ? (
+              <div style={{ padding: 16 }}>
+                <SkeletonRow count={3} />
+              </div>
+            ) : transactionsError ? (
+              <div role="alert" style={{ padding: 16 }}>
+                <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--hub-text)' }}>
+                  {t('errors.generic')}
+                </p>
+                <button type="button" style={ghostBtn} onClick={() => void refetchTransactions()}>
+                  {t('common.refresh')}
+                </button>
+              </div>
+            ) : transactions.length === 0 ? (
+              <div
+                style={{
+                  padding: 20,
+                  textAlign: 'center',
+                  color: 'var(--hub-text-dim)',
+                  fontSize: 13,
+                }}
+              >
+                {t('common.noData')}
+              </div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                    {['Date', 'Description', 'Category', 'Amount', 'Match'].map((h) => (
+                      <th
+                        key={h}
                         style={{
-                          padding: '2px 8px',
-                          borderRadius: 20,
-                          background: t.matched
-                            ? 'var(--finance-accent-soft)'
-                            : 'var(--finance-warning-soft)',
-                          color: t.matched ? ACCENT : 'var(--finance-warning)',
+                          padding: '10px 16px',
+                          textAlign: h === 'Amount' ? 'end' : 'start',
+                          fontSize: 11,
                           fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.07em',
+                          color: 'var(--hub-text-dim)',
                         }}
                       >
-                        {t.matched ? 'Matched' : 'Pending'}
-                      </span>
-                    </td>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {transactions.map((t) => (
+                    <tr key={t.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                      <td
+                        style={{
+                          padding: '10px 16px',
+                          fontSize: 12,
+                          color: 'var(--hub-text-muted)',
+                        }}
+                      >
+                        {t.date}
+                      </td>
+                      <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
+                        {t.description}
+                      </td>
+                      <td
+                        style={{
+                          padding: '10px 16px',
+                          fontSize: 12,
+                          color: 'var(--hub-text-muted)',
+                        }}
+                      >
+                        {t.category}
+                      </td>
+                      <td
+                        style={{
+                          padding: '10px 16px',
+                          fontSize: 13,
+                          fontWeight: 600,
+                          textAlign: 'end',
+                          color: (t.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
+                        }}
+                      >
+                        <MoneyDisplay amount={t.amount ?? 0} signed />
+                      </td>
+                      <td style={{ padding: '10px 16px', fontSize: 11 }}>
+                        <span
+                          style={{
+                            padding: '2px 8px',
+                            borderRadius: 20,
+                            background: t.matched
+                              ? 'var(--finance-accent-soft)'
+                              : 'var(--finance-warning-soft)',
+                            color: t.matched ? ACCENT : 'var(--finance-warning)',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {t.matched ? 'Matched' : 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </>
       )}

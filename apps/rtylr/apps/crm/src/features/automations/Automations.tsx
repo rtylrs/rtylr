@@ -19,7 +19,7 @@ const Automations: React.FC = () => {
   const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageAutomations = canCrmPermission(role, 'crm:automations');
-  const { data: fetched, isLoading } = useListAutomations();
+  const { data: fetched, isLoading, isError, refetch } = useListAutomations();
   const updateAutomation = useUpdateAutomation();
   const removeAutomation = useDeleteAutomation();
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
@@ -65,7 +65,11 @@ const Automations: React.FC = () => {
       <div style={{ maxWidth: '1100px' }}>
         <PageHeader
           title={t('crm.automations.pageTitle')}
-          subtitle={`${automations.length} workflows configured`}
+          subtitle={
+            isError && automations.length === 0
+              ? t('errors.refreshAndTryAgain')
+              : `${automations.length} workflows configured`
+          }
           actions={
             <Button variant="primary" onClick={() => navigate({ to: '/automations/new' })}>
               <Plus size={13} />
@@ -77,6 +81,27 @@ const Automations: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError && automations.length === 0 ? (
+          <Card>
+            <div
+              role="alert"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '32px 16px',
+                textAlign: 'center',
+                color: 'var(--hub-text-muted)',
+              }}
+            >
+              <Zap size={22} style={{ color: '#f59e0b' }} />
+              <p style={{ margin: 0, fontSize: '13px' }}>{t('errors.generic')}</p>
+              <Button variant="outline" onClick={() => void refetch()}>
+                {t('crm.actions.refresh')}
+              </Button>
+            </div>
           </Card>
         ) : automations.length === 0 ? (
           <Card>

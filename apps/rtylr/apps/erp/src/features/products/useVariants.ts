@@ -47,8 +47,7 @@ export function useCreateVariant() {
   const qc = useQueryClient();
   return useMutation<CreateVariantResponse, Error, CreateVariantRequest>({
     mutationFn: (data) => variantClient.createVariant(data),
-    onSuccess: (_result, variables) =>
-      qc.invalidateQueries({ queryKey: ['variants', variables.productId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['variants'] }),
     onError: () => toast.error(t('erp.products.variants.createFailedOne')),
   });
 }

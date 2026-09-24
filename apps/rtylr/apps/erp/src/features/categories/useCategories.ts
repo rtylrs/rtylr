@@ -10,19 +10,35 @@ import type {
   UpdateCategoryRequest,
   UpdateCategoryResponse,
 } from '@voxire/voxie/erp/category/v1/types';
-import { withErpListBounds } from '../../shared/lib/erpListBounds';
+import { ERP_LIST_LIMIT } from '../../shared/lib/erpListBounds';
 
 const categoryClient = createOneKitClient(CategoryServiceClient, 'erp');
 
 export type { Category };
 
+export async function fetchAllCategories(): Promise<Category[]> {
+  const categories: Category[] = [];
+  let offset = 0;
+
+  while (true) {
+    const response = await categoryClient.listCategories({ limit: ERP_LIST_LIMIT, offset });
+    const page = response.categories ?? [];
+    categories.push(...page);
+
+    const hasMore =
+      response.hasMore ??
+      (response.total !== undefined
+        ? categories.length < response.total
+        : page.length === ERP_LIST_LIMIT);
+    if (!hasMore || page.length === 0) return categories;
+    offset += page.length;
+  }
+}
+
 export function useCategories() {
   return useQuery<Category[]>({
     queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await categoryClient.listCategories(withErpListBounds({}));
-      return response.categories ?? [];
-    },
+    queryFn: fetchAllCategories,
   });
 }
 

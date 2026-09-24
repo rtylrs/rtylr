@@ -58,4 +58,24 @@ describe('Balance sheet as-of labelling', () => {
     expect(container.querySelector('input[type="date"]')).toBeNull();
     expect(screen.getByText('As of Date: 2026-01-31')).toBeInTheDocument();
   });
+
+  it('uses the authoritative totals for both section and summary cards', () => {
+    balanceSheetMock.mockReturnValue({
+      data: {
+        assets: [{ label: 'Cash', amount: 100, type: 'asset' }],
+        liabilities: [{ label: 'Accounts Payable', amount: 20, type: 'liability' }],
+        equity: [{ label: 'Equity', amount: 80, type: 'equity' }],
+        totalAssets: 125,
+        totalLiabilities: 85,
+        totalEquity: 40,
+      },
+      isLoading: false,
+      dataUpdatedAt: new Date(2026, 0, 31, 9, 30).getTime(),
+    });
+
+    render(<BalanceSheet />);
+
+    expect(screen.getAllByText('$125.00')).toHaveLength(2);
+    expect(screen.getAllByText('$85.00')).toHaveLength(2);
+  });
 });

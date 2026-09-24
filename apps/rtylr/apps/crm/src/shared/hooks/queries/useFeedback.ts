@@ -31,15 +31,30 @@ export const useListFeedback = (params?: ListFeedbackParams): UseQueryResult<Fee
   useQuery<FeedbackItem[]>({
     queryKey: ['crm-feedback', params],
     queryFn: async (): Promise<FeedbackItem[]> => {
-      const res = await feedbackClient.listFeedback({
-        type: params?.type ?? '',
-        source: params?.source ?? '',
-        minScore: params?.minScore,
-        maxScore: params?.maxScore,
-        page: 1,
-        pageSize: 100,
-      });
-      return z.array(feedbackItemSchema).parse((res.feedback ?? []).map(fromApiFeedback));
+      const feedback: FeedbackItem[] = [];
+      let page = 1;
+      let total = 0;
+
+      do {
+        const res = await feedbackClient.listFeedback({
+          type: params?.type ?? '',
+          source: params?.source ?? '',
+          minScore: params?.minScore,
+          maxScore: params?.maxScore,
+          page,
+          pageSize: 100,
+        });
+        const pageItems = (res.feedback ?? []).map(fromApiFeedback);
+        feedback.push(...pageItems);
+        total = res.total ?? feedback.length;
+        page += 1;
+        if (pageItems.length === 0) {
+          if (feedback.length < total) throw new Error('Feedback pagination ended early');
+          break;
+        }
+      } while (feedback.length < total);
+
+      return z.array(feedbackItemSchema).parse(feedback);
     },
   });
 

@@ -1,9 +1,10 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
+import type { ShiftAssignmentPayload, ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
 import type { CreateShiftRequest } from '@voxire/voxie/hr/shift/v1/types';
 import type { ListShiftsResponse } from '@voxire/voxie/hr/shift/v1/types';
 import type { CreateShiftAssignmentResponse } from '@voxire/voxie/hr/shift/v1/types';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ import { useTranslation } from 'react-i18next';
  * needs long enough to read who and when before deciding to undo it.
  */
 const WARNING_TOAST_DURATION_MS = 10_000;
+const staffClient = createOneKitClient(StaffServiceClient, 'hr');
 
 interface RosterParams {
   weekStart: string;
@@ -37,8 +39,15 @@ interface ShiftAssignment {
   conflict: boolean;
 }
 
+interface RosterConflict {
+  employeeId?: number | string;
+  employee_id?: number | string;
+  date?: string;
+}
+
 interface RosterResponse {
-  entries: RosterEntry[];
+  assignments?: ShiftAssignmentPayload[];
+  conflicts?: Array<RosterConflict | string>;
 }
 
 interface CreateShiftAssignmentPayload {
@@ -84,11 +93,72 @@ export const useCreateShift = () => {
 };
 
 export const useGetRoster = (params: RosterParams) => {
+  const queryClient = useQueryClient();
+
   return useQuery<RosterEntry[]>({
     queryKey: ['roster', params],
     queryFn: async (): Promise<RosterEntry[]> => {
-      const res = await unwrap(hrTransport.get<RosterResponse>('/hr/shifts/roster', { params }));
-      return (res as RosterResponse).entries;
+      const [res, shifts, staff] = await Promise.all([
+        unwrap(hrTransport.get<RosterResponse>('/hr/shifts/roster', { params })),
+        queryClient.fetchQuery({
+          queryKey: ['shifts'],
+          queryFn: async (): Promise<ShiftPayload[]> => {
+            const response = await unwrap(hrTransport.get<ListShiftsResponse>('/hr/shifts'));
+            return (response as ListShiftsResponse).shifts ?? [];
+          },
+        }),
+        staffClient.listStaff({ search: '', departmentId: '', status: '' }),
+      ]);
+
+      const assignments = res.assignments ?? [];
+      const shiftsById = new Map(shifts.map((shift) => [Number(shift.id), shift]));
+      const staffById = new Map((staff.staff ?? []).map((member) => [Number(member.id), member]));
+      const conflictKeys = new Set<string>();
+      let hasUnscopedConflict = false;
+
+      for (const conflict of res.conflicts ?? []) {
+        if (typeof conflict === 'string') {
+          hasUnscopedConflict = true;
+          continue;
+        }
+        const employeeId = Number(conflict.employeeId ?? conflict.employee_id);
+        if (!Number.isFinite(employeeId) || !conflict.date) {
+          hasUnscopedConflict = true;
+          continue;
+        }
+        conflictKeys.add(`${employeeId}:${conflict.date}`);
+      }
+
+      const employeeIds = new Set([
+        ...staffById.keys(),
+        ...assignments.map((assignment) => Number(assignment.employeeId)),
+      ]);
+
+      return Array.from(employeeIds, (staffId) => {
+        const member = staffById.get(staffId);
+        return {
+          staffId,
+          staffName: member
+            ? `${member.firstName} ${member.lastName}`.trim()
+            : `Employee #${staffId}`,
+          assignments: assignments
+            .filter((assignment) => Number(assignment.employeeId) === staffId)
+            .map((assignment) => {
+              const shiftId = Number(assignment.shiftId);
+              const shift = shiftsById.get(shiftId);
+              return {
+                id: Number(assignment.id),
+                shiftId,
+                shiftName: shift?.name ?? '',
+                date: assignment.date ?? '',
+                startTime: shift?.startTime ?? '',
+                endTime: shift?.endTime ?? '',
+                color: shift?.color ?? '',
+                conflict: hasUnscopedConflict || conflictKeys.has(`${staffId}:${assignment.date}`),
+              };
+            }),
+        };
+      });
     },
   });
 };

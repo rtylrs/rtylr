@@ -33,8 +33,8 @@ type EventHandler = (e: RealtimeEvent) => void;
  * to for as long as the outage lasts.
  */
 export type RealtimeDiagnosticEvent =
-  | { type: 'malformed_message' }
-  | { type: 'repeated_reconnect_failures'; attempt: number };
+  | { type: "malformed_message" }
+  | { type: "repeated_reconnect_failures"; attempt: number };
 
 interface ClientOptions {
   /** Full ws URL, e.g. `wss://api.voxire.com/flow/ws`. */
@@ -70,7 +70,8 @@ const REPEATED_RECONNECT_THRESHOLD = 3;
  * with backoff, the latter followed an explicit close and will never recover on
  * its own.
  */
-export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+export type RealtimeStatus =
+  "disconnected" | "connecting" | "connected" | "reconnecting";
 
 type StatusHandler = (status: RealtimeStatus) => void;
 
@@ -85,7 +86,7 @@ export class RealtimeClient {
   private closed = false;
   private pingInterval: ReturnType<typeof setInterval> | null = null;
   private connectionPromise: Promise<void> | null = null;
-  private status: RealtimeStatus = 'disconnected';
+  private status: RealtimeStatus = "disconnected";
   private statusHandlers = new Set<StatusHandler>();
 
   constructor(opts: ClientOptions) {
@@ -149,7 +150,7 @@ export class RealtimeClient {
       // First subscriber for this topic: tell the server if we're
       // already connected; otherwise the connect path will re-subscribe
       // everything on (re)open.
-      this.send({ op: 'subscribe', topics: [topic] });
+      this.send({ op: "subscribe", topics: [topic] });
     }
     entry.handlers.add(handler);
 
@@ -176,7 +177,7 @@ export class RealtimeClient {
     // Set directly rather than waiting for onclose: a socket that never opened
     // has no onclose to fire, and the caller has already been told the session
     // is over.
-    this.setStatus('disconnected');
+    this.setStatus("disconnected");
   }
 
   // ─── private ──────────────────────────────────────────────────────────
@@ -187,7 +188,7 @@ export class RealtimeClient {
     entry.handlers.delete(handler);
     if (entry.handlers.size === 0) {
       this.subs.delete(topic);
-      this.send({ op: 'unsubscribe', topics: [topic] });
+      this.send({ op: "unsubscribe", topics: [topic] });
     }
   }
 
@@ -195,7 +196,9 @@ export class RealtimeClient {
     if (this.closed) return;
     if (
       this.ws &&
-      (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)
+      (this.ws.readyState === WebSocket.OPEN ||
+        this.ws.readyState === WebSocket.CONNECTING ||
+        this.ws.readyState === WebSocket.CLOSING)
     ) {
       return;
     }
@@ -209,7 +212,9 @@ export class RealtimeClient {
 
   private async connect(): Promise<void> {
     if (!this.closed) {
-      this.setStatus(this.reconnectAttempts > 0 ? 'reconnecting' : 'connecting');
+      this.setStatus(
+        this.reconnectAttempts > 0 ? "reconnecting" : "connecting",
+      );
     }
     let ticket: string | null | undefined;
     try {
@@ -230,8 +235,8 @@ export class RealtimeClient {
       url = new URL(this.url);
       // Never carry forward the legacy reusable-JWT query parameter, even if
       // a caller supplies a URL that still contains one.
-      url.searchParams.delete('token');
-      url.searchParams.set('ticket', ticket);
+      url.searchParams.delete("token");
+      url.searchParams.set("ticket", ticket);
     } catch {
       this.scheduleReconnect();
       return;
@@ -247,24 +252,34 @@ export class RealtimeClient {
     this.ws = ws;
 
     ws.onopen = (): void => {
+      if (this.ws !== ws) return;
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+      }
+      if (this.pingInterval) {
+        clearInterval(this.pingInterval);
+        this.pingInterval = null;
+      }
       this.reconnectAttempts = 0;
-      this.setStatus('connected');
+      this.setStatus("connected");
       // Re-subscribe to everything that was active before the connect.
       const topics = Array.from(this.subs.keys());
       if (topics.length > 0) {
-        this.send({ op: 'subscribe', topics });
+        this.send({ op: "subscribe", topics });
       }
       // Keep intermediaries from killing idle connections.
       this.pingInterval = setInterval(() => {
-        this.send({ op: 'ping' });
+        this.send({ op: "ping" });
       }, 25_000);
     };
 
     ws.onmessage = (evt: MessageEvent): void => {
+      if (this.ws !== ws) return;
       try {
-        if (typeof evt.data !== 'string') return;
+        if (typeof evt.data !== "string") return;
         const msg = JSON.parse(evt.data);
-        if (msg?.op === 'event' && msg.event) {
+        if (msg?.op === "event" && msg.event) {
           const e = msg.event as RealtimeEvent;
           const entry = this.subs.get(e.topic);
           if (entry) {
@@ -274,7 +289,7 @@ export class RealtimeClient {
       } catch {
         // Malformed payloads: dropped, but worth a breadcrumb for whoever's
         // watching before it becomes a user-visible symptom.
-        this.notifyDiagnostic({ type: 'malformed_message' });
+        this.notifyDiagnostic({ type: "malformed_message" });
       }
     };
 
@@ -283,18 +298,19 @@ export class RealtimeClient {
     };
 
     ws.onclose = (): void => {
+      if (this.ws !== ws) return;
       if (this.pingInterval) {
         clearInterval(this.pingInterval);
         this.pingInterval = null;
       }
       this.ws = null;
       if (this.closed) {
-        this.setStatus('disconnected');
+        this.setStatus("disconnected");
         return;
       }
       // Retrying with backoff, which is not the same as being disconnected: the
       // caller can keep buffering rather than treating the session as over.
-      this.setStatus('reconnecting');
+      this.setStatus("reconnecting");
       this.scheduleReconnect();
     };
   }
@@ -306,9 +322,15 @@ export class RealtimeClient {
     // outage can last minutes and a breadcrumb per backoff cycle would just
     // be noise by the time anyone reads it.
     if (attempt + 1 === REPEATED_RECONNECT_THRESHOLD) {
-      this.notifyDiagnostic({ type: 'repeated_reconnect_failures', attempt: attempt + 1 });
+      this.notifyDiagnostic({
+        type: "repeated_reconnect_failures",
+        attempt: attempt + 1,
+      });
     }
-    const backoff = Math.min(MAX_BACKOFF_MS, MIN_BACKOFF_MS * Math.pow(2, attempt));
+    const backoff = Math.min(
+      MAX_BACKOFF_MS,
+      MIN_BACKOFF_MS * Math.pow(2, attempt),
+    );
     // Full jitter - helps when many clients bounce at once.
     const delay = Math.floor(Math.random() * backoff);
     this.reconnectTimer = setTimeout(() => {

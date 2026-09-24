@@ -3,12 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useCreateEquipmentRequest } from '../../shared/hooks/queries/useEquipment';
 import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
-import { Modal, Input, Textarea, Select, Label, Button } from '../../shared/components/ui';
+import { Modal, Input, Textarea, Label, Button } from '../../shared/components/ui';
 
 const equipmentRequestSchema = z.object({
   equipmentType: z.string().min(1),
   description: z.string().min(1),
-  urgency: z.enum(['low', 'medium', 'high']),
   neededByDate: z.string().optional(),
 });
 
@@ -24,7 +23,6 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
 
   const [equipmentType, setEquipmentType] = useState('');
   const [description, setDescription] = useState('');
-  const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium');
   const [neededByDate, setNeededByDate] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -32,7 +30,6 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
     const result = equipmentRequestSchema.safeParse({
       equipmentType,
       description,
-      urgency,
       neededByDate: neededByDate || undefined,
     });
 
@@ -89,19 +86,6 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
               {errors.description}
             </span>
           )}
-        </div>
-
-        <div>
-          <Label>{t('equipment.form.urgency')}</Label>
-          <Select
-            value={urgency}
-            onChange={(e) => setUrgency(e.target.value as 'low' | 'medium' | 'high')}
-            style={{ fontSize: 16 }}
-          >
-            <option value="low">{t('equipment.urgencies.low')}</option>
-            <option value="medium">{t('equipment.urgencies.medium')}</option>
-            <option value="high">{t('equipment.urgencies.high')}</option>
-          </Select>
         </div>
 
         <div>

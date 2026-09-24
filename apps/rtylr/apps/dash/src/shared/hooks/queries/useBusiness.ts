@@ -82,7 +82,9 @@ export const useUpdateBusiness = () => {
       };
 
       setIfPresent('storeName', 'siteName');
-      if (!payload.siteName) setIfPresent('companyName', 'siteName');
+      if (!has('storeName') || data.storeName === undefined) {
+        setIfPresent('companyName', 'siteName');
+      }
       setIfPresent('contactEmail');
       setIfPresent('telephone', 'contactNumber');
       setIfPresent('aboutContent');

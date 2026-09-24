@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, AlertTriangle, CheckCircle2, PauseCircle } from 'lucide-react';
+import { Trash2, CheckCircle2, PauseCircle } from 'lucide-react';
 import type { Webhook } from '../../hooks/queries/useWebhooks';
 
 export interface WebhookRowProps {
@@ -17,11 +17,6 @@ const STATUS_META = {
     color: 'var(--dash-text-muted)',
     labelKey: 'common.webhook.paused',
   },
-  failing: {
-    icon: AlertTriangle,
-    color: 'var(--status-cancelled)',
-    labelKey: 'common.webhook.failing',
-  },
 } as const;
 
 function formatRelative(iso?: string): string {
@@ -36,7 +31,7 @@ function formatRelative(iso?: string): string {
 
 export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => {
   const { t } = useTranslation();
-  const meta = STATUS_META[webhook.status];
+  const meta = webhook.isActive ? STATUS_META.active : STATUS_META.paused;
   const Icon = meta.icon;
 
   return (
@@ -68,7 +63,7 @@ export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => 
           ))}
         </div>
         <p className="text-[11px] mt-1.5" style={{ color: 'var(--dash-text-dim)' }}>
-          Last delivery {formatRelative(webhook.lastDelivery)} · {webhook.secretPreview}
+          Last delivery {formatRelative(webhook.lastTriggeredAt)}
         </p>
       </div>
       <button

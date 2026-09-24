@@ -1,11 +1,13 @@
 /**
  * The appearance preferences store.
  *
- * Pure state, deliberately. This file never touches the DOM: no setProperty, no
+ * Pure state, deliberately. This file never writes the DOM: no setProperty, no
  * setAttribute, no matchMedia. The provider in `@voxire/ui` is the single writer,
  * and that is not a stylistic preference. An inline custom property on
  * documentElement outranks every stylesheet rule, so a second writer here would
- * silently defeat `globals.css` in whichever app adopted it. `resolveMode` takes
+ * silently defeat `globals.css` in whichever app adopted it. Cross-tab
+ * synchronization is limited to listening for persisted-storage changes.
+ * `resolveMode` takes
  * `prefersDark` as an argument for the same reason: the media query is the
  * caller's to read.
  *
@@ -13,11 +15,18 @@
  * section 4.1.
  */
 
-import { create } from 'zustand';
-import type { Mutate, StoreApi, UseBoundStore } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import type { Mutate, StoreApi, UseBoundStore } from "zustand";
+import { persist } from "zustand/middleware";
 
-import type { AppearancePrefs, Corners, Density, ResolvedMode, TextSize, ThemeMode } from './types';
+import type {
+  AppearancePrefs,
+  Corners,
+  Density,
+  ResolvedMode,
+  TextSize,
+  ThemeMode,
+} from "./types";
 
 /**
  * The shipped defaults.
@@ -37,13 +46,13 @@ import type { AppearancePrefs, Corners, Density, ResolvedMode, TextSize, ThemeMo
  * `createAppearanceStore(key, { reduceMotion: prefersReducedMotion })`.
  */
 export const APPEARANCE_DEFAULTS: AppearancePrefs = {
-  mode: 'dark',
+  mode: "dark",
   // 'midnight' is Flow as it ships today, lifted from globals.css. See palettes.ts.
-  palette: 'midnight',
+  palette: "midnight",
   accent: null,
-  density: 'cozy',
-  textSize: 'm',
-  corners: 'soft',
+  density: "cozy",
+  textSize: "m",
+  corners: "soft",
   reduceMotion: false,
 };
 
@@ -55,7 +64,7 @@ export const APPEARANCE_DEFAULTS: AppearancePrefs = {
  * reads it on its own: Flow passes it as `legacyModeKey` at its own call site.
  * See `CreateAppearanceStoreOptions.legacyModeKey` for why it is opt-in.
  */
-export const LEGACY_THEME_STORAGE_KEY = 'flow-theme';
+export const LEGACY_THEME_STORAGE_KEY = "flow-theme";
 
 /** Actions, one per field plus a reset. */
 export interface AppearanceActions {
@@ -101,7 +110,7 @@ export interface CreateAppearanceStoreOptions extends Partial<AppearancePrefs> {
  * contract rather than whatever survived JSON.stringify.
  */
 export type AppearanceStoreHook = UseBoundStore<
-  Mutate<StoreApi<AppearanceStore>, [['zustand/persist', AppearancePrefs]]>
+  Mutate<StoreApi<AppearanceStore>, [["zustand/persist", AppearancePrefs]]>
 >;
 
 /**
@@ -110,8 +119,11 @@ export type AppearanceStoreHook = UseBoundStore<
  * Pure on purpose: the provider owns the media query and its change listener, so
  * this stays testable for both preferences without a DOM in scope.
  */
-export function resolveMode(mode: ThemeMode, prefersDark: boolean): ResolvedMode {
-  if (mode === 'system') return prefersDark ? 'dark' : 'light';
+export function resolveMode(
+  mode: ThemeMode,
+  prefersDark: boolean,
+): ResolvedMode {
+  if (mode === "system") return prefersDark ? "dark" : "light";
   return mode;
 }
 
@@ -121,7 +133,7 @@ export function resolveMode(mode: ThemeMode, prefersDark: boolean): ResolvedMode
  * derivation as a value it has no branch for.
  */
 function isThemeMode(value: unknown): value is ThemeMode {
-  return value === 'light' || value === 'dark' || value === 'system';
+  return value === "light" || value === "dark" || value === "system";
 }
 
 /**
@@ -146,7 +158,7 @@ function isThemeMode(value: unknown): value is ThemeMode {
  * exists to prevent.
  */
 export function readLegacyMode(key: string): ThemeMode | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
 
   let raw: string | null = null;
   try {
@@ -162,10 +174,10 @@ export function readLegacyMode(key: string): ThemeMode | null {
   } catch {
     return null;
   }
-  if (typeof parsed !== 'object' || parsed === null) return null;
+  if (typeof parsed !== "object" || parsed === null) return null;
 
   const state = (parsed as { state?: unknown }).state;
-  if (typeof state !== 'object' || state === null) return null;
+  if (typeof state !== "object" || state === null) return null;
 
   const theme = (state as { theme?: unknown }).theme;
   return isThemeMode(theme) ? theme : null;
@@ -183,14 +195,16 @@ export function readLegacyMode(key: string): ThemeMode | null {
  */
 export function createAppearanceStore(
   storageKey: string,
-  options?: CreateAppearanceStoreOptions
+  options?: CreateAppearanceStoreOptions,
 ): AppearanceStoreHook {
   const { legacyModeKey, ...defaults } = options ?? {};
   const base: AppearancePrefs = { ...APPEARANCE_DEFAULTS, ...defaults };
-  const legacyMode = typeof legacyModeKey === 'string' ? readLegacyMode(legacyModeKey) : null;
-  const initial: AppearancePrefs = legacyMode === null ? base : { ...base, mode: legacyMode };
+  const legacyMode =
+    typeof legacyModeKey === "string" ? readLegacyMode(legacyModeKey) : null;
+  const initial: AppearancePrefs =
+    legacyMode === null ? base : { ...base, mode: legacyMode };
 
-  return create<AppearanceStore>()(
+  const useStore = create<AppearanceStore>()(
     persist(
       (set) => ({
         ...initial,
@@ -214,7 +228,17 @@ export function createAppearanceStore(
           corners: state.corners,
           reduceMotion: state.reduceMotion,
         }),
-      }
-    )
+      },
+    ),
   );
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", (event) => {
+      if (event.key !== storageKey || event.storageArea !== window.localStorage)
+        return;
+      void useStore.persist.rehydrate();
+    });
+  }
+
+  return useStore;
 }

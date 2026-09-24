@@ -99,6 +99,7 @@
     "salary": "Salaire",
     "both": "Les deux",
     "period": "Période de paie",
+    "payDayOfMonth": "Jour de paie du mois",
     "weekly": "Hebdomadaire",
     "biweekly": "Bimensuel",
     "monthly": "Mensuel",
@@ -108,7 +109,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "description": "Choisissez comment votre équipe reçoit les notifications.",
+    "description": "Les identifiants des canaux de notification seront configurés plus tard dans les Paramètres.",
     "emailEnabled": "Notifications par e-mail",
     "smsEnabled": "Notifications SMS / WhatsApp",
     "channelNote": "Les identifiants de canal peuvent être configurés plus tard dans les Paramètres."

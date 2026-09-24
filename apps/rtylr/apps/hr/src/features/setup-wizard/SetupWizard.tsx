@@ -25,7 +25,6 @@ import type {
   OrgStructureFormData,
   LocationsFormData,
   PayrollConfigFormData,
-  NotificationsFormData,
 } from '../../shared/schemas/wizardSchemas';
 
 function PageLoader(): React.JSX.Element {
@@ -161,8 +160,8 @@ const SetupWizard = (): React.JSX.Element => {
     handleStepComplete('payroll', data as Record<string, unknown>);
   };
 
-  const handleNotifications = (data: NotificationsFormData): void => {
-    handleStepComplete('notifications', data as Record<string, unknown>);
+  const handleNotifications = (): void => {
+    handleStepComplete('notifications');
   };
 
   const handleEmployees = (): void => {

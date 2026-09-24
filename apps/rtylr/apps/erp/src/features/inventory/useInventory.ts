@@ -8,7 +8,7 @@ import type {
   AdjustInventoryResponse,
   InventoryReportItem,
 } from '@voxire/voxie/erp/inventory/v1/types';
-import { withErpListBounds } from '../../shared/lib/erpListBounds';
+import { ERP_LIST_LIMIT } from '../../shared/lib/erpListBounds';
 import { invalidateStockDerivedQueries } from '../../shared/lib/stockInvalidation';
 
 const inventoryClient = createOneKitClient(InventoryServiceClient, 'erp');
@@ -17,23 +17,52 @@ export type { InventoryReportItem };
 
 export type AdjustInventoryInput = AdjustInventoryRequest;
 
+type InventoryPage<T> = {
+  items?: T[];
+  hasMore?: boolean;
+  total?: number;
+};
+
+async function fetchAllPages<T>(fetchPage: (offset: number) => Promise<InventoryPage<T>>) {
+  const items: T[] = [];
+  let offset = 0;
+
+  while (true) {
+    const response = await fetchPage(offset);
+    const page = response.items ?? [];
+    items.push(...page);
+
+    const hasMore =
+      response.hasMore ??
+      (response.total !== undefined
+        ? items.length < response.total
+        : page.length === ERP_LIST_LIMIT);
+    if (!hasMore || page.length === 0) return items;
+    offset += page.length;
+  }
+}
+
+export function fetchAllInventoryReport(): Promise<InventoryReportItem[]> {
+  return fetchAllPages((offset) =>
+    inventoryClient.getInventoryReport({ limit: ERP_LIST_LIMIT, offset })
+  );
+}
+
+export function fetchAllLowStock(): Promise<InventoryReportItem[]> {
+  return fetchAllPages((offset) => inventoryClient.getLowStock({ limit: ERP_LIST_LIMIT, offset }));
+}
+
 export function useInventoryReport() {
   return useQuery<InventoryReportItem[]>({
     queryKey: ['inventory-report'],
-    queryFn: async () => {
-      const response = await inventoryClient.getInventoryReport(withErpListBounds({}));
-      return response.items ?? [];
-    },
+    queryFn: fetchAllInventoryReport,
   });
 }
 
 export function useLowStock() {
   return useQuery<InventoryReportItem[]>({
     queryKey: ['low-stock'],
-    queryFn: async () => {
-      const response = await inventoryClient.getLowStock(withErpListBounds({}));
-      return response.items ?? [];
-    },
+    queryFn: fetchAllLowStock,
   });
 }
 

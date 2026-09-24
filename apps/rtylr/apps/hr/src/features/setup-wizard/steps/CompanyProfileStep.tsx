@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { COUNTRIES, TIMEZONES, INDUSTRIES } from '@voxire/config';
+import { TIMEZONES } from '@voxire/config';
 import {
   companyProfileSchema,
   type CompanyProfileFormData,
@@ -26,8 +26,6 @@ const CompanyProfileStep = ({
   const { t } = useTranslation();
   const [form, setForm] = useState<CompanyProfileFormData>({
     name: '',
-    industry: '',
-    country: '',
     timezone: '',
     currency: 'USD',
   });
@@ -89,69 +87,24 @@ const CompanyProfileStep = ({
 
         <div>
           <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-            {t('setup.companyProfile.industry')}
+            {t('setup.companyProfile.timezone')}
           </label>
           <select
-            value={form.industry}
+            value={form.timezone}
             onChange={(e) => {
-              setForm((f) => ({ ...f, industry: e.target.value }));
-              setErrors((prev) => ({ ...prev, industry: '' }));
+              setForm((f) => ({ ...f, timezone: e.target.value }));
+              setErrors((prev) => ({ ...prev, timezone: '' }));
             }}
             style={inputStyle}
           >
             <option value="">-</option>
-            {INDUSTRIES.map((i) => (
-              <option key={i.value} value={i.value}>
-                {i.label}
+            {TIMEZONES.map((tz) => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
               </option>
             ))}
           </select>
-          {errors.industry && <p className="mt-1 text-xs text-red-500">{errors.industry}</p>}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-              {t('setup.companyProfile.country')}
-            </label>
-            <select
-              value={form.country}
-              onChange={(e) => {
-                setForm((f) => ({ ...f, country: e.target.value }));
-                setErrors((prev) => ({ ...prev, country: '' }));
-              }}
-              style={inputStyle}
-            >
-              <option value="">-</option>
-              {COUNTRIES.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            {errors.country && <p className="mt-1 text-xs text-red-500">{errors.country}</p>}
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-              {t('setup.companyProfile.timezone')}
-            </label>
-            <select
-              value={form.timezone}
-              onChange={(e) => {
-                setForm((f) => ({ ...f, timezone: e.target.value }));
-                setErrors((prev) => ({ ...prev, timezone: '' }));
-              }}
-              style={inputStyle}
-            >
-              <option value="">-</option>
-              {TIMEZONES.map((tz) => (
-                <option key={tz.value} value={tz.value}>
-                  {tz.label}
-                </option>
-              ))}
-            </select>
-            {errors.timezone && <p className="mt-1 text-xs text-red-500">{errors.timezone}</p>}
-          </div>
+          {errors.timezone && <p className="mt-1 text-xs text-red-500">{errors.timezone}</p>}
         </div>
 
         <div>
