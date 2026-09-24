@@ -60,6 +60,48 @@ func TestHasAnyAppScopeFailsClosedForUnscopedNormalizedFlowAssignments(t *testin
 	}
 }
 
+func TestHasAnyAppScopeAllowsOwnerAndAdminWithoutScopedAssignments(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		isOwner bool
+		isAdmin bool
+	}{
+		{name: "owner", isOwner: true},
+		{name: "admin", isAdmin: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			user := &AuthUser{EffectiveAccess: &authorization.EffectiveAccess{
+				AuthorizationVersion: 1,
+				IsOwner:              tc.isOwner,
+				IsAdmin:              tc.isAdmin,
+				Apps: []authorization.EffectiveAppAccess{{
+					AppID:     authorization.AppFlow,
+					Licensed:  true,
+					HasAccess: true,
+				}},
+			}}
+			if !HasAnyAppScope(user, authorization.AppFlow) {
+				t.Fatalf("%s with system access must not need a resource scope", tc.name)
+			}
+		})
+	}
+}
+
+func TestHasAnyAppScopeStillRequiresAccessForOwner(t *testing.T) {
+	user := &AuthUser{EffectiveAccess: &authorization.EffectiveAccess{
+		AuthorizationVersion: 1,
+		IsOwner:              true,
+		Apps: []authorization.EffectiveAppAccess{{
+			AppID:     authorization.AppFlow,
+			Licensed:  true,
+			HasAccess: false,
+		}},
+	}}
+	if HasAnyAppScope(user, authorization.AppFlow) {
+		t.Fatal("owner without app access (inactive membership) must fail closed")
+	}
+}
+
 func TestHasAnyAppScopePreservesLegacyMigrationShape(t *testing.T) {
 	user := &AuthUser{EffectiveAccess: &authorization.EffectiveAccess{
 		Apps: []authorization.EffectiveAppAccess{{

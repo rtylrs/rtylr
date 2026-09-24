@@ -98,6 +98,12 @@ func HasAnyAppScope(user *AuthUser, appID authorization.AppID) bool {
 		if user.EffectiveAccess.AuthorizationVersion == 0 {
 			return true
 		}
+		// Owners and admins resolve through the system path, which grants every
+		// permission without creating scoped assignments. HasAccess is only true
+		// for them when their membership is active, so this cannot widen access.
+		if user.EffectiveAccess.IsOwner || user.EffectiveAccess.IsAdmin {
+			return true
+		}
 		return len(app.Scopes) > 0
 	}
 	return false
