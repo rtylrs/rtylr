@@ -336,8 +336,8 @@
       },
       "press": {
         "label": "Press",
-        "value": "info@voxire.com",
-        "description": "There is no separate press address, so press requests go to the general inbox."
+        "value": "sales@rtylr.com",
+        "description": "There is no separate press address, so press requests reach the same inbox."
       }
     },
     "hero": {
@@ -358,7 +358,7 @@
       },
       "email": {
         "label": "Email us",
-        "value": "info@voxire.com",
+        "value": "sales@rtylr.com",
         "description": "We reply within 24 hours."
       }
     },
@@ -393,11 +393,12 @@
       "nameRequired": "Name is required.",
       "emailRequired": "Email is required.",
       "emailInvalid": "Please enter a valid email address.",
-      "messageRequired": "Message is required."
+      "messageRequired": "Message is required.",
+      "submitFailed": "That did not send. Please try again, or email us at"
     },
     "success": {
       "title": "One more step.",
-      "body": "We opened a pre-filled draft in your email app. Hit send to get it to us and we will reply within 24 hours. If nothing opened, email us directly at",
+      "body": "Your message is with the rtylr team and we will reply within one business day. If you would rather write directly, the address is",
       "reset": "Send another message"
     },
     "strip": {
@@ -1616,7 +1617,7 @@
     },
     "success": {
       "title": "One more step.",
-      "body": "We opened a pre-filled draft in your email app. Hit send and someone from the rtylr team will reach out within one business day to schedule the walkthrough. If nothing opened, email us directly at"
+      "body": "Your request is with the rtylr team and someone will reach out within one business day to schedule the walkthrough. If you would rather write directly, the address is"
     },
     "form": {
       "emailLabel": "WORK EMAIL",
@@ -1639,7 +1640,8 @@
       "emailInvalid": "Please enter a valid email address",
       "country": "Please select your location",
       "reason": "Please select a reason for demo",
-      "size": "Please select company size"
+      "size": "Please select company size",
+      "submitFailed": "That did not send. Please try again, or email us at"
     }
   },
   "support": {

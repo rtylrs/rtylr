@@ -812,8 +812,8 @@
       },
       "press": {
         "label": "Presse",
-        "value": "info@voxire.com",
-        "description": "Il n’existe pas d’adresse presse dédiée, les demandes arrivent donc à l’adresse générale."
+        "value": "sales@rtylr.com",
+        "description": "Il n’existe pas d’adresse presse dédiée, les demandes arrivent donc à la même adresse."
       }
     },
     "hero": {
@@ -866,7 +866,8 @@
       "nameRequired": "Le nom est obligatoire.",
       "emailRequired": "L’e-mail est obligatoire.",
       "emailInvalid": "Saisissez une adresse e-mail valide.",
-      "messageRequired": "Le message est obligatoire."
+      "messageRequired": "Le message est obligatoire.",
+      "submitFailed": "L’envoi a échoué. Réessayez, ou écrivez-nous à"
     },
     "success": {
       "title": "Encore une étape.",

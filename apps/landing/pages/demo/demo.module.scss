@@ -257,3 +257,20 @@
     }
   }
 }
+
+// Off-screen rather than display:none: some bots skip hidden inputs, and the
+// point is that an automated form filler does reach this one.
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.submitError {
+  color: var(--ink);
+  opacity: 0.85;
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}

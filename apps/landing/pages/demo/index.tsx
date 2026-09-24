@@ -8,6 +8,7 @@ import { Input, Select, Button } from '@voxire/components';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 import { contactPageSchema } from '../../lib/structured-data';
+import { submitLead } from '../../lib/submitLead';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { useFaq } from '../../lib/faqs';
@@ -36,6 +37,8 @@ const DemoPage = (): React.JSX.Element => {
 
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
   // Rendered as an inline success block instead of alert() so the
   // form doesn't yank the user's attention with a native dialog.
   const [submitted, setSubmitted] = useState(false);
@@ -107,14 +110,25 @@ const DemoPage = (): React.JSX.Element => {
     }
 
     setIsSubmitting(true);
-    const subject = encodeURIComponent('Demo request from rtylr.com');
-    const body = encodeURIComponent(
-      `Email: ${formData.email}\nCountry: ${formData.country}\nCompany size: ${formData.companySize}\nReason: ${formData.reason}`
-    );
-    window.location.href = `mailto:sales@rtylr.com?subject=${subject}&body=${body}`;
-    setSubmitted(true);
-    setFormData({ email: '', country: '', reason: '', companySize: '' });
-    setIsSubmitting(false);
+    setSubmitError(false);
+    try {
+      await submitLead({
+        form: 'demo',
+        email: formData.email,
+        country: formData.country,
+        companySize: formData.companySize,
+        reason: formData.reason,
+        honeypot,
+      });
+      setSubmitted(true);
+      setFormData({ email: '', country: '', reason: '', companySize: '' });
+    } catch {
+      // Only a 2xx shows the success state. TODO(#1349): fire generate_lead
+      // here once the analytics events land.
+      setSubmitError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const faq = useFaq('demo');
@@ -221,6 +235,30 @@ const DemoPage = (): React.JSX.Element => {
                         className={styles.select}
                       />
                     </div>
+
+                    {/* Honeypot. Positioned off-screen rather than
+                        display:none, which some bots skip, and excluded from
+                        the accessibility tree and the tab order so no human
+                        ever reaches it. */}
+                    <div className={styles.honeypot} aria-hidden="true">
+                      <label htmlFor="demo-company-url">Company URL</label>
+                      <input
+                        id="demo-company-url"
+                        name="companyUrl"
+                        type="text"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                      />
+                    </div>
+
+                    {submitError && (
+                      <p className={styles.submitError} role="alert">
+                        {t('demo.errors.submitFailed')}{' '}
+                        <a href="mailto:sales@rtylr.com">sales@rtylr.com</a>.
+                      </p>
+                    )}
 
                     <p className={styles.privacyText}>
                       By submitting this form, you agree to our{' '}

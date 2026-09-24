@@ -8,6 +8,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
+import { submitLead } from '../../lib/submitLead';
 import { organizationContactSchema } from '../../lib/structured-data';
 import {
   blurFadeIn,
@@ -37,7 +38,7 @@ const ROUTING = ['sales', 'support', 'security', 'partners', 'press'] as const;
 const CONTACT_CHANNELS = [
   { icon: MessageCircle, id: 'whatsapp', href: 'https://wa.me/9613940708' },
   { icon: Phone, id: 'phone', href: 'tel:+9613940708' },
-  { icon: Mail, id: 'email', href: 'mailto:info@voxire.com' },
+  { icon: Mail, id: 'email', href: 'mailto:sales@rtylr.com' },
 ];
 
 const ContactPage = (): React.JSX.Element => {
@@ -46,6 +47,9 @@ const ContactPage = (): React.JSX.Element => {
   const [form, setForm] = useState<ContactForm>({ name: '', email: '', company: '', message: '' });
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
 
   const validate = (): boolean => {
     const next: ContactFormErrors = {};
@@ -68,17 +72,28 @@ const ContactPage = (): React.JSX.Element => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!validate()) return;
-    const subject = encodeURIComponent(
-      `Contact from ${form.name}${form.company ? ` at ${form.company}` : ''}`
-    );
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}${form.company ? `\nCompany: ${form.company}` : ''}\n\n${form.message}`
-    );
-    window.location.href = `mailto:info@voxire.com?subject=${subject}&body=${body}`;
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(false);
+    try {
+      await submitLead({
+        form: 'contact',
+        name: form.name,
+        email: form.email,
+        company: form.company,
+        message: form.message,
+        honeypot,
+      });
+      setSubmitted(true);
+    } catch {
+      // Only a 2xx shows the success state. TODO(#1349): fire generate_lead
+      // here once the analytics events land.
+      setSubmitError(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDemoNavigation = (): void => {
@@ -207,7 +222,7 @@ const ContactPage = (): React.JSX.Element => {
                     <h3 className={styles.successTitle}>{t('contact.success.title')}</h3>
                     <p className={styles.successBody}>
                       {t('contact.success.body')}{' '}
-                      <a href="mailto:info@voxire.com">info@voxire.com</a>.
+                      <a href="mailto:sales@rtylr.com">sales@rtylr.com</a>.
                     </p>
                     <button
                       className={styles.successReset}
@@ -313,7 +328,29 @@ const ContactPage = (): React.JSX.Element => {
                       )}
                     </div>
 
-                    <button type="submit" className={styles.submitBtn}>
+                    {/* Honeypot. Off-screen rather than display:none, out of
+                        the tab order and out of the accessibility tree. */}
+                    <div className={styles.honeypot} aria-hidden="true">
+                      <label htmlFor="contact-company-url">Company URL</label>
+                      <input
+                        id="contact-company-url"
+                        name="companyUrl"
+                        type="text"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                      />
+                    </div>
+
+                    {submitError && (
+                      <p className={styles.submitError} role="alert">
+                        {t('contact.errors.submitFailed')}{' '}
+                        <a href="mailto:sales@rtylr.com">sales@rtylr.com</a>.
+                      </p>
+                    )}
+
+                    <button type="submit" className={styles.submitBtn} disabled={submitting}>
                       {t('contact.form.submit')}
                     </button>
                   </form>

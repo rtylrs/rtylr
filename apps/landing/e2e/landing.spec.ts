@@ -106,3 +106,76 @@ test.describe('Landing page', () => {
     expect(body).toContain('PerplexityBot');
   });
 });
+
+/**
+ * Lead capture.
+ *
+ * The worker is not running here: `serve` hands out the static export and
+ * nothing answers /api/v1/lead, so the endpoint is stubbed. What this proves
+ * is the half the worker suite cannot, that the form collects the right
+ * fields, posts them, and only shows the confirmation on a 2xx.
+ *
+ * The three selects are react-select, so they are driven by typing the
+ * option text and pressing Enter rather than by selectOption().
+ */
+test.describe('Demo form', () => {
+  const chooseOption = async (page, label: string, option: string) => {
+    const field = page.locator('.voxire-select', { hasText: label }).first();
+    await field.locator('input').first().click();
+    await page.keyboard.type(option);
+    await page.keyboard.press('Enter');
+  };
+
+  test('posts the lead and shows the confirmation only on a 2xx', async ({ page }) => {
+    const posted: Array<Record<string, unknown>> = [];
+    await page.route('**/api/v1/lead', async (route) => {
+      posted.push(JSON.parse(route.request().postData() ?? '{}'));
+      await route.fulfill({
+        status: 202,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, delivered: ['email'] }),
+      });
+    });
+
+    await page.goto(`${LANDING_URL}/demo/`);
+    await page.getByPlaceholder('Your work email').fill('buyer@example.com');
+    await chooseOption(page, 'WHERE ARE YOU LOCATED?', 'Lebanon');
+    await chooseOption(page, 'REASON FOR DEMO', 'Partnerships');
+    await chooseOption(page, 'HOW MANY EMPLOYEES', '26-50');
+    await page.getByRole('button', { name: /book a demo/i }).click();
+
+    await expect(page.getByRole('heading', { name: /one more step|thank/i })).toBeVisible();
+    expect(posted).toHaveLength(1);
+    expect(posted[0]).toMatchObject({
+      form: 'demo',
+      email: 'buyer@example.com',
+      reason: 'partnerships',
+      companySize: '26-50',
+    });
+  });
+
+  test('keeps the form and offers the address when delivery fails', async ({ page }) => {
+    await page.route('**/api/v1/lead', (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 'delivery_unavailable' } }),
+      })
+    );
+
+    await page.goto(`${LANDING_URL}/demo/`);
+    await page.getByPlaceholder('Your work email').fill('buyer@example.com');
+    await chooseOption(page, 'WHERE ARE YOU LOCATED?', 'Lebanon');
+    await chooseOption(page, 'REASON FOR DEMO', 'Partnerships');
+    await chooseOption(page, 'HOW MANY EMPLOYEES', '26-50');
+    await page.getByRole('button', { name: /book a demo/i }).click();
+
+    // The regression this guards: a form that says "sent" while the lead is
+    // gone is worse than the mailto: link it replaced.
+    // Next ships its own role=alert route announcer, so match the message
+    // rather than the role, which would resolve to two elements.
+    await expect(page.getByText(/did not send/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: 'sales@rtylr.com' })).toBeVisible();
+  });
+});
+
