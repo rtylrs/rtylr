@@ -745,14 +745,20 @@ func TestSplitOrder_SplitsSubtotalAndTax(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 	productID := insertTestProduct(ctx, t, db, "OrderSplit", 10.00)
+	if _, err := db.ExecContext(ctx, `UPDATE erp_products SET tax_rate = 10.00 WHERE id = ?`, productID); err != nil {
+		t.Fatalf("set test product tax rate: %v", err)
+	}
 
 	orderNum := fmt.Sprintf("TEST-ORD-%d", 9101)
+	// Unit price and tax rate are resolved from the catalog, not taken from the
+	// caller, so the item inputs carry only the product and the quantity. Both
+	// lines resolve to the same product at 10.00 and a 10 percent tax rate.
 	id, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101, orderNum, domain.OrderInput{
 		SessionID: 3201,
 		Type:      domain.OrderTypeTakeaway,
 		Items: []domain.OrderItemInput{
-			{MenuItemID: productID, Quantity: 1, UnitPrice: 10, TaxRate: 10},
-			{MenuItemID: productID, Quantity: 1, UnitPrice: 20},
+			{MenuItemID: productID, Quantity: 1},
+			{MenuItemID: productID, Quantity: 1},
 		},
 	})
 	if err != nil {
