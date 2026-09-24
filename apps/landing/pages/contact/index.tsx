@@ -7,6 +7,7 @@ import { MessageCircle, Phone, Mail, ArrowRight, CheckCircle } from 'lucide-reac
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import { organizationContactSchema } from '../../lib/structured-data';
 import {
   blurFadeIn,
@@ -29,6 +30,9 @@ interface ContactFormErrors {
   email?: string;
   message?: string;
 }
+
+/** Address routing, in the order a reader is most likely to need it. */
+const ROUTING = ['sales', 'support', 'security', 'partners', 'press'] as const;
 
 const CONTACT_CHANNELS = [
   { icon: MessageCircle, id: 'whatsapp', href: 'https://wa.me/9613940708' },
@@ -107,6 +111,10 @@ const ContactPage = (): React.JSX.Element => {
             </motion.p>
           </motion.section>
 
+          <DirectAnswer label={t('contact.directAnswer.label')}>
+            {t('contact.directAnswer.body')}
+          </DirectAnswer>
+
           {/* Two-column layout */}
           <section className={styles.mainSection}>
             <div className={styles.mainContainer}>
@@ -153,6 +161,35 @@ const ContactPage = (): React.JSX.Element => {
                   <span className={styles.hoursLabel}>{t('contact.hours.label')}</span>
                   <span className={styles.hoursValue}>{t('contact.hours.days')}</span>
                   <span className={styles.hoursValue}>{t('contact.hours.time')}</span>
+                </div>
+
+                {/* Which address for what. The channels above are the general
+                    ways in; this is the routing table, so a security report
+                    does not sit in a sales inbox. */}
+                <h2 className={styles.infoTitle}>{t('contact.routing.title')}</h2>
+                <div className={styles.channelsList}>
+                  {ROUTING.map((id) => (
+                    <div key={id} className={styles.channelCard}>
+                      <div className={styles.channelContent}>
+                        <span className={styles.channelLabel}>
+                          {t(`contact.routing.${id}.label`)}
+                        </span>
+                        {/* The anchor wraps inline content only. An <a> around
+                            a block element is dropped wholesale from the
+                            markdown twin, which is how the existing channel
+                            cards became invisible to agents. */}
+                        <a
+                          className={styles.channelValue}
+                          href={`mailto:${t(`contact.routing.${id}.value`)}`}
+                        >
+                          {t(`contact.routing.${id}.value`)}
+                        </a>
+                        <span className={styles.channelDescription}>
+                          {t(`contact.routing.${id}.description`)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </motion.div>
 

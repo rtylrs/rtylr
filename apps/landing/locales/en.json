@@ -284,12 +284,61 @@
           "answer": "Yes. Flow is included in the Free plan along with the other six apps, covering 10 team members at one location, with unlimited projects, tasks, comments and attachments. Pro and Scale raise the team and location limits and add the controls a larger team needs. rtylr does not publish prices yet, so Pro and Scale are quoted."
         }
       ]
+    },
+    "demo": {
+      "title": "Questions about the rtylr demo",
+      "items": [
+        {
+          "question": "What should I prepare for the demo?",
+          "answer": "Nothing is required. If you would rather see your own data than a sample, bring a menu or a SKU list, a recent invoice, and a rough idea of how many people and how many locations you run. Those are enough to show the register, stock, payroll and the books working against something you recognise."
+        },
+        {
+          "question": "Is the demo a sales call?",
+          "answer": "It is a 30 minute product walkthrough, run by someone who built rtylr. You do not need one in order to start: the Free plan covers 10 team members at one location and needs no card, so you can sign up and look around on your own first. The walkthrough is for the questions a signup page cannot answer."
+        },
+        {
+          "question": "Can the demo cover self hosting?",
+          "answer": "Yes. rtylr can be self hosted, and the setup is documented publicly at docs.rtylr.com/self-hosting. Say so when you book, under Explore a Rtylr Use Case, and the walkthrough can go that way instead. The documentation is open, so you can also read it first and arrive with specific questions about your own infrastructure."
+        }
+      ]
     }
   },
   "contact": {
     "meta": {
       "title": "Contact rtylr Sales and Support in Lebanon | rtylr",
       "description": "Reach the rtylr team for sales, support, press or partnerships. Every message lands with a human and we reply within one business day, usually faster."
+    },
+    "directAnswer": {
+      "label": "What happens when you write",
+      "body": "Every message sent from this page lands in front of a human on the rtylr team, and we reply within one business day, usually faster. Use the form for anything at all, or write to the address that matches what you need. Phone and WhatsApp are open Monday to Friday, 9 am to 5 pm GMT+3."
+    },
+    "routing": {
+      "title": "Which channel for what",
+      "sales": {
+        "label": "Sales and demos",
+        "value": "sales@rtylr.com",
+        "description": "Pricing, plans, migrating from another system, and booking a walkthrough."
+      },
+      "support": {
+        "label": "Help with an account",
+        "value": "support@voxire.com",
+        "description": "Something is broken, or you are stuck in an account you already have."
+      },
+      "security": {
+        "label": "Security reports",
+        "value": "security@voxire.com",
+        "description": "Suspected vulnerabilities and incidents. See the Trust Center for disclosure."
+      },
+      "partners": {
+        "label": "Partnerships",
+        "value": "partners@voxire.com",
+        "description": "Implementation, technology, solution and hardware partner enquiries."
+      },
+      "press": {
+        "label": "Press",
+        "value": "info@voxire.com",
+        "description": "There is no separate press address, so press requests go to the general inbox."
+      }
     },
     "hero": {
       "title": "Reach out. We read it all.",
@@ -1557,6 +1606,10 @@
       "description": "See rtylr running against real data in a live 30 minute walkthrough with someone who built it. Bring your questions about POS, inventory, payroll and books.",
       "schemaName": "Book a Demo"
     },
+    "directAnswer": {
+      "label": "What a rtylr demo is",
+      "body": "A rtylr demo is a 30 minute walkthrough of the product running against real data, led by someone who built it. It covers the register, inventory, payroll and the books, and shows how they sit on one data model rather than four tools that have to be reconciled. Bring your menu, your SKU list or a PDF of invoices and the walkthrough uses those. If you would rather not book anything, the Free plan needs no card."
+    },
     "hero": {
       "title": "See rtylr on your data.",
       "subtitle": "A 30-minute walkthrough with someone who actually built it. Bring your menu, your SKU list, your PDF of invoices, we'll show you what the switch would look like."
@@ -1701,7 +1754,9 @@
     },
     "hero": {
       "eyebrow": "BLOG",
-      "title": "Playbooks for running the whole business."
+      "title": "Playbooks for running the whole business.",
+      "subtitle": "Concrete, operator-tested writing on POS, inventory, payroll, and what changes when they share one platform. No fluff, just what works on a Saturday night.",
+      "intro": "The writing here covers four things: running a small or mid-sized Lebanese business on one system instead of six, the day to day of POS and restaurants, what actually changes when you move off spreadsheets and disconnected tools, and plain explainers for each rtylr module. Written from how the product works, not from a keyword list."
     },
     "readingTime": "{{minutes}} min read",
     "readingTimeShort": "{{minutes}} min",

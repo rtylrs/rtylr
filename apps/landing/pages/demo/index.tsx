@@ -8,6 +8,9 @@ import { Input, Select, Button } from '@voxire/components';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 import { contactPageSchema } from '../../lib/structured-data';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
+import FaqSection from '../../components/FaqSection/FaqSection';
+import { useFaq } from '../../lib/faqs';
 import { blurFadeIn, staggerBlur } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './demo.module.scss';
@@ -114,6 +117,8 @@ const DemoPage = (): React.JSX.Element => {
     setIsSubmitting(false);
   };
 
+  const faq = useFaq('demo');
+
   return (
     <AppLayout>
       <MainLayout>
@@ -155,6 +160,10 @@ const DemoPage = (): React.JSX.Element => {
                   <motion.p className={styles.subtitle} variants={blurFadeIn}>
                     {t('demo.hero.subtitle')}
                   </motion.p>
+
+                  <DirectAnswer label={t('demo.directAnswer.label')}>
+                    {t('demo.directAnswer.body')}
+                  </DirectAnswer>
 
                   <motion.form onSubmit={handleSubmit} className={styles.form} variants={blurFadeIn}>
                     <div className={styles.formGroup}>
@@ -229,6 +238,8 @@ const DemoPage = (): React.JSX.Element => {
               )}
             </motion.div>
           </div>
+
+          <FaqSection title={faq.title} faqs={faq.items} />
         </div>
       </MainLayout>
     </AppLayout>

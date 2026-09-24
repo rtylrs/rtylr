@@ -54,7 +54,16 @@ import type { FAQEntry } from './structured-data';
  */
 
 /** Sections that carry their own FAQ. Matches the locale namespaces. */
-export type FaqSection = 'home' | 'pricing' | 'pos' | 'erp' | 'crm' | 'hr' | 'finance' | 'flow';
+export type FaqSection =
+  | 'home'
+  | 'pricing'
+  | 'pos'
+  | 'erp'
+  | 'crm'
+  | 'hr'
+  | 'finance'
+  | 'flow'
+  | 'demo';
 
 interface Faq {
   /** Section heading for the block. */
