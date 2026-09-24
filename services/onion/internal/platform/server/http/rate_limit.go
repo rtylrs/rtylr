@@ -20,6 +20,11 @@ import (
 // singletons that last the whole process.
 var serverCtx = context.Background()
 
+var (
+	rateLimiterMu sync.RWMutex
+	activeRateLimiters = make(map[*SecurityRateLimiter]struct{})
+)
+
 var rateLimitExceededJSON = []byte(`{"error":"Rate limit exceeded","message":"Too many requests, please try again later","retry_after":60}`)
 
 type SecurityRateLimiter struct {
@@ -35,13 +40,19 @@ type SecurityRateLimiter struct {
 func NewSecurityRateLimiter(limit int, window time.Duration) *SecurityRateLimiter {
 	ctx, cancel := context.WithCancel(serverCtx)
 
-	return &SecurityRateLimiter{
+	rl := &SecurityRateLimiter{
 		requests: make(map[string][]time.Time),
 		limit:    limit,
 		window:   window,
 		ctx:      ctx,
 		cancel:   cancel,
 	}
+
+	rateLimiterMu.Lock()
+	activeRateLimiters[rl] = struct{}{}
+	rateLimiterMu.Unlock()
+
+	return rl
 }
 
 func (rl *SecurityRateLimiter) isAllowed(key string) bool {
@@ -111,6 +122,24 @@ func retainTimesAfter(times []time.Time, cutoff time.Time) []time.Time {
 func (rl *SecurityRateLimiter) Stop() {
 	if rl.cancel != nil {
 		rl.cancel()
+	}
+
+	rateLimiterMu.Lock()
+	delete(activeRateLimiters, rl)
+	rateLimiterMu.Unlock()
+}
+
+func StopAllSecurityRateLimiters() {
+	rateLimiterMu.Lock()
+	limiters := make([]*SecurityRateLimiter, 0, len(activeRateLimiters))
+	for limiter := range activeRateLimiters {
+		limiters = append(limiters, limiter)
+		delete(activeRateLimiters, limiter)
+	}
+	rateLimiterMu.Unlock()
+
+	for _, limiter := range limiters {
+		limiter.Stop()
 	}
 }
 

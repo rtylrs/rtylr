@@ -76,6 +76,8 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 		MaxHeaderBytes:    1 << 20, // 1 MB
 	}
 
+	defer StopAllSecurityRateLimiters()
+
 	listenErr := make(chan error, 1)
 
 	go func() {
