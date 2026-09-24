@@ -1,7 +1,7 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-# Onekit generates standalone OpenAPI 3.1 YAML/JSON specs per service.
-ONK_VERSION := 76384f1e85fe0fbd10f6628ba16fa2fe86fc2156
+# Onekit v0.18.0: latest release; main CI regenerates and commits output.
+ONK_VERSION := 15e45f2b523c12299116121f110e855bb0d95284
 
 # Clean generated code
 clean:

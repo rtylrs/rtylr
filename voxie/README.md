@@ -35,6 +35,10 @@ directory, for example `gen/openapi/hub/business/v1/openapi.yaml` and
 types, including shared types. Directories with multiple services use
 `<ServiceName>.openapi.yaml` and `<ServiceName>.openapi.json`.
 
+The `Contracts` workflow runs on pushes to `main`: it regenerates the outputs,
+builds and typechecks them, then commits any generated changes. Feature PRs
+should contain the source/config change only, not `gen/`.
+
 ## Adding or Changing Contracts
 
 1. Create or edit `api/{app-or-common}/{domain}/v1/models.onk` and `service.onk`.
