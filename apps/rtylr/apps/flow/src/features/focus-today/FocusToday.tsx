@@ -13,6 +13,8 @@ import { isTaskMine } from '../../shared/lib/currentUser';
 import { formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { formatDate } from '../../shared/lib/utils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 
 const ACCENT_VAR = 'var(--accent)';
 
@@ -60,7 +62,11 @@ const FocusToday: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { projects } = useFlowStore();
-  const { data: myTasks } = useMyIssues();
+  const myIssuesQuery = useMyIssues();
+  const { data: myTasks, isLoading } = myIssuesQuery;
+  // A failed load must not render as "nothing due today": that tells the user
+  // their day is clear when we simply could not read it.
+  const loadFailed = hasQueryFailed(myIssuesQuery);
   const tasks: Task[] = (myTasks ?? []).map(apiTaskToTask);
 
   const focusTasks = useMemo(() => {
@@ -138,7 +144,9 @@ const FocusToday: React.FC = () => {
       </motion.div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {focusTasks.length === 0 ? (
+        {loadFailed ? (
+          <ListLoadFailed onRetry={() => void myIssuesQuery.refetch()} />
+        ) : isLoading ? null : focusTasks.length === 0 ? (
           // G-E1: sized to its content on the page background. It used to sit
           // in a bordered card stretched to the full viewport height, with
           // roughly 250px of blank card above the illustration and 400px
