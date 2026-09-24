@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
@@ -113,6 +115,9 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 	if req.CustomerEmail == "" && req.CustomerName == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Customer info is required")
 	}
+	if status := strings.TrimSpace(req.Status); status != "" && !strings.EqualFold(status, "pending") {
+		return onekiterrors.New(http.StatusBadRequest, "New orders must start with status pending")
+	}
 	if req.Subtotal < 0 || req.Tax < 0 || req.ShippingCost < 0 || req.Total < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Monetary amounts cannot be negative")
 	}
@@ -162,16 +167,12 @@ type (
 	UpdateHandler struct{ Service *application.Service }
 	UpdateRequest struct {
 		ID              int64   `json:"id"`
-		CustomerEmail   string  `json:"customer_email"`
-		CustomerName    string  `json:"customer_name"`
-		CustomerPhone   string  `json:"customer_phone"`
-		Status          string  `json:"status"`
-		Subtotal        float64 `json:"subtotal"`
-		Tax             float64 `json:"tax"`
-		ShippingCost    float64 `json:"shipping_cost"`
-		Total           float64 `json:"total"`
-		ShippingAddress string  `json:"shipping_address"`
-		Notes           string  `json:"notes"`
+		CustomerEmail   *string `json:"customer_email,omitempty"`
+		CustomerName    *string `json:"customer_name,omitempty"`
+		CustomerPhone   *string `json:"customer_phone,omitempty"`
+		Status          *string `json:"status,omitempty"`
+		ShippingAddress *string `json:"shipping_address,omitempty"`
+		Notes           *string `json:"notes,omitempty"`
 	}
 )
 
@@ -182,9 +183,6 @@ type UpdateResponse struct {
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 	if req.ID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "ID is required")
-	}
-	if req.Subtotal < 0 || req.Tax < 0 || req.ShippingCost < 0 || req.Total < 0 {
-		return onekiterrors.New(http.StatusBadRequest, "Monetary amounts cannot be negative")
 	}
 	return nil
 }
@@ -201,21 +199,42 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if bizErr != nil {
 		return UpdateResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := h.Service.Update(ctx, businessID, req.ID, domain.StoreOrderInput{
-		CustomerEmail:   req.CustomerEmail,
-		CustomerName:    req.CustomerName,
-		CustomerPhone:   req.CustomerPhone,
-		Status:          req.Status,
-		Subtotal:        req.Subtotal,
-		Tax:             req.Tax,
-		ShippingCost:    req.ShippingCost,
-		Total:           req.Total,
-		ShippingAddress: req.ShippingAddress,
-		Notes:           req.Notes,
-	}); err != nil {
-		if errors.Is(err, domain.ErrInvalidAmount) {
-			return UpdateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+	detail, err := h.Service.GetDetail(ctx, businessID, req.ID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
+		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get order for update")
+	}
+	current := detail.Order
+	input := domain.StoreOrderInput{
+		CustomerEmail:   current.CustomerEmail,
+		CustomerName:    current.CustomerName,
+		CustomerPhone:   current.CustomerPhone,
+		Status:          current.Status,
+		ShippingAddress: current.ShippingAddress,
+		Notes:           current.Notes,
+	}
+	if req.CustomerEmail != nil {
+		input.CustomerEmail = *req.CustomerEmail
+	}
+	if req.CustomerName != nil {
+		input.CustomerName = *req.CustomerName
+	}
+	if req.CustomerPhone != nil {
+		input.CustomerPhone = *req.CustomerPhone
+	}
+	if req.Status != nil {
+		input.Status = *req.Status
+	}
+	if req.ShippingAddress != nil {
+		input.ShippingAddress = *req.ShippingAddress
+	}
+	if req.Notes != nil {
+		input.Notes = *req.Notes
+	}
+
+	if err := h.Service.Update(ctx, businessID, req.ID, input); err != nil {
 		if errors.Is(err, domain.ErrInvalidStatus) {
 			return UpdateResponse{}, onekiterrors.New(http.StatusConflict, "Order status transition is not allowed")
 		}

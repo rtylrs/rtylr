@@ -430,6 +430,41 @@ func TestTaskRole_MemberAllowedOnWriteTierMutations(t *testing.T) {
 	}
 }
 
+// v1 predates the business-wide label pool and its insert used to rely on
+// flow_labels.business_id's default of zero. The row was therefore invisible to
+// v2 and could collide in the recurring dedupe migration with labels belonging
+// to unrelated businesses. Exercise the registered v1 handler, then read via
+// the current v2 service so the regression covers the full API-to-SQL scope.
+func TestV1CreateLabelPersistsBusinessScope(t *testing.T) {
+	f := newRoleFixture(t)
+	created, err := f.labelAPI.CreateLabel(ctxAs(roleOwnerID), &flowlabelv1.CreateLabelRequest{
+		WorkspaceId: testutil.Int64Ptr(f.wsID),
+		Name:        "Business-scoped regression label",
+		Color:       "#123456",
+	})
+	if err != nil {
+		t.Fatalf("v1 CreateLabel: %v", err)
+	}
+	if created.GetLabel() == nil || created.GetLabel().GetId() <= 0 {
+		t.Fatalf("v1 CreateLabel returned no stored label: %+v", created)
+	}
+	labelID := created.GetLabel().GetId()
+	t.Cleanup(func() {
+		_ = f.repo.DeleteLabel(context.Background(), labelID, roleOwnerID, testutil.BusinessID)
+	})
+
+	labels, _, err := f.service.ListLabelsV2(context.Background(), testutil.BusinessID, 10_000, 0)
+	if err != nil {
+		t.Fatalf("v2 ListLabels: %v", err)
+	}
+	for _, label := range labels {
+		if label.ID == labelID {
+			return
+		}
+	}
+	t.Fatalf("v1 label %d is absent from the business-scoped v2 list", labelID)
+}
+
 // SetTaskLabels lives in LabelAPI but mutates a task. Its SQL guard admits any
 // flow_workspace_members row regardless of role, so the exploitable case is a
 // workspace viewer — a project viewer is already turned away for lack of a

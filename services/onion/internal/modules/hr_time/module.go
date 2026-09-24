@@ -41,14 +41,36 @@ func (a *hrCoreApprovalAdapter) GetApprovalChain(ctx context.Context, businessID
 	}, nil
 }
 
+func (a *hrCoreApprovalAdapter) GetEmployeeIDByUserID(ctx context.Context, businessID, userID int64) (int64, error) {
+	return a.core.GetEmployeeIDByUserID(ctx, businessID, userID)
+}
+
+func (a *hrCoreApprovalAdapter) GetEmployeeBusinessID(ctx context.Context, businessID, employeeID int64) (int64, error) {
+	return a.core.GetEmployeeBusinessID(ctx, businessID, employeeID)
+}
+
+func (a *hrCoreApprovalAdapter) HasPermission(ctx context.Context, businessID, employeeID int64, permissionKey string) (bool, error) {
+	return a.core.HasPermission(ctx, businessID, employeeID, permissionKey)
+}
+
+func (a *hrCoreApprovalAdapter) HasRole(ctx context.Context, businessID, employeeID, roleID int64) (bool, error) {
+	return a.core.HasRole(ctx, businessID, employeeID, roleID)
+}
+
 type Module struct {
 	service *application.Service
 }
 
 func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Module {
-	approvalAdapter := &hrCoreApprovalAdapter{core: hrCoreModule}
+	var approvalProvider domain.ApprovalChainProvider
+	var permissions domain.PermissionProvider
+	if hrCoreModule != nil {
+		adapter := &hrCoreApprovalAdapter{core: hrCoreModule}
+		approvalProvider = adapter
+		permissions = adapter
+	}
 	return &Module{
-		service: application.NewService(ctx, db, approvalAdapter),
+		service: application.NewService(ctx, db, approvalProvider, permissions),
 	}
 }
 

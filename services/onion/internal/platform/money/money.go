@@ -49,19 +49,30 @@ func FromString(value string) (Amount, error) {
 	}
 
 	whole, fraction := s, ""
+	hasDecimal := false
 	if dot := strings.IndexByte(s, '.'); dot >= 0 {
+		hasDecimal = true
 		whole, fraction = s[:dot], s[dot+1:]
 		if strings.Contains(fraction, ".") || len(fraction) > 2 {
+			return 0, ErrInvalidAmount
+		}
+		if fraction == "" {
 			return 0, ErrInvalidAmount
 		}
 	}
 	if whole == "" {
 		whole = "0"
 	}
-	if fraction == "" {
+	if !isDecimalDigits(whole) {
+		return 0, ErrInvalidAmount
+	}
+	if !hasDecimal {
 		fraction = "00"
 	} else if len(fraction) == 1 {
 		fraction += "0"
+	}
+	if !isDecimalDigits(fraction) {
+		return 0, ErrInvalidAmount
 	}
 	wholeValue, err := strconv.ParseInt(whole, 10, 64)
 	if err != nil || wholeValue < 0 {
@@ -84,6 +95,18 @@ func FromString(value string) (Amount, error) {
 		return Amount(-cents), nil
 	}
 	return Amount(cents), nil
+}
+
+func isDecimalDigits(value string) bool {
+	if value == "" {
+		return false
+	}
+	for i := 0; i < len(value); i++ {
+		if value[i] < '0' || value[i] > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func FromFloat64(value float64) (Amount, error) {

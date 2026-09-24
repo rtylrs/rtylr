@@ -478,6 +478,9 @@ func readSafetensors(path string) (map[string]Tensor, map[string]string, error) 
 				return nil, nil, fmt.Errorf("s1: invalid shape for %q", name)
 			}
 			shape[i] = di
+			if di != 0 && n > math.MaxInt/di {
+				return nil, nil, fmt.Errorf("s1: invalid shape for %q", name)
+			}
 			n *= di
 		}
 		offsRaw, ok := entry["data_offsets"].([]any)
@@ -495,6 +498,9 @@ func readSafetensors(path string) (map[string]Tensor, map[string]string, error) 
 		}
 		ei, err := strictAtoi(end.String())
 		if err != nil || si < 0 || ei < si || ei > len(data) {
+			return nil, nil, fmt.Errorf("s1: data offsets out of range for %q", name)
+		}
+		if n > len(data)/4 {
 			return nil, nil, fmt.Errorf("s1: data offsets out of range for %q", name)
 		}
 		if ei-si != n*4 {

@@ -15,6 +15,9 @@ type mockRepo struct {
 	reportErr    error
 	lowStockErr  error
 	valuationErr error
+	reportBounds struct {
+		limit, offset int
+	}
 }
 
 func (m *mockRepo) AdjustInventory(_ context.Context, _, _ int64, _ float64, _ domain.InventoryTransactionType, _ string) error {
@@ -31,6 +34,44 @@ func (m *mockRepo) GetLowStockProducts(_ context.Context, _ int64) ([]domain.Inv
 
 func (m *mockRepo) GetValuation(_ context.Context, _ int64) ([]domain.ValuationItem, error) {
 	return m.valuations, m.valuationErr
+}
+
+func (m *mockRepo) GetInventoryReportPage(_ context.Context, _ int64, limit, offset int) (domain.InventoryReportPage, error) {
+	m.reportBounds.limit = limit
+	m.reportBounds.offset = offset
+	return domain.InventoryReportPage{
+		Items:      m.reportItems,
+		Total:      int64(len(m.reportItems)),
+		TotalValue: domain.TotalStockValue(m.reportItems),
+		HasMore:    int64(len(m.reportItems))+int64(offset) > int64(limit),
+		Limit:      int64(limit),
+		Offset:     int64(offset),
+	}, m.reportErr
+}
+
+func (m *mockRepo) GetLowStockProductsPage(_ context.Context, _ int64, limit, offset int) (domain.LowStockPage, error) {
+	return domain.LowStockPage{
+		Items:   m.reportItems,
+		Total:   int64(len(m.reportItems)),
+		HasMore: int64(len(m.reportItems))+int64(offset) > int64(limit),
+		Limit:   int64(limit),
+		Offset:  int64(offset),
+	}, m.lowStockErr
+}
+
+func (m *mockRepo) GetValuationPage(_ context.Context, _ int64, limit, offset int) (domain.ValuationPage, error) {
+	totalValue := 0.0
+	for _, valuation := range m.valuations {
+		totalValue += valuation.TotalValue
+	}
+	return domain.ValuationPage{
+		Items:      m.valuations,
+		Total:      int64(len(m.valuations)),
+		TotalValue: totalValue,
+		HasMore:    int64(len(m.valuations))+int64(offset) > int64(limit),
+		Limit:      int64(limit),
+		Offset:     int64(offset),
+	}, m.valuationErr
 }
 
 func TestAdjustInventory_HappyPath(t *testing.T) {
@@ -61,6 +102,22 @@ func TestAdjustInventory_LowStockCheckDoesNotBlockSuccess(t *testing.T) {
 	err := s.AdjustInventory(context.Background(), 1, domain.InventoryAdjustInput{ProductID: 1, Change: -1})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestGetInventoryReportPage_HonorsOffsetAndReturnsMetadata(t *testing.T) {
+	repo := &mockRepo{reportItems: []domain.InventoryReportItem{{ProductID: 101}}}
+	s := &Service{repo: repo}
+
+	page, err := s.GetInventoryReportPage(context.Background(), 7, 25, 10_100)
+	if err != nil {
+		t.Fatalf("GetInventoryReportPage: %v", err)
+	}
+	if repo.reportBounds.limit != 25 || repo.reportBounds.offset != 10_100 {
+		t.Fatalf("repository bounds = %+v", repo.reportBounds)
+	}
+	if page.Limit != 25 || page.Offset != 10_100 || page.Total != 1 || page.HasMore {
+		t.Fatalf("page metadata = %+v", page)
 	}
 }
 

@@ -15,7 +15,7 @@ var (
 // IsValidPayrollStatus returns true when the status is recognised.
 func IsValidPayrollStatus(status string) bool {
 	switch status {
-	case PayrollStatusDraft, PayrollStatusPendingApproval, PayrollStatusApproved, PayrollStatusExported:
+	case PayrollStatusDraft, PayrollStatusInReview, PayrollStatusApproved, PayrollStatusExported:
 		return true
 	}
 	return false

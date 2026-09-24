@@ -168,7 +168,7 @@ SELECT id, owner_id, business_id, task_id, user_id, duration_minutes, descriptio
 FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC, id DESC LIMIT 500;
 
 -- name: CreateLabel :execresult
-INSERT INTO flow_labels (workspace_id, name, color) VALUES (?, ?, ?);
+INSERT INTO flow_labels (workspace_id, business_id, name, color) VALUES (?, ?, ?, ?);
 
 -- name: CountLabelsByWorkspace :one
 SELECT COUNT(*) FROM flow_labels WHERE workspace_id = ?;

@@ -26,35 +26,77 @@ func invalidateHRTimeScope(ctx context.Context, businessID int64) {
 type Service struct {
 	repo             *infrastructure.Repository
 	approvalProvider domain.ApprovalChainProvider
+	permissions      domain.PermissionProvider
 }
 
-func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, permissions domain.PermissionProvider) *Service {
 	return &Service{
 		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
+		permissions:      permissions,
 	}
+}
+
+func (s *Service) callerEmployeeID(ctx context.Context, businessID, callerUserID int64) (int64, error) {
+	if s.permissions == nil || businessID <= 0 || callerUserID <= 0 {
+		return 0, domain.ErrTimeEntryAccessDenied
+	}
+	employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, businessID, callerUserID)
+	if err != nil || employeeID <= 0 {
+		return 0, domain.ErrTimeEntryAccessDenied
+	}
+	return employeeID, nil
+}
+
+func (s *Service) authorizeTimeEntryTarget(ctx context.Context, businessID, callerUserID, targetEmployeeID int64) error {
+	callerEmployeeID, err := s.callerEmployeeID(ctx, businessID, callerUserID)
+	if err != nil {
+		return err
+	}
+	if targetEmployeeID == callerEmployeeID {
+		return nil
+	}
+
+	allowed, err := s.permissions.HasPermission(ctx, businessID, callerEmployeeID, domain.PermissionManageEmployees)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return domain.ErrTimeEntryAccessDenied
+	}
+	targetBusinessID, err := s.permissions.GetEmployeeBusinessID(ctx, businessID, targetEmployeeID)
+	if err != nil || targetBusinessID != businessID {
+		return domain.ErrTimeEntryAccessDenied
+	}
+	return nil
 }
 
 // --- Time Entries ---
 
-func (s *Service) CreateTimeEntry(ctx context.Context, businessID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
+func (s *Service) CreateTimeEntry(ctx context.Context, businessID, callerUserID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
 	if entry.DurationMinutes <= 0 {
 		return nil, domain.ErrInvalidDuration
+	}
+	if _, err := time.Parse(time.DateOnly, entry.Date); err != nil {
+		return nil, err
+	}
+	if err := s.authorizeTimeEntryTarget(ctx, businessID, callerUserID, entry.EmployeeID); err != nil {
+		return nil, err
 	}
 
 	ts, err := s.repo.GetTimesheetForPeriod(ctx, businessID, entry.EmployeeID, entry.Date[:7]+"-01")
 	if err != nil {
 		return nil, err
 	}
-	if ts != nil && ts.Status == "locked" {
+	if ts != nil && ts.Status == domain.TimesheetStatusLocked {
 		return nil, domain.ErrDateInLockedPeriod
 	}
 
 	if entry.Status == "" {
-		entry.Status = "draft"
+		entry.Status = domain.EntryStatusDraft
 	}
 	if entry.Source == "" {
-		entry.Source = "manual"
+		entry.Source = domain.EntrySourceManual
 	}
 
 	rec, err := s.repo.CreateTimeEntry(ctx, businessID, entry)
@@ -64,20 +106,83 @@ func (s *Service) CreateTimeEntry(ctx context.Context, businessID int64, entry d
 	return rec, err
 }
 
-func (s *Service) UpdateTimeEntry(ctx context.Context, businessID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
-	if entry.DurationMinutes <= 0 {
+func applyTimeEntryPatch(entry *domain.TimeEntryRecord, patch domain.TimeEntryPatch) {
+	if patch.EmployeeID != nil {
+		entry.EmployeeID = *patch.EmployeeID
+	}
+	if patch.ProjectID != nil {
+		entry.ProjectID = *patch.ProjectID
+	}
+	if patch.TaskID != nil {
+		entry.TaskID = *patch.TaskID
+	}
+	if patch.CategoryID != nil {
+		entry.CategoryID = *patch.CategoryID
+	}
+	if patch.Date != nil {
+		entry.Date = *patch.Date
+	}
+	if patch.DurationMinutes != nil {
+		entry.DurationMinutes = *patch.DurationMinutes
+	}
+	if patch.StartTime != nil {
+		entry.StartTime = *patch.StartTime
+	}
+	if patch.EndTime != nil {
+		entry.EndTime = *patch.EndTime
+	}
+	if patch.Description != nil {
+		entry.Description = *patch.Description
+	}
+	if patch.IsBillable != nil {
+		entry.IsBillable = *patch.IsBillable
+	}
+	if patch.Source != nil {
+		entry.Source = *patch.Source
+	}
+}
+
+func (s *Service) UpdateTimeEntry(ctx context.Context, businessID, callerUserID, entryID int64, patch domain.TimeEntryPatch) (*domain.TimeEntryRecord, error) {
+	if patch.DurationMinutes != nil && *patch.DurationMinutes <= 0 {
 		return nil, domain.ErrInvalidDuration
 	}
+	if patch.EmployeeID != nil && *patch.EmployeeID <= 0 {
+		return nil, domain.ErrTimeEntryAccessDenied
+	}
+	if patch.Date != nil {
+		if _, err := time.Parse(time.DateOnly, *patch.Date); err != nil {
+			return nil, err
+		}
+	}
 
-	// A locked timesheet must freeze its entries: check both the period the
-	// entry currently lives in and the one a new date would move it into.
-	existing, err := s.repo.GetTimeEntry(ctx, businessID, entry.ID)
+	existing, err := s.repo.GetTimeEntry(ctx, businessID, entryID)
 	if err != nil {
 		return nil, err
 	}
 	if existing == nil {
 		return nil, domain.ErrTimeEntryNotFound
 	}
+	if err := s.authorizeTimeEntryTarget(ctx, businessID, callerUserID, existing.EmployeeID); err != nil {
+		return nil, err
+	}
+
+	merged := *existing
+	applyTimeEntryPatch(&merged, patch)
+	if merged.DurationMinutes <= 0 {
+		return nil, domain.ErrInvalidDuration
+	}
+	if merged.EmployeeID != existing.EmployeeID {
+		if err := s.authorizeTimeEntryTarget(ctx, businessID, callerUserID, merged.EmployeeID); err != nil {
+			return nil, err
+		}
+	}
+	if merged.EmployeeID <= 0 {
+		return nil, domain.ErrTimeEntryAccessDenied
+	}
+	if _, err := time.Parse(time.DateOnly, merged.Date); err != nil {
+		return nil, err
+	}
+
 	locked, err := s.periodLocked(ctx, businessID, existing.EmployeeID, existing.Date)
 	if err != nil {
 		return nil, err
@@ -85,8 +190,8 @@ func (s *Service) UpdateTimeEntry(ctx context.Context, businessID int64, entry d
 	if locked {
 		return nil, domain.ErrDateInLockedPeriod
 	}
-	if entry.Date != "" && entry.Date != existing.Date {
-		locked, err := s.periodLocked(ctx, businessID, existing.EmployeeID, entry.Date)
+	if merged.EmployeeID != existing.EmployeeID || merged.Date != existing.Date {
+		locked, err := s.periodLocked(ctx, businessID, merged.EmployeeID, merged.Date)
 		if err != nil {
 			return nil, err
 		}
@@ -95,20 +200,23 @@ func (s *Service) UpdateTimeEntry(ctx context.Context, businessID int64, entry d
 		}
 	}
 
-	rec, err := s.repo.UpdateTimeEntry(ctx, businessID, entry)
+	rec, err := s.repo.UpdateTimeEntry(ctx, businessID, merged)
 	if err == nil {
 		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) DeleteTimeEntry(ctx context.Context, businessID, entryID int64) error {
+func (s *Service) DeleteTimeEntry(ctx context.Context, businessID, callerUserID, entryID int64) error {
 	existing, err := s.repo.GetTimeEntry(ctx, businessID, entryID)
 	if err != nil {
 		return err
 	}
 	if existing == nil {
 		return domain.ErrTimeEntryNotFound
+	}
+	if err := s.authorizeTimeEntryTarget(ctx, businessID, callerUserID, existing.EmployeeID); err != nil {
+		return err
 	}
 	locked, err := s.periodLocked(ctx, businessID, existing.EmployeeID, existing.Date)
 	if err != nil {
@@ -221,12 +329,19 @@ func (s *Service) GetOrCreateTimesheet(ctx context.Context, businessID, employee
 		EmployeeID:  employeeID,
 		PeriodStart: periodStart,
 		PeriodEnd:   periodEnd,
-		Status:      "draft",
+		Status:      domain.TimesheetStatusDraft,
 	})
 	if err == nil {
 		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
+}
+
+func (s *Service) GetOrCreateTimesheetForCaller(ctx context.Context, businessID, callerUserID, employeeID int64, periodStart, periodEnd string) (*domain.TimesheetRecord, error) {
+	if err := s.authorizeTimeEntryTarget(ctx, businessID, callerUserID, employeeID); err != nil {
+		return nil, domain.ErrTimesheetAccessDenied
+	}
+	return s.GetOrCreateTimesheet(ctx, businessID, employeeID, periodStart, periodEnd)
 }
 
 func (s *Service) GetTimesheetForPeriod(ctx context.Context, businessID, employeeID int64, periodStart string) (*domain.TimesheetRecord, error) {
@@ -248,6 +363,44 @@ func (s *Service) GetTimesheet(ctx context.Context, businessID, timesheetID int6
 		},
 		cacher.WithExpiry(ctx, hrTimeTTL),
 	)
+}
+
+func (s *Service) callerTimesheetEmployeeID(ctx context.Context, businessID, callerUserID int64) (int64, error) {
+	employeeID, err := s.callerEmployeeID(ctx, businessID, callerUserID)
+	if err != nil {
+		return 0, domain.ErrTimesheetAccessDenied
+	}
+	return employeeID, nil
+}
+
+func (s *Service) canViewAllTimesheets(ctx context.Context, businessID, employeeID int64) (bool, error) {
+	allowed, err := s.permissions.HasPermission(ctx, businessID, employeeID, domain.PermissionApproveTimeOff)
+	if err != nil || allowed {
+		return allowed, err
+	}
+	return s.permissions.HasPermission(ctx, businessID, employeeID, domain.PermissionManageEmployees)
+}
+
+func (s *Service) GetTimesheetForCaller(ctx context.Context, businessID, callerUserID, timesheetID int64) (*domain.TimesheetRecord, error) {
+	ts, err := s.GetTimesheet(ctx, businessID, timesheetID)
+	if err != nil {
+		return nil, err
+	}
+	employeeID, err := s.callerTimesheetEmployeeID(ctx, businessID, callerUserID)
+	if err != nil {
+		return nil, err
+	}
+	if ts.EmployeeID == employeeID {
+		return ts, nil
+	}
+	allowed, err := s.canViewAllTimesheets(ctx, businessID, employeeID)
+	if err != nil {
+		return nil, err
+	}
+	if !allowed {
+		return nil, domain.ErrTimesheetAccessDenied
+	}
+	return ts, nil
 }
 
 func (s *Service) ListTimesheets(ctx context.Context, businessID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
@@ -272,12 +425,27 @@ func (s *Service) ListTimesheets(ctx context.Context, businessID int64, params d
 	return res.Items, res.Total, err
 }
 
+func (s *Service) ListTimesheetsForCaller(ctx context.Context, businessID, callerUserID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
+	employeeID, err := s.callerTimesheetEmployeeID(ctx, businessID, callerUserID)
+	if err != nil {
+		return nil, 0, err
+	}
+	allowed, err := s.canViewAllTimesheets(ctx, businessID, employeeID)
+	if err != nil {
+		return nil, 0, err
+	}
+	if !allowed {
+		params.EmployeeID = &employeeID
+	}
+	return s.ListTimesheets(ctx, businessID, params)
+}
+
 func (s *Service) SubmitTimesheet(ctx context.Context, businessID, timesheetID int64) (*domain.TimesheetRecord, error) {
 	ts, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
 	if err != nil {
 		return nil, err
 	}
-	if ts.Status != "draft" && ts.Status != "rejected" {
+	if ts.Status != domain.TimesheetStatusDraft && ts.Status != domain.TimesheetStatusRejected {
 		return nil, domain.ErrTimesheetAlreadySubmitted
 	}
 
@@ -288,47 +456,120 @@ func (s *Service) SubmitTimesheet(ctx context.Context, businessID, timesheetID i
 	return rec, err
 }
 
-func (s *Service) ApproveTimesheet(ctx context.Context, businessID, timesheetID, approverID int64) (*domain.TimesheetRecord, error) {
+func (s *Service) resolveTimesheetApprover(ctx context.Context, businessID, approverUserID int64) (int64, error) {
+	employeeID, err := s.callerTimesheetEmployeeID(ctx, businessID, approverUserID)
+	if err != nil {
+		return 0, err
+	}
+	allowed, err := s.permissions.HasPermission(ctx, businessID, employeeID, domain.PermissionApproveTimeOff)
+	if err != nil {
+		return 0, err
+	}
+	if !allowed {
+		return 0, domain.ErrTimesheetApproverNotAllowed
+	}
+	return employeeID, nil
+}
+
+func (s *Service) authorizeTimesheetDecision(ctx context.Context, businessID int64, ts *domain.TimesheetRecord, approverEmployeeID int64) (*domain.ApprovalChainInfo, error) {
+	if ts.EmployeeID == approverEmployeeID {
+		return nil, domain.ErrTimesheetSelfApproval
+	}
+	if s.approvalProvider == nil {
+		return nil, domain.ErrApprovalChainNotConfigured
+	}
+	chain, err := s.approvalProvider.GetApprovalChain(ctx, businessID, "timesheet")
+	if err != nil {
+		return nil, err
+	}
+	if chain == nil || chain.TotalLevels <= 0 || len(chain.Levels) == 0 || int(chain.TotalLevels) != len(chain.Levels) {
+		return nil, domain.ErrApprovalChainNotConfigured
+	}
+	if ts.CurrentApprovalLevel < 1 || ts.CurrentApprovalLevel > chain.TotalLevels {
+		return nil, domain.ErrTimesheetApproverNotAllowed
+	}
+
+	levelIndex := -1
+	for index, level := range chain.Levels {
+		if level.LevelOrder == ts.CurrentApprovalLevel {
+			levelIndex = index
+			break
+		}
+	}
+	if levelIndex < 0 {
+		levelIndex = int(ts.CurrentApprovalLevel - 1)
+	}
+	if levelIndex < 0 || levelIndex >= len(chain.Levels) {
+		return nil, domain.ErrTimesheetApproverNotAllowed
+	}
+
+	level := chain.Levels[levelIndex]
+	if level.ApproverEmployeeID > 0 {
+		if level.ApproverEmployeeID != approverEmployeeID {
+			return nil, domain.ErrTimesheetApproverNotAllowed
+		}
+		return chain, nil
+	}
+	if level.ApproverRoleID <= 0 {
+		return nil, domain.ErrTimesheetApproverNotAllowed
+	}
+	allowed, err := s.permissions.HasRole(ctx, businessID, approverEmployeeID, level.ApproverRoleID)
+	if err != nil {
+		return nil, err
+	}
+	if !allowed {
+		return nil, domain.ErrTimesheetApproverNotAllowed
+	}
+	return chain, nil
+}
+
+func (s *Service) ApproveTimesheet(ctx context.Context, businessID, timesheetID, approverUserID int64) (*domain.TimesheetRecord, error) {
+	approverEmployeeID, err := s.resolveTimesheetApprover(ctx, businessID, approverUserID)
+	if err != nil {
+		return nil, err
+	}
 	ts, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
 	if err != nil {
 		return nil, err
 	}
-	// Only a submitted timesheet has an approval to record. Without this a
-	// draft (level 0) or a rejected/locked row could be advanced and then
-	// locked as if a submission had been approved (B08-R02).
 	if ts.Status != domain.TimesheetStatusSubmitted {
 		return nil, domain.ErrTimesheetNotPending
 	}
-
-	chain, chainErr := s.approvalProvider.GetApprovalChain(ctx, businessID, "timesheet")
-	if chainErr != nil {
-		return nil, chainErr
-	}
-	if chain == nil {
-		return nil, domain.ErrApprovalChainNotConfigured
+	chain, err := s.authorizeTimesheetDecision(ctx, businessID, ts, approverEmployeeID)
+	if err != nil {
+		return nil, err
 	}
 
 	if ts.CurrentApprovalLevel >= chain.TotalLevels {
-		// The lock and its final_approved action commit together: a logged-only
-		// action failure used to leave a locked timesheet whose approval
-		// history was permanently missing the final entry.
-		rec, err := s.repo.LockTimesheetWithApprovalAction(ctx, businessID, timesheetID, approverID, ts.CurrentApprovalLevel)
+		rec, err := s.repo.LockTimesheetWithApprovalAction(ctx, businessID, timesheetID, approverUserID, ts.CurrentApprovalLevel)
 		if err == nil {
 			invalidateHRTimeScope(ctx, businessID)
 		}
 		return rec, err
 	}
 
-	// The level read above travels with the write so a retried or overlapping
-	// approval cannot increment twice and skip a level of the chain (B44-R02).
-	rec, err := s.repo.AdvanceApprovalLevel(ctx, businessID, timesheetID, ts.CurrentApprovalLevel, approverID)
+	rec, err := s.repo.AdvanceApprovalLevel(ctx, businessID, timesheetID, ts.CurrentApprovalLevel, approverUserID)
 	if err == nil {
 		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) RejectTimesheet(ctx context.Context, businessID, timesheetID int64, reason string) (*domain.TimesheetRecord, error) {
+func (s *Service) RejectTimesheet(ctx context.Context, businessID, timesheetID, approverUserID int64, reason string) (*domain.TimesheetRecord, error) {
+	approverEmployeeID, err := s.resolveTimesheetApprover(ctx, businessID, approverUserID)
+	if err != nil {
+		return nil, err
+	}
+	ts, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
+	if err != nil {
+		return nil, err
+	}
+	if ts.Status != domain.TimesheetStatusSubmitted {
+		return nil, domain.ErrTimesheetNotPending
+	}
+	if _, err := s.authorizeTimesheetDecision(ctx, businessID, ts, approverEmployeeID); err != nil {
+		return nil, err
+	}
 	rec, err := s.repo.RejectTimesheet(ctx, businessID, timesheetID, reason)
 	if err == nil {
 		invalidateHRTimeScope(ctx, businessID)
@@ -415,6 +656,7 @@ func (s *Service) MarkEntriesInvoiced(ctx context.Context, businessID, invoiceID
 	if err != nil {
 		return result, err
 	}
+	invalidateHRTimeScope(ctx, businessID)
 	result.MarkedCount = int32(marked)                       // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	result.SkippedCount = int32(len(entryIDs) - int(marked)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	return result, nil

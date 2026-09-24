@@ -252,6 +252,7 @@ func (r *Repository) CreateLabel(ctx context.Context, input domain.LabelInput) (
 
 	res, err := r.queries.CreateLabel(ctx, sqlc.CreateLabelParams{
 		WorkspaceID: input.WorkspaceID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Color:       color,
 	})

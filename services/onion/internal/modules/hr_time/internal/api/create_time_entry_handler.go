@@ -92,8 +92,11 @@ type CreateTimeEntryResponse struct {
 }
 
 func (h *CreateTimeEntryHandler) Validate(_ context.Context, req *CreateTimeEntryRequest) error {
-	if req.EmployeeID == 0 {
-		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
+	if req.EmployeeID <= 0 {
+		return onekiterrors.New(http.StatusBadRequest, "employee_id must be greater than 0")
 	}
 	if req.DurationMinutes <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "duration_minutes must be greater than 0")
@@ -108,6 +111,9 @@ func (h *CreateTimeEntryHandler) Validate(_ context.Context, req *CreateTimeEntr
 }
 
 func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntryRequest) (CreateTimeEntryResponse, error) {
+	if req == nil {
+		return CreateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return CreateTimeEntryResponse{}, onekiterrors.PermissionDenied()
@@ -116,6 +122,9 @@ func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntry
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return CreateTimeEntryResponse{}, onekiterrors.PermissionDenied()
+	}
+	if req.EmployeeID <= 0 {
+		return CreateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "employee_id must be greater than 0")
 	}
 
 	entry := domain.TimeEntryRecord{
@@ -132,8 +141,11 @@ func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntry
 		Source:          req.Source,
 	}
 
-	created, err := h.Service.CreateTimeEntry(ctx, businessID, entry)
+	created, err := h.Service.CreateTimeEntry(ctx, businessID, device.User.UserID, entry)
 	if err != nil {
+		if errors.Is(err, domain.ErrTimeEntryAccessDenied) {
+			return CreateTimeEntryResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrInvalidDuration) {
 			return CreateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "Duration must be greater than 0")
 		}

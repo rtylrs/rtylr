@@ -2,6 +2,7 @@ package invalidate
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
@@ -27,13 +28,21 @@ func RegisterDefaultGroups() {
 }
 
 func patternGroup(t keys.InvalidationType) invalidation.InvalidateFunc {
-	return func(ctx context.Context, ids []string, _ ...cacher.ClientOption) {
-		if len(ids) == 0 && t == keys.InvalidateAll {
-			Invalidate(ctx, t, "")
-			return
+	return func(ctx context.Context, ids []string, _ ...cacher.ClientOption) error {
+		if len(ids) == 0 {
+			if t == keys.InvalidateAll {
+				Invalidate(ctx, t, "")
+				return nil
+			}
+			return fmt.Errorf("ids are required for %s cache invalidation", t)
 		}
+
 		for _, id := range ids {
-			Invalidate(ctx, t, id)
+			result := Invalidate(ctx, t, id)
+			if len(result.Patterns) == 0 {
+				return fmt.Errorf("id %q is invalid for %s cache invalidation", id, t)
+			}
 		}
+		return nil
 	}
 }

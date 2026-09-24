@@ -50,6 +50,32 @@ type InventoryReportItem struct {
 	IsLowStock        bool    `json:"is_low_stock"`
 }
 
+type InventoryReportPage struct {
+	Items      []InventoryReportItem `json:"items"`
+	Total      int64                 `json:"total"`
+	TotalValue float64               `json:"total_value"`
+	HasMore    bool                  `json:"has_more"`
+	Limit      int64                 `json:"limit"`
+	Offset     int64                 `json:"offset"`
+}
+
+type LowStockPage struct {
+	Items   []InventoryReportItem `json:"items"`
+	Total   int64                 `json:"total"`
+	HasMore bool                  `json:"has_more"`
+	Limit   int64                 `json:"limit"`
+	Offset  int64                 `json:"offset"`
+}
+
+type ValuationPage struct {
+	Items      []ValuationItem `json:"items"`
+	Total      int64           `json:"total"`
+	TotalValue float64         `json:"total_value"`
+	HasMore    bool            `json:"has_more"`
+	Limit      int64           `json:"limit"`
+	Offset     int64           `json:"offset"`
+}
+
 // CentsToFloat converts integer cents to standard float amount.
 func CentsToFloat(cents int64) float64 {
 	return float64(cents) / 100.0

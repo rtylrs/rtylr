@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -11,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/campaigns/internal/api"
 	"github.com/voxire/onion/internal/modules/campaigns/internal/application"
 	internaldomain "github.com/voxire/onion/internal/modules/campaigns/internal/domain"
+	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
 
 var ErrNotFound = errors.New("campaign not found")
@@ -51,6 +54,15 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := crmcampaignv1.RegisterCampaignServiceServer(
+		api.NewCampaignAPI(m.service),
+		crmcampaignv1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register crm campaign service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

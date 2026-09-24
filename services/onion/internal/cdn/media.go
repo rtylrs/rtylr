@@ -89,20 +89,52 @@ func mimeForFormat(format string) string {
 }
 
 // negotiateFormat picks an output format from a request Accept header,
-// preferring the most modern codec the client advertises (AVIF, then WebP).
-// It returns "" when the header offers nothing better, leaving the caller's
-// default in place. An explicit ?format= query param should take precedence
-// over this.
+// preferring the most modern acceptable codec. It returns "" when neither
+// codec has a positive quality value, leaving the caller's default in place.
+// An explicit ?format= query param should take precedence over this.
 func negotiateFormat(accept string) string {
-	a := strings.ToLower(accept)
-	switch {
-	case strings.Contains(a, "image/avif"):
-		return "avif"
-	case strings.Contains(a, "image/webp"):
-		return "webp"
-	default:
+	avifQuality, webpQuality := -1.0, -1.0
+	for _, part := range strings.Split(accept, ",") {
+		mediaType, params, _ := strings.Cut(part, ";")
+		mediaType = strings.ToLower(strings.TrimSpace(mediaType))
+		if mediaType != "image/avif" && mediaType != "image/webp" {
+			continue
+		}
+		quality, ok := acceptQuality(params)
+		if !ok {
+			continue
+		}
+		if mediaType == "image/avif" && quality > avifQuality {
+			avifQuality = quality
+		}
+		if mediaType == "image/webp" && quality > webpQuality {
+			webpQuality = quality
+		}
+	}
+	if avifQuality <= 0 && webpQuality <= 0 {
 		return ""
 	}
+	if avifQuality > 0 && avifQuality >= webpQuality {
+		return "avif"
+	}
+	return "webp"
+}
+
+func acceptQuality(params string) (float64, bool) {
+	quality := 1.0
+	for _, param := range strings.Split(params, ";") {
+		key, value, ok := strings.Cut(param, "=")
+		if !ok || !strings.EqualFold(strings.TrimSpace(key), "q") {
+			continue
+		}
+		parsed, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+		if err != nil || parsed < 0 || parsed > 1 {
+			return 0, false
+		}
+		quality = parsed
+		break
+	}
+	return quality, true
 }
 
 // mimeTypeToFormat maps an upload MIME type to the short format name used when
@@ -295,10 +327,14 @@ func (p *Params) Validate() error {
 }
 
 func validateTransformationChain(chain string) error {
-	maxWidth, maxHeight := 0, 0
-	borderTotal := 0
-	zScale := 1.0
+	// Track an upper bound for the current canvas instead of only the largest
+	// dimensions seen anywhere in the chain. A zero bound means that the
+	// source dimension is still unknown; when a growth operation needs a
+	// conservative bound, use maxTransformDimension for it.
+	width, height := 0.0, 0.0
 	for _, step := range strings.Split(chain, "/") {
+		stepWidth, stepHeight, border := 0, 0, 0
+		stepScale := 1.0
 		for _, token := range strings.Split(step, ",") {
 			parts := strings.SplitN(token, "_", 2)
 			if len(parts) != 2 {
@@ -311,20 +347,17 @@ func validateTransformationChain(chain string) error {
 				if err != nil || n < 0 || n > maxTransformDimension {
 					return fmt.Errorf("chain %s must be between 0 and %d", key, maxTransformDimension)
 				}
-				if key == "w" && n > maxWidth {
-					maxWidth = n
-				}
-				if key == "h" && n > maxHeight {
-					maxHeight = n
+				if key == "w" {
+					stepWidth = n
+				} else {
+					stepHeight = n
 				}
 			case "z":
 				n, err := strconv.ParseFloat(value, 64)
 				if err != nil || n <= 0 || n > maxTransformScale {
 					return fmt.Errorf("chain scale must be greater than 0 and at most %.0fx", maxTransformScale)
 				}
-				if n > zScale {
-					zScale = n
-				}
+				stepScale = n
 			case "bo":
 				// Border/pad widens the canvas by 2n per axis; without a cap
 				// a single bo_40000 token turns any image into a ~gigapixel
@@ -334,7 +367,7 @@ func validateTransformationChain(chain string) error {
 				if err != nil || n <= 0 || n > maxTransformBorder {
 					return fmt.Errorf("chain border must be between 1 and %d", maxTransformBorder)
 				}
-				borderTotal += n
+				border += n
 			case "e":
 				effectParts := strings.SplitN(value, ":", 2)
 				if len(effectParts) != 2 {
@@ -361,20 +394,60 @@ func validateTransformationChain(chain string) error {
 				}
 			}
 		}
-	}
-	// Account for border growth and scale amplification so the declared
-	// w/h alone can't hide a much larger effective canvas.
-	if maxWidth > 0 && maxHeight > 0 {
-		effW := maxWidth + 2*borderTotal
-		effH := maxHeight + 2*borderTotal
-		area := float64(int64(effW)*int64(effH)) * zScale * zScale
-		if area > float64(maxPixelArea) {
-			return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
+
+		// The engine applies z before geometry and border operations. Keep the
+		// scale factor cumulative across steps so z_4/z_4 cannot evade the
+		// area budget merely because each individual factor is in range.
+		if stepScale != 1 {
+			width = chainDimensionBound(width, stepScale)
+			height = chainDimensionBound(height, stepScale)
+			if chainAreaExceeds(width, height) {
+				return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
+			}
 		}
-	} else if borderTotal > 0 && zScale > 1 {
-		return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
+		if stepWidth > 0 || stepHeight > 0 {
+			if stepWidth > 0 {
+				width = float64(stepWidth)
+			} else {
+				// A single-dimension resize derives the other axis from the
+				// source aspect ratio; do not carry a previous exact bound.
+				width = float64(maxTransformDimension)
+			}
+			if stepHeight > 0 {
+				height = float64(stepHeight)
+			} else {
+				height = float64(maxTransformDimension)
+			}
+			if chainAreaExceeds(width, height) {
+				return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
+			}
+		}
+		if border > 0 {
+			width = chainDimensionBound(width, 1) + 2*float64(border)
+			height = chainDimensionBound(height, 1) + 2*float64(border)
+			if chainAreaExceeds(width, height) {
+				return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
+			}
+		}
 	}
 	return nil
+}
+
+func chainDimensionBound(current, scale float64) float64 {
+	if current <= 0 {
+		current = float64(maxTransformDimension)
+	}
+	return current * scale
+}
+
+func chainAreaExceeds(width, height float64) bool {
+	if width <= 0 {
+		width = float64(maxTransformDimension)
+	}
+	if height <= 0 {
+		height = float64(maxTransformDimension)
+	}
+	return width*height > float64(maxPixelArea)
 }
 
 // CacheKey returns a deterministic hash key for this transformation of a file.

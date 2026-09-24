@@ -210,10 +210,34 @@ func erpFeaturePermission(method, path string) (string, bool) {
 	return "", false
 }
 
+func isHRPolicyExemptPath(method, path string) bool {
+	// Attendance clock-in/clock-out and availability are self-scoped by their
+	// handlers. Keep these routes unmapped here rather than requiring a broad
+	// employee/schedule permission before the handler can resolve the caller.
+	if method == http.MethodPost && strings.HasPrefix(path, "/hr/attendance/") &&
+		(strings.HasSuffix(path, "/clock-in") || strings.HasSuffix(path, "/clock-out")) {
+		return true
+	}
+	if path == "/hr/shifts/availability" || strings.HasPrefix(path, "/hr/shifts/availability/") ||
+		path == "/hr/shift/v1/availability" || strings.HasPrefix(path, "/hr/shift/v1/availability/") {
+		return true
+	}
+	return method == http.MethodGet &&
+		(path == "/hr/payroll/my-runs" || strings.HasPrefix(path, "/hr/payroll/my-runs/"))
+}
+
+func isPayrollExecutePath(path string) bool {
+	return strings.HasSuffix(path, "/run") ||
+		strings.HasSuffix(path, "/execute") ||
+		strings.HasSuffix(path, "/runs/trigger")
+}
+
 func hrFeaturePermission(method, path string) (string, bool) {
 	switch {
+	case isHRPolicyExemptPath(method, path):
+		return "", false
 	case strings.Contains(path, "/hr/payroll"):
-		if strings.Contains(path, "/run") || strings.Contains(path, "/execute") {
+		if isPayrollExecutePath(path) {
 			return "hr:payroll:execute", true
 		}
 		if method == http.MethodGet {
@@ -265,6 +289,13 @@ func insightsFeaturePermission(method, path string) (string, bool) {
 }
 
 func posFeaturePermission(method, path string) (string, bool) {
+	// The POS matcher is intentionally anchored to the POS namespace. Broad
+	// substrings such as "/employees" and "/reports" otherwise classify
+	// unmapped HR/Finance routes as POS features and deny legitimate users.
+	if path != "/pos" && !strings.HasPrefix(path, "/pos/") {
+		return "", false
+	}
+
 	switch {
 	case strings.Contains(path, "/void"):
 		if strings.Contains(path, "/approve") {

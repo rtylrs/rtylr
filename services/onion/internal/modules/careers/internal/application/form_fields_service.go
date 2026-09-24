@@ -21,11 +21,32 @@ func (s *Service) ListFormFieldsByCareer(ctx context.Context, careerID int64) ([
 }
 
 func (s *Service) CreateFormField(ctx context.Context, in domain.FormFieldInput) (int64, error) {
+	// A form field is public input for a career, so validate the career inside
+	// the caller's tenant before writing. Without this scoped read, an attacker
+	// can attach a field to another tenant's career and render it on their
+	// public application page.
+	if _, err := s.repo.GetCareerByID(ctx, in.BusinessID, in.CareerID); err != nil {
+		if errors.Is(err, infrastructure.ErrCareerNotFound) {
+			return 0, ErrNotFound
+		}
+		return 0, err
+	}
+
+	// Positions are sparse after deletes, so len(existing) can place a new
+	// field in the middle of the editor. Append after the highest position and
+	// propagate a list failure rather than silently writing an unsafe position.
 	if in.Position == 0 {
 		existing, err := s.repo.ListFormFields(ctx, in.BusinessID, in.CareerID)
-		if err == nil {
-			in.Position = int32(len(existing)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		if err != nil {
+			return 0, err
 		}
+		var next int32
+		for _, field := range existing {
+			if field.Position >= next {
+				next = field.Position + 1
+			}
+		}
+		in.Position = next
 	}
 	return s.repo.CreateFormField(ctx, in)
 }

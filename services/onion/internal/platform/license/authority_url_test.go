@@ -105,3 +105,27 @@ func TestHostedDeploymentNeverCallsAnAuthority(t *testing.T) {
 		t.Errorf("a hosted deployment contacted the authority %d times, want 0", got)
 	}
 }
+
+func TestCachedValidatorPreservesInvalidAuthorityReport(t *testing.T) {
+	var calls atomic.Int32
+	authority := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"valid":false,"status":"expired","reason":"license expired"}`))
+	}))
+	defer authority.Close()
+
+	validator := NewCachedValidator(selfHostConfig(t, authority.URL))
+	first := validator.Refresh(context.Background())
+	if first.Status != StatusExpired || first.Reason != "license expired" {
+		t.Fatalf("first report = %+v, want the authority's expired report", first)
+	}
+
+	cached := validator.Current(context.Background())
+	if cached.Status != StatusExpired || cached.Reason != "license expired" {
+		t.Fatalf("cached report = %+v, want the authority's expired report", cached)
+	}
+	if got := calls.Load(); got != 1 {
+		t.Fatalf("authority was called %d times, want one refresh", got)
+	}
+}

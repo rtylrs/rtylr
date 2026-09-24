@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func GetPayrollConfigRoutes() []string { return []string{"/hr/payroll/config"} }
@@ -33,13 +34,20 @@ func (h *GetPayrollConfigHandler) Serve(ctx context.Context, _ *GetPayrollConfig
 	if device.IsAnonymous || device.User == nil {
 		return GetPayrollConfigResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePayrollPermission(ctx, "hr:payroll:view"); err != nil {
+		return GetPayrollConfigResponse{}, err
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return GetPayrollConfigResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	cfg, err := h.Service.GetPayrollConfig(ctx, device.User.UserID)
+	cfg, err := h.Service.GetPayrollConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollNotConfigured) {
 			return GetPayrollConfigResponse{}, onekiterrors.New(http.StatusNotFound, "Payroll not configured for this company")
 		}
-		logger.Ctx(ctx).Error("failed to get payroll config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get payroll config", logger.Any("business_id", businessID), logger.Error(err))
 		return GetPayrollConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get payroll config")
 	}
 

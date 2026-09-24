@@ -444,6 +444,28 @@ func (r *Repository) LockTimesheetWithApprovalAction(ctx context.Context, busine
 		return nil, domain.ErrTimesheetNotPending
 	}
 
+	ts, err := qtx.GetTimesheet(ctx, sqlc.GetTimesheetParams{ID: timesheetID, BusinessID: businessID})
+	if err != nil {
+		_ = tx.Rollback()
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrTimesheetNotFound
+		}
+		return nil, err
+	}
+	if _, err := qtx.ApproveTimesheetEntries(ctx, sqlc.ApproveTimesheetEntriesParams{
+		TimesheetID:   nullInt64(timesheetID),
+		ApprovedBy:    nullInt64(approverID),
+		BusinessID:    businessID,
+		EmployeeID:    ts.EmployeeID,
+		TimesheetID_2: nullInt64(timesheetID),
+		Date:          ts.PeriodStart,
+		Date_2:        ts.PeriodEnd,
+	}); err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("failed to approve timesheet entries", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
+		return nil, err
+	}
+
 	if err := qtx.CreateApprovalAction(ctx, sqlc.CreateApprovalActionParams{
 		OwnerID:     businessID,
 		BusinessID:  businessID,
@@ -466,7 +488,7 @@ func (r *Repository) LockTimesheetWithApprovalAction(ctx context.Context, busine
 }
 
 func (r *Repository) RejectTimesheet(ctx context.Context, businessID, timesheetID int64, reason string) (*domain.TimesheetRecord, error) {
-	err := r.queries.RejectTimesheet(ctx, sqlc.RejectTimesheetParams{
+	affected, err := r.queries.RejectTimesheet(ctx, sqlc.RejectTimesheetParams{
 		RejectionReason: nullString(reason),
 		ID:              timesheetID,
 		BusinessID:      businessID,
@@ -474,6 +496,9 @@ func (r *Repository) RejectTimesheet(ctx context.Context, businessID, timesheetI
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to reject timesheet", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
 		return nil, err
+	}
+	if affected == 0 {
+		return nil, domain.ErrTimesheetNotPending
 	}
 	return r.GetTimesheet(ctx, businessID, timesheetID)
 }
@@ -636,6 +661,17 @@ func (r *Repository) MarkEntriesInvoiced(ctx context.Context, businessID, invoic
 	}()
 
 	qtx := r.queries.WithTx(tx)
+	var lockedInvoiceID int64
+	if err := tx.QueryRowContext(ctx, `
+		SELECT id
+		FROM finance_invoices
+		WHERE business_id = ? AND id = ?
+		FOR SHARE`, businessID, invoiceID).Scan(&lockedInvoiceID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, domain.ErrInvoiceNotFound
+		}
+		return 0, err
+	}
 	for _, entryID := range entryIDs {
 		n, execErr := qtx.MarkEntryInvoiced(ctx, sqlc.MarkEntryInvoicedParams{
 			BillableInvoiceID: sql.NullInt64{Int64: invoiceID, Valid: true},

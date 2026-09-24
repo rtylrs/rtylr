@@ -60,7 +60,7 @@ func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 			ToEmail:   job.To,
 			Subject:   job.Subject,
 			Html:      sealHTML(job.HTML),
-			TextBody:  nullStr(job.Text),
+			TextBody:  nullStr(sealHTML(job.Text)),
 			FromEmail: nullStr(job.From),
 			ReplyTo:   nullStr(job.ReplyTo),
 			DedupeKey: nullStr(job.DedupeKey),
@@ -72,7 +72,7 @@ func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 		ToEmail:   job.To,
 		Subject:   job.Subject,
 		Html:      sealHTML(job.HTML),
-		TextBody:  nullStr(job.Text),
+		TextBody:  nullStr(sealHTML(job.Text)),
 		FromEmail: nullStr(job.From),
 		ReplyTo:   nullStr(job.ReplyTo),
 	})
@@ -205,7 +205,7 @@ func (p *Pool) processOne(ctx context.Context) bool {
 		HTML:    html,
 	}
 	if job.TextBody.Valid {
-		params.Text = job.TextBody.String
+		params.Text = openHTML(job.TextBody.String)
 	}
 	if job.FromEmail.Valid && job.FromEmail.String != "" {
 		params.From = job.FromEmail.String

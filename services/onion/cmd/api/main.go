@@ -46,6 +46,7 @@ import (
 	"github.com/voxire/onion/internal/modules/documents"
 	"github.com/voxire/onion/internal/modules/echo"
 	"github.com/voxire/onion/internal/modules/emailtest"
+	erpsettings "github.com/voxire/onion/internal/modules/erp_settings"
 	"github.com/voxire/onion/internal/modules/expenses"
 	"github.com/voxire/onion/internal/modules/featuresupport"
 	"github.com/voxire/onion/internal/modules/feedback"
@@ -376,6 +377,7 @@ type apiModules struct {
 	Echo                  *echo.Module
 	EmailTest             *emailtest.Module
 	Expenses              *expenses.Module
+	ERPSettings           *erpsettings.Module
 	Feedback              *feedback.Module
 	FinanceBankFeeds      *financebankfeeds.Module
 	FinanceReconciliation *financereconciliation.Module
@@ -590,6 +592,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, memoryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule, s1FormsExecutor),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
+		ERPSettings:           erpsettings.NewModule(ctx, dbclient.Pool()),
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
 		FinanceBankFeeds:      financeBankFeedsModule,
 		FinanceReconciliation: financeReconciliationModule,

@@ -4,13 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 )
 
-// ScheduledReportPayload is the JSON shape returned from every scheduled-
-// report endpoint. Timestamps are emitted in RFC3339 so the frontend can
-// parse them with native Date without ambiguity.
 type ScheduledReportPayload struct {
 	ID         int64  `json:"id"`
 	TemplateID string `json:"template_id"`
@@ -22,49 +20,91 @@ type ScheduledReportPayload struct {
 	UpdatedAt  string `json:"updated_at"`
 }
 
-// ScheduledReportErrNotFound is re-exported so handlers can 404 cleanly
-// without depending on the infrastructure package.
+type ScheduledReportInput struct {
+	TemplateID string
+	Cadence    string
+	Channel    string
+	Recipient  string
+	IsActive   *bool
+}
+
+type ScheduledReportListOptions struct {
+	Page    int32
+	Limit   int32
+	SortBy  string
+	SortDir string
+}
+
+type ScheduledReportPage struct {
+	Rows  []ScheduledReportPayload
+	Total int64
+}
+
 var ScheduledReportErrNotFound = infrastructure.ErrScheduledReportNotFound
 
-// validCadences/validChannels enforce a small, product-level whitelist.
-// These are not per-tenant configurable — they're the set the product
-// supports. A new cadence requires a schema change anyway (worker cron).
 var validCadences = map[string]bool{
-	"daily":   true,
-	"weekly":  true,
-	"monthly": true,
+	"daily": true, "weekly": true, "monthly": true,
 }
 
-var validChannels = map[string]bool{
-	"email": true,
+var validChannels = map[string]bool{"email": true}
+
+func NormalizeScheduledReportListOptions(options ScheduledReportListOptions) (ScheduledReportListOptions, error) {
+	options.Page = normalizePage(options.Page)
+	options.Limit = normalizeListLimit(options.Limit)
+	options.SortBy = strings.ToLower(strings.TrimSpace(options.SortBy))
+	switch options.SortBy {
+	case "":
+		options.SortBy = "created_at"
+	case "createdat", "created_at", "updatedat", "updated_at", "recipient", "recipient_email", "cadence", "frequency", "channel", "is_active", "isactive":
+		switch options.SortBy {
+		case "createdat":
+			options.SortBy = "created_at"
+		case "updatedat":
+			options.SortBy = "updated_at"
+		case "recipient_email":
+			options.SortBy = "recipient"
+		case "frequency":
+			options.SortBy = "cadence"
+		case "isactive":
+			options.SortBy = "is_active"
+		}
+	default:
+		return ScheduledReportListOptions{}, fmt.Errorf("unsupported sort_by %q", options.SortBy)
+	}
+	options.SortDir = strings.ToLower(strings.TrimSpace(options.SortDir))
+	switch options.SortDir {
+	case "":
+		options.SortDir = "desc"
+	case "asc", "desc":
+	default:
+		return ScheduledReportListOptions{}, fmt.Errorf("unsupported sort_dir %q", options.SortDir)
+	}
+	return options, nil
 }
 
-// ListScheduledReports returns all schedules for the owner.
-func (s *Service) ListScheduledReports(ctx context.Context, businessID int64) ([]ScheduledReportPayload, error) {
-	rows, err := s.repo.ListScheduledReports(ctx, businessID)
+func (s *Service) ListScheduledReports(ctx context.Context, businessID int64, options ScheduledReportListOptions) (ScheduledReportPage, error) {
+	options, err := NormalizeScheduledReportListOptions(options)
 	if err != nil {
-		return nil, err
+		return ScheduledReportPage{}, err
+	}
+	rows, total, err := s.repo.ListScheduledReports(ctx, businessID, options.SortBy, options.SortDir, options.Limit, pageOffset(options.Page, options.Limit))
+	if err != nil {
+		return ScheduledReportPage{}, err
 	}
 	out := make([]ScheduledReportPayload, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, toScheduledReportPayload(row))
 	}
-	return out, nil
+	return ScheduledReportPage{Rows: out, Total: total}, nil
 }
 
-// CreateScheduledReport validates input and persists a new schedule.
-func (s *Service) CreateScheduledReport(ctx context.Context, businessID int64, input ScheduledReportPayload) (ScheduledReportPayload, error) {
-	if err := validateScheduledReport(input); err != nil {
+func (s *Service) CreateScheduledReport(ctx context.Context, businessID int64, input ScheduledReportInput) (ScheduledReportPayload, error) {
+	if err := validateScheduledReport(input.validationPayload()); err != nil {
 		return ScheduledReportPayload{}, err
 	}
-	id, err := s.repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportRow{
-		OwnerID:    businessID,
-		BusinessID: businessID,
-		TemplateID: input.TemplateID,
-		Cadence:    input.Cadence,
-		Channel:    input.Channel,
-		Recipient:  input.Recipient,
-		IsActive:   input.IsActive,
+	id, err := s.repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportWrite{
+		OwnerID: businessID, BusinessID: businessID, TemplateID: input.TemplateID,
+		Cadence: input.Cadence, Channel: input.Channel, Recipient: input.Recipient, IsActive: input.IsActive,
 	})
 	if err != nil {
 		return ScheduledReportPayload{}, err
@@ -76,23 +116,16 @@ func (s *Service) CreateScheduledReport(ctx context.Context, businessID int64, i
 	return toScheduledReportPayload(row), nil
 }
 
-// UpdateScheduledReport validates input and applies the update.
-func (s *Service) UpdateScheduledReport(ctx context.Context, businessID, id int64, input ScheduledReportPayload) (ScheduledReportPayload, error) {
-	if err := validateScheduledReport(input); err != nil {
+func (s *Service) UpdateScheduledReport(ctx context.Context, businessID, id int64, input ScheduledReportInput) (ScheduledReportPayload, error) {
+	if err := validateScheduledReport(input.validationPayload()); err != nil {
 		return ScheduledReportPayload{}, err
 	}
-	uerr := s.repo.UpdateScheduledReport(ctx, infrastructure.ScheduledReportRow{
-		ID:         id,
-		OwnerID:    businessID,
-		BusinessID: businessID,
-		TemplateID: input.TemplateID,
-		Cadence:    input.Cadence,
-		Channel:    input.Channel,
-		Recipient:  input.Recipient,
-		IsActive:   input.IsActive,
+	err := s.repo.UpdateScheduledReport(ctx, infrastructure.ScheduledReportWrite{
+		ID: id, OwnerID: businessID, BusinessID: businessID, TemplateID: input.TemplateID,
+		Cadence: input.Cadence, Channel: input.Channel, Recipient: input.Recipient, IsActive: input.IsActive,
 	})
-	if uerr != nil {
-		return ScheduledReportPayload{}, uerr
+	if err != nil {
+		return ScheduledReportPayload{}, err
 	}
 	row, err := s.repo.GetScheduledReport(ctx, businessID, id)
 	if err != nil {
@@ -101,9 +134,17 @@ func (s *Service) UpdateScheduledReport(ctx context.Context, businessID, id int6
 	return toScheduledReportPayload(row), nil
 }
 
-// DeleteScheduledReport removes a schedule by id.
 func (s *Service) DeleteScheduledReport(ctx context.Context, businessID, id int64) error {
 	return s.repo.DeleteScheduledReport(ctx, businessID, id)
+}
+
+func (p ScheduledReportInput) validationPayload() ScheduledReportPayload {
+	return ScheduledReportPayload{
+		TemplateID: p.TemplateID,
+		Cadence:    p.Cadence,
+		Channel:    p.Channel,
+		Recipient:  p.Recipient,
+	}
 }
 
 func validateScheduledReport(p ScheduledReportPayload) error {
@@ -124,13 +165,9 @@ func validateScheduledReport(p ScheduledReportPayload) error {
 
 func toScheduledReportPayload(row infrastructure.ScheduledReportRow) ScheduledReportPayload {
 	return ScheduledReportPayload{
-		ID:         row.ID,
-		TemplateID: row.TemplateID,
-		Cadence:    row.Cadence,
-		Channel:    row.Channel,
-		Recipient:  row.Recipient,
-		IsActive:   row.IsActive,
-		CreatedAt:  row.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:  row.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ID: row.ID, TemplateID: row.TemplateID, Cadence: row.Cadence, Channel: row.Channel,
+		Recipient: row.Recipient, IsActive: row.IsActive,
+		CreatedAt: row.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: row.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }

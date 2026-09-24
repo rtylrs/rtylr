@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -17,13 +19,31 @@ func NewFinancialAPI(service *application.Service) *FinancialAPI {
 	return &FinancialAPI{Service: service}
 }
 
+func resolveFinancialPeriod(period string) (time.Time, time.Time, error) {
+	now := time.Now().UTC()
+	switch strings.ToLower(strings.TrimSpace(period)) {
+	case "month", "this_month":
+		from := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+		return from, from.AddDate(0, 1, -1), nil
+	case "quarter", "this_quarter":
+		firstMonth := time.Month(((int(now.Month())-1)/3)*3 + 1)
+		from := time.Date(now.Year(), firstMonth, 1, 0, 0, 0, 0, time.UTC)
+		return from, from.AddDate(0, 3, -1), nil
+	case "year", "this_year":
+		from := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, time.UTC)
+		return from, time.Date(now.Year(), 12, 31, 0, 0, 0, 0, time.UTC), nil
+	default:
+		return resolveDateRangeFromPeriod(period)
+	}
+}
+
 func (a *FinancialAPI) GetCashFlowAnalytics(ctx context.Context, req *insightsfinancialv1.GetCashFlowAnalyticsRequest) (*insightsfinancialv1.GetCashFlowAnalyticsResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:financial:view")
 	if err != nil {
 		return nil, err
 	}
 
-	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
+	from, to, err := resolveFinancialPeriod(req.GetPeriod())
 	if err != nil {
 		return nil, err
 	}

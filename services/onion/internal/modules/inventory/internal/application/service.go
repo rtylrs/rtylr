@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
@@ -12,13 +13,22 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-const inventoryCacheTTL = 5 * time.Minute
+const (
+	inventoryCacheTTL = 5 * time.Minute
+
+	// Inventory contracts expose offset-based bounds rather than page numbers.
+	// Keep the historical 100-row default, cap page size, and keep offsets within
+	// the signed 32-bit range used by the generated SQL parameters.
+	defaultInventoryLimit int64 = 100
+	maxInventoryLimit     int64 = 500
+	maxInventoryOffset    int64 = 1<<31 - 1
+)
 
 type repository interface {
 	AdjustInventory(ctx context.Context, ownerID, productID int64, change float64, txType domain.InventoryTransactionType, notes string) error
-	GetInventoryReport(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error)
-	GetLowStockProducts(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error)
-	GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error)
+	GetInventoryReportPage(ctx context.Context, ownerID int64, limit, offset int) (domain.InventoryReportPage, error)
+	GetLowStockProductsPage(ctx context.Context, ownerID int64, limit, offset int) (domain.LowStockPage, error)
+	GetValuationPage(ctx context.Context, ownerID int64, limit, offset int) (domain.ValuationPage, error)
 }
 
 type Service struct {
@@ -44,13 +54,13 @@ func (s *Service) AdjustInventory(ctx context.Context, ownerID int64, input doma
 
 	invalidateInventoryScope(ctx, ownerID)
 
-	lowStock, lowErr := s.repo.GetLowStockProducts(ctx, ownerID)
+	lowStock, lowErr := s.repo.GetLowStockProductsPage(ctx, ownerID, int(defaultInventoryLimit), 0)
 	if lowErr != nil {
 		logger.Ctx(ctx).Error("Failed to check low stock after adjustment", logger.Error(lowErr))
-	} else if len(lowStock) > 0 {
+	} else if len(lowStock.Items) > 0 {
 		logger.Ctx(ctx).Info("Low stock detected after inventory adjustment",
 			logger.Any("owner_id", ownerID),
-			logger.Any("low_stock_count", len(lowStock)),
+			logger.Any("low_stock_count", lowStock.Total),
 		)
 	}
 
@@ -58,31 +68,95 @@ func (s *Service) AdjustInventory(ctx context.Context, ownerID int64, input doma
 }
 
 func (s *Service) GetInventoryReport(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	return cacher.Of[[]domain.InventoryReportItem]().GetOrComputeSingle(ctx,
-		cacheKeys.InventoryReport(ownerID),
-		func(ctx context.Context) ([]domain.InventoryReportItem, error) {
-			return s.repo.GetInventoryReport(ctx, ownerID)
+	page, err := s.GetInventoryReportPage(ctx, ownerID, defaultInventoryLimit, 0)
+	if err != nil {
+		return nil, err
+	}
+	return page.Items, nil
+}
+
+func (s *Service) GetInventoryReportPage(ctx context.Context, ownerID, limit, offset int64) (domain.InventoryReportPage, error) {
+	limit, offset = normalizeInventoryBounds(limit, offset)
+	key := fmt.Sprintf("%s|l=%d|o=%d", cacheKeys.InventoryReport(ownerID), limit, offset)
+	return cacher.Of[domain.InventoryReportPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.InventoryReportPage, error) {
+			page, err := s.repo.GetInventoryReportPage(ctx, ownerID, int(limit), int(offset)) // #nosec G115 -- bounds are normalized above.
+			if err != nil {
+				return domain.InventoryReportPage{}, err
+			}
+			page.Limit = limit
+			page.Offset = offset
+			page.HasMore = int64(len(page.Items))+offset < page.Total
+			return page, nil
 		},
 		cacher.WithExpiry(ctx, inventoryCacheTTL),
 	)
 }
 
 func (s *Service) GetLowStockProducts(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	return cacher.Of[[]domain.InventoryReportItem]().GetOrComputeSingle(ctx,
-		cacheKeys.InventoryLowStock(ownerID),
-		func(ctx context.Context) ([]domain.InventoryReportItem, error) {
-			return s.repo.GetLowStockProducts(ctx, ownerID)
+	page, err := s.GetLowStockProductsPage(ctx, ownerID, defaultInventoryLimit, 0)
+	if err != nil {
+		return nil, err
+	}
+	return page.Items, nil
+}
+
+func (s *Service) GetLowStockProductsPage(ctx context.Context, ownerID, limit, offset int64) (domain.LowStockPage, error) {
+	limit, offset = normalizeInventoryBounds(limit, offset)
+	key := fmt.Sprintf("%s|l=%d|o=%d", cacheKeys.InventoryLowStock(ownerID), limit, offset)
+	return cacher.Of[domain.LowStockPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.LowStockPage, error) {
+			page, err := s.repo.GetLowStockProductsPage(ctx, ownerID, int(limit), int(offset)) // #nosec G115 -- bounds are normalized above.
+			if err != nil {
+				return domain.LowStockPage{}, err
+			}
+			page.Limit = limit
+			page.Offset = offset
+			page.HasMore = int64(len(page.Items))+offset < page.Total
+			return page, nil
 		},
 		cacher.WithExpiry(ctx, inventoryCacheTTL),
 	)
 }
 
 func (s *Service) GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error) {
-	return cacher.Of[[]domain.ValuationItem]().GetOrComputeSingle(ctx,
-		cacheKeys.InventoryValuation(ownerID),
-		func(ctx context.Context) ([]domain.ValuationItem, error) {
-			return s.repo.GetValuation(ctx, ownerID)
+	page, err := s.GetValuationPage(ctx, ownerID, defaultInventoryLimit, 0)
+	if err != nil {
+		return nil, err
+	}
+	return page.Items, nil
+}
+
+func (s *Service) GetValuationPage(ctx context.Context, ownerID, limit, offset int64) (domain.ValuationPage, error) {
+	limit, offset = normalizeInventoryBounds(limit, offset)
+	key := fmt.Sprintf("%s|l=%d|o=%d", cacheKeys.InventoryValuation(ownerID), limit, offset)
+	return cacher.Of[domain.ValuationPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.ValuationPage, error) {
+			page, err := s.repo.GetValuationPage(ctx, ownerID, int(limit), int(offset)) // #nosec G115 -- bounds are normalized above.
+			if err != nil {
+				return domain.ValuationPage{}, err
+			}
+			page.Limit = limit
+			page.Offset = offset
+			page.HasMore = int64(len(page.Items))+offset < page.Total
+			return page, nil
 		},
 		cacher.WithExpiry(ctx, inventoryCacheTTL),
 	)
+}
+
+func normalizeInventoryBounds(limit, offset int64) (int64, int64) {
+	if limit < 1 {
+		limit = defaultInventoryLimit
+	}
+	if limit > maxInventoryLimit {
+		limit = maxInventoryLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	if offset > maxInventoryOffset {
+		offset = maxInventoryOffset
+	}
+	return limit, offset
 }

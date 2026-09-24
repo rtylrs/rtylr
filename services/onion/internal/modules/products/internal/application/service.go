@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,7 +13,9 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -40,10 +43,15 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateProductScope(ctx context.Context, ownerID int64) {
-	cacher.InvalidateScope(ctx,
+	invalidationCtx := context.WithoutCancel(ctx)
+	cacher.InvalidateScope(invalidationCtx,
 		cacheKeys.ProductPrefix(ownerID),
 		cacheKeys.MenuPrefix(ownerID),
 	)
+
+	owner := strconv.FormatInt(ownerID, 10)
+	cacheInvalidate.InvalidateAsync(invalidationCtx, cacheKeys.InvalidateProduct, owner)
+	cacheInvalidate.InvalidateAsync(invalidationCtx, cacheKeys.InvalidateMenu, owner)
 }
 
 func normalizeProductPagination(page, pageSize int64) (int64, int64, int, int) {
@@ -107,10 +115,13 @@ func (s *Service) CreateProduct(ctx context.Context, ownerID int64, input domain
 	if err != nil {
 		return 0, err
 	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "created", NewValues: input}); err != nil {
-		return 0, err
-	}
 	invalidateProductScope(ctx, ownerID)
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		logger.Ctx(ctx).Warn("product created but audit append failed",
+			logger.Any("product_id", id),
+			logger.Error(err),
+		)
+	}
 	return id, nil
 }
 
@@ -119,13 +130,17 @@ func (s *Service) UpdateProduct(ctx context.Context, ownerID, id int64, input do
 	if err != nil {
 		return err
 	}
-	if err := s.repo.UpdateProduct(ctx, ownerID, id, input); err != nil {
-		return err
-	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "updated", OldValues: old, NewValues: input}); err != nil {
+	merged := domain.MergeProductUpdate(old, input)
+	if err := s.repo.UpdateProduct(ctx, ownerID, id, merged); err != nil {
 		return err
 	}
 	invalidateProductScope(ctx, ownerID)
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "updated", OldValues: old, NewValues: merged}); err != nil {
+		logger.Ctx(ctx).Warn("product updated but audit append failed",
+			logger.Any("product_id", id),
+			logger.Error(err),
+		)
+	}
 	return nil
 }
 
@@ -141,10 +156,13 @@ func (s *Service) ReplaceProductAttributes(ctx context.Context, ownerID, product
 	if err := s.repo.ReplaceProductAttributes(ctx, ownerID, productID, attrs); err != nil {
 		return err
 	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product_attribute", EntityID: productID, Action: "replaced", OldValues: old, NewValues: attrs}); err != nil {
-		return err
-	}
 	invalidateProductScope(ctx, ownerID)
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product_attribute", EntityID: productID, Action: "replaced", OldValues: old, NewValues: attrs}); err != nil {
+		logger.Ctx(ctx).Warn("product attributes replaced but audit append failed",
+			logger.Any("product_id", productID),
+			logger.Error(err),
+		)
+	}
 	return nil
 }
 
@@ -156,10 +174,13 @@ func (s *Service) DeleteProduct(ctx context.Context, ownerID, id int64) error {
 	if err := s.repo.DeleteProduct(ctx, ownerID, id); err != nil {
 		return err
 	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "deleted", OldValues: old}); err != nil {
-		return err
-	}
 	invalidateProductScope(ctx, ownerID)
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "deleted", OldValues: old}); err != nil {
+		logger.Ctx(ctx).Warn("product deleted but audit append failed",
+			logger.Any("product_id", id),
+			logger.Error(err),
+		)
+	}
 	return nil
 }
 

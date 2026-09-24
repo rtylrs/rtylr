@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS stock_ledger (
     employee_id BIGINT NULL,
     created_by BIGINT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_ledger_reference (owner_id, reference_type, reference_id, entry_type),
+    UNIQUE KEY uq_ledger_reference (owner_id, reference_type, reference_id, entry_type, product_id, location_id),
     INDEX idx_ledger_owner_product (owner_id, product_id, created_at),
     INDEX idx_ledger_owner_loc (owner_id, location_id, created_at),
     INDEX idx_ledger_ref (reference_type, reference_id),

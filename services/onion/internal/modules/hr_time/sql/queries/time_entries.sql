@@ -67,6 +67,22 @@ SELECT DISTINCT business_id FROM hr_timesheets
 ORDER BY business_id ASC
 LIMIT 500;
 
+-- Final timesheet approval owns the entry workflow transition. Entries created
+-- through the self-service API may not have a timesheet_id yet, so unlinked
+-- rows are matched by employee and period; explicitly linked rows remain bound
+-- to their timesheet. This runs in the same transaction as the final lock.
+-- name: ApproveTimesheetEntries :execrows
+UPDATE hr_time_entries
+SET timesheet_id = COALESCE(timesheet_id, ?),
+    status = 'approved',
+    approved_by = ?,
+    rejection_reason = NULL,
+    updated_at = NOW()
+WHERE business_id = ?
+  AND employee_id = ?
+  AND (timesheet_id = ? OR (timesheet_id IS NULL AND date >= ? AND date <= ?))
+  AND status IN ('draft', 'rejected');
+
 -- name: MarkEntryInvoiced :execrows
 -- The invoice-side half of the billable loop (#836/#791), applied per entry
 -- by the repository inside one transaction so the whole batch lands or none

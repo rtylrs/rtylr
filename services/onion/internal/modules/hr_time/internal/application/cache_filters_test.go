@@ -56,12 +56,14 @@ func TestListTimeEntries_DifferentDateFiltersDoNotShareACachedPage(t *testing.T)
 		}
 	})
 
-	service := NewService(ctx, db, nil)
+	permissions := newW2PermissionProvider()
+	permissions.employeeByUser[employeeID] = employeeID
+	service := NewService(ctx, db, nil, permissions)
 
 	// Two October entries and one November entry make the two filter
 	// combinations distinguishable by total, not just by item identity.
 	for _, date := range []string{"2026-10-05", "2026-10-06", "2026-11-04"} {
-		if _, err := service.CreateTimeEntry(ctx, businessID, domain.TimeEntryRecord{
+		if _, err := service.CreateTimeEntry(ctx, businessID, employeeID, domain.TimeEntryRecord{
 			EmployeeID:      employeeID,
 			Date:            date,
 			DurationMinutes: 60,
@@ -168,7 +170,7 @@ func TestListTimesheets_DifferentStatusFiltersDoNotShareACachedPage(t *testing.T
 		}
 	})
 
-	service := NewService(ctx, db, nil)
+	service := NewService(ctx, db, nil, nil)
 
 	october, err := service.GetOrCreateTimesheet(ctx, businessID, employeeID, "2026-10-01", "2026-10-31")
 	if err != nil {

@@ -71,6 +71,9 @@ func (h *TriggerPayrollRunHandler) Serve(ctx context.Context, req *TriggerPayrol
 
 	run, entries, err := h.Service.TriggerPayrollRun(ctx, businessID, device.User.UserID, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
+		if errors.Is(err, domain.ErrPayrollRunAlreadyExists) {
+			return TriggerPayrollRunResponse{}, onekiterrors.New(http.StatusConflict, "Payroll run already exists for this period")
+		}
 		if errors.Is(err, domain.ErrPayrollNotConfigured) {
 			return TriggerPayrollRunResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Payroll not configured for this company")
 		}

@@ -74,6 +74,14 @@ func authSuccessLogsEnabled() bool {
 }
 
 func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolver authPkg.TokenValidatorResolver, accessResolvers ...authPkg.EffectiveAccessResolver) MiddlewareFunc {
+	// MetricsHandler owns the /metrics basic-auth check. Mark the route
+	// anonymous here so the bearer gate (and the downstream subscription and
+	// license gates, which consult the same policy) let that handler decide
+	// whether the scraper is authorized.
+	if accessPolicy != nil {
+		accessPolicy.RegisterAnonymousRoutes("/metrics")
+	}
+
 	var accessResolver authPkg.EffectiveAccessResolver
 	if len(accessResolvers) > 0 {
 		accessResolver = accessResolvers[0]

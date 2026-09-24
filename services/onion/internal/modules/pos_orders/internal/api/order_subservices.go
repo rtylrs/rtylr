@@ -118,6 +118,42 @@ func NewSplitAPI(service *application.Service) *SplitAPI {
 	return &SplitAPI{Service: service}
 }
 
+func isValidOrderItemPartition(order *domain.Order, splits [][]int64) bool {
+	if order == nil || len(splits) < 2 {
+		return false
+	}
+
+	expected := make(map[int64]struct{}, len(order.Items))
+	for _, item := range order.Items {
+		if item.Status != domain.ItemStatusCancelled {
+			expected[item.ID] = struct{}{}
+		}
+	}
+	if len(expected) == 0 {
+		return false
+	}
+
+	seen := make(map[int64]struct{}, len(expected))
+	for _, group := range splits {
+		if len(group) == 0 {
+			return false
+		}
+		for _, itemID := range group {
+			if itemID <= 0 {
+				return false
+			}
+			if _, ok := expected[itemID]; !ok {
+				return false
+			}
+			if _, duplicate := seen[itemID]; duplicate {
+				return false
+			}
+			seen[itemID] = struct{}{}
+		}
+	}
+	return len(seen) == len(expected)
+}
+
 func (a *SplitAPI) SplitOrder(ctx context.Context, req *posorderssplitv1.SplitOrderRequest) (*posorderssplitv1.SplitOrderResponse, error) {
 	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
@@ -141,6 +177,17 @@ func (a *SplitAPI) SplitOrder(ctx context.Context, req *posorderssplitv1.SplitOr
 	splitGroups := make([][]int64, 0, len(splits))
 	for _, group := range splits {
 		splitGroups = append(splitGroups, group.GetItemIds())
+	}
+
+	order, err := a.Service.GetOrder(ctx, businessID, orderID)
+	if err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to split order")
+	}
+	if !isValidOrderItemPartition(order, splitGroups) {
+		return nil, orderAPIStatusError(http.StatusBadRequest, "Split groups must contain every active order item exactly once")
 	}
 
 	orderIDs, err := a.Service.SplitOrder(ctx, businessID, orderID, splitGroups)

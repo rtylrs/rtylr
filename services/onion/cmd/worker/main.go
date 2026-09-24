@@ -17,6 +17,7 @@ import (
 	"github.com/voxire/onion/internal/modules/journal"
 	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
 	"github.com/voxire/onion/internal/modules/subscriptions"
+	"github.com/voxire/onion/internal/modules/team"
 	"github.com/voxire/onion/internal/modules/voxhire"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/workspaces"
@@ -132,6 +133,7 @@ type jobModules struct {
 	Voxhire           *voxhire.Module
 	RecurringInvoices *recurringinvoices.Module
 	Subscriptions     *subscriptions.Module
+	Team              *team.Module
 }
 
 func initializeJobModules(ctx context.Context) *jobModules {
@@ -158,5 +160,6 @@ func initializeJobModules(ctx context.Context) *jobModules {
 		Voxhire:           voxhire.NewModule(ctx, db),
 		RecurringInvoices: recurringinvoices.NewModule(ctx, db),
 		Subscriptions:     subscriptions.NewModule(ctx, db),
+		Team:              team.NewModule(ctx, db),
 	}
 }

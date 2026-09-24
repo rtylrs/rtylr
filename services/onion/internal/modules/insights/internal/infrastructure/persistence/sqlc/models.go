@@ -3309,14 +3309,18 @@ type InsightsScheduledReport struct {
 }
 
 type InsightsSetting struct {
-	ID              int64     `db:"id" json:"id"`
-	OwnerID         int64     `db:"owner_id" json:"owner_id"`
-	BusinessID      int64     `db:"business_id" json:"business_id"`
-	DefaultCurrency string    `db:"default_currency" json:"default_currency"`
-	FiscalYearStart string    `db:"fiscal_year_start" json:"fiscal_year_start"`
-	Timezone        string    `db:"timezone" json:"timezone"`
-	CreatedAt       time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt       time.Time `db:"updated_at" json:"updated_at"`
+	ID               int64           `db:"id" json:"id"`
+	OwnerID          int64           `db:"owner_id" json:"owner_id"`
+	BusinessID       int64           `db:"business_id" json:"business_id"`
+	DefaultCurrency  string          `db:"default_currency" json:"default_currency"`
+	FiscalYearStart  string          `db:"fiscal_year_start" json:"fiscal_year_start"`
+	Timezone         string          `db:"timezone" json:"timezone"`
+	DefaultPeriod    string          `db:"default_period" json:"default_period"`
+	ComparePrevious  bool            `db:"compare_previous" json:"compare_previous"`
+	DashboardWidgets json.RawMessage `db:"dashboard_widgets" json:"dashboard_widgets"`
+	FavoriteReports  json.RawMessage `db:"favorite_reports" json:"favorite_reports"`
+	CreatedAt        time.Time       `db:"created_at" json:"created_at"`
+	UpdatedAt        time.Time       `db:"updated_at" json:"updated_at"`
 }
 
 type InviteToken struct {

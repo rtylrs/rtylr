@@ -17,21 +17,10 @@ WHERE business_id = ? AND id = ?;
 INSERT INTO hr_payroll_runs (owner_id, business_id, period_start, period_end, status, created_by, total_gross, total_net)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
--- Payroll approval currently has no persisted approval-level cursor. Only the
--- draft -> pending_approval transition is valid here; other state changes use
--- dedicated guarded queries below.
--- name: UpdatePayrollRunStatus :execresult
-UPDATE hr_payroll_runs
-SET status = ?
-WHERE business_id = ?
-  AND id = ?
-  AND status = 'draft'
-  AND ? = 'pending_approval';
-
 -- name: SetPayrollRunApproved :execresult
 UPDATE hr_payroll_runs
 SET status = 'approved', approved_by = ?
-WHERE business_id = ? AND id = ? AND status = 'pending_approval';
+WHERE business_id = ? AND id = ? AND status = 'in_review';
 
 -- name: SetPayrollRunExported :execresult
 UPDATE hr_payroll_runs

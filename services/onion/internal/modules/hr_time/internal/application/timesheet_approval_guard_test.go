@@ -15,7 +15,13 @@ import (
 type twoLevelApprovalChain struct{}
 
 func (twoLevelApprovalChain) GetApprovalChain(context.Context, int64, string) (*domain.ApprovalChainInfo, error) {
-	return &domain.ApprovalChainInfo{TotalLevels: 2}, nil
+	return &domain.ApprovalChainInfo{
+		TotalLevels: 2,
+		Levels: []domain.ApprovalLevelInfo{
+			{LevelOrder: 1, ApproverRoleID: 1},
+			{LevelOrder: 2, ApproverRoleID: 2},
+		},
+	}, nil
 }
 
 // TestApproveTimesheet_RejectsDraftBeforeAnyWrite is the B08-R02 service half:
@@ -42,7 +48,7 @@ func TestApproveTimesheet_RejectsDraftBeforeAnyWrite(t *testing.T) {
 		}
 	})
 
-	service := NewService(ctx, db, twoLevelApprovalChain{})
+	service := NewService(ctx, db, twoLevelApprovalChain{}, newAllowApprovalPermissions(map[int64]int64{approverID: 4203}))
 	ts, err := service.GetOrCreateTimesheet(ctx, businessID, employeeID, "2026-10-01", "2026-10-31")
 	if err != nil {
 		t.Fatalf("GetOrCreateTimesheet: %v", err)
@@ -96,7 +102,7 @@ func TestApproveTimesheet_FinalApprovalRecordsActionWithLock(t *testing.T) {
 		}
 	})
 
-	service := NewService(ctx, db, singleLevelApprovalChain{})
+	service := NewService(ctx, db, singleLevelApprovalChain{}, newAllowApprovalPermissions(map[int64]int64{approverID: 4205}))
 	ts, err := service.GetOrCreateTimesheet(ctx, businessID, employeeID, "2026-10-01", "2026-10-31")
 	if err != nil {
 		t.Fatalf("GetOrCreateTimesheet: %v", err)

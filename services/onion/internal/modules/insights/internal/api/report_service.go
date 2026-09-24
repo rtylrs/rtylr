@@ -39,8 +39,8 @@ func scheduledReportToProto(row application.ScheduledReportPayload) *insightsrep
 	}
 }
 
-func scheduledReportInput(reqTemplateSlug, frequency, channel, recipient string, isActive bool) application.ScheduledReportPayload {
-	return application.ScheduledReportPayload{
+func scheduledReportInput(reqTemplateSlug, frequency, channel, recipient string, isActive *bool) application.ScheduledReportInput {
+	return application.ScheduledReportInput{
 		TemplateID: reqTemplateSlug,
 		Cadence:    frequency,
 		Channel:    channel,
@@ -49,24 +49,32 @@ func scheduledReportInput(reqTemplateSlug, frequency, channel, recipient string,
 	}
 }
 
-func (a *ReportAPI) ListReportTemplates(ctx context.Context, _ *insightsreportv1.ListReportTemplatesRequest) (*insightsreportv1.ListReportTemplatesResponse, error) {
+func (a *ReportAPI) ListReportTemplates(ctx context.Context, req *insightsreportv1.ListReportTemplatesRequest) (*insightsreportv1.ListReportTemplatesResponse, error) {
 	_, err := resolveBusinessIDFor(ctx, "insights:reports:create")
 	if err != nil {
 		return nil, err
 	}
+	page, err := a.Service.ListReportTemplates(ctx, application.ReportTemplateListOptions{
+		Page: req.GetPage(), Limit: req.GetLimit(), SortBy: req.GetSortBy(), SortDir: req.GetSortDir(), Type: req.GetType(),
+	})
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
 
-	rows := a.Service.ListReportTemplates(ctx)
-	templates := make([]*insightsreportv1.ReportTemplate, 0, len(rows))
-	for i, row := range rows {
+	templates := make([]*insightsreportv1.ReportTemplate, 0, len(page.Rows))
+	for i, row := range page.Rows {
 		templates = append(templates, &insightsreportv1.ReportTemplate{
 			Id:          int64(i + 1),
 			Name:        row.Name,
 			Description: row.Description,
-			Type:        row.ID,
+			Type:        row.Type,
 		})
 	}
-
-	return &insightsreportv1.ListReportTemplatesResponse{Templates: templates}, nil
+	limit := normalizeLimit(req.GetLimit())
+	return &insightsreportv1.ListReportTemplatesResponse{
+		Templates:  templates,
+		Pagination: paginationResponse(req.GetPage(), limit, page.Total),
+	}, nil
 }
 
 func (a *ReportAPI) CreateReportTemplate(ctx context.Context, req *insightsreportv1.CreateReportTemplateRequest) (*insightsreportv1.CreateReportTemplateResponse, error) {
@@ -94,23 +102,31 @@ func (a *ReportAPI) GetReportTemplate(context.Context, *insightsreportv1.GetRepo
 	return nil, notImplemented("GetReportTemplate")
 }
 
-func (a *ReportAPI) ListScheduledReports(ctx context.Context, _ *insightsreportv1.ListScheduledReportsRequest) (*insightsreportv1.ListScheduledReportsResponse, error) {
+func (a *ReportAPI) ListScheduledReports(ctx context.Context, req *insightsreportv1.ListScheduledReportsRequest) (*insightsreportv1.ListScheduledReportsResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:reports:create")
 	if err != nil {
 		return nil, err
 	}
-
-	rows, err := a.Service.ListScheduledReports(ctx, businessID)
+	options, err := application.NormalizeScheduledReportListOptions(application.ScheduledReportListOptions{
+		Page: req.GetPage(), Limit: req.GetLimit(), SortBy: req.GetSortBy(), SortDir: req.GetSortDir(),
+	})
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+	page, err := a.Service.ListScheduledReports(ctx, businessID, options)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list scheduled reports")
 	}
 
-	reports := make([]*insightsreportv1.ScheduledReport, 0, len(rows))
-	for _, row := range rows {
+	reports := make([]*insightsreportv1.ScheduledReport, 0, len(page.Rows))
+	for _, row := range page.Rows {
 		reports = append(reports, scheduledReportToProto(row))
 	}
-
-	return &insightsreportv1.ListScheduledReportsResponse{Reports: reports}, nil
+	limit := normalizeLimit(req.GetLimit())
+	return &insightsreportv1.ListScheduledReportsResponse{
+		Reports:    reports,
+		Pagination: paginationResponse(req.GetPage(), limit, page.Total),
+	}, nil
 }
 
 func (a *ReportAPI) CreateScheduledReport(ctx context.Context, req *insightsreportv1.CreateScheduledReportRequest) (*insightsreportv1.CreateScheduledReportResponse, error) {
@@ -124,7 +140,7 @@ func (a *ReportAPI) CreateScheduledReport(ctx context.Context, req *insightsrepo
 		req.GetFrequency(),
 		req.GetChannel(),
 		req.GetRecipientEmail(),
-		req.GetIsActive(),
+		scheduledReportIsActive(ctx, req.GetIsActive()),
 	))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
@@ -144,7 +160,7 @@ func (a *ReportAPI) UpdateScheduledReport(ctx context.Context, req *insightsrepo
 		req.GetFrequency(),
 		req.GetChannel(),
 		req.GetRecipientEmail(),
-		req.GetIsActive(),
+		scheduledReportIsActive(ctx, req.GetIsActive()),
 	))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())

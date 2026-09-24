@@ -23,6 +23,34 @@ func TestListInvoices_NoError(t *testing.T) {
 	_ = invoices
 }
 
+func TestSumOverdueAmountUsesDueDateForSentInvoices(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	businessID := int64(994101)
+
+	_, err := db.ExecContext(ctx, `
+		INSERT INTO finance_invoices
+			(owner_id, business_id, invoice_number, client_name, status,
+			 issue_date, due_date, total, amount_due)
+		VALUES (?, ?, 'OVERDUE-REGRESSION-994101', 'Overdue Client', 'sent',
+			'2020-01-01', '2020-01-02', 125.50, 125.50)`, businessID, businessID)
+	if err != nil {
+		t.Fatalf("insert overdue invoice: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_invoices WHERE business_id = ?", businessID)
+	})
+
+	got, err := repo.SumOverdueAmount(ctx, businessID)
+	if err != nil {
+		t.Fatalf("SumOverdueAmount: %v", err)
+	}
+	if got != 125.50 {
+		t.Fatalf("overdue amount = %v, want 125.50", got)
+	}
+}
+
 func TestListFinanceExpenses_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

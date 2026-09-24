@@ -26,8 +26,8 @@ func TestParseScheduleReportToolInputNormalizesAliases(t *testing.T) {
 	if got.Recipient != "ops@example.com" {
 		t.Fatalf("Recipient = %q, want ops@example.com", got.Recipient)
 	}
-	if !got.IsActive {
-		t.Fatalf("IsActive = false, want true")
+	if got.IsActive != nil {
+		t.Fatalf("IsActive = %v, want nil so persistence applies the active default", *got.IsActive)
 	}
 }
 
@@ -53,8 +53,8 @@ func TestParseScheduleReportToolInputSupportsSlackRecipientArray(t *testing.T) {
 	if got.Recipient != "#sales" {
 		t.Fatalf("Recipient = %q, want #sales", got.Recipient)
 	}
-	if got.IsActive {
-		t.Fatalf("IsActive = true, want false")
+	if got.IsActive == nil || *got.IsActive {
+		t.Fatalf("IsActive = %v, want explicit false", got.IsActive)
 	}
 }
 

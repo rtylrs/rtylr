@@ -13,12 +13,6 @@ import (
 	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
 )
 
-// listCategoriesPageSize bounds ListCategories server-side. The voxie
-// erp.category.v1.ListCategoriesRequest contract has no pagination fields
-// yet, so the endpoint returns at most one maximum-size page instead of every
-// row.
-const listCategoriesPageSize int32 = 100
-
 type CategoryAPI struct {
 	Service *application.Service
 }
@@ -27,20 +21,26 @@ func NewCategoryAPI(service *application.Service) *CategoryAPI {
 	return &CategoryAPI{Service: service}
 }
 
-func (a *CategoryAPI) ListCategories(ctx context.Context, _ *erpcategoryv1.ListCategoriesRequest) (*erpcategoryv1.ListCategoriesResponse, error) {
+func (a *CategoryAPI) ListCategories(ctx context.Context, req *erpcategoryv1.ListCategoriesRequest) (*erpcategoryv1.ListCategoriesResponse, error) {
 	ownerID, err := categoryOwnerID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	categories, listErr := a.Service.ListCategoriesPaginated(ctx, ownerID, listCategoriesPageSize, 0)
+	page, listErr := a.Service.ListCategoriesPage(ctx, ownerID, req.GetLimit(), req.GetOffset())
 	if listErr != nil {
 		return nil, categoryStatusError(http.StatusInternalServerError, "Failed to list categories")
 	}
-	out := make([]*erpcategoryv1.Category, 0, len(categories))
-	for _, c := range categories {
+	out := make([]*erpcategoryv1.Category, 0, len(page.Categories))
+	for _, c := range page.Categories {
 		out = append(out, newCategoryPayload(c))
 	}
-	return &erpcategoryv1.ListCategoriesResponse{Categories: out}, nil
+	return &erpcategoryv1.ListCategoriesResponse{
+		Categories: out,
+		HasMore:    page.Offset+int64(len(out)) < page.Total,
+		Limit:      page.Limit,
+		Offset:     page.Offset,
+		Total:      page.Total,
+	}, nil
 }
 
 func (a *CategoryAPI) CreateCategory(ctx context.Context, req *erpcategoryv1.CreateCategoryRequest) (*erpcategoryv1.CreateCategoryResponse, error) {

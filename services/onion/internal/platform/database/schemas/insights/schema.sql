@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS insights_settings (
     default_currency VARCHAR(10) NOT NULL DEFAULT 'USD',
     fiscal_year_start VARCHAR(5) NOT NULL DEFAULT '01-01',
     timezone VARCHAR(50) NOT NULL DEFAULT 'UTC',
+    default_period VARCHAR(20) NOT NULL DEFAULT 'this_month',
+    compare_previous BOOLEAN NOT NULL DEFAULT FALSE,
+    dashboard_widgets JSON NOT NULL DEFAULT (JSON_ARRAY()),
+    favorite_reports JSON NOT NULL DEFAULT (JSON_ARRAY()),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_insights_settings_owner (owner_id)

@@ -213,6 +213,7 @@ type Label struct {
 
 type LabelInput struct {
 	WorkspaceID int64
+	BusinessID  int64
 	Name        string
 	Color       string
 }

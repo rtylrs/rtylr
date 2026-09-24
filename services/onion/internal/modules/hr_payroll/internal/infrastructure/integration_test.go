@@ -441,30 +441,40 @@ func TestListDistinctOwnerIDs_NoError(t *testing.T) {
 	_ = ids
 }
 
-func TestUpdatePayrollRunStatus_Changes(t *testing.T) {
+func TestSetPayrollRunApproved_ChangesInReview(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	const (
+		businessID int64 = 9100203
+		approverID int64 = 9300203
+	)
 
-	run, _, err := repo.CreatePayrollRunWithEntries(ctx, testutil.OwnerID, domain.PayrollRunRecord{
-		PeriodStart: "2026-09-01",
-		PeriodEnd:   "2026-09-30",
-		Status:      "draft",
+	run, _, err := repo.CreatePayrollRunWithEntries(ctx, businessID, domain.PayrollRunRecord{
+		PeriodStart: "2031-05-01",
+		PeriodEnd:   "2031-05-31",
+		Status:      domain.PayrollStatusInReview,
 	}, []domain.PayrollEntryRecord{})
 	if err != nil {
 		t.Fatalf("CreatePayrollRunWithEntries: %v", err)
 	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_payroll_runs WHERE id = ? AND business_id = ?", run.ID, businessID)
+	})
 
-	if err := repo.UpdatePayrollRunStatus(ctx, testutil.OwnerID, run.ID, "pending_approval"); err != nil {
-		t.Fatalf("UpdatePayrollRunStatus: %v", err)
+	if err := repo.SetPayrollRunApproved(ctx, businessID, run.ID, approverID); err != nil {
+		t.Fatalf("SetPayrollRunApproved: %v", err)
 	}
 
-	got, err := repo.GetPayrollRun(ctx, testutil.OwnerID, run.ID)
+	got, err := repo.GetPayrollRun(ctx, businessID, run.ID)
 	if err != nil {
-		t.Fatalf("GetPayrollRun after status update: %v", err)
+		t.Fatalf("GetPayrollRun after approval: %v", err)
 	}
-	if got.Status != "pending_approval" {
-		t.Errorf("expected status='pending_approval', got %q", got.Status)
+	if got.Status != domain.PayrollStatusApproved {
+		t.Errorf("approved status = %q, want %q", got.Status, domain.PayrollStatusApproved)
+	}
+	if got.ApprovedBy != approverID {
+		t.Errorf("approved_by = %d, want %d", got.ApprovedBy, approverID)
 	}
 }
 

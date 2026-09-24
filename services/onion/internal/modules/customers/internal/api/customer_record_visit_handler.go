@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -57,6 +58,13 @@ func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest)
 		return RecordVisitResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	if _, err := h.CRMService.GetCustomer(ctx, businessID, req.CustomerID); err != nil {
+		if errors.Is(err, domain.ErrCustomerNotFound) {
+			return RecordVisitResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
+		}
+		return RecordVisitResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to record visit")
+	}
+
 	err := h.CRMService.RecordVisit(ctx, domain.RecordVisitInput{
 		OwnerID:     device.User.UserID,
 		BusinessID:  businessID,
@@ -65,6 +73,9 @@ func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest)
 		AwardPoints: req.AwardPoints,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrCustomerNotFound) {
+			return RecordVisitResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
+		}
 		return RecordVisitResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to record visit")
 	}
 

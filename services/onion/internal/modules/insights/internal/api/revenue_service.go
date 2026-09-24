@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -16,6 +17,11 @@ type RevenueAPI struct {
 func NewRevenueAPI(service *application.Service) *RevenueAPI {
 	return &RevenueAPI{Service: service}
 }
+
+const (
+	comparePreviousPeriod   = "previous_period"
+	compareSamePeriodYearly = "same_period_last_year"
+)
 
 func (a *RevenueAPI) GetRevenueOverview(ctx context.Context, req *insightsrevenuev1.GetRevenueOverviewRequest) (*insightsrevenuev1.GetRevenueOverviewResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
@@ -81,6 +87,11 @@ func (a *RevenueAPI) GetRevenueComparison(ctx context.Context, req *insightsreve
 		return nil, err
 	}
 
+	compareTo := strings.TrimSpace(req.GetCompareTo())
+	if compareTo != comparePreviousPeriod && compareTo != compareSamePeriodYearly {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid compare_to")
+	}
+
 	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
 	if err != nil {
 		return nil, err
@@ -89,6 +100,22 @@ func (a *RevenueAPI) GetRevenueComparison(ctx context.Context, req *insightsreve
 	payload, err := a.Service.GetRevenueComparison(ctx, businessID, from, to)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load revenue comparison")
+	}
+
+	previous := payload.LastPeriodMinorUnits
+	change := payload.DeltaPct
+	if compareTo == compareSamePeriodYearly {
+		priorFrom := from.AddDate(-1, 0, 0)
+		priorTo := to.AddDate(-1, 0, 0)
+		priorPayload, priorErr := a.Service.GetRevenueComparison(ctx, businessID, priorFrom, priorTo)
+		if priorErr != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load revenue comparison")
+		}
+		previous = priorPayload.ThisPeriodMinorUnits
+		change = 0
+		if previous > 0 {
+			change = (float64(payload.ThisPeriodMinorUnits-previous) / float64(previous)) * 100
+		}
 	}
 
 	periodLabel := req.GetPeriod()
@@ -100,8 +127,8 @@ func (a *RevenueAPI) GetRevenueComparison(ctx context.Context, req *insightsreve
 		Comparisons: []*insightsrevenuev1.RevenueComparison{{
 			Period:   periodLabel,
 			Current:  minorToMajor(payload.ThisPeriodMinorUnits),
-			Previous: minorToMajor(payload.LastPeriodMinorUnits),
-			Change:   payload.DeltaPct,
+			Previous: minorToMajor(previous),
+			Change:   change,
 		}},
 	}, nil
 }

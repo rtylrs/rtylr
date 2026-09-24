@@ -2,12 +2,37 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func seedInvoice(t *testing.T, db interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+}, invoiceNumber string,
+) int64 {
+	t.Helper()
+	if _, err := db.ExecContext(context.Background(), "DELETE FROM finance_invoices WHERE business_id = ? AND invoice_number = ?", testutil.OwnerID, invoiceNumber); err != nil {
+		t.Fatalf("clear invoice fixture: %v", err)
+	}
+	result, err := db.ExecContext(context.Background(), `
+		INSERT INTO finance_invoices
+			(owner_id, business_id, invoice_number, client_name, status, issue_date, due_date)
+		VALUES (?, ?, ?, 'Test Client', 'sent', '2026-04-01', '2026-05-01')`,
+		testutil.OwnerID, testutil.OwnerID, invoiceNumber)
+	if err != nil {
+		t.Fatalf("seed invoice: %v", err)
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("invoice id: %v", err)
+	}
+	return id
+}
 
 func seedApprovedBillableEntry(ctx context.Context, t *testing.T, repo *infrastructure.Repository, description string) int64 {
 	t.Helper()
@@ -36,8 +61,15 @@ func TestMarkEntriesInvoiced_BatchSemantics(t *testing.T) {
 	first := seedApprovedBillableEntry(ctx, t, repo, "invoiced batch a")
 	second := seedApprovedBillableEntry(ctx, t, repo, "invoiced batch b")
 	foreign := int64(9_999_999)
+	firstInvoiceID := seedInvoice(t, db, "hr-time-mark-invoiced-a")
+	secondInvoiceID := seedInvoice(t, db, "hr-time-mark-invoiced-b")
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(),
+			"DELETE FROM finance_invoices WHERE business_id = ? AND invoice_number IN (?, ?)",
+			testutil.OwnerID, "hr-time-mark-invoiced-a", "hr-time-mark-invoiced-b")
+	})
 
-	marked, err := repo.MarkEntriesInvoiced(ctx, testutil.OwnerID, 4242, []int64{first, second, foreign})
+	marked, err := repo.MarkEntriesInvoiced(ctx, testutil.OwnerID, firstInvoiceID, []int64{first, second, foreign})
 	if err != nil {
 		t.Fatalf("MarkEntriesInvoiced: %v", err)
 	}
@@ -53,14 +85,14 @@ func TestMarkEntriesInvoiced_BatchSemantics(t *testing.T) {
 		).Scan(&invoiceID); err != nil {
 			t.Fatalf("read billable_invoice_id for %d: %v", id, err)
 		}
-		if invoiceID != 4242 {
-			t.Fatalf("entry %d has billable_invoice_id %d, want 4242", id, invoiceID)
+		if invoiceID != firstInvoiceID {
+			t.Fatalf("entry %d has billable_invoice_id %d, want %d", id, invoiceID, firstInvoiceID)
 		}
 	}
 
 	// Idempotent skip: re-marking under a different invoice must not overwrite
 	// the first settlement.
-	markedAgain, err := repo.MarkEntriesInvoiced(ctx, testutil.OwnerID, 8888, []int64{first})
+	markedAgain, err := repo.MarkEntriesInvoiced(ctx, testutil.OwnerID, secondInvoiceID, []int64{first})
 	if err != nil {
 		t.Fatalf("re-mark: %v", err)
 	}
@@ -73,7 +105,7 @@ func TestMarkEntriesInvoiced_BatchSemantics(t *testing.T) {
 	).Scan(&invoiceID); err != nil {
 		t.Fatalf("read billable_invoice_id after re-mark: %v", err)
 	}
-	if invoiceID != 4242 {
+	if invoiceID != firstInvoiceID {
 		t.Fatalf("entry %d was overwritten to %d; already-invoiced rows are skip-only", first, invoiceID)
 	}
 
@@ -83,6 +115,30 @@ func TestMarkEntriesInvoiced_BatchSemantics(t *testing.T) {
 			first, second, testutil.OwnerID,
 		)
 	})
+}
+
+func TestMarkEntriesInvoiced_RejectsMissingInvoice(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	repo := infrastructure.NewRepository(db)
+	entryID := seedApprovedBillableEntry(ctx, t, repo, "missing invoice")
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_time_entries WHERE id = ? AND business_id = ?", entryID, testutil.OwnerID)
+	})
+
+	if _, err := repo.MarkEntriesInvoiced(ctx, testutil.OwnerID, 9_999_999, []int64{entryID}); !errors.Is(err, domain.ErrInvoiceNotFound) {
+		t.Fatalf("missing invoice error = %v, want ErrInvoiceNotFound", err)
+	}
+	var invoiceID int64
+	if err := db.QueryRowContext(ctx,
+		"SELECT COALESCE(billable_invoice_id, 0) FROM hr_time_entries WHERE id = ? AND business_id = ?",
+		entryID, testutil.OwnerID,
+	).Scan(&invoiceID); err != nil {
+		t.Fatalf("read entry after rejected invoice: %v", err)
+	}
+	if invoiceID != 0 {
+		t.Fatalf("entry was stamped with nonexistent invoice %d", invoiceID)
+	}
 }
 
 // An empty batch is a no-op rather than an error, so callers can pipe filtered

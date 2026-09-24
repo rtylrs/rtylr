@@ -34,6 +34,7 @@ func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 
 type repository interface {
 	ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
+	ListInvoicesForCustomer(ctx context.Context, businessID, customerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
 	ListUnbilledBillableTimeEntries(ctx context.Context, businessID int64, limit, offset int) ([]domain.BillableTimeEntry, error)
 	CountUnbilledBillableTimeEntries(ctx context.Context, businessID int64) (int64, int64, error)
 	ListInvoicesByCustomer(ctx context.Context, businessID, customerID int64, limit, offset int) ([]domain.Invoice, error)
@@ -88,6 +89,27 @@ func (s *Service) ListInvoices(ctx context.Context, businessID int64, status, se
 	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Invoice, error) {
 			return s.repo.ListInvoices(ctx, businessID, status, search, dateFrom, dateTo, limit+1, offset)
+		},
+		cacher.WithExpiry(ctx, invoicesTTL),
+	)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
+}
+
+// ListInvoicesForCustomer applies the same pagination and filter semantics as
+// ListInvoices while also restricting the result to one CRM customer.
+func (s *Service) ListInvoicesForCustomer(ctx context.Context, businessID, customerID, page, pageSize int64, status, search, dateFrom, dateTo string) ([]domain.Invoice, bool, error) {
+	limit, offset := paginateInvoices(page, pageSize)
+	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("by-customer=%d|s=%s|q=%s|f=%s|t=%s|p=%d|ps=%d", customerID, status, search, dateFrom, dateTo, page, pageSize))
+	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Invoice, error) {
+			return s.repo.ListInvoicesForCustomer(ctx, businessID, customerID, status, search, dateFrom, dateTo, limit+1, offset)
 		},
 		cacher.WithExpiry(ctx, invoicesTTL),
 	)
@@ -841,25 +863,11 @@ func CentsToFloat(cents int64) float64 {
 	return float64(cents) / 100.0
 }
 
-// ListInvoicesByCustomer returns one page of a customer's invoices
-// (CRM->FIN-02's read surface), backed by the business+customer index.
+// ListInvoicesByCustomer returns one page of a customer's invoices. Keep this
+// compatibility wrapper for the legacy read surface; the RPC path uses the
+// filtered variant above.
 func (s *Service) ListInvoicesByCustomer(ctx context.Context, businessID, customerID, page, pageSize int64) ([]domain.Invoice, bool, error) {
-	limit, offset := paginateInvoices(page, pageSize)
-	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("by-customer=%d|p=%d|ps=%d", customerID, page, pageSize))
-	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.Invoice, error) {
-			return s.repo.ListInvoicesByCustomer(ctx, businessID, customerID, limit+1, offset)
-		},
-		cacher.WithExpiry(ctx, invoicesTTL),
-	)
-	if err != nil {
-		return nil, false, err
-	}
-	hasMore := len(rows) > limit
-	if hasMore {
-		rows = rows[:limit]
-	}
-	return rows, hasMore, nil
+	return s.ListInvoicesForCustomer(ctx, businessID, customerID, page, pageSize, "", "", "", "")
 }
 
 // CountInvoicesByCustomer reports how many invoices carry the customer link.

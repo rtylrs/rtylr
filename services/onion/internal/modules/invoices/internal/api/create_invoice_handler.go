@@ -180,6 +180,12 @@ func (h *CreateInvoiceHandler) Serve(ctx context.Context, req *CreateInvoiceRequ
 	if err != nil {
 		return CreateInvoiceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create invoice")
 	}
+	if inv.CreatedAt.IsZero() || inv.UpdatedAt.IsZero() {
+		inv, err = h.FinanceService.GetInvoice(ctx, businessID, inv.ID)
+		if err != nil {
+			return CreateInvoiceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load created invoice")
+		}
+	}
 
 	return CreateInvoiceResponse{Invoice: newInvoiceDetailPayload(inv)}, nil
 }

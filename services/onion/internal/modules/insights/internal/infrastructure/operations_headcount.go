@@ -2,7 +2,6 @@ package infrastructure
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
@@ -10,40 +9,61 @@ import (
 )
 
 type HeadcountSnapshot struct {
-	ActiveHeadcount      int64
-	HeadcountOneMonthAgo int64
+	ActiveHeadcount    int64
+	HeadcountAtStart   int64
+	HiredThisPeriod    int64
+	DepartedThisPeriod int64
 }
 
-func dateParam(t time.Time) sql.NullTime {
-	d := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-	return sql.NullTime{Time: d, Valid: true}
-}
+func (r *Repository) GetHeadcount(ctx context.Context, businessID int64, from, to time.Time) (HeadcountSnapshot, error) {
+	periodStart := dateParam(from)
+	periodEnd := dateParam(to)
+	dayBeforeStart := dateParam(from.AddDate(0, 0, -1))
 
-func (r *Repository) GetHeadcount(ctx context.Context, businessID int64) (HeadcountSnapshot, error) {
-	now := nowFn()
-	monthAgo := now.AddDate(0, -1, 0)
-
-	// cross-schema read from hr_employees — current active headcount
-	nowCount, err := r.queries.GetHeadcountNow(ctx, sqlc.GetHeadcountNowParams{
+	headcountAtStart, err := r.queries.GetHeadcountAsOf(ctx, sqlc.GetHeadcountAsOfParams{
 		BusinessID: businessID,
-		StartDate:  dateParam(now),
-		EndDate:    dateParam(now),
+		StartDate:  dayBeforeStart,
+		EndDate:    dayBeforeStart,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("insights: headcount now failed", logger.Error(err))
+		logger.Ctx(ctx).Error("insights: headcount period start failed", logger.Error(err))
 		return HeadcountSnapshot{}, err
 	}
 
-	// cross-schema read from hr_employees — headcount as-of one month ago for MoM delta
-	priorCount, err := r.queries.GetHeadcountPrior(ctx, sqlc.GetHeadcountPriorParams{
+	activeHeadcount, err := r.queries.GetHeadcountAsOf(ctx, sqlc.GetHeadcountAsOfParams{
 		BusinessID: businessID,
-		StartDate:  dateParam(monthAgo),
-		EndDate:    dateParam(monthAgo),
+		StartDate:  periodEnd,
+		EndDate:    periodEnd,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("insights: headcount prior failed", logger.Error(err))
+		logger.Ctx(ctx).Error("insights: headcount period end failed", logger.Error(err))
 		return HeadcountSnapshot{}, err
 	}
 
-	return HeadcountSnapshot{ActiveHeadcount: nowCount, HeadcountOneMonthAgo: priorCount}, nil
+	hired, err := r.queries.CountHeadcountHires(ctx, sqlc.CountHeadcountHiresParams{
+		BusinessID:  businessID,
+		StartDate:   periodStart,
+		StartDate_2: periodEnd,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: headcount hires failed", logger.Error(err))
+		return HeadcountSnapshot{}, err
+	}
+
+	departed, err := r.queries.CountHeadcountDepartures(ctx, sqlc.CountHeadcountDeparturesParams{
+		BusinessID: businessID,
+		EndDate:    periodStart,
+		EndDate_2:  periodEnd,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: headcount departures failed", logger.Error(err))
+		return HeadcountSnapshot{}, err
+	}
+
+	return HeadcountSnapshot{
+		ActiveHeadcount:    activeHeadcount,
+		HeadcountAtStart:   headcountAtStart,
+		HiredThisPeriod:    hired,
+		DepartedThisPeriod: departed,
+	}, nil
 }

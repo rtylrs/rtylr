@@ -2,6 +2,7 @@ package money
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 )
 
@@ -16,6 +17,14 @@ func TestFromStringUsesMinorUnits(t *testing.T) {
 	}
 	if got+other != Amount(30) {
 		t.Fatalf("got %d cents, want 30", got+other)
+	}
+}
+
+func TestFromStringRejectsMalformedDecimalFractions(t *testing.T) {
+	for _, value := range []string{"1000.-5", "1000.+5", "1000.-", "1000.", ".", "1000.1a"} {
+		if _, err := FromString(value); !errors.Is(err, ErrInvalidAmount) {
+			t.Errorf("FromString(%q) error = %v, want ErrInvalidAmount", value, err)
+		}
 	}
 }
 

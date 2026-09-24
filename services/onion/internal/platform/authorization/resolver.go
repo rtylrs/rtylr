@@ -140,16 +140,32 @@ type ProvisioningStatus struct {
 // assignments. It deliberately returns no app permission when membership is
 // inactive, a license is absent, a role is archived, or a role cannot be found.
 func Resolve(snapshot Snapshot) EffectiveAccess {
-	isOwner := snapshot.DashRole == "owner"
-	isAdmin := snapshot.DashRole == "admin"
+	// A revoked business membership must not retain dashboard privileges merely
+	// because the stale dash role/permission rows are still present. App access
+	// already fails closed on MembershipActive; apply the same boundary to the
+	// dashboard surface and its owner/admin shortcuts.
+	isOwner := snapshot.MembershipActive && snapshot.DashRole == "owner"
+	isAdmin := snapshot.MembershipActive && snapshot.DashRole == "admin"
 	rolesByID := make(map[int64]Role, len(snapshot.Roles))
 	for _, role := range snapshot.Roles {
 		rolesByID[role.ID] = role
 	}
 
-	dashPermissions := uniqueSorted(snapshot.DashPermissions)
-	if snapshot.MembershipActive && (isOwner || isAdmin) {
-		dashPermissions = uniqueSorted(snapshot.AllPermissions)
+	dashPermissions := []string{}
+	if snapshot.MembershipActive {
+		dashPermissions = uniqueSorted(snapshot.DashPermissions)
+		if isOwner || isAdmin {
+			dashPermissions = uniqueSorted(snapshot.AllPermissions)
+		}
+	}
+
+	dashRole := snapshot.DashRole
+	dashRoleID := snapshot.DashRoleID
+	if !snapshot.MembershipActive {
+		// CanAssignDashboardRole and other consumers use the role string as a
+		// fallback ceiling, so clear the identity as well as the flags.
+		dashRole = ""
+		dashRoleID = nil
 	}
 
 	apps := make([]AppID, 0, len(snapshot.SubscribedApps))
@@ -165,8 +181,8 @@ func Resolve(snapshot Snapshot) EffectiveAccess {
 
 	resolved := EffectiveAccess{
 		BusinessID:           snapshot.BusinessID,
-		DashRole:             snapshot.DashRole,
-		DashRoleID:           snapshot.DashRoleID,
+		DashRole:             dashRole,
+		DashRoleID:           dashRoleID,
 		DashPermissions:      dashPermissions,
 		SubscribedApps:       apps,
 		Licenses:             append([]License{}, snapshot.Licenses...),

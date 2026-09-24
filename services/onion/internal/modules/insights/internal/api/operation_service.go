@@ -17,23 +17,27 @@ func NewOperationAPI(service *application.Service) *OperationAPI {
 	return &OperationAPI{Service: service}
 }
 
-func (a *OperationAPI) GetHeadcountMetrics(ctx context.Context, _ *insightsoperationv1.GetHeadcountMetricsRequest) (*insightsoperationv1.GetHeadcountMetricsResponse, error) {
+func (a *OperationAPI) GetHeadcountMetrics(ctx context.Context, req *insightsoperationv1.GetHeadcountMetricsRequest) (*insightsoperationv1.GetHeadcountMetricsResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
+	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
+	if err != nil {
+		return nil, err
+	}
 
-	row, err := a.Service.GetHeadcount(ctx, businessID)
+	row, err := a.Service.GetHeadcount(ctx, businessID, from, to)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load headcount metrics")
 	}
 
 	return &insightsoperationv1.GetHeadcountMetricsResponse{
 		Metrics: &insightsoperationv1.HeadcountMetrics{
-			Current:            int32(row.ActiveStaff),            // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-			HiredThisPeriod:    int32(maxInt64(row.MomDelta, 0)),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-			DepartedThisPeriod: int32(maxInt64(-row.MomDelta, 0)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-			TurnoverRate:       row.MomDeltaPct,
+			Current:            int32(row.ActiveStaff),        // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			HiredThisPeriod:    int32(row.HiredThisPeriod),    // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			DepartedThisPeriod: int32(row.DepartedThisPeriod), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			TurnoverRate:       row.TurnoverRate,
 		},
 	}, nil
 }
@@ -43,7 +47,6 @@ func (a *OperationAPI) GetShiftMetrics(ctx context.Context, req *insightsoperati
 	if err != nil {
 		return nil, err
 	}
-
 	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
 	if err != nil {
 		return nil, err
@@ -64,13 +67,17 @@ func (a *OperationAPI) GetShiftMetrics(ctx context.Context, req *insightsoperati
 	}, nil
 }
 
-func (a *OperationAPI) GetTimeOffMetrics(ctx context.Context, _ *insightsoperationv1.GetTimeOffMetricsRequest) (*insightsoperationv1.GetTimeOffMetricsResponse, error) {
+func (a *OperationAPI) GetTimeOffMetrics(ctx context.Context, req *insightsoperationv1.GetTimeOffMetricsRequest) (*insightsoperationv1.GetTimeOffMetricsResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
+	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
+	if err != nil {
+		return nil, err
+	}
 
-	row, err := a.Service.GetTimeOffSummary(ctx, businessID)
+	row, err := a.Service.GetTimeOffSummary(ctx, businessID, from, to)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load time-off metrics")
 	}
@@ -84,13 +91,17 @@ func (a *OperationAPI) GetTimeOffMetrics(ctx context.Context, _ *insightsoperati
 	}, nil
 }
 
-func (a *OperationAPI) GetUtilization(ctx context.Context, _ *insightsoperationv1.GetUtilizationRequest) (*insightsoperationv1.GetUtilizationResponse, error) {
+func (a *OperationAPI) GetUtilization(ctx context.Context, req *insightsoperationv1.GetUtilizationRequest) (*insightsoperationv1.GetUtilizationResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
+	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
+	if err != nil {
+		return nil, err
+	}
 
-	row, err := a.Service.GetUtilization(ctx, businessID)
+	row, err := a.Service.GetUtilization(ctx, businessID, from, to)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load utilization metrics")
 	}
@@ -121,11 +132,4 @@ func (a *OperationAPI) GetOperationsSummary(ctx context.Context, _ *insightsoper
 		PendingTimeOff:    kpis.PendingTimeOff,
 		OpenLeaveRequests: kpis.OpenLeaveRequests,
 	}, nil
-}
-
-func maxInt64(a, b int64) int64 {
-	if a > b {
-		return a
-	}
-	return b
 }

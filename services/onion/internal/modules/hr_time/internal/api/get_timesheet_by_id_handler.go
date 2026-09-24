@@ -44,8 +44,11 @@ func (h *GetTimesheetByIDHandler) Serve(ctx context.Context, _ *GetTimesheetByID
 		return GetTimesheetByIDResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")
 	}
 
-	ts, err := h.Service.GetTimesheet(ctx, businessID, id)
+	ts, err := h.Service.GetTimesheetForCaller(ctx, businessID, device.User.UserID, id)
 	if err != nil {
+		if errors.Is(err, domain.ErrTimesheetAccessDenied) {
+			return GetTimesheetByIDResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrTimesheetNotFound) {
 			return GetTimesheetByIDResponse{}, onekiterrors.New(http.StatusNotFound, "Timesheet not found")
 		}

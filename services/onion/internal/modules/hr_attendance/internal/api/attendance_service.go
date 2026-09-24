@@ -91,9 +91,20 @@ func (a *AttendanceAPI) AttendanceClockIn(ctx context.Context, req *hrattendance
 }
 
 func (a *AttendanceAPI) AttendanceClockOut(ctx context.Context, req *hrattendancev1.AttendanceClockOutRequest) (*hrattendancev1.AttendanceClockOutResponse, error) {
-	result, err := (&ClockOutHandler{Service: a.Service}).Serve(ctx, &ClockOutRequest{
-		EmployeeID: req.GetAttendanceRecordId(),
-	})
+	_, employeeID, err := a.resolveIdentity(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// The generated request carries an attendance record id, but it is not an
+	// authorization input. Clock-out is self-scoped to the authenticated
+	// employee, just like clock-in.
+	handler := &ClockOutHandler{Service: a.Service, Resolve: a.resolveIdentity}
+	clockOutReq := &ClockOutRequest{EmployeeID: employeeID}
+	if err := handler.Validate(ctx, clockOutReq); err != nil {
+		return nil, err
+	}
+	result, err := handler.Serve(ctx, clockOutReq)
 	if err != nil {
 		return nil, err
 	}

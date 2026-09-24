@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
@@ -50,6 +51,18 @@ type ImportCustomersResponse struct {
 // PII rows in one shot.
 const maxImportBatchSize = 1000
 
+func validateImportCustomerItem(item ImportCustomerItem) error {
+	if item.FirstName == "" {
+		return onekiterrors.New(http.StatusBadRequest, "First name is required")
+	}
+	if item.DateOfBirth != "" {
+		if _, err := time.Parse("2006-01-02", item.DateOfBirth); err != nil {
+			return onekiterrors.New(http.StatusBadRequest, "Invalid date of birth format, expected YYYY-MM-DD")
+		}
+	}
+	return nil
+}
+
 func (h *ImportCustomersHandler) Validate(_ context.Context, req *ImportCustomersRequest) error {
 	if len(req.Customers) == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "At least one customer is required")
@@ -77,9 +90,14 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 		return ImportCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	items := make([]domain.CustomerImportItem, len(req.Customers))
-	for i, c := range req.Customers {
-		items[i] = domain.CustomerImportItem{
+	items := make([]domain.CustomerImportItem, 0, len(req.Customers))
+	failed := 0
+	for _, c := range req.Customers {
+		if validateImportCustomerItem(c) != nil {
+			failed++
+			continue
+		}
+		items = append(items, domain.CustomerImportItem{
 			FirstName:   c.FirstName,
 			LastName:    c.LastName,
 			Email:       c.Email,
@@ -91,12 +109,20 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 			Country:     c.Country,
 			Tags:        c.Tags,
 			Notes:       c.Notes,
-		}
+		})
 	}
 
-	result, err := h.CRMService.ImportCustomers(ctx, businessID, device.User.UserID, items, req.Dedupe)
-	if err != nil {
-		return ImportCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to import customers")
+	result := domain.CustomerImportResult{
+		TotalProcessed: len(req.Customers),
+		Failed:         failed,
+	}
+	if len(items) > 0 {
+		importResult, err := h.CRMService.ImportCustomers(ctx, businessID, device.User.UserID, items, req.Dedupe)
+		if err != nil {
+			return ImportCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to import customers")
+		}
+		result.Imported = importResult.Imported
+		result.Failed += importResult.Failed
 	}
 
 	return ImportCustomersResponse{

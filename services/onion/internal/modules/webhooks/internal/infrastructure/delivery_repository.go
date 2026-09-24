@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
 	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure/persistence/sqlc"
@@ -152,10 +154,15 @@ func nullResponseStatus(status int) sql.NullInt16 {
 
 func truncateCause(cause string) string {
 	const limit = 500
+	cause = strings.ToValidUTF8(cause, "")
 	if len(cause) <= limit {
 		return cause
 	}
-	return cause[:limit] + "..."
+	cut := limit
+	for !utf8.ValidString(cause[:cut]) {
+		cut--
+	}
+	return cause[:cut] + "..."
 }
 
 // ListDeliveriesForBusiness returns a page of delivery attempts for one

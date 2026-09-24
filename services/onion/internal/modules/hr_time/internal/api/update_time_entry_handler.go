@@ -23,17 +23,17 @@ func UpdateTimeEntryRoutes() []string { return []string{"/hr/time-entries/{id}"}
 type UpdateTimeEntryHandler struct{ Service *application.Service }
 
 type UpdateTimeEntryRequest struct {
-	EmployeeID      int64  `json:"employee_id"`
-	ProjectID       int64  `json:"project_id"`
-	TaskID          int64  `json:"task_id"`
-	CategoryID      int64  `json:"category_id"`
-	Date            string `json:"date"`
-	DurationMinutes int32  `json:"duration_minutes"`
-	StartTime       string `json:"start_time"`
-	EndTime         string `json:"end_time"`
-	Description     string `json:"description"`
-	IsBillable      bool   `json:"is_billable"`
-	Source          string `json:"source"`
+	EmployeeID      *int64  `json:"employee_id"`
+	ProjectID       *int64  `json:"project_id"`
+	TaskID          *int64  `json:"task_id"`
+	CategoryID      *int64  `json:"category_id"`
+	Date            *string `json:"date"`
+	DurationMinutes *int32  `json:"duration_minutes"`
+	StartTime       *string `json:"start_time"`
+	EndTime         *string `json:"end_time"`
+	Description     *string `json:"description"`
+	IsBillable      *bool   `json:"is_billable"`
+	Source          *string `json:"source"`
 }
 
 type UpdateTimeEntryResponse struct {
@@ -41,19 +41,27 @@ type UpdateTimeEntryResponse struct {
 }
 
 func (h *UpdateTimeEntryHandler) Validate(_ context.Context, req *UpdateTimeEntryRequest) error {
-	if req.DurationMinutes <= 0 {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
+	if req.EmployeeID != nil && *req.EmployeeID <= 0 {
+		return onekiterrors.New(http.StatusBadRequest, "employee_id must be greater than 0")
+	}
+	if req.DurationMinutes != nil && *req.DurationMinutes <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "duration_minutes must be greater than 0")
 	}
-	if req.Date == "" {
-		return onekiterrors.New(http.StatusBadRequest, "date is required")
-	}
-	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
-		return onekiterrors.New(http.StatusBadRequest, "date must be in YYYY-MM-DD format")
+	if req.Date != nil {
+		if _, err := time.Parse(time.DateOnly, *req.Date); err != nil {
+			return onekiterrors.New(http.StatusBadRequest, "date must be in YYYY-MM-DD format")
+		}
 	}
 	return nil
 }
 
 func (h *UpdateTimeEntryHandler) Serve(ctx context.Context, req *UpdateTimeEntryRequest) (UpdateTimeEntryResponse, error) {
+	if err := h.Validate(ctx, req); err != nil {
+		return UpdateTimeEntryResponse{}, err
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateTimeEntryResponse{}, onekiterrors.PermissionDenied()
@@ -70,8 +78,7 @@ func (h *UpdateTimeEntryHandler) Serve(ctx context.Context, req *UpdateTimeEntry
 		return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid time entry id")
 	}
 
-	entry := domain.TimeEntryRecord{
-		ID:              id,
+	patch := domain.TimeEntryPatch{
 		EmployeeID:      req.EmployeeID,
 		ProjectID:       req.ProjectID,
 		TaskID:          req.TaskID,
@@ -84,11 +91,19 @@ func (h *UpdateTimeEntryHandler) Serve(ctx context.Context, req *UpdateTimeEntry
 		IsBillable:      req.IsBillable,
 		Source:          req.Source,
 	}
-
-	updated, err := h.Service.UpdateTimeEntry(ctx, businessID, entry)
+	updated, err := h.Service.UpdateTimeEntry(ctx, businessID, device.User.UserID, id, patch)
 	if err != nil {
+		if errors.Is(err, domain.ErrTimeEntryAccessDenied) {
+			return UpdateTimeEntryResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrInvalidDuration) {
 			return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "Duration must be greater than 0")
+		}
+		if errors.Is(err, domain.ErrDateInLockedPeriod) {
+			return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusConflict, "Cannot add entry to a locked period")
+		}
+		if errors.Is(err, domain.ErrTimeEntryNotFound) {
+			return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusNotFound, "Time entry not found")
 		}
 		logger.Ctx(ctx).Error("failed to update time entry", logger.Any("owner_id", device.User.UserID), logger.Any("entry_id", id), logger.Error(err))
 		return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update time entry")

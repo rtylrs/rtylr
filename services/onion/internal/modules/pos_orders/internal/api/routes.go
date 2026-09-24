@@ -10,6 +10,10 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+	serverHttp.RegisterGETWithValidation[ListOrdersRequest, ListOrdersResponse](
+		ctx, router, ListOrdersRoutes(), &ListOrdersHandler{Service: service},
+	)
+
 	serverHttp.RegisterPOSTWithValidation[VoidOrderApprovalRequest, VoidOrderApprovalResponse](
 		ctx, router, ApproveVoidOrderRoutes(), &ApproveVoidOrderHandler{Service: service},
 	)

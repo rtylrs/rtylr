@@ -13,7 +13,10 @@ import (
 type singleLevelApprovalChain struct{}
 
 func (singleLevelApprovalChain) GetApprovalChain(context.Context, int64, string) (*domain.ApprovalChainInfo, error) {
-	return &domain.ApprovalChainInfo{TotalLevels: 1}, nil
+	return &domain.ApprovalChainInfo{
+		TotalLevels: 1,
+		Levels:      []domain.ApprovalLevelInfo{{LevelOrder: 1, ApproverRoleID: 1}},
+	}, nil
 }
 
 // TestApproveTimesheet_FinalLevelLocksTimesheet is the hr_time half of the
@@ -44,7 +47,10 @@ func TestApproveTimesheet_FinalLevelLocksTimesheet(t *testing.T) {
 		}
 	})
 
-	service := NewService(ctx, db, singleLevelApprovalChain{})
+	service := NewService(ctx, db, singleLevelApprovalChain{}, newAllowApprovalPermissions(map[int64]int64{
+		employeeID: employeeID,
+		approverID: 9100767,
+	}))
 
 	ts, err := service.GetOrCreateTimesheet(ctx, businessID, employeeID, "2026-10-01", "2026-10-31")
 	if err != nil {
@@ -52,7 +58,7 @@ func TestApproveTimesheet_FinalLevelLocksTimesheet(t *testing.T) {
 	}
 
 	for _, minutes := range []int32{480, 240} {
-		if _, err := service.CreateTimeEntry(ctx, businessID, domain.TimeEntryRecord{
+		if _, err := service.CreateTimeEntry(ctx, businessID, employeeID, domain.TimeEntryRecord{
 			EmployeeID:      employeeID,
 			TimesheetID:     ts.ID,
 			Date:            "2026-10-05",

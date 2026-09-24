@@ -47,6 +47,25 @@ func TestOpenCodeConfiguration(t *testing.T) {
 	}
 }
 
+func TestLoadAndValidate_TrimsAndFiltersRedisHosts(t *testing.T) {
+	setLicenseConfigEnv(t)
+	t.Setenv("REDIS_HOSTS", " redis-a:6379, , redis-b:6380, ")
+
+	cfg, err := LoadAndValidate()
+	if err != nil {
+		t.Fatalf("LoadAndValidate: %v", err)
+	}
+	want := []string{"redis-a:6379", "redis-b:6380"}
+	if len(cfg.RedisHosts) != len(want) {
+		t.Fatalf("RedisHosts = %v, want %v", cfg.RedisHosts, want)
+	}
+	for i := range want {
+		if cfg.RedisHosts[i] != want[i] {
+			t.Fatalf("RedisHosts = %v, want %v", cfg.RedisHosts, want)
+		}
+	}
+}
+
 func TestLoadAndValidate_DefaultsJWTDuration(t *testing.T) {
 	setLicenseConfigEnv(t)
 

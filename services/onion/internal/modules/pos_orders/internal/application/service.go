@@ -327,6 +327,47 @@ func (s *Service) UpdateOrderItemStatus(ctx context.Context, ownerID, orderID, i
 	return nil
 }
 
+type paymentSessionTotalsRefresher interface {
+	GetOrderSessionID(context.Context, int64) (int64, error)
+	GetSessionTotals(context.Context, int64) (float64, float64, float64, float64, int, error)
+	UpdateSessionTotals(context.Context, int64, float64, float64, float64, float64, int) error
+}
+
+// refreshSessionTotalsAfterPayment is deliberately best effort. The payment
+// transaction has already committed when this runs, so a totals refresh must
+// not turn a durable payment into a failed request.
+func refreshSessionTotalsAfterPayment(ctx context.Context, repo paymentSessionTotalsRefresher, orderID int64) {
+	sessionID, err := repo.GetOrderSessionID(ctx, orderID)
+	if err != nil {
+		logger.Ctx(ctx).Warn("payment recorded but session lookup failed",
+			logger.Any("order_id", orderID),
+			logger.Error(err),
+		)
+		return
+	}
+	if sessionID == 0 {
+		return
+	}
+
+	totalSales, cashSales, cardSales, onlineSales, totalOrders, err := repo.GetSessionTotals(ctx, sessionID)
+	if err != nil {
+		logger.Ctx(ctx).Warn("payment recorded but session totals read failed",
+			logger.Any("order_id", orderID),
+			logger.Any("session_id", sessionID),
+			logger.Error(err),
+		)
+		return
+	}
+
+	if err := repo.UpdateSessionTotals(ctx, sessionID, totalSales, cashSales, cardSales, onlineSales, totalOrders); err != nil {
+		logger.Ctx(ctx).Warn("payment recorded but session totals update failed",
+			logger.Any("order_id", orderID),
+			logger.Any("session_id", sessionID),
+			logger.Error(err),
+		)
+	}
+}
+
 func (s *Service) ProcessPayment(ctx context.Context, ownerID int64, input domain.PaymentInput) error {
 	if input.OrderID == 0 {
 		return errors.New("order id is required")
@@ -344,17 +385,8 @@ func (s *Service) ProcessPayment(ctx context.Context, ownerID int64, input domai
 
 	invalidateOrderScope(ctx, ownerID)
 
-	sessionID, err := s.repo.GetOrderSessionID(ctx, input.OrderID)
-	if err != nil || sessionID == 0 {
-		return nil
-	}
-
-	totalSales, cashSales, cardSales, onlineSales, totalOrders, err := s.repo.GetSessionTotals(ctx, sessionID)
-	if err != nil {
-		return nil
-	}
-
-	return s.repo.UpdateSessionTotals(ctx, sessionID, totalSales, cashSales, cardSales, onlineSales, totalOrders)
+	refreshSessionTotalsAfterPayment(ctx, s.repo, input.OrderID)
+	return nil
 }
 
 func (s *Service) ProcessRefund(ctx context.Context, ownerID, refundedBy int64, input domain.RefundInput) (int64, error) {

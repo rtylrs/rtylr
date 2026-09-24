@@ -43,9 +43,10 @@ var fields = map[string]fieldSpec{
 }
 
 type parsedRule struct {
-	spec fieldSpec
-	op   string
-	val  string
+	spec      fieldSpec
+	op        string
+	val       string
+	boolValue bool
 }
 
 type rulesDoc struct {
@@ -99,10 +100,11 @@ func parseRule(raw string) (parsedRule, bool) {
 	if spec.numeric && !isNumeric(value) {
 		return parsedRule{}, false
 	}
+	boolValue := false
 	if spec.boolean {
-		value = normalizeBool(value)
+		boolValue = normalizeBool(value)
 	}
-	return parsedRule{spec: spec, op: op, val: value}, true
+	return parsedRule{spec: spec, op: op, val: value, boolValue: boolValue}, true
 }
 
 func isNumeric(value string) bool {
@@ -123,18 +125,25 @@ func isNumeric(value string) bool {
 	return true
 }
 
-func normalizeBool(value string) string {
+func normalizeBool(value string) bool {
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "true", "1", "yes":
-		return "TRUE"
+		return true
 	default:
-		return "FALSE"
+		return false
 	}
 }
 
 func likeEscape(value string) string {
 	replacer := strings.NewReplacer("!", "!!", "%", "!%", "_", "!_")
 	return replacer.Replace(value)
+}
+
+func (r parsedRule) valueArg() any {
+	if r.spec.boolean {
+		return r.boolValue
+	}
+	return r.val
 }
 
 func (r parsedRule) sql() (string, []any) {
@@ -153,9 +162,9 @@ func (r parsedRule) sql() (string, []any) {
 			}
 			return "JSON_CONTAINS(tags, ?)", []any{string(encoded)}
 		}
-		return fmt.Sprintf("%s = ?", col), []any{r.val}
+		return fmt.Sprintf("%s = ?", col), []any{r.valueArg()}
 	case "!=", "<>":
-		return fmt.Sprintf("%s <> ?", col), []any{r.val}
+		return fmt.Sprintf("%s <> ?", col), []any{r.valueArg()}
 	case "contains":
 		if r.spec.numeric || r.spec.boolean {
 			break

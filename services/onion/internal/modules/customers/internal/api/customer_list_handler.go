@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -11,6 +12,11 @@ import (
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
+)
+
+const (
+	defaultCustomerPageSize = 20
+	maxCustomerPageSize     = 100
 )
 
 func CustomerListRoutes() []string {
@@ -90,8 +96,16 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 		req.Page = 1
 	}
 
-	if req.PageSize < 1 {
-		req.PageSize = 20
+	if req.PageSize < 1 || req.PageSize > maxCustomerPageSize {
+		req.PageSize = defaultCustomerPageSize
+	}
+
+	// The repository binds LIMIT/OFFSET as int32 for MySQL. Keep the computed
+	// offset within that range so a very large page number cannot wrap to a
+	// different page or produce a negative OFFSET.
+	maxPage := math.MaxInt32/req.PageSize + 1
+	if req.Page > maxPage {
+		req.Page = maxPage
 	}
 
 	result, err := h.CRMService.ListCustomers(ctx, domain.CustomerListFilter{

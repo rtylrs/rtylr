@@ -81,12 +81,13 @@ type CachedValidator struct {
 	key    string
 	grace  time.Duration
 
-	mu          sync.Mutex
-	last        StatusReport
-	lastSuccess time.Time // last time the authority answered
-	lastCheck   time.Time
-	haveResult  bool
-	clock       *ClockGuard
+	mu                     sync.Mutex
+	last                   StatusReport
+	lastSuccess            time.Time // last time the authority returned a valid report
+	lastCheck              time.Time
+	lastAttemptUnreachable bool // whether the most recent authority attempt failed
+	haveResult             bool
+	clock                  *ClockGuard
 }
 
 func NewCachedValidator(cfg *platformconfig.AppConfig) *CachedValidator {
@@ -177,6 +178,7 @@ func (v *CachedValidator) refreshLocked(ctx context.Context, now time.Time) Stat
 	if v.key == "" {
 		v.last = StatusReport{Mode: mode, Valid: false, Status: StatusMissing, Reason: ErrMissingLicense.Error(), CheckedAt: now}
 		v.lastCheck = now
+		v.lastAttemptUnreachable = false
 		v.haveResult = true
 		return v.last
 	}
@@ -187,6 +189,7 @@ func (v *CachedValidator) refreshLocked(ctx context.Context, now time.Time) Stat
 		report.Mode = mode
 		report.CheckedAt = now
 		v.last = report
+		v.lastAttemptUnreachable = false
 		v.haveResult = true
 		if report.Valid {
 			v.lastSuccess = now
@@ -195,13 +198,21 @@ func (v *CachedValidator) refreshLocked(ctx context.Context, now time.Time) Stat
 	}
 
 	// Authority unreachable — serve the last valid result within grace.
+	v.lastAttemptUnreachable = true
 	v.haveResult = true
 	return v.effectiveLocked(now)
 }
 
-// effectiveLocked applies grace when the authority is unreachable. Caller holds v.mu.
+// effectiveLocked returns the latest authority answer, or applies grace when
+// the most recent authority attempt was unreachable. Caller holds v.mu.
 func (v *CachedValidator) effectiveLocked(now time.Time) StatusReport {
 	mode := deploymentMode(v.cfg)
+	if v.haveResult && !v.lastAttemptUnreachable {
+		cached := v.last
+		cached.Mode = mode
+		cached.CheckedAt = now
+		return cached
+	}
 	if v.last.Valid && !v.lastSuccess.IsZero() && now.Before(v.lastSuccess.Add(v.grace)) {
 		degraded := v.last
 		degraded.Mode = mode

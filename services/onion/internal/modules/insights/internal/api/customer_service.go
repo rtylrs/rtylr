@@ -17,31 +17,33 @@ func NewCustomerAPI(service *application.Service) *CustomerAPI {
 	return &CustomerAPI{Service: service}
 }
 
-func (a *CustomerAPI) GetCustomerAnalytics(ctx context.Context, _ *insightscustomerv1.GetCustomerAnalyticsRequest) (*insightscustomerv1.GetCustomerAnalyticsResponse, error) {
+func (a *CustomerAPI) GetCustomerAnalytics(ctx context.Context, req *insightscustomerv1.GetCustomerAnalyticsRequest) (*insightscustomerv1.GetCustomerAnalyticsResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:customers:view")
 	if err != nil {
 		return nil, err
 	}
+	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
+	if err != nil {
+		return nil, err
+	}
 
-	kpis, err := a.Service.GetCustomerKPIs(ctx, businessID)
+	kpis, err := a.Service.GetCustomerKPIs(ctx, businessID, from, to)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load customer analytics")
 	}
 
-	var churnRate float64
-	if kpis.Total > 0 {
-		churnRate = (float64(kpis.Churned) / float64(kpis.Total)) * 100
-	}
-	var retention float64
-	if kpis.Total > 0 {
-		retention = (float64(kpis.Active) / float64(kpis.Total)) * 100
+	cohort := kpis.Active + kpis.Churned
+	var churnRate, retention float64
+	if cohort > 0 {
+		churnRate = float64(kpis.Churned) / float64(cohort) * 100
+		retention = float64(kpis.Active) / float64(cohort) * 100
 	}
 
 	// #nosec G115 -- Analytics counters are database-backed non-negative values mapped to bounded protobuf fields.
 	return &insightscustomerv1.GetCustomerAnalyticsResponse{
 		Analytics: &insightscustomerv1.CustomerAnalytics{
 			Total:            int32(kpis.Total), // #nosec G115 -- Analytics counters are database-backed non-negative values mapped to bounded protobuf fields.
-			NewThisPeriod:    int32(kpis.NewThisMonth),
+			NewThisPeriod:    int32(kpis.NewThisPeriod),
 			RetentionRate:    retention,
 			ChurnRate:        churnRate,
 			AvgLifetimeValue: 0,
@@ -49,13 +51,17 @@ func (a *CustomerAPI) GetCustomerAnalytics(ctx context.Context, _ *insightscusto
 	}, nil
 }
 
-func (a *CustomerAPI) GetChurnAnalysis(ctx context.Context, _ *insightscustomerv1.GetChurnAnalysisRequest) (*insightscustomerv1.GetChurnAnalysisResponse, error) {
+func (a *CustomerAPI) GetChurnAnalysis(ctx context.Context, req *insightscustomerv1.GetChurnAnalysisRequest) (*insightscustomerv1.GetChurnAnalysisResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:customers:view")
 	if err != nil {
 		return nil, err
 	}
+	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
+	if err != nil {
+		return nil, err
+	}
 
-	windows, err := a.Service.GetChurnRates(ctx, businessID)
+	windows, err := a.Service.GetChurnRates(ctx, businessID, from, to)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load churn analysis")
 	}
@@ -66,7 +72,6 @@ func (a *CustomerAPI) GetChurnAnalysis(ctx context.Context, _ *insightscustomerv
 		analysis.ChurnRate = w.ChurnPct
 		analysis.ChurnedCount = int32(w.ChurnedCount) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
-
 	return &insightscustomerv1.GetChurnAnalysisResponse{Analysis: analysis}, nil
 }
 
@@ -92,9 +97,7 @@ func (a *CustomerAPI) GetLTVAnalysis(ctx context.Context, _ *insightscustomerv1.
 	}
 
 	return &insightscustomerv1.GetLTVAnalysisResponse{
-		Analysis: &insightscustomerv1.LTVAnalysis{
-			Segments: segments,
-		},
+		Analysis: &insightscustomerv1.LTVAnalysis{Segments: segments},
 	}, nil
 }
 
@@ -103,21 +106,37 @@ func (a *CustomerAPI) GetTopCustomers(ctx context.Context, req *insightscustomer
 	if err != nil {
 		return nil, err
 	}
+	from, to, err := resolveDateRangeFromPeriod(req.GetPeriod())
+	if err != nil {
+		return nil, err
+	}
+	sortBy, sortDir, err := application.NormalizeTopCustomerSort(req.GetSortBy(), req.GetSortDir())
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+	limit := normalizeLimit(req.GetLimit())
+	page := normalizePage(req.GetPage())
 
-	rows, err := a.Service.GetTopCustomers(ctx, businessID, normalizeLimit(req.GetLimit()))
+	result, err := a.Service.GetTopCustomers(ctx, businessID, application.TopCustomerQuery{
+		From: from, To: to, Page: page, Limit: limit, SortBy: sortBy, SortDir: sortDir,
+	})
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load top customers")
 	}
 
-	customers := make([]*insightscustomerv1.TopCustomerEntry, 0, len(rows))
-	for _, row := range rows {
+	customers := make([]*insightscustomerv1.TopCustomerEntry, 0, len(result.Rows))
+	for _, row := range result.Rows {
 		customers = append(customers, &insightscustomerv1.TopCustomerEntry{
-			Id:         row.CustomerID,
-			Name:       row.Name,
-			TotalSpent: minorToMajor(row.LifetimeSpendMinorUnits),
-			OrderCount: int32(row.OrderCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			Id:          row.CustomerID,
+			Name:        row.Name,
+			TotalSpent:  minorToMajor(row.LifetimeSpendMinorUnits),
+			OrderCount:  int32(row.OrderCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			LastOrderAt: row.LastOrderAt.UTC().Format("2006-01-02T15:04:05Z07:00"),
 		})
 	}
 
-	return &insightscustomerv1.GetTopCustomersResponse{Customers: customers}, nil
+	return &insightscustomerv1.GetTopCustomersResponse{
+		Customers:  customers,
+		Pagination: paginationResponse(page, limit, result.Total),
+	}, nil
 }

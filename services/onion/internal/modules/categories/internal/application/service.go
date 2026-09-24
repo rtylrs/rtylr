@@ -19,9 +19,17 @@ const (
 	maxListLimit     int32 = 100
 )
 
+type CategoryPage struct {
+	Categories []domain.Category
+	Total      int64
+	Limit      int64
+	Offset     int64
+}
+
 type repository interface {
 	ListCategories(ctx context.Context, businessID int64) ([]domain.Category, error)
 	ListCategoriesPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Category, error)
+	CountCategories(ctx context.Context, businessID int64) (int64, error)
 	CreateCategory(ctx context.Context, businessID int64, input domain.CategoryInput) (int64, error)
 	UpdateCategory(ctx context.Context, businessID, id int64, input domain.CategoryInput) error
 	DeleteCategory(ctx context.Context, businessID, id int64) error
@@ -53,17 +61,43 @@ func (s *Service) ListCategories(ctx context.Context, businessID int64) ([]domai
 // limit defaults to 20 and limit is capped at 100; a negative offset is
 // clamped to zero.
 func (s *Service) ListCategoriesPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Category, error) {
-	if limit <= 0 {
-		limit = defaultListLimit
+	normalizedLimit, normalizedOffset := normalizeListBounds(int64(limit), int64(offset))
+	return s.repo.ListCategoriesPaginated(ctx, businessID, normalizedLimit, normalizedOffset)
+}
+
+func (s *Service) ListCategoriesPage(ctx context.Context, businessID int64, limit, offset int64) (CategoryPage, error) {
+	normalizedLimit, normalizedOffset := normalizeListBounds(limit, offset)
+	categories, err := s.repo.ListCategoriesPaginated(ctx, businessID, normalizedLimit, normalizedOffset)
+	if err != nil {
+		return CategoryPage{}, err
 	}
-	if limit > maxListLimit {
-		limit = maxListLimit
+	total, err := s.repo.CountCategories(ctx, businessID)
+	if err != nil {
+		return CategoryPage{}, err
+	}
+	return CategoryPage{
+		Categories: categories,
+		Total:      total,
+		Limit:      int64(normalizedLimit),
+		Offset:     int64(normalizedOffset),
+	}, nil
+}
+
+func normalizeListBounds(limit, offset int64) (int32, int32) {
+	if limit <= 0 {
+		limit = int64(defaultListLimit)
+	}
+	if limit > int64(maxListLimit) {
+		limit = int64(maxListLimit)
 	}
 	if offset < 0 {
 		offset = 0
 	}
-
-	return s.repo.ListCategoriesPaginated(ctx, businessID, limit, offset)
+	const maxInt32 = int64(1<<31 - 1)
+	if offset > maxInt32 {
+		offset = maxInt32
+	}
+	return int32(limit), int32(offset)
 }
 
 func (s *Service) CreateCategory(ctx context.Context, businessID int64, input domain.CategoryInput) (int64, error) {

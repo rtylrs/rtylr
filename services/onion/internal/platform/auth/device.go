@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -60,18 +61,14 @@ func GetAnonymousDevice() Device {
 }
 
 func extractIP(r *http.Request) string {
-	if ip := r.Header.Get("Cf-Connecting-Ip"); ip != "" {
+	// Keep this trust boundary aligned with the rate limiter: Cloudflare's
+	// header is the only proxy header we trust, and direct connections must
+	// use the socket peer rather than an attacker-supplied forwarding header.
+	if ip := strings.TrimSpace(r.Header.Get("Cf-Connecting-Ip")); ip != "" {
 		return ip
 	}
-	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
-		// X-Forwarded-For may be a comma-separated list; take the first
-		if idx := strings.Index(ip, ","); idx != -1 {
-			return strings.TrimSpace(ip[:idx])
-		}
-		return strings.TrimSpace(ip)
-	}
-	if ip := r.Header.Get("X-Real-Ip"); ip != "" {
-		return ip
+	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		return host
 	}
 	return r.RemoteAddr
 }

@@ -120,7 +120,7 @@ INSERT INTO careers (
     is_active
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true);
 
--- name: UpdateRecruitCareer :exec
+-- name: UpdateRecruitCareer :execresult
 UPDATE careers
 SET
     slug = ?,
@@ -138,7 +138,7 @@ SET
     is_published = ?
 WHERE id = ? AND business_id = ?;
 
--- name: SoftDeleteRecruitCareer :exec
+-- name: SoftDeleteRecruitCareer :execresult
 UPDATE careers
 SET is_active = false, is_published = false
 WHERE id = ? AND business_id = ?;
@@ -380,7 +380,7 @@ FROM careers_submissions
 WHERE id = ? AND business_id = ?
 LIMIT 1;
 
--- name: UpdateCareerSubmissionStatus :exec
+-- name: UpdateCareerSubmissionStatus :execresult
 UPDATE careers_submissions
 SET status = ?
 WHERE id = ? AND business_id = ?;

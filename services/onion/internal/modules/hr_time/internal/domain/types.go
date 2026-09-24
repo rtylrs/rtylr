@@ -26,6 +26,23 @@ type TimeEntryRecord struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
+// TimeEntryPatch carries only fields supplied by an update request. A nil
+// field preserves the stored value; workflow-owned fields are intentionally
+// absent so an ordinary update cannot clear approval state or ownership links.
+type TimeEntryPatch struct {
+	EmployeeID      *int64
+	ProjectID       *int64
+	TaskID          *int64
+	CategoryID      *int64
+	Date            *string
+	DurationMinutes *int32
+	StartTime       *string
+	EndTime         *string
+	Description     *string
+	IsBillable      *bool
+	Source          *string
+}
+
 type TimesheetRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`

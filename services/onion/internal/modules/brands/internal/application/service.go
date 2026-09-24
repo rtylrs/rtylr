@@ -19,9 +19,17 @@ const (
 	maxListLimit     int32 = 100
 )
 
+type BrandPage struct {
+	Brands []domain.Brand
+	Total  int64
+	Limit  int64
+	Offset int64
+}
+
 type repository interface {
 	ListBrands(ctx context.Context, businessID int64) ([]domain.Brand, error)
 	ListBrandsPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Brand, error)
+	CountBrands(ctx context.Context, businessID int64) (int64, error)
 	CreateBrand(ctx context.Context, businessID int64, input domain.BrandInput) (int64, error)
 	UpdateBrand(ctx context.Context, businessID, id int64, input domain.BrandInput) error
 	DeleteBrand(ctx context.Context, businessID, id int64) error
@@ -53,17 +61,43 @@ func (s *Service) ListBrands(ctx context.Context, businessID int64) ([]domain.Br
 // defaults to 20 and limit is capped at 100; a negative offset is clamped to
 // zero.
 func (s *Service) ListBrandsPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Brand, error) {
-	if limit <= 0 {
-		limit = defaultListLimit
+	normalizedLimit, normalizedOffset := normalizeListBounds(int64(limit), int64(offset))
+	return s.repo.ListBrandsPaginated(ctx, businessID, normalizedLimit, normalizedOffset)
+}
+
+func (s *Service) ListBrandsPage(ctx context.Context, businessID int64, limit, offset int64) (BrandPage, error) {
+	normalizedLimit, normalizedOffset := normalizeListBounds(limit, offset)
+	brands, err := s.repo.ListBrandsPaginated(ctx, businessID, normalizedLimit, normalizedOffset)
+	if err != nil {
+		return BrandPage{}, err
 	}
-	if limit > maxListLimit {
-		limit = maxListLimit
+	total, err := s.repo.CountBrands(ctx, businessID)
+	if err != nil {
+		return BrandPage{}, err
+	}
+	return BrandPage{
+		Brands: brands,
+		Total:  total,
+		Limit:  int64(normalizedLimit),
+		Offset: int64(normalizedOffset),
+	}, nil
+}
+
+func normalizeListBounds(limit, offset int64) (int32, int32) {
+	if limit <= 0 {
+		limit = int64(defaultListLimit)
+	}
+	if limit > int64(maxListLimit) {
+		limit = int64(maxListLimit)
 	}
 	if offset < 0 {
 		offset = 0
 	}
-
-	return s.repo.ListBrandsPaginated(ctx, businessID, limit, offset)
+	const maxInt32 = int64(1<<31 - 1)
+	if offset > maxInt32 {
+		offset = maxInt32
+	}
+	return int32(limit), int32(offset)
 }
 
 func (s *Service) CreateBrand(ctx context.Context, businessID int64, input domain.BrandInput) (int64, error) {

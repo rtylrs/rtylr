@@ -267,7 +267,7 @@ func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after fl
 	if _, _, err = applyKnown(ctx, q, m, before, after); err != nil {
 		return 0, 0, err
 	}
-	if m.EntryType == EntrySale && m.Change < 0 {
+	if m.Change < 0 {
 		if err := consumeCostLayersTx(ctx, tx, m, -m.Change); err != nil {
 			return 0, 0, err
 		}
@@ -275,10 +275,11 @@ func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after fl
 	return before, after, nil
 }
 
-// consumeCostLayersTx depletes receipt layers in FIFO order for a sale. Stock
-// movement and valuation updates share the caller's transaction, so a failed
-// layer update rolls back the corresponding stock movement as well. Missing
-// layers are tolerated for legacy stock that predates cost-layer tracking.
+// consumeCostLayersTx depletes receipt layers in FIFO order for a negative
+// stock movement. Stock movement and valuation updates share the caller's
+// transaction, so a failed layer update rolls back the corresponding stock
+// movement as well. Missing layers are tolerated for legacy stock that
+// predates cost-layer tracking.
 func consumeCostLayersTx(ctx context.Context, tx DBTX, m Movement, quantity float64) error {
 	if quantity <= 0 {
 		return nil
@@ -457,6 +458,11 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	if _, _, err = applyKnown(ctx, q, m, before, target); err != nil {
 		return before, 0, err
 	}
+	if delta < 0 {
+		if err := consumeCostLayersTx(ctx, tx, m, -delta); err != nil {
+			return before, 0, err
+		}
+	}
 	return before, delta, nil
 }
 
@@ -533,10 +539,18 @@ func SetTotalTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	if delta == 0 {
 		return before, 0, nil
 	}
+	if currentLocation+delta < 0 && !m.AllowNegative {
+		return before, 0, ErrInsufficientStock
+	}
 
 	m.Change = delta
 	if _, _, err = applyKnown(ctx, queries(tx), m, currentLocation, currentLocation+delta); err != nil {
 		return before, 0, err
+	}
+	if delta < 0 {
+		if err := consumeCostLayersTx(ctx, tx, m, -delta); err != nil {
+			return before, 0, err
+		}
 	}
 	return before, delta, nil
 }

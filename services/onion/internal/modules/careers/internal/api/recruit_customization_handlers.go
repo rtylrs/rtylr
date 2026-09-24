@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
+	"github.com/voxire/onion/internal/modules/careers/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -214,6 +215,9 @@ func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizati
 	}
 
 	if err := h.CareersService.UpsertCustomization(ctx, input); err != nil {
+		if errors.Is(err, infrastructure.ErrCustomizationConflict) {
+			return PutCustomizationResponse{}, onekiterrors.New(http.StatusConflict, "Slug is already in use")
+		}
 		return PutCustomizationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to save customization")
 	}
 	invalidatePublicCareersCache(ctx, businessID)

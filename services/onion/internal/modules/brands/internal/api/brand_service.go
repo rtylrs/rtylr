@@ -13,11 +13,6 @@ import (
 	erpbrandv1 "github.com/voxire/voxie/gen/go/erp/brand/v1"
 )
 
-// listBrandsPageSize bounds ListBrands server-side. The voxie
-// erp.brand.v1.ListBrandsRequest contract has no pagination fields yet, so
-// the endpoint returns at most one maximum-size page instead of every row.
-const listBrandsPageSize int32 = 100
-
 type BrandAPI struct {
 	Service *application.Service
 }
@@ -26,20 +21,26 @@ func NewBrandAPI(service *application.Service) *BrandAPI {
 	return &BrandAPI{Service: service}
 }
 
-func (a *BrandAPI) ListBrands(ctx context.Context, _ *erpbrandv1.ListBrandsRequest) (*erpbrandv1.ListBrandsResponse, error) {
+func (a *BrandAPI) ListBrands(ctx context.Context, req *erpbrandv1.ListBrandsRequest) (*erpbrandv1.ListBrandsResponse, error) {
 	ownerID, err := brandOwnerID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	brands, listErr := a.Service.ListBrandsPaginated(ctx, ownerID, listBrandsPageSize, 0)
+	page, listErr := a.Service.ListBrandsPage(ctx, ownerID, req.GetLimit(), req.GetOffset())
 	if listErr != nil {
 		return nil, brandStatusError(http.StatusInternalServerError, "Failed to list brands")
 	}
-	out := make([]*erpbrandv1.Brand, 0, len(brands))
-	for _, b := range brands {
+	out := make([]*erpbrandv1.Brand, 0, len(page.Brands))
+	for _, b := range page.Brands {
 		out = append(out, newBrandPayload(b))
 	}
-	return &erpbrandv1.ListBrandsResponse{Brands: out}, nil
+	return &erpbrandv1.ListBrandsResponse{
+		Brands:  out,
+		HasMore: page.Offset+int64(len(out)) < page.Total,
+		Limit:   page.Limit,
+		Offset:  page.Offset,
+		Total:   page.Total,
+	}, nil
 }
 
 func (a *BrandAPI) CreateBrand(ctx context.Context, req *erpbrandv1.CreateBrandRequest) (*erpbrandv1.CreateBrandResponse, error) {

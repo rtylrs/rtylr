@@ -45,8 +45,22 @@ func NewRepository(db *sql.DB) *Repository {
 // Invoices
 // ---------------------------------------------------------------------------
 
-// dynamic-query: squirrel
+// ListInvoices returns a page of invoices using the same filter pipeline as the
+// customer-scoped path. Customer filtering is optional so every caller gets
+// identical status, search, and date semantics.
 func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
+	return r.listInvoices(ctx, businessID, 0, status, search, dateFrom, dateTo, limit, offset)
+}
+
+// ListInvoicesForCustomer is the customer-scoped variant of ListInvoices. It
+// deliberately shares the full filter pipeline; a customer filter must not
+// silently turn status, search, or date filters into no-ops.
+func (r *Repository) ListInvoicesForCustomer(ctx context.Context, businessID, customerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
+	return r.listInvoices(ctx, businessID, customerID, status, search, dateFrom, dateTo, limit, offset)
+}
+
+// dynamic-query: squirrel
+func (r *Repository) listInvoices(ctx context.Context, businessID, customerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
 	qb := squirrel.Select(
 		"id", "owner_id", "business_id", "invoice_number", "client_name", "client_email", "client_address", "client_tax_id",
 		"status", "issue_date", "due_date", "paid_date", "currency", "subtotal", "discount_type",
@@ -55,6 +69,10 @@ func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status,
 	).
 		From("finance_invoices").
 		Where(squirrel.Eq{"business_id": businessID})
+
+	if customerID > 0 {
+		qb = qb.Where(squirrel.Eq{"customer_id": customerID})
+	}
 
 	if status != "" {
 		qb = qb.Where(squirrel.Eq{"status": status})

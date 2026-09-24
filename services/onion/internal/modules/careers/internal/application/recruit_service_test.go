@@ -12,7 +12,8 @@ func TestSlugify(t *testing.T) {
 		{"---leading-trailing---", "leading-trailing"},
 		{"a   b   c", "a-b-c"},
 		{"Café", "caf"}, // diacritics stripped (non a-z0-9-)
-		{"", ""},
+		{"مهند برمجيات", "slug-aa4afb8ffe4341f5"},
+		{"", "slug-e3b0c44298fc1c14"},
 	}
 	for _, tc := range cases {
 		if got := slugify(tc.in); got != tc.out {

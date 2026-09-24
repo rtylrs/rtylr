@@ -42,6 +42,16 @@ func TestPatternsForTeamRejectsEmptyID(t *testing.T) {
 	}
 }
 
+func TestPatternsForBusinessScopedGroupsRejectMalformedID(t *testing.T) {
+	for _, invalidID := range []string{"not-a-number", "42 ", "0", "-1"} {
+		for _, invalidationType := range []keys.InvalidationType{keys.InvalidateTeam, keys.InvalidateConfig} {
+			if got := patternsFor(invalidationType, invalidID); got != nil {
+				t.Fatalf("patternsFor(%q, %q) = %v, want nil", invalidationType, invalidID, got)
+			}
+		}
+	}
+}
+
 func TestPatternsForSubscriptionDelimitsOwnerID(t *testing.T) {
 	got := patternsFor(keys.InvalidateSubscription, "4")
 	want := []string{"cache:subscription:4", "cache:subscription:4:*"}

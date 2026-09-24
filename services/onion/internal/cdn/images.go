@@ -19,6 +19,8 @@ import (
 // it is killed, so a malformed or pathological input can't pin a worker.
 const engineTimeout = 60 * time.Second
 
+var errCDNStorageNotConfigured = errors.New("cdn: object storage is not configured")
+
 // transform returns a transformed image, generating it via the media-engine on
 // a cache miss and persisting the result to S3 + cdn_transformations. fileID is
 // the BIGINT key; fileUUID is the public id used for cache keys and storage paths.
@@ -26,6 +28,9 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 	p.Defaults()
 	if err := p.Validate(); err != nil {
 		return nil, 0, "", fmt.Errorf("invalid params: %w", err)
+	}
+	if c.storage == nil {
+		return nil, 0, "", errCDNStorageNotConfigured
 	}
 
 	key := p.CacheKey(fileUUID)
@@ -134,6 +139,9 @@ func (c *CDN) generateTransformation(ctx context.Context, fileID int64, fileUUID
 // an empty temp output file for the media-engine. The returned cleanup removes
 // both. Caller must call cleanup once done with the output file.
 func (c *CDN) stageOriginal(ctx context.Context, originalStorageKey string) (inPath, outPath string, cleanup func(), err error) {
+	if c.storage == nil {
+		return "", "", func() {}, errCDNStorageNotConfigured
+	}
 	origReader, _, err := c.storage.Download(ctx, originalStorageKey)
 	if err != nil {
 		return "", "", func() {}, fmt.Errorf("downloading original: %w", err)
@@ -220,6 +228,10 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 
 	reader, size, mimeType, err := c.transform(r.Context(), meta.ID, meta.FileUUID, meta.StorageKey, p)
 	if err != nil {
+		if errors.Is(err, errCDNStorageNotConfigured) {
+			http.Error(w, "image storage is not configured", http.StatusNotImplemented)
+			return
+		}
 		logger.Ctx(r.Context()).Error("cdn: transform failed",
 			logger.String("file_uuid", fileUUID), logger.Error(err))
 		http.Error(w, "image transformation failed", http.StatusInternalServerError)

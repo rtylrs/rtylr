@@ -275,7 +275,7 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		OwnerID:         ownerID,
 		PeriodStart:     periodStart,
 		PeriodEnd:       periodEnd,
-		Status:          "draft",
+		Status:          domain.PayrollStatusInReview,
 		CreatedBy:       createdBy,
 		TotalGrossCents: totalGrossCents,
 		TotalNetCents:   totalNetCents,
@@ -331,7 +331,7 @@ func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approve
 	if err != nil {
 		return err
 	}
-	if run.Status != domain.PayrollStatusDraft && run.Status != domain.PayrollStatusPendingApproval {
+	if run.Status != domain.PayrollStatusInReview {
 		return domain.ErrPayrollRunNotApprovable
 	}
 	if err := validatePayrollApprover(run, approverID); err != nil {
@@ -361,12 +361,6 @@ func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approve
 	}
 	if !allowed {
 		return domain.ErrPayrollApproverNotAllowed
-	}
-
-	if run.Status == domain.PayrollStatusDraft {
-		if err := s.repo.UpdatePayrollRunStatus(ctx, ownerID, runID, domain.PayrollStatusPendingApproval); err != nil {
-			return err
-		}
 	}
 
 	return s.repo.SetPayrollRunApproved(ctx, ownerID, runID, approverID)

@@ -64,6 +64,15 @@ func (r *Repository) ListBrandsPaginated(ctx context.Context, businessID int64, 
 	return brands, nil
 }
 
+func (r *Repository) CountBrands(ctx context.Context, businessID int64) (int64, error) {
+	total, err := r.queries.CountBrands(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count brands", logger.Error(err))
+		return 0, err
+	}
+	return total, nil
+}
+
 // brandFromRow maps a sqlc erp_brands row (with its computed product count)
 // to the domain model, collapsing nullable columns to their zero value when
 // NULL.

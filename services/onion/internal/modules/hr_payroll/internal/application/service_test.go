@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
+	"github.com/voxire/onion/internal/testutil"
 )
 
 func TestNoopFinancePoster_ReportsUnavailable(t *testing.T) {
@@ -344,5 +345,84 @@ func TestSpyNotifier_CollectsEvents(t *testing.T) {
 	}
 	if spy.events[0].Type != "payroll.payslip" {
 		t.Errorf("unexpected event type: %s", spy.events[0].Type)
+	}
+}
+
+type fakeApprovalChainProvider struct {
+	chain *domain.ApprovalChainInfo
+}
+
+func (f fakeApprovalChainProvider) GetApprovalChain(_ context.Context, _ int64, _ string) (*domain.ApprovalChainInfo, error) {
+	return f.chain, nil
+}
+
+func TestTriggerAndApprovePayrollRun_PersistsContractStates(t *testing.T) {
+	ctx := context.Background()
+	db := testutil.OpenDB(t)
+
+	const (
+		businessID     int64 = 9100202
+		creatorUserID  int64 = 9200202
+		approverUserID int64 = 9300202
+		approverEmpID  int64 = 9400202
+		periodStart          = "2031-04-01"
+		periodEnd            = "2031-04-30"
+	)
+
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(),
+			"DELETE FROM hr_payroll_runs WHERE business_id = ? AND period_start = ? AND period_end = ?",
+			businessID, periodStart, periodEnd)
+		_, _ = db.ExecContext(context.Background(),
+			"DELETE FROM hr_payroll_config WHERE owner_id = ? AND business_id = ?",
+			businessID, businessID)
+	})
+
+	service := NewService(ctx, db, fakeApprovalChainProvider{
+		chain: &domain.ApprovalChainInfo{
+			TotalLevels: 1,
+			Levels: []domain.ApprovalLevelInfo{{
+				LevelOrder:         1,
+				ApproverEmployeeID: approverEmpID,
+			}},
+		},
+	}, fakePermissionProvider{employeeID: approverEmpID})
+
+	if err := service.UpsertPayrollConfig(ctx, businessID, domain.PayrollConfigRecord{
+		PeriodType:    domain.PayrollPeriodMonthly,
+		PayDayOfMonth: 28,
+	}); err != nil {
+		t.Fatalf("UpsertPayrollConfig: %v", err)
+	}
+
+	run, _, err := service.TriggerPayrollRun(ctx, businessID, creatorUserID, periodStart, periodEnd)
+	if err != nil {
+		t.Fatalf("TriggerPayrollRun: %v", err)
+	}
+	if run.Status != "in_review" {
+		t.Fatalf("triggered payroll status = %q, want in_review", run.Status)
+	}
+
+	persisted, err := service.repo.GetPayrollRun(ctx, businessID, run.ID)
+	if err != nil {
+		t.Fatalf("GetPayrollRun before approval: %v", err)
+	}
+	if persisted.Status != "in_review" {
+		t.Fatalf("persisted payroll status = %q, want in_review", persisted.Status)
+	}
+
+	if err := service.ApprovePayrollRun(ctx, businessID, run.ID, approverUserID); err != nil {
+		t.Fatalf("ApprovePayrollRun: %v", err)
+	}
+
+	approved, err := service.repo.GetPayrollRun(ctx, businessID, run.ID)
+	if err != nil {
+		t.Fatalf("GetPayrollRun after approval: %v", err)
+	}
+	if approved.Status != domain.PayrollStatusApproved {
+		t.Errorf("approved payroll status = %q, want %q", approved.Status, domain.PayrollStatusApproved)
+	}
+	if approved.ApprovedBy != approverUserID {
+		t.Errorf("approved_by = %d, want %d", approved.ApprovedBy, approverUserID)
 	}
 }

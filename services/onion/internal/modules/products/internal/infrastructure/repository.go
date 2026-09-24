@@ -338,7 +338,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		return err
 	}
 
-	if strings.TrimSpace(input.ImageURL) != "" {
+	if input.ImageURLSet || (input.PresentFields == nil && strings.TrimSpace(input.ImageURL) != "") {
 		if err := r.replacePrimaryProductImage(ctx, qtx, ownerID, id, input.Name, input.ImageURL); err != nil {
 			return err
 		}

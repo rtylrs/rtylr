@@ -8,27 +8,24 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// SettingsPayload is what /insights/settings returns. Non-critical config
-// — we silently fall back to defaults when the tenant has not yet
-// created a row, per the fallback rules in CLAUDE.md §8.
 type SettingsPayload struct {
-	DefaultCurrency string `json:"default_currency"`
-	FiscalYearStart string `json:"fiscal_year_start"`
-	Timezone        string `json:"timezone"`
+	DefaultPeriod    string   `json:"default_period"`
+	DefaultCurrency  string   `json:"default_currency"`
+	ComparePrevious  bool     `json:"compare_previous"`
+	DashboardWidgets []string `json:"dashboard_widgets"`
+	FavoriteReports  []string `json:"favorite_reports"`
+	FiscalYearStart  string   `json:"fiscal_year_start"`
+	Timezone         string   `json:"timezone"`
 }
 
-// defaultSettings is the in-code fallback. Product-level defaults; if a
-// tenant wants to override them they insert a row explicitly.
 func defaultSettings() SettingsPayload {
 	return SettingsPayload{
-		DefaultCurrency: "USD",
-		FiscalYearStart: "01-01",
-		Timezone:        "UTC",
+		DefaultPeriod: "this_month", DefaultCurrency: "USD", ComparePrevious: false,
+		DashboardWidgets: []string{}, FavoriteReports: []string{},
+		FiscalYearStart: "01-01", Timezone: "UTC",
 	}
 }
 
-// GetSettings returns the insights-settings row, or the default envelope
-// when no row exists yet for this tenant.
 func (s *Service) GetSettings(ctx context.Context, businessID int64) (SettingsPayload, error) {
 	row, err := s.repo.GetSettings(ctx, businessID)
 	if err != nil {
@@ -39,31 +36,37 @@ func (s *Service) GetSettings(ctx context.Context, businessID int64) (SettingsPa
 		return SettingsPayload{}, err
 	}
 	return SettingsPayload{
-		DefaultCurrency: row.DefaultCurrency,
-		FiscalYearStart: row.FiscalYearStart,
-		Timezone:        row.Timezone,
+		DefaultPeriod: row.DefaultPeriod, DefaultCurrency: row.DefaultCurrency, ComparePrevious: row.ComparePrevious,
+		DashboardWidgets: row.DashboardWidgets, FavoriteReports: row.FavoriteReports,
+		FiscalYearStart: row.FiscalYearStart, Timezone: row.Timezone,
 	}, nil
 }
 
-// UpdateSettings writes the payload. Missing fields are rejected —
-// partial updates would surprise the UI which always sends the full
-// envelope.
 func (s *Service) UpdateSettings(ctx context.Context, businessID int64, in SettingsPayload) (SettingsPayload, error) {
+	defaults := defaultSettings()
+	if in.DefaultPeriod == "" {
+		in.DefaultPeriod = defaults.DefaultPeriod
+	}
 	if in.DefaultCurrency == "" {
-		in.DefaultCurrency = "USD"
+		in.DefaultCurrency = defaults.DefaultCurrency
+	}
+	if in.DashboardWidgets == nil {
+		in.DashboardWidgets = []string{}
+	}
+	if in.FavoriteReports == nil {
+		in.FavoriteReports = []string{}
 	}
 	if in.FiscalYearStart == "" {
-		in.FiscalYearStart = "01-01"
+		in.FiscalYearStart = defaults.FiscalYearStart
 	}
 	if in.Timezone == "" {
-		in.Timezone = "UTC"
+		in.Timezone = defaults.Timezone
 	}
 	err := s.repo.UpsertSettings(ctx, infrastructure.SettingsRow{
-		OwnerID:         businessID,
-		BusinessID:      businessID,
-		DefaultCurrency: in.DefaultCurrency,
-		FiscalYearStart: in.FiscalYearStart,
-		Timezone:        in.Timezone,
+		OwnerID: businessID, BusinessID: businessID,
+		DefaultCurrency: in.DefaultCurrency, FiscalYearStart: in.FiscalYearStart, Timezone: in.Timezone,
+		DefaultPeriod: in.DefaultPeriod, ComparePrevious: in.ComparePrevious,
+		DashboardWidgets: in.DashboardWidgets, FavoriteReports: in.FavoriteReports,
 	})
 	if err != nil {
 		return SettingsPayload{}, err

@@ -808,7 +808,7 @@ func TestWorkspaces_CreateLabel_ReturnsPositiveID(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	labelID, err := repo.CreateLabel(ctx, domain.LabelInput{
-		WorkspaceID: wsID, Name: "Bug", Color: "#ff0000",
+		WorkspaceID: wsID, BusinessID: testutil.BusinessID, Name: "Bug", Color: "#ff0000",
 	})
 	if err != nil {
 		t.Fatalf("CreateLabel: %v", err)
@@ -833,7 +833,7 @@ func TestWorkspaces_GetLabelsByWorkspace_ReturnsLabel(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	labelID, err := repo.CreateLabel(ctx, domain.LabelInput{
-		WorkspaceID: wsID, Name: "Feature", Color: "#00ff00",
+		WorkspaceID: wsID, BusinessID: testutil.BusinessID, Name: "Feature", Color: "#00ff00",
 	})
 	if err != nil {
 		t.Fatalf("CreateLabel: %v", err)

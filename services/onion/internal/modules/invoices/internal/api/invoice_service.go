@@ -47,7 +47,7 @@ func (a *InvoicesAPI) ListInvoices(ctx context.Context, req *financeinvoicesv1.L
 	// CRM->FIN-02's read surface: per-customer revenue starts here. The
 	// business+customer index serves this shape (schemas zz migration).
 	if req.GetCustomerId() > 0 {
-		invoices, hasMore, err = a.Service.ListInvoicesByCustomer(ctx, businessID, req.GetCustomerId(), page, pageSize)
+		invoices, hasMore, err = a.Service.ListInvoicesForCustomer(ctx, businessID, req.GetCustomerId(), page, pageSize, req.GetStatus(), req.GetSearch(), req.GetDateFrom(), req.GetDateTo())
 	} else {
 		invoices, hasMore, err = a.Service.ListInvoices(ctx, businessID, req.GetStatus(), req.GetSearch(), req.GetDateFrom(), req.GetDateTo(), page, pageSize)
 	}
@@ -154,6 +154,12 @@ func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.
 			return nil, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create invoice")
+	}
+	if inv.CreatedAt.IsZero() || inv.UpdatedAt.IsZero() {
+		inv, err = a.Service.GetInvoice(ctx, businessID, inv.ID)
+		if err != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load created invoice")
+		}
 	}
 
 	return &financeinvoicesv1.CreateInvoiceResponse{Invoice: newInvoiceDetailPayload(inv)}, nil
@@ -276,11 +282,36 @@ func (a *InvoicesAPI) DeleteInvoice(ctx context.Context, req *financeinvoicesv1.
 		return nil, errModel
 	}
 
+	inv, err := a.Service.GetInvoice(ctx, businessID, req.GetId())
+	if err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load invoice")
+	}
+	if inv.Status != domain.StatusDraft {
+		return nil, onekiterrors.New(http.StatusConflict, "Only draft invoices can be deleted")
+	}
+
 	if err := a.Service.DeleteInvoice(ctx, businessID, req.GetId()); err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete invoice")
 	}
 
-	return &financeinvoicesv1.DeleteInvoiceResponse{Message: "Invoice deleted successfully"}, nil
+	remaining, err := a.Service.GetInvoice(ctx, businessID, req.GetId())
+	if errors.Is(err, domain.ErrInvoiceNotFound) {
+		return &financeinvoicesv1.DeleteInvoiceResponse{Message: "Invoice deleted successfully"}, nil
+	}
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to verify invoice deletion")
+	}
+	if remaining.Status != domain.StatusDraft {
+		return nil, onekiterrors.New(http.StatusConflict, "Invoice status changed before deletion")
+	}
+
+	return nil, onekiterrors.New(http.StatusConflict, "Invoice could not be deleted")
 }
 
 func (a *InvoicesAPI) SendInvoice(ctx context.Context, req *financeinvoicesv1.SendInvoiceRequest) (*financeinvoicesv1.SendInvoiceResponse, error) {
@@ -292,7 +323,24 @@ func (a *InvoicesAPI) SendInvoice(ctx context.Context, req *financeinvoicesv1.Se
 		return nil, errModel
 	}
 
+	inv, err := a.Service.GetInvoice(ctx, businessID, req.GetId())
+	if err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load invoice")
+	}
+	if domain.IsTerminal(inv.Status) {
+		return nil, onekiterrors.New(http.StatusConflict, "Terminal invoices cannot be sent")
+	}
+
 	if err := a.Service.SendInvoice(ctx, businessID, req.GetId()); err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
+		if errors.Is(err, domain.ErrInvoiceNotDraft) {
+			return nil, onekiterrors.New(http.StatusConflict, "Terminal invoices cannot be sent")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to send invoice")
 	}
 

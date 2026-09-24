@@ -10,7 +10,7 @@ import (
 func TestIsValidPayrollStatus_AllValid(t *testing.T) {
 	for _, s := range []string{
 		domain.PayrollStatusDraft,
-		domain.PayrollStatusPendingApproval,
+		domain.PayrollStatusInReview,
 		domain.PayrollStatusApproved,
 		domain.PayrollStatusExported,
 	} {

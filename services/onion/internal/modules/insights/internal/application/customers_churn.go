@@ -2,12 +2,12 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
-// ChurnWindowPayload is the JSON shape for a single rolling window.
 type ChurnWindowPayload struct {
 	WindowDays   int32   `json:"window_days"`
 	ChurnedCount int64   `json:"churned_count"`
@@ -15,9 +15,8 @@ type ChurnWindowPayload struct {
 	ChurnPct     float64 `json:"churn_pct"`
 }
 
-// GetChurnRates returns all four standard windows (30/60/90/180d).
-func (s *Service) GetChurnRates(ctx context.Context, businessID int64) ([]ChurnWindowPayload, error) {
-	key, err := s.insightsCacheKey(ctx, businessID, "customers:churn")
+func (s *Service) GetChurnRates(ctx context.Context, businessID int64, from, to time.Time) ([]ChurnWindowPayload, error) {
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("customers:churn:%s:%s", from.Format("2006-01-02"), to.Format("2006-01-02")))
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +24,7 @@ func (s *Service) GetChurnRates(ctx context.Context, businessID int64) ([]ChurnW
 		Windows []ChurnWindowPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetChurnRates(ctx, businessID)
+		rows, rerr := s.repo.GetChurnRates(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr
 		}

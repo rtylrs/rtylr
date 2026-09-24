@@ -153,12 +153,14 @@ func TestGetTopCustomers_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rows, err := repo.GetTopCustomers(ctx, testutil.OwnerID, 10)
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 0, 0, 0, 0, time.UTC)
+	page, err := repo.GetTopCustomers(ctx, testutil.OwnerID, infrastructure.TopCustomerQuery{From: from, To: to, Limit: 10})
 	if err != nil {
 		t.Fatalf("GetTopCustomers: %v", err)
 	}
-	if len(rows) > 10 {
-		t.Errorf("expected at most 10 rows, got %d", len(rows))
+	if len(page.Rows) > 10 {
+		t.Errorf("expected at most 10 rows, got %d", len(page.Rows))
 	}
 }
 
@@ -167,12 +169,14 @@ func TestGetTopCustomers_UnknownOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rows, err := repo.GetTopCustomers(ctx, 9999999, 10)
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 0, 0, 0, 0, time.UTC)
+	page, err := repo.GetTopCustomers(ctx, 9999999, infrastructure.TopCustomerQuery{From: from, To: to, Limit: 10})
 	if err != nil {
 		t.Fatalf("GetTopCustomers unknown owner: %v", err)
 	}
-	if len(rows) != 0 {
-		t.Errorf("expected 0 rows for unknown owner, got %d", len(rows))
+	if len(page.Rows) != 0 {
+		t.Errorf("expected 0 rows for unknown owner, got %d", len(page.Rows))
 	}
 }
 
@@ -193,7 +197,9 @@ func TestGetHeadcount_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	snap, err := repo.GetHeadcount(ctx, testutil.OwnerID)
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 0, 0, 0, 0, time.UTC)
+	snap, err := repo.GetHeadcount(ctx, testutil.OwnerID, from, to)
 	if err != nil {
 		t.Fatalf("GetHeadcount: %v", err)
 	}
@@ -231,7 +237,7 @@ func TestListScheduledReports_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rows, err := repo.ListScheduledReports(ctx, testutil.OwnerID)
+	rows, _, err := repo.ListScheduledReports(ctx, testutil.OwnerID, "created_at", "desc", 10, 0)
 	if err != nil {
 		t.Fatalf("ListScheduledReports: %v", err)
 	}
@@ -243,14 +249,15 @@ func TestCreateAndDeleteScheduledReport_RoundTrip(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportRow{
+	isActive := true
+	id, err := repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportWrite{
 		OwnerID:    testutil.OwnerID,
 		BusinessID: testutil.BusinessID,
 		TemplateID: "weekly_revenue",
 		Cadence:    "weekly",
 		Channel:    "email",
 		Recipient:  "test@example.com",
-		IsActive:   true,
+		IsActive:   &isActive,
 	})
 	if err != nil {
 		t.Fatalf("CreateScheduledReport: %v", err)
@@ -281,11 +288,14 @@ func TestUpsertSettings_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 
 	row := infrastructure.SettingsRow{
-		OwnerID:         testutil.OwnerID,
-		BusinessID:      testutil.BusinessID,
-		DefaultCurrency: "USD",
-		FiscalYearStart: "01-01",
-		Timezone:        "UTC",
+		OwnerID:          testutil.OwnerID,
+		BusinessID:       testutil.BusinessID,
+		DefaultCurrency:  "USD",
+		FiscalYearStart:  "01-01",
+		Timezone:         "UTC",
+		DefaultPeriod:    "this_month",
+		DashboardWidgets: []string{},
+		FavoriteReports:  []string{},
 	}
 	if err := repo.UpsertSettings(ctx, row); err != nil {
 		t.Fatalf("UpsertSettings: %v", err)

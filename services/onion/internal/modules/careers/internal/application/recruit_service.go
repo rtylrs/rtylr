@@ -2,7 +2,9 @@ package application
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"regexp"
 	"strings"
@@ -77,11 +79,23 @@ func (s *Service) UpdateCareer(ctx context.Context, in domain.RecruitCareerInput
 	if in.Slug == "" {
 		in.Slug = slugify(in.Title)
 	}
-	return s.repo.UpdateCareer(ctx, in)
+	if err := s.repo.UpdateCareer(ctx, in); err != nil {
+		if errors.Is(err, infrastructure.ErrCareerNotFound) {
+			return ErrNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 func (s *Service) DeleteCareer(ctx context.Context, businessID, careerID int64) error {
-	return s.repo.DeleteCareer(ctx, businessID, careerID)
+	if err := s.repo.DeleteCareer(ctx, businessID, careerID); err != nil {
+		if errors.Is(err, infrastructure.ErrCareerNotFound) {
+			return ErrNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 // ── customization ────────────────────────────────────────────────────
@@ -142,7 +156,13 @@ func (s *Service) GetSubmissionResumeURL(ctx context.Context, businessID, submis
 }
 
 func (s *Service) UpdateSubmissionStatus(ctx context.Context, businessID, submissionID int64, status string) error {
-	return s.repo.UpdateSubmissionStatus(ctx, businessID, submissionID, status)
+	if err := s.repo.UpdateSubmissionStatus(ctx, businessID, submissionID, status); err != nil {
+		if errors.Is(err, infrastructure.ErrSubmissionNotFound) {
+			return ErrNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 // ── helpers ──────────────────────────────────────────────────────────
@@ -160,12 +180,18 @@ var (
 // slugify lowercases, strips non-alphanumerics, collapses repeated
 // dashes. Accepts partially-slugged input ("Backend Engineer" →
 // "backend-engineer") so admins can paste a job title and have the
-// URL come out clean.
+// URL come out clean. Inputs with no ASCII slug characters get a stable
+// hash fallback so they can never produce an unreachable empty URL.
 func slugify(s string) string {
+	source := s
 	s = strings.ToLower(strings.TrimSpace(s))
 	s = strings.ReplaceAll(s, " ", "-")
 	s = slugInvalid.ReplaceAllString(s, "")
 	s = slugCollapse.ReplaceAllString(s, "-")
 	s = strings.Trim(s, "-")
+	if s == "" {
+		sum := sha256.Sum256([]byte(source))
+		return "slug-" + hex.EncodeToString(sum[:8])
+	}
 	return s
 }

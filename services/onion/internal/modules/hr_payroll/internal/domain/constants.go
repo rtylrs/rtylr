@@ -2,11 +2,11 @@ package domain
 
 // Payroll run status values.
 const (
-	PayrollStatusDraft           = "draft"
-	PayrollStatusPendingApproval = "pending_approval"
-	PayrollStatusApproved        = "approved"
-	PayrollStatusExporting       = "exporting"
-	PayrollStatusExported        = "exported"
+	PayrollStatusDraft     = "draft"
+	PayrollStatusInReview  = "in_review"
+	PayrollStatusApproved  = "approved"
+	PayrollStatusExporting = "exporting"
+	PayrollStatusExported  = "exported"
 )
 
 // Payroll period type values.

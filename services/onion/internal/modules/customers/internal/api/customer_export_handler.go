@@ -15,6 +15,8 @@ import (
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
+const customerExportPageSize = 100
+
 func CustomerExportRoutes() []string {
 	return []string{"/crm/customers/export"}
 }
@@ -64,8 +66,20 @@ func (h *ExportCustomerHandler) Serve(ctx context.Context, req *ExportCustomerRe
 		return ExportCustomerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export customer data")
 	}
 
-	txPayloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(export.Transactions))
-	for i, tx := range export.Transactions {
+	transactions := make([]domain.LoyaltyTransaction, 0)
+	for page := 1; ; page++ {
+		batch, total, listErr := h.CRMService.ListLoyaltyTransactions(ctx, businessID, req.CustomerID, page, customerExportPageSize)
+		if listErr != nil {
+			return ExportCustomerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export customer data")
+		}
+		transactions = append(transactions, batch...)
+		if len(transactions) >= total || len(batch) == 0 {
+			break
+		}
+	}
+
+	txPayloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(transactions))
+	for i, tx := range transactions {
 		txPayloads[i] = newLoyaltyTransactionPayload(tx)
 	}
 

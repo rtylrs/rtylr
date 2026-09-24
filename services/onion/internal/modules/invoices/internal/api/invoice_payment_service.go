@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
@@ -19,6 +20,29 @@ type InvoicePaymentAPI struct {
 
 func NewInvoicePaymentAPI(service *application.Service) *InvoicePaymentAPI {
 	return &InvoicePaymentAPI{Service: service}
+}
+
+func normalizeInvoicePaymentMethod(value string) (string, bool) {
+	method := strings.ToLower(strings.TrimSpace(value))
+	method = strings.ReplaceAll(method, "-", "_")
+	method = strings.ReplaceAll(method, " ", "_")
+
+	switch method {
+	case "", domain.PaymentMethodCash:
+		return domain.PaymentMethodCash, true
+	case domain.PaymentMethodCard, "credit_card", "debit_card":
+		return domain.PaymentMethodCard, true
+	case domain.PaymentMethodBankTransfer, "transfer", "bank", "ach", "wire", "wire_transfer":
+		return domain.PaymentMethodBankTransfer, true
+	case "cheque", "check":
+		return "cheque", true
+	case "online", "paypal", "stripe":
+		return "online", true
+	case domain.PaymentMethodOther:
+		return domain.PaymentMethodOther, true
+	default:
+		return "", false
+	}
 }
 
 func (a *InvoicePaymentAPI) RecordPayment(ctx context.Context, req *financeinvoicespaymentsv1.RecordPaymentRequest) (*financeinvoicespaymentsv1.RecordPaymentResponse, error) {
@@ -39,9 +63,9 @@ func (a *InvoicePaymentAPI) RecordPayment(ctx context.Context, req *financeinvoi
 		paymentDate = time.Now().Format("2006-01-02")
 	}
 
-	method := req.GetMethod()
-	if method == "" {
-		method = "cash"
+	method, ok := normalizeInvoicePaymentMethod(req.GetMethod())
+	if !ok {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid payment method")
 	}
 
 	p, err := a.Service.RecordPayment(ctx, businessID, domain.PaymentInput{

@@ -2,13 +2,14 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 )
 
@@ -99,7 +100,12 @@ func (a *GroupsAPI) GetGroupDetail(ctx context.Context, req *hubteamgroupsv1.Get
 
 	detail, err := a.Service.GetGroupDetail(ctx, ownerID, groupID)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
+		if errors.Is(err, sql.ErrNoRows) ||
+			errors.Is(err, domain.ErrGroupNotFound) ||
+			errors.Is(err, domain.ErrPermissionNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get group detail")
 	}
 
 	return &hubteamgroupsv1.GetGroupDetailResponse{Group: toProtoGroupDetail(*detail)}, nil
@@ -173,17 +179,17 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 }
 
 func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.AddGroupMembersRequest) (*hubteamgroupsv1.AddGroupMembersResponse, error) {
-	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+	authUser, permissionErr := requireHubPermission(ctx, "hub:groups:manage")
+	if permissionErr != nil {
 		return nil, permissionErr
 	}
 	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	device := authPkg.DeviceCtx(ctx)
-	businessID := int64(0)
-	if device.User != nil {
-		businessID = device.User.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	groupID := req.GetId()
@@ -194,6 +200,17 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 	userIDs := req.GetUserIds()
 	if len(userIDs) == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "user_ids is required")
+	}
+	for _, userID := range userIDs {
+		if userID <= 0 {
+			return nil, onekiterrors.New(http.StatusBadRequest, "user_ids must contain positive ids")
+		}
+		if _, err := a.Service.GetStaffUserByID(ctx, ownerID, businessID, userID); err != nil {
+			if errors.Is(err, domain.ErrUserNotFound) {
+				return nil, onekiterrors.New(http.StatusBadRequest, "user_ids must belong to the current business")
+			}
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to validate members")
+		}
 	}
 
 	if err := a.Service.AddGroupMembers(ctx, ownerID, groupID, businessID, actorID, userIDs); err != nil {
@@ -222,6 +239,9 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 	}
 
 	if err := a.Service.RemoveGroupMember(ctx, ownerID, groupID, userID); err != nil {
+		if errors.Is(err, domain.ErrPermissionNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to remove member")
 	}
 

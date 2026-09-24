@@ -29,6 +29,19 @@ type PayOrderResponse struct {
 	CheckoutURL   string `json:"checkout_url"`
 }
 
+func paddlePaymentError(err error) error {
+	switch {
+	case errors.Is(err, domain.ErrOrderNotFound):
+		return onekiterrors.New(http.StatusNotFound, "Order not found")
+	case errors.Is(err, domain.ErrOrderAlreadyPaid), err.Error() == "order already paid", err.Error() == domain.ErrOrderAlreadyPaid.Error():
+		return onekiterrors.New(http.StatusConflict, "Order is already paid")
+	case err.Error() == "order total must be positive":
+		return onekiterrors.New(http.StatusBadRequest, "Order total must be positive")
+	default:
+		return onekiterrors.New(http.StatusInternalServerError, "Failed to create payment")
+	}
+}
+
 func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayOrderResponse, error) {
 	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
@@ -47,10 +60,7 @@ func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayO
 
 	result, payErr := h.Service.CreatePaddlePayment(ctx, businessID, orderID, req.CustomerEmail, req.Currency)
 	if payErr != nil {
-		if errors.Is(payErr, domain.ErrOrderNotFound) {
-			return PayOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
-		}
-		return PayOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create payment")
+		return PayOrderResponse{}, paddlePaymentError(payErr)
 	}
 
 	return PayOrderResponse{

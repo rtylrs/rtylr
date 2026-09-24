@@ -8,25 +8,50 @@ package sqlc
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const countCustomersActive = `-- name: CountCustomersActive :one
 SELECT COUNT(DISTINCT c.id) AS count
 FROM crm_customers c
-JOIN pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id
-  AND o.payment_status = 'paid'
+JOIN pos_orders o
+  ON o.customer_id = c.id
+ AND o.business_id = c.business_id
+ AND o.payment_status = 'paid'
 WHERE c.business_id = ?
   AND o.created_at >= ?
+  AND o.created_at < DATE_ADD(?, INTERVAL 1 DAY)
 `
 
 type CountCustomersActiveParams struct {
 	BusinessID int64        `db:"business_id" json:"business_id"`
 	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
+	DATEADD    time.Time    `db:"DATE_ADD" json:"DATE_ADD"`
 }
 
-// cross-schema read from crm and pos — count customers with recent paid orders.
+// cross-schema read from crm and pos — count customers with paid orders during a period.
 func (q *Queries) CountCustomersActive(ctx context.Context, arg CountCustomersActiveParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countCustomersActive, arg.BusinessID, arg.CreatedAt)
+	row := q.db.QueryRowContext(ctx, countCustomersActive, arg.BusinessID, arg.CreatedAt, arg.DATEADD)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countCustomersAsOf = `-- name: CountCustomersAsOf :one
+SELECT COUNT(*) AS count
+FROM crm_customers
+WHERE business_id = ?
+  AND created_at < DATE_ADD(?, INTERVAL 1 DAY)
+`
+
+type CountCustomersAsOfParams struct {
+	BusinessID int64     `db:"business_id" json:"business_id"`
+	DATEADD    time.Time `db:"DATE_ADD" json:"DATE_ADD"`
+}
+
+// cross-schema read from crm — count customers that existed by the end of a period.
+func (q *Queries) CountCustomersAsOf(ctx context.Context, arg CountCustomersAsOfParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countCustomersAsOf, arg.BusinessID, arg.DATEADD)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -36,47 +61,88 @@ const countCustomersChurned = `-- name: CountCustomersChurned :one
 SELECT COUNT(*) AS count
 FROM crm_customers c
 WHERE c.business_id = ?
-  AND EXISTS (SELECT 1 FROM pos_orders o WHERE o.business_id = c.business_id AND o.customer_id = c.id AND o.payment_status = 'paid')
-  AND NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.business_id = c.business_id AND o2.customer_id = c.id AND o2.payment_status = 'paid' AND o2.created_at >= ?)
+  AND EXISTS (
+    SELECT 1
+    FROM pos_orders o
+    WHERE o.business_id = c.business_id
+      AND o.customer_id = c.id
+      AND o.payment_status = 'paid'
+      AND o.created_at < ?
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM pos_orders o2
+    WHERE o2.business_id = c.business_id
+      AND o2.customer_id = c.id
+      AND o2.payment_status = 'paid'
+      AND o2.created_at >= ?
+      AND o2.created_at < DATE_ADD(?, INTERVAL 1 DAY)
+  )
 `
 
 type CountCustomersChurnedParams struct {
-	BusinessID int64        `db:"business_id" json:"business_id"`
-	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
+	BusinessID  int64        `db:"business_id" json:"business_id"`
+	CreatedAt   sql.NullTime `db:"created_at" json:"created_at"`
+	CreatedAt_2 sql.NullTime `db:"created_at_2" json:"created_at_2"`
+	DATEADD     time.Time    `db:"DATE_ADD" json:"DATE_ADD"`
 }
 
-// cross-schema read from crm and pos — identify customers without recent paid orders.
+// cross-schema read from crm and pos — count previously purchasing customers with no paid order during a period.
 func (q *Queries) CountCustomersChurned(ctx context.Context, arg CountCustomersChurnedParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countCustomersChurned, arg.BusinessID, arg.CreatedAt)
+	row := q.db.QueryRowContext(ctx, countCustomersChurned,
+		arg.BusinessID,
+		arg.CreatedAt,
+		arg.CreatedAt_2,
+		arg.DATEADD,
+	)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const countCustomersNewThisMonth = `-- name: CountCustomersNewThisMonth :one
-SELECT COUNT(*) AS count FROM crm_customers WHERE business_id = ? AND created_at >= ?
+const countCustomersNewInPeriod = `-- name: CountCustomersNewInPeriod :one
+SELECT COUNT(*) AS count
+FROM crm_customers
+WHERE business_id = ?
+  AND created_at >= ?
+  AND created_at < DATE_ADD(?, INTERVAL 1 DAY)
 `
 
-type CountCustomersNewThisMonthParams struct {
+type CountCustomersNewInPeriodParams struct {
 	BusinessID int64        `db:"business_id" json:"business_id"`
 	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
+	DATEADD    time.Time    `db:"DATE_ADD" json:"DATE_ADD"`
 }
 
-// cross-schema read from crm — count recently created customers.
-func (q *Queries) CountCustomersNewThisMonth(ctx context.Context, arg CountCustomersNewThisMonthParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countCustomersNewThisMonth, arg.BusinessID, arg.CreatedAt)
+// cross-schema read from crm — count customers created during a period.
+func (q *Queries) CountCustomersNewInPeriod(ctx context.Context, arg CountCustomersNewInPeriodParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countCustomersNewInPeriod, arg.BusinessID, arg.CreatedAt, arg.DATEADD)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const countCustomersTotal = `-- name: CountCustomersTotal :one
-SELECT COUNT(*) AS count FROM crm_customers WHERE business_id = ?
+const countCustomersWithPaidOrders = `-- name: CountCustomersWithPaidOrders :one
+SELECT COUNT(DISTINCT c.id) AS count
+FROM crm_customers c
+JOIN pos_orders o
+  ON o.customer_id = c.id
+ AND o.business_id = c.business_id
+ AND o.payment_status = 'paid'
+ AND o.created_at >= ?
+ AND o.created_at < DATE_ADD(?, INTERVAL 1 DAY)
+WHERE c.business_id = ?
 `
 
-// cross-schema read from crm — count customers for insight totals.
-func (q *Queries) CountCustomersTotal(ctx context.Context, businessID int64) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countCustomersTotal, businessID)
+type CountCustomersWithPaidOrdersParams struct {
+	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
+	DATEADD    time.Time    `db:"DATE_ADD" json:"DATE_ADD"`
+	BusinessID int64        `db:"business_id" json:"business_id"`
+}
+
+// cross-schema read from crm and pos — count customers active during a period.
+func (q *Queries) CountCustomersWithPaidOrders(ctx context.Context, arg CountCustomersWithPaidOrdersParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countCustomersWithPaidOrders, arg.CreatedAt, arg.DATEADD, arg.BusinessID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -152,33 +218,57 @@ SELECT
   COALESCE(c.first_name, '') AS first_name,
   COALESCE(c.last_name, '') AS last_name,
   COALESCE(c.email, '') AS email,
-  COALESCE(SUM(o.total), 0) AS spend,
-  COUNT(o.id) AS orders
+  SUM(o.total) AS spend,
+  COUNT(o.id) AS orders,
+  MAX(o.created_at) AS last_order_at
 FROM crm_customers c
-LEFT JOIN pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id AND o.payment_status = 'paid'
+JOIN pos_orders o
+  ON o.customer_id = c.id
+ AND o.business_id = c.business_id
+ AND o.payment_status = 'paid'
+ AND o.created_at >= ?
+ AND o.created_at < DATE_ADD(?, INTERVAL 1 DAY)
 WHERE c.business_id = ?
 GROUP BY c.id, c.first_name, c.last_name, c.email
-ORDER BY spend DESC
-LIMIT ?
+ORDER BY
+  (CASE WHEN ? THEN COUNT(o.id) ELSE SUM(o.total) END) * ? DESC,
+  c.id ASC
+LIMIT ? OFFSET ?
 `
 
 type GetTopCustomersParams struct {
-	BusinessID int64 `db:"business_id" json:"business_id"`
-	Limit      int32 `db:"limit" json:"limit"`
+	CreatedAt    sql.NullTime `db:"created_at" json:"created_at"`
+	DATEADD      time.Time    `db:"DATE_ADD" json:"DATE_ADD"`
+	BusinessID   int64        `db:"business_id" json:"business_id"`
+	ByOrderCount int64        `db:"by_order_count" json:"by_order_count"`
+	Direction    int64        `db:"direction" json:"direction"`
+	Limit        int32        `db:"limit" json:"limit"`
+	Offset       int32        `db:"offset" json:"offset"`
 }
 
 type GetTopCustomersRow struct {
-	ID        int64       `db:"id" json:"id"`
-	FirstName string      `db:"first_name" json:"first_name"`
-	LastName  string      `db:"last_name" json:"last_name"`
-	Email     string      `db:"email" json:"email"`
-	Spend     interface{} `db:"spend" json:"spend"`
-	Orders    int64       `db:"orders" json:"orders"`
+	ID          int64       `db:"id" json:"id"`
+	FirstName   string      `db:"first_name" json:"first_name"`
+	LastName    string      `db:"last_name" json:"last_name"`
+	Email       string      `db:"email" json:"email"`
+	Spend       interface{} `db:"spend" json:"spend"`
+	Orders      int64       `db:"orders" json:"orders"`
+	LastOrderAt interface{} `db:"last_order_at" json:"last_order_at"`
 }
 
-// cross-schema read from crm and pos — rank customers by paid order spend.
+// cross-schema read from crm and pos — rank customers in a period.
+// The allow-listed column and numeric direction are bound parameters rather than
+// interpolated SQL identifiers.
 func (q *Queries) GetTopCustomers(ctx context.Context, arg GetTopCustomersParams) ([]GetTopCustomersRow, error) {
-	rows, err := q.db.QueryContext(ctx, getTopCustomers, arg.BusinessID, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, getTopCustomers,
+		arg.CreatedAt,
+		arg.DATEADD,
+		arg.BusinessID,
+		arg.ByOrderCount,
+		arg.Direction,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -193,6 +283,7 @@ func (q *Queries) GetTopCustomers(ctx context.Context, arg GetTopCustomersParams
 			&i.Email,
 			&i.Spend,
 			&i.Orders,
+			&i.LastOrderAt,
 		); err != nil {
 			return nil, err
 		}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -44,13 +45,45 @@ func (a *LabelAPI) resolveWorkspaceID(ctx context.Context, userID, businessID, w
 	return resolved, nil
 }
 
+func findLabelInBusiness(ctx context.Context, service *application.Service, businessID, labelID int64) (domain.Label, int64, error) {
+	workspaces, err := listBusinessWorkspaces(ctx, service, businessID)
+	if err != nil {
+		return domain.Label{}, 0, err
+	}
+
+	for _, workspace := range workspaces {
+		for offset := int64(0); ; offset += workspaceLookupPageSize {
+			labels, total, listErr := service.ListLabels(ctx, workspace.ID, workspaceLookupPageSize, offset)
+			if listErr != nil {
+				return domain.Label{}, 0, listErr
+			}
+			for _, label := range labels {
+				if label.ID == labelID {
+					return label, workspace.ID, nil
+				}
+			}
+			if len(labels) == 0 || offset+int64(len(labels)) >= total {
+				break
+			}
+		}
+	}
+
+	// Match the cycle lookup's non-disclosing failure for an out-of-scope id.
+	return domain.Label{}, 0, domain.ErrUnauthorized
+}
+
 func (a *LabelAPI) ListLabels(ctx context.Context, req *flowlabelv1.ListLabelsRequest) (*flowlabelv1.ListLabelsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, authUser.BusinessID, req.GetWorkspaceId())
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -77,18 +110,35 @@ func (a *LabelAPI) CreateLabel(ctx context.Context, req *flowlabelv1.CreateLabel
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, authUser.BusinessID, req.GetWorkspaceId())
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
+	}
+	if roleErr := a.Service.RequireWorkspaceRole(ctx, workspaceID, authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	label, err := a.Service.CreateLabel(ctx, domain.LabelInput{
 		WorkspaceID: workspaceID,
+		BusinessID:  businessID,
 		Name:        req.GetName(),
 		Color:       req.GetColor(),
 	})
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create label")
+	}
+	// The legacy repository returns only the inserted id. Prefer the persisted
+	// value when the row is readable, and fall back to the same UTC clock used
+	// by MySQL's default if the follow-up read is unavailable.
+	if persisted, _, readErr := findLabelInBusiness(ctx, a.Service, businessID, label.ID); readErr == nil {
+		label = persisted
+	} else {
+		label.CreatedAt = time.Now().UTC()
 	}
 
 	return &flowlabelv1.CreateLabelResponse{Label: toLabel(label)}, nil
@@ -105,10 +155,24 @@ func (a *LabelAPI) UpdateLabel(ctx context.Context, req *flowlabelv1.UpdateLabel
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	_, workspaceID, lookupErr := findLabelInBusiness(ctx, a.Service, businessID, req.GetId())
+	if lookupErr != nil {
+		if errors.Is(lookupErr, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update label")
+	}
+	if roleErr := a.Service.RequireWorkspaceRole(ctx, workspaceID, authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	if err := a.Service.UpdateLabel(ctx, req.GetId(), authUser.UserID, businessID, domain.LabelInput{
 		Name:  req.GetName(),
 		Color: req.GetColor(),
 	}); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update label")
 	}
 
@@ -126,7 +190,21 @@ func (a *LabelAPI) DeleteLabel(ctx context.Context, req *flowlabelv1.DeleteLabel
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	_, workspaceID, lookupErr := findLabelInBusiness(ctx, a.Service, businessID, req.GetId())
+	if lookupErr != nil {
+		if errors.Is(lookupErr, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete label")
+	}
+	if roleErr := a.Service.RequireWorkspaceRole(ctx, workspaceID, authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	if err := a.Service.DeleteLabel(ctx, req.GetId(), authUser.UserID, businessID); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete label")
 	}
 

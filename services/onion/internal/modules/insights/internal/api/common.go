@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	commonpaginationv1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 )
 
 func resolveBusinessID(ctx context.Context) (int64, error) {
@@ -69,6 +71,36 @@ func normalizeLimit(limit int32) int32 {
 		return 100
 	}
 	return limit
+}
+
+func normalizePage(page int32) int32 {
+	if page <= 0 {
+		return 1
+	}
+	return page
+}
+
+func paginationResponse(page, limit int32, total int64) *commonpaginationv1.PaginationResponse {
+	page = normalizePage(page)
+	limit = normalizeLimit(limit)
+	totalPages := int64(0)
+	if total > 0 {
+		totalPages = (total + int64(limit) - 1) / int64(limit)
+	}
+	if total > math.MaxInt32 {
+		total = math.MaxInt32
+	}
+	if totalPages > math.MaxInt32 {
+		totalPages = math.MaxInt32
+	}
+	return &commonpaginationv1.PaginationResponse{
+		Page:       page,
+		Limit:      limit,
+		Total:      int32(total),
+		TotalPages: int32(totalPages),
+		HasNext:    int64(page)*int64(limit) < total,
+		HasPrev:    page > 1,
+	}
 }
 
 func notImplemented(feature string) error {

@@ -21,8 +21,11 @@ func NewSettingAPI(service *application.Service) *SettingAPI {
 
 func settingsToProto(payload application.SettingsPayload) *insightssettingv1.InsightsSettings {
 	return &insightssettingv1.InsightsSettings{
-		DefaultPeriod: "this_month",
-		Currency:      payload.DefaultCurrency,
+		DefaultPeriod:    payload.DefaultPeriod,
+		Currency:         payload.DefaultCurrency,
+		ComparePrevious:  payload.ComparePrevious,
+		DashboardWidgets: append([]string(nil), payload.DashboardWidgets...),
+		FavoriteReports:  append([]string(nil), payload.FavoriteReports...),
 	}
 }
 
@@ -48,9 +51,13 @@ func (a *SettingAPI) UpdateInsightsSettings(ctx context.Context, req *insightsse
 
 	body := req.GetSettings()
 	payload, err := a.Service.UpdateSettings(ctx, businessID, application.SettingsPayload{
-		DefaultCurrency: body.GetCurrency(),
-		FiscalYearStart: "01-01",
-		Timezone:        "UTC",
+		DefaultPeriod:    body.GetDefaultPeriod(),
+		DefaultCurrency:  body.GetCurrency(),
+		ComparePrevious:  body.GetComparePrevious(),
+		DashboardWidgets: append([]string(nil), body.GetDashboardWidgets()...),
+		FavoriteReports:  append([]string(nil), body.GetFavoriteReports()...),
+		FiscalYearStart:  "01-01",
+		Timezone:         "UTC",
 	})
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to save insights settings")

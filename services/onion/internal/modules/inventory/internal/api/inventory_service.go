@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
@@ -21,56 +23,73 @@ func NewInventoryAPI(service *application.Service) *InventoryAPI {
 	return &InventoryAPI{Service: service}
 }
 
-func (a *InventoryAPI) GetInventoryReport(ctx context.Context, _ *erpinventoryv1.GetInventoryReportRequest) (*erpinventoryv1.GetInventoryReportResponse, error) {
+func (a *InventoryAPI) GetInventoryReport(ctx context.Context, req *erpinventoryv1.GetInventoryReportRequest) (*erpinventoryv1.GetInventoryReportResponse, error) {
 	ownerID, err := inventoryOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
-	items, listErr := a.Service.GetInventoryReport(ctx, ownerID)
+	page, listErr := a.Service.GetInventoryReportPage(ctx, ownerID, req.GetLimit(), req.GetOffset())
 	if listErr != nil {
 		return nil, inventoryStatusError(http.StatusInternalServerError, "Failed to get inventory report")
 	}
-	out := make([]*erpinventoryv1.InventoryReportItem, 0, len(items))
-	var totalValue float64
-	for _, item := range items {
+	out := make([]*erpinventoryv1.InventoryReportItem, 0, len(page.Items))
+	for _, item := range page.Items {
 		out = append(out, newInventoryReportItemPayload(item))
-		totalValue += item.StockValue
 	}
-	return &erpinventoryv1.GetInventoryReportResponse{Items: out, TotalValue: totalValue}, nil
+	return &erpinventoryv1.GetInventoryReportResponse{
+		Items:      out,
+		TotalValue: page.TotalValue,
+		HasMore:    page.HasMore,
+		Limit:      page.Limit,
+		Offset:     page.Offset,
+		Total:      page.Total,
+	}, nil
 }
 
-func (a *InventoryAPI) GetLowStock(ctx context.Context, _ *erpinventoryv1.GetLowStockRequest) (*erpinventoryv1.GetLowStockResponse, error) {
+func (a *InventoryAPI) GetLowStock(ctx context.Context, req *erpinventoryv1.GetLowStockRequest) (*erpinventoryv1.GetLowStockResponse, error) {
 	ownerID, err := inventoryOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
-	items, listErr := a.Service.GetLowStockProducts(ctx, ownerID)
+	page, listErr := a.Service.GetLowStockProductsPage(ctx, ownerID, req.GetLimit(), req.GetOffset())
 	if listErr != nil {
 		return nil, inventoryStatusError(http.StatusInternalServerError, "Failed to get low stock products")
 	}
-	out := make([]*erpinventoryv1.InventoryReportItem, 0, len(items))
-	for _, item := range items {
+	out := make([]*erpinventoryv1.InventoryReportItem, 0, len(page.Items))
+	for _, item := range page.Items {
 		out = append(out, newInventoryReportItemPayload(item))
 	}
-	return &erpinventoryv1.GetLowStockResponse{Items: out, Count: int64(len(out))}, nil
+	return &erpinventoryv1.GetLowStockResponse{
+		Items:   out,
+		Count:   page.Total,
+		HasMore: page.HasMore,
+		Limit:   page.Limit,
+		Offset:  page.Offset,
+		Total:   page.Total,
+	}, nil
 }
 
-func (a *InventoryAPI) GetValuation(ctx context.Context, _ *erpinventoryv1.GetValuationRequest) (*erpinventoryv1.GetValuationResponse, error) {
+func (a *InventoryAPI) GetValuation(ctx context.Context, req *erpinventoryv1.GetValuationRequest) (*erpinventoryv1.GetValuationResponse, error) {
 	ownerID, err := inventoryOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
-	items, listErr := a.Service.GetValuation(ctx, ownerID)
+	page, listErr := a.Service.GetValuationPage(ctx, ownerID, req.GetLimit(), req.GetOffset())
 	if listErr != nil {
 		return nil, inventoryStatusError(http.StatusInternalServerError, "Failed to get inventory valuation")
 	}
-	out := make([]*erpinventoryv1.ValuationItem, 0, len(items))
-	var totalValue float64
-	for _, item := range items {
+	out := make([]*erpinventoryv1.ValuationItem, 0, len(page.Items))
+	for _, item := range page.Items {
 		out = append(out, newValuationItemPayload(item))
-		totalValue += item.TotalValue
 	}
-	return &erpinventoryv1.GetValuationResponse{Items: out, TotalValue: totalValue}, nil
+	return &erpinventoryv1.GetValuationResponse{
+		Items:      out,
+		TotalValue: page.TotalValue,
+		HasMore:    page.HasMore,
+		Limit:      page.Limit,
+		Offset:     page.Offset,
+		Total:      page.Total,
+	}, nil
 }
 
 func (a *InventoryAPI) AdjustInventory(ctx context.Context, req *erpinventoryv1.AdjustInventoryRequest) (*erpinventoryv1.AdjustInventoryResponse, error) {
@@ -91,12 +110,21 @@ func (a *InventoryAPI) AdjustInventory(ctx context.Context, req *erpinventoryv1.
 	if _, ok := validTypes[req.GetType()]; !ok {
 		return nil, inventoryStatusError(http.StatusBadRequest, "Invalid type. Must be one of: purchase, sale, adjustment, return, waste")
 	}
+	txType := domain.InventoryTransactionType(req.GetType())
+	change := req.GetChange()
+	if (txType == domain.InventoryTypeSale || txType == domain.InventoryTypeWaste) && change > 0 {
+		change = -change
+	}
+
 	adjustErr := a.Service.AdjustInventory(ctx, ownerID, domain.InventoryAdjustInput{
 		ProductID: req.GetProductId(),
-		Change:    req.GetChange(),
-		Type:      domain.InventoryTransactionType(req.GetType()),
+		Change:    change,
+		Type:      txType,
 		Notes:     req.GetNotes(),
 	})
+	if errors.Is(adjustErr, sql.ErrNoRows) {
+		return nil, inventoryStatusError(http.StatusNotFound, "Product not found")
+	}
 	if adjustErr != nil {
 		return nil, inventoryStatusError(http.StatusInternalServerError, "Failed to adjust inventory")
 	}

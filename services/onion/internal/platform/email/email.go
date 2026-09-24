@@ -234,8 +234,8 @@ func enqueue(ctx context.Context, db dbtx, p enqueueParams) error {
 		Priority:  int8(p.priority), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ToEmail:   p.to,
 		Subject:   p.subject,
-		Html:      p.html,
-		TextBody:  sql.NullString{String: p.text, Valid: p.text != ""},
+		Html:      SealHTML(p.html),
+		TextBody:  sql.NullString{String: SealHTML(p.text), Valid: p.text != ""},
 		FromEmail: sql.NullString{String: p.from, Valid: p.from != ""},
 		ReplyTo:   sql.NullString{String: p.replyTo, Valid: p.replyTo != ""},
 	})

@@ -2,10 +2,13 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
+	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -62,6 +65,10 @@ func (h *MarkTimeEntriesInvoicedHandler) Serve(ctx context.Context, req *MarkTim
 
 	result, err := h.Service.MarkEntriesInvoiced(ctx, businessID, req.InvoiceID, req.EntryIDs)
 	if err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return MarkTimeEntriesInvoicedResponse{}, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
+		logger.Ctx(ctx).Error("failed to mark time entries invoiced", logger.Any("business_id", businessID), logger.Any("invoice_id", req.InvoiceID), logger.Error(err))
 		return MarkTimeEntriesInvoicedResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to mark time entries invoiced")
 	}
 	return MarkTimeEntriesInvoicedResponse{

@@ -53,7 +53,12 @@ func TestFilter_TagsJSONContains(t *testing.T) {
 
 func TestFilter_Boolean(t *testing.T) {
 	frag, args := Filter([]byte(`{"rules":["isActive = true"]}`))
-	if frag != "is_active = ?" || len(args) != 1 || args[0] != "TRUE" {
+	if frag != "is_active = ?" || len(args) != 1 || args[0] != true {
 		t.Fatalf("frag=%q args=%v", frag, args)
+	}
+
+	frag, args = Filter([]byte(`{"rules":["isActive = false"]}`))
+	if frag != "is_active = ?" || len(args) != 1 || args[0] != false {
+		t.Fatalf("false rule frag=%q args=%v", frag, args)
 	}
 }

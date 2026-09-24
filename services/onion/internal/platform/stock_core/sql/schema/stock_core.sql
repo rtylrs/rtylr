@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS stock_ledger (
     employee_id     BIGINT NULL,
     created_by      BIGINT NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_ledger_reference (owner_id, reference_type, reference_id, entry_type)
+    UNIQUE KEY uq_ledger_reference (owner_id, reference_type, reference_id, entry_type, product_id, location_id)
 );
 
 CREATE OR REPLACE VIEW product_stock_total AS

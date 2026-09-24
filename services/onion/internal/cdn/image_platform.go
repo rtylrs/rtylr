@@ -77,7 +77,7 @@ func (c *CDN) imagePlan(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	writeJSON(w, r, resp, immutableCacheControl)
+	writeJSON(w, r, resp, immutableCacheControl, len(resp.Vary) > 0)
 }
 
 func (c *CDN) uploadPlan(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +96,7 @@ func (c *CDN) uploadPlan(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		writeJSON(w, r, resp, immutableCacheControl)
+		writeJSON(w, r, resp, immutableCacheControl, len(resp.Vary) > 0)
 		return
 	}
 
@@ -111,14 +111,15 @@ func (c *CDN) uploadPlan(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	writeJSON(w, r, resp, uploadURLCacheControl)
+	writeJSON(w, r, resp, uploadURLCacheControl, len(resp.Vary) > 0)
 }
 
 func (c *CDN) planUploadedImage(id, mimeType string, query url.Values, accept string) (imagePlanResponse, error) {
-	parsed, err := parseImageParams(query, accept, imageParamOptions{
+	opts := imageParamOptions{
 		defaultFullImage: true,
 		negotiateDefault: true,
-	})
+	}
+	parsed, err := parseImageParams(query, accept, opts)
 	if err != nil {
 		return imagePlanResponse{}, err
 	}
@@ -132,17 +133,29 @@ func (c *CDN) planUploadedImage(id, mimeType string, query url.Values, accept st
 			Original:     true,
 		}, nil
 	}
-	p := parsed.params
+
+	// uploadImageReadURL historically defaults to WebP when no format is
+	// present. A plan has already negotiated its default from Accept, so pin
+	// that result into the URL and describe the exact URL we return.
+	readQuery := imageTransformQuery(query)
+	if readQuery.Get("format") == "" && readQuery.Get("f") == "" && readQuery.Get("auto") == "" {
+		readQuery.Set("format", parsed.params.Format)
+	}
+	served, err := parseImageParams(readQuery, accept, opts)
+	if err != nil {
+		return imagePlanResponse{}, err
+	}
+	p := served.params
 	return imagePlanResponse{
 		ID:                id,
-		URL:               c.uploadImageReadURL(id, query),
+		URL:               c.uploadImageReadURL(id, readQuery),
 		Chain:             p.Chain,
 		Format:            p.Format,
 		Quality:           p.Quality,
 		ContentType:       mimeForFormat(p.Format),
 		CacheControl:      immutableCacheControl,
 		Vary:              varyHeaders(parsed.varyAccept),
-		SurrogateKeys:     []string{"cdn-file-" + id, parsed.surrogateKey},
+		SurrogateKeys:     []string{"cdn-file-" + id, served.surrogateKey},
 		TransformExplicit: parsed.explicit,
 	}, nil
 }
@@ -195,7 +208,7 @@ func (c *CDN) imageVariants(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	writeJSON(w, r, imageVariantsResponse{ID: id, Variants: variants}, immutableCacheControl)
+	writeJSON(w, r, imageVariantsResponse{ID: id, Variants: variants}, immutableCacheControl, true)
 }
 
 func (c *CDN) uploadVariants(w http.ResponseWriter, r *http.Request) {
@@ -209,7 +222,7 @@ func (c *CDN) uploadVariants(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	writeJSON(w, r, imageVariantsResponse{SourceURL: raw, Variants: variants}, uploadURLCacheControl)
+	writeJSON(w, r, imageVariantsResponse{SourceURL: raw, Variants: variants}, uploadURLCacheControl, true)
 }
 
 func (c *CDN) variantPlansForID(id string, classes []string, baseQuery url.Values, accept string) (map[string]imageVariantPlan, error) {
@@ -356,7 +369,10 @@ func varyHeaders(varyAccept bool) []string {
 	return nil
 }
 
-func writeJSON(w http.ResponseWriter, r *http.Request, payload any, cacheControl string) {
+func writeJSON(w http.ResponseWriter, r *http.Request, payload any, cacheControl string, varyAccept ...bool) {
+	if len(varyAccept) > 0 && varyAccept[0] {
+		w.Header().Add("Vary", "Accept")
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", cacheControl)
 	if err := json.NewEncoder(w).Encode(payload); err != nil {

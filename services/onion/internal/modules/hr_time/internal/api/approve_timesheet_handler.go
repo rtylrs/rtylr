@@ -50,6 +50,9 @@ func (h *ApproveTimesheetHandler) Serve(ctx context.Context, _ *ApproveTimesheet
 
 	ts, err := h.Service.ApproveTimesheet(ctx, businessID, id, device.User.UserID)
 	if err != nil {
+		if errors.Is(err, domain.ErrTimesheetAccessDenied) || errors.Is(err, domain.ErrTimesheetApproverNotAllowed) || errors.Is(err, domain.ErrTimesheetSelfApproval) {
+			return ApproveTimesheetResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrTimesheetNotFound) {
 			return ApproveTimesheetResponse{}, onekiterrors.New(http.StatusNotFound, "Timesheet not found")
 		}

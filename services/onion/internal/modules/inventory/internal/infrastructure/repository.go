@@ -43,6 +43,23 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 
 	qtx := r.queries.WithTx(tx)
 
+	// Lock the product while verifying tenancy so a movement can never create
+	// stock rows for another business's catalog entry.
+	var ownedProductID int64
+	err = tx.QueryRowContext(ctx, `
+		SELECT id
+		FROM erp_products
+		WHERE id = ? AND owner_id = ? AND business_id = ?
+		FOR UPDATE`, productID, ownerID, ownerID).Scan(&ownedProductID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return sql.ErrNoRows
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to verify inventory product ownership", logger.Error(err))
+
+		return err
+	}
+
 	// Route the stock change through the shared stock_core primitive so it lands
 	// in stock_levels + stock_ledger and keeps erp_products.stock_quantity (the
 	// legacy scalar) synced as the owner-wide total. ERP adjustments target the
@@ -104,132 +121,160 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 }
 
 func (r *Repository) GetInventoryReport(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	rows, err := r.queries.GetInventoryReport(ctx, ownerID)
+	page, err := r.GetInventoryReportPage(ctx, ownerID, 100, 0)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get inventory report", logger.Error(err))
-
 		return nil, err
 	}
+	return page.Items, nil
+}
 
-	report := make([]domain.InventoryReportItem, 0, len(rows))
-
-	for _, row := range rows {
-		var item domain.InventoryReportItem
-		item.ProductID = row.ID
-		item.ProductName = row.Name
-
-		if row.Sku.Valid {
-			item.SKU = row.Sku.String
-		}
-
-		if row.Unit.Valid {
-			item.Unit = row.Unit.String
-		}
-
-		item.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
-		item.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
-		item.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
-		item.StockValue = sqlutil.ParseDecimal(row.StockValue)
-		item.IsLowStock = row.IsLowStock != 0
-
-		if row.LowStockThreshold.Valid {
-			item.LowStockThreshold = sqlutil.ParseDecimal(row.LowStockThreshold.String)
-		}
-
-		if row.ReorderQuantity.Valid {
-			item.ReorderQuantity = sqlutil.ParseDecimal(row.ReorderQuantity.String)
-		}
-
-		report = append(report, item)
+func (r *Repository) GetInventoryReportPage(ctx context.Context, ownerID int64, limit, offset int) (domain.InventoryReportPage, error) {
+	rows, err := r.queries.GetInventoryReport(ctx, sqlc.GetInventoryReportParams{
+		BusinessID: ownerID,
+		Limit:      int32(limit),  // #nosec G115 -- pagination is normalized by the application service.
+		Offset:     int32(offset), // #nosec G115 -- pagination is normalized by the application service.
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get inventory report", logger.Error(err))
+		return domain.InventoryReportPage{}, err
 	}
 
-	return report, nil
+	summary, err := r.queries.GetInventoryReportSummary(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to summarize inventory report", logger.Error(err))
+		return domain.InventoryReportPage{}, err
+	}
+
+	return domain.InventoryReportPage{
+		Items:      inventoryReportItems(rows),
+		Total:      summary.Total,
+		TotalValue: sqlutil.DecimalToFloat(summary.TotalValue),
+		HasMore:    int64(len(rows))+int64(offset) < summary.Total,
+		Limit:      int64(limit),
+		Offset:     int64(offset),
+	}, nil
+}
+
+func inventoryReportItems(rows []sqlc.GetInventoryReportRow) []domain.InventoryReportItem {
+	report := make([]domain.InventoryReportItem, 0, len(rows))
+	for _, row := range rows {
+		report = append(report, inventoryReportItem(row.ID, row.Name, row.Sku, row.Unit, row.StockQuantity, row.LowStockThreshold, row.ReorderQuantity, row.CostPrice, row.SalePrice, row.StockValue, row.IsLowStock))
+	}
+	return report
 }
 
 func (r *Repository) GetLowStockProducts(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	rows, err := r.queries.GetLowStockProducts(ctx, ownerID)
+	page, err := r.GetLowStockProductsPage(ctx, ownerID, 100, 0)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get low stock products", logger.Error(err))
-
 		return nil, err
 	}
+	return page.Items, nil
+}
 
-	report := make([]domain.InventoryReportItem, 0, len(rows))
-
-	for _, row := range rows {
-		var item domain.InventoryReportItem
-		item.ProductID = row.ID
-		item.ProductName = row.Name
-
-		if row.Sku.Valid {
-			item.SKU = row.Sku.String
-		}
-
-		if row.Unit.Valid {
-			item.Unit = row.Unit.String
-		}
-
-		item.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
-		item.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
-		item.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
-		item.StockValue = sqlutil.ParseDecimal(row.StockValue)
-		item.IsLowStock = row.IsLowStock != 0
-
-		if row.LowStockThreshold.Valid {
-			item.LowStockThreshold = sqlutil.ParseDecimal(row.LowStockThreshold.String)
-		}
-
-		if row.ReorderQuantity.Valid {
-			item.ReorderQuantity = sqlutil.ParseDecimal(row.ReorderQuantity.String)
-		}
-
-		report = append(report, item)
+func (r *Repository) GetLowStockProductsPage(ctx context.Context, ownerID int64, limit, offset int) (domain.LowStockPage, error) {
+	rows, err := r.queries.GetLowStockProducts(ctx, sqlc.GetLowStockProductsParams{
+		BusinessID: ownerID,
+		Limit:      int32(limit),  // #nosec G115 -- pagination is normalized by the application service.
+		Offset:     int32(offset), // #nosec G115 -- pagination is normalized by the application service.
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get low stock products", logger.Error(err))
+		return domain.LowStockPage{}, err
 	}
 
-	return report, nil
+	summary, err := r.queries.CountLowStockProducts(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count low stock products", logger.Error(err))
+		return domain.LowStockPage{}, err
+	}
+
+	items := make([]domain.InventoryReportItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, inventoryReportItem(row.ID, row.Name, row.Sku, row.Unit, row.StockQuantity, row.LowStockThreshold, row.ReorderQuantity, row.CostPrice, row.SalePrice, row.StockValue, row.IsLowStock))
+	}
+
+	return domain.LowStockPage{
+		Items:   items,
+		Total:   summary,
+		HasMore: int64(len(rows))+int64(offset) < summary,
+		Limit:   int64(limit),
+		Offset:  int64(offset),
+	}, nil
+}
+
+func inventoryReportItem(productID int64, name string, sku, unit sql.NullString, stockQuantity string, lowStockThreshold, reorderQuantity sql.NullString, costPrice, salePrice, stockValue string, isLowStock int32) domain.InventoryReportItem {
+	item := domain.InventoryReportItem{
+		ProductID:     productID,
+		ProductName:   name,
+		StockQuantity: sqlutil.ParseDecimal(stockQuantity),
+		CostPrice:     sqlutil.ParseDecimal(costPrice),
+		SalePrice:     sqlutil.ParseDecimal(salePrice),
+		StockValue:    sqlutil.ParseDecimal(stockValue),
+		IsLowStock:    isLowStock != 0,
+	}
+	if sku.Valid {
+		item.SKU = sku.String
+	}
+	if unit.Valid {
+		item.Unit = unit.String
+	}
+	if lowStockThreshold.Valid {
+		item.LowStockThreshold = sqlutil.ParseDecimal(lowStockThreshold.String)
+	}
+	if reorderQuantity.Valid {
+		item.ReorderQuantity = sqlutil.ParseDecimal(reorderQuantity.String)
+	}
+	return item
 }
 
 func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error) {
+	page, err := r.GetValuationPage(ctx, ownerID, 100, 0)
+	if err != nil {
+		return nil, err
+	}
+	return page.Items, nil
+}
+
+func (r *Repository) GetValuationPage(ctx context.Context, ownerID int64, limit, offset int) (domain.ValuationPage, error) {
 	rows, err := r.queries.GetValuation(ctx, sqlc.GetValuationParams{
+		BusinessID:   ownerID,
+		BusinessID_2: ownerID,
+		Limit:        int32(limit),  // #nosec G115 -- pagination is normalized by the application service.
+		Offset:       int32(offset), // #nosec G115 -- pagination is normalized by the application service.
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get inventory valuation", logger.Error(err))
+		return domain.ValuationPage{}, err
+	}
+
+	summary, err := r.queries.GetValuationSummary(ctx, sqlc.GetValuationSummaryParams{
 		BusinessID:   ownerID,
 		BusinessID_2: ownerID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get inventory valuation", logger.Error(err))
-
-		return nil, err
+		logger.Ctx(ctx).Error("Failed to summarize inventory valuation", logger.Error(err))
+		return domain.ValuationPage{}, err
 	}
 
 	items := make([]domain.ValuationItem, 0, len(rows))
-
 	for _, row := range rows {
-		var item domain.ValuationItem
-		item.CategoryName = row.CategoryName
-		item.WarehouseName = row.WarehouseName
-		item.TotalItems = row.TotalItems
-
-		if row.TotalValue != nil {
-			switch v := row.TotalValue.(type) {
-			case float64:
-				item.TotalValue = v
-			case []byte:
-				item.TotalValue = sqlutil.ParseDecimal(string(v))
-			}
-		}
-
-		if row.TotalCost != nil {
-			switch v := row.TotalCost.(type) {
-			case float64:
-				item.TotalCost = v
-			case []byte:
-				item.TotalCost = sqlutil.ParseDecimal(string(v))
-			}
-		}
-
-		items = append(items, item)
+		items = append(items, domain.ValuationItem{
+			CategoryName:  row.CategoryName,
+			WarehouseName: row.WarehouseName,
+			TotalItems:    row.TotalItems,
+			TotalValue:    sqlutil.DecimalToFloat(row.TotalValue),
+			TotalCost:     sqlutil.DecimalToFloat(row.TotalCost),
+		})
 	}
 
-	return items, nil
+	return domain.ValuationPage{
+		Items:      items,
+		Total:      summary.Total,
+		TotalValue: sqlutil.DecimalToFloat(summary.TotalValue),
+		HasMore:    int64(len(rows))+int64(offset) < summary.Total,
+		Limit:      int64(limit),
+		Offset:     int64(offset),
+	}, nil
 }
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt

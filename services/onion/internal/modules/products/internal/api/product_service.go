@@ -15,6 +15,8 @@ import (
 	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
+const maxProductListOffset int64 = 10_000
+
 type ProductAPI struct {
 	Service *application.Service
 }
@@ -36,10 +38,7 @@ func (a *ProductAPI) ListProducts(ctx context.Context, req *erpproductv1.ListPro
 	if limit > 500 {
 		limit = 500
 	}
-	offset := req.GetOffset()
-	if offset < 0 {
-		offset = 0
-	}
+	offset := normalizeProductListOffset(req.GetOffset())
 	page := offset/limit + 1
 
 	products, total, hasMore, listErr := a.Service.ListProducts(ctx, ownerID, req.GetSearch(), req.GetCategoryId(), page, limit)
@@ -113,40 +112,19 @@ func (a *ProductAPI) UpdateProduct(ctx context.Context, req *erpproductv1.Update
 	if body == nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Product body is required")
 	}
+	return a.updateProductWithOwner(ctx, ownerID, req.GetId(), productUpdateInput(body, nil))
+}
 
-	updateErr := a.Service.UpdateProduct(ctx, ownerID, req.GetId(), domain.ProductInput{
-		CategoryID:        body.GetCategoryId(),
-		SupplierID:        body.GetSupplierId(),
-		Name:              body.GetName(),
-		SKU:               body.GetSku(),
-		Barcode:           body.GetBarcode(),
-		Description:       body.GetDescription(),
-		Unit:              body.GetUnit(),
-		CostPrice:         body.GetCostPrice(),
-		SalePrice:         body.GetSalePrice(),
-		StockQuantity:     body.GetStockQuantity(),
-		StockQuantitySet:  true,
-		LowStockThreshold: body.GetLowStockThreshold(),
-		ReorderQuantity:   body.GetReorderQuantity(),
-		IsActive:          body.GetIsActive(),
-		TrackInventory:    body.GetTrackInventory(),
-		BrandID:           body.GetBrandId(),
-		CompareAtPrice:    body.GetCompareAtPrice(),
-		TaxRate:           body.GetTaxRate(),
-		Currency:          body.GetCurrency(),
-		Weight:            body.GetWeight(),
-		WeightUnit:        body.GetWeightUnit(),
-		Length:            body.GetLength(),
-		Width:             body.GetWidth(),
-		Height:            body.GetHeight(),
-		DimensionUnit:     body.GetDimensionUnit(),
-		CountryOfOrigin:   body.GetCountryOfOrigin(),
-		HSCode:            body.GetHsCode(),
-		AllowBackorder:    body.GetAllowBackorder(),
-		LeadTimeDays:      int(body.GetLeadTimeDays()),
-		ImageURL:          body.GetImageUrl(),
-	})
-	if updateErr != nil {
+func (a *ProductAPI) updateProduct(ctx context.Context, productID int64, input domain.ProductInput) (*erpproductv1.UpdateProductResponse, error) {
+	ownerID, err := productOwnerID(ctx, "erp:products:edit")
+	if err != nil {
+		return nil, err
+	}
+	return a.updateProductWithOwner(ctx, ownerID, productID, input)
+}
+
+func (a *ProductAPI) updateProductWithOwner(ctx context.Context, ownerID, productID int64, input domain.ProductInput) (*erpproductv1.UpdateProductResponse, error) {
+	if updateErr := a.Service.UpdateProduct(ctx, ownerID, productID, input); updateErr != nil {
 		return nil, productMutationError(updateErr)
 	}
 	return &erpproductv1.UpdateProductResponse{Message: "Product updated"}, nil
@@ -318,6 +296,16 @@ func (a *ProductAPI) ListExpiringItems(ctx context.Context, req *erpproductv1.Li
 		})
 	}
 	return &erpproductv1.ListExpiringItemsResponse{Items: out}, nil
+}
+
+func normalizeProductListOffset(offset int64) int64 {
+	if offset < 0 {
+		return 0
+	}
+	if offset > maxProductListOffset {
+		return maxProductListOffset
+	}
+	return offset
 }
 
 func productOwnerID(ctx context.Context, permission string) (int64, error) {

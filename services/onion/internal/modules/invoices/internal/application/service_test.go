@@ -48,6 +48,10 @@ func (m *mockRepo) ListInvoices(_ context.Context, _ int64, _, _, _, _ string, _
 	return m.invoices, m.err
 }
 
+func (m *mockRepo) ListInvoicesForCustomer(_ context.Context, _, _ int64, _, _, _, _ string, _, _ int) ([]domain.Invoice, error) {
+	return m.invoices, m.err
+}
+
 func (m *mockRepo) ListUnbilledBillableTimeEntries(_ context.Context, _ int64, _, _ int) ([]domain.BillableTimeEntry, error) {
 	return m.billableTime, m.err
 }

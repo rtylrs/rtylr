@@ -219,26 +219,6 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, businessID
 	return &run, createdEntries, nil
 }
 
-func (r *Repository) UpdatePayrollRunStatus(ctx context.Context, businessID, runID int64, status string) error {
-	result, err := r.queries.UpdatePayrollRunStatus(ctx, sqlc.UpdatePayrollRunStatusParams{
-		Status:     status,
-		BusinessID: businessID,
-		ID:         runID,
-		Column4:    status,
-	})
-	if err != nil {
-		return err
-	}
-	affected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affected != 1 {
-		return domain.ErrPayrollRunNotApprovable
-	}
-	return nil
-}
-
 func (r *Repository) SetPayrollRunApproved(ctx context.Context, businessID, runID, approverID int64) error {
 	result, err := r.queries.SetPayrollRunApproved(ctx, sqlc.SetPayrollRunApprovedParams{
 		ApprovedBy: sql.NullInt64{Int64: approverID, Valid: true},
@@ -347,7 +327,7 @@ func (r *Repository) ListPayrollEntries(ctx context.Context, businessID, runID i
 
 // ListPayrollRunsForEmployee lists payroll runs in which the given employee has
 // an entry, restricted to statuses that represent finalized pay (approved or
-// exported) — draft/pending-approval runs are not visible to self-service callers.
+// exported) — draft/in-review runs are not visible to self-service callers.
 func (r *Repository) ListPayrollRunsForEmployee(ctx context.Context, businessID, employeeID int64, params domain.ListPayrollRunsParams) ([]domain.PayrollRunRecord, int64, error) {
 	total, err := r.queries.CountPayrollRunsForEmployee(ctx, sqlc.CountPayrollRunsForEmployeeParams{
 		BusinessID: businessID,

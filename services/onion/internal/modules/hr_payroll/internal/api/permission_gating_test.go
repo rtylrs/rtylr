@@ -169,13 +169,16 @@ func TestApprovePayrollRunHandler_Serve_SucceedsWithManagePayroll(t *testing.T) 
 	ctx := context.Background()
 
 	run, _, err := repo.CreatePayrollRunWithEntries(ctx, testutil.OwnerID, domain.PayrollRunRecord{
-		PeriodStart: "2026-11-01",
-		PeriodEnd:   "2026-11-30",
-		Status:      domain.PayrollStatusDraft,
+		PeriodStart: "2031-11-01",
+		PeriodEnd:   "2031-11-30",
+		Status:      domain.PayrollStatusInReview,
 	}, []domain.PayrollEntryRecord{})
 	if err != nil {
 		t.Fatalf("CreatePayrollRunWithEntries: %v", err)
 	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_payroll_runs WHERE id = ? AND business_id = ?", run.ID, testutil.OwnerID)
+	})
 
 	svc := application.NewService(ctx, db, fakeApprovalChainProvider{}, fakePermissionProvider{employeeID: 4101, allowed: true})
 	h := &ApprovePayrollRunHandler{Service: svc}

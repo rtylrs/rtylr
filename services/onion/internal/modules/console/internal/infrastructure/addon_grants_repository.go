@@ -57,6 +57,9 @@ func (r *Repository) AddonExists(ctx context.Context, addonID string) (bool, err
 
 // dynamic-query: squirrel
 func (r *Repository) ListAddonGrants(ctx context.Context, limit, offset int) ([]AddonGrantRow, int64, error) {
+	if offset < 0 {
+		offset = 0
+	}
 	countSQL, countArgs, err := sq.
 		Select("COUNT(*)").
 		From("manual_addon_grants").
@@ -86,7 +89,7 @@ func (r *Repository) ListAddonGrants(ctx context.Context, limit, offset int) ([]
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		OrderBy("g.created_at DESC").
 		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- negative offsets are clamped above; limit is validated by the application.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

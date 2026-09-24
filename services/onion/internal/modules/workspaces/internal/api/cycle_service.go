@@ -22,6 +22,68 @@ func NewCycleAPI(service *application.Service) *CycleAPI {
 	return &CycleAPI{Service: service}
 }
 
+const workspaceLookupPageSize int64 = 500
+
+// listBusinessWorkspaces is used by the resource-level lookup paths below. The
+// legacy v1 cycle and label contracts do not carry a workspace id on update,
+// while the service only exposes paginated workspace/cycle reads. Resolve the
+// owning workspace through those reads before applying a role check or merging
+// omitted fields into a partial update.
+func listBusinessWorkspaces(ctx context.Context, service *application.Service, businessID int64) ([]domain.Workspace, error) {
+	workspaces := make([]domain.Workspace, 0)
+	for page := int64(1); ; page++ {
+		pageWorkspaces, total, err := service.ListWorkspaces(ctx, businessID, page, workspaceLookupPageSize)
+		if err != nil {
+			return nil, err
+		}
+		workspaces = append(workspaces, pageWorkspaces...)
+		if len(pageWorkspaces) == 0 || int64(len(workspaces)) >= total {
+			return workspaces, nil
+		}
+	}
+}
+
+func findCycleInBusiness(ctx context.Context, service *application.Service, businessID, cycleID int64) (domain.Cycle, error) {
+	workspaces, err := listBusinessWorkspaces(ctx, service, businessID)
+	if err != nil {
+		return domain.Cycle{}, err
+	}
+
+	for _, workspace := range workspaces {
+		for offset := int64(0); ; offset += workspaceLookupPageSize {
+			cycles, total, listErr := service.ListCycles(ctx, workspace.ID, workspaceLookupPageSize, offset)
+			if listErr != nil {
+				return domain.Cycle{}, listErr
+			}
+			for _, cycle := range cycles {
+				if cycle.ID == cycleID {
+					return cycle, nil
+				}
+			}
+			if len(cycles) == 0 || offset+int64(len(cycles)) >= total {
+				break
+			}
+		}
+	}
+
+	// Do not disclose whether an id exists in another business. The repository
+	// uses the same unauthorized sentinel for an out-of-scope write.
+	return domain.Cycle{}, domain.ErrUnauthorized
+}
+
+func (a *CycleAPI) resolveCycleWorkspaceID(ctx context.Context, userID, businessID int64, requested string) (int64, error) {
+	// An omitted workspace means the caller's personal workspace, not a
+	// business id used in the independent workspace-id sequence.
+	if requested == "" {
+		requested = "personal"
+	}
+	resolved, err := a.Service.ResolveWorkspaceID(ctx, userID, businessID, requested)
+	if err != nil || resolved == 0 {
+		return 0, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
+	}
+	return resolved, nil
+}
+
 func toCycle(c domain.Cycle) *flowcyclev1.Cycle {
 	return &flowcyclev1.Cycle{
 		Id:          c.ID,
@@ -46,17 +108,9 @@ func (a *CycleAPI) ListCycles(ctx context.Context, req *flowcyclev1.ListCyclesRe
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID := businessID
-	if req.GetWorkspaceId() != "" {
-		resolved, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
-		if err != nil {
-			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
-		}
-		if resolved != 0 {
-			wsID = resolved
-		}
-	} else if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, wsID) {
-		return nil, onekiterrors.PermissionDenied()
+	wsID, err := a.resolveCycleWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
+	if err != nil {
+		return nil, err
 	}
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
@@ -86,16 +140,11 @@ func (a *CycleAPI) CreateCycle(ctx context.Context, req *flowcyclev1.CreateCycle
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID := businessID
-	if req.GetWorkspaceId() != "" {
-		resolved, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
-		if err != nil {
-			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
-		}
-		if resolved != 0 {
-			wsID = resolved
-		}
-	} else if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, wsID) {
+	wsID, err := a.resolveCycleWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
+	if err != nil {
+		return nil, err
+	}
+	if roleErr := a.Service.RequireWorkspaceRole(ctx, wsID, authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -162,11 +211,39 @@ func (a *CycleAPI) UpdateCycle(ctx context.Context, req *flowcyclev1.UpdateCycle
 		end = parsed
 	}
 
+	existing, lookupErr := findCycleInBusiness(ctx, a.Service, businessID, req.GetId())
+	if lookupErr != nil {
+		if errors.Is(lookupErr, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
+		return nil, workspaceInternalError(ctx, "Load cycle for update failed", lookupErr)
+	}
+	var roleErr error
+	if existing.ProjectID != nil {
+		roleErr = a.Service.RequireProjectRole(ctx, *existing.ProjectID, authUser.UserID, businessID, domain.FlowRoleMember)
+	} else {
+		roleErr = a.Service.RequireWorkspaceRole(ctx, existing.WorkspaceID, authUser.UserID, businessID, domain.FlowRoleMember)
+	}
+	if roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if !end.IsZero() && !existing.StartDate.IsZero() && end.Before(existing.StartDate) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "end_date cannot be before start_date")
+	}
+
+	name := req.GetName()
+	if name == "" {
+		// The generated v1 request uses scalar strings, so an omitted name and
+		// an explicit empty string are indistinguishable. Preserve the stored
+		// value rather than allowing a status-only update to erase it.
+		name = existing.Name
+	}
+
 	if err := a.Service.UpdateCycle(ctx, domain.UpdateCycleInput{
 		ID:         req.GetId(),
 		ActorID:    authUser.UserID,
 		BusinessID: businessID,
-		Name:       req.GetName(),
+		Name:       name,
 		Status:     req.GetStatus(),
 		EndDate:    end,
 	}); err != nil {

@@ -43,3 +43,33 @@ func TestCreateTimeEntryRequestUnmarshalJSONRejectsInvalidID(t *testing.T) {
 		t.Fatal("expected invalid employee_id to fail decoding")
 	}
 }
+
+func TestCreateTimeEntryValidateRejectsNonPositiveEmployeeID(t *testing.T) {
+	handler := &CreateTimeEntryHandler{}
+	for _, employeeID := range []int64{0, -1} {
+		err := handler.Validate(t.Context(), &CreateTimeEntryRequest{
+			EmployeeID:      employeeID,
+			Date:            "2026-11-02",
+			DurationMinutes: 30,
+		})
+		if err == nil {
+			t.Fatalf("employee_id %d unexpectedly passed validation", employeeID)
+		}
+	}
+}
+
+func TestUpdateTimeEntryRequestTracksOmittedFields(t *testing.T) {
+	var req UpdateTimeEntryRequest
+	if err := json.Unmarshal([]byte(`{"description":"updated","is_billable":false}`), &req); err != nil {
+		t.Fatalf("unmarshal update request: %v", err)
+	}
+	if req.Description == nil || *req.Description != "updated" {
+		t.Fatalf("description = %v, want updated", req.Description)
+	}
+	if req.IsBillable == nil || *req.IsBillable {
+		t.Fatalf("is_billable = %v, want present false", req.IsBillable)
+	}
+	if req.EmployeeID != nil || req.Date != nil || req.DurationMinutes != nil || req.ProjectID != nil {
+		t.Fatalf("omitted fields were materialized: %+v", req)
+	}
+}

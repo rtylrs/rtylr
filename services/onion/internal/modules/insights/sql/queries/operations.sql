@@ -21,21 +21,30 @@ SELECT COUNT(*) AS count
  WHERE business_id = ?
    AND status NOT IN ('rejected','cancelled','completed');
 
--- cross-schema read from hr_core — calculate current active headcount.
--- name: GetHeadcountNow :one
-SELECT COUNT(*) AS count FROM hr_employees
- WHERE business_id = ?
-   AND (start_date IS NULL OR start_date <= ?)
-   AND (end_date IS NULL OR end_date > ?)
-   AND status = 'active';
-
--- cross-schema read from hr_core — calculate prior-period active headcount.
--- name: GetHeadcountPrior :one
-SELECT COUNT(*) AS count FROM hr_employees
+-- cross-schema read from hr_core — calculate headcount as of a date. Historical
+-- rows must not depend on the employee's current status.
+-- name: GetHeadcountAsOf :one
+SELECT COUNT(*) AS count
+FROM hr_employees
 WHERE business_id = ?
-   AND (start_date IS NULL OR start_date <= ?)
-   AND (end_date IS NULL OR end_date > ?)
-   AND status = 'active';
+  AND (start_date IS NULL OR start_date <= ?)
+  AND (end_date IS NULL OR end_date > ?);
+
+-- cross-schema read from hr_core — count gross hires during a period.
+-- name: CountHeadcountHires :one
+SELECT COUNT(*) AS count
+FROM hr_employees
+WHERE business_id = ?
+  AND start_date >= ?
+  AND start_date <= ?;
+
+-- cross-schema read from hr_core — count gross departures during a period.
+-- name: CountHeadcountDepartures :one
+SELECT COUNT(*) AS count
+FROM hr_employees
+WHERE business_id = ?
+  AND end_date >= ?
+  AND end_date <= ?;
 
 -- cross-schema read from hr_shifts — summarize assignment statuses for a date range.
 -- name: GetShiftMetrics :one
@@ -47,20 +56,32 @@ FROM hr_shift_assignments
 WHERE business_id = ?
   AND date BETWEEN ? AND ?;
 
--- cross-schema read from hr_leave — count approved-workflow requests pending action.
+-- cross-schema read from hr_leave — count requests starting during a period.
 -- name: CountPendingTimeOff :one
-SELECT COUNT(*) AS count FROM hr_leave_requests WHERE business_id = ? AND status = 'pending';
+SELECT COUNT(*) AS count
+FROM hr_leave_requests
+WHERE business_id = ?
+  AND status = 'pending'
+  AND start_date BETWEEN ? AND ?;
 
--- cross-schema read from hr_leave — count approved time-off requests.
+-- cross-schema read from hr_leave — count approved requests starting during a period.
 -- name: CountApprovedTimeOff :one
-SELECT COUNT(*) AS count FROM hr_leave_requests WHERE business_id = ? AND status = 'approved';
+SELECT COUNT(*) AS count
+FROM hr_leave_requests
+WHERE business_id = ?
+  AND status = 'approved'
+  AND start_date BETWEEN ? AND ?;
 
--- cross-schema read from hr_core — count employees used in utilization insights.
--- name: CountActiveEmployeesUtilization :one
-SELECT COUNT(*) AS count FROM hr_employees WHERE business_id = ? AND status = 'active';
+-- cross-schema read from hr_core — count employees active at the end of a period.
+-- name: CountEmployeesAsOf :one
+SELECT COUNT(*) AS count
+FROM hr_employees
+WHERE business_id = ?
+  AND (start_date IS NULL OR start_date <= ?)
+  AND (end_date IS NULL OR end_date > ?);
 
--- cross-schema read from hr_shifts — sum scheduled hours for the next seven days.
--- name: SumScheduledHoursNext7Days :one
+-- cross-schema read from hr_shifts — sum scheduled hours during a period.
+-- name: SumScheduledHoursInRange :one
 SELECT COALESCE(SUM(
   TIME_TO_SEC(STR_TO_DATE(s.end_time, '%H:%i'))
   - TIME_TO_SEC(STR_TO_DATE(s.start_time, '%H:%i'))
@@ -69,4 +90,5 @@ FROM hr_shift_assignments a
 JOIN hr_shifts s ON s.id = a.shift_id AND s.business_id = a.business_id
 WHERE a.business_id = ?
   AND a.status <> 'cancelled'
-  AND a.date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+  AND a.date >= ?
+  AND a.date <= ?;

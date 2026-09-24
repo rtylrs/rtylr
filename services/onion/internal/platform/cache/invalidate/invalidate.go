@@ -88,17 +88,19 @@ func SubscribeAsyncInvalidations(ctx context.Context) {
 // own prefix from internal/platform/cache/keys.
 func patternsFor(t keys.InvalidationType, id string) []string {
 	switch t {
-	case keys.InvalidateTeam:
-		// Team membership is bucketed under the business owner.
-		if id == "" {
+	case keys.InvalidateTeam, keys.InvalidateConfig:
+		// Team membership and configuration are bucketed under a numeric
+		// business id. Reject malformed ids here rather than constructing a
+		// wildcard that can never match a real key.
+		idN, err := strconv.ParseInt(id, 10, 64)
+		if err != nil || idN <= 0 {
 			return nil
 		}
-		return []string{fmt.Sprintf("%sbusiness:%s:team*", keys.Namespace, id)}
-	case keys.InvalidateConfig:
-		if id == "" {
-			return nil
+		prefix := "team"
+		if t == keys.InvalidateConfig {
+			prefix = "config"
 		}
-		return []string{fmt.Sprintf("%sbusiness:%s:config*", keys.Namespace, id)}
+		return []string{fmt.Sprintf("%sbusiness:%d:%s*", keys.Namespace, idN, prefix)}
 	case keys.InvalidateAll:
 		return []string{keys.Namespace + "*"}
 	}

@@ -68,9 +68,16 @@ type CreateGrantResponse struct {
 
 type CreateGrantHandler struct{ Service *application.Service }
 
+func parseGrantExpiresAt(value string) (*time.Time, error) {
+	return parseOptionalTime(&value)
+}
+
 func (h *CreateGrantHandler) Validate(_ context.Context, req *CreateGrantRequest) error {
 	if req.UserID == 0 || req.PlanID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "user_id and plan_id are required")
+	}
+	if _, err := parseGrantExpiresAt(req.ExpiresAt); err != nil {
+		return badRequest("Invalid expires_at")
 	}
 	return nil
 }
@@ -83,12 +90,9 @@ func (h *CreateGrantHandler) Serve(ctx context.Context, req *CreateGrantRequest)
 	if !ok {
 		return CreateGrantResponse{}, onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
-	var expiresAt *time.Time
-	if req.ExpiresAt != "" {
-		t, err := time.Parse(time.RFC3339, req.ExpiresAt)
-		if err == nil {
-			expiresAt = &t
-		}
+	expiresAt, err := parseGrantExpiresAt(req.ExpiresAt)
+	if err != nil {
+		return CreateGrantResponse{}, badRequest("Invalid expires_at")
 	}
 	grant, err := h.Service.CreateGrant(ctx, req.UserID, req.PlanID, admin.UserID, req.Note, expiresAt)
 	if err != nil {
@@ -162,6 +166,9 @@ func (h *CreateAddonGrantHandler) Validate(_ context.Context, req *CreateAddonGr
 	if req.UserID == 0 || req.AddonID == "" {
 		return onekiterrors.New(http.StatusBadRequest, "user_id and addon_id are required")
 	}
+	if _, err := parseGrantExpiresAt(req.ExpiresAt); err != nil {
+		return badRequest("Invalid expires_at")
+	}
 	return nil
 }
 
@@ -173,12 +180,9 @@ func (h *CreateAddonGrantHandler) Serve(ctx context.Context, req *CreateAddonGra
 	if !ok {
 		return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
-	var expiresAt *time.Time
-	if req.ExpiresAt != "" {
-		t, err := time.Parse(time.RFC3339, req.ExpiresAt)
-		if err == nil {
-			expiresAt = &t
-		}
+	expiresAt, err := parseGrantExpiresAt(req.ExpiresAt)
+	if err != nil {
+		return CreateAddonGrantResponse{}, badRequest("Invalid expires_at")
 	}
 	grant, err := h.Service.CreateAddonGrant(ctx, req.UserID, req.BusinessID, req.AddonID, admin.UserID, req.Note, expiresAt)
 	if err != nil {

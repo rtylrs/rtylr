@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -65,6 +67,9 @@ func (h *MergeCustomersHandler) Serve(ctx context.Context, req *MergeCustomersRe
 		SecondaryID: req.SecondaryID,
 	})
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, domain.ErrCustomerNotFound) {
+			return MergeCustomersResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
+		}
 		return MergeCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to merge customers")
 	}
 

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -33,6 +34,10 @@ const (
 	sectionPositionTestUserID     int64 = 993512
 	formFieldEchoTestBusinessID   int64 = 993601
 	formFieldEchoTestUserID       int64 = 993602
+
+	missingWriteTestBusinessID int64 = 993701
+	missingWriteTestUserID     int64 = 993702
+	missingWriteTestRowID      int64 = 993799
 )
 
 // recruitTestAuthContext builds the server-resolved auth user the recruit
@@ -53,6 +58,63 @@ func recruitTestAuthContext(businessID, userID int64, permissions ...string) con
 		}},
 	}
 	return authPkg.WithAuthUser(context.Background(), user)
+}
+
+// A scoped UPDATE that matches no row is not a successful write. These three
+// endpoints used to discard the sql.Result and return 200 for a stale, foreign,
+// or unknown id. Keep the regression at the handler boundary so it also proves
+// that the repository sentinel is translated through the service to HTTP 404.
+func TestRecruitWritesReturnNotFoundWhenNoRowMatches(t *testing.T) {
+	db := testutil.OpenDB(t)
+	testutil.GrantBusinessAccess(t, db, missingWriteTestBusinessID, missingWriteTestUserID)
+	ctx := recruitTestAuthContext(
+		missingWriteTestBusinessID,
+		missingWriteTestUserID,
+		"recruit:jobs:manage",
+		"recruit:candidates:edit",
+	)
+	service := application.NewService(ctx, db)
+
+	cases := []struct {
+		name string
+		call func() error
+	}{
+		{
+			name: "update career",
+			call: func() error {
+				_, err := (&UpdateRecruitCareerHandler{CareersService: service}).Serve(ctx, &UpdateRecruitCareerRequest{
+					ID:    missingWriteTestRowID,
+					Title: "Missing Career",
+				})
+				return err
+			},
+		},
+		{
+			name: "delete career",
+			call: func() error {
+				_, err := (&DeleteRecruitCareerHandler{CareersService: service}).Serve(ctx, &DeleteRecruitCareerRequest{ID: missingWriteTestRowID})
+				return err
+			},
+		},
+		{
+			name: "update submission status",
+			call: func() error {
+				_, err := (&UpdateSubmissionStatusHandler{CareersService: service}).Serve(ctx, &UpdateSubmissionStatusRequest{
+					ID:     missingWriteTestRowID,
+					Status: "reviewed",
+				})
+				return err
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if status := recruitStatus(tc.call()); status != http.StatusNotFound {
+				t.Fatalf("status = %d, want %d", status, http.StatusNotFound)
+			}
+		})
+	}
 }
 
 // The public careers page used to be cached under the customization's

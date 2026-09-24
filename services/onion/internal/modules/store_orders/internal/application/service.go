@@ -89,9 +89,10 @@ func (s *Service) Create(ctx context.Context, ownerID, businessID int64, input d
 }
 
 func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.StoreOrderInput) error {
-	if err := validateOrder(input); err != nil {
-		return err
-	}
+	// Updates change only order metadata and status. Items and monetary totals
+	// are create-time, catalog-derived values and are not persisted by Update,
+	// so applying create-order amount validation here rejects valid partial
+	// updates (for example, an update that echoes the existing total).
 	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}

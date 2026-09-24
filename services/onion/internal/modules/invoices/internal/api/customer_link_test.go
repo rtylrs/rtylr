@@ -121,6 +121,53 @@ func TestCreateInvoicePersistsCustomerLink(t *testing.T) {
 	}
 }
 
+func TestListInvoicesCustomerFilterPreservesOtherFilters(t *testing.T) {
+	const businessID int64 = 993103
+	const userID int64 = 993103
+	apiSvc, ctx, db := newCustomerLinkAPI(t, businessID, userID, stubCustomerSnapshots{
+		name: "Filtered Client", email: "filtered@example.test", address: "1 Filter Way",
+	})
+
+	customerID := int64(5302)
+	first, err := apiSvc.CreateInvoice(ctx, createInvoiceRequest(customerID))
+	if err != nil {
+		t.Fatalf("create first invoice: %v", err)
+	}
+	second, err := apiSvc.CreateInvoice(ctx, createInvoiceRequest(customerID))
+	if err != nil {
+		t.Fatalf("create second invoice: %v", err)
+	}
+	t.Cleanup(func() {
+		for _, invoiceID := range []int64{first.GetInvoice().GetId(), second.GetInvoice().GetId()} {
+			_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_invoice_items WHERE invoice_id = ?", invoiceID)
+			_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_invoices WHERE id = ?", invoiceID)
+		}
+	})
+
+	if _, err := db.ExecContext(ctx, "UPDATE finance_invoices SET status = 'sent' WHERE id = ?", first.GetInvoice().GetId()); err != nil {
+		t.Fatalf("mark first invoice sent: %v", err)
+	}
+
+	resp, err := apiSvc.ListInvoices(ctx, &financeinvoicesv1.ListInvoicesRequest{
+		CustomerId: &customerID,
+		Status:     "sent",
+		Search:     first.GetInvoice().GetInvoiceNumber(),
+		DateFrom:   "2026-06-01",
+		DateTo:     "2026-06-30",
+		Page:       1,
+		PageSize:   50,
+	})
+	if err != nil {
+		t.Fatalf("ListInvoices with customer and filters: %v", err)
+	}
+	if len(resp.GetInvoices()) != 1 {
+		t.Fatalf("returned %d invoices, want 1", len(resp.GetInvoices()))
+	}
+	if got := resp.GetInvoices()[0].GetId(); got != first.GetInvoice().GetId() {
+		t.Fatalf("returned invoice %d, want %d", got, first.GetInvoice().GetId())
+	}
+}
+
 func TestCreateInvoiceUnknownCustomerIsNotFound(t *testing.T) {
 	const businessID int64 = 993102
 	const userID int64 = 993102

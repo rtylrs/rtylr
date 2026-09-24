@@ -93,6 +93,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		return insightsreportv1.RegisterReportServiceServer(
 			api.NewReportAPI(m.service),
 			insightsreportv1.WithMux(mux),
+			insightsreportv1.WithMiddleware(api.ScheduledReportPresenceMiddleware),
 		)
 	})
 }

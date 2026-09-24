@@ -432,7 +432,7 @@ func TestWorkspaces_GetLabelsByWorkspace_PaginationAndTotal(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		labelID, err := repo.CreateLabel(ctx, domain.LabelInput{
-			WorkspaceID: wsID, Name: fmt.Sprintf("Label %d", i), Color: "#112233",
+			WorkspaceID: wsID, BusinessID: testutil.BusinessID, Name: fmt.Sprintf("Label %d", i), Color: "#112233",
 		})
 		if err != nil {
 			t.Fatalf("CreateLabel %d: %v", i, err)

@@ -250,12 +250,19 @@ func LoadAndValidate() (*AppConfig, error) {
 		jwtDuration = parsed
 	}
 
-	hosts := os.Getenv("REDIS_HOSTS")
+	hosts := strings.TrimSpace(os.Getenv("REDIS_HOSTS"))
 	var redisHosts []string
-	if hosts != "" {
-		redisHosts = strings.Split(hosts, ",")
-	} else {
+	if hosts == "" {
 		redisHosts = []string{"localhost:6379"}
+	} else {
+		for _, host := range strings.Split(hosts, ",") {
+			if host = strings.TrimSpace(host); host != "" {
+				redisHosts = append(redisHosts, host)
+			}
+		}
+		if len(redisHosts) == 0 {
+			return nil, fmt.Errorf("REDIS_HOSTS contains no usable host")
+		}
 	}
 
 	inMemoryCacheMaxSizeMb := 0

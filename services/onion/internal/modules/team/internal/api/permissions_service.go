@@ -29,7 +29,10 @@ func (a *PermissionsAPI) UpdatePermissions(ctx context.Context, req *hubteamperm
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	appsSlice := req.GetApps()
+	var apps *[]string
+	if req.Apps != nil {
+		apps = &req.Apps
+	}
 	appAssignments, assignmentErr := appAssignmentsFromProto(req.GetAppAssignments())
 	if assignmentErr != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, assignmentErr.Error())
@@ -38,7 +41,7 @@ func (a *PermissionsAPI) UpdatePermissions(ctx context.Context, req *hubteamperm
 	if err := a.Service.UpdatePermissions(ctx, device.UserID, device.BusinessID, domain.UpdatePermissionsInput{
 		UserID:         req.GetUserId(),
 		FullName:       req.FullName,
-		Apps:           &appsSlice,
+		Apps:           apps,
 		Role:           domain.Role(req.GetRole()),
 		DashRole:       req.GetDashRole(),
 		AppAssignments: appAssignments,

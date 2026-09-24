@@ -207,7 +207,11 @@ func (a *ConsoleAdminAPI) UpdateBusiness(ctx context.Context, req *consoleadminv
 	if err := requireConsoleAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if err := a.service.UpdateBusiness(ctx, req.GetId(), strings.TrimSpace(req.GetName())); err != nil {
+	name := strings.TrimSpace(req.GetName())
+	if name == "" {
+		return nil, badRequest("name is required")
+	}
+	if err := a.service.UpdateBusiness(ctx, req.GetId(), name); err != nil {
 		return nil, internalError("Failed to update business")
 	}
 	return &consoleadminv1.UpdateBusinessResponse{Message: "Business updated"}, nil

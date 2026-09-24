@@ -50,10 +50,19 @@ func (h *RejectTimesheetHandler) Serve(ctx context.Context, req *RejectTimesheet
 		return RejectTimesheetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")
 	}
 
-	ts, err := h.Service.RejectTimesheet(ctx, businessID, id, req.RejectionReason)
+	ts, err := h.Service.RejectTimesheet(ctx, businessID, id, device.User.UserID, req.RejectionReason)
 	if err != nil {
+		if errors.Is(err, domain.ErrTimesheetAccessDenied) || errors.Is(err, domain.ErrTimesheetApproverNotAllowed) || errors.Is(err, domain.ErrTimesheetSelfApproval) {
+			return RejectTimesheetResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrTimesheetNotFound) {
 			return RejectTimesheetResponse{}, onekiterrors.New(http.StatusNotFound, "Timesheet not found")
+		}
+		if errors.Is(err, domain.ErrTimesheetNotPending) {
+			return RejectTimesheetResponse{}, onekiterrors.New(http.StatusConflict, "Timesheet is not awaiting rejection")
+		}
+		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
+			return RejectTimesheetResponse{}, onekiterrors.New(http.StatusPreconditionFailed, "Approval chain not configured for timesheets")
 		}
 		logger.Ctx(ctx).Error("failed to reject timesheet", logger.Any("owner_id", device.User.UserID), logger.Any("timesheet_id", id), logger.Error(err))
 		return RejectTimesheetResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to reject timesheet")

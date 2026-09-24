@@ -103,6 +103,8 @@ func ogCardETag(c domain.Customization) string {
 	h.Write([]byte{0})
 	h.Write([]byte(c.TextColor))
 	h.Write([]byte{0})
+	h.Write([]byte(c.MutedTextColor))
+	h.Write([]byte{0})
 	h.Write([]byte(c.Template))
 	return `"` + hex.EncodeToString(h.Sum(nil)) + `"`
 }

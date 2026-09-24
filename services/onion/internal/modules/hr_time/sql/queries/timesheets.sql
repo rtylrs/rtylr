@@ -63,10 +63,10 @@ UPDATE hr_timesheets
 SET status = 'locked', updated_at = NOW()
 WHERE id = ? AND business_id = ? AND status = 'submitted';
 
--- name: RejectTimesheet :exec
+-- name: RejectTimesheet :execrows
 UPDATE hr_timesheets
 SET status = 'rejected', rejection_reason = ?, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status = 'submitted';
 
 -- name: CreateApprovalAction :exec
 INSERT INTO hr_timesheet_approval_actions (

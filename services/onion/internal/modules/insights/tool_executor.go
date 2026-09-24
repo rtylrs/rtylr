@@ -149,29 +149,57 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsCustomerKPIsToolName:
-		kpis, err := m.service.GetCustomerKPIs(ctx, businessID)
+		from, to, err := insightsToolDateRange(input)
 		if err != nil {
 			return nil, err
 		}
-		return map[string]any{"customer_kpis": kpis}, nil
+		kpis, err := m.service.GetCustomerKPIs(ctx, businessID, from, to)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"customer_kpis": kpis, "range": insightsToolRangePayload(from, to)}, nil
 
 	case listInsightsTopCustomersToolName:
 		limit, err := insightsToolInt32(input, 10, "limit", "page_size")
 		if err != nil {
 			return nil, err
 		}
-		customers, err := m.service.GetTopCustomers(ctx, businessID, limit)
+		page, err := insightsToolInt32(input, 1, "page")
+		if err != nil {
+			return nil, err
+		}
+		from, to, err := insightsToolDateRange(input)
+		if err != nil {
+			return nil, err
+		}
+		sortBy, sortDir, err := insightsapp.NormalizeTopCustomerSort(
+			insightsToolFirstString(input, "sort_by", "sortBy"),
+			insightsToolFirstString(input, "sort_dir", "sortDir"),
+		)
+		if err != nil {
+			return nil, err
+		}
+		result, err := m.service.GetTopCustomers(ctx, businessID, insightsapp.TopCustomerQuery{
+			From: from, To: to, Page: page, Limit: limit, SortBy: sortBy, SortDir: sortDir,
+		})
 		if err != nil {
 			return nil, err
 		}
 		return map[string]any{
-			"customers": customers,
+			"customers": result.Rows,
 			"limit":     limit,
-			"returned":  len(customers),
+			"page":      page,
+			"total":     result.Total,
+			"range":     insightsToolRangePayload(from, to),
+			"returned":  len(result.Rows),
 		}, nil
 
 	case getInsightsCustomerChurnToolName:
-		windows, err := m.service.GetChurnRates(ctx, businessID)
+		from, to, err := insightsToolDateRange(input)
+		if err != nil {
+			return nil, err
+		}
+		windows, err := m.service.GetChurnRates(ctx, businessID, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -318,11 +346,15 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		return map[string]any{"operations_kpis": kpis}, nil
 
 	case getInsightsHeadcountToolName:
-		headcount, err := m.service.GetHeadcount(ctx, businessID)
+		from, to, err := insightsToolDateRange(input)
 		if err != nil {
 			return nil, err
 		}
-		return map[string]any{"headcount": headcount}, nil
+		headcount, err := m.service.GetHeadcount(ctx, businessID, from, to)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"headcount": headcount, "range": insightsToolRangePayload(from, to)}, nil
 
 	case getInsightsShiftMetricsToolName:
 		from, to, err := insightsToolDateRange(input)
@@ -339,18 +371,26 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsTimeOffToolName:
-		timeOff, err := m.service.GetTimeOffSummary(ctx, businessID)
+		from, to, err := insightsToolDateRange(input)
 		if err != nil {
 			return nil, err
 		}
-		return map[string]any{"time_off": timeOff}, nil
+		timeOff, err := m.service.GetTimeOffSummary(ctx, businessID, from, to)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"time_off": timeOff, "range": insightsToolRangePayload(from, to)}, nil
 
 	case getInsightsUtilizationToolName:
-		utilization, err := m.service.GetUtilization(ctx, businessID)
+		from, to, err := insightsToolDateRange(input)
 		if err != nil {
 			return nil, err
 		}
-		return map[string]any{"utilization": utilization}, nil
+		utilization, err := m.service.GetUtilization(ctx, businessID, from, to)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"utilization": utilization, "range": insightsToolRangePayload(from, to)}, nil
 
 	case getInsightsSettingsToolName:
 		settings, err := m.service.GetSettings(ctx, businessID)
@@ -395,7 +435,7 @@ func insightsToolPermission(name string) string {
 	}
 }
 
-func parseScheduleReportToolInput(input map[string]any) (insightsapp.ScheduledReportPayload, error) {
+func parseScheduleReportToolInput(input map[string]any) (insightsapp.ScheduledReportInput, error) {
 	if input == nil {
 		input = map[string]any{}
 	}
@@ -422,15 +462,15 @@ func parseScheduleReportToolInput(input map[string]any) (insightsapp.ScheduledRe
 	}
 
 	if err := validateScheduleReportRecipient(channel, recipient); err != nil {
-		return insightsapp.ScheduledReportPayload{}, err
+		return insightsapp.ScheduledReportInput{}, err
 	}
 
-	return insightsapp.ScheduledReportPayload{
+	return insightsapp.ScheduledReportInput{
 		TemplateID: templateID,
 		Cadence:    cadence,
 		Channel:    channel,
 		Recipient:  recipient,
-		IsActive:   scheduleReportBool(input["is_active"], input["isActive"], true),
+		IsActive:   scheduleReportOptionalBool(input["is_active"], input["isActive"]),
 	}, nil
 }
 
@@ -563,22 +603,24 @@ func validateScheduleReportRecipient(channel, recipient string) error {
 	return nil
 }
 
-func scheduleReportBool(primary, fallback any, defaultValue bool) bool {
+func scheduleReportOptionalBool(primary, fallback any) *bool {
 	for _, value := range []any{primary, fallback} {
 		switch v := value.(type) {
 		case nil:
 			continue
 		case bool:
-			return v
+			result := v
+			return &result
 		case string:
 			trimmed := strings.TrimSpace(strings.ToLower(v))
 			if trimmed == "" {
 				continue
 			}
-			return trimmed != "false" && trimmed != "0" && trimmed != "no" && trimmed != "inactive"
+			result := trimmed != "false" && trimmed != "0" && trimmed != "no" && trimmed != "inactive"
+			return &result
 		}
 	}
-	return defaultValue
+	return nil
 }
 
 func scheduleReportSlug(value string) string {

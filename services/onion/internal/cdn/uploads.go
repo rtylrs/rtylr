@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -46,17 +47,43 @@ func (c *CDN) uploadFile(ctx context.Context, filename, mimeType string, size in
 
 	fileUUID := uuid.NewString()
 	storageKey := fmt.Sprintf("originals/%s%s", fileUUID, extensionForFormat(mimeTypeToFormat(mimeType)))
+	if c.storage == nil {
+		return nil, errCDNStorageNotConfigured
+	}
 
 	if err := c.storage.Upload(ctx, storageKey, mimeType, body); err != nil {
+		// Upload can report an error after the object has reached the store;
+		// make the same best-effort cleanup for the partial-success case.
+		c.cleanupUploadedObject(ctx, storageKey)
 		return nil, fmt.Errorf("uploading to storage: %w", err)
 	}
 
 	id, err := c.insertFile(ctx, fileUUID, storageKey, mimeType, filename, size)
 	if err != nil {
+		c.cleanupUploadedObject(ctx, storageKey)
 		return nil, err
 	}
 
-	return c.fileByID(ctx, id)
+	uploaded, err := c.fileByID(ctx, id)
+	if err != nil {
+		c.cleanupUploadedObject(ctx, storageKey)
+		return nil, err
+	}
+	return uploaded, nil
+}
+
+const uploadCleanupTimeout = 5 * time.Second
+
+func (c *CDN) cleanupUploadedObject(ctx context.Context, storageKey string) {
+	if c.storage == nil {
+		return
+	}
+	cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), uploadCleanupTimeout)
+	defer cancel()
+	if err := c.storage.Delete(cleanupCtx, storageKey); err != nil {
+		logger.Ctx(ctx).Warn("cdn: failed to clean up orphaned upload",
+			logger.String("storage_key", storageKey), logger.Error(err))
+	}
 }
 
 // maxInMemoryUpload bounds how much of a multipart upload is buffered in RAM;
@@ -101,6 +128,10 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 
 	uploaded, err := c.uploadFile(r.Context(), header.Filename, mimeType, header.Size, file)
 	if err != nil {
+		if errors.Is(err, errCDNStorageNotConfigured) {
+			http.Error(w, "file uploads are not configured on this server", http.StatusNotImplemented)
+			return
+		}
 		if errors.Is(err, ErrImageBlocked) {
 			http.Error(w, "image rejected by content policy", http.StatusUnprocessableEntity)
 			return

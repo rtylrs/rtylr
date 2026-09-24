@@ -6,43 +6,95 @@ import (
 	"strings"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
-// TopCustomerPayload is one row in the top-customers response. Name is
-// already joined here so the frontend doesn't need to stitch first+last.
 type TopCustomerPayload struct {
-	CustomerID              int64  `json:"customer_id"`
-	Name                    string `json:"name"`
-	Email                   string `json:"email"`
-	LifetimeSpendMinorUnits int64  `json:"lifetime_spend_minor_units"`
-	OrderCount              int64  `json:"order_count"`
+	CustomerID              int64     `json:"customer_id"`
+	Name                    string    `json:"name"`
+	Email                   string    `json:"email"`
+	LifetimeSpendMinorUnits int64     `json:"lifetime_spend_minor_units"`
+	OrderCount              int64     `json:"order_count"`
+	LastOrderAt             time.Time `json:"last_order_at"`
 }
 
-// GetTopCustomers returns the leaderboard. Limit is capped at 100 upstream
-// in the repository. Cache key varies on limit so two callers with
-// different limits get distinct cached responses.
-func (s *Service) GetTopCustomers(ctx context.Context, businessID int64, limit int32) ([]TopCustomerPayload, error) {
-	if limit <= 0 {
-		limit = 10
+type TopCustomerQuery struct {
+	From    time.Time
+	To      time.Time
+	Page    int32
+	Limit   int32
+	SortBy  string
+	SortDir string
+}
+
+type TopCustomerPage struct {
+	Rows  []TopCustomerPayload
+	Total int64
+}
+
+func NormalizeTopCustomerSort(sortBy, sortDir string) (string, string, error) {
+	normalizedSort := strings.ToLower(strings.TrimSpace(sortBy))
+	switch normalizedSort {
+	case "", "total_spent", "totalspent", "total spent":
+		normalizedSort = "total_spent"
+	case "order_count", "ordercount", "order count":
+		normalizedSort = "order_count"
+	default:
+		return "", "", fmt.Errorf("unsupported sort_by %q", sortBy)
 	}
-	if limit > 100 {
-		limit = 100
+
+	normalizedDir := strings.ToLower(strings.TrimSpace(sortDir))
+	switch normalizedDir {
+	case "":
+		normalizedDir = "desc"
+	case "asc", "desc":
+	default:
+		return "", "", fmt.Errorf("unsupported sort_dir %q", sortDir)
 	}
-	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("customers:top:%d", limit))
+	return normalizedSort, normalizedDir, nil
+}
+
+func (s *Service) GetTopCustomers(ctx context.Context, businessID int64, query TopCustomerQuery) (TopCustomerPage, error) {
+	if query.Limit <= 0 {
+		query.Limit = 10
+	}
+	if query.Limit > 100 {
+		query.Limit = 100
+	}
+	query.Page = normalizePage(query.Page)
+	sortBy, sortDir, err := NormalizeTopCustomerSort(query.SortBy, query.SortDir)
 	if err != nil {
-		return nil, err
+		return TopCustomerPage{}, err
+	}
+	query.SortBy, query.SortDir = sortBy, sortDir
+
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf(
+		"customers:top:%s:%s:%d:%d:%s:%s",
+		query.From.Format("2006-01-02"), query.To.Format("2006-01-02"),
+		query.Page, query.Limit, sortBy, sortDir,
+	))
+	if err != nil {
+		return TopCustomerPage{}, err
 	}
 	type result struct {
-		Rows []TopCustomerPayload
+		Rows  []TopCustomerPayload
+		Total int64
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetTopCustomers(ctx, businessID, limit)
+		page, rerr := s.repo.GetTopCustomers(ctx, businessID, infrastructure.TopCustomerQuery{
+			From:         query.From,
+			To:           query.To,
+			Limit:        query.Limit,
+			Offset:       pageOffset(query.Page, query.Limit),
+			ByOrderCount: sortBy == "order_count",
+			Descending:   sortDir == "desc",
+		})
 		if rerr != nil {
 			return result{}, rerr
 		}
-		payloads := make([]TopCustomerPayload, 0, len(rows))
-		for _, row := range rows {
+		payloads := make([]TopCustomerPayload, 0, len(page.Rows))
+		for _, row := range page.Rows {
 			name := strings.TrimSpace(row.FirstName + " " + row.LastName)
 			payloads = append(payloads, TopCustomerPayload{
 				CustomerID:              row.CustomerID,
@@ -50,12 +102,13 @@ func (s *Service) GetTopCustomers(ctx context.Context, businessID int64, limit i
 				Email:                   row.Email,
 				LifetimeSpendMinorUnits: row.LifetimeSpendMinor,
 				OrderCount:              row.OrderCount,
+				LastOrderAt:             row.LastOrderAt,
 			})
 		}
-		return result{Rows: payloads}, nil
+		return result{Rows: payloads, Total: page.Total}, nil
 	}, cacher.WithExpiry(ctx, 5*time.Minute))
 	if err != nil {
-		return nil, err
+		return TopCustomerPage{}, err
 	}
-	return out.Rows, nil
+	return TopCustomerPage{Rows: out.Rows, Total: out.Total}, nil
 }

@@ -62,6 +62,9 @@ func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRuns
 	if req.Limit > 100 {
 		req.Limit = 100
 	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
 
 	runs, total, err := h.Service.ListPayrollRuns(ctx, businessID, domain.ListPayrollRunsParams{
 		Limit: req.Limit, Offset: req.Offset,
@@ -73,7 +76,19 @@ func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRuns
 
 	payloads := make([]*hremployeespayrollrunsv1.PayrollRunPayload, 0, len(runs))
 	for _, r := range runs {
-		payloads = append(payloads, payrollRunToProto(r))
+		_, entries, entriesErr := h.Service.GetPayrollRun(ctx, businessID, r.ID)
+		if entriesErr != nil {
+			logger.Ctx(ctx).Error("failed to load payroll run entries", logger.Any("business_id", businessID), logger.Any("run_id", r.ID), logger.Error(entriesErr))
+			return ListPayrollRunsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list payroll runs")
+		}
+
+		payload := payrollRunToProto(r)
+		entryPayloads := make([]*hremployeespayrollrunsv1.PayrollEntryPayload, 0, len(entries))
+		for _, e := range entries {
+			entryPayloads = append(entryPayloads, payrollEntryToProto(e))
+		}
+		payload.Entries = entryPayloads
+		payloads = append(payloads, payload)
 	}
 
 	return ListPayrollRunsResponse{Runs: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil

@@ -215,7 +215,15 @@ SELECT COALESCE(SUM(amount),0) FROM finance_expenses WHERE business_id = ? AND e
 SELECT COALESCE(SUM(amount_due),0) FROM finance_invoices WHERE business_id = ? AND status IN ('sent','viewed','partial','overdue');
 
 -- name: SumOverdueAmount :one
-SELECT COALESCE(SUM(amount_due),0) FROM finance_invoices WHERE business_id = ? AND status = 'overdue';
+-- Overdue is a date-derived state: the normal send flow stores status='sent'
+-- and no scheduler changes it to 'overdue'. Keep this in step with the
+-- due-date-based overdue invoice list and count only open receivables.
+SELECT COALESCE(SUM(amount_due),0)
+FROM finance_invoices
+WHERE business_id = ?
+  AND status IN ('sent', 'viewed', 'partial', 'overdue')
+  AND due_date < CURRENT_DATE
+  AND amount_due > 0;
 
 -- name: SumTaxCollected :one
 SELECT COALESCE(SUM(tax_amount),0) FROM finance_invoices WHERE business_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?;

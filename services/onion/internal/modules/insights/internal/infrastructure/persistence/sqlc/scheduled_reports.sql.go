@@ -10,20 +10,33 @@ import (
 	"database/sql"
 )
 
+const countScheduledReports = `-- name: CountScheduledReports :one
+SELECT COUNT(*) AS count
+FROM insights_scheduled_reports
+WHERE business_id = ?
+`
+
+func (q *Queries) CountScheduledReports(ctx context.Context, businessID int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countScheduledReports, businessID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createScheduledReport = `-- name: CreateScheduledReport :execresult
 INSERT INTO insights_scheduled_reports
   (owner_id, business_id, template_id, cadence, channel, recipient, is_active)
-VALUES (?, ?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?, COALESCE(?, TRUE))
 `
 
 type CreateScheduledReportParams struct {
-	OwnerID    int64  `db:"owner_id" json:"owner_id"`
-	BusinessID int64  `db:"business_id" json:"business_id"`
-	TemplateID string `db:"template_id" json:"template_id"`
-	Cadence    string `db:"cadence" json:"cadence"`
-	Channel    string `db:"channel" json:"channel"`
-	Recipient  string `db:"recipient" json:"recipient"`
-	IsActive   bool   `db:"is_active" json:"is_active"`
+	OwnerID    int64       `db:"owner_id" json:"owner_id"`
+	BusinessID int64       `db:"business_id" json:"business_id"`
+	TemplateID string      `db:"template_id" json:"template_id"`
+	Cadence    string      `db:"cadence" json:"cadence"`
+	Channel    string      `db:"channel" json:"channel"`
+	Recipient  string      `db:"recipient" json:"recipient"`
+	IsActive   interface{} `db:"is_active" json:"is_active"`
 }
 
 func (q *Queries) CreateScheduledReport(ctx context.Context, arg CreateScheduledReportParams) (sql.Result, error) {
@@ -85,12 +98,62 @@ const listScheduledReports = `-- name: ListScheduledReports :many
 SELECT id, owner_id, business_id, template_id, cadence, channel, recipient, is_active, created_at, updated_at
 FROM insights_scheduled_reports
 WHERE business_id = ?
-ORDER BY created_at DESC
-LIMIT 200
+ORDER BY
+  CASE WHEN ? = 'created_at' AND ? = 'asc' THEN created_at END ASC,
+  CASE WHEN ? = 'created_at' AND ? = 'desc' THEN created_at END DESC,
+  CASE WHEN ? = 'updated_at' AND ? = 'asc' THEN updated_at END ASC,
+  CASE WHEN ? = 'updated_at' AND ? = 'desc' THEN updated_at END DESC,
+  CASE WHEN ? = 'recipient' AND ? = 'asc' THEN LOWER(recipient) END ASC,
+  CASE WHEN ? = 'recipient' AND ? = 'desc' THEN LOWER(recipient) END DESC,
+  CASE WHEN ? = 'cadence' AND ? = 'asc' THEN cadence END ASC,
+  CASE WHEN ? = 'cadence' AND ? = 'desc' THEN cadence END DESC,
+  CASE WHEN ? = 'channel' AND ? = 'asc' THEN channel END ASC,
+  CASE WHEN ? = 'channel' AND ? = 'desc' THEN channel END DESC,
+  CASE WHEN ? = 'is_active' AND ? = 'asc' THEN is_active END ASC,
+  CASE WHEN ? = 'is_active' AND ? = 'desc' THEN is_active END DESC,
+  created_at DESC,
+  id DESC
+LIMIT ? OFFSET ?
 `
 
-func (q *Queries) ListScheduledReports(ctx context.Context, businessID int64) ([]InsightsScheduledReport, error) {
-	rows, err := q.db.QueryContext(ctx, listScheduledReports, businessID)
+type ListScheduledReportsParams struct {
+	BusinessID int64       `db:"business_id" json:"business_id"`
+	SortBy     interface{} `db:"sort_by" json:"sort_by"`
+	SortDir    interface{} `db:"sort_dir" json:"sort_dir"`
+	Limit      int32       `db:"limit" json:"limit"`
+	Offset     int32       `db:"offset" json:"offset"`
+}
+
+func (q *Queries) ListScheduledReports(ctx context.Context, arg ListScheduledReportsParams) ([]InsightsScheduledReport, error) {
+	rows, err := q.db.QueryContext(ctx, listScheduledReports,
+		arg.BusinessID,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.SortBy,
+		arg.SortDir,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -125,18 +188,19 @@ func (q *Queries) ListScheduledReports(ctx context.Context, businessID int64) ([
 
 const updateScheduledReport = `-- name: UpdateScheduledReport :exec
 UPDATE insights_scheduled_reports
-SET template_id = ?, cadence = ?, channel = ?, recipient = ?, is_active = ?
+SET template_id = ?, cadence = ?, channel = ?, recipient = ?,
+    is_active = COALESCE(?, is_active)
 WHERE id = ? AND business_id = ?
 `
 
 type UpdateScheduledReportParams struct {
-	TemplateID string `db:"template_id" json:"template_id"`
-	Cadence    string `db:"cadence" json:"cadence"`
-	Channel    string `db:"channel" json:"channel"`
-	Recipient  string `db:"recipient" json:"recipient"`
-	IsActive   bool   `db:"is_active" json:"is_active"`
-	ID         int64  `db:"id" json:"id"`
-	BusinessID int64  `db:"business_id" json:"business_id"`
+	TemplateID string       `db:"template_id" json:"template_id"`
+	Cadence    string       `db:"cadence" json:"cadence"`
+	Channel    string       `db:"channel" json:"channel"`
+	Recipient  string       `db:"recipient" json:"recipient"`
+	IsActive   sql.NullBool `db:"is_active" json:"is_active"`
+	ID         int64        `db:"id" json:"id"`
+	BusinessID int64        `db:"business_id" json:"business_id"`
 }
 
 func (q *Queries) UpdateScheduledReport(ctx context.Context, arg UpdateScheduledReportParams) error {

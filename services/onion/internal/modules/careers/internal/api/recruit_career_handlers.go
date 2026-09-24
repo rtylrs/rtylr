@@ -271,6 +271,9 @@ func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecru
 	}
 
 	if err := h.CareersService.UpdateCareer(ctx, input); err != nil {
+		if errors.Is(err, application.ErrNotFound) {
+			return UpdateRecruitCareerResponse{}, onekiterrors.New(http.StatusNotFound, "Career not found")
+		}
 		return UpdateRecruitCareerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update career")
 	}
 	invalidatePublicCareersCache(ctx, businessID)

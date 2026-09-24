@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
 )
 
@@ -18,13 +19,26 @@ func NewInsightsAPI(service *application.Service) *InsightsAPI {
 	return &InsightsAPI{Service: service}
 }
 
+func (a *InsightsAPI) resolveWorkspace(ctx context.Context, authUser *authPkg.AuthUser, requested string) (int64, error) {
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, onekiterrors.PermissionDenied()
+	}
+	if requested == "" {
+		// Workspace ids and business ids are independent sequences. An omitted
+		// filter means the caller's actual personal workspace, not businessID.
+		requested = "personal"
+	}
+	return resolveWorkspaceQuery(ctx, a.Service, authUser, businessID, requested)
+}
+
 func (a *InsightsAPI) GetInsights(ctx context.Context, req *flowinsightsv1.GetInsightsRequest) (*flowinsightsv1.GetInsightsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
+	wsID, err := a.resolveWorkspace(ctx, authUser, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +105,7 @@ func (a *InsightsAPI) GetTeamWorkload(ctx context.Context, req *flowinsightsv1.G
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
+	wsID, err := a.resolveWorkspace(ctx, authUser, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +153,7 @@ func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoa
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
+	wsID, err := a.resolveWorkspace(ctx, authUser, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}

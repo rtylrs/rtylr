@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -146,6 +147,9 @@ func (h *UpdateSubmissionStatusHandler) Serve(ctx context.Context, req *UpdateSu
 	}
 
 	if err := h.CareersService.UpdateSubmissionStatus(ctx, businessID, req.ID, req.Status); err != nil {
+		if errors.Is(err, application.ErrNotFound) {
+			return UpdateSubmissionStatusResponse{}, onekiterrors.New(http.StatusNotFound, "Submission not found")
+		}
 		return UpdateSubmissionStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update submission status")
 	}
 	return UpdateSubmissionStatusResponse{Message: "Submission updated"}, nil
