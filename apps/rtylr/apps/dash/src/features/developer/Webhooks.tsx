@@ -27,17 +27,9 @@ import {
   useDeleteWebhook,
   type Webhook,
 } from '../../shared/hooks/queries/useWebhooks';
+import { normalizeWebhookUrl, SUPPORTED_WEBHOOK_EVENTS } from '../../shared/lib/webhookUrl';
 
-const EVENTS = [
-  'order.created',
-  'order.paid',
-  'order.refunded',
-  'customer.created',
-  'inventory.low',
-  'shift.started',
-  'shift.ended',
-  'invoice.paid',
-];
+const EVENTS = SUPPORTED_WEBHOOK_EVENTS;
 
 const Webhooks: React.FC = () => {
   const { t } = useTranslation();
@@ -50,8 +42,11 @@ const Webhooks: React.FC = () => {
   const [toDelete, setToDelete] = useState<Webhook | null>(null);
 
   const submitCreate = async () => {
-    if (!url.trim()) {
-      toast.error('Webhook URL is required');
+    const normalizedUrl = normalizeWebhookUrl(url);
+    if (!normalizedUrl) {
+      toast.error(
+        url.trim() ? 'Webhook URL must be a valid HTTP(S) URL' : 'Webhook URL is required'
+      );
       return;
     }
     if (events.length === 0) {
@@ -59,7 +54,7 @@ const Webhooks: React.FC = () => {
       return;
     }
     try {
-      await create.mutateAsync({ url, events });
+      await create.mutateAsync({ url: normalizedUrl, events });
       setUrl('');
       setEvents([]);
       setCreateOpen(false);

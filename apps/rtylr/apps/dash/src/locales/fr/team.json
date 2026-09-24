@@ -51,6 +51,10 @@
     "addNButton_many": "Ajouter {{count}} membres",
     "addNButton_other": "Ajouter {{count}} membres",
     "removeMemberAriaLabel": "Retirer {{name}} du groupe",
+    "loadMembersFailed": "Impossible de charger les membres de l'équipe",
+    "loadMembersFailedDescription": "Actualisez la liste des candidats avant d'ajouter des membres.",
+    "candidatePagination": "Pages des membres",
+    "candidatePage": "Page {{page}}",
     "pageTitle": "Détail du groupe"
   },
   "list": {

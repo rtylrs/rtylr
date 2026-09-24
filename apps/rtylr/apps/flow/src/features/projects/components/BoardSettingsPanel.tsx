@@ -72,24 +72,28 @@ const BoardSettingsPanel = ({
       return;
     }
     if (name === col.name) return;
-    updateColumn.mutate({ id: col.id, name, sortOrder: col.sortOrder });
+    updateColumn.mutate({ id: col.id, name, color: col.color, sortOrder: col.sortOrder });
   };
 
   /**
    * Swaps a column with its neighbour. Two independent PUTs, because the column
    * API has no bulk reorder - if the second fails the invalidated query pulls the
-   * server's real order back rather than leaving the local list lying.
+   * server's real order back rather than leaving the local list lying. The name
+   * override is the row's current draft so a reorder cannot write the old name
+   * back over an edit that has not blurred yet.
    */
-  const move = (index: number, direction: -1 | 1): void => {
+  const move = (index: number, direction: -1 | 1, nameOverride?: string): void => {
     const target = index + direction;
     if (target < 0 || target >= ordered.length) return;
     const a = ordered[index];
     const b = ordered[target];
-    updateColumn.mutate({ id: a.id, name: a.name, sortOrder: b.sortOrder });
-    updateColumn.mutate({ id: b.id, name: b.name, sortOrder: a.sortOrder });
+    const aName = nameOverride === undefined ? a.name : nameOverride.trim();
+    if (!aName) return;
+    updateColumn.mutate({ id: a.id, name: aName, color: a.color, sortOrder: b.sortOrder });
+    updateColumn.mutate({ id: b.id, name: b.name, color: b.color, sortOrder: a.sortOrder });
     setAnnouncement(
       t('flow.board.movedAnnouncement', {
-        name: a.name,
+        name: aName,
         position: target + 1,
         total: ordered.length,
       })
@@ -99,7 +103,8 @@ const BoardSettingsPanel = ({
   const addColumn = (): void => {
     const name = newColumnName.trim();
     if (!name) return;
-    createColumn.mutate({ name, sortOrder: ordered.length });
+    const nextSortOrder = ordered.reduce((max, col) => Math.max(max, col.sortOrder), -1) + 1;
+    createColumn.mutate({ name, sortOrder: nextSortOrder });
     setNewColumnName('');
   };
 
@@ -317,7 +322,7 @@ interface ColumnRowProps {
   isLastColumn: boolean;
   pendingDelete: boolean;
   onRename: (col: ApiProjectColumn, raw: string, restore: () => void) => void;
-  onMove: (index: number, direction: -1 | 1) => void;
+  onMove: (index: number, direction: -1 | 1, name?: string) => void;
   onRequestDelete: () => void;
   onCancelDelete: () => void;
   onConfirmDelete: () => void;
@@ -339,6 +344,15 @@ const ColumnRow = ({
   const { t } = useTranslation();
   const [draft, setDraft] = useState(column.name);
 
+  const moveWithDraft = (direction: -1 | 1): void => {
+    const name = draft.trim();
+    if (!name) {
+      setDraft(column.name);
+      return;
+    }
+    onMove(index, direction, name);
+  };
+
   return (
     <li className="rounded-md p-2" style={{ background: 'var(--flow-hover)' }}>
       <div className="flex items-center gap-2">
@@ -353,7 +367,7 @@ const ColumnRow = ({
             // region. Drag-and-drop on a touch board fights the scroll.
             if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
               e.preventDefault();
-              if (canManage) onMove(index, e.key === 'ArrowUp' ? -1 : 1);
+              if (canManage) moveWithDraft(e.key === 'ArrowUp' ? -1 : 1);
               return;
             }
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
@@ -364,7 +378,7 @@ const ColumnRow = ({
 
         <button
           type="button"
-          onClick={() => onMove(index, -1)}
+          onClick={() => moveWithDraft(-1)}
           disabled={!canManage || index === 0}
           aria-label={t('flow.board.moveUpLabel', { name: column.name })}
           className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
@@ -374,7 +388,7 @@ const ColumnRow = ({
         </button>
         <button
           type="button"
-          onClick={() => onMove(index, 1)}
+          onClick={() => moveWithDraft(1)}
           disabled={!canManage || index === total - 1}
           aria-label={t('flow.board.moveDownLabel', { name: column.name })}
           className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"

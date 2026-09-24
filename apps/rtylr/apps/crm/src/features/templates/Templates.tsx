@@ -11,7 +11,7 @@ import { PageHeader, Card, Button, SkeletonList } from '../../shared/components/
 const Templates: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { data: fetched, isLoading } = useTemplates();
+  const { data: fetched, isLoading, isError, refetch } = useTemplates();
   const createMut = useCreateTemplate();
   const templates = fetched ?? [];
 
@@ -49,15 +49,21 @@ const Templates: React.FC = () => {
     }
   };
 
-  const applyTemplate = (t: (typeof templates)[number]) => {
-    if (t.channel === 'email') {
+  const applyTemplate = (template: (typeof templates)[number]) => {
+    if (template.channel === 'email') {
       navigate({
-        to: `/campaigns/email?name=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(
-          t.subject || ''
-        )}&body=${encodeURIComponent(t.body)}`,
+        to: '/campaigns/email',
+        search: {
+          name: template.name,
+          subject: template.subject ?? '',
+          body: template.body,
+        },
       });
     } else {
-      navigate({ to: '/campaigns/sms' });
+      navigate({
+        to: '/campaigns/sms',
+        search: { name: template.name, body: template.body },
+      });
     }
   };
 
@@ -111,6 +117,27 @@ const Templates: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError && templates.length === 0 ? (
+          <Card>
+            <div
+              role="alert"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '32px 16px',
+                textAlign: 'center',
+                color: 'var(--hub-text-muted)',
+              }}
+            >
+              <FileText size={22} />
+              <p style={{ margin: 0, fontSize: '13px' }}>{t('errors.generic')}</p>
+              <Button variant="outline" onClick={() => void refetch()}>
+                {t('crm.actions.retry')}
+              </Button>
+            </div>
           </Card>
         ) : filtered.length === 0 ? (
           <Card>

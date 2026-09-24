@@ -17,19 +17,21 @@ import {
   LayoutGrid,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { APP_URLS, resolveAppUrl } from '@voxire/config';
+import { resolveAppUrl, type AppId } from '@voxire/config';
 import { useUserStore } from '../../../shared/stores/userStore';
 import { useCommandPalette } from '../../../shared/stores/commandPaletteStore';
 import { getTenantKey } from '../../../shared/utils/tenantStorage';
 import { useTranslation } from 'react-i18next';
 import { APP_NAMES } from '../../../shared/config/appNames';
 
-const today = new Date().toLocaleDateString('en-US', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+function formatToday(): string {
+  return new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
 
 // ─── Zero-query home ──────────────────────────────────────────────────────────
 // Deliberately fires NO backend queries: no KPIs, no activity feed, no team
@@ -38,10 +40,9 @@ const today = new Date().toLocaleDateString('en-US', {
 // analytics live in the Insights app and per-app pages, loaded on demand.
 
 interface AppLink {
-  id: string;
+  id: AppId;
   nameKey: string;
   blurbKey: string;
-  href: string;
   external: boolean;
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   color: string;
@@ -52,7 +53,6 @@ const APP_LINKS: AppLink[] = [
     id: 'pos',
     nameKey: APP_NAMES.pos.full,
     blurbKey: 'appNames.blurb.pos',
-    href: APP_URLS.pos,
     external: true,
     icon: MonitorSpeaker,
     color: '#4583C4',
@@ -61,7 +61,6 @@ const APP_LINKS: AppLink[] = [
     id: 'erp',
     nameKey: APP_NAMES.erp.full,
     blurbKey: 'appNames.blurb.erp',
-    href: APP_URLS.erp,
     external: true,
     icon: Package,
     color: '#10b981',
@@ -70,7 +69,6 @@ const APP_LINKS: AppLink[] = [
     id: 'hr',
     nameKey: APP_NAMES.hr.full,
     blurbKey: 'appNames.blurb.hr',
-    href: APP_URLS.hr,
     external: true,
     icon: UserCheck,
     color: '#f59e0b',
@@ -79,7 +77,6 @@ const APP_LINKS: AppLink[] = [
     id: 'crm',
     nameKey: APP_NAMES.crm.full,
     blurbKey: 'appNames.blurb.crm',
-    href: APP_URLS.crm,
     external: true,
     icon: Users,
     color: '#8b5cf6',
@@ -88,7 +85,6 @@ const APP_LINKS: AppLink[] = [
     id: 'finance',
     nameKey: APP_NAMES.finance.full,
     blurbKey: 'appNames.blurb.finance',
-    href: APP_URLS.finance,
     external: true,
     icon: CreditCard,
     color: '#ef4444',
@@ -97,7 +93,6 @@ const APP_LINKS: AppLink[] = [
     id: 'flow',
     nameKey: APP_NAMES.flow.full,
     blurbKey: 'appNames.blurb.flow',
-    href: APP_URLS.flow,
     external: true,
     icon: Layers,
     color: '#64C5B9',
@@ -132,6 +127,7 @@ interface RecentEntry {
   label: string;
   path: string;
   at: number;
+  externalUrl?: string;
 }
 
 const RECENTS_KEY = 'rtylr-home-recents';
@@ -141,17 +137,46 @@ function readRecents(): RecentEntry[] {
   try {
     const raw = localStorage.getItem(getTenantKey(RECENTS_KEY));
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.slice(0, MAX_RECENTS) : [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((entry): entry is RecentEntry => {
+        if (!entry || typeof entry !== 'object') return false;
+        const candidate = entry as Record<string, unknown>;
+        return (
+          typeof candidate.label === 'string' &&
+          typeof candidate.path === 'string' &&
+          typeof candidate.at === 'number' &&
+          (candidate.externalUrl === undefined || typeof candidate.externalUrl === 'string')
+        );
+      })
+      .slice(0, MAX_RECENTS);
   } catch {
     return [];
   }
 }
 
-export function recordRecent(label: string, path: string) {
+function safeExternalUrl(value: string): string | null {
+  try {
+    const parsed = new URL(value);
+    if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.hostname) {
+      return value;
+    }
+  } catch {
+    // Invalid URLs are not usable destinations.
+  }
+  return null;
+}
+
+export function recordRecent(label: string, path: string, externalUrl?: string) {
   try {
     const next = [
-      { label, path, at: Date.now() },
+      {
+        label,
+        path,
+        at: Date.now(),
+        ...(externalUrl ? { externalUrl } : {}),
+      },
       ...readRecents().filter((r) => r.path !== path),
     ].slice(0, MAX_RECENTS);
     localStorage.setItem(getTenantKey(RECENTS_KEY), JSON.stringify(next));
@@ -168,9 +193,32 @@ const AdminHome: React.FC = () => {
   const businessName = (user?.businessName as string | undefined) || 'Welcome';
 
   const [recents, setRecents] = useState<RecentEntry[]>([]);
+  const [today, setToday] = useState(formatToday);
 
   useEffect(() => {
     setRecents(readRecents());
+  }, []);
+
+  useEffect(() => {
+    let timeoutId: number | undefined;
+
+    const scheduleNextDay = () => {
+      const now = new Date();
+      const nextDay = new Date(now);
+      nextDay.setHours(24, 0, 0, 0);
+      timeoutId = window.setTimeout(
+        () => {
+          setToday(formatToday());
+          scheduleNextDay();
+        },
+        Math.max(1000, nextDay.getTime() - now.getTime())
+      );
+    };
+
+    scheduleNextDay();
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
   }, []);
 
   const goInternal = useCallback(
@@ -183,12 +231,34 @@ const AdminHome: React.FC = () => {
   );
 
   const openExternal = useCallback((label: string, href: string, pathForRecent?: string) => {
+    const safeHref = safeExternalUrl(href);
+    if (!safeHref) return;
     if (pathForRecent) {
-      recordRecent(label, pathForRecent);
+      recordRecent(label, pathForRecent, safeHref);
       setRecents(readRecents());
     }
-    window.open(href, '_blank', 'noopener');
+    window.open(safeHref, '_blank', 'noopener');
   }, []);
+
+  const openRecent = useCallback(
+    (recent: RecentEntry) => {
+      if (recent.externalUrl) {
+        openExternal(recent.label, recent.externalUrl, recent.path);
+        return;
+      }
+
+      // Recents written by the previous implementation used /apps/<id> as if
+      // it were a Dash route. Resolve those entries to their external app too.
+      const appId = recent.path.startsWith('/apps/') ? recent.path.slice('/apps/'.length) : '';
+      const app = APP_LINKS.find((candidate) => candidate.id === appId);
+      if (app) {
+        openExternal(recent.label, resolveAppUrl(app.id), recent.path);
+        return;
+      }
+      goInternal(recent.label, recent.path);
+    },
+    [goInternal, openExternal]
+  );
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8 pb-12 pt-6 sm:space-y-10 sm:pt-12">
@@ -240,7 +310,9 @@ const AdminHome: React.FC = () => {
                 <li key={app.id}>
                   <button
                     type="button"
-                    onClick={() => openExternal(app.nameKey, app.href, `/apps/${app.id}`)}
+                    onClick={() =>
+                      openExternal(app.nameKey, resolveAppUrl(app.id), `/apps/${app.id}`)
+                    }
                     className="w-full flex items-center gap-3 rounded-lg px-2 py-4 text-left transition-colors hover:bg-[var(--dash-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                   >
                     <span
@@ -338,7 +410,7 @@ const AdminHome: React.FC = () => {
                 <li key={r.path}>
                   <button
                     type="button"
-                    onClick={() => goInternal(r.label, r.path)}
+                    onClick={() => openRecent(r)}
                     className="w-full flex items-center gap-3 rounded-lg px-2 py-4 text-left transition-colors hover:bg-[var(--dash-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                   >
                     <History size={14} style={{ color: 'var(--dash-text-dim)' }} />
@@ -357,7 +429,7 @@ const AdminHome: React.FC = () => {
           <div className="mx-2 mt-3 py-4" style={{ borderTop: '1px solid var(--dash-border)' }}>
             <button
               type="button"
-              onClick={() => openExternal('Insights', APP_URLS.insights)}
+              onClick={() => openExternal('Insights', resolveAppUrl('insights'))}
               className="flex items-center gap-1.5 text-xs font-medium"
               style={{ color: 'var(--accent)' }}
             >

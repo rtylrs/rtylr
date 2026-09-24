@@ -41,6 +41,18 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+function toExportRows(suppliers: Supplier[]): Array<Record<string, unknown>> {
+  return suppliers.map((supplier) => ({
+    id: supplier.id,
+    name: supplier.name,
+    email: supplier.email,
+    phone: supplier.phone,
+    city: supplier.city,
+    country: supplier.country,
+    status: supplier.isActive ? 'Active' : 'Inactive',
+  }));
+}
+
 // ─── Animation variants ───────────────────────────────────────────────────────
 
 const containerVariants: Variants = {
@@ -95,12 +107,38 @@ const Suppliers: React.FC = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const pageSize = 50;
-  const { data: supplierResult, isLoading } = useSuppliers({ page, pageSize });
+  const pageQuery = useSuppliers({ page, pageSize });
+  const allSuppliersQuery = useSuppliers();
+  const {
+    data: supplierResult,
+    isLoading: pageLoading,
+    isPending: pagePending,
+    isError: pageError,
+    isPaused: pagePaused,
+    failureCount: pageFailureCount,
+    refetch: refetchPage,
+  } = pageQuery;
+  const {
+    data: allSupplierResult,
+    isLoading: allLoading,
+    isPending: allPending,
+    isError: allError,
+    isPaused: allPaused,
+    failureCount: allFailureCount,
+    refetch: refetchAll,
+  } = allSuppliersQuery;
   const suppliers = supplierResult?.suppliers ?? [];
+  const allSuppliers = allSupplierResult?.suppliers ?? [];
   const hasMore = supplierResult?.hasMore ?? false;
+  const isLoading = pagePending || pageLoading || allPending || allLoading;
+  const loadFailed =
+    pageError === true ||
+    allError === true ||
+    (pagePaused === true && pageFailureCount > 0) ||
+    (allPaused === true && allFailureCount > 0);
   const createMut = useCreateSupplier();
   const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageSuppliers = canErpPermission(role, 'erp:suppliers');
+  const canManageSuppliers = canErpPermission(role, 'erp:suppliers:create');
   const [showScorecards, setShowScorecards] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -110,7 +148,7 @@ const Suppliers: React.FC = () => {
   const [newCountry, setNewCountry] = useState('');
   const [newAddress, setNewAddress] = useState('');
 
-  const activeCount = suppliers.filter((s) => s.isActive).length;
+  const activeCount = allSuppliers.filter((s) => s.isActive).length;
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim() || !newEmail.trim() || !newCity.trim() || !newCountry.trim()) {
@@ -158,7 +196,11 @@ const Suppliers: React.FC = () => {
             {t(routeLabels['/suppliers'].title)}
           </h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-            {isLoading ? '…' : t('erp.suppliers.activeCount', { count: activeCount })}
+            {isLoading
+              ? '…'
+              : loadFailed
+                ? t('errors.generic')
+                : t('erp.suppliers.activeCount', { count: activeCount })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -177,15 +219,13 @@ const Suppliers: React.FC = () => {
             <BarChart3 size={12} /> Scorecards
           </button>
           <ExportButton
-            data={suppliers.map((s) => ({
-              id: s.id,
-              name: s.name,
-              email: s.email,
-              phone: s.phone,
-              city: s.city,
-              country: s.country,
-              status: s.isActive ? 'Active' : 'Inactive',
-            }))}
+            data={toExportRows(allSuppliers)}
+            getData={async () => {
+              if (allSupplierResult === undefined) {
+                throw new Error('Supplier export is still loading');
+              }
+              return toExportRows(allSuppliers);
+            }}
             filename="suppliers.csv"
           />
           {canManageSuppliers && (
@@ -209,7 +249,7 @@ const Suppliers: React.FC = () => {
         </div>
       </motion.div>
 
-      {showScorecards && (
+      {showScorecards && !loadFailed && (
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {suppliers.map((s) => (
             <div key={s.id}>
@@ -220,103 +260,131 @@ const Suppliers: React.FC = () => {
         </motion.div>
       )}
 
+      {loadFailed && (
+        <div
+          role="alert"
+          className="flex flex-col items-center gap-3 rounded-xl p-8 text-center"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            {t('errors.generic')}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              void refetchPage();
+              void refetchAll();
+            }}
+            className="rounded-lg px-3 py-2 text-xs font-medium"
+            style={{ background: 'var(--hub-hover)', color: 'var(--hub-text)' }}
+          >
+            {t('erp.suppliers.retry', { defaultValue: 'Retry' })}
+          </button>
+        </div>
+      )}
+
       {/* Supplier cards grid */}
       <motion.div
         variants={containerVariants}
         className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
       >
-        {isLoading
-          ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
-          : suppliers.map((supplier, index) => {
-              const color = getSupplierColor(supplier, index);
-              const initials = getInitials(supplier.name ?? '');
-              return (
-                <motion.div
-                  key={supplier.id}
-                  variants={itemVariants}
-                  className="rounded-xl p-5 flex flex-col gap-4 transition-colors"
-                  style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-                >
-                  {/* Header row */}
-                  <div className="flex items-start gap-3">
-                    <span
-                      className="flex items-center justify-center h-10 w-10 rounded-xl text-sm font-bold shrink-0"
-                      style={{ background: `color-mix(in srgb, ${color} 9%, transparent)`, color }}
-                    >
-                      {initials}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="text-sm font-semibold truncate"
-                        style={{ color: 'var(--hub-text)' }}
+        {loadFailed
+          ? null
+          : isLoading
+            ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
+            : suppliers.map((supplier, index) => {
+                const color = getSupplierColor(supplier, index);
+                const initials = getInitials(supplier.name ?? '');
+                return (
+                  <motion.div
+                    key={supplier.id}
+                    variants={itemVariants}
+                    className="rounded-xl p-5 flex flex-col gap-4 transition-colors"
+                    style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+                  >
+                    {/* Header row */}
+                    <div className="flex items-start gap-3">
+                      <span
+                        className="flex items-center justify-center h-10 w-10 rounded-xl text-sm font-bold shrink-0"
+                        style={{
+                          background: `color-mix(in srgb, ${color} 9%, transparent)`,
+                          color,
+                        }}
                       >
-                        {supplier.name}
-                      </p>
-                      <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
-                        {[supplier.city, supplier.country].filter(Boolean).join(', ')}
-                      </p>
-                    </div>
-                    <span
-                      className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"
-                      style={{
-                        background: supplier.isActive
-                          ? 'color-mix(in srgb, var(--erp-success) 10%, transparent)'
-                          : 'var(--hub-hover)',
-                        color: supplier.isActive ? 'var(--erp-success)' : 'var(--hub-text-muted)',
-                      }}
-                    >
-                      {supplier.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-
-                  {/* Contact info */}
-                  <div className="space-y-1.5">
-                    <a
-                      href={`mailto:${supplier.email}`}
-                      className="flex items-center gap-2 text-xs no-underline transition-colors"
-                      style={{ color: 'var(--hub-text-muted)' }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = color;
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-muted)';
-                      }}
-                    >
-                      <Mail size={12} style={{ flexShrink: 0 }} />
-                      <span className="truncate">{supplier.email}</span>
-                    </a>
-                    <div
-                      className="flex items-center gap-2 text-xs"
-                      style={{ color: 'var(--hub-text-muted)' }}
-                    >
-                      <Phone size={12} style={{ flexShrink: 0 }} />
-                      <span>{supplier.phone}</span>
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <div style={{ height: '1px', background: 'var(--hub-border)' }} />
-
-                  {/* Product count + categories */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin size={12} style={{ color }} />
-                      <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        {supplier.address ||
-                          [supplier.city, supplier.country].filter(Boolean).join(', ') ||
-                          'No address'}
+                        {initials}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-sm font-semibold truncate"
+                          style={{ color: 'var(--hub-text)' }}
+                        >
+                          {supplier.name}
+                        </p>
+                        <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                          {[supplier.city, supplier.country].filter(Boolean).join(', ')}
+                        </p>
+                      </div>
+                      <span
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"
+                        style={{
+                          background: supplier.isActive
+                            ? 'color-mix(in srgb, var(--erp-success) 10%, transparent)'
+                            : 'var(--hub-hover)',
+                          color: supplier.isActive ? 'var(--erp-success)' : 'var(--hub-text-muted)',
+                        }}
+                      >
+                        {supplier.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
-                    <span
-                      className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
-                      style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
-                    >
-                      {supplier.paymentTerms || 'No terms'}
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
+
+                    {/* Contact info */}
+                    <div className="space-y-1.5">
+                      <a
+                        href={`mailto:${supplier.email}`}
+                        className="flex items-center gap-2 text-xs no-underline transition-colors"
+                        style={{ color: 'var(--hub-text-muted)' }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.color = color;
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-muted)';
+                        }}
+                      >
+                        <Mail size={12} style={{ flexShrink: 0 }} />
+                        <span className="truncate">{supplier.email}</span>
+                      </a>
+                      <div
+                        className="flex items-center gap-2 text-xs"
+                        style={{ color: 'var(--hub-text-muted)' }}
+                      >
+                        <Phone size={12} style={{ flexShrink: 0 }} />
+                        <span>{supplier.phone}</span>
+                      </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div style={{ height: '1px', background: 'var(--hub-border)' }} />
+
+                    {/* Product count + categories */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin size={12} style={{ color }} />
+                        <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                          {supplier.address ||
+                            [supplier.city, supplier.country].filter(Boolean).join(', ') ||
+                            'No address'}
+                        </span>
+                      </div>
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
+                        style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+                      >
+                        {supplier.paymentTerms || 'No terms'}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
       </motion.div>
 
       <PaginationControls

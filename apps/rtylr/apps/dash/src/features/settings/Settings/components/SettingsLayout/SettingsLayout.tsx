@@ -15,6 +15,7 @@ import {
 import { allFeaturesEnabled } from '@voxire/config';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
+import { isAdminOrOwner } from '../../../../../shared/utils/requireAdminOrOwner';
 import {
   isAddonEnabled,
   type AddonData,
@@ -94,8 +95,8 @@ const SettingsLayout: React.FC = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useUserStore();
   const { data: addons = [] } = useAddons();
-  const isOwner = user?.isOwner !== false;
-  const navGroups = getNavGroups(isOwner, addons, allFeaturesEnabled());
+  const canManageSettings = isAdminOrOwner(user);
+  const navGroups = getNavGroups(canManageSettings, addons, allFeaturesEnabled());
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--dash-bg)' }}>

@@ -47,6 +47,14 @@ export function useProjectRealtime(projectId: string | undefined): void {
         qc.invalidateQueries({ queryKey: ['project-overview', projectId] });
         qc.invalidateQueries({ queryKey: ['milestones', projectId] });
       }
+      if (e.type.startsWith('status.')) {
+        // A status rename/recolour changes the projections returned with every
+        // task row, not just the status list. Keep all task consumers in sync.
+        qc.invalidateQueries({ queryKey: ['statuses', projectId] });
+        qc.invalidateQueries({ queryKey: ['tasks'] });
+        qc.invalidateQueries({ queryKey: ['my-tasks'] });
+        qc.invalidateQueries({ queryKey: ['task'] });
+      }
       if (e.type.startsWith('project.')) {
         qc.invalidateQueries({ queryKey: ['projects'] });
         qc.invalidateQueries({ queryKey: ['project-overview', projectId] });

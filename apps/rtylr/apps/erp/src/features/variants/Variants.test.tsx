@@ -1,10 +1,11 @@
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Variants from './Variants';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
+  createVariant: vi.fn(),
   useVariants: vi.fn(),
 }));
 
@@ -25,7 +26,15 @@ vi.mock('motion/react', () => ({
 vi.mock('../products/useVariants', () => ({
   parseVariantAttributes: () => ({}),
   useVariants: mocks.useVariants,
-  useCreateVariant: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useCreateVariant: () => ({ mutateAsync: mocks.createVariant, isPending: false }),
+}));
+
+vi.mock('../products/useProducts', () => ({
+  useProducts: () => ({
+    data: { products: [{ id: '5201', name: 'Widget', sku: 'W-1' }], hasMore: false },
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 beforeAll(async () => {
@@ -35,6 +44,7 @@ beforeAll(async () => {
 describe('Variants empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.createVariant.mockResolvedValue({ variantId: '1' });
     mocks.useVariants.mockReturnValue({ data: [], isLoading: false });
   });
 
@@ -48,7 +58,27 @@ describe('Variants empty state', () => {
     const emptyState = title.parentElement as HTMLElement;
     fireEvent.click(within(emptyState).getByRole('button', { name: 'Add Variant' }));
 
-    expect(screen.getByPlaceholderText('Product ID')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Select a product' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Widget (W-1)' })).toBeInTheDocument();
+  });
+
+  it('creates the variant from a tenant-scoped product selection', async () => {
+    render(<Variants />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add Variant' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Select a product' }), {
+      target: { value: '5201' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Variant name (e.g. Large / Red)'), {
+      target: { value: 'Large' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Price'), { target: { value: '12.5' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+
+    await waitFor(() =>
+      expect(mocks.createVariant).toHaveBeenCalledWith(
+        expect.objectContaining({ productId: '5201', name: 'Large', salePrice: 12.5 })
+      )
+    );
   });
 
   it('does not show the empty state when variants exist', () => {

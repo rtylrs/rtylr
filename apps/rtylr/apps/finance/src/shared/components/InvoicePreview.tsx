@@ -13,6 +13,11 @@ interface InvoicePreviewProps {
   items: LineItem[];
   notes?: string;
   discount?: number;
+  discountType?: string | null;
+  discountAmount?: number | null;
+  subtotal?: number | null;
+  tax?: number | null;
+  total?: number | null;
 }
 
 const InvoicePreview: React.FC<InvoicePreviewProps> = ({
@@ -23,12 +28,27 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   items,
   notes,
   discount = 0,
+  discountType,
+  discountAmount,
+  subtotal: persistedSubtotal,
+  tax: persistedTax,
+  total: persistedTotal,
 }) => {
   const { t } = useTranslation();
   const settings = useSettings();
-  const subtotal = items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
-  const tax = items.reduce((s, it) => s + it.quantity * it.unitPrice * (it.taxRate / 100), 0);
-  const total = subtotal + tax - discount;
+  const calculatedSubtotal = items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
+  const calculatedTax = items.reduce(
+    (s, it) => s + it.quantity * it.unitPrice * (it.taxRate / 100),
+    0
+  );
+  const subtotal = persistedSubtotal ?? calculatedSubtotal;
+  const tax = persistedTax ?? calculatedTax;
+  const calculatedDiscount =
+    discountType === 'percentage'
+      ? (subtotal * Math.max(discount, 0)) / 100
+      : Math.max(discount, 0);
+  const appliedDiscount = Math.max(discountAmount ?? calculatedDiscount, 0);
+  const total = persistedTotal ?? subtotal + tax - appliedDiscount;
 
   return (
     <div
@@ -195,7 +215,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             </span>
             <MoneyDisplay amount={tax} />
           </div>
-          {discount > 0 && (
+          {appliedDiscount > 0 && (
             <div
               style={{
                 display: 'flex',
@@ -207,7 +227,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             >
               <span>{t('invoices.preview.discount')}</span>
               <span>
-                -<MoneyDisplay amount={discount} />
+                -<MoneyDisplay amount={appliedDiscount} />
               </span>
             </div>
           )}

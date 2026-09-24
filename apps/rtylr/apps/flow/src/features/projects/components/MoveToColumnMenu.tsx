@@ -53,6 +53,11 @@ const MoveToColumnMenu = ({
       menuRef.current?.querySelectorAll<HTMLButtonElement>('[data-move-item]:not([disabled])') ?? []
     );
 
+  const closeAndRestoreFocus = useCallback((): void => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, []);
+
   // Close on outside press and on Escape. Escape is listened for on the root
   // rather than the document so it does not swallow the key for whatever else
   // is open behind this.
@@ -114,7 +119,7 @@ const MoveToColumnMenu = ({
   const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
     if (e.key === 'Escape') {
       e.stopPropagation();
-      setOpen(false);
+      closeAndRestoreFocus();
       return;
     }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -185,7 +190,7 @@ const MoveToColumnMenu = ({
                     disabled={isCurrent}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setOpen(false);
+                      closeAndRestoreFocus();
                       onMove(target.id);
                     }}
                     onPointerDown={(e) => e.stopPropagation()}

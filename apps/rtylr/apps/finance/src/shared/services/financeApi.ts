@@ -77,10 +77,12 @@ export interface Invoice {
   items?: InvoiceLine[];
   notes?: string;
   discount?: number;
+  discountType?: string | null;
+  discountAmount?: number;
   tax?: number;
   subtotal?: number;
   number?: string;
-  history?: { label: string; at: string }[];
+  history?: { id?: string; label: string; at: string }[];
 }
 
 export interface QuotePayload {

@@ -55,6 +55,7 @@ const NewInvoice: React.FC = () => {
   ]);
   const [notes, setNotes] = useState(settings.invoiceNotes);
   const [discount, setDiscount] = useState(0);
+  const [discountType, setDiscountType] = useState<'fixed' | 'percentage' | 'none'>('none');
   // CRM->FIN-01 (#839): signed contracts offered as one-click prefills.
   const { data: signedContracts } = useSignedContracts();
   const [prefilledContractId, setPrefilledContractId] = useState('');
@@ -83,11 +84,16 @@ const NewInvoice: React.FC = () => {
           description: item.description ?? '',
           quantity: item.quantity ?? 1,
           unitPrice: item.unitPrice ?? 0,
-          taxRate: settings.defaultTaxRate,
+          taxRate: item.taxRate ?? settings.defaultTaxRate,
         }))
       );
       setNotes(sourceInvoice.notes ?? settings.invoiceNotes);
       setDiscount(sourceInvoice.discount ?? 0);
+      setDiscountType(
+        sourceInvoice.discountType === 'percentage' || sourceInvoice.discountType === 'fixed'
+          ? sourceInvoice.discountType
+          : 'none'
+      );
     }
     // Clone prefill only: re-running on the derived defaults (today/due)
     // or settings would wipe in-progress edits, so this intentionally
@@ -180,7 +186,7 @@ const NewInvoice: React.FC = () => {
       issueDate: issuedDate,
       dueDate,
       currency: settings.currency,
-      discountType: discount > 0 ? 'fixed' : 'none',
+      discountType: discount > 0 ? discountType : 'none',
       discountValue: discount,
       taxRate: settings.defaultTaxRate,
       notes,
@@ -407,7 +413,7 @@ const NewInvoice: React.FC = () => {
 
           {step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <TaxBreakdown items={items} discount={discount} />
+              <TaxBreakdown items={items} discount={discount} discountType={discountType} />
               <div>
                 <label style={labelStyle}>{t('invoices.new.discount')}</label>
                 <input
@@ -415,7 +421,10 @@ const NewInvoice: React.FC = () => {
                   value={discount}
                   onChange={(e) => {
                     const v = parseFloat(e.target.value);
-                    if (!isNaN(v) && v >= 0) setDiscount(v);
+                    if (!isNaN(v) && v >= 0) {
+                      setDiscount(v);
+                      if (v > 0) setDiscountType('fixed');
+                    }
                   }}
                   style={{ ...inputStyle, marginTop: 6 }}
                 />
@@ -449,6 +458,7 @@ const NewInvoice: React.FC = () => {
             items={items}
             notes={notes}
             discount={discount}
+            discountType={discountType}
           />
         )}
       </div>

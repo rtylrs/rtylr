@@ -166,7 +166,17 @@ export const crmCompatibilityClient = {
 
   // ── Automations: no contract ─────────────────────────────────────────────
   listAutomations: restGet('/crm/automations'),
-  getAutomation: restGetById((id) => `/crm/automations/${id}`),
+  getAutomation: async (req: { id: string }) => {
+    const response = (await restGet('/crm/automations')()) as
+      unknown[] | { automations?: unknown[] };
+    const automations = Array.isArray(response) ? response : (response.automations ?? []);
+    const automation = automations.find((item) => {
+      if (!item || typeof item !== 'object') return false;
+      return String((item as { id?: unknown }).id ?? '') === req.id;
+    });
+    if (!automation) throw new Error(`Automation ${req.id} not found`);
+    return automation;
+  },
   createAutomation: restPost('/crm/automations'),
   updateAutomation: restPut((id) => `/crm/automations/${id}`),
   deleteAutomation: restDelete((id) => `/crm/automations/${id}`),
@@ -188,7 +198,7 @@ export const crmCompatibilityClient = {
   updateLead: restPut((id) => `/crm/sales/leads/${id}`),
   deleteLead: restDelete((id) => `/crm/sales/leads/${id}`),
 
-  listTouchpoints: restGet('/crm/sales/touchpoints'),
+  listTouchpoints: restGetById((id) => `/crm/sales/leads/${encodeURIComponent(id)}/touchpoints`),
   createTouchpoint: restPost('/crm/sales/touchpoints'),
   deleteTouchpoint: restDelete((id) => `/crm/sales/touchpoints/${id}`),
 

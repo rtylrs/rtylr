@@ -66,7 +66,14 @@ export function apiTaskToTask(t: ApiTask): Task {
     createdAt: t.createdAt ?? new Date().toISOString(),
     updatedAt: t.updatedAt ?? new Date().toISOString(),
     estimate: t.estimate,
-    effortMinutes: t.effortMinutes,
+    // CreateTask has no effort_minutes field in the v2 contract, so the quick
+    // create path sends effort as estimated_hours. Prefer the explicit field
+    // when it exists and derive the legacy representation only as a fallback.
+    effortMinutes:
+      t.effortMinutes ??
+      (t.estimatedHours != null && Number.isFinite(t.estimatedHours) && t.estimatedHours > 0
+        ? Math.round(t.estimatedHours * 60)
+        : undefined),
     waitingOn: t.waitingOn,
     decisionNote: t.decisionNote,
     focusPin: t.focusPin,

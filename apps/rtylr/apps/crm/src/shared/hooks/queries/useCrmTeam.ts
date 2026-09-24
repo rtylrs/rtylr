@@ -21,13 +21,44 @@ interface InvitePayload {
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
+const CRM_TEAM_PAGE_SIZE = 50;
+
+async function fetchAllCrmTeamMembers(): Promise<CrmTeamMember[]> {
+  const all: CrmTeamMember[] = [];
+  const seenPages = new Set<string>();
+  let page = 1;
+
+  for (;;) {
+    const res = await membersClient.listTeam({ page, pageSize: CRM_TEAM_PAGE_SIZE });
+    const users = res.users ?? [];
+    if (users.length === 0) {
+      if (typeof res.total === 'number' && all.length < res.total) {
+        throw new Error('CRM team pagination ended before the reported total');
+      }
+      return all;
+    }
+
+    const pageKey = users
+      .map((user) => user.id ?? `${user.email ?? ''}:${user.fullName ?? ''}`)
+      .join('|');
+    if (seenPages.has(pageKey)) {
+      throw new Error('CRM team pagination did not advance');
+    }
+    seenPages.add(pageKey);
+    all.push(...users);
+
+    const hasNext =
+      typeof res.total === 'number' ? all.length < res.total : users.length === CRM_TEAM_PAGE_SIZE;
+    if (!hasNext) return all;
+
+    page += 1;
+  }
+}
+
 export const useCrmTeam = (): UseQueryResult<CrmTeamMember[]> =>
   useQuery<CrmTeamMember[]>({
     queryKey: ['crm-team'],
-    queryFn: async (): Promise<CrmTeamMember[]> => {
-      const res = await membersClient.listTeam({});
-      return res.users ?? [];
-    },
+    queryFn: fetchAllCrmTeamMembers,
     staleTime: 30_000,
   });
 

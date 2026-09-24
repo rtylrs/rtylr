@@ -1,4 +1,7 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
@@ -8,11 +11,30 @@ import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { cardStyle, ghostBtn, ACCENT } from '../../shared/lib/tokens';
-import { useTaxReport } from '../../shared/hooks/useTax';
+import { taxReportSchema } from '../../shared/schemas/tax';
+import { todayIso } from '../../shared/lib/date';
+
+const reportClient = createOneKitClient(ReportServiceClient, 'finance');
 
 const TaxReport: React.FC = () => {
   const { t } = useTranslation();
-  const { data: taxReport, isLoading, refetch } = useTaxReport();
+  const reportDate = todayIso();
+  const {
+    data: taxReport,
+    error,
+    isError,
+    isFetching,
+    isPending,
+    refetch,
+  } = useQuery({
+    queryKey: ['tax-report', reportDate],
+    queryFn: async () => {
+      const response = await reportClient.getTaxReport({ period: 'month', date: reportDate });
+      return taxReportSchema.parse(response);
+    },
+  });
+  const loading = isPending && isFetching;
+  const failed = isError || (isPending && !isFetching);
 
   const totalCollected = taxReport?.taxCollected ?? 0;
   const totalOwed = taxReport?.taxOwed ?? 0;
@@ -75,7 +97,7 @@ const TaxReport: React.FC = () => {
       </div>
 
       <div style={{ ...cardStyle, overflow: 'hidden' }}>
-        {isLoading ? (
+        {loading ? (
           <div
             style={{
               padding: '32px 20px',
@@ -85,6 +107,20 @@ const TaxReport: React.FC = () => {
             }}
           >
             Loading tax periods…
+          </div>
+        ) : failed ? (
+          <div role="alert" style={{ padding: '32px 20px', textAlign: 'center' }}>
+            <p style={{ margin: '0 0 12px', color: 'var(--hub-text)', fontSize: 13 }}>
+              {getOneKitErrorMessage(error, t('errors.generic'))}
+            </p>
+            <button
+              type="button"
+              style={ghostBtn}
+              disabled={isFetching}
+              onClick={() => void refetch()}
+            >
+              {t('common.refresh')}
+            </button>
           </div>
         ) : rows.length === 0 ? (
           <EmptyState

@@ -5,6 +5,7 @@ import i18next from '../../shared/services/i18next';
 import { flowApi, ApiAttachment, ApiTask } from '../../shared/services/flowApi';
 import type { ApiTaskDetail } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
+import { fetchAllMyTasks } from './useMyIssues';
 
 const t = (key: string, opts?: Record<string, unknown>): string => i18next.t(key, opts) as string;
 
@@ -38,10 +39,7 @@ export function useTasks(params: {
 export function useMyTasks() {
   return useQuery<ApiTask[]>({
     queryKey: ['my-tasks'],
-    queryFn: async () => {
-      const res = await unwrap(flowApi.getMyTasks());
-      return unwrapListResponse<ApiTask>(res, 'tasks');
-    },
+    queryFn: fetchAllMyTasks,
   });
 }
 

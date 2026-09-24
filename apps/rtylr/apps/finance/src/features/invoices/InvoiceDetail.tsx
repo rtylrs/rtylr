@@ -10,7 +10,7 @@ import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
-import { useInvoiceDetail, useDeleteInvoice } from './useInvoices';
+import { useInvoiceDetail, useUpdateInvoiceStatus } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import PaymentBadge from '../../shared/components/PaymentBadge';
@@ -23,17 +23,84 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
 
+interface VoidInvoiceDialogProps {
+  invoiceId: string;
+  invoiceNumber: string;
+  onClose: () => void;
+  onVoided: () => void;
+}
+
+const VoidInvoiceDialog: React.FC<VoidInvoiceDialogProps> = ({
+  invoiceId,
+  invoiceNumber,
+  onClose,
+  onVoided,
+}) => {
+  const { t } = useTranslation();
+  const updateStatus = useUpdateInvoiceStatus();
+
+  return (
+    <ConfirmDialog
+      open
+      onClose={onClose}
+      onConfirm={() =>
+        updateStatus.mutate(
+          { id: invoiceId, status: 'Cancelled' },
+          {
+            onSuccess: () => {
+              toast.success(`Invoice ${invoiceNumber} voided`);
+              onVoided();
+            },
+            onError: (error) =>
+              toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoiceNumber}`)),
+          }
+        )
+      }
+      title={t('invoices.detail.void')}
+      message={`Are you sure you want to void ${invoiceNumber}? This cannot be undone.`}
+      confirmLabel={updateStatus.isPending ? 'Voiding...' : 'Void'}
+      destructive
+    />
+  );
+};
+
 const InvoiceDetail: React.FC = () => {
   const { t } = useTranslation();
   const { id } = routeApi.useParams();
   const navigate = useNavigate();
-  const { data: invoice, isLoading } = useInvoiceDetail(id);
-  const deleteInvoice = useDeleteInvoice();
+  const { data: invoice, isLoading, isError, error, isFetching, refetch } = useInvoiceDetail(id);
   const [showSend, setShowSend] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canSendInvoice = canFinancePermission(role, 'finance:invoices:send');
+
+  if (isError && !invoice) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <PageHeader
+          title={t('invoices.detail.title')}
+          breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: id ?? '' }]}
+        />
+        <div
+          role="alert"
+          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text)' }}>
+            {getOneKitErrorMessage(error, t('errors.generic'))}
+          </p>
+          <button
+            type="button"
+            style={ghostBtn}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            {t('common.refresh')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || !invoice) {
     return (
@@ -51,7 +118,8 @@ const InvoiceDetail: React.FC = () => {
 
   const paymentStatus =
     invoice.status === 'Paid' ? 'paid' : invoice.status === 'Overdue' ? 'overdue' : 'unpaid';
-  const balanceDue = invoice.amount - (invoice.paid ?? 0);
+  const balanceDue = Math.max(0, invoice.amount - (invoice.paid ?? 0));
+  const invoiceNumber = invoice.number?.trim() || invoice.id;
 
   // clientId is not available in the current Invoice payload; using empty string until the API provides it.
   const clientObj = { id: invoice.id, name: invoice.client, email: invoice.clientEmail };
@@ -64,13 +132,13 @@ const InvoiceDetail: React.FC = () => {
     >
       <HelmetContainer title={pageTitle(t('common.pageTitles.invoiceDetail'))} />
       <PageHeader
-        title={`Invoice ${invoice.id}`}
+        title={`Invoice ${invoiceNumber}`}
         subtitle={
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <PaymentBadge status={paymentStatus} /> <MoneyDisplay amount={invoice.amount} /> total
           </span>
         }
-        breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: invoice.id }]}
+        breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: invoiceNumber }]}
         actions={
           <>
             <button type="button" style={ghostBtn} onClick={() => window.print()}>
@@ -97,7 +165,7 @@ const InvoiceDetail: React.FC = () => {
                 <Send size={13} /> Send
               </button>
             )}
-            {canSendInvoice && invoice.status !== 'Paid' && (
+            {canSendInvoice && invoice.status !== 'Paid' && invoice.status !== 'Cancelled' && (
               <button
                 type="button"
                 style={{
@@ -116,7 +184,7 @@ const InvoiceDetail: React.FC = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
         <InvoicePreview
-          invoiceNumber={invoice.id}
+          invoiceNumber={invoiceNumber}
           client={clientObj}
           issuedDate={invoice.issuedDate}
           dueDate={invoice.dueDate}
@@ -129,6 +197,11 @@ const InvoiceDetail: React.FC = () => {
           }))}
           notes={invoice.notes}
           discount={invoice.discount}
+          discountType={invoice.discountType}
+          discountAmount={invoice.discountAmount}
+          subtotal={invoice.subtotal}
+          tax={invoice.tax}
+          total={invoice.amount}
         />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -198,7 +271,7 @@ const InvoiceDetail: React.FC = () => {
             </div>
             {invoice.history?.map((h, i) => (
               <div
-                key={i}
+                key={h.id ?? `${h.at}-${i}`}
                 style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}
               >
                 <div
@@ -242,25 +315,17 @@ const InvoiceDetail: React.FC = () => {
         amount={balanceDue}
         currency={invoice.currency}
       />
-      <ConfirmDialog
-        open={showVoid}
-        onClose={() => setShowVoid(false)}
-        onConfirm={() =>
-          deleteInvoice.mutate(invoice.id, {
-            onSuccess: () => {
-              toast.success(`Invoice ${invoice.id} voided`);
-              setShowVoid(false);
-              navigate({ to: '/invoices' });
-            },
-            onError: (error) =>
-              toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoice.id}`)),
-          })
-        }
-        title={t('invoices.detail.void')}
-        message={`Are you sure you want to void ${invoice.id}? This cannot be undone.`}
-        confirmLabel={deleteInvoice.isPending ? 'Voiding...' : 'Void'}
-        destructive
-      />
+      {showVoid && (
+        <VoidInvoiceDialog
+          invoiceId={invoice.id}
+          invoiceNumber={invoiceNumber}
+          onClose={() => setShowVoid(false)}
+          onVoided={() => {
+            setShowVoid(false);
+            navigate({ to: '/invoices' });
+          }}
+        />
+      )}
     </motion.div>
   );
 };

@@ -5,6 +5,8 @@ import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   createTransfer: vi.fn(),
+  updateTransferStatus: vi.fn(),
+  useStockTransfers: vi.fn(),
   role: 'admin' as string,
   refetch: vi.fn(),
 }));
@@ -23,13 +25,13 @@ vi.mock('@voxire/auth', () => ({
 }));
 
 vi.mock('./useStockTransfers', () => ({
-  useStockTransfers: () => ({
-    data: { stockTransfers: [], hasMore: false },
-    isLoading: false,
-    refetch: mocks.refetch,
-  }),
+  useStockTransfers: mocks.useStockTransfers,
   useCreateStockTransfer: () => ({
     mutateAsync: mocks.createTransfer,
+    isPending: false,
+  }),
+  useUpdateStockTransferStatus: () => ({
+    mutate: mocks.updateTransferStatus,
     isPending: false,
   }),
 }));
@@ -58,6 +60,17 @@ describe('StockTransfers', () => {
   beforeEach(() => {
     mocks.createTransfer.mockReset();
     mocks.createTransfer.mockResolvedValue({ transferId: '1' });
+    mocks.updateTransferStatus.mockReset();
+    mocks.updateTransferStatus.mockImplementation((_request, callbacks) =>
+      callbacks?.onSuccess?.()
+    );
+    mocks.useStockTransfers.mockReset();
+    mocks.useStockTransfers.mockReturnValue({
+      data: { stockTransfers: [], hasMore: false },
+      isLoading: false,
+      isError: false,
+      refetch: mocks.refetch,
+    });
     mocks.refetch.mockReset();
     mocks.role = 'admin';
   });
@@ -67,6 +80,36 @@ describe('StockTransfers', () => {
     render(<StockTransfers />);
 
     expect(screen.queryByRole('button', { name: 'New Transfer' })).not.toBeInTheDocument();
+  });
+
+  it('offers a receive action for a transfer and sends the received status', async () => {
+    mocks.useStockTransfers.mockReturnValue({
+      data: {
+        stockTransfers: [
+          {
+            id: '9',
+            fromWarehouseId: '1',
+            toWarehouseId: '2',
+            status: 'in_transit',
+            items: [{ productId: '11', quantity: 2 }],
+          },
+        ],
+        hasMore: false,
+      },
+      isLoading: false,
+      isError: false,
+      refetch: mocks.refetch,
+    });
+    render(<StockTransfers />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Receive stock transfer #9' }));
+
+    await waitFor(() =>
+      expect(mocks.updateTransferStatus).toHaveBeenCalledWith(
+        { id: '9', body: { status: 'received' } },
+        expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+      )
+    );
   });
 
   it('submits the selected product and positive quantity instead of an empty draft', async () => {
@@ -95,6 +138,13 @@ describe('StockTransfers', () => {
 describe('StockTransfers empty state', () => {
   beforeEach(() => {
     mocks.refetch.mockReset();
+    mocks.useStockTransfers.mockReset();
+    mocks.useStockTransfers.mockReturnValue({
+      data: { stockTransfers: [], hasMore: false },
+      isLoading: false,
+      isError: false,
+      refetch: mocks.refetch,
+    });
     mocks.role = 'admin';
   });
 

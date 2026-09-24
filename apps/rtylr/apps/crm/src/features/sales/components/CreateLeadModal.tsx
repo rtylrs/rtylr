@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useCreateLead } from '../../../shared/hooks/queries/useSales';
@@ -10,25 +10,47 @@ interface Props {
   onClose: () => void;
 }
 
+const INITIAL_FORM = {
+  company: '',
+  industry: '',
+  size: '',
+  source: '',
+  stage: 'cold' as LeadStage,
+  mrrPotential: '',
+  assignedTo: '',
+  notes: '',
+};
+
+function parseMrrPotential(value: string): number | null {
+  const normalized = value.trim();
+  if (normalized === '') return 0;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
   const { t } = useTranslation();
   const createLead = useCreateLead();
-  const [form, setForm] = useState({
-    company: '',
-    industry: '',
-    size: '',
-    source: '',
-    stage: 'cold' as LeadStage,
-    mrrPotential: '',
-    assignedTo: '',
-    notes: '',
-  });
+  const submissionId = useRef(0);
+  const [form, setForm] = useState({ ...INITIAL_FORM });
+  const mrrPotential = parseMrrPotential(form.mrrPotential);
+
+  const closeModal = (): void => {
+    submissionId.current += 1;
+    onClose();
+  };
 
   const handleSubmit = (): void => {
     if (!form.company.trim()) {
       toast.error(t('crm.createLead.companyRequired'));
       return;
     }
+    if (mrrPotential === null) {
+      toast.error(t('errors.generic'));
+      return;
+    }
+
+    const requestId = ++submissionId.current;
     createLead.mutate(
       {
         company: form.company,
@@ -36,23 +58,15 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
         size: form.size,
         source: form.source,
         stage: form.stage,
-        mrrPotential: Number(form.mrrPotential) || 0,
+        mrrPotential,
         assignedTo: form.assignedTo ? Number(form.assignedTo) : undefined,
         notes: form.notes,
       },
       {
         onSuccess: () => {
-          setForm({
-            company: '',
-            industry: '',
-            size: '',
-            source: '',
-            stage: 'cold',
-            mrrPotential: '',
-            assignedTo: '',
-            notes: '',
-          });
-          onClose();
+          if (requestId !== submissionId.current) return;
+          setForm({ ...INITIAL_FORM });
+          closeModal();
         },
         onError: () => toast.error(t('crm.createLead.createFailed')),
       }
@@ -62,18 +76,18 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={closeModal}
       title={t('crm.leads.new')}
       size="md"
       footer={
         <>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={closeModal}>
             {t('common.cancel')}
           </Button>
           <Button
             variant="primary"
             onClick={handleSubmit}
-            disabled={createLead.isPending || !form.company.trim()}
+            disabled={createLead.isPending || !form.company.trim() || mrrPotential === null}
           >
             {createLead.isPending ? 'Creating...' : 'Create lead'}
           </Button>
@@ -111,6 +125,9 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
           <Input
             label={t('crm.createLead.mrrPotentialUsd')}
             type="number"
+            min={0}
+            step="any"
+            aria-invalid={mrrPotential === null}
             value={form.mrrPotential}
             onChange={(e) => setForm((f) => ({ ...f, mrrPotential: e.target.value }))}
             placeholder="500"

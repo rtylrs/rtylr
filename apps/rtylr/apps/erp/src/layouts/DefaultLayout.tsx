@@ -45,6 +45,7 @@ import KeyboardShortcutsModal from '../shared/components/KeyboardShortcutsModal'
 import QuickAddProductModal from '../shared/components/QuickAddProductModal';
 import { useTranslation } from 'react-i18next';
 import { pageTitleKey, routeLabels } from '../shared/lib/routeLabels';
+import { applyErpTheme, useSettings, type ErpTheme } from '../shared/lib/settingsStore';
 
 interface NavItem {
   labelKey: string;
@@ -102,18 +103,6 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-type Theme = 'dark' | 'light' | 'system';
-
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-  } else {
-    root.setAttribute('data-theme', theme);
-  }
-}
-
 const SidebarNavItem: React.FC<NavItem> = ({ labelKey, path, icon: Icon }) => {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -152,9 +141,8 @@ const DefaultLayout: React.FC = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
-  const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem('rtylr-erp-theme') as Theme) || 'dark';
-  });
+  const theme = useSettings((state) => state.theme);
+  const setTheme = useSettings((state) => state.setTheme);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -220,7 +208,7 @@ const DefaultLayout: React.FC = () => {
   );
 
   useEffect(() => {
-    applyTheme(theme);
+    applyErpTheme(theme);
   }, [theme]);
 
   useEffect(() => {
@@ -230,10 +218,8 @@ const DefaultLayout: React.FC = () => {
   const userEmail = erpUser?.email || erpUser?.emailAddress || null;
   const userName = erpUser?.name || erpUser?.firstName || userEmail || 'User';
 
-  const handleSetTheme = (t: Theme) => {
-    setThemeState(t);
-    applyTheme(t);
-    localStorage.setItem('rtylr-erp-theme', t);
+  const handleSetTheme = (theme: ErpTheme) => {
+    setTheme(theme);
   };
 
   const handleLogout = (): void => {
@@ -472,9 +458,9 @@ const DefaultLayout: React.FC = () => {
                     <div className="flex gap-1 mb-2">
                       {(
                         [
-                          { value: 'light' as Theme, icon: Sun, label: 'Light' },
-                          { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-                          { value: 'system' as Theme, icon: Monitor, label: 'System' },
+                          { value: 'light' as ErpTheme, icon: Sun, label: 'Light' },
+                          { value: 'dark' as ErpTheme, icon: Moon, label: 'Dark' },
+                          { value: 'system' as ErpTheme, icon: Monitor, label: 'System' },
                         ] as const
                       ).map(({ value, icon: Icon, label }) => (
                         <button

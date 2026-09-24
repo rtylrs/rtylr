@@ -15,6 +15,7 @@
   },
   "payment": {
     "amountPositive": "يجب أن يكون المبلغ أكبر من صفر",
+    "amountExceedsDue": "لا يمكن أن يتجاوز الدفع المبلغ المتبقي المستحق",
     "dateAndReferenceRequired": "تاريخ السداد والمرجع مطلوبان",
     "method": "طريقة السداد",
     "reference": "المرجع",

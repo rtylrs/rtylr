@@ -64,6 +64,7 @@ function renderPanel(props: Partial<React.ComponentProps<typeof TimePanel>> = {}
       estimateHours={8}
       canLog
       canLogForOthers={false}
+      canDelete
       currentUserId="7"
       {...props}
     />
@@ -241,6 +242,21 @@ describe('TimePanel: entries', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('does not offer delete to a project member, because the server requires project admin', () => {
+    timeLogsState.value = {
+      data: { timeLogs: [makeLog({ id: 5, userId: 7 })] },
+      isLoading: false,
+      isError: false,
+      refetch,
+    };
+
+    renderPanel({ canDelete: false });
+
+    expect(
+      screen.queryByRole('button', { name: 'flow.time.deleteEntryLabel' })
+    ).not.toBeInTheDocument();
+  });
+
   it('does not offer delete on someone else’s entry', () => {
     timeLogsState.value = {
       data: { timeLogs: [makeLog({ id: 5, userId: 9 })] },
@@ -316,6 +332,18 @@ describe('TimePanel: the log form', () => {
 
     expect(logTimeMutate).not.toHaveBeenCalled();
     expect(screen.getByLabelText('flow.time.duration')).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('rejects an oversized numeric duration before sending it to the RPC', () => {
+    openForm();
+    fireEvent.change(screen.getByLabelText('flow.time.duration'), {
+      target: { value: '9'.repeat(400) },
+    });
+
+    expect(screen.getByLabelText('flow.time.duration')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByRole('button', { name: 'flow.time.logAction' })).toBeDisabled();
+    fireEvent.keyDown(screen.getByLabelText('flow.time.duration'), { key: 'Enter' });
+    expect(logTimeMutate).not.toHaveBeenCalled();
   });
 
   it('submits parsed minutes on Enter', () => {

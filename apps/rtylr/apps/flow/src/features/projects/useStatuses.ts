@@ -1,11 +1,18 @@
 import { unwrap } from '@voxire/api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi, ApiStatus } from '../../shared/services/flowApi';
 
 function key(projectId: string) {
   return ['statuses', projectId];
+}
+
+function invalidateStatusViews(qc: QueryClient, projectId: string): void {
+  qc.invalidateQueries({ queryKey: key(projectId) });
+  qc.invalidateQueries({ queryKey: ['tasks'] });
+  qc.invalidateQueries({ queryKey: ['my-tasks'] });
+  qc.invalidateQueries({ queryKey: ['task'] });
 }
 
 export function useProjectStatuses(projectId: string) {
@@ -47,7 +54,7 @@ export function useUpdateStatus(projectId: string) {
       sortOrder?: number;
       isDefault?: boolean;
     }) => unwrap(flowApi.updateStatus(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: key(projectId) }),
+    onSuccess: () => invalidateStatusViews(qc, projectId),
     onError: () => toast.error(t('toasts.status.updateFailed')),
   });
 }
@@ -58,8 +65,7 @@ export function useDeleteStatus(projectId: string) {
   return useMutation({
     mutationFn: (id: string) => unwrap(flowApi.deleteStatus(id)),
     onSuccess: (res) => {
-      qc.invalidateQueries({ queryKey: key(projectId) });
-      qc.invalidateQueries({ queryKey: ['tasks'] });
+      invalidateStatusViews(qc, projectId);
       if (res.reassignedTaskCount > 0) {
         toast.success(
           t('toasts.status.deletedWithReassignment', { count: res.reassignedTaskCount })

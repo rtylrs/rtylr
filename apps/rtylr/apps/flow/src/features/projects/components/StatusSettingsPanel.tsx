@@ -1,8 +1,11 @@
 import React, { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import GateNotice from '../../../shared/components/GateNotice';
+import { ListLoadFailed } from '../../../shared/components/ListLoadFailed';
+import { hasQueryFailed } from '../../../shared/lib/queryFailureUtils';
 import {
   useProjectStatuses,
   useCreateStatus,
@@ -54,10 +57,24 @@ const StatusSettingsPanel = ({
 }: StatusSettingsPanelProps): React.JSX.Element | null => {
   const { t } = useTranslation();
   const { panelRef } = useDialogBehavior<HTMLDivElement>(open, onClose);
-  const { data: statuses = [] } = useProjectStatuses(projectId);
+  const statusesQuery = useProjectStatuses(projectId);
+  const {
+    data: statuses = [],
+    isPending: statusesPending,
+    refetch: refetchStatuses,
+  } = statusesQuery;
+  const statusesLoadFailed = hasQueryFailed(statusesQuery);
+  const statusesReady = !statusesPending && !statusesLoadFailed && statusesQuery.data !== undefined;
+  const queryClient = useQueryClient();
   const createStatus = useCreateStatus(projectId);
   const updateStatus = useUpdateStatus(projectId);
   const deleteStatus = useDeleteStatus(projectId);
+
+  const invalidateStatusViews = (): void => {
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['task'] });
+  };
 
   const [newName, setNewName] = useState('');
   const [newBucket, setNewBucket] = useState<Bucket>('backlog');
@@ -79,76 +96,103 @@ const StatusSettingsPanel = ({
       return;
     }
     if (name === status.name) return;
-    updateStatus.mutate({
-      id: status.id,
-      name,
-      bucket: status.bucket,
-      color: status.color,
-      sortOrder: status.sortOrder,
-      isDefault: status.isDefault,
-    });
+    updateStatus.mutate(
+      {
+        id: status.id,
+        name,
+        bucket: status.bucket,
+        color: status.color,
+        sortOrder: status.sortOrder,
+        isDefault: status.isDefault,
+      },
+      { onSuccess: invalidateStatusViews }
+    );
   };
 
-  const recolor = (status: ApiStatus, color: string): void => {
-    updateStatus.mutate({
-      id: status.id,
-      name: status.name,
-      bucket: status.bucket,
-      color,
-      sortOrder: status.sortOrder,
-      isDefault: status.isDefault,
-    });
+  const recolor = (status: ApiStatus, color: string, nameOverride?: string): void => {
+    const name = nameOverride === undefined ? status.name : nameOverride.trim();
+    if (!name) return;
+    updateStatus.mutate(
+      {
+        id: status.id,
+        name,
+        bucket: status.bucket,
+        color,
+        sortOrder: status.sortOrder,
+        isDefault: status.isDefault,
+      },
+      { onSuccess: invalidateStatusViews }
+    );
   };
 
-  const rebucket = (status: ApiStatus, bucket: Bucket): void => {
-    updateStatus.mutate({
-      id: status.id,
-      name: status.name,
-      bucket,
-      color: status.color,
-      sortOrder: status.sortOrder,
-      isDefault: status.isDefault,
-    });
+  const rebucket = (status: ApiStatus, bucket: Bucket, nameOverride?: string): void => {
+    const name = nameOverride === undefined ? status.name : nameOverride.trim();
+    if (!name) return;
+    updateStatus.mutate(
+      {
+        id: status.id,
+        name,
+        bucket,
+        color: status.color,
+        sortOrder: status.sortOrder,
+        isDefault: status.isDefault,
+      },
+      { onSuccess: invalidateStatusViews }
+    );
   };
 
-  const makeDefault = (status: ApiStatus): void => {
-    updateStatus.mutate({
-      id: status.id,
-      name: status.name,
-      bucket: status.bucket,
-      color: status.color,
-      sortOrder: status.sortOrder,
-      isDefault: true,
-    });
+  const makeDefault = (status: ApiStatus, nameOverride?: string): void => {
+    const name = nameOverride === undefined ? status.name : nameOverride.trim();
+    if (!name) return;
+    updateStatus.mutate(
+      {
+        id: status.id,
+        name,
+        bucket: status.bucket,
+        color: status.color,
+        sortOrder: status.sortOrder,
+        isDefault: true,
+      },
+      { onSuccess: invalidateStatusViews }
+    );
   };
 
   /** Two independent PUTs, no bulk reorder on the contract - same pattern as
    * BoardSettingsPanel.move: if the second fails, the invalidated query pulls
-   * the server's real order back rather than leaving the local list lying. */
-  const move = (index: number, direction: -1 | 1): void => {
+   * the server's real order back rather than leaving the local list lying. The
+   * current row draft is carried into the first replacement update. */
+  const move = (index: number, direction: -1 | 1, nameOverride?: string): void => {
     const target = index + direction;
     if (target < 0 || target >= ordered.length) return;
     const a = ordered[index];
     const b = ordered[target];
-    updateStatus.mutate({
-      id: a.id,
-      name: a.name,
-      bucket: a.bucket,
-      color: a.color,
-      sortOrder: b.sortOrder,
-      isDefault: a.isDefault,
-    });
-    updateStatus.mutate({
-      id: b.id,
-      name: b.name,
-      bucket: b.bucket,
-      color: b.color,
-      sortOrder: a.sortOrder,
-      isDefault: b.isDefault,
-    });
+    const aName = nameOverride === undefined ? a.name : nameOverride.trim();
+    if (!aName) return;
+    updateStatus.mutate(
+      {
+        id: a.id,
+        name: aName,
+        bucket: a.bucket,
+        color: a.color,
+        sortOrder: b.sortOrder,
+        isDefault: a.isDefault,
+      },
+      { onSuccess: invalidateStatusViews }
+    );
+    updateStatus.mutate(
+      {
+        id: b.id,
+        name: b.name,
+        bucket: b.bucket,
+        color: b.color,
+        sortOrder: a.sortOrder,
+        isDefault: b.isDefault,
+      },
+      { onSuccess: invalidateStatusViews }
+    );
     setAnnouncement(
       t('flow.status.movedAnnouncement', {
-        name: a.name,
+        name: aName,
         position: target + 1,
         total: ordered.length,
       })
@@ -161,8 +205,9 @@ const StatusSettingsPanel = ({
       toast.error(t('errors.generic'));
       return;
     }
+    const nextSortOrder = ordered.reduce((max, status) => Math.max(max, status.sortOrder), -1) + 1;
     createStatus.mutate(
-      { name, bucket: newBucket, color: newColor, sortOrder: ordered.length },
+      { name, bucket: newBucket, color: newColor, sortOrder: nextSortOrder },
       {
         onSuccess: () => {
           setNewName('');
@@ -222,37 +267,52 @@ const StatusSettingsPanel = ({
           {announcement}
         </p>
 
-        {ordered.length === 0 && (
-          <p className="mb-4 text-meta leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
-            {t('flow.status.emptyExplainer')}
+        {statusesLoadFailed ? (
+          <div className="mb-4">
+            <ListLoadFailed onRetry={() => void refetchStatuses()} />
+          </div>
+        ) : statusesPending || statusesQuery.data === undefined ? (
+          <p className="mb-4 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
+            {t('shell.loading')}
           </p>
+        ) : (
+          <>
+            {ordered.length === 0 && (
+              <p
+                className="mb-4 text-meta leading-snug"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                {t('flow.status.emptyExplainer')}
+              </p>
+            )}
+
+            <ul className="space-y-1.5">
+              {ordered.map((status, index) => (
+                <StatusRow
+                  key={status.id}
+                  status={status}
+                  index={index}
+                  total={ordered.length}
+                  canManage={canManage}
+                  pendingDelete={pendingDelete === status.id}
+                  onRename={rename}
+                  onRecolor={recolor}
+                  onRebucket={rebucket}
+                  onMakeDefault={makeDefault}
+                  onMove={move}
+                  onRequestDelete={() => setPendingDelete(status.id)}
+                  onCancelDelete={() => setPendingDelete(null)}
+                  onConfirmDelete={() => {
+                    deleteStatus.mutate(status.id, { onSuccess: invalidateStatusViews });
+                    setPendingDelete(null);
+                  }}
+                />
+              ))}
+            </ul>
+          </>
         )}
 
-        <ul className="space-y-1.5">
-          {ordered.map((status, index) => (
-            <StatusRow
-              key={status.id}
-              status={status}
-              index={index}
-              total={ordered.length}
-              canManage={canManage}
-              pendingDelete={pendingDelete === status.id}
-              onRename={rename}
-              onRecolor={recolor}
-              onRebucket={rebucket}
-              onMakeDefault={() => makeDefault(status)}
-              onMove={move}
-              onRequestDelete={() => setPendingDelete(status.id)}
-              onCancelDelete={() => setPendingDelete(null)}
-              onConfirmDelete={() => {
-                deleteStatus.mutate(status.id);
-                setPendingDelete(null);
-              }}
-            />
-          ))}
-        </ul>
-
-        {canManage && (
+        {canManage && statusesReady && (
           <div
             className="mt-4 space-y-2 rounded-md p-3"
             style={{ background: 'var(--flow-hover)' }}
@@ -337,10 +397,10 @@ interface StatusRowProps {
   canManage: boolean;
   pendingDelete: boolean;
   onRename: (status: ApiStatus, raw: string, restore: () => void) => void;
-  onRecolor: (status: ApiStatus, color: string) => void;
-  onRebucket: (status: ApiStatus, bucket: Bucket) => void;
-  onMakeDefault: () => void;
-  onMove: (index: number, direction: -1 | 1) => void;
+  onRecolor: (status: ApiStatus, color: string, name?: string) => void;
+  onRebucket: (status: ApiStatus, bucket: Bucket, name?: string) => void;
+  onMakeDefault: (status: ApiStatus, name?: string) => void;
+  onMove: (index: number, direction: -1 | 1, name?: string) => void;
   onRequestDelete: () => void;
   onCancelDelete: () => void;
   onConfirmDelete: () => void;
@@ -364,6 +424,20 @@ const StatusRow = ({
   const { t } = useTranslation();
   const [draft, setDraft] = useState(status.name);
 
+  const currentDraftName = (): string | null => {
+    const name = draft.trim();
+    if (!name) {
+      setDraft(status.name);
+      return null;
+    }
+    return name;
+  };
+
+  const moveWithDraft = (direction: -1 | 1): void => {
+    const name = currentDraftName();
+    if (name) onMove(index, direction, name);
+  };
+
   return (
     <li className="rounded-md p-2" style={{ background: 'var(--flow-hover)' }}>
       <div className="flex items-center gap-2">
@@ -381,7 +455,7 @@ const StatusRow = ({
           onKeyDown={(e) => {
             if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
               e.preventDefault();
-              if (canManage) onMove(index, e.key === 'ArrowUp' ? -1 : 1);
+              if (canManage) moveWithDraft(e.key === 'ArrowUp' ? -1 : 1);
               return;
             }
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
@@ -393,7 +467,10 @@ const StatusRow = ({
           aria-label={t('flow.status.bucketFor', { name: status.name })}
           value={status.bucket}
           disabled={!canManage}
-          onChange={(e) => onRebucket(status, e.target.value as Bucket)}
+          onChange={(e) => {
+            const name = currentDraftName();
+            if (name) onRebucket(status, e.target.value as Bucket, name);
+          }}
           className="flow-focus min-h-[44px] rounded-sm px-1.5 text-body disabled:opacity-70 md:min-h-0 md:py-1"
           style={{
             background: 'var(--flow-input-bg)',
@@ -409,7 +486,7 @@ const StatusRow = ({
         </select>
         <button
           type="button"
-          onClick={() => onMove(index, -1)}
+          onClick={() => moveWithDraft(-1)}
           disabled={!canManage || index === 0}
           aria-label={t('flow.status.moveUpLabel', { name: status.name })}
           className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
@@ -419,7 +496,7 @@ const StatusRow = ({
         </button>
         <button
           type="button"
-          onClick={() => onMove(index, 1)}
+          onClick={() => moveWithDraft(1)}
           disabled={!canManage || index === total - 1}
           aria-label={t('flow.status.moveDownLabel', { name: status.name })}
           className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
@@ -455,7 +532,10 @@ const StatusRow = ({
               key={c}
               type="button"
               disabled={!canManage}
-              onClick={() => onRecolor(status, c)}
+              onClick={() => {
+                const name = currentDraftName();
+                if (name) onRecolor(status, c, name);
+              }}
               aria-label={t('flow.status.chooseColorLabel', { color: c })}
               aria-pressed={status.color === c}
               className="flow-focus h-5 w-5 shrink-0 rounded-full disabled:opacity-40"
@@ -478,7 +558,10 @@ const StatusRow = ({
             name="flow-status-default"
             checked={status.isDefault}
             disabled={!canManage}
-            onChange={onMakeDefault}
+            onChange={() => {
+              const name = currentDraftName();
+              if (name) onMakeDefault(status, name);
+            }}
             aria-label={t('flow.status.isDefaultFor', { name: status.name })}
           />
           {t('flow.status.isDefault')}

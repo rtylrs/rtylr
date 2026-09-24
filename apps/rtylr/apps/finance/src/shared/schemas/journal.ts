@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const journalLineSchema = z.object({
+  accountId: z.union([z.string(), z.number()]).transform(String).optional().nullable(),
   account: z.string().optional().nullable(),
   debit: z.number().optional().nullable(),
   credit: z.number().optional().nullable(),

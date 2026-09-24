@@ -9,6 +9,11 @@
 const CLOCK = /^(\d+):([0-5]\d)$/;
 const DECIMAL_HOURS = /^(\d+(?:\.\d+)?)h$/;
 const MINUTES = /^(\d+)m?$/;
+const MAX_DURATION_MINUTES = 2_147_483_647;
+
+function validDurationMinutes(value: number): number | null {
+  return Number.isSafeInteger(value) && value > 0 && value <= MAX_DURATION_MINUTES ? value : null;
+}
 
 /**
  * Reads the three notations people actually type: `90` / `90m`, `1.5h`, and
@@ -21,19 +26,19 @@ export function parseDurationInput(raw: string): number | null {
   const clock = trimmed.match(CLOCK);
   if (clock) {
     const minutes = parseInt(clock[1], 10) * 60 + parseInt(clock[2], 10);
-    return minutes > 0 ? minutes : null;
+    return validDurationMinutes(minutes);
   }
 
   const hours = trimmed.match(DECIMAL_HOURS);
   if (hours) {
     const minutes = Math.round(parseFloat(hours[1]) * 60);
-    return minutes > 0 ? minutes : null;
+    return validDurationMinutes(minutes);
   }
 
   const mins = trimmed.match(MINUTES);
   if (mins) {
     const minutes = parseInt(mins[1], 10);
-    return minutes > 0 ? minutes : null;
+    return validDurationMinutes(minutes);
   }
 
   return null;

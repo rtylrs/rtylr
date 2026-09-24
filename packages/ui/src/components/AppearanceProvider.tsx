@@ -1,5 +1,5 @@
-import React from 'react';
-import { appearanceTokens, readLegacyMode, resolveMode } from '@voxire/utils';
+import React from "react";
+import { appearanceTokens, readLegacyMode, resolveMode } from "@voxire/utils";
 import type {
   AppearanceContext,
   AppearancePrefs,
@@ -7,7 +7,7 @@ import type {
   Density,
   TextSize,
   ThemeMode,
-} from '@voxire/utils';
+} from "@voxire/utils";
 
 /**
  * The one place appearance tokens reach the DOM.
@@ -38,34 +38,36 @@ import type {
  * Design: docs/superpowers/specs/2026-08-22-flow-appearance-design.md (rtylr)
  */
 
-const DARK_QUERY = '(prefers-color-scheme: dark)';
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+const DARK_QUERY = "(prefers-color-scheme: dark)";
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 /** Attribute every `:root[data-theme='light']` rule in an app's CSS keys off. */
-const THEME_ATTRIBUTE = 'data-theme';
+const THEME_ATTRIBUTE = "data-theme";
 
 /**
  * Attribute the reduced-motion CSS keys off. Written even when motion is on, so
  * a rule can select either state rather than relying on the absence of a value.
  */
-const MOTION_ATTRIBUTE = 'data-motion';
-const MOTION_REDUCE = 'reduce';
-const MOTION_FULL = 'full';
+const MOTION_ATTRIBUTE = "data-motion";
+const MOTION_REDUCE = "reduce";
+const MOTION_FULL = "full";
 
-const MODES: readonly ThemeMode[] = ['light', 'dark', 'system'];
-const DENSITIES: readonly Density[] = ['compact', 'cozy', 'roomy'];
-const TEXT_SIZES: readonly TextSize[] = ['s', 'm', 'l'];
-const CORNERS: readonly Corners[] = ['sharp', 'soft', 'round'];
+const MODES: readonly ThemeMode[] = ["light", "dark", "system"];
+const DENSITIES: readonly Density[] = ["compact", "cozy", "roomy"];
+const TEXT_SIZES: readonly TextSize[] = ["s", "m", "l"];
+const CORNERS: readonly Corners[] = ["sharp", "soft", "round"];
 
-const HEX_PATTERN = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+/** Keep persisted accents in step with @voxire/utils' six-digit optional-hash contract. */
+const HEX_PATTERN = /^#?[0-9a-f]{6}$/i;
 
 function matches(query: string): boolean {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function")
+    return false;
   return window.matchMedia(query).matches;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -73,18 +75,30 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * readonly tuple of literals does not narrow an `unknown`, and it is safe
  * because the membership test is the narrowing.
  */
-function isMember<T extends string>(value: unknown, allowed: readonly T[]): value is T {
-  return typeof value === 'string' && (allowed as readonly string[]).includes(value);
+function isMember<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+): value is T {
+  return (
+    typeof value === "string" && (allowed as readonly string[]).includes(value)
+  );
 }
 
-function pick<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+function pick<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+  fallback: T,
+): T {
   return isMember(value, allowed) ? value : fallback;
 }
 
 function pickAccent(value: unknown, fallback: string | null): string | null {
   // An explicit null is a real choice: it means "follow the workspace colour".
   if (value === null) return null;
-  if (typeof value === 'string' && HEX_PATTERN.test(value)) return value;
+  if (typeof value === "string" && HEX_PATTERN.test(value)) {
+    const normalized = value.startsWith("#") ? value : `#${value}`;
+    return normalized.toLowerCase();
+  }
   return fallback;
 }
 
@@ -147,13 +161,14 @@ function resolvePrefs(options: AppearanceInitOptions): AppearancePrefs {
   const stored = flattenStored(raw);
 
   let mode = pick(stored.mode, MODES, defaults.mode);
-  if (raw === undefined && typeof legacyModeKey === 'string') {
+  if (raw === undefined && typeof legacyModeKey === "string") {
     mode = readLegacyMode(legacyModeKey) ?? mode;
   }
 
   return {
     mode,
-    palette: typeof stored.palette === 'string' ? stored.palette : defaults.palette,
+    palette:
+      typeof stored.palette === "string" ? stored.palette : defaults.palette,
     accent: pickAccent(stored.accent, defaults.accent),
     density: pick(stored.density, DENSITIES, defaults.density),
     textSize: pick(stored.textSize, TEXT_SIZES, defaults.textSize),
@@ -161,7 +176,7 @@ function resolvePrefs(options: AppearanceInitOptions): AppearancePrefs {
     // No stored answer means the OS gets to answer. A stored `false` still
     // wins, because an explicit choice outranks an inferred one.
     reduceMotion:
-      typeof stored.reduceMotion === 'boolean'
+      typeof stored.reduceMotion === "boolean"
         ? stored.reduceMotion
         : defaults.reduceMotion || matches(REDUCED_MOTION_QUERY),
   };
@@ -179,7 +194,10 @@ function write(prefs: AppearancePrefs, context: AppearanceContext): string[] {
     root.style.setProperty(name, value);
   }
   root.setAttribute(THEME_ATTRIBUTE, context.resolvedMode);
-  root.setAttribute(MOTION_ATTRIBUTE, prefs.reduceMotion ? MOTION_REDUCE : MOTION_FULL);
+  root.setAttribute(
+    MOTION_ATTRIBUTE,
+    prefs.reduceMotion ? MOTION_REDUCE : MOTION_FULL,
+  );
 
   return Object.keys(derived);
 }
@@ -223,11 +241,12 @@ export function AppearanceProvider({
   workspaceAccent,
   children,
 }: AppearanceProviderProps): React.JSX.Element {
-  const { mode, palette, accent, density, textSize, corners, reduceMotion } = prefs;
-  const isSystem = mode === 'system';
+  const { mode, palette, accent, density, textSize, corners, reduceMotion } =
+    prefs;
+  const isSystem = mode === "system";
 
   const [systemDark, setSystemDark] = React.useState<boolean>(
-    () => isSystem && matches(DARK_QUERY)
+    () => isSystem && matches(DARK_QUERY),
   );
 
   // Subscribed only while the mode is `system`. Gating the subscription rather
@@ -235,25 +254,47 @@ export function AppearanceProvider({
   // for a user who picked light or dark explicitly.
   React.useEffect(() => {
     if (!isSystem) return;
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    )
+      return;
 
     const query = window.matchMedia(DARK_QUERY);
     setSystemDark(query.matches);
 
-    const onChange = (event: MediaQueryListEvent): void => setSystemDark(event.matches);
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
+    const onChange = (event: MediaQueryListEvent): void =>
+      setSystemDark(event.matches);
+    if (typeof query.addEventListener === "function") {
+      query.addEventListener("change", onChange);
+      return () => {
+        if (typeof query.removeEventListener === "function") {
+          query.removeEventListener("change", onChange);
+        }
+      };
+    }
+
+    // Safari 13 and older expose only the legacy listener API.
+    if (typeof query.addListener === "function") {
+      query.addListener(onChange);
+      return () => {
+        if (typeof query.removeListener === "function") {
+          query.removeListener(onChange);
+        }
+      };
+    }
   }, [isSystem]);
 
-  // `systemDark` is only ever true while subscribed, and resolveMode ignores it
-  // for an explicit mode, so the gate above governs the subscription alone.
-  const resolvedMode = resolveMode(mode, systemDark);
+  // Read the current value synchronously so entering system mode never writes
+  // the previous explicit-mode value for one render.
+  const resolvedSystemDark = isSystem ? matches(DARK_QUERY) : systemDark;
+  const resolvedMode = resolveMode(mode, resolvedSystemDark);
 
   // Rebuilt from the individual fields so a caller that hands us a fresh object
   // on every render does not re-run the write on every render.
   const current = React.useMemo<AppearancePrefs>(
     () => ({ mode, palette, accent, density, textSize, corners, reduceMotion }),
-    [mode, palette, accent, density, textSize, corners, reduceMotion]
+    [mode, palette, accent, density, textSize, corners, reduceMotion],
   );
 
   const writtenKeys = React.useRef<string[]>([]);

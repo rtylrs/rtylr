@@ -24,6 +24,7 @@ import {
   benefitEnrollmentSchema,
   myBenefitEnrollmentSchema,
 } from '../schemas/benefits';
+import type { MyBenefitEnrollment } from '../schemas/benefits';
 import { toTitleCase } from '../lib/hrStringUtils';
 import { trainingCourseSchema, trainingProgressSchema } from '../schemas/training';
 import { birthdaySchema, anniversarySchema, myEmployeeSchema } from '../schemas/staff';
@@ -358,19 +359,60 @@ export function useBenefitEnrollments() {
   });
 }
 
+const MY_BENEFIT_ENROLLMENT_PAGE_SIZE = 500;
+
+async function fetchAllMyBenefitEnrollments(): Promise<MyBenefitEnrollment[]> {
+  const all: unknown[] = [];
+  const seenPages = new Set<string>();
+  let page = 1;
+
+  for (;;) {
+    const res = await benefitClient.listMyBenefitEnrollments({
+      page,
+      limit: MY_BENEFIT_ENROLLMENT_PAGE_SIZE,
+    });
+    const raw = res.enrollments ?? [];
+    if (raw.length === 0) {
+      if (
+        res.pagination?.hasNext === true ||
+        (typeof res.pagination?.total === 'number' && all.length < res.pagination.total)
+      ) {
+        throw new Error('Benefit enrollment pagination ended before the reported total');
+      }
+      break;
+    }
+
+    const pageKey = raw.map((enrollment) => enrollment.id ?? JSON.stringify(enrollment)).join('|');
+    if (seenPages.has(pageKey)) {
+      throw new Error('Benefit enrollment pagination did not advance');
+    }
+    seenPages.add(pageKey);
+    all.push(...raw);
+
+    const pagination = res.pagination;
+    const hasNext =
+      pagination?.hasNext ??
+      (typeof pagination?.total === 'number'
+        ? all.length < pagination.total
+        : raw.length === MY_BENEFIT_ENROLLMENT_PAGE_SIZE);
+    if (!hasNext) break;
+
+    page += 1;
+  }
+
+  return z.array(myBenefitEnrollmentSchema).parse(all);
+}
+
 /**
  * The caller's own benefit enrollments, resolved server-side from the auth
  * token via hr.benefit.v1's ListMyBenefitEnrollments - never from a
- * client-supplied staff id.
+ * client-supplied staff id. The generated endpoint is paginated, so merge
+ * every page instead of presenting the first page as the full history.
  */
 export function useMyBenefitEnrollments() {
   return useQuery({
     queryKey: ['benefits', 'my-enrollments'],
-    queryFn: async () => {
-      const res = await benefitClient.listMyBenefitEnrollments({});
-      const raw = res.enrollments ?? [];
-      return z.array(myBenefitEnrollmentSchema).parse(raw);
-    },
+    queryFn: fetchAllMyBenefitEnrollments,
   });
 }
 

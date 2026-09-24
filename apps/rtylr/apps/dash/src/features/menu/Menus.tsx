@@ -43,10 +43,16 @@ function formatDate(value?: string): string {
 const Menus: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { userId } = useUserStore();
+  const { user, userId } = useUserStore();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: allMenus = [], isLoading } = useGetAllMenus(userId);
+  const menuQueryId =
+    user?.businessId != null
+      ? String(user.businessId)
+      : user?.id != null
+        ? String(user.id)
+        : userId;
+  const { data: allMenus = [], isLoading } = useGetAllMenus(menuQueryId);
   const menus = allMenus as MenuEntry[];
   const normalizedSearch = searchTerm.trim().toLowerCase();
 

@@ -9,6 +9,7 @@ import {
   useConnectIntegration,
   useDisconnectIntegration,
 } from '../../shared/hooks/queries/useIntegrations';
+import { INTEGRATION_CATALOG } from '../../shared/schemas/integrations';
 
 const CATEGORIES = [
   { key: 'all', label: 'All' },
@@ -17,17 +18,38 @@ const CATEGORIES = [
   { key: 'accounting', label: 'Accounting' },
   { key: 'analytics', label: 'Analytics' },
   { key: 'delivery', label: 'Delivery' },
+  { key: 'data', label: 'Other' },
 ] as const;
 
 const Integrations: React.FC = () => {
   const { t } = useTranslation();
-  const { data = [], isLoading } = useIntegrations();
+  const { data, isLoading, isError, refetch } = useIntegrations();
   const connect = useConnectIntegration();
   const disconnect = useDisconnectIntegration();
   const [searchTerm, setSearchTerm] = useState('');
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]['key']>('all');
 
-  const integrations = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+  const integrations = useMemo(() => {
+    const connected = Array.isArray(data) ? data : [];
+    const connectedProviders = new Set(
+      connected.map((integration) => integration.provider.toLowerCase())
+    );
+    const available = INTEGRATION_CATALOG.filter(
+      (integration) => !connectedProviders.has(integration.provider.toLowerCase())
+    ).map((integration) => ({
+      id: `catalog:${integration.provider}`,
+      provider: integration.provider,
+      name: integration.name,
+      category: integration.category,
+      logo: integration.provider,
+      status: 'available',
+      description: integration.description,
+      config: undefined,
+      connectedAt: undefined,
+      createdAt: undefined,
+    }));
+    return [...connected, ...available];
+  }, [data]);
 
   const filtered = useMemo(() => {
     return integrations.filter((i) => {
@@ -91,7 +113,17 @@ const Integrations: React.FC = () => {
         </div>
 
         {/* Grid */}
-        {isLoading ? (
+        {isError ? (
+          <EmptyState
+            icon={Plug2}
+            title={t('integrations.loadFailed', 'Unable to load integrations')}
+            description={t(
+              'integrations.loadFailedDescription',
+              'Refresh the list before changing connected integrations.'
+            )}
+            action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+          />
+        ) : isLoading ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
               <div
@@ -121,7 +153,7 @@ const Integrations: React.FC = () => {
 
               return (
                 <div
-                  key={i.id}
+                  key={i.id || i.provider}
                   className="rounded-xl p-5 flex flex-col gap-4"
                   style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
                 >
@@ -193,7 +225,7 @@ const Integrations: React.FC = () => {
                     ) : (
                       <button
                         type="button"
-                        onClick={() => connect.mutate(i.id)}
+                        onClick={() => connect.mutate(i.provider)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                         style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
                       >

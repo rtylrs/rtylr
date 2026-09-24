@@ -8,7 +8,11 @@ import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import { useJournal, useCreateJournalEntry } from '../../shared/hooks/useChartOfAccounts';
+import {
+  useJournal,
+  useCreateJournalEntry,
+  useChartOfAccounts,
+} from '../../shared/hooks/useChartOfAccounts';
 import { cardStyle, primaryBtn, ghostBtn, inputStyle } from '../../shared/lib/tokens';
 import { todayIso } from '../../shared/lib/date';
 
@@ -20,12 +24,45 @@ interface LineInput {
   amount: number;
 }
 
+interface JournalLineValues {
+  debit?: number | null;
+  credit?: number | null;
+}
+
+export function toJournalMinorUnits(amount: number): number | null {
+  if (!Number.isFinite(amount) || amount < 0) return null;
+
+  const cents = amount * 100;
+  const rounded = Math.round(cents);
+  if (Math.abs(cents - rounded) > 1e-8 || !Number.isSafeInteger(rounded)) return null;
+  return rounded;
+}
+
+export function journalTotals(lines: JournalLineValues[]) {
+  let debitMinor = 0;
+  let creditMinor = 0;
+  let valid = true;
+
+  for (const line of lines) {
+    const debit = toJournalMinorUnits(line.debit ?? 0);
+    const credit = toJournalMinorUnits(line.credit ?? 0);
+    if (debit === null || credit === null || (debit === 0 && credit === 0)) {
+      valid = false;
+    }
+    debitMinor += debit ?? 0;
+    creditMinor += credit ?? 0;
+  }
+
+  return { debitMinor, creditMinor, valid };
+}
+
 const Journal: React.FC = () => {
   const { t } = useTranslation('journal');
   const [page, setPage] = useState(1);
-  const { data: journalData, isLoading } = useJournal({ page });
+  const { data: journalData, isLoading, isError, refetch } = useJournal({ page });
+  const { data: accounts = [] } = useChartOfAccounts();
   const data = journalData?.entries ?? [];
-  const hasMore = journalData?.hasMore ?? false;
+  const hasMore = !isError && (journalData?.hasMore ?? false);
   const createMut = useCreateJournalEntry();
   const [showCreate, setShowCreate] = useState(false);
   const [memo, setMemo] = useState('');
@@ -55,21 +92,50 @@ const Journal: React.FC = () => {
     setLines((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
   };
 
-  const totalDebits = lines
-    .filter((l) => l.type === 'debit')
-    .reduce((sum, l) => sum + (l.amount || 0), 0);
-  const totalCredits = lines
-    .filter((l) => l.type === 'credit')
-    .reduce((sum, l) => sum + (l.amount || 0), 0);
+  const selectAccount = (id: string, accountId: string): void => {
+    const account = accounts.find((candidate) => candidate.id === accountId);
+    setLines((prev) =>
+      prev.map((line) =>
+        line.id === id
+          ? {
+              ...line,
+              accountId: Number(accountId) || 0,
+              accountName: account?.name ?? '',
+            }
+          : line
+      )
+    );
+  };
+
+  const formTotals = journalTotals(
+    lines.map((line) => ({
+      debit: line.type === 'debit' ? line.amount : 0,
+      credit: line.type === 'credit' ? line.amount : 0,
+    }))
+  );
+  const totalDebits = formTotals.debitMinor / 100;
+  const totalCredits = formTotals.creditMinor / 100;
+  const isBalanced =
+    formTotals.valid &&
+    formTotals.debitMinor > 0 &&
+    formTotals.debitMinor === formTotals.creditMinor;
 
   const handleCreate = async (): Promise<void> => {
     if (!memo.trim()) {
       toast.error(t('journal.memoRequired'));
       return;
     }
-    if (Math.abs(totalDebits - totalCredits) > 0.01 || totalDebits === 0) {
+    if (lines.some((line) => !Number.isSafeInteger(line.accountId) || line.accountId <= 0)) {
+      toast.error(`${t('journal.accountName')}: account ID must be a positive integer`);
+      return;
+    }
+    if (!formTotals.valid) {
+      toast.error(t('journal.amountZero'));
+      return;
+    }
+    if (!isBalanced) {
       toast.error(
-        `Journal entry must balance: Debits (${totalDebits}) must equal Credits (${totalCredits})`
+        `Journal entry must balance: Debits (${totalDebits.toFixed(2)}) must equal Credits (${totalCredits.toFixed(2)})`
       );
       return;
     }
@@ -84,7 +150,7 @@ const Journal: React.FC = () => {
         description: memo.trim(),
         lines: lines.map((l) => ({
           accountId: l.accountId,
-          accountName: l.accountName || (l.type === 'debit' ? 'Debit Account' : 'Credit Account'),
+          accountName: l.accountName,
           debit: l.type === 'debit' ? l.amount : 0,
           credit: l.type === 'credit' ? l.amount : 0,
           description: '',
@@ -111,7 +177,7 @@ const Journal: React.FC = () => {
       <HelmetContainer title={`${t('journal.title')} · rtylr`} />
       <PageHeader
         title={t('journal.title')}
-        subtitle={`${data.length} entries`}
+        subtitle={!isLoading && !isError ? `${data.length} entries` : undefined}
         actions={
           <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
             <Plus size={13} /> {t('journal.newEntry')}
@@ -123,12 +189,33 @@ const Journal: React.FC = () => {
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
         </div>
+      ) : isError ? (
+        <div
+          role="alert"
+          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text)' }}>{t('errors.generic')}</p>
+          <button type="button" style={ghostBtn} onClick={() => void refetch?.()}>
+            {t('common.refresh')}
+          </button>
+        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {data.map((e) => {
-            // The API returns authoritative entry totals; do not recompute accounting
-            // invariants from client-side floating-point line values.
-            const isBalanced = e.debit != null && e.credit != null && e.debit === e.credit;
+            const entryTotals =
+              e.debit != null && e.credit != null
+                ? {
+                    debitMinor: toJournalMinorUnits(e.debit) ?? 0,
+                    creditMinor: toJournalMinorUnits(e.credit) ?? 0,
+                    valid:
+                      toJournalMinorUnits(e.debit) !== null &&
+                      toJournalMinorUnits(e.credit) !== null,
+                  }
+                : journalTotals(e.lines ?? []);
+            const isBalanced =
+              entryTotals.valid &&
+              entryTotals.debitMinor > 0 &&
+              entryTotals.debitMinor === entryTotals.creditMinor;
             return (
               <div key={e.id} style={{ ...cardStyle, padding: 18 }}>
                 <div
@@ -141,7 +228,7 @@ const Journal: React.FC = () => {
                 >
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-                      {e.memo}
+                      {e.description ?? e.memo ?? ''}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
                       {e.id} <>&middot;</> {e.date}
@@ -297,7 +384,7 @@ const Journal: React.FC = () => {
                 </div>
               </div>
 
-              {lines.map((l) => (
+              {lines.map((l, lineIndex) => (
                 <div key={l.id} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <span
                     style={{
@@ -315,20 +402,35 @@ const Journal: React.FC = () => {
                   >
                     {l.type}
                   </span>
-                  <input
+                  <select
                     style={{ ...inputStyle, flex: 2 }}
-                    placeholder={t('journal.accountName')}
-                    value={l.accountName}
-                    onChange={(e) => updateLine(l.id, 'accountName', e.target.value)}
-                  />
+                    aria-label={`${t('journal.account')} ${lineIndex + 1}`}
+                    value={l.accountId || ''}
+                    onChange={(e) => selectAccount(l.id, e.target.value)}
+                  >
+                    <option value="">{t('journal.accountName')}</option>
+                    {l.accountId > 0 &&
+                      !accounts.some((account) => account.id === String(l.accountId)) && (
+                        <option value={l.accountId}>
+                          {l.accountName || `Account ${l.accountId}`}
+                        </option>
+                      )}
+                    {accounts.map((account) => (
+                      <option key={account.id} value={account.id}>
+                        {account.code ? `${account.code} · ` : ''}
+                        {account.name}
+                        {account.type ? ` (${account.type})` : ''}
+                      </option>
+                    ))}
+                  </select>
                   <input
                     style={{ ...inputStyle, flex: 1 }}
                     type="number"
-                    min="0"
+                    min="0.01"
                     step="0.01"
                     placeholder={t('common.amount')}
                     value={l.amount || ''}
-                    onChange={(e) => updateLine(l.id, 'amount', parseFloat(e.target.value) || 0)}
+                    onChange={(e) => updateLine(l.id, 'amount', Number(e.target.value) || 0)}
                   />
                   {lines.length > 2 && (
                     <button
@@ -350,20 +452,17 @@ const Journal: React.FC = () => {
                   fontSize: 12,
                   fontWeight: 600,
                   borderTop: '1px solid var(--hub-border)',
-                  color:
-                    Math.abs(totalDebits - totalCredits) < 0.01 && totalDebits > 0
-                      ? 'var(--finance-accent)'
-                      : 'var(--finance-danger)',
+                  color: isBalanced ? 'var(--finance-accent)' : 'var(--finance-danger)',
                 }}
               >
                 <span>
                   Debits: ${totalDebits.toFixed(2)} | Credits: ${totalCredits.toFixed(2)}
                 </span>
                 <span>
-                  {Math.abs(totalDebits - totalCredits) < 0.01 && totalDebits > 0
+                  {isBalanced
                     ? 'Balanced ✓'
-                    : totalDebits === 0
-                      ? 'Enter amounts'
+                    : !formTotals.valid
+                      ? t('journal.amountZero')
                       : `Imbalance: $${Math.abs(totalDebits - totalCredits).toFixed(2)}`}
                 </span>
               </div>

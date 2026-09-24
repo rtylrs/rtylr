@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -7,7 +7,15 @@ import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { EmptyState } from '@voxire/ui';
 import { useCrmSettings, useUpdateCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
-import { PageHeader, Card, Input, Select, Button, ACCENT } from '../../shared/components/ui';
+import {
+  PageHeader,
+  Card,
+  Input,
+  Select,
+  Button,
+  SkeletonList,
+  ACCENT,
+} from '../../shared/components/ui';
 import type { Settings } from '../../shared/schemas/settings';
 import {
   useCrmTeam,
@@ -18,6 +26,7 @@ import {
   useCrmSubscription,
   centsToDisplay,
   computeSeatProration,
+  type CrmSubscription,
 } from '../../shared/hooks/queries/useCrmSubscription';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
@@ -40,7 +49,7 @@ const TABS: Omit<TabDef, 'label'>[] = [
 
 const GeneralTab: React.FC = () => {
   const { t } = useTranslation();
-  const { data: fetched } = useCrmSettings();
+  const { data: fetched, isLoading, isError, refetch } = useCrmSettings();
   const update = useUpdateCrmSettings();
   const defaultSettings: Settings = {
     defaultConsent: true,
@@ -50,25 +59,60 @@ const GeneralTab: React.FC = () => {
     smsSenderId: '',
   };
   const [form, setForm] = useState<Settings>(defaultSettings);
+  const isDirty = useRef(false);
+  const saveInFlight = useRef(false);
 
   useEffect(() => {
-    if (fetched) setForm(fetched);
+    if (fetched && !isDirty.current) setForm(fetched);
   }, [fetched]);
 
-  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]): void =>
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]): void => {
+    isDirty.current = true;
     setForm((f) => ({ ...f, [k]: v }));
+  };
 
   const handleSave = (): void => {
+    if (!fetched || update.isPending || saveInFlight.current) return;
+    saveInFlight.current = true;
     update.mutate(form, {
-      onSuccess: () => toast.success(t('crm.settings.saved')),
+      onSuccess: () => {
+        isDirty.current = false;
+        toast.success(t('crm.settings.saved'));
+      },
       onError: () => toast.error(t('crm.settings.saveFailed')),
+      onSettled: () => {
+        saveInFlight.current = false;
+      },
     });
   };
+
+  if (isError) {
+    return (
+      <Card>
+        <div role="alert" style={{ display: 'grid', justifyItems: 'start', gap: 12 }}>
+          <p style={{ margin: 0, color: 'var(--hub-text-muted)' }}>{t('errors.generic')}</p>
+          <Button variant="outline" onClick={() => void refetch()}>
+            {t('crm.actions.retry')}
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
+  if (isLoading || !fetched) {
+    return (
+      <div aria-busy="true">
+        <Card>
+          <SkeletonList count={3} />
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '680px' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-        <Button variant="primary" onClick={handleSave}>
+        <Button variant="primary" disabled={update.isPending} onClick={handleSave}>
           <Save size={13} />
           {t('crm.settings.saveChanges')}
         </Button>
@@ -91,6 +135,7 @@ const GeneralTab: React.FC = () => {
           <Select
             label={t('crm.settings.timezone')}
             value={form.timezone}
+            disabled={update.isPending}
             onChange={(e) => set('timezone', e.target.value)}
           >
             <option value="America/Los_Angeles">{t('crm.settings.tzLosAngeles')}</option>
@@ -124,16 +169,19 @@ const GeneralTab: React.FC = () => {
             label={t('crm.settings.fromEmail')}
             type="email"
             value={form.fromEmail}
+            disabled={update.isPending}
             onChange={(e) => set('fromEmail', e.target.value)}
           />
           <Input
             label={t('crm.settings.fromName')}
             value={form.fromName}
+            disabled={update.isPending}
             onChange={(e) => set('fromName', e.target.value)}
           />
           <Input
             label={t('crm.settings.smsSenderId')}
             value={form.smsSenderId}
+            disabled={update.isPending}
             onChange={(e) => set('smsSenderId', e.target.value)}
           />
         </div>
@@ -164,6 +212,7 @@ const GeneralTab: React.FC = () => {
           <input
             type="checkbox"
             checked={form.defaultConsent}
+            disabled={update.isPending}
             onChange={(e) => set('defaultConsent', e.target.checked)}
             style={{ accentColor: ACCENT, width: '16px', height: '16px' }}
           />
@@ -181,6 +230,31 @@ const GeneralTab: React.FC = () => {
   );
 };
 
+function getInviteSeatQuote(subscription: CrmSubscription | undefined) {
+  const pricePerSeatCents = subscription?.pricePerSeatCents;
+  const seatCount = subscription?.seatCount;
+  const includedSeatLimit = subscription?.includedSeatLimit;
+  if (
+    typeof pricePerSeatCents !== 'number' ||
+    pricePerSeatCents <= 0 ||
+    typeof seatCount !== 'number' ||
+    seatCount < 0 ||
+    typeof includedSeatLimit !== 'number' ||
+    includedSeatLimit < 0
+  ) {
+    return null;
+  }
+
+  const incrementalBillableSeats = subscription?.isGranted
+    ? 0
+    : Math.max(0, Math.min(1, seatCount + 1 - includedSeatLimit));
+  const incrementalPriceCents = pricePerSeatCents * incrementalBillableSeats;
+  return {
+    ...computeSeatProration(incrementalPriceCents),
+    monthlyCents: incrementalPriceCents,
+  };
+}
+
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 
 const TeamTab: React.FC = () => {
@@ -188,10 +262,12 @@ const TeamTab: React.FC = () => {
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canInvite = canCrmPermission(role, 'hub:team:invite');
   const canRemove = canCrmPermission(role, 'hub:team:remove');
-  const { data: members = [], isLoading, refetch } = useCrmTeam();
+  const { data: fetchedMembers = [], isLoading, isError, refetch } = useCrmTeam();
+  const members = fetchedMembers.filter((member) => member.isActive !== false);
   const invite = useCrmInviteMember();
   const deactivate = useCrmDeactivateMember();
   const { data: sub } = useCrmSubscription();
+  const seatQuote = getInviteSeatQuote(sub);
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -291,25 +367,19 @@ const TeamTab: React.FC = () => {
               />
             </div>
           </div>
-          {sub &&
-            (sub.pricePerSeatCents ?? 0) > 0 &&
-            (() => {
-              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                computeSeatProration(sub.pricePerSeatCents ?? 0);
-              return (
-                <p style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
-                  Adding this member costs{' '}
-                  <strong style={{ color: 'var(--hub-text)' }}>
-                    {centsToDisplay(proratedCents)}
-                  </strong>{' '}
-                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
-                  <strong style={{ color: 'var(--hub-text)' }}>
-                    {centsToDisplay(sub.pricePerSeatCents ?? 0)}/mo
-                  </strong>{' '}
-                  from {nextMonthName} 1st.
-                </p>
-              );
-            })()}
+          {seatQuote ? (
+            <p style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
+              Adding this member costs{' '}
+              <strong style={{ color: 'var(--hub-text)' }}>
+                {centsToDisplay(seatQuote.proratedCents)}
+              </strong>{' '}
+              this month ({seatQuote.daysRemaining}/{seatQuote.daysInMonth} days), then{' '}
+              <strong style={{ color: 'var(--hub-text)' }}>
+                {centsToDisplay(seatQuote.monthlyCents)}/mo
+              </strong>{' '}
+              from {seatQuote.nextMonthName} 1st.
+            </p>
+          ) : null}
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
               variant="primary"
@@ -346,6 +416,15 @@ const TeamTab: React.FC = () => {
             />
           ))}
         </div>
+      ) : isError ? (
+        <Card>
+          <div role="alert" style={{ display: 'grid', justifyItems: 'start', gap: 12 }}>
+            <p style={{ margin: 0, color: 'var(--hub-text-muted)' }}>{t('errors.generic')}</p>
+            <Button variant="outline" onClick={() => void refetch()}>
+              {t('crm.actions.retry')}
+            </Button>
+          </div>
+        </Card>
       ) : members.length === 0 ? (
         <EmptyState
           icon={Users}

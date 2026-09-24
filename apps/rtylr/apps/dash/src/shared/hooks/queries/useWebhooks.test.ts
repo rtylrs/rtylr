@@ -36,7 +36,7 @@ describe('useWebhooks', () => {
         {
           id: 1,
           url: 'https://example.com/wh',
-          events: ['order.created'],
+          events: ['order_created'],
           isActive: false,
           createdAt: '2026-09-01T12:00:00Z',
           lastTriggeredAt: '2026-09-23T11:00:00Z',
@@ -61,7 +61,7 @@ describe('useWebhooks', () => {
     expect(result.current.data?.[0]).not.toHaveProperty('secretPreview');
   });
 
-  it('creates a webhook successfully', async () => {
+  it('creates a webhook successfully and trims the destination', async () => {
     mockDeveloperClient.createWebhook.mockResolvedValue({ id: 1, secret: 'sec_123' });
 
     const client = new QueryClient({
@@ -71,14 +71,40 @@ describe('useWebhooks', () => {
     const { result } = renderHook(() => useCreateWebhook(), { wrapper });
 
     act(() => {
-      result.current.mutate({ url: 'https://example.com/wh', events: ['order.created'] });
+      result.current.mutate({ url: '  https://example.com/wh  ', events: ['order_created'] });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockDeveloperClient.createWebhook).toHaveBeenCalledWith({
       url: 'https://example.com/wh',
-      events: ['order.created'],
+      events: ['order_created'],
     });
+  });
+
+  it('rejects event names that the live dispatcher cannot publish', async () => {
+    const client = new QueryClient({
+      defaultOptions: { mutations: { retry: false } },
+    });
+    const wrapper = createWrapper(client);
+    const { result } = renderHook(() => useCreateWebhook(), { wrapper });
+
+    await expect(
+      result.current.mutateAsync({ url: 'https://example.com/wh', events: ['order.created'] })
+    ).rejects.toThrow('Unsupported webhook event');
+    expect(mockDeveloperClient.createWebhook).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-HTTP destination before calling the API', async () => {
+    const client = new QueryClient({
+      defaultOptions: { mutations: { retry: false } },
+    });
+    const wrapper = createWrapper(client);
+    const { result } = renderHook(() => useCreateWebhook(), { wrapper });
+
+    await expect(
+      result.current.mutateAsync({ url: 'not-a-url', events: ['order_created'] })
+    ).rejects.toThrow('valid HTTP(S) URL');
+    expect(mockDeveloperClient.createWebhook).not.toHaveBeenCalled();
   });
 
   it('deletes a webhook successfully', async () => {

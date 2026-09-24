@@ -110,6 +110,45 @@ describe('useInvoiceDetail', () => {
     expect(result.current.data?.status).toBe('Sent');
   });
 
+  it('preserves line tax, discount metadata, and payment history from the detail response', async () => {
+    mockInvoicesClient.getInvoice.mockResolvedValue({
+      invoice: {
+        ...baseDetail,
+        discountType: 'percentage',
+        discountValue: 10,
+        discountAmount: 120,
+        items: [
+          {
+            description: 'Taxed line',
+            quantity: 1,
+            unitPrice: 100,
+            taxRate: 10,
+            total: 110,
+          },
+        ],
+      },
+      payments: [
+        {
+          id: 'pay-1',
+          amount: 50,
+          currency: 'USD',
+          paymentDate: '2026-06-10',
+          method: 'Card',
+          reference: 'TXN-1',
+        },
+      ],
+    });
+    const { result } = renderHook(() => useInvoiceDetail('5'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.items?.[0]?.taxRate).toBe(10);
+    expect(result.current.data?.discountType).toBe('percentage');
+    expect(result.current.data?.discountAmount).toBe(120);
+    expect(result.current.data?.history).toEqual([
+      { id: 'pay-1', label: 'Card · TXN-1', at: '2026-06-10' },
+    ]);
+  });
+
   it('does not fetch when id is undefined', () => {
     const { result } = renderHook(() => useInvoiceDetail(undefined), { wrapper: createWrapper() });
     expect(result.current.fetchStatus).toBe('idle');

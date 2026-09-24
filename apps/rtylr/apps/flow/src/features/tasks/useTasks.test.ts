@@ -92,6 +92,25 @@ describe('useMyTasks', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
   });
+
+  it('merges every page before Today filters the list', async () => {
+    (flowApi.getMyTasks as unknown as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({
+        tasks: [{ id: 't-1' }],
+        pagination: { page: 1, hasNext: true },
+      })
+      .mockResolvedValueOnce({
+        tasks: [{ id: 't-2' }],
+        pagination: { page: 2, hasNext: false },
+      });
+    const { result } = renderHook(() => useMyTasks(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual([{ id: 't-1' }, { id: 't-2' }]);
+    expect(flowApi.getMyTasks).toHaveBeenNthCalledWith(1, { page: 1, limit: 500 });
+    expect(flowApi.getMyTasks).toHaveBeenNthCalledWith(2, { page: 2, limit: 500 });
+  });
 });
 
 describe('useTaskDetail', () => {

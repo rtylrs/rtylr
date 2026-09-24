@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -6,7 +6,9 @@ interface ErrorBoundaryProps {
    * Custom fallback. Receives the captured error and a reset callback that
    * clears the boundary's error state so the children can re-mount.
    */
-  fallback?: React.ReactNode | ((args: { error: Error; reset: () => void }) => React.ReactNode);
+  fallback?:
+    | React.ReactNode
+    | ((args: { error: Error; reset: () => void }) => React.ReactNode);
   /**
    * Side-effect hook for telemetry (Sentry, PostHog, etc.). Called once per
    * caught error.
@@ -18,23 +20,42 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-const DYNAMIC_IMPORT_RELOAD_KEY = 'rtylr:dynamic-import-reload';
+const DYNAMIC_IMPORT_RELOAD_KEY = "rtylr:dynamic-import-reload";
+
+function dynamicImportReloadKey(): string {
+  return `${window.location.origin}${window.location.pathname}${window.location.search}`;
+}
+
+function clearDynamicImportReloadMarker(): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    const key = dynamicImportReloadKey();
+    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === key) {
+      window.sessionStorage.removeItem(DYNAMIC_IMPORT_RELOAD_KEY);
+    }
+  } catch {
+    // Storage can be unavailable in private browsing; the loop guard is optional.
+  }
+}
 
 export function isDynamicImportError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error ?? '');
+  const message = error instanceof Error ? error.message : String(error ?? "");
 
   return /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk \d+ failed|ChunkLoadError|error loading dynamically imported module/i.test(
-    message
+    message,
   );
 }
 
 export function recoverFromDynamicImportError(error: unknown): boolean {
-  if (!isDynamicImportError(error) || typeof window === 'undefined') return false;
+  if (!isDynamicImportError(error) || typeof window === "undefined")
+    return false;
 
-  const reloadKey = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+  const reloadKey = dynamicImportReloadKey();
 
   try {
-    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === reloadKey) return false;
+    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === reloadKey)
+      return false;
     window.sessionStorage.setItem(DYNAMIC_IMPORT_RELOAD_KEY, reloadKey);
   } catch {
     return false;
@@ -44,11 +65,25 @@ export function recoverFromDynamicImportError(error: unknown): boolean {
   return true;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   state: ErrorBoundaryState = { error: null };
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { error: error instanceof Error ? error : new Error(String(error)) };
+  }
+
+  componentDidMount(): void {
+    if (!this.state.error) clearDynamicImportReloadMarker();
+  }
+
+  componentDidUpdate(
+    _prevProps: ErrorBoundaryProps,
+    prevState: ErrorBoundaryState,
+  ): void {
+    if (prevState.error && !this.state.error) clearDynamicImportReloadMarker();
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
@@ -64,7 +99,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     const { error } = this.state;
     if (!error) return this.props.children;
 
-    if (typeof this.props.fallback === 'function') {
+    if (typeof this.props.fallback === "function") {
       return this.props.fallback({ error, reset: this.reset });
     }
     if (this.props.fallback !== undefined) return this.props.fallback;
@@ -78,44 +113,48 @@ interface FallbackProps {
   reset: () => void;
 }
 
-export function DefaultErrorFallback({ error, reset }: FallbackProps): React.JSX.Element {
+export function DefaultErrorFallback({
+  error,
+  reset,
+}: FallbackProps): React.JSX.Element {
   return (
     <div
       role="alert"
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '60vh',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "60vh",
         gap: 12,
         padding: 24,
-        textAlign: 'center',
+        textAlign: "center",
       }}
     >
-      <p style={{ fontWeight: 600, fontSize: 16, color: 'var(--text, #111)' }}>
+      <p style={{ fontWeight: 600, fontSize: 16, color: "var(--text, #111)" }}>
         Something went wrong
       </p>
       <p
         style={{
           fontSize: 13,
-          color: 'var(--text-muted, #6b7280)',
+          color: "var(--text-muted, #6b7280)",
           maxWidth: 420,
         }}
       >
-        {error.message || 'An unexpected error occurred. Try again or refresh the page.'}
+        {error.message ||
+          "An unexpected error occurred. Try again or refresh the page."}
       </p>
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <button
           onClick={reset}
           style={{
-            padding: '8px 16px',
+            padding: "8px 16px",
             borderRadius: 8,
-            border: '1px solid var(--border, #e5e7eb)',
-            background: 'transparent',
-            color: 'var(--text, #111)',
+            border: "1px solid var(--border, #e5e7eb)",
+            background: "transparent",
+            color: "var(--text, #111)",
             fontSize: 13,
-            cursor: 'pointer',
+            cursor: "pointer",
           }}
         >
           Try again
@@ -123,13 +162,13 @@ export function DefaultErrorFallback({ error, reset }: FallbackProps): React.JSX
         <button
           onClick={() => window.location.reload()}
           style={{
-            padding: '8px 16px',
+            padding: "8px 16px",
             borderRadius: 8,
-            border: 'none',
-            background: 'var(--accent, #111)',
-            color: 'var(--accent-foreground, #fff)',
+            border: "none",
+            background: "var(--accent, #111)",
+            color: "var(--accent-foreground, #fff)",
             fontSize: 13,
-            cursor: 'pointer',
+            cursor: "pointer",
           }}
         >
           Reload
@@ -139,35 +178,38 @@ export function DefaultErrorFallback({ error, reset }: FallbackProps): React.JSX
   );
 }
 
-export function WidgetErrorFallback({ error, reset }: FallbackProps): React.JSX.Element {
+export function WidgetErrorFallback({
+  error,
+  reset,
+}: FallbackProps): React.JSX.Element {
   return (
     <div
       role="alert"
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
         gap: 6,
         padding: 16,
         minHeight: 120,
-        border: '1px dashed var(--border, #e5e7eb)',
+        border: "1px dashed var(--border, #e5e7eb)",
         borderRadius: 8,
-        textAlign: 'center',
+        textAlign: "center",
       }}
     >
-      <p style={{ fontSize: 12, color: 'var(--text-muted, #6b7280)' }}>
-        {error.message || 'Widget failed to load'}
+      <p style={{ fontSize: 12, color: "var(--text-muted, #6b7280)" }}>
+        {error.message || "Widget failed to load"}
       </p>
       <button
         onClick={reset}
         style={{
           fontSize: 11,
-          color: 'var(--text, #111)',
-          background: 'transparent',
-          border: 'none',
-          textDecoration: 'underline',
-          cursor: 'pointer',
+          color: "var(--text, #111)",
+          background: "transparent",
+          border: "none",
+          textDecoration: "underline",
+          cursor: "pointer",
         }}
       >
         Retry

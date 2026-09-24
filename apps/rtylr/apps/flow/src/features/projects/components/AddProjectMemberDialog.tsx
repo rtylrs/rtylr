@@ -37,7 +37,13 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
     }
   }, [open]);
 
+  const handleOpenChange = (nextOpen: boolean): void => {
+    if (inviteMember.isPending && !nextOpen) return;
+    onOpenChange(nextOpen);
+  };
+
   const handleInvite = (): void => {
+    if (inviteMember.isPending) return;
     if (!email.trim()) {
       toast.error(t('toasts.projectMember.enterEmail'));
       return;
@@ -53,7 +59,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         className="max-w-md"
         style={{ background: 'var(--flow-card)', color: 'var(--flow-text)' }}
@@ -74,6 +80,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
             aria-label={t('flow.projectSettings.emailPlaceholder')}
             placeholder={t('flow.projectSettings.emailPlaceholder')}
             value={email}
+            disabled={inviteMember.isPending}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -90,6 +97,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
           />
           <select
             value={role}
+            disabled={inviteMember.isPending}
             onChange={(e) => setRole(e.target.value as 'admin' | 'member' | 'viewer')}
             aria-label={t('flow.projectSettings.roleLabel')}
             className="rounded-sm px-2 py-1.5 text-title md:text-meta"

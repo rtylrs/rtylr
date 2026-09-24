@@ -267,6 +267,11 @@
     "subtitle": "Des références distinctes pour les tailles, couleurs, parfums et plus",
     "newVariant": "Nouvelle variante",
     "productIdPlaceholder": "Identifiant du produit",
+    "productSearch": "Rechercher des produits",
+    "selectProduct": "Sélectionner un produit",
+    "loadingProducts": "Chargement des produits…",
+    "productsUnavailable": "Produits indisponibles",
+    "noProducts": "Aucun produit disponible",
     "namePlaceholder": "Nom de la variante (par ex. Grand / Rouge)",
     "skuPlaceholder": "Référence (facultatif)",
     "attributes": "Attributs"
@@ -333,7 +338,19 @@
     "created": "Créé le",
     "fromWarehouse": "Depuis l'entrepôt…",
     "toWarehouse": "Vers l'entrepôt…",
-    "newTransferTitle": "Nouveau transfert de stock"
+    "newTransferTitle": "Nouveau transfert de stock",
+    "receive": "Recevoir",
+    "received": "Transfert reçu",
+    "receiveFailed": "Échec de la réception du transfert",
+    "receiveAria": "Recevoir le transfert de stock n° {{id}}",
+    "reloadBeforeCreate": "Rechargez le formulaire avant de créer un transfert",
+    "loadingWarehouses": "Chargement des entrepôts…",
+    "warehousesUnavailable": "Entrepôts indisponibles",
+    "searchProducts": "Rechercher des produits",
+    "loadingProducts": "Chargement des produits…",
+    "productsUnavailable": "Produits indisponibles",
+    "noProducts": "Aucun produit disponible",
+    "selectProduct": "Sélectionner un produit"
   },
   "lowStockAlerts": {
     "empty": {
@@ -360,6 +377,11 @@
     "completeAria": "Terminer l'inventaire",
     "variance": "ÉCART",
     "selectWarehouse": "Choisir un entrepôt…",
+    "loadingInventory": "Chargement de l'inventaire actuel…",
+    "inventoryLoadFailed": "L'inventaire n'a pas pu être chargé.",
+    "inventoryRequiredForCreate": "Impossible de charger l'inventaire pour cet inventaire physique",
+    "noInventoryToCount": "Aucun article d'inventaire à compter",
+    "itemsWillBeIncluded": "Les produits seront relevés à partir de l'entrepôt sélectionné.",
     "uncountedWarning_one": "{{count}} article non compté. Terminer quand même ?",
     "uncountedWarning_many": "{{count}} d'articles non comptés. Terminer quand même ?",
     "uncountedWarning_other": "{{count}} articles non comptés. Terminer quand même ?"

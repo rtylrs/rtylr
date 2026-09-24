@@ -10,6 +10,10 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigateMock,
+}));
+
 type Notification = {
   id: string;
   read: boolean;
@@ -18,6 +22,7 @@ type Notification = {
   body: string;
   app: string;
   createdAt: string;
+  link?: string;
 };
 
 const makeNotification = (overrides: Partial<Notification>): Notification => ({
@@ -31,6 +36,8 @@ const makeNotification = (overrides: Partial<Notification>): Notification => ({
   ...overrides,
 });
 
+const navigateMock = vi.hoisted(() => vi.fn());
+const markReadMock = vi.hoisted(() => vi.fn());
 const notificationsData = vi.hoisted(() => ({
   pages: undefined as { pages: { notifications: Notification[] }[] } | undefined,
   isLoading: false,
@@ -51,16 +58,31 @@ vi.mock('../../shared/hooks/queries/useNotifications', () => ({
     isFetchingNextPage: false,
     refetch: notificationsData.refetch,
   }),
-  useMarkNotificationRead: () => ({ mutate: vi.fn() }),
+  useMarkNotificationRead: () => ({ mutate: markReadMock }),
   useMarkAllNotificationsRead: () => ({ mutate: vi.fn() }),
 }));
 
-import Notifications from './Notifications';
+import Notifications, { resolveNotificationTarget } from './Notifications';
 
 beforeEach(() => {
   vi.clearAllMocks();
   notificationsData.pages = undefined;
   notificationsData.isLoading = false;
+});
+
+describe('notification link safety', () => {
+  it('accepts an absolute self-host Dash URL and keeps its internal path', () => {
+    expect(
+      resolveNotificationTarget(
+        'https://dash.self-host.test/team?from=notification#pending',
+        'https://app.self-host.test',
+        'https://dash.self-host.test'
+      )
+    ).toMatchObject({
+      path: '/team?from=notification#pending',
+      isCurrentOrigin: false,
+    });
+  });
 });
 
 describe('Notifications empty state', () => {
@@ -111,5 +133,25 @@ describe('Notifications empty state', () => {
     render(<Notifications />);
 
     expect(screen.queryByText('notifications.emptyAllCaughtUpTitle')).not.toBeInTheDocument();
+  });
+
+  it('marks a linked notification read and navigates to its internal Hub route', () => {
+    setPages([makeNotification({ link: '/team' })]);
+    render(<Notifications />);
+
+    fireEvent.click(screen.getByText('New order'));
+
+    expect(markReadMock).toHaveBeenCalledWith('1');
+    expect(navigateMock).toHaveBeenCalledWith({ to: '/team' });
+  });
+
+  it('does not navigate to an unsafe notification scheme', () => {
+    setPages([makeNotification({ link: 'javascript:alert(1)' })]);
+    render(<Notifications />);
+
+    fireEvent.click(screen.getByText('New order'));
+
+    expect(markReadMock).toHaveBeenCalledWith('1');
+    expect(navigateMock).not.toHaveBeenCalled();
   });
 });

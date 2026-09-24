@@ -1,11 +1,12 @@
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import StockTakes from './StockTakes';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
   useStockTakes: vi.fn(),
+  updateStockTake: vi.fn(),
   refetch: vi.fn(),
   role: 'admin' as string,
 }));
@@ -32,7 +33,7 @@ vi.mock('@voxire/auth', () => ({
 vi.mock('./useStockTakes', () => ({
   useStockTakes: mocks.useStockTakes,
   useCreateStockTake: () => ({ mutateAsync: vi.fn(), isPending: false }),
-  useUpdateStockTake: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateStockTake: () => ({ mutateAsync: mocks.updateStockTake, isPending: false }),
 }));
 
 vi.mock('../warehouses/useWarehouses', () => ({
@@ -40,16 +41,71 @@ vi.mock('../warehouses/useWarehouses', () => ({
 }));
 
 vi.mock('../inventory/useInventory', () => ({
-  useInventoryReport: () => ({ data: [], isLoading: false, isError: false }),
+  useInventoryReport: () => ({
+    data: [{ productId: '5201', productName: 'Widget', stockQuantity: 7 }],
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 beforeAll(async () => {
   await initTestI18n('en');
 });
 
+describe('StockTakes physical counts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.role = 'admin';
+    mocks.updateStockTake.mockResolvedValue({ message: 'completed' });
+    mocks.useStockTakes.mockReturnValue({
+      data: {
+        stockTakes: [
+          {
+            id: 'st1',
+            warehouseId: '1',
+            status: 'in_progress',
+            notes: '',
+            items: [{ productId: '5201', expectedQty: 7, countedQty: 0 }],
+          },
+        ],
+        hasMore: false,
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mocks.refetch,
+    });
+  });
+
+  it('requires an explicit count, including an intentional zero, before completion', async () => {
+    render(<StockTakes />);
+
+    const complete = screen.getByRole('button', { name: 'Complete stock take' });
+    expect(complete).toBeDisabled();
+
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Counted quantity for Widget' }), {
+      target: { value: '0' },
+    });
+    expect(complete).toBeEnabled();
+    fireEvent.click(complete);
+
+    await waitFor(() =>
+      expect(mocks.updateStockTake).toHaveBeenCalledWith({
+        id: 'st1',
+        body: {
+          status: 'completed',
+          notes: '',
+          items: [{ productId: '5201', expectedQty: 7, countedQty: 0 }],
+        },
+      })
+    );
+  });
+});
+
 describe('StockTakes empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.updateStockTake.mockResolvedValue({ message: 'completed' });
     mocks.useStockTakes.mockReturnValue({
       data: { stockTakes: [], hasMore: false },
       isLoading: false,

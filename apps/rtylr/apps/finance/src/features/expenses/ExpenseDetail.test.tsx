@@ -13,15 +13,25 @@ const expense = {
   currency: 'USD',
   vendor: 'Acme',
   receiptUrl: null,
+  paymentMethod: 'Card',
+  isTaxDeductible: true,
+  taxAmount: 3.21,
   expenseDate: '2026-08-01',
   status: 'pending',
-  notes: '',
+  notes: 'Keep this note',
 };
 
 const mocks = vi.hoisted(() => ({
   role: 'staff' as string | null,
   updateExpense: vi.fn(),
   refetchExpense: vi.fn(),
+  expenseQuery: {
+    data: undefined as unknown,
+    isLoading: false,
+    isError: false,
+    error: null as unknown,
+    isFetching: false,
+  },
 }));
 
 vi.mock('@voxire/auth', () => ({
@@ -32,7 +42,8 @@ vi.mock('@voxire/auth', () => ({
 
 vi.mock('@voxire/api', () => ({
   createOneKitClient: () => ({ updateExpense: mocks.updateExpense }),
-  getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
+  getOneKitErrorMessage: (error: unknown, fallback: string) =>
+    error instanceof Error ? error.message : fallback,
 }));
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -47,8 +58,7 @@ vi.mock('motion/react', () => ({
 
 vi.mock('./useExpenseById', () => ({
   useExpenseById: () => ({
-    data: expense,
-    isLoading: false,
+    ...mocks.expenseQuery,
     refetch: mocks.refetchExpense,
   }),
 }));
@@ -98,6 +108,13 @@ describe('ExpenseDetail', () => {
     mocks.role = 'staff';
     mocks.updateExpense.mockResolvedValue({});
     mocks.refetchExpense.mockResolvedValue({ data: expense });
+    Object.assign(mocks.expenseQuery, {
+      data: expense,
+      isLoading: false,
+      isError: false,
+      error: null,
+      isFetching: false,
+    });
   });
 
   it('hides Approve/Reject for a role without finance:expenses:approve', () => {
@@ -140,12 +157,31 @@ describe('ExpenseDetail', () => {
           description: 'Office supplies',
           vendor: 'Acme',
           receiptUrl: 'https://cdn.example/receipt.png',
-          notes: '',
+          paymentMethod: 'Card',
+          isTaxDeductible: true,
+          taxAmount: 3.21,
+          notes: 'Keep this note',
           expenseDate: '2026-08-01',
         },
       })
     );
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['expenses'] });
     expect(mocks.refetchExpense).toHaveBeenCalled();
+  });
+
+  it('shows a retry state instead of an endless skeleton when detail loading fails', () => {
+    Object.assign(mocks.expenseQuery, {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new Error('Expense not found'),
+      isFetching: false,
+    });
+
+    renderDetail();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Expense not found');
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    expect(mocks.refetchExpense).toHaveBeenCalledTimes(1);
   });
 });

@@ -32,26 +32,89 @@ import {
   DialogTitle,
 } from '../../shared/components/ui';
 
-type OrderStatus = 'all' | 'pending' | 'in_progress' | 'completed';
+type OrderTab = 'all' | 'pending' | 'in_progress' | 'completed';
+
+type OrderServerStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'served'
+  | 'paid'
+  | 'completed'
+  | 'cancelled'
+  | 'refunded'
+  | 'voided'
+  | 'held';
+
+const PAGE_SIZE = 50;
+
+const IN_PROGRESS_STATUSES = new Set<OrderServerStatus>([
+  'confirmed',
+  'preparing',
+  'ready',
+  'served',
+  'held',
+]);
+const COMPLETED_STATUSES = new Set<OrderServerStatus>([
+  'paid',
+  'completed',
+  'cancelled',
+  'refunded',
+  'voided',
+]);
 
 const statusBadgeVariant: Record<string, BadgeVariant> = {
   pending: 'warning',
-  in_progress: 'default',
+  confirmed: 'default',
+  preparing: 'default',
+  ready: 'secondary',
+  served: 'secondary',
+  held: 'warning',
+  paid: 'success',
   completed: 'success',
   cancelled: 'destructive',
+  refunded: 'destructive',
+  voided: 'destructive',
 };
 
 const statusLabel: Record<string, string> = {
   pending: 'Pending',
-  in_progress: 'In Progress',
+  confirmed: 'Confirmed',
+  preparing: 'Preparing',
+  ready: 'Ready',
+  served: 'Served',
+  held: 'Held',
+  paid: 'Paid',
   completed: 'Completed',
   cancelled: 'Cancelled',
+  voided: 'Voided',
 };
 
 const tabIcons: Record<string, React.ReactNode> = {
   pending: <Clock size={13} />,
   in_progress: <Loader2 size={13} />,
   completed: <CheckCircle2 size={13} />,
+};
+
+function orderBucket(status: string): Exclude<OrderTab, 'all'> | null {
+  if (status === 'pending') return 'pending';
+  if (IN_PROGRESS_STATUSES.has(status as OrderServerStatus)) return 'in_progress';
+  if (COMPLETED_STATUSES.has(status as OrderServerStatus)) return 'completed';
+  return null;
+}
+
+function formatStatus(status: string): string {
+  return statusLabel[status] || status.replace(/_/g, ' ');
+}
+
+const nextOrderStatus: Partial<
+  Record<OrderServerStatus, { status: OrderServerStatus; label: string }>
+> = {
+  pending: { status: 'confirmed', label: 'Confirm order' },
+  confirmed: { status: 'preparing', label: 'Start preparing' },
+  preparing: { status: 'ready', label: 'Mark ready' },
+  ready: { status: 'served', label: 'Mark served' },
 };
 
 const OrdersEmptyRow: React.FC<{ label: string; onRefresh: () => void }> = ({
@@ -81,59 +144,121 @@ function formatTime(iso: string): string {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+type OrderItemWithTotal = HubOrder['items'][number] & { total?: number };
+
+function formatOrderItemTotal(item: OrderItemWithTotal): string {
+  const total = Number(item.total);
+  return formatMoney(Number.isFinite(total) ? total : item.price * item.quantity);
+}
+
 const OrdersTable: React.FC<{
   orders: HubOrder[];
   emptyLabel: string;
   onSelectOrder: (order: HubOrder) => void;
   onRefresh: () => void;
-}> = ({ orders, emptyLabel, onSelectOrder, onRefresh }) => (
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>Order #</TableHead>
-        <TableHead>Customer</TableHead>
-        <TableHead>Subtotal</TableHead>
-        <TableHead>Total</TableHead>
-        <TableHead>Status</TableHead>
-        <TableHead>Time</TableHead>
-        <TableHead className="text-right">Actions</TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {orders.length === 0 ? (
-        <OrdersEmptyRow label={emptyLabel} onRefresh={onRefresh} />
-      ) : (
-        orders.map((order) => (
-          <TableRow key={order.id}>
-            <TableCell className="font-mono text-xs">#{order.id}</TableCell>
-            <TableCell>{order.customerName || order.customerEmail || '-'}</TableCell>
-            <TableCell>{formatMoney(order.subtotal)}</TableCell>
-            <TableCell>{formatMoney(order.total)}</TableCell>
-            <TableCell>
-              <Badge variant={statusBadgeVariant[order.status] || 'outline'}>
-                {statusLabel[order.status] || order.status.replace('_', ' ')}
-              </Badge>
-            </TableCell>
-            <TableCell className="text-gray-400 text-xs">{formatTime(order.createdAt)}</TableCell>
-            <TableCell className="text-right">
-              <Button variant="ghost" size="sm" onClick={() => onSelectOrder(order)}>
-                View
-              </Button>
-            </TableCell>
+  page: number;
+  hasNextPage: boolean;
+  onPageChange: (page: number) => void;
+}> = ({ orders, emptyLabel, onSelectOrder, onRefresh, page, hasNextPage, onPageChange }) => {
+  const { t } = useTranslation();
+  const showPagination = hasNextPage || page > 1;
+
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Order #</TableHead>
+            <TableHead>Customer</TableHead>
+            <TableHead>Subtotal</TableHead>
+            <TableHead>Total</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Time</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ))
+        </TableHeader>
+        <TableBody>
+          {orders.length === 0 ? (
+            <OrdersEmptyRow label={emptyLabel} onRefresh={onRefresh} />
+          ) : (
+            orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-mono text-xs">#{order.id}</TableCell>
+                <TableCell>{order.customerName || order.customerEmail || '-'}</TableCell>
+                <TableCell>{formatMoney(order.subtotal)}</TableCell>
+                <TableCell>{formatMoney(order.total)}</TableCell>
+                <TableCell>
+                  <Badge variant={statusBadgeVariant[order.status] || 'outline'}>
+                    {formatStatus(order.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-gray-400 text-xs">
+                  {formatTime(order.createdAt)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => onSelectOrder(order)}>
+                    View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+      {showPagination && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-xs"
+          style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text-muted)' }}
+        >
+          <span>Page {page}</span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(Math.max(1, page - 1))}
+              disabled={page <= 1}
+              aria-label={t('common.pagination.previous')}
+            >
+              {t('common.pagination.previous')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page + 1)}
+              disabled={!hasNextPage}
+              aria-label={t('common.pagination.next')}
+            >
+              {t('common.pagination.next')}
+            </Button>
+          </div>
+        </div>
       )}
-    </TableBody>
-  </Table>
-);
+    </>
+  );
+};
 
 const Orders: React.FC = () => {
-  const [tab, setTab] = useState<OrderStatus>('all');
+  const [tab, setTab] = useState<OrderTab>('all');
+  const [page, setPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<HubOrder | null>(null);
-  const { data: allOrders = [], isLoading, isError, refetch } = useOrders();
+  const {
+    data: ordersPage,
+    isLoading,
+    isError,
+    refetch,
+  } = useOrders({
+    limit: PAGE_SIZE,
+    offset: (page - 1) * PAGE_SIZE,
+  });
+  // Accept a legacy cached array while the page-shaped adapter is active; the
+  // live hook now always supplies the metadata-bearing object.
+  const allOrders = useMemo(
+    () => (Array.isArray(ordersPage) ? ordersPage : (ordersPage?.orders ?? [])),
+    [ordersPage]
+  );
   const updateStatusMutation = useUpdateOrderStatus();
 
-  const handleStatusUpdate = (newStatus: string) => {
+  const handleStatusUpdate = (newStatus: OrderServerStatus) => {
     if (!selectedOrder) return;
     updateStatusMutation.mutate(
       { id: selectedOrder.id, status: newStatus },
@@ -145,22 +270,35 @@ const Orders: React.FC = () => {
     );
   };
 
-  const pendingOrders = useMemo(() => allOrders.filter((o) => o.status === 'pending'), [allOrders]);
+  const pendingOrders = useMemo(
+    () => allOrders.filter((o) => orderBucket(o.status) === 'pending'),
+    [allOrders]
+  );
   const inProgressOrders = useMemo(
-    () => allOrders.filter((o) => o.status === 'in_progress'),
+    () => allOrders.filter((o) => orderBucket(o.status) === 'in_progress'),
     [allOrders]
   );
   const completedOrders = useMemo(
-    () => allOrders.filter((o) => o.status === 'completed'),
+    () => allOrders.filter((o) => orderBucket(o.status) === 'completed'),
     [allOrders]
   );
+  const hasNextPage = Array.isArray(ordersPage)
+    ? allOrders.length >= PAGE_SIZE
+    : (ordersPage?.hasMore ?? false);
 
-  const ordersForTab: Record<OrderStatus, HubOrder[]> = {
+  const ordersForTab: Record<OrderTab, HubOrder[]> = {
     all: allOrders,
     pending: pendingOrders,
     in_progress: inProgressOrders,
     completed: completedOrders,
   };
+  const selectedStatus = selectedOrder?.status as OrderServerStatus | undefined;
+  const nextAction = selectedStatus ? nextOrderStatus[selectedStatus] : undefined;
+  const canCancel =
+    selectedStatus === 'pending' ||
+    selectedStatus === 'confirmed' ||
+    selectedStatus === 'preparing' ||
+    selectedStatus === 'ready';
 
   if (isLoading) {
     return (
@@ -196,6 +334,9 @@ const Orders: React.FC = () => {
           <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
             Failed to load orders. Please refresh.
           </p>
+          <Button size="sm" variant="outline" onClick={() => void refetch()}>
+            Refresh
+          </Button>
         </div>
       </div>
     );
@@ -233,6 +374,9 @@ const Orders: React.FC = () => {
         </div>
 
         {/* Stats */}
+        <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+          Status counts for the current page.
+        </p>
         <div className="grid grid-cols-3 gap-4">
           {[
             {
@@ -274,7 +418,14 @@ const Orders: React.FC = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle>All Orders</CardTitle>
-              <Tabs value={tab} onValueChange={(v) => setTab(v as OrderStatus)}>
+              <Tabs
+                value={tab}
+                onValueChange={(v) => {
+                  setTab(v as OrderTab);
+                  setPage(1);
+                  setSelectedOrder(null);
+                }}
+              >
                 <TabsList>
                   <TabsTrigger value="all">All</TabsTrigger>
                   <TabsTrigger value="pending">
@@ -300,6 +451,12 @@ const Orders: React.FC = () => {
               emptyLabel={tab === 'all' ? '' : tab.replace('_', ' ')}
               onSelectOrder={setSelectedOrder}
               onRefresh={() => void refetch()}
+              page={page}
+              hasNextPage={hasNextPage}
+              onPageChange={(nextPage) => {
+                setPage(Math.max(1, nextPage));
+                setSelectedOrder(null);
+              }}
             />
           </CardContent>
         </Card>
@@ -314,7 +471,7 @@ const Orders: React.FC = () => {
                 <div className="flex items-center justify-between pr-6">
                   <DialogTitle>Order #{selectedOrder.id}</DialogTitle>
                   <Badge variant={statusBadgeVariant[selectedOrder.status] || 'outline'}>
-                    {statusLabel[selectedOrder.status] || selectedOrder.status.replace('_', ' ')}
+                    {formatStatus(selectedOrder.status)}
                   </Badge>
                 </div>
               </DialogHeader>
@@ -371,7 +528,7 @@ const Orders: React.FC = () => {
                           <span className="text-muted ml-2">x{item.quantity}</span>
                         </div>
                         <span className="font-semibold text-primary">
-                          {formatMoney(item.price * item.quantity)}
+                          {formatOrderItemTotal(item)}
                         </span>
                       </div>
                     ))}
@@ -383,45 +540,25 @@ const Orders: React.FC = () => {
                 className="flex items-center justify-end gap-2 pt-3 border-t"
                 style={{ borderColor: 'var(--dash-border)' }}
               >
-                {selectedOrder.status === 'pending' && (
-                  <>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={updateStatusMutation.isPending}
-                      onClick={() => handleStatusUpdate('cancelled')}
-                    >
-                      Cancel Order
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      disabled={updateStatusMutation.isPending}
-                      onClick={() => handleStatusUpdate('in_progress')}
-                    >
-                      Process Order
-                    </Button>
-                  </>
+                {canCancel && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={updateStatusMutation.isPending}
+                    onClick={() => handleStatusUpdate('cancelled')}
+                  >
+                    Cancel Order
+                  </Button>
                 )}
-                {selectedOrder.status === 'in_progress' && (
-                  <>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={updateStatusMutation.isPending}
-                      onClick={() => handleStatusUpdate('cancelled')}
-                    >
-                      Cancel Order
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      disabled={updateStatusMutation.isPending}
-                      onClick={() => handleStatusUpdate('completed')}
-                    >
-                      Complete Order
-                    </Button>
-                  </>
+                {nextAction && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    disabled={updateStatusMutation.isPending}
+                    onClick={() => handleStatusUpdate(nextAction.status)}
+                  >
+                    {nextAction.label}
+                  </Button>
                 )}
                 <Button variant="outline" size="sm" onClick={() => setSelectedOrder(null)}>
                   Close

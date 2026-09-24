@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { Play, Pause, Repeat } from 'lucide-react';
+import { Play, Pause, Repeat, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { getOneKitErrorMessage } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
+import { useUserStore } from '@voxire/auth';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
@@ -23,6 +24,7 @@ import {
   inputStyle,
   labelStyle,
 } from '../../shared/lib/tokens';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 // The stored value is the frequency; only its label is translated. A second
 // copy of these four words lived here and a third in the options below.
@@ -40,7 +42,13 @@ import { todayIso } from '../../shared/lib/date';
 const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { t } = useTranslation();
   const create = useCreateRecurringInvoice();
-  const { data: invoicesData } = useInvoices({ pageSize: 100 });
+  const [templatePage, setTemplatePage] = useState(1);
+  const {
+    data: invoicesData,
+    isFetching: invoicesFetching,
+    isError: invoicesError,
+    refetch: refetchInvoices,
+  } = useInvoices({ page: templatePage, pageSize: 100 });
   const invoiceList = invoicesData?.invoices ?? [];
 
   const emptyForm = (): NewRecurringForm => ({
@@ -66,6 +74,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
         onSuccess: () => {
           toast.success(t('recurringInvoices.created'));
           onClose();
+          setTemplatePage(1);
           setForm(emptyForm());
         },
         onError: (error) =>
@@ -105,8 +114,17 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
               setForm((f) => ({ ...f, templateInvoiceId: Number(e.target.value) || 0 }))
             }
             style={inputStyle}
+            disabled={invoicesFetching || invoicesError}
           >
             <option value="">{t('recurringInvoices.templatePlaceholder')}</option>
+            {form.templateInvoiceId > 0 &&
+              !invoiceList.some(
+                (invoice) => String(invoice.id) === String(form.templateInvoiceId)
+              ) && (
+                <option
+                  value={form.templateInvoiceId}
+                >{`Invoice #${form.templateInvoiceId}`}</option>
+              )}
             {invoiceList.map((inv) => (
               <option key={inv.id} value={inv.id}>
                 {inv.number ? `Invoice #${inv.number}` : `Invoice ${inv.id}`} — {inv.client} ($
@@ -114,6 +132,39 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
               </option>
             ))}
           </select>
+          {invoicesError ? (
+            <button
+              type="button"
+              style={{ ...ghostBtn, alignSelf: 'flex-end' }}
+              onClick={() => void refetchInvoices()}
+            >
+              {t('common.refresh')}
+            </button>
+          ) : invoicesFetching && invoiceList.length === 0 ? (
+            <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>
+              {t('common.loading')}
+            </span>
+          ) : null}
+          {(templatePage > 1 || invoicesData?.hasMore) && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button
+                type="button"
+                style={ghostBtn}
+                onClick={() => setTemplatePage((page) => Math.max(1, page - 1))}
+                disabled={templatePage === 1 || invoicesFetching}
+              >
+                {t('common.prev')}
+              </button>
+              <button
+                type="button"
+                style={ghostBtn}
+                onClick={() => setTemplatePage((page) => page + 1)}
+                disabled={!invoicesData?.hasMore || invoicesFetching}
+              >
+                {t('common.next')}
+              </button>
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -147,11 +198,21 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
 
 const RecurringInvoices: React.FC = () => {
   const { t } = useTranslation();
-  const { data = [], isLoading } = useRecurringInvoices();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError, refetch } = useRecurringInvoices({ page });
+  const rows = data?.invoices ?? [];
+  const hasMore = data?.hasMore ?? false;
+  const activeCount = rows.reduce((count, recurring) => count + Number(recurring.isActive), 0);
   const setStatus = useSetRecurringStatus();
   const [showCreate, setShowCreate] = useState(false);
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageRecurringInvoices = canFinancePermission(
+    role,
+    'finance:recurring_invoices:manage'
+  );
 
   const togglePause = (id: string, isActive: boolean): void => {
+    if (!canManageRecurringInvoices) return;
     const next = isActive ? 'paused' : 'active';
     setStatus.mutate(
       { id, status: next },
@@ -175,35 +236,52 @@ const RecurringInvoices: React.FC = () => {
       <HelmetContainer title={pageTitle(t('common.pageTitles.recurringInvoices'))} />
       <PageHeader
         title={t('recurringInvoices.title')}
-        subtitle={`${data.length} active subscriptions`}
+        subtitle={data ? `${activeCount} active subscriptions` : undefined}
         breadcrumbs={[{ label: t('nav.invoices'), to: '/invoices' }, { label: t('nav.recurring') }]}
         actions={
-          <button
-            type="button"
-            style={primaryBtn}
-            aria-label={t('recurringInvoices.new')}
-            onClick={() => setShowCreate(true)}
-          >
-            <Repeat size={13} /> New Recurring
-          </button>
+          canManageRecurringInvoices && !isError ? (
+            <button
+              type="button"
+              style={primaryBtn}
+              aria-label={t('recurringInvoices.new')}
+              onClick={() => setShowCreate(true)}
+            >
+              <Repeat size={13} /> New Recurring
+            </button>
+          ) : undefined
         }
       />
 
-      <NewRecurringModal open={showCreate} onClose={() => setShowCreate(false)} />
+      {canManageRecurringInvoices && (
+        <NewRecurringModal open={showCreate} onClose={() => setShowCreate(false)} />
+      )}
 
       {isLoading ? (
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
         </div>
-      ) : data.length === 0 ? (
+      ) : isError && data === undefined ? (
+        <EmptyState
+          icon={AlertTriangle}
+          title={t('errors.generic')}
+          action={{
+            label: t('common.refresh'),
+            onClick: () => void refetch(),
+          }}
+        />
+      ) : rows.length === 0 ? (
         <EmptyState
           icon={Repeat}
           title={t('recurringInvoices.emptyTitle')}
           description={t('recurringInvoices.emptyDescription')}
-          action={{
-            label: t('recurringInvoices.emptyCta'),
-            onClick: () => setShowCreate(true),
-          }}
+          action={
+            canManageRecurringInvoices
+              ? {
+                  label: t('recurringInvoices.emptyCta'),
+                  onClick: () => setShowCreate(true),
+                }
+              : { label: t('common.refresh'), onClick: () => void refetch() }
+          }
         />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
@@ -229,7 +307,7 @@ const RecurringInvoices: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((r) => (
+              {rows.map((r) => (
                 <tr key={r.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                   <td
                     style={{
@@ -270,31 +348,66 @@ const RecurringInvoices: React.FC = () => {
                     </span>
                   </td>
                   <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button
-                        type="button"
-                        style={{
-                          ...ghostBtn,
-                          padding: '4px 10px',
-                          opacity: setStatus.isPending ? 0.6 : 1,
-                        }}
-                        onClick={() => togglePause(r.id, r.isActive)}
-                        disabled={setStatus.isPending}
-                        aria-label={
-                          r.isActive
-                            ? `Pause recurring invoice ${r.id}`
-                            : `Resume recurring invoice ${r.id}`
-                        }
-                      >
-                        {r.isActive ? <Pause size={12} /> : <Play size={12} />}
-                        {r.isActive ? 'Pause' : 'Resume'}
-                      </button>
-                    </div>
+                    {canManageRecurringInvoices && (
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          type="button"
+                          style={{
+                            ...ghostBtn,
+                            padding: '4px 10px',
+                            opacity: setStatus.isPending ? 0.6 : 1,
+                          }}
+                          onClick={() => togglePause(r.id, r.isActive)}
+                          disabled={setStatus.isPending}
+                          aria-label={
+                            r.isActive
+                              ? `Pause recurring invoice ${r.id}`
+                              : `Resume recurring invoice ${r.id}`
+                          }
+                        >
+                          {r.isActive ? <Pause size={12} /> : <Play size={12} />}
+                          {r.isActive ? 'Pause' : 'Resume'}
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {!isError && (page > 1 || hasMore) && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 0',
+          }}
+        >
+          <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>
+            Page {data?.page ?? page}
+          </span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              type="button"
+              style={ghostBtn}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              disabled={page <= 1 || isLoading}
+            >
+              {t('common.prev')}
+            </button>
+            <button
+              type="button"
+              style={ghostBtn}
+              onClick={() => setPage((current) => current + 1)}
+              disabled={!hasMore || isLoading}
+            >
+              {t('common.next')}
+            </button>
+          </div>
         </div>
       )}
     </motion.div>

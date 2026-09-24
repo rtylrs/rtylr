@@ -1,39 +1,29 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   ListAttendanceRequest,
   ListAttendanceResponse,
+  AttendanceClockInResponse,
+  AttendanceClockOutResponse,
 } from '@voxire/voxie/hr/attendance/v1/types';
-import type { AttendanceClockInResponse } from '@voxire/voxie/hr/attendance/v1/types';
-import type { AttendanceClockOutResponse } from '@voxire/voxie/hr/attendance/v1/types';
+import { AttendanceServiceClient } from '@voxire/voxie/hr/attendance/v1/client';
 import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
+const attendanceClient = createOneKitClient(AttendanceServiceClient, 'hr');
+
 export interface ClockInPayload {
-  ownerId: number;
-  employeeId: number;
   method: string;
-  locationId: number;
+  locationId: string;
   lat?: number;
   lng?: number;
   qrToken?: string;
   pin?: string;
 }
 
-interface BackendClockInPayload {
-  ownerId: number;
-  employeeId: number;
-  locationId: number;
-  clockInMethod: string;
-  clockInLat?: number;
-  clockInLng?: number;
-  qrToken?: string;
-  pin?: string;
-}
-
 export interface ClockOutPayload {
-  employeeId: number;
+  attendanceRecordId: string;
 }
 
 export interface SetPinPayload {
@@ -41,26 +31,46 @@ export interface SetPinPayload {
   pin: string;
 }
 
-const toBackendClockInPayload = (data: ClockInPayload): BackendClockInPayload => ({
-  ownerId: data.ownerId,
-  employeeId: data.employeeId,
-  locationId: data.locationId,
-  clockInMethod: data.method,
-  clockInLat: data.lat,
-  clockInLng: data.lng,
-  qrToken: data.qrToken,
-  pin: data.pin,
-});
+export interface AttendanceLocation {
+  id: string;
+  name: string;
+  isDefault: boolean;
+}
+
+interface LocationResponse {
+  locations?: Array<{
+    id?: string | number;
+    name?: string;
+    isDefault?: boolean;
+    is_default?: boolean;
+  }>;
+}
 
 export const useGetMyAttendance = (params: ListAttendanceRequest) => {
   return useQuery<ListAttendanceResponse>({
     queryKey: ['attendance', 'filter', params],
-    queryFn: async (): Promise<ListAttendanceResponse> => {
-      const res = await unwrap(
-        hrTransport.get<ListAttendanceResponse>('/hr/attendance', { params })
-      );
-      return res as ListAttendanceResponse;
+    queryFn: () => attendanceClient.listAttendance(params),
+  });
+};
+
+export const useAttendanceLocations = () => {
+  return useQuery<AttendanceLocation[]>({
+    queryKey: ['attendance', 'locations'],
+    queryFn: async (): Promise<AttendanceLocation[]> => {
+      const response = await unwrap(hrTransport.get<LocationResponse>('/hr/locations'));
+      return (response.locations ?? []).flatMap((location) => {
+        const id = location.id === undefined ? '' : String(location.id);
+        if (!/^[1-9][0-9]*$/.test(id)) return [];
+        return [
+          {
+            id,
+            name: location.name ?? '',
+            isDefault: location.isDefault ?? location.is_default ?? false,
+          },
+        ];
+      });
     },
+    staleTime: 5 * 60_000,
   });
 };
 
@@ -69,15 +79,15 @@ export const useClockIn = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: ClockInPayload): Promise<AttendanceClockInResponse> => {
-      const res = await unwrap(
-        hrTransport.post<AttendanceClockInResponse>(
-          '/hr/attendance/clock-in',
-          toBackendClockInPayload(data)
-        )
-      );
-      return res as AttendanceClockInResponse;
-    },
+    mutationFn: (data: ClockInPayload): Promise<AttendanceClockInResponse> =>
+      attendanceClient.attendanceClockIn({
+        method: data.method,
+        locationId: data.locationId,
+        lat: data.lat,
+        lng: data.lng,
+        qrToken: data.qrToken,
+        pin: data.pin,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['attendance'] });
       toast.success(t('attendance.clockedIn'));
@@ -110,12 +120,10 @@ export const useClockOut = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: ClockOutPayload): Promise<AttendanceClockOutResponse> => {
-      const res = await unwrap(
-        hrTransport.post<AttendanceClockOutResponse>('/hr/attendance/clock-out', data)
-      );
-      return res as AttendanceClockOutResponse;
-    },
+    mutationFn: (data: ClockOutPayload): Promise<AttendanceClockOutResponse> =>
+      attendanceClient.attendanceClockOut({
+        attendanceRecordId: data.attendanceRecordId,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['attendance'] });
       toast.success(t('attendance.clockedOut'));

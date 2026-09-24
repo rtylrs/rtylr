@@ -83,6 +83,7 @@ export function useJournal(params: UseJournalParams = {}) {
           date: e.date,
           description: e.description,
           lines: (e.lines ?? []).map((l) => ({
+            accountId: l.accountId,
             account: l.accountName,
             debit: l.debit,
             credit: l.credit,
@@ -90,12 +91,11 @@ export function useJournal(params: UseJournalParams = {}) {
           })),
         }))
       );
-      const total = res.pagination?.total ?? entries.length;
       return {
         entries,
-        hasMore: page * pageSize < total,
-        page,
-        pageSize,
+        hasMore: res.pagination?.hasNext ?? false,
+        page: res.pagination?.page ?? page,
+        pageSize: res.pagination?.limit ?? pageSize,
       };
     },
   });

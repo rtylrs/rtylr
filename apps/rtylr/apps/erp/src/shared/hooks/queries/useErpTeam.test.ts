@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useErpTeam, useErpInviteMember, useErpDeactivateMember } from './useErpTeam';
+import {
+  fetchAllErpTeam,
+  useErpTeam,
+  useErpInviteMember,
+  useErpDeactivateMember,
+} from './useErpTeam';
 
 const { mockClient } = vi.hoisted(() => ({
   mockClient: {
@@ -60,6 +65,35 @@ describe('useErpTeam', () => {
     const { result } = renderHook(() => useErpTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual([]);
+  });
+
+  it('loads every team page before exposing the query as complete', async () => {
+    mockClient.listTeam
+      .mockResolvedValueOnce({
+        users: Array.from({ length: 100 }, (_, index) => ({
+          id: String(index + 1),
+          email: `u${index + 1}@test`,
+        })),
+        total: 101,
+      })
+      .mockResolvedValueOnce({
+        users: [{ id: '101', email: 'u101@test' }],
+        total: 101,
+      });
+
+    const members = await fetchAllErpTeam();
+    expect(members).toHaveLength(101);
+    expect(mockClient.listTeam).toHaveBeenNthCalledWith(1, { page: 1, pageSize: 100 });
+    expect(mockClient.listTeam).toHaveBeenNthCalledWith(2, { page: 2, pageSize: 100 });
+  });
+
+  it('rejects a repeated page instead of silently truncating the team', async () => {
+    mockClient.listTeam.mockResolvedValue({
+      users: [{ id: '1', email: 'one@test' }],
+      total: 2,
+    });
+
+    await expect(fetchAllErpTeam()).rejects.toThrow('Team pagination did not advance');
   });
 
   it('handles API error', async () => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -76,7 +76,18 @@ const Leads: React.FC = () => {
     isError,
     refetch,
   } = useLeads(pageSize, offset);
+  // Keep the first page mounted as a write sentinel. The create modal lives in
+  // a child component, so this is how the list notices its cache invalidation
+  // and rebuilds from page zero instead of merging a stale later page.
+  const firstPageQuery = useLeads(pageSize, 0);
+  const firstPageRevisionRef = useRef<number | string | null>(null);
   const deleteLead = useDeleteLead();
+
+  const resetPagination = (): void => {
+    setOffset(0);
+    setExhausted(false);
+    setLoadedLeads([]);
+  };
 
   useEffect(() => {
     if (!fetchedLeads) return;
@@ -93,8 +104,21 @@ const Leads: React.FC = () => {
     });
   }, [fetchedLeads, offset]);
 
+  const firstPageLeads = firstPageQuery.data;
+  const firstPageSignature = firstPageLeads?.map((lead) => lead.id).join(',') ?? null;
+  const firstPageRevision = firstPageQuery.dataUpdatedAt ?? firstPageSignature;
+  useEffect(() => {
+    if (!firstPageLeads || firstPageRevision === null) return;
+    const previousRevision = firstPageRevisionRef.current;
+    firstPageRevisionRef.current = firstPageRevision;
+    if (offset > 0 && previousRevision !== null && previousRevision !== firstPageRevision) {
+      resetPagination();
+      setLoadedLeads(firstPageLeads);
+    }
+  }, [firstPageLeads, firstPageRevision, offset]);
+
   const leads = loadedLeads;
-  const hasMore = !exhausted && fetchedLeads?.length === pageSize;
+  const hasMore = !exhausted && !isError && fetchedLeads?.length === pageSize;
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<LeadStage | 'all'>('all');
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -116,8 +140,12 @@ const Leads: React.FC = () => {
 
   const handleDelete = (): void => {
     if (deleteId === null) return;
-    deleteLead.mutate(deleteId, {
+    const deletedId = deleteId;
+    deleteLead.mutate(deletedId, {
       onSuccess: () => {
+        setLoadedLeads((previous) => previous.filter((lead) => lead.id !== deletedId));
+        setOffset(0);
+        setExhausted(false);
         toast.success(t('crm.leads.deleted'));
         setDeleteId(null);
       },
@@ -408,7 +436,26 @@ const Leads: React.FC = () => {
               </tbody>
             </table>
           )}
-          {hasMore && filtered.length > 0 && (
+          {isError && leads.length > 0 && (
+            <div
+              role="alert"
+              style={{
+                padding: '12px 16px',
+                borderTop: '1px solid var(--hub-border)',
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <AlertCircle size={15} />
+              <span style={{ flex: 1, fontSize: '12px' }}>{t('crm.leads.loadFailedTitle')}</span>
+              <Button variant="outline" onClick={() => void refetch()} disabled={isFetching}>
+                {t('crm.actions.retry')}
+              </Button>
+            </div>
+          )}
+          {hasMore && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
               <Button
                 variant="outline"

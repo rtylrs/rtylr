@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '../lib/cn';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "../lib/cn";
 
 /**
  * All date-only values in this component are 'YYYY-MM-DD' strings, parsed and
@@ -15,7 +15,7 @@ function parseISODate(date: string): Date {
 }
 
 function toISODate(year: number, month: number, day: number): string {
-  return `${String(year).padStart(4, '0')}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return `${String(year).padStart(4, "0")}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
 function todayISODate(): string {
@@ -23,7 +23,11 @@ function todayISODate(): string {
   return toISODate(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
-function addMonths(year: number, month: number, delta: number): { year: number; month: number } {
+function addMonths(
+  year: number,
+  month: number,
+  delta: number,
+): { year: number; month: number } {
   const total = year * 12 + month + delta;
   return { year: Math.floor(total / 12), month: ((total % 12) + 12) % 12 };
 }
@@ -34,10 +38,39 @@ function addDaysISO(date: string, delta: number): string {
   return toISODate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
 }
 
+function normalizeDateInput(value: string | undefined): string {
+  return value?.trim() || todayISODate();
+}
+
+function isDateDisabled(
+  date: string,
+  minDate: string | undefined,
+  maxDate: string | undefined,
+): boolean {
+  return (
+    (minDate !== undefined && date < minDate) ||
+    (maxDate !== undefined && date > maxDate)
+  );
+}
+
+function clampDateToRange(
+  date: string,
+  minDate: string | undefined,
+  maxDate: string | undefined,
+): string {
+  if (minDate !== undefined && date < minDate) return minDate;
+  if (maxDate !== undefined && date > maxDate) return maxDate;
+  return date;
+}
+
 /** Grid cells are built with the local Date constructor - this is calendar-
  * layout arithmetic (which weekday a given month starts on), not parsing of
  * a stored date string, so the UTC-anchoring rule above does not apply here. */
-function buildMonthGrid(year: number, month: number, weekStartsOn: 0 | 1): string[] {
+function buildMonthGrid(
+  year: number,
+  month: number,
+  weekStartsOn: 0 | 1,
+): string[] {
   const firstOfMonth = new Date(year, month, 1);
   const startOffset = (firstOfMonth.getDay() - weekStartsOn + 7) % 7;
   const gridStart = new Date(year, month, 1 - startOffset);
@@ -48,11 +81,14 @@ function buildMonthGrid(year: number, month: number, weekStartsOn: 0 | 1): strin
   });
 }
 
-function weekdayLabels(locale: string | undefined, weekStartsOn: 0 | 1): string[] {
-  const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+function weekdayLabels(
+  locale: string | undefined,
+  weekStartsOn: 0 | 1,
+): string[] {
+  const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
   // 1970-01-04 was a Sunday - a fixed, DST-free reference week to read labels from.
   return Array.from({ length: 7 }, (_, i) =>
-    formatter.format(new Date(1970, 0, 4 + weekStartsOn + i))
+    formatter.format(new Date(1970, 0, 4 + weekStartsOn + i)),
   );
 }
 
@@ -83,82 +119,163 @@ const Calendar = ({
   labels,
   className,
 }: CalendarProps): React.JSX.Element => {
-  const anchor = value ? parseISODate(value) : null;
-  const [view, setView] = useState(() =>
-    anchor
-      ? { year: anchor.getUTCFullYear(), month: anchor.getUTCMonth() }
-      : (() => {
-          const now = new Date();
-          return { year: now.getFullYear(), month: now.getMonth() };
-        })()
+  const initialDate = normalizeDateInput(value);
+  const anchor = parseISODate(initialDate);
+  const [view, setView] = useState(() => ({
+    year: anchor.getUTCFullYear(),
+    month: anchor.getUTCMonth(),
+  }));
+  const [focused, setFocused] = useState(() =>
+    clampDateToRange(initialDate, minDate, maxDate),
   );
-  const [focused, setFocused] = useState(() => value ?? todayISODate());
   const cellRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const focusRequestRef = useRef<string | null>(null);
 
   const grid = useMemo(
     () => buildMonthGrid(view.year, view.month, weekStartsOn),
-    [view.year, view.month, weekStartsOn]
+    [view.year, view.month, weekStartsOn],
   );
-  const weekdays = useMemo(() => weekdayLabels(locale, weekStartsOn), [locale, weekStartsOn]);
+  const enabledGrid = useMemo(
+    () => grid.filter((iso) => !isDateDisabled(iso, minDate, maxDate)),
+    [grid, minDate, maxDate],
+  );
+  const effectiveFocused = useMemo(() => {
+    const preferred = focused || initialDate;
+    return enabledGrid.includes(preferred)
+      ? preferred
+      : (enabledGrid[0] ?? preferred);
+  }, [enabledGrid, focused, initialDate]);
+  const weekdays = useMemo(
+    () => weekdayLabels(locale, weekStartsOn),
+    [locale, weekStartsOn],
+  );
   const monthLabel = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(
-        new Date(view.year, view.month, 1)
-      ),
-    [locale, view.year, view.month]
+      new Intl.DateTimeFormat(locale, {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(new Date(Date.UTC(view.year, view.month, 1))),
+    [locale, view.year, view.month],
+  );
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" }),
+    [locale],
   );
   const today = todayISODate();
 
   const isDisabled = (iso: string): boolean =>
-    (minDate !== undefined && iso < minDate) || (maxDate !== undefined && iso > maxDate);
+    isDateDisabled(iso, minDate, maxDate);
+
+  const syncedValueRef = useRef<string | null>(null);
+  useEffect(() => {
+    // The visible month follows the controlled value only. Clamping the view to
+    // min/max would jump the grid forward the moment a constraint changes,
+    // discarding the month the user is browsing; clamping applies to focus only.
+    const next = normalizeDateInput(value);
+    if (next === syncedValueRef.current) return;
+    syncedValueRef.current = next;
+    const nextDate = parseISODate(next);
+    setView({ year: nextDate.getUTCFullYear(), month: nextDate.getUTCMonth() });
+    setFocused(clampDateToRange(next, minDate, maxDate));
+  }, [value, minDate, maxDate]);
+
+  useEffect(() => {
+    const target = focusRequestRef.current;
+    if (!target) return;
+    focusRequestRef.current = null;
+    cellRefs.current[target]?.focus();
+  }, [focused, view.year, view.month]);
 
   const goToMonth = (delta: number): void => {
-    setView((v) => addMonths(v.year, v.month, delta));
+    const currentDate = parseISODate(effectiveFocused);
+    const target = addMonths(view.year, view.month, delta);
+    const daysInTargetMonth = new Date(
+      Date.UTC(target.year, target.month + 1, 0),
+    ).getUTCDate();
+    let next = clampDateToRange(
+      toISODate(
+        target.year,
+        target.month,
+        Math.min(currentDate.getUTCDate(), daysInTargetMonth),
+      ),
+      minDate,
+      maxDate,
+    );
+    const targetGrid = buildMonthGrid(target.year, target.month, weekStartsOn);
+    const targetEnabled = targetGrid.find(
+      (iso) => !isDateDisabled(iso, minDate, maxDate),
+    );
+    if (!targetGrid.includes(next) || isDateDisabled(next, minDate, maxDate)) {
+      next = targetEnabled ?? next;
+    }
+    focusRequestRef.current = next;
+    setView(target);
+    setFocused(next);
   };
 
   const moveFocus = (delta: number): void => {
-    const next = addDaysISO(focused, delta);
+    const base = effectiveFocused || focused || todayISODate();
+    let next = addDaysISO(base, delta);
+    if (isDateDisabled(next, minDate, maxDate)) {
+      const step = delta < 0 ? -Math.abs(delta) : Math.abs(delta);
+      let candidate = next;
+      for (
+        let attempts = 0;
+        attempts < 3660 && isDateDisabled(candidate, minDate, maxDate);
+        attempts++
+      ) {
+        candidate = addDaysISO(candidate, step);
+      }
+      if (!isDateDisabled(candidate, minDate, maxDate)) next = candidate;
+    }
+    focusRequestRef.current = next;
     setFocused(next);
     const nextDate = parseISODate(next);
     setView({ year: nextDate.getUTCFullYear(), month: nextDate.getUTCMonth() });
-    requestAnimationFrame(() => cellRefs.current[next]?.focus());
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>): void => {
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+  ): void => {
     switch (event.key) {
-      case 'ArrowLeft':
+      case "ArrowLeft":
         event.preventDefault();
         moveFocus(-1);
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         event.preventDefault();
         moveFocus(1);
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         event.preventDefault();
         moveFocus(-7);
         break;
-      case 'ArrowDown':
+      case "ArrowDown":
         event.preventDefault();
         moveFocus(7);
         break;
-      case 'PageUp':
+      case "PageUp":
         event.preventDefault();
         goToMonth(-1);
         break;
-      case 'PageDown':
+      case "PageDown":
         event.preventDefault();
         goToMonth(1);
         break;
-      case 'Home': {
+      case "Home": {
         event.preventDefault();
-        const offsetFromWeekStart = (parseISODate(focused).getUTCDay() - weekStartsOn + 7) % 7;
+        const offsetFromWeekStart =
+          (parseISODate(effectiveFocused).getUTCDay() - weekStartsOn + 7) % 7;
         moveFocus(-offsetFromWeekStart);
         break;
       }
-      case 'End': {
+      case "End": {
         event.preventDefault();
-        const offsetToWeekEnd = 6 - ((parseISODate(focused).getUTCDay() - weekStartsOn + 7) % 7);
+        const offsetToWeekEnd =
+          6 -
+          ((parseISODate(effectiveFocused).getUTCDay() - weekStartsOn + 7) % 7);
         moveFocus(offsetToWeekEnd);
         break;
       }
@@ -166,12 +283,12 @@ const Calendar = ({
   };
 
   return (
-    <div className={cn('w-[280px] p-3', className)}>
+    <div className={cn("w-[280px] p-3", className)}>
       <div className="flex items-center justify-between pb-2">
         <button
           type="button"
           onClick={() => goToMonth(-1)}
-          aria-label={labels?.previousMonth ?? 'Previous month'}
+          aria-label={labels?.previousMonth ?? "Previous month"}
           className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-muted/15 hover:text-inherit"
         >
           <ChevronLeft size={16} className="rtl:rotate-180" />
@@ -180,7 +297,7 @@ const Calendar = ({
         <button
           type="button"
           onClick={() => goToMonth(1)}
-          aria-label={labels?.nextMonth ?? 'Next month'}
+          aria-label={labels?.nextMonth ?? "Next month"}
           className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-muted/15 hover:text-inherit"
         >
           <ChevronRight size={16} className="rtl:rotate-180" />
@@ -207,20 +324,23 @@ const Calendar = ({
               type="button"
               role="gridcell"
               disabled={disabled}
-              tabIndex={iso === focused ? 0 : -1}
-              aria-current={isToday ? 'date' : undefined}
+              tabIndex={!disabled && iso === effectiveFocused ? 0 : -1}
+              aria-current={isToday ? "date" : undefined}
               aria-selected={selected}
-              aria-label={new Intl.DateTimeFormat(locale, { dateStyle: 'full' }).format(date)}
-              onFocus={() => setFocused(iso)}
+              aria-label={dateFormatter.format(date)}
+              onFocus={() =>
+                setFocused((current) => (current === iso ? current : iso))
+              }
               onKeyDown={handleKeyDown}
               onClick={() => onChange(iso)}
               className={cn(
-                'm-auto flex h-8 w-8 items-center justify-center rounded-full text-[13px] tabular-nums transition-colors',
-                'disabled:cursor-not-allowed disabled:opacity-35',
-                !inMonth && 'text-muted/50',
-                inMonth && !selected && 'text-inherit hover:bg-muted/15',
-                isToday && !selected && 'font-semibold text-accent',
-                selected && 'bg-accent font-semibold text-accent-foreground hover:opacity-90'
+                "m-auto flex h-8 w-8 items-center justify-center rounded-full text-[13px] tabular-nums transition-colors",
+                "disabled:cursor-not-allowed disabled:opacity-35",
+                !inMonth && "text-muted/50",
+                inMonth && !selected && "text-inherit hover:bg-muted/15",
+                isToday && !selected && "font-semibold text-accent",
+                selected &&
+                  "bg-accent font-semibold text-accent-foreground hover:opacity-90",
               )}
             >
               {date.getUTCDate()}

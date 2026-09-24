@@ -30,12 +30,25 @@ export function useSystemDark(): boolean {
     const query = window.matchMedia(DARK_QUERY);
     setDark(query.matches);
 
-    // Older Safari exposes only addListener, and the test environment's stub
-    // exposes both as no-ops. Neither is a reason to throw on mount.
-    if (typeof query.addEventListener !== 'function') return;
     const onChange = (event: MediaQueryListEvent): void => setDark(event.matches);
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
+    if (typeof query.addEventListener === 'function') {
+      query.addEventListener('change', onChange);
+      return () => {
+        if (typeof query.removeEventListener === 'function') {
+          query.removeEventListener('change', onChange);
+        }
+      };
+    }
+
+    // Safari 13 and older expose only the legacy listener API.
+    if (typeof query.addListener === 'function') {
+      query.addListener(onChange);
+      return () => {
+        if (typeof query.removeListener === 'function') {
+          query.removeListener(onChange);
+        }
+      };
+    }
   }, []);
 
   return dark;

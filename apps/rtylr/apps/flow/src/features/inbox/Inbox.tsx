@@ -133,7 +133,8 @@ const NotificationRow: React.FC<{
 const Inbox: React.FC = () => {
   const { t } = useTranslation();
   const notificationsQuery = useNotifications();
-  const { data: notifications = [], isLoading, refetch } = notificationsQuery;
+  const { data: notifications = [], isLoading, isPending, refetch } = notificationsQuery;
+  const initialLoading = isPending || isLoading;
   const loadFailed = hasQueryFailed(notificationsQuery);
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
@@ -216,13 +217,13 @@ const Inbox: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 size={20} className="animate-spin" style={{ color: 'var(--flow-text-dim)' }} />
-          </div>
-        ) : loadFailed ? (
+        {loadFailed ? (
           <div className="py-10">
             <ListLoadFailed onRetry={() => void refetch()} />
+          </div>
+        ) : initialLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 size={20} className="animate-spin" style={{ color: 'var(--flow-text-dim)' }} />
           </div>
         ) : (
           <AnimatePresence>

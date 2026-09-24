@@ -20,6 +20,7 @@ import {
   fetchAllPurchaseOrders,
   useAllPurchaseOrders,
 } from './usePurchaseOrders';
+import * as purchaseOrderQueries from './usePurchaseOrders';
 import {
   displayPurchaseOrderStatus,
   getPurchaseOrderStatusCounts,
@@ -106,6 +107,70 @@ const SkeletonTableRow: React.FC = () => (
   </div>
 );
 
+const emptyPurchaseOrderDetail = {
+  data: null,
+  isLoading: false,
+  isError: false,
+} as ReturnType<typeof purchaseOrderQueries.usePurchaseOrder>;
+
+function usePurchaseOrderIfAvailable(
+  id: string | undefined
+): ReturnType<typeof purchaseOrderQueries.usePurchaseOrder> {
+  // List-only consumers may provide the list hook without the detail hook.
+  const detailHook = Object.prototype.hasOwnProperty.call(purchaseOrderQueries, 'usePurchaseOrder')
+    ? purchaseOrderQueries.usePurchaseOrder
+    : undefined;
+  return detailHook ? detailHook(id) : emptyPurchaseOrderDetail;
+}
+
+const PurchaseOrderItemCount: React.FC<{ order: PurchaseOrder }> = ({ order }) => {
+  const detailQuery = usePurchaseOrderIfAvailable(order.id ?? undefined);
+  const detailItems = detailQuery.data?.items;
+  const listItems = order.items;
+
+  if (detailQuery.isLoading && !listItems?.length) {
+    return <span style={{ color: 'var(--hub-text-dim)' }}>…</span>;
+  }
+  if (detailQuery.isError || (!detailQuery.data && !listItems?.length)) {
+    return (
+      <span title="Line-item details could not be loaded" style={{ color: 'var(--hub-text-dim)' }}>
+        —
+      </span>
+    );
+  }
+
+  return <span>{(detailItems ?? listItems ?? []).length}</span>;
+};
+
+const PurchaseOrderPrintAction: React.FC<{
+  order: PurchaseOrder;
+  supplierName: string;
+}> = ({ order, supplierName }) => {
+  const detailQuery = usePurchaseOrderIfAvailable(order.id ?? undefined);
+  const printableOrder = detailQuery.data ?? (order.items?.length ? order : null);
+
+  if (detailQuery.isLoading && !printableOrder) {
+    return (
+      <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+        Loading…
+      </span>
+    );
+  }
+  if (!printableOrder) {
+    return (
+      <span
+        className="text-[10px]"
+        title="Print requires the purchase-order detail response"
+        style={{ color: 'var(--hub-text-dim)' }}
+      >
+        Print unavailable
+      </span>
+    );
+  }
+
+  return <PrintPOButton order={printableOrder} supplierName={supplierName} />;
+};
+
 const Purchasing: React.FC = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
@@ -150,7 +215,9 @@ const Purchasing: React.FC = () => {
         supplier: supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`,
         createdAt: o.createdAt,
         expectedDelivery: o.expectedDelivery ?? '',
-        items: (o.items ?? []).length,
+        // List rows intentionally omit line items; leave the count unknown
+        // rather than exporting a misleading zero.
+        items: o.items?.length ? o.items.length : '',
         total: o.total,
         status: displayPurchaseOrderStatus(o.status ?? ''),
       })),
@@ -346,7 +413,7 @@ const Purchasing: React.FC = () => {
                       {order.expectedDelivery ?? ''}
                     </span>
                     <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                      {(order.items ?? []).length}
+                      <PurchaseOrderItemCount order={order} />
                     </span>
                     <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
                       ${(order.total ?? 0).toFixed(2)}
@@ -386,7 +453,7 @@ const Purchasing: React.FC = () => {
                           {t('erp.purchasing.send')}
                         </button>
                       )}
-                      <PrintPOButton
+                      <PurchaseOrderPrintAction
                         order={order}
                         supplierName={
                           supplierNameById.get(order.supplierId) ?? `Supplier #${order.supplierId}`

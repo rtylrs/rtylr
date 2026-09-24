@@ -1,21 +1,32 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { CheckCircle2, ReceiptText, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'sonner';
-import { createOneKitClient } from '@voxire/api';
-import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
-import { useCartStore } from '../../../../shared/stores/cartStore';
-import { useHeldOrdersStore } from '../../../../shared/stores/heldOrdersStore';
-import { useSettingsStore } from '../../../../shared/stores/settingsStore';
-import { useTerminalContextStore } from '../../../../shared/stores/terminalContextStore';
-import ConfirmModal from '../../../../shared/components/ConfirmModal';
-import QuickNoteModal from '../../../../shared/components/QuickNoteModal';
-import OfflineBadge from '../../../../shared/components/OfflineBadge';
-import { formatCurrency } from '../../../../shared/utils/format';
-import { buildOrderSubmitPayload, extractCreatedOrderId } from './orderSubmitWorkflow';
+import React, { useCallback, useMemo, useState } from "react";
+import { CheckCircle2, ReceiptText, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { toast } from "sonner";
+import { createOneKitClient } from "@voxire/api";
+import { OrderServiceClient } from "@voxire/voxie/pos/orders/v1/client";
+import { useCartStore } from "../../../../shared/stores/cartStore";
+import { useHeldOrdersStore } from "../../../../shared/stores/heldOrdersStore";
+import { useSettingsStore } from "../../../../shared/stores/settingsStore";
+import { useTerminalContextStore } from "../../../../shared/stores/terminalContextStore";
+import ConfirmModal from "../../../../shared/components/ConfirmModal";
+import QuickNoteModal from "../../../../shared/components/QuickNoteModal";
+import OfflineBadge from "../../../../shared/components/OfflineBadge";
+import { formatCurrency } from "../../../../shared/utils/format";
+import {
+  buildOrderSubmitPayload,
+  extractCreatedOrderId,
+} from "./orderSubmitWorkflow";
+import {
+  buildOrderCompatPayload,
+  buildResumeOrderPayload,
+  createOrderCompat,
+  requiresCompatOrder,
+  persistResumedOrder,
+} from "../../../orders/orderCompatWorkflow";
+import { resolveOpenSessionId } from "../../../close-session/closeSessionWorkflow";
 
-const orderClient = createOneKitClient(OrderServiceClient, 'pos');
+const orderClient = createOneKitClient(OrderServiceClient, "pos");
 
 interface OrderPanelProps {
   tableNumber?: string;
@@ -30,6 +41,7 @@ interface OrderLineItemProps {
   onUpdateQuantity: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
   onAddNote: (id: string) => void;
+  disabled?: boolean;
 }
 
 // Memoized so editing one line (quantity/notes) doesn't re-render every row.
@@ -42,6 +54,7 @@ const OrderLineItem = React.memo<OrderLineItemProps>(function OrderLineItem({
   onUpdateQuantity,
   onRemove,
   onAddNote,
+  disabled = false,
 }) {
   return (
     <motion.div
@@ -54,24 +67,31 @@ const OrderLineItem = React.memo<OrderLineItemProps>(function OrderLineItem({
       <div className="flex items-center justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-pos-text truncate">{name}</p>
-          <p className="text-xs text-pos-muted">{formatCurrency(price * quantity)}</p>
+          <p className="text-xs text-pos-muted">
+            {formatCurrency(price * quantity)}
+          </p>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <button
-            className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm"
+            disabled={disabled}
+            className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm disabled:opacity-40"
             onClick={() => onUpdateQuantity(id, quantity - 1)}
           >
             −
           </button>
-          <span className="w-6 text-center text-xs font-semibold text-pos-text">{quantity}</span>
+          <span className="w-6 text-center text-xs font-semibold text-pos-text">
+            {quantity}
+          </span>
           <button
-            className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm"
+            disabled={disabled}
+            className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm disabled:opacity-40"
             onClick={() => onUpdateQuantity(id, quantity + 1)}
           >
             +
           </button>
           <button
-            className="w-6 h-6 flex items-center justify-center rounded text-pos-muted hover:text-destructive transition-colors text-xs ml-1"
+            disabled={disabled}
+            className="w-6 h-6 flex items-center justify-center rounded text-pos-muted hover:text-destructive transition-colors text-xs ml-1 disabled:opacity-40"
             onClick={() => onRemove(id)}
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -79,8 +99,12 @@ const OrderLineItem = React.memo<OrderLineItemProps>(function OrderLineItem({
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <button onClick={() => onAddNote(id)} className="text-[10px] text-pos-muted hover:text-pos-text">
-          {notes ? `Note: ${notes}` : '+ Add note'}
+        <button
+          disabled={disabled}
+          onClick={() => onAddNote(id)}
+          className="text-[10px] text-pos-muted hover:text-pos-text disabled:opacity-40"
+        >
+          {notes ? `Note: ${notes}` : "+ Add note"}
         </button>
       </div>
     </motion.div>
@@ -96,21 +120,31 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const removeItem = useCartStore((s) => s.removeItem);
   const clearCart = useCartStore((s) => s.clearCart);
   const updateItemNotes = useCartStore((s) => s.updateItemNotes);
-  const total = useCartStore((s) => s.total);
+  const subtotalFn = useCartStore((s) => s.subtotal);
+  const taxTotalFn = useCartStore((s) => s.taxTotal);
+  const totalFn = useCartStore((s) => s.total);
+  const orderDiscount = useCartStore((s) => s.orderDiscount);
+  const tipAmount = useCartStore((s) => s.tipAmount);
   const serverOrderId = useCartStore((s) => s.serverOrderId);
   const tableId = useCartStore((s) => s.tableId);
   const orderType = useCartStore((s) => s.orderType);
   const notes = useCartStore((s) => s.notes);
+  const kitchenNotes = useCartStore((s) => s.kitchenNotes);
   const customerId = useCartStore((s) => s.customerId);
   const customerName = useCartStore((s) => s.customerName);
   const hold = useHeldOrdersStore((s) => s.hold);
-  const taxRate = useSettingsStore((s) => s.taxRate);
   const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const locationId = useTerminalContextStore((s) => s.locationId);
 
-  const subtotal = useMemo(() => total(), [total, items]);
-  const tax = subtotal * taxRate;
-  const grandTotal = subtotal + tax;
+  const subtotal = useMemo(
+    () => subtotalFn(),
+    [subtotalFn, items, orderDiscount],
+  );
+  const tax = useMemo(() => taxTotalFn(), [taxTotalFn, items, orderDiscount]);
+  const grandTotal = useMemo(
+    () => totalFn(),
+    [totalFn, items, orderDiscount, tipAmount],
+  );
   const activeTableId = tablesEnabled ? tableId : undefined;
   const activeTableNumber = tablesEnabled ? tableNumber : undefined;
 
@@ -119,56 +153,150 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const [submittingOrder, setSubmittingOrder] = useState(false);
 
   const handleUpdateQuantity = useCallback(
-    (id: string, quantity: number) => updateQuantity(id, quantity),
-    [updateQuantity]
+    (id: string, quantity: number) => {
+      if (!submittingOrder) updateQuantity(id, quantity);
+    },
+    [submittingOrder, updateQuantity],
   );
-  const handleRemove = useCallback((id: string) => removeItem(id), [removeItem]);
-  const handleAddNote = useCallback((id: string) => setNotingItemId(id), []);
+  const handleRemove = useCallback(
+    (id: string) => {
+      if (!submittingOrder) removeItem(id);
+    },
+    [removeItem, submittingOrder],
+  );
+  const handleAddNote = useCallback(
+    (id: string) => {
+      if (!submittingOrder) setNotingItemId(id);
+    },
+    [submittingOrder],
+  );
 
   const onHold = () => {
-    if (items.length === 0) return;
+    if (items.length === 0 || submittingOrder) return;
+    if (serverOrderId) {
+      toast.error("Resumed orders cannot be held from the order panel");
+      return;
+    }
     hold({
       label: activeTableNumber
         ? `Table ${activeTableNumber}`
         : `Cart ${new Date().toLocaleTimeString()}`,
+      note: notes,
+      orderDiscount,
+      tipAmount,
       items: items.map((i) => ({
-        id: i.id,
+        id: i.lineId,
+        productId: i.comboId ?? i.productId,
         name: i.name,
-        price: i.price,
+        price: i.unitPrice,
         quantity: i.quantity,
+        sku: i.sku,
+        barcode: i.barcode,
         notes: i.notes,
+        taxRate: i.taxRate,
+        modifiers: i.modifiers,
+        comboId: i.comboId,
+        variantName: i.variantName,
+        discountPct: i.discountPct,
+        discountAmount: i.discountAmount,
       })),
       tableNumber: activeTableNumber,
     });
     clearCart();
-    toast.success('Order held');
+    toast.success("Order held");
   };
 
-  const notingItem = notingItemId ? items.find((i) => i.id === notingItemId) : null;
+  const notingItem = notingItemId
+    ? items.find((i) => i.id === notingItemId)
+    : null;
 
   const handleCompleteOrder = async (): Promise<void> => {
-    if (items.length === 0) return;
+    if (items.length === 0 || submittingOrder) return;
+
+    const submittedItems = items;
+    const submittedNotes = notes;
+    const submittedKitchenNotes = kitchenNotes;
+    const submittedOrderDiscount = orderDiscount;
+    const submittedTipAmount = tipAmount;
+    const submittedCustomerId = customerId;
+    const submittedCustomerName = customerName;
+    const submittedTableId = tableId;
+    const submittedOrderType = orderType;
     setSubmittingOrder(true);
     try {
-      if (!serverOrderId) {
-        const created = await orderClient.createOrder(
-          buildOrderSubmitPayload({
-            items,
+      if (serverOrderId) {
+        await persistResumedOrder(
+          buildResumeOrderPayload({
+            orderId: serverOrderId,
+            items: submittedItems,
             locationId,
             tableId: activeTableId,
-            customerId,
-            customerName,
-            orderType,
-            notes,
-          })
+            customerId: submittedCustomerId,
+            customerName: submittedCustomerName,
+            orderType: submittedOrderType,
+            notes: submittedNotes,
+            kitchenNotes: submittedKitchenNotes,
+          }),
         );
-        extractCreatedOrderId(created);
+      } else {
+        const sessionId = await resolveOpenSessionId();
+        if (requiresCompatOrder(submittedItems)) {
+          const created = await createOrderCompat(
+            buildOrderCompatPayload({
+              items: submittedItems,
+              sessionId,
+              locationId,
+              tableId: activeTableId,
+              customerId: submittedCustomerId,
+              customerName: submittedCustomerName,
+              orderType: submittedOrderType,
+              notes: submittedNotes,
+              kitchenNotes: submittedKitchenNotes,
+            }),
+          );
+          extractCreatedOrderId({ orderId: String(created.orderId ?? "") });
+        } else {
+          const created = await orderClient.createOrder(
+            buildOrderSubmitPayload({
+              items: submittedItems,
+              sessionId,
+              locationId,
+              tableId: activeTableId,
+              customerId: submittedCustomerId,
+              customerName: submittedCustomerName,
+              orderType: submittedOrderType,
+              notes: submittedNotes,
+              kitchenNotes: submittedKitchenNotes,
+            }),
+          );
+          extractCreatedOrderId(created);
+        }
       }
-      clearCart();
-      toast.success('Order saved to Orders');
-      navigate('/orders');
-    } catch {
-      toast.error('Failed to complete order');
+
+      const current = useCartStore.getState();
+      const cartChanged =
+        current.items !== submittedItems ||
+        current.notes !== submittedNotes ||
+        current.kitchenNotes !== submittedKitchenNotes ||
+        current.orderDiscount !== submittedOrderDiscount ||
+        current.tipAmount !== submittedTipAmount ||
+        current.customerId !== submittedCustomerId ||
+        current.customerName !== submittedCustomerName ||
+        current.tableId !== submittedTableId ||
+        current.orderType !== submittedOrderType;
+      if (cartChanged) {
+        toast.success("Order saved; newer cart changes were kept");
+      } else {
+        clearCart();
+        toast.success("Order saved to Orders");
+      }
+      navigate("/orders");
+    } catch (error) {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Failed to complete order",
+      );
     } finally {
       setSubmittingOrder(false);
     }
@@ -180,7 +308,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-pos-text">Current Order</h2>
           {activeTableNumber && (
-            <span className="text-xs text-pos-muted">Table {activeTableNumber}</span>
+            <span className="text-xs text-pos-muted">
+              Table {activeTableNumber}
+            </span>
           )}
           <div className="mt-1">
             <OfflineBadge />
@@ -188,7 +318,8 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
         </div>
         {items.length > 0 && (
           <button
-            className="text-xs text-pos-muted hover:text-pos-text transition-colors"
+            disabled={submittingOrder}
+            className="text-xs text-pos-muted hover:text-pos-text transition-colors disabled:opacity-40"
             onClick={() => setConfirmClear(true)}
           >
             Clear
@@ -204,7 +335,11 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <ReceiptText className="h-8 w-8" aria-hidden="true" strokeWidth={1.8} />
+              <ReceiptText
+                className="h-8 w-8"
+                aria-hidden="true"
+                strokeWidth={1.8}
+              />
               <p className="text-sm font-medium">No items added yet</p>
               <span className="text-xs">Tap a product to add it</span>
             </motion.div>
@@ -216,10 +351,11 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
                 name={item.name}
                 quantity={item.quantity}
                 price={item.price}
-                notes={item.notes ?? ''}
+                notes={item.notes ?? ""}
                 onUpdateQuantity={handleUpdateQuantity}
                 onRemove={handleRemove}
                 onAddNote={handleAddNote}
+                disabled={submittingOrder}
               />
             ))
           )}
@@ -234,7 +370,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
               <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-pos-muted">
-              <span>Tax ({Math.round(taxRate * 100)}%)</span>
+              <span>Tax</span>
               <span>{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between font-bold text-pos-text pt-1 border-t border-pos-border">
@@ -244,14 +380,16 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button
-              className="h-12 rounded-xl bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 transition"
+              disabled={submittingOrder}
+              className="h-12 rounded-xl bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 transition disabled:opacity-40"
               onClick={onHold}
             >
               Hold
             </button>
             <button
-              className="h-12 rounded-xl bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 transition"
-              onClick={() => navigate('/split-bill/current')}
+              disabled={submittingOrder}
+              className="h-12 rounded-xl bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 transition disabled:opacity-40"
+              onClick={() => navigate("/split-bill/current")}
             >
               Split Pay
             </button>
@@ -260,13 +398,19 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
             className="w-full h-11 rounded-xl bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 transition disabled:opacity-40 inline-flex items-center justify-center gap-2"
             onClick={handleCompleteOrder}
             disabled={submittingOrder}
+            title={
+              serverOrderId ? "Save changes to this resumed order" : undefined
+            }
           >
-            {!submittingOrder && <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
-            {submittingOrder ? 'Saving…' : 'Complete Order'}
+            {!submittingOrder && (
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            )}
+            {submittingOrder ? "Saving…" : "Complete Order"}
           </button>
           <button
-            className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 transition-opacity active:scale-[0.98]"
-            onClick={() => navigate('/payment')}
+            disabled={submittingOrder}
+            className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 transition-opacity active:scale-[0.98] disabled:opacity-40"
+            onClick={() => navigate("/payment")}
           >
             Charge {formatCurrency(grandTotal)}
           </button>
@@ -280,7 +424,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
         danger
         confirmText="Clear"
         onConfirm={() => {
-          clearCart();
+          if (!submittingOrder) clearCart();
           setConfirmClear(false);
         }}
         onCancel={() => setConfirmClear(false)}
@@ -288,11 +432,12 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
 
       <QuickNoteModal
         open={!!notingItem}
-        initialValue={notingItem?.notes ?? ''}
-        title={`Note for ${notingItem?.name ?? ''}`}
+        initialValue={notingItem?.notes ?? ""}
+        title={`Note for ${notingItem?.name ?? ""}`}
         onCancel={() => setNotingItemId(null)}
         onSave={(val) => {
-          if (notingItemId) updateItemNotes(notingItemId, val);
+          if (notingItemId && !submittingOrder)
+            updateItemNotes(notingItemId, val);
           setNotingItemId(null);
         }}
       />

@@ -8,12 +8,35 @@ import { recurringInvoiceSchema } from '../../shared/schemas/recurringInvoices';
 
 const recurringClient = createOneKitClient(RecurringInvoiceServiceClient, 'finance');
 
-export function useRecurringInvoices() {
-  return useQuery({
-    queryKey: ['recurring-invoices'],
-    queryFn: async () => {
-      const res = await recurringClient.listRecurringInvoices({});
-      return z.array(recurringInvoiceSchema).parse(res.recurringInvoices);
+interface UseRecurringInvoicesParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface RecurringInvoiceListResult {
+  invoices: z.infer<typeof recurringInvoiceSchema>[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export function useRecurringInvoices({ page = 1, pageSize = 50 }: UseRecurringInvoicesParams = {}) {
+  return useQuery<RecurringInvoiceListResult>({
+    queryKey: ['recurring-invoices', { page, pageSize }],
+    queryFn: async (): Promise<RecurringInvoiceListResult> => {
+      const res = await recurringClient.listRecurringInvoices({ page, pageSize });
+      return {
+        invoices: z.array(recurringInvoiceSchema).parse(
+          (res.recurringInvoices ?? []).map((invoice) => ({
+            ...invoice,
+            // The Go JSON encoder omits false for an omitempty bool.
+            isActive: invoice.isActive ?? false,
+          }))
+        ),
+        hasMore: res.hasMore ?? false,
+        page: res.page ?? page,
+        pageSize: res.pageSize ?? pageSize,
+      };
     },
   });
 }

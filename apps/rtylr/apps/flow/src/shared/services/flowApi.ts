@@ -93,6 +93,15 @@ export type ProjectUpdate = Partial<{
   dueDate: string;
 }>;
 
+export interface ApiPagination {
+  page?: number;
+  limit?: number;
+  total?: number;
+  totalPages?: number;
+  hasNext?: boolean;
+  hasPrev?: boolean;
+}
+
 export interface ApiTask {
   id: string;
   projectId: string;
@@ -480,8 +489,10 @@ export const flowApi = {
 
   // -- Project Columns ----------------------------------------------------
 
-  getProjectColumns: (projectId: string) =>
-    flowResult<{ columns: ApiProjectColumn[] }>(() => projectV2.listProjectColumns({ projectId })),
+  getProjectColumns: (projectId: string, params: { page?: number; limit?: number } = {}) =>
+    flowResult<{ columns: ApiProjectColumn[]; pagination?: ApiPagination }>(() =>
+      projectV2.listProjectColumns({ projectId, ...params })
+    ),
 
   // Columns move to v2 because the v2 requests carry no workspace_id at all:
   // the server derives it from the project rather than trusting a client echo,
@@ -648,7 +659,8 @@ export const flowApi = {
       })
     ),
 
-  getMyTasks: () => flowResult<{ tasks: ApiTask[] }>(() => taskV2.getMyTasks({})),
+  getMyTasks: (params: { page?: number; limit?: number } = {}) =>
+    flowResult<{ tasks: ApiTask[]; pagination?: ApiPagination }>(() => taskV2.getMyTasks(params)),
 
   // Get-or-create the caller's personal "My Tasks" project board and return its
   // ids. Backs the My Tasks landing — we redirect to its project board.
@@ -724,6 +736,10 @@ export const flowApi = {
           startDate: data.startDate,
           labels: data.labels?.map((l) => String(Number(l))),
           archived: data.archived,
+          effortMinutes: data.effortMinutes,
+          estimatedHours:
+            data.estimatedHours ?? (data.estimate !== undefined ? data.estimate : undefined),
+          focusPin: data.focusPin,
         },
       })
     ),
@@ -1035,9 +1051,9 @@ export const flowApi = {
 
   // -- Notifications ------------------------------------------------------
 
-  getNotifications: () =>
-    flowResult<{ notifications: ApiNotification[] }>(() =>
-      notificationClient.listNotifications({})
+  getNotifications: (params: { page?: number; limit?: number } = {}) =>
+    flowResult<{ notifications: ApiNotification[]; pagination?: ApiPagination }>(() =>
+      notificationClient.listNotifications(params)
     ),
 
   markNotificationRead: (id: string) =>

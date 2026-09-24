@@ -10,6 +10,8 @@ import { getOneKitErrorMessage } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import ReceiptUpload from '../../shared/components/ReceiptUpload';
 import CurrencyInput from '../../shared/components/CurrencyInput';
+import { minorToMajor } from '../../shared/lib/money';
+import { useSettings } from '../../shared/lib/settings';
 import { useExpenseCategories } from '../../shared/hooks/useExpenseCategories';
 import { useCreateExpense } from './useExpenses';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
@@ -18,6 +20,7 @@ import { todayIso } from '../../shared/lib/date';
 const NewExpense: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currency = useSettings((state) => state.currency);
   const { data: categories = [] } = useExpenseCategories();
   const [receipt, setReceipt] = useState<string | null>(null);
   const [description, setDescription] = useState('');
@@ -32,15 +35,17 @@ const NewExpense: React.FC = () => {
       toast.error(t('expenses.descriptionAndCategoryRequired'));
       return;
     }
-    if (amount <= 0) {
+    const amountInMajorUnits = minorToMajor(amount, currency);
+    if (!Number.isFinite(amountInMajorUnits) || amountInMajorUnits <= 0) {
       toast.error(t('expenses.amountPositive'));
       return;
     }
     createExpense.mutate(
       {
         description,
-        amount,
+        amount: amountInMajorUnits,
         categoryId,
+        currency,
         expenseDate: date,
         receiptUrl: receipt ?? undefined,
         notes,
@@ -84,7 +89,7 @@ const NewExpense: React.FC = () => {
             <div>
               <label style={labelStyle}>{t('expenses.amount')}</label>
               <div style={{ marginTop: 6 }}>
-                <CurrencyInput value={amount} onChange={setAmount} />
+                <CurrencyInput value={amount} onChange={setAmount} currency={currency} />
               </div>
             </div>
             <div>

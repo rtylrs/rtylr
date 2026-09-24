@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { developerClient } from '../../lib/clients';
+import { isSupportedWebhookEvent, normalizeWebhookUrl } from '../../lib/webhookUrl';
 import { toast } from 'sonner';
 import i18next from 'i18next';
 
@@ -31,7 +32,13 @@ export const useCreateWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { url: string; events: string[] }) => {
-      return developerClient.createWebhook(payload);
+      const url = normalizeWebhookUrl(payload.url);
+      if (!url) throw new Error('Webhook URL must be a valid HTTP(S) URL');
+      if (payload.events.length === 0) throw new Error('At least one webhook event is required');
+      if (payload.events.some((event) => !isSupportedWebhookEvent(event))) {
+        throw new Error('Unsupported webhook event');
+      }
+      return developerClient.createWebhook({ url, events: payload.events });
     },
     onSuccess: () => {
       toast.success(i18next.t('common.toasts.webhookCreated', 'Webhook created'));

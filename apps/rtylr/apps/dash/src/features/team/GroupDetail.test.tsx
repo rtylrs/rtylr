@@ -39,8 +39,26 @@ const groupState = vi.hoisted(() => ({
   isLoading: false,
 }));
 
+const teamRequest = vi.hoisted(() => ({ page: 1, pageSize: 50 }));
 const teamState = vi.hoisted(() => ({
-  data: { members: [] as TeamMember[] } as { members: TeamMember[] } | undefined,
+  data: {
+    members: [] as TeamMember[],
+    hasMore: false,
+    total: 0,
+    page: 1,
+    pageSize: 50,
+  } as
+    | {
+        members: TeamMember[];
+        hasMore: boolean;
+        total: number;
+        page: number;
+        pageSize: number;
+      }
+    | undefined,
+  isLoading: false,
+  isError: false,
+  refetch: vi.fn(),
 }));
 
 vi.mock('../../shared/hooks/queries/useGroups', () => ({
@@ -52,7 +70,11 @@ vi.mock('../../shared/hooks/queries/useGroups', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useTeam', () => ({
-  useTeam: () => teamState,
+  useTeam: (params: { page?: number; pageSize?: number }) => {
+    teamRequest.page = params.page ?? 1;
+    teamRequest.pageSize = params.pageSize ?? 50;
+    return teamState;
+  },
 }));
 
 import GroupDetail from './GroupDetail';
@@ -72,13 +94,27 @@ beforeEach(() => {
   vi.clearAllMocks();
   groupState.data = makeGroup({});
   groupState.isLoading = false;
-  teamState.data = { members: [] };
+  teamState.data = {
+    members: [],
+    hasMore: false,
+    total: 0,
+    page: 1,
+    pageSize: 50,
+  };
+  teamState.isLoading = false;
+  teamState.isError = false;
+  teamRequest.page = 1;
+  teamRequest.pageSize = 50;
 });
 
 describe('GroupDetail: no-members empty state', () => {
   it('shows the illustration, title and an add-members call-to-action when the group has no members', () => {
     teamState.data = {
       members: [{ id: '1', name: 'Jane Doe', email: 'jane@rtylr.com', role: 'staff' }],
+      hasMore: false,
+      total: 1,
+      page: 1,
+      pageSize: 50,
     };
     groupState.data = makeGroup({ members: [] });
     render(<GroupDetail />);
@@ -98,10 +134,48 @@ describe('GroupDetail: no-members empty state', () => {
   });
 });
 
+describe('GroupDetail: candidate pagination', () => {
+  it('keeps the next candidate page reachable when the first page is full', () => {
+    teamState.data = {
+      members: Array.from({ length: 50 }, (_, index) => ({
+        id: String(index + 1),
+        name: `Member ${index + 1}`,
+        email: `member${index + 1}@rtylr.com`,
+        role: 'staff',
+      })),
+      hasMore: true,
+      total: 51,
+      page: 1,
+      pageSize: 50,
+    };
+    groupState.data = makeGroup({
+      members: Array.from({ length: 50 }, (_, index) => ({
+        userId: index + 1,
+        fullName: `Member ${index + 1}`,
+        email: `member${index + 1}@rtylr.com`,
+      })),
+    });
+
+    render(<GroupDetail />);
+    fireEvent.click(screen.getByRole('button', { name: /team.groupDetail.tabMembers/ }));
+    fireEvent.click(screen.getByRole('button', { name: /team.groupDetail.addMembersButton/ }));
+
+    const next = screen.getByRole('button', { name: 'common.pagination.next' });
+    expect(next).toBeEnabled();
+    fireEvent.click(next);
+
+    expect(teamRequest.page).toBe(2);
+  });
+});
+
 describe('GroupDetail: all-members-in-group empty state', () => {
   it('shows the "everyone already added" state and closes the panel when its call-to-action is clicked', () => {
     teamState.data = {
       members: [{ id: '1', name: 'Jane Doe', email: 'jane@rtylr.com', role: 'staff' }],
+      hasMore: false,
+      total: 1,
+      page: 1,
+      pageSize: 50,
     };
     groupState.data = makeGroup({
       members: [{ userId: 1, fullName: 'Jane Doe', email: 'jane@rtylr.com' }],
