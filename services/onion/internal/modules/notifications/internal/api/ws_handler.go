@@ -12,9 +12,13 @@ import (
 // DashWSRoutes returns the /dash/ws endpoint.
 //
 // Anonymous at the middleware level because browsers cannot set an
-// Authorization header on WebSocket handshakes. Existing browser clients
-// pass a JWT via ?token= and it is validated here before upgrading. Flow's
-// WebSocket path uses the newer one-time ticket flow.
+// Authorization header on WebSocket handshakes. Bearer tokens are no longer
+// accepted in query parameters, so clients authenticate with a one-time ticket.
+//
+// TODO: this module has no /dash/ws-ticket issuer yet (workspaces serves
+// /flow/ws-ticket and pos_orders serves /pos/ws-ticket), so dashboard browsers
+// currently have no supported way to obtain a ticket and /dash/ws rejects
+// them. Add the exchange and migrate the dashboard client.
 func DashWSRoutes() []string { return []string{"/dash/ws"} }
 
 // ServeDashWS upgrades the HTTP request to a WebSocket and hands it off

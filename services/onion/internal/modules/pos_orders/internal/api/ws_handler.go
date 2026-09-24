@@ -13,10 +13,9 @@ import (
 // POSWebSocketRoutes returns the single /pos/ws endpoint.
 //
 // This route is listed as anonymous at the middleware layer because browsers
-// cannot set an Authorization header on a WebSocket handshake. Existing
-// browser clients pass a JWT in the `?token=` query param and it is validated
-// here before upgrading. Flow's WebSocket path uses the newer one-time ticket
-// flow.
+// cannot set an Authorization header on a WebSocket handshake. Browser
+// clients must use the one-time ticket flow so bearer tokens are no longer
+// accepted in query parameters.
 func POSWebSocketRoutes() []string { return []string{"/pos/ws"} }
 
 // IssuePOSWebSocketTicket exchanges the authenticated POS session for an

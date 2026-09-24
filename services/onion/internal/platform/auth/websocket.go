@@ -45,15 +45,6 @@ func WithAuthUser(ctx context.Context, user *AuthUser) context.Context {
 }
 
 func WebSocketToken(r *http.Request) string {
-	// Flow browser handshakes must use a one-time ticket. Keep the legacy
-	// query-token fallback for the existing dash and POS browser clients until
-	// their independent ticket exchanges are migrated.
-	if r.URL.Path != "/flow/ws" {
-		if token := r.URL.Query().Get("token"); token != "" {
-			return token
-		}
-	}
-
 	authHeader := r.Header.Get("Authorization")
 	if strings.HasPrefix(authHeader, "Bearer ") {
 		return strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))

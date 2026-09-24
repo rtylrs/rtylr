@@ -87,18 +87,15 @@ func TestAuthUserFromWebSocketRequest_LegacyQueryTokenRejected(t *testing.T) {
 	}
 }
 
-func TestAuthUserFromWebSocketRequest_NonFlowLegacyQueryTokensRemainSupported(t *testing.T) {
+func TestAuthUserFromWebSocketRequest_NonFlowLegacyQueryTokenRejected(t *testing.T) {
 	for _, path := range []string{"/dash/ws", "/pos/ws"} {
 		t.Run(path, func(t *testing.T) {
 			token := signedWebSocketToken(t, &webSocketClaims{UserID: 17, BusinessID: 4})
 			req := wsRequest(path + "?token=" + token)
 
-			user, err := AuthUserFromWebSocketRequest(req)
-			if err != nil {
-				t.Fatalf("AuthUserFromWebSocketRequest: %v", err)
-			}
-			if user.UserID != 17 || user.BusinessID != 4 || user.Token != token {
-				t.Fatalf("legacy non-Flow query auth was not preserved: %+v", user)
+			_, err := AuthUserFromWebSocketRequest(req)
+			if !errors.Is(err, ErrWebSocketTokenMissing) {
+				t.Fatalf("expected legacy query token to be rejected for %s, got %v", path, err)
 			}
 		})
 	}
