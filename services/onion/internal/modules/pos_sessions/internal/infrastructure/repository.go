@@ -1,0 +1,207 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+
+	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_sessions/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
+)
+
+type Repository struct {
+	queries *sqlc.Queries
+	pool    *sql.DB
+}
+
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
+}
+
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Session, error) {
+	rows, err := r.queries.ListSessionsByOwner(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list sessions", logger.Error(err))
+		return nil, err
+	}
+
+	sessions := make([]domain.Session, 0, len(rows))
+	for _, row := range rows {
+		s := domain.Session{
+			ID:           row.ID,
+			OwnerID:      row.OwnerID,
+			BusinessID:   row.BusinessID,
+			OpeningFloat: sqlutil.DecimalToFloat(row.OpeningCash.String),
+			ClosingFloat: sqlutil.DecimalToFloat(row.ClosingCash.String),
+			TotalSales:   sqlutil.DecimalToFloat(row.TotalSales.String),
+			Status:       string(row.Status.PosSessionsStatus),
+			OpenedAt:     row.OpenedAt.Time,
+			CreatedAt:    row.OpenedAt.Time,
+		}
+		if row.LocationID.Valid {
+			s.LocationID = &row.LocationID.Int64
+		}
+		if row.StaffID != 0 {
+			s.StaffID = &row.StaffID
+		}
+		if row.ClosedAt.Valid {
+			t := row.ClosedAt.Time
+			s.ClosedAt = &t
+		}
+		sessions = append(sessions, s)
+	}
+	return sessions, nil
+}
+
+func (r *Repository) Get(ctx context.Context, businessID, id int64) (*domain.Session, error) {
+	row, err := r.queries.GetSessionByID(ctx, sqlc.GetSessionByIDParams{ID: id, BusinessID: businessID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrSessionNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get session", logger.Error(err))
+		return nil, err
+	}
+	s := domain.Session{
+		ID:           row.ID,
+		OwnerID:      row.OwnerID,
+		BusinessID:   row.BusinessID,
+		OpeningFloat: sqlutil.DecimalToFloat(row.OpeningCash.String),
+		ClosingFloat: sqlutil.DecimalToFloat(row.ClosingCash.String),
+		TotalSales:   sqlutil.DecimalToFloat(row.TotalSales.String),
+		Status:       string(row.Status.PosSessionsStatus),
+		OpenedAt:     row.OpenedAt.Time,
+		CreatedAt:    row.OpenedAt.Time,
+	}
+	if row.LocationID.Valid {
+		s.LocationID = &row.LocationID.Int64
+	}
+	if row.StaffID != 0 {
+		s.StaffID = &row.StaffID
+	}
+	if row.ClosedAt.Valid {
+		t := row.ClosedAt.Time
+		s.ClosedAt = &t
+	}
+	return &s, nil
+}
+
+func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (int64, error) {
+	var staffID int64
+	if input.StaffID != nil {
+		staffID = *input.StaffID
+	}
+
+	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	lockName := fmt.Sprintf("pos_session:%d:%d", input.BusinessID, staffID)
+	var acquired int
+	if err := tx.QueryRowContext(ctx, `SELECT GET_LOCK(?, 5)`, lockName).Scan(&acquired); err != nil {
+		return 0, err
+	}
+	if acquired != 1 {
+		return 0, fmt.Errorf("session is already being opened")
+	}
+	// MySQL named locks are connection-scoped: COMMIT/ROLLBACK do not release
+	// them, and database/sql refuses to run statements on a finished Tx, so a
+	// deferred RELEASE_LOCK after Commit never reaches the server and leaks
+	// the lock onto the pooled connection. Keep a deferred best-effort release
+	// for the early-return paths and release explicitly (with the result
+	// checked) while the transaction is still open on the success path below.
+	defer func() {
+		_ = releaseNamedLock(ctx, tx, lockName)
+	}()
+
+	var exists int
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(
+		SELECT 1 FROM pos_sessions WHERE business_id = ? AND staff_id = ? AND status = 'open')`, input.BusinessID, staffID).Scan(&exists); err != nil {
+		return 0, err
+	}
+	if exists == 1 {
+		return 0, fmt.Errorf("an open session already exists")
+	}
+
+	var locationID any
+	if input.LocationID != nil {
+		locationID = *input.LocationID
+	}
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO pos_sessions (owner_id, business_id, location_id, staff_id, opening_cash, status, opened_at)
+		VALUES (?, ?, ?, ?, ?, 'open', NOW())`, input.OwnerID, input.BusinessID, locationID, staffID, sqlutil.FloatToDecimal(input.OpeningFloat))
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to open session", logger.Error(err))
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := releaseNamedLock(ctx, tx, lockName); err != nil {
+		logger.Ctx(ctx).Error("Failed to release session lock", logger.Error(err))
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+// releaseNamedLock releases a MySQL named lock held by tx. It must be called
+// while tx is still open: MySQL releases named locks at connection close, not
+// at COMMIT/ROLLBACK, and a finished *sql.Tx returns ErrTxDone without sending
+// the statement, which would leak the lock on the pooled connection.
+func releaseNamedLock(ctx context.Context, tx *sql.Tx, name string) error {
+	var released sql.NullInt64
+	if err := tx.QueryRowContext(ctx, `SELECT RELEASE_LOCK(?)`, name).Scan(&released); err != nil {
+		return err
+	}
+	if !released.Valid || released.Int64 != 1 {
+		return fmt.Errorf("mysql lock %q was not held by this connection", name)
+	}
+	return nil
+}
+
+func (r *Repository) Close(ctx context.Context, input domain.CloseSessionInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
+	var result sql.Result
+	var err error
+	if input.StaffID != 0 {
+		result, err = r.pool.ExecContext(ctx, `
+			UPDATE pos_sessions SET closing_cash = ?, status = 'closed', closed_at = NOW()
+			WHERE id = ? AND business_id = ? AND staff_id = ? AND status = 'open'`,
+			sqlutil.FloatToDecimal(input.ClosingFloat), input.ID, businessID, input.StaffID)
+	} else {
+		result, err = r.queries.CloseSession(ctx, sqlc.CloseSessionParams{
+			ClosingCash: sql.NullString{String: sqlutil.FloatToDecimal(input.ClosingFloat), Valid: true},
+			ID:          input.ID,
+			BusinessID:  businessID,
+		})
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to close session", logger.Error(err))
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrSessionNotFound
+	}
+	return nil
+}

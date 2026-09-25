@@ -1,0 +1,84 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+
+# Environment variables.
+#
+# .env* rather than an enumerated list: the previous three patterns missed
+# .env.backup, .env.bak, .env.old and anything else a person creates while
+# debugging, so a `git add -A` would have staged real credentials. The negation
+# keeps the committed example files addable.
+.env*
+!.env.example
+
+# Build artifacts
+/dist/
+/build/
+/bin/
+/tmp/
+
+# Coverage reports and profiles
+coverage/
+*.coverprofile
+
+# Generated sqlc files
+internal/modules/*/internal/infrastructure/persistence/sqlc/
+
+# Downloaded tools
+sqlc
+buf
+
+
+# Comprehensive SQLC generated files (all nesting levels)
+internal/**/sql/dbmodels/
+internal/**/sql/*.sql.go
+
+# Server binary (if it exists in root)
+/server
+# Compiled binaries
+/api
+/worker
+/pay
+/main
+
+# Per-machine agent config, not shared across machines
+/CLAUDE.md
+/AGENTS.md
+/.codex/
+.worktrees/
+.codex-worktrees/
+

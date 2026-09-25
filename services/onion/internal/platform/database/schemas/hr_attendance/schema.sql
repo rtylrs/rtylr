@@ -1,0 +1,41 @@
+CREATE TABLE IF NOT EXISTS hr_attendance_records (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    employee_id BIGINT NOT NULL,
+    location_id BIGINT NOT NULL DEFAULT 0,
+    date DATE NOT NULL,
+    clock_in_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    clock_out_at TIMESTAMP NULL,
+    duration_minutes INT NULL,
+    clock_in_method VARCHAR(50) NOT NULL DEFAULT 'app',
+    clock_in_lat DOUBLE NULL,
+    clock_in_lng DOUBLE NULL,
+    is_late BOOLEAN NOT NULL DEFAULT FALSE,
+    late_minutes INT NOT NULL DEFAULT 0,
+    status VARCHAR(50) NOT NULL DEFAULT 'present',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_attendance_owner (owner_id),
+    INDEX idx_attendance_employee (owner_id, employee_id),
+    INDEX idx_attendance_date (owner_id, date),
+    INDEX idx_attendance_location_date (owner_id, location_id, date),
+    INDEX idx_attendance_active (owner_id, employee_id, clock_out_at)
+);
+
+CREATE TABLE IF NOT EXISTS hr_attendance_config (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    app_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    qr_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    gps_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    pin_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    facial_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    geofence_radius_m INT NOT NULL DEFAULT 200,
+    default_location_lat DOUBLE NOT NULL DEFAULT 0,
+    default_location_lng DOUBLE NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_attendance_config_owner (owner_id)
+);

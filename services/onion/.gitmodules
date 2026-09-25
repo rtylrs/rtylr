@@ -1,0 +1,3 @@
+[submodule "voxie"]
+	path = voxie
+	url = https://github.com/tryrtylr/voxie.git

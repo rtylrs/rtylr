@@ -1,0 +1,17 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../../../internal/platform/database/schemas/shared"
+      - "../../../../internal/platform/database/schemas/pos"
+      - "../../../../internal/platform/database/schemas/erp"
+      - "../../../../internal/platform/database/schemas/shared/addons.sql"
+      - "../../../../internal/platform/stock_core/sql/schema/stock_core.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../internal/infrastructure/persistence/sqlc"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_db_tags: true

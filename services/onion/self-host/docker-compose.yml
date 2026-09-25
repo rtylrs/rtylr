@@ -1,0 +1,153 @@
+name: rtylr-self-host
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-onion_self_host}
+      MYSQL_USER: ${MYSQL_USER:-onion_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-onion_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-onion_root_password}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-onion_root_password}"]
+      interval: 2s
+      timeout: 20s
+      retries: 60
+    ports:
+      - "3306:3306"
+    volumes:
+      - rtylr_mysql:/var/lib/mysql
+
+  redis:
+    image: redis:7.4.1
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  floci:
+    image: floci/floci:latest-compat
+    restart: unless-stopped
+    environment:
+      FLOCI_HOSTNAME: floci
+      FLOCI_STORAGE_MODE: persistent
+      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+      FLOCI_BUCKET: ${FLOCI_BUCKET:-rtylr-self-host}
+    ports:
+      - "4566:4566"
+    volumes:
+      - rtylr_floci:/app/data
+      - ../local-env/floci/init:/etc/floci/init/ready.d:ro
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        DEPLOYMENT_MODE: self_hosted
+        LICENSE_VENDOR_PUBLIC_KEY: ${LICENSE_VENDOR_PUBLIC_KEY:-}
+    restart: unless-stopped
+    env_file:
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
+    environment:
+      RUN_MODE: api
+      SERVICE_NAME: api
+      PORT: "9999"
+      DB_HOST: db
+      REDIS_HOSTS: redis:6379
+      FLOCI_ENDPOINT: http://floci:4566
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      floci:
+        condition: service_started
+    ports:
+      - "9999:9999"
+
+  upload:
+    build:
+      context: ..
+      dockerfile: Dockerfile.upload
+    restart: unless-stopped
+    env_file:
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
+    environment:
+      RUN_MODE: upload
+      SERVICE_NAME: upload
+      PORT: "8080"
+      DB_HOST: db
+      REDIS_HOSTS: redis:6379
+      FLOCI_ENDPOINT: http://floci:4566
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      floci:
+        condition: service_started
+    ports:
+      - "8081:8080"
+
+  worker:
+    build:
+      context: ..
+      dockerfile: Dockerfile.worker
+    restart: unless-stopped
+    env_file:
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
+    environment:
+      RUN_MODE: worker
+      SERVICE_NAME: worker
+      DB_HOST: db
+      REDIS_HOSTS: redis:6379
+      FLOCI_ENDPOINT: http://floci:4566
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      floci:
+        condition: service_started
+
+  license:
+    build:
+      context: ..
+      dockerfile: Dockerfile.license
+      args:
+        DEPLOYMENT_MODE: self_hosted
+        LICENSE_VENDOR_PUBLIC_KEY: ${LICENSE_VENDOR_PUBLIC_KEY:-}
+    restart: unless-stopped
+    env_file:
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
+    environment:
+      RUN_MODE: license
+      SERVICE_NAME: license
+      PORT: "8082"
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8082"
+
+volumes:
+  rtylr_mysql:
+  rtylr_floci:

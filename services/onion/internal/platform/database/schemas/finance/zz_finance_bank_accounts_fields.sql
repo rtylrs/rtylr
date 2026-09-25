@@ -1,0 +1,13 @@
+SET @sql := IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'finance_bank_accounts' AND COLUMN_NAME = 'last_four') = 0,
+  'ALTER TABLE finance_bank_accounts ADD COLUMN last_four VARCHAR(4) NULL AFTER account_type',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql := IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'finance_bank_accounts' AND COLUMN_NAME = 'is_primary') = 0,
+  'ALTER TABLE finance_bank_accounts ADD COLUMN is_primary BOOLEAN NOT NULL DEFAULT FALSE AFTER currency',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

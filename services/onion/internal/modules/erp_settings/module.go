@@ -1,0 +1,33 @@
+package erpsettings
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/erp_settings/internal/api"
+	"github.com/voxire/onion/internal/modules/erp_settings/internal/application"
+	erpsettingsv1 "github.com/voxire/voxie/gen/go/erp/settings/v1"
+)
+
+type Module struct {
+	service *application.Service
+}
+
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	return &Module{service: application.NewService(ctx, db)}
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := erpsettingsv1.RegisterSettingsServiceServer(
+		api.NewSettingsAPI(m.service),
+		erpsettingsv1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register ERP settings service: %w", err))
+	}
+}
+
+func (m *Module) GetAnonymousRoutes() []string {
+	return []string{}
+}

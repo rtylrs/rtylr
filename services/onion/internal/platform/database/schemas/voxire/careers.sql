@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS careers (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    title VARCHAR(255) NOT NULL,
+    department VARCHAR(100) NULL,
+    location VARCHAR(100) NULL,
+    employment_type VARCHAR(50) NULL,
+    work_mode VARCHAR(20) NULL,
+    seniority VARCHAR(50) NULL,
+    details TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,88 @@
+name: Publish public images
+
+# Builds the PUBLIC self-host images docker.io/rtylr/{api,worker,upload,migrate}.
+# Triggered by a version bump in tryrtylr/rtylr-version (repository_dispatch
+# "rtylr-release") or manually with a version. NOT on normal pushes — day-to-day
+# CI only builds/deploys the internal ECR images. The license image is internal
+# only and is never published here.
+on:
+  repository_dispatch:
+    types: [rtylr-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Suite version tag (e.g. 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    name: Publish rtylr/${{ matrix.name }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: api, dockerfile: Dockerfile, public_repo: rtylr/api, platforms: "linux/amd64,linux/arm64" }
+          - { name: worker, dockerfile: Dockerfile.worker, public_repo: rtylr/worker, platforms: "linux/amd64,linux/arm64" }
+          # upload: Go binary cross-compiles; the C++ media-engine builds for arm64
+          # under emulation (slower) — so the published image is multi-arch.
+          - { name: upload, dockerfile: Dockerfile.upload, public_repo: rtylr/upload, platforms: "linux/amd64,linux/arm64" }
+          # migrate is a client+scripts+sql image (no compilation) for self-host
+          # DB bootstrap, so it builds multi-arch trivially.
+          - { name: migrate, dockerfile: Dockerfile.migrate, public_repo: rtylr/migrate, platforms: "linux/amd64,linux/arm64" }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Verify Voxie contract ref
+        run: ./scripts/check-voxie-ref.sh
+
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Resolve version
+        id: v
+        env:
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="${DISPATCH_VERSION:-$INPUT_VERSION}"
+          if [ -z "$VERSION" ]; then echo "no version supplied"; exit 1; fi
+          # Restrict to a safe Docker-tag charset (dispatch payload is trusted-org
+          # but validate anyway — no shell metachars reach the build).
+          if ! printf '%s' "$VERSION" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'; then
+            echo "invalid version tag: $VERSION"; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Login to Docker Hub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+      - name: Build and push public image
+        env:
+          PUBLIC_REPO: ${{ matrix.public_repo }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+          SCOPE: ${{ matrix.name }}
+          PLATFORMS: ${{ matrix.platforms }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          PUB="docker.io/${PUBLIC_REPO}"
+          docker buildx build \
+            --platform "$PLATFORMS" \
+            --cache-from type=gha,scope=${SCOPE} \
+            --cache-to   type=gha,scope=${SCOPE},mode=max \
+            -f "${DOCKERFILE}" \
+            --build-arg VERSION="$VERSION" \
+            --build-arg COMMIT=${GITHUB_SHA::7} \
+            --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+            -t "$PUB:$VERSION" \
+            -t "$PUB:latest" \
+            --push \
+            .
+          echo "Published $PUB:$VERSION + :latest"

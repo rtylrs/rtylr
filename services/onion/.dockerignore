@@ -1,0 +1,72 @@
+# Build artifacts
+tmp/
+bin/
+/api
+/worker
+/upload
+/license
+*.log
+
+# Source-control metadata and local checkout state
+.git
+.gitmodules
+
+# Documentation
+*.md
+README.md
+TODO.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+*_test.go
+test/
+tests/
+
+# Coverage files
+*.out
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker files
+Dockerfile*
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# Python (if any)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Logs
+logs/
+*.log

@@ -1,0 +1,18 @@
+{
+  "config": {
+    "context_tokens": 224,
+    "encoder": "tinyx",
+    "heads": 4,
+    "layers": 2,
+    "option_tokens": 96,
+    "rank": 128,
+    "width": 128
+  },
+  "format": "cua-s1",
+  "format_version": 1,
+  "metadata": {
+    "license": "MIT (model card)",
+    "source": "cua-ai/cua-s1-forms (Hugging Face)"
+  },
+  "state_signature": "c9d6f4aefb30f503e2c5f032589c59ec4e512f49e0d7451b09f8ef8bb1509cc6"
+}

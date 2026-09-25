@@ -1,0 +1,68 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: onion_dev
+      MYSQL_USER: onion_user
+      MYSQL_PASSWORD: onion_password
+      MYSQL_ROOT_PASSWORD: onion_root_password
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-ponion_root_password"]
+      interval: 2s
+      timeout: 20s
+      retries: 60
+    ports:
+      - "3306:3306"
+    volumes:
+      - onion_mysql:/var/lib/mysql
+
+  redis:
+    image: redis:7.4.1
+    restart: on-failure
+    ports:
+      - "6379:6379"
+
+  floci:
+    image: floci/floci:latest-compat
+    restart: on-failure
+    environment:
+      FLOCI_HOSTNAME: floci
+      FLOCI_STORAGE_MODE: persistent
+      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+      FLOCI_BUCKET: onion-dev
+    ports:
+      - "4566:4566"
+    volumes:
+      - onion_floci:/app/data
+      - ./floci/init:/etc/floci/init/ready.d:ro
+
+  # mindsdb:
+  #   image: mindsdb/mindsdb:latest
+  #   restart: on-failure
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     MINDSDB_APIS: "http,mysql,mongodb"
+  #     MINDSDB_DEFAULT_PROJECT: onion
+  #   ports:
+  #     - "47334:47334"
+  #     - "47335:47335"
+  #   volumes:
+  #     - onion_mindsdb:/root/mdb_storage
+  #     - ./mindsdb/init:/mdb_init:ro
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-fsS", "http://localhost:47334/api/status"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 30
+
+volumes:
+  onion_mysql:
+  onion_floci:
+  onion_mindsdb:

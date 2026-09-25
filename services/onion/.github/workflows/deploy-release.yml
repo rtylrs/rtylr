@@ -1,0 +1,144 @@
+name: Deploy promoted release
+
+# This adapter is the only ECS deployment entrypoint in onion. It is
+# dispatched by tryrtylr/deploy after a service manifest is promoted.
+on:
+  repository_dispatch:
+    types: [deploy-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Promoted backend version
+        required: true
+        type: string
+      release_tag:
+        description: GitHub release tag
+        required: true
+        type: string
+      dockerfile:
+        description: Dockerfile relative to the repository root
+        required: true
+        type: string
+      image_repository:
+        description: ECR repository path
+        required: true
+        type: string
+      cluster:
+        description: ECS cluster
+        required: true
+        type: string
+      service:
+        description: ECS service
+        required: true
+        type: string
+      container:
+        description: ECS container name
+        required: true
+        type: string
+      desired_count:
+        description: Desired ECS service count
+        required: false
+        default: 1
+        type: number
+      health_url:
+        description: Optional health endpoint
+        required: false
+        type: string
+      runs_on:
+        description: Runner label
+        required: false
+        default: blacksmith-2vcpu-ubuntu-2404
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Resolve promoted manifest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    outputs:
+      version: ${{ steps.values.outputs.version }}
+      release_tag: ${{ steps.values.outputs.release_tag }}
+      dockerfile: ${{ steps.values.outputs.dockerfile }}
+      image_repository: ${{ steps.values.outputs.image_repository }}
+      cluster: ${{ steps.values.outputs.cluster }}
+      service: ${{ steps.values.outputs.service }}
+      container: ${{ steps.values.outputs.container }}
+      desired_count: ${{ steps.values.outputs.desired_count }}
+      health_url: ${{ steps.values.outputs.health_url }}
+      runs_on: ${{ steps.values.outputs.runs_on }}
+    steps:
+      - name: Read dispatch or manual inputs
+        id: values
+        env:
+          PAYLOAD_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ inputs.version }}
+          PAYLOAD_RELEASE_TAG: ${{ github.event.client_payload.release_tag }}
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+          PAYLOAD_DOCKERFILE: ${{ github.event.client_payload.dockerfile }}
+          INPUT_DOCKERFILE: ${{ inputs.dockerfile }}
+          PAYLOAD_IMAGE_REPOSITORY: ${{ github.event.client_payload.image_repository }}
+          INPUT_IMAGE_REPOSITORY: ${{ inputs.image_repository }}
+          PAYLOAD_CLUSTER: ${{ github.event.client_payload.cluster }}
+          INPUT_CLUSTER: ${{ inputs.cluster }}
+          PAYLOAD_SERVICE: ${{ github.event.client_payload.service }}
+          INPUT_SERVICE: ${{ inputs.service }}
+          PAYLOAD_CONTAINER: ${{ github.event.client_payload.container }}
+          INPUT_CONTAINER: ${{ inputs.container }}
+          PAYLOAD_DESIRED_COUNT: ${{ github.event.client_payload.desired_count }}
+          INPUT_DESIRED_COUNT: ${{ inputs.desired_count }}
+          PAYLOAD_HEALTH_URL: ${{ github.event.client_payload.health_url }}
+          INPUT_HEALTH_URL: ${{ inputs.health_url }}
+          PAYLOAD_RUNS_ON: ${{ github.event.client_payload.runs_on }}
+          INPUT_RUNS_ON: ${{ inputs.runs_on }}
+        run: |
+          set -euo pipefail
+          version="${PAYLOAD_VERSION:-$INPUT_VERSION}"
+          release_tag="${PAYLOAD_RELEASE_TAG:-$INPUT_RELEASE_TAG}"
+          dockerfile="${PAYLOAD_DOCKERFILE:-$INPUT_DOCKERFILE}"
+          image_repository="${PAYLOAD_IMAGE_REPOSITORY:-$INPUT_IMAGE_REPOSITORY}"
+          cluster="${PAYLOAD_CLUSTER:-$INPUT_CLUSTER}"
+          service="${PAYLOAD_SERVICE:-$INPUT_SERVICE}"
+          container="${PAYLOAD_CONTAINER:-$INPUT_CONTAINER}"
+          desired_count="${PAYLOAD_DESIRED_COUNT:-${INPUT_DESIRED_COUNT:-1}}"
+          health_url="${PAYLOAD_HEALTH_URL:-$INPUT_HEALTH_URL}"
+          runs_on="${PAYLOAD_RUNS_ON:-${INPUT_RUNS_ON:-ubuntu-latest}}"
+
+          for value in "$version" "$release_tag" "$dockerfile" "$image_repository" "$cluster" "$service" "$container"; do
+            [ -n "$value" ] || { echo 'Missing deployment input' >&2; exit 1; }
+          done
+
+          {
+            echo "version=$version"
+            echo "release_tag=$release_tag"
+            echo "dockerfile=$dockerfile"
+            echo "image_repository=$image_repository"
+            echo "cluster=$cluster"
+            echo "service=$service"
+            echo "container=$container"
+            echo "desired_count=$desired_count"
+            echo "health_url=$health_url"
+            echo "runs_on=$runs_on"
+          } >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy ${{ needs.resolve.outputs.service }}
+    needs: resolve
+    uses: tryrtylr/pipelines/.github/workflows/deploy-ecs-release.yml@main
+    with:
+      source_repository: tryrtylr/onion
+      source_ref: ${{ needs.resolve.outputs.release_tag }}
+      version: ${{ needs.resolve.outputs.version }}
+      dockerfile: ${{ needs.resolve.outputs.dockerfile }}
+      image_repository: ${{ needs.resolve.outputs.image_repository }}
+      cluster: ${{ needs.resolve.outputs.cluster }}
+      service: ${{ needs.resolve.outputs.service }}
+      container: ${{ needs.resolve.outputs.container }}
+      desired_count: ${{ needs.resolve.outputs.desired_count }}
+      health_url: ${{ needs.resolve.outputs.health_url }}
+      runs_on: ${{ needs.resolve.outputs.runs_on }}
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

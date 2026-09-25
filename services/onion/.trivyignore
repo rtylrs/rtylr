@@ -1,0 +1,3 @@
+# GO-2026-5932 affects x/crypto/openpgp, which is not imported by onion.
+# onion uses x/crypto/bcrypt only, and the advisory has no upstream fixed version.
+GO-2026-5932
