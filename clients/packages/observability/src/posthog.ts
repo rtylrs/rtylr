@@ -15,7 +15,7 @@ let initialised = false;
 
 // See sentry.ts - local accessor avoids needing vite/client types
 // downstream.
-const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
+const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
 
 export function initPostHog(opts: InitPostHogOptions): void {
   if (initialised) {

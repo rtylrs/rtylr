@@ -29,7 +29,7 @@ const CONSENT_EVENT = "rtylr-consent-change";
 // Type-safe accessor for `import.meta.env` without pulling the whole
 // `vite/client` types into every transitive consumer's tsconfig.
 const viteEnv =
-  (import.meta as { env?: Record<string, string | boolean | undefined> }).env ??
+  (import.meta as unknown as { env?: Record<string, string | boolean | undefined> }).env ??
   {};
 
 function hasConsent(): boolean {

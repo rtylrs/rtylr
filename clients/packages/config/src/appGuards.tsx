@@ -18,7 +18,7 @@ import { allFeaturesEnabled } from './runtimeConfig';
 
 // Local env accessor - keeps consumers' tsconfigs free of a
 // `vite/client` dependency for what is just an optional lookup.
-const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
+const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
 
 function readEnvOverride(flag: FlagKey): boolean | null {
   const envName = FLAG_ENV_OVERRIDES[flag];
