@@ -216,7 +216,7 @@ importers:
         version: link:../../packages/utils
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../packages/voxie
+        version: link:../../voxie
       dexie:
         specifier: ^4.4.2
         version: 4.4.6
@@ -452,7 +452,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -522,7 +522,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -619,7 +619,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -749,7 +749,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -834,7 +834,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -928,7 +928,7 @@ importers:
         version: link:../../../../packages/utils
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1025,7 +1025,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       i18next:
         specifier: ^26.0.6
         version: 26.0.6(typescript@6.0.3)
@@ -1122,7 +1122,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -1204,7 +1204,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       i18next:
         specifier: ^26.0.6
         version: 26.0.6(typescript@6.0.3)
@@ -1292,7 +1292,7 @@ importers:
         version: link:../../../../packages/ui
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../../../../packages/voxie
+        version: link:../../../../voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -1415,7 +1415,7 @@ importers:
         version: 5.99.2(react@19.2.5)
       '@voxire/voxie':
         specifier: workspace:*
-        version: link:../voxie
+        version: link:../../voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -1752,7 +1752,7 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@25.9.7)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(happy-dom@20.9.0)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.15.0(@types/node@25.9.7)(typescript@6.0.3))(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.104.1)(tsx@4.23.13)(yaml@2.9.1))
 
-  packages/voxie:
+  voxie:
     devDependencies:
       typescript:
         specifier: ^5.9.3
